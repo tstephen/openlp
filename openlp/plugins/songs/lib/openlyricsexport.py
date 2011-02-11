@@ -23,32 +23,52 @@
 # with this program; if not, write to the Free Software Foundation, Inc., 59  #
 # Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
 ###############################################################################
+"""
+The :mod:`openlyricsexport` module provides the functionality for exporting
+songs from the database to the OpenLyrics format.
+"""
+import logging
+import os
 
-from PyQt4 import QtCore, QtGui
+from lxml import etree
 
-from openlp.core.lib import translate
-from openlp.core.lib.ui import create_accept_reject_button_box
+from openlp.core.lib import Receiver, translate
+from openlp.plugins.songs.lib import OpenLyrics
 
-class Ui_FileRenameDialog(object):
-    def setupUi(self, fileRenameDialog):
-        fileRenameDialog.setObjectName(u'fileRenameDialog')
-        fileRenameDialog.resize(300, 10)
-        self.dialogLayout = QtGui.QGridLayout(fileRenameDialog)
-        self.dialogLayout.setObjectName(u'dialogLayout')
-        self.fileNameLabel = QtGui.QLabel(fileRenameDialog)
-        self.fileNameLabel.setObjectName(u'fileNameLabel')
-        self.dialogLayout.addWidget(self.fileNameLabel, 0, 0)
-        self.fileNameEdit = QtGui.QLineEdit(fileRenameDialog)
-        self.fileNameEdit.setValidator(QtGui.QRegExpValidator(
-            QtCore.QRegExp(r'[^/\\?*|<>\[\]":<>+%]+'), self))
-        self.fileNameEdit.setObjectName(u'fileNameEdit')
-        self.dialogLayout.addWidget(self.fileNameEdit, 0, 1)
-        self.buttonBox = create_accept_reject_button_box(fileRenameDialog, True)
-        self.dialogLayout.addWidget(self.buttonBox, 1, 0, 1, 2)
-        self.retranslateUi(fileRenameDialog)
-        self.setMaximumHeight(self.sizeHint().height())
-        QtCore.QMetaObject.connectSlotsByName(fileRenameDialog)
+log = logging.getLogger(__name__)
 
-    def retranslateUi(self, fileRenameDialog):
-        self.fileNameLabel.setText(translate('OpenLP.FileRenameForm',
-            'New File Name:'))
+class OpenLyricsExport(object):
+    """
+    This provides the Openlyrics export.
+    """
+    def __init__(self, parent, songs, save_path):
+        """
+        Initialise the export.
+        """
+        log.debug(u'initialise OpenLyricsExport')
+        self.parent = parent
+        self.manager = parent.plugin.manager
+        self.songs = songs
+        self.save_path = save_path
+        if not os.path.exists(self.save_path):
+            os.mkdir(self.save_path)
+
+    def do_export(self):
+        """
+        Export the songs.
+        """
+        log.debug(u'started OpenLyricsExport')
+        openLyrics = OpenLyrics(self.manager)
+        self.parent.progressBar.setMaximum(len(self.songs))
+        for song in self.songs:
+            Receiver.send_message(u'openlp_process_events')
+            if self.parent.stop_export_flag:
+                return False
+            self.parent.incrementProgressBar(unicode(translate(
+                'SongsPlugin.OpenLyricsExport', 'Exporting "%s"...')) %
+                song.title)
+            xml = openLyrics.song_to_xml(song)
+            tree = etree.ElementTree(etree.fromstring(xml))
+            tree.write(os.path.join(self.save_path, song.title + u'.xml'),
+                encoding=u'utf-8', xml_declaration=True, pretty_print=True)
+        return True
