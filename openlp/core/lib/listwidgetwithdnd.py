@@ -23,32 +23,34 @@
 # with this program; if not, write to the Free Software Foundation, Inc., 59  #
 # Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
 ###############################################################################
-
+"""
+Extend QListWidget to handle drag and drop functionality
+"""
 from PyQt4 import QtCore, QtGui
 
-from openlp.core.lib import translate
-from openlp.core.lib.ui import create_accept_reject_button_box
+class ListWidgetWithDnD(QtGui.QListWidget):
+    """
+    Provide a list widget to store objects and handle drag and drop events
+    """
+    def __init__(self, parent=None, name=u''):
+        """
+        Initialise the list widget
+        """
+        QtGui.QListWidget.__init__(self, parent)
+        self.mimeDataText = name
+        assert(self.mimeDataText)
 
-class Ui_FileRenameDialog(object):
-    def setupUi(self, fileRenameDialog):
-        fileRenameDialog.setObjectName(u'fileRenameDialog')
-        fileRenameDialog.resize(300, 10)
-        self.dialogLayout = QtGui.QGridLayout(fileRenameDialog)
-        self.dialogLayout.setObjectName(u'dialogLayout')
-        self.fileNameLabel = QtGui.QLabel(fileRenameDialog)
-        self.fileNameLabel.setObjectName(u'fileNameLabel')
-        self.dialogLayout.addWidget(self.fileNameLabel, 0, 0)
-        self.fileNameEdit = QtGui.QLineEdit(fileRenameDialog)
-        self.fileNameEdit.setValidator(QtGui.QRegExpValidator(
-            QtCore.QRegExp(r'[^/\\?*|<>\[\]":<>+%]+'), self))
-        self.fileNameEdit.setObjectName(u'fileNameEdit')
-        self.dialogLayout.addWidget(self.fileNameEdit, 0, 1)
-        self.buttonBox = create_accept_reject_button_box(fileRenameDialog, True)
-        self.dialogLayout.addWidget(self.buttonBox, 1, 0, 1, 2)
-        self.retranslateUi(fileRenameDialog)
-        self.setMaximumHeight(self.sizeHint().height())
-        QtCore.QMetaObject.connectSlotsByName(fileRenameDialog)
-
-    def retranslateUi(self, fileRenameDialog):
-        self.fileNameLabel.setText(translate('OpenLP.FileRenameForm',
-            'New File Name:'))
+    def mouseMoveEvent(self, event):
+        """
+        Drag and drop event does not care what data is selected
+        as the recipient will use events to request the data move
+        just tell it what plugin to call
+        """
+        if event.buttons() != QtCore.Qt.LeftButton:
+            event.ignore()
+            return
+        drag = QtGui.QDrag(self)
+        mimeData = QtCore.QMimeData()
+        drag.setMimeData(mimeData)
+        mimeData.setText(self.mimeDataText)
+        drag.start(QtCore.Qt.CopyAction)
