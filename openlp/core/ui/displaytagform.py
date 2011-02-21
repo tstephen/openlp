@@ -33,154 +33,20 @@ import cPickle
 
 from PyQt4 import QtCore, QtGui
 
-from openlp.core.lib import SettingsTab, translate, DisplayTags
+from openlp.core.lib import translate, DisplayTags
 from openlp.core.lib.ui import UiStrings, critical_error_message_box
+from openlp.core.ui.displaytagdialog import Ui_DisplayTagDialog
 
-class DisplayTagTab(SettingsTab):
+class DisplayTagForm(QtGui.QDialog, Ui_DisplayTagDialog):
     """
     The :class:`DisplayTagTab` manages the settings tab .
     """
-    def __init__(self):
+    def __init__(self, parent):
         """
-        Initialise the settings tab
+        Constructor
         """
-        SettingsTab.__init__(self, u'Display Tags')
-
-    def resizeEvent(self, event=None):
-        pass
-
-    def preLoad(self):
-        """
-        Initialise values before the Load takes place
-        """
-        # Create initial copy from master
-        DisplayTags.reset_html_tags()
-        user_expands = QtCore.QSettings().value(u'displayTags/html_tags',
-            QtCore.QVariant(u'')).toString()
-        # cPickle only accepts str not unicode strings
-        user_expands_string = str(unicode(user_expands).encode(u'utf8'))
-        if user_expands_string:
-            user_tags = cPickle.loads(user_expands_string)
-            # If we have some user ones added them as well
-            for t in user_tags:
-                DisplayTags.add_html_tag(t)
-        self.selected = -1
-
-    def setupUi(self):
-        """
-        Configure the UI elements for the tab.
-        """
-        self.setObjectName(u'DisplayTagTab')
-        self.tabTitleVisible = \
-            translate(u'OpenLP.DisplayTagTab', 'Display Tags')
-        self.displayTagEdit = QtGui.QWidget(self)
-        self.editGroupBox = QtGui.QGroupBox(self.displayTagEdit)
-        self.editGroupBox.setGeometry(QtCore.QRect(10, 220, 650, 181))
-        self.editGroupBox.setObjectName(u'editGroupBox')
-        self.updatePushButton = QtGui.QPushButton(self.editGroupBox)
-        self.updatePushButton.setGeometry(QtCore.QRect(550, 140, 71, 26))
-        self.updatePushButton.setObjectName(u'updatePushButton')
-        self.layoutWidget = QtGui.QWidget(self.editGroupBox)
-        self.layoutWidget.setGeometry(QtCore.QRect(5, 20, 571, 114))
-        self.layoutWidget.setObjectName(u'layoutWidget')
-        self.formLayout = QtGui.QFormLayout(self.layoutWidget)
-        self.formLayout.setObjectName(u'formLayout')
-        self.descriptionLabel = QtGui.QLabel(self.layoutWidget)
-        self.descriptionLabel.setAlignment(QtCore.Qt.AlignCenter)
-        self.descriptionLabel.setObjectName(u'descriptionLabel')
-        self.formLayout.setWidget(0, QtGui.QFormLayout.LabelRole,
-            self.descriptionLabel)
-        self.descriptionLineEdit = QtGui.QLineEdit(self.layoutWidget)
-        self.descriptionLineEdit.setObjectName(u'descriptionLineEdit')
-        self.formLayout.setWidget(0, QtGui.QFormLayout.FieldRole,
-            self.descriptionLineEdit)
-        self.tagLabel = QtGui.QLabel(self.layoutWidget)
-        self.tagLabel.setAlignment(QtCore.Qt.AlignCenter)
-        self.tagLabel.setObjectName(u'tagLabel')
-        self.formLayout.setWidget(1, QtGui.QFormLayout.LabelRole, self.tagLabel)
-        self.tagLineEdit = QtGui.QLineEdit(self.layoutWidget)
-        self.tagLineEdit.setMaximumSize(QtCore.QSize(50, 16777215))
-        self.tagLineEdit.setMaxLength(5)
-        self.tagLineEdit.setObjectName(u'tagLineEdit')
-        self.formLayout.setWidget(1, QtGui.QFormLayout.FieldRole,
-            self.tagLineEdit)
-        self.startTagLabel = QtGui.QLabel(self.layoutWidget)
-        self.startTagLabel.setAlignment(QtCore.Qt.AlignCenter)
-        self.startTagLabel.setObjectName(u'startTagLabel')
-        self.formLayout.setWidget(2, QtGui.QFormLayout.LabelRole,
-            self.startTagLabel)
-        self.startTagLineEdit = QtGui.QLineEdit(self.layoutWidget)
-        self.startTagLineEdit.setObjectName(u'startTagLineEdit')
-        self.formLayout.setWidget(2, QtGui.QFormLayout.FieldRole,
-            self.startTagLineEdit)
-        self.endTagLabel = QtGui.QLabel(self.layoutWidget)
-        self.endTagLabel.setAlignment(QtCore.Qt.AlignCenter)
-        self.endTagLabel.setObjectName(u'endTagLabel')
-        self.formLayout.setWidget(3, QtGui.QFormLayout.LabelRole,
-            self.endTagLabel)
-        self.endTagLineEdit = QtGui.QLineEdit(self.layoutWidget)
-        self.endTagLineEdit.setObjectName(u'endTagLineEdit')
-        self.formLayout.setWidget(3, QtGui.QFormLayout.FieldRole,
-            self.endTagLineEdit)
-        self.defaultPushButton = QtGui.QPushButton(self.displayTagEdit)
-        self.defaultPushButton.setGeometry(QtCore.QRect(430, 188, 71, 26))
-        self.defaultPushButton.setObjectName(u'updatePushButton')
-        self.deletePushButton = QtGui.QPushButton(self.displayTagEdit)
-        self.deletePushButton.setGeometry(QtCore.QRect(510, 188, 71, 26))
-        self.deletePushButton.setObjectName(u'deletePushButton')
-        self.newPushButton = QtGui.QPushButton(self.displayTagEdit)
-        self.newPushButton.setGeometry(QtCore.QRect(600, 188, 71, 26))
-        self.newPushButton.setObjectName(u'newPushButton')
-        self.tagTableWidget = QtGui.QTableWidget(self.displayTagEdit)
-        self.tagTableWidget.setGeometry(QtCore.QRect(10, 10, 650, 171))
-        self.tagTableWidget.setHorizontalScrollBarPolicy(
-            QtCore.Qt.ScrollBarAlwaysOff)
-        self.tagTableWidget.setEditTriggers(
-            QtGui.QAbstractItemView.NoEditTriggers)
-        self.tagTableWidget.setAlternatingRowColors(True)
-        self.tagTableWidget.setSelectionMode(
-            QtGui.QAbstractItemView.SingleSelection)
-        self.tagTableWidget.setSelectionBehavior(
-            QtGui.QAbstractItemView.SelectRows)
-        self.tagTableWidget.setCornerButtonEnabled(False)
-        self.tagTableWidget.setObjectName(u'tagTableWidget')
-        self.tagTableWidget.setColumnCount(4)
-        self.tagTableWidget.setRowCount(0)
-        item = QtGui.QTableWidgetItem()
-        self.tagTableWidget.setHorizontalHeaderItem(0, item)
-        item = QtGui.QTableWidgetItem()
-        self.tagTableWidget.setHorizontalHeaderItem(1, item)
-        item = QtGui.QTableWidgetItem()
-        self.tagTableWidget.setHorizontalHeaderItem(2, item)
-        item = QtGui.QTableWidgetItem()
-        self.tagTableWidget.setHorizontalHeaderItem(3, item)
-        self.editGroupBox.setTitle(
-            translate('OpenLP.DisplayTagTab', 'Edit Selection'))
-        self.updatePushButton.setText(
-            translate('OpenLP.DisplayTagTab', 'Update'))
-        self.descriptionLabel.setText(
-            translate('OpenLP.DisplayTagTab', 'Description'))
-        self.tagLabel.setText(translate('OpenLP.DisplayTagTab', 'Tag'))
-        self.startTagLabel.setText(
-            translate('OpenLP.DisplayTagTab', 'Start tag'))
-        self.endTagLabel.setText(translate('OpenLP.DisplayTagTab', 'End tag'))
-        self.deletePushButton.setText(UiStrings.Delete)
-        self.defaultPushButton.setText(
-            translate('OpenLP.DisplayTagTab', 'Default'))
-        self.newPushButton.setText(translate('OpenLP.DisplayTagTab', 'New'))
-        self.tagTableWidget.horizontalHeaderItem(0)\
-            .setText(translate('OpenLP.DisplayTagTab', 'Description'))
-        self.tagTableWidget.horizontalHeaderItem(1)\
-            .setText(translate('OpenLP.DisplayTagTab', 'Tag id'))
-        self.tagTableWidget.horizontalHeaderItem(2)\
-            .setText(translate('OpenLP.DisplayTagTab', 'Start Html'))
-        self.tagTableWidget.horizontalHeaderItem(3)\
-            .setText(translate('OpenLP.DisplayTagTab', 'End Html'))
-        QtCore.QMetaObject.connectSlotsByName(self.displayTagEdit)
-        self.tagTableWidget.setColumnWidth(0, 120)
-        self.tagTableWidget.setColumnWidth(1, 40)
-        self.tagTableWidget.setColumnWidth(2, 240)
-        self.tagTableWidget.setColumnWidth(3, 200)
+        QtGui.QDialog.__init__(self, parent)
+        self.setupUi(self)
         QtCore.QObject.connect(self.tagTableWidget,
             QtCore.SIGNAL(u'clicked(QModelIndex)'), self.onRowSelected)
         QtCore.QObject.connect(self.defaultPushButton,
@@ -192,9 +58,29 @@ class DisplayTagTab(SettingsTab):
         QtCore.QObject.connect(self.deletePushButton,
             QtCore.SIGNAL(u'pressed()'), self.onDeletePushed)
 
-    def load(self):
+    def exec_(self):
         """
         Load Display and set field state.
+        """
+        # Create initial copy from master
+        self._resetTable()
+        DisplayTags.reset_html_tags()
+        user_expands = QtCore.QSettings().value(u'displayTags/html_tags',
+            QtCore.QVariant(u'')).toString()
+        # cPickle only accepts str not unicode strings
+        user_expands_string = str(unicode(user_expands).encode(u'utf8'))
+        if user_expands_string:
+            user_tags = cPickle.loads(user_expands_string)
+            # If we have some user ones added them as well
+            for t in user_tags:
+                DisplayTags.add_html_tag(t)
+        self.selected = -1
+        self.load()
+        return QtGui.QDialog.exec_(self)
+
+    def load(self):
+        """
+        Load the form with data and set the initial state of the buttons
         """
         self.newPushButton.setEnabled(True)
         self.updatePushButton.setEnabled(False)
@@ -220,7 +106,7 @@ class DisplayTagTab(SettingsTab):
         self.startTagLineEdit.setEnabled(False)
         self.endTagLineEdit.setEnabled(False)
 
-    def save(self):
+    def accept(self):
         """
         Save Custom tags in a pickle .
         """
@@ -235,13 +121,14 @@ class DisplayTagTab(SettingsTab):
         else:
             QtCore.QSettings().setValue(u'displayTags/html_tags',
                 QtCore.QVariant(u''))
+        return QtGui.QDialog.accept(self)
 
-    def cancel(self):
+    def reject(self):
         """
         Reset Custom tags from Settings.
         """
-        self.preLoad()
         self._resetTable()
+        return QtGui.QDialog.reject(self)
 
     def onRowSelected(self):
         """
@@ -288,6 +175,7 @@ class DisplayTagTab(SettingsTab):
         self._resetTable()
         # Highlight new row
         self.tagTableWidget.selectRow(self.tagTableWidget.rowCount() - 1)
+        self.onRowSelected()
 
     def onDefaultPushed(self):
         """
@@ -335,7 +223,6 @@ class DisplayTagTab(SettingsTab):
         """
         self.tagTableWidget.clearContents()
         self.tagTableWidget.setRowCount(0)
-        self.load()
 
     def _strip(self, tag):
         """
