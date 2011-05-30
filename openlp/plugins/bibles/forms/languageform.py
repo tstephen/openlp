@@ -5,11 +5,10 @@
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
 # Copyright (c) 2008-2011 Raoul Snyman                                        #
-# Portions copyright (c) 2008-2011 Tim Bentley, Gerald Britton, Jonathan      #
-# Corwin, Michael Gorven, Scott Guerrieri, Matthias Hub, Meinert Jordan,      #
-# Armin Köhler, Joshua Miller, Stevan Pettit, Andreas Preikschat, Mattias     #
-# Põldaru, Christian Richter, Philip Ridout, Jeffrey Smith, Maikel            #
-# Stuivenberg, Martin Thompson, Jon Tibble, Frode Woldsund                    #
+# Portions copyright (c) 2008-2011 Tim Bentley, Jonathan Corwin, Michael      #
+# Gorven, Scott Guerrieri, Meinert Jordan, Armin Köhler, Andreas Preikschat,  #
+# Christian Richter, Philip Ridout, Maikel Stuivenberg, Martin Thompson, Jon  #
+# Tibble, Carsten Tinggaard, Frode Woldsund                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -24,38 +23,50 @@
 # with this program; if not, write to the Free Software Foundation, Inc., 59  #
 # Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
 ###############################################################################
+
 """
-Provide additional functionality required by OpenLP from the inherited
-QDockWidget.
+Module implementing LanguageForm.
 """
 import logging
 
-from PyQt4 import QtGui
+from PyQt4.QtGui import QDialog
 
-from openlp.core.lib import build_icon
-from openlp.core.ui import ScreenList
+from openlp.core.lib import translate
+from openlp.core.lib.ui import critical_error_message_box
+from openlp.plugins.bibles.forms.languagedialog import \
+    Ui_LanguageDialog
+from openlp.plugins.bibles.lib.db import BiblesResourcesDB
 
 log = logging.getLogger(__name__)
 
-class OpenLPDockWidget(QtGui.QDockWidget):
+class LanguageForm(QDialog, Ui_LanguageDialog):
     """
-    Custom DockWidget class to handle events
+    Class to manage a dialog which ask the user for a language.
     """
-    def __init__(self, parent=None, name=None, icon=None):
+    log.info(u'LanguageForm loaded')
+    
+    def __init__(self, parent = None):
         """
-        Initialise the DockWidget
+        Constructor
         """
-        log.debug(u'Initialise the %s widget' % name)
-        QtGui.QDockWidget.__init__(self, parent)
-        if name:
-            self.setObjectName(name)
-        if icon:
-            self.setWindowIcon(build_icon(icon))
-        # Sort out the minimum width.
-        screens = ScreenList.get_instance()
-        screen_width = screens.current[u'size'].width()
-        mainwindow_docbars = screen_width / 5
-        if mainwindow_docbars > 300:
-            self.setMinimumWidth(300)
+        QDialog.__init__(self, parent)
+        self.setupUi(self)
+
+    def exec_(self, bible_name):
+        self.languageComboBox.addItem(u'')
+        if bible_name:
+            self.bibleLabel.setText(unicode(bible_name))
+        items = BiblesResourcesDB.get_languages()
+        for item in items:
+            self.languageComboBox.addItem(item[u'name'])
+        return QDialog.exec_(self)
+    
+    def accept(self):
+        if self.languageComboBox.currentText() == u'':
+            critical_error_message_box(
+                message=translate('BiblesPlugin.LanguageForm',
+                'You need to choose a language.'))
+            self.languageComboBox.setFocus()
+            return False
         else:
-            self.setMinimumWidth(mainwindow_docbars)
+            return QDialog.accept(self)
