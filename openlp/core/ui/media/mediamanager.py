@@ -32,7 +32,8 @@ from PyQt4 import QtCore, QtGui, QtWebKit
 
 from openlp.core.lib import OpenLPToolbar, Receiver, translate
 from openlp.core.lib.ui import UiStrings, critical_error_message_box
-from openlp.plugins.media.lib import MediaAPI, MediaState, MediaInfo
+from openlp.core.ui.media import MediaAPI, MediaState, MediaInfo
+from openlp.core.utils import AppLocation
 
 log = logging.getLogger(__name__)
 
@@ -64,13 +65,10 @@ class MediaManager(object):
         self.Timer = QtCore.QTimer()
         self.Timer.setInterval(200)
         self.withLivePreview = False
+        self.checkPreConditions()
         #Signals
         QtCore.QObject.connect(self.Timer,
             QtCore.SIGNAL("timeout()"), self.video_state)
-        QtCore.QObject.connect(Receiver.get_receiver(),
-            QtCore.SIGNAL(u'setup_display'), self.setup_display)
-        QtCore.QObject.connect(Receiver.get_receiver(),
-            QtCore.SIGNAL(u'media_video'), self.video)
         QtCore.QObject.connect(Receiver.get_receiver(),
             QtCore.SIGNAL(u'Media Start'), self.video_play)
         QtCore.QObject.connect(Receiver.get_receiver(),
@@ -82,13 +80,51 @@ class MediaManager(object):
         QtCore.QObject.connect(Receiver.get_receiver(),
             QtCore.SIGNAL(u'volumeSlider'), self.video_volume)
         QtCore.QObject.connect(Receiver.get_receiver(),
-            QtCore.SIGNAL(u'media_reset'), self.video_reset)
-        QtCore.QObject.connect(Receiver.get_receiver(),
             QtCore.SIGNAL(u'media_hide'), self.video_hide)
         QtCore.QObject.connect(Receiver.get_receiver(),
             QtCore.SIGNAL(u'media_blank'), self.video_blank)
         QtCore.QObject.connect(Receiver.get_receiver(),
             QtCore.SIGNAL(u'media_unblank'), self.video_unblank)
+
+    def registerControllers(self, controller):
+        """
+        Register each media API controller (Webkit, Phonon, etc) and
+        store for later use
+        """
+        if controller.check_available():
+            self.APIs[controller.name] = controller
+
+    def checkPreConditions(self):
+        """
+        Check to see if we have any media API's available
+        If Not do not install the plugin.
+        """
+        log.debug(u'checkPreConditions')
+        controller_dir = os.path.join(
+            AppLocation.get_directory(AppLocation.AppDir),
+            u'core', u'ui', u'media')
+        for filename in os.listdir(controller_dir):
+            if filename.endswith(u'api.py') and \
+                not filename == 'mediaapi.py':
+                path = os.path.join(controller_dir, filename)
+                if os.path.isfile(path):
+                    modulename = u'openlp.core.ui.media.' + \
+                        os.path.splitext(filename)[0]
+                    log.debug(u'Importing controller %s', modulename)
+                    try:
+                        __import__(modulename, globals(), locals(), [])
+                    except ImportError:
+                        log.warn(u'Failed to import %s on path %s',
+                            modulename, path)
+        controller_classes = MediaAPI.__subclasses__()
+        for controller_class in controller_classes:
+            controller = controller_class(self)
+            self.registerControllers(controller)
+        if self.APIs:
+            return True
+        else:
+            return False
+
 
     def video_state(self):
         """
@@ -214,19 +250,21 @@ class MediaManager(object):
             display.resize(controller.slidePreview.size())
         api.resize(display)
 
-    def video(self, msg):
+    def video(self, controller, file, muted, isBackground):
         """
         Loads and starts a video to run with the option of sound
         """
         log.debug(u'video')
-        controller = msg[0]
         isValid = False
         # stop running videos
         self.video_reset(controller)
         controller.media_info = MediaInfo()
-        controller.media_info.volume = controller.volumeSlider.value()
-        controller.media_info.file_info = QtCore.QFileInfo(msg[1])
-        controller.media_info.is_background = msg[2]
+        if muted:
+            controller.media_info.volume = 0
+        else:
+            controller.media_info.volume = controller.volumeSlider.value()
+        controller.media_info.file_info = QtCore.QFileInfo(file)
+        controller.media_info.is_background = isBackground
         if controller.isLive:
             if self.withLivePreview:
                 display = controller.previewDisplay
@@ -242,7 +280,7 @@ class MediaManager(object):
                 translate('MediaPlugin.MediaItem', 'Unsupported File'),
                 unicode(translate('MediaPlugin.MediaItem',
                 'Unsupported File')))
-            return
+            return False
         #now start playing
         self.video_play([controller])
         self.video_pause([controller])
@@ -250,7 +288,7 @@ class MediaManager(object):
         self.video_play([controller])
         self.set_controls_visible(controller, True)
         log.debug(u'use %s controller' % self.curDisplayMediaAPI[display])
-        print u'use %s controller' % self.curDisplayMediaAPI[display].name
+        return True
 
     def check_file_type(self, controller, display):
         """
