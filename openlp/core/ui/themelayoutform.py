@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=80 tabstop=4 softtabstop=4
 
@@ -26,20 +25,31 @@
 # Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
 ###############################################################################
 
-"""
-Configuration file for pytest framework.
-"""
+from PyQt4 import QtGui, QtCore
 
-from openlp.core import main as openlp_main
+from themelayoutdialog import Ui_ThemeLayoutDialog
 
+from openlp.core.lib import translate
+from openlp.core.lib.ui import UiStrings, critical_error_message_box
 
-# Test function argument to make openlp gui instance persistent for all tests.
-# All test cases have to access the same instance. To allow create multiple
-# instances it would be necessary use diffrent configuraion and data files.
-# Created instance will use your OpenLP settings.
-def pytest_funcarg__openlpapp(request):
-    def setup():
-        return openlp_main(['--testing'])
-    def teardown(app):
-        pass
-    return request.cached_setup(setup=setup, teardown=teardown, scope='session')
+class ThemeLayoutForm(QtGui.QDialog, Ui_ThemeLayoutDialog):
+    """
+    The exception dialog
+    """
+    def __init__(self, parent):
+        QtGui.QDialog.__init__(self, parent)
+        self.setupUi(self)
+
+    def exec_(self, image):
+        """
+        Run the Dialog with correct heading.
+        """
+        pixmap = image.scaledToHeight(400, QtCore.Qt.SmoothTransformation)
+        self.themeDisplayLabel.setPixmap(image)
+        displayAspectRatio = float(image.width()) / image.height()
+        self.themeDisplayLabel.setFixedSize(400, 400 / displayAspectRatio )
+        return QtGui.QDialog.exec_(self)
+
+    def accept(self):
+        return QtGui.QDialog.accept(self)
+
