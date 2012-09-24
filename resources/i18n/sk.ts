@@ -1,38 +1,38 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS language="it" sourcelanguage="" version="2.0">
+<?xml version="1.0" ?><!DOCTYPE TS><TS language="sk" sourcelanguage="" version="2.0">
 <context>
     <name>AlertsPlugin</name>
     <message>
         <location filename="openlp/plugins/alerts/alertsplugin.py" line="138"/>
         <source>&amp;Alert</source>
-        <translation>&amp;Avviso</translation>
+        <translation>&amp;Upozornenie</translation>
     </message>
     <message>
         <location filename="openlp/plugins/alerts/alertsplugin.py" line="138"/>
         <source>Show an alert message.</source>
-        <translation>Mostra un messaggio di avviso.</translation>
+        <translation>Zobraziť upozornenie.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/alerts/alertsplugin.py" line="184"/>
         <source>Alert</source>
         <comment>name singular</comment>
-        <translation>Avviso</translation>
+        <translation>Upozornenie</translation>
     </message>
     <message>
         <location filename="openlp/plugins/alerts/alertsplugin.py" line="185"/>
         <source>Alerts</source>
         <comment>name plural</comment>
-        <translation>Avvisi</translation>
+        <translation>Upozornenia</translation>
     </message>
     <message>
         <location filename="openlp/plugins/alerts/alertsplugin.py" line="189"/>
         <source>Alerts</source>
         <comment>container title</comment>
-        <translation>Avvisi</translation>
+        <translation>Upozornenia</translation>
     </message>
     <message>
         <location filename="openlp/plugins/alerts/alertsplugin.py" line="173"/>
         <source>&lt;strong&gt;Alerts Plugin&lt;/strong&gt;&lt;br /&gt;The alert plugin controls the displaying of nursery alerts on the display screen.</source>
-        <translation>&lt;strong&gt;Plugin di Avvisi&lt;/strong&gt;&lt;br /&gt;Il plugin di allarme controlla la visualizzazione di avvisi sul display.</translation>
+        <translation>&lt;strong&gt;Modul upozornení&lt;/strong&gt;&lt;br /&gt;Modul upozornení umožňuje zobrazovat rôzne hlášky a upozornenia na zobrazovacej obrazovke.</translation>
     </message>
 </context>
 <context>
@@ -40,71 +40,69 @@
     <message>
         <location filename="openlp/plugins/alerts/forms/alertdialog.py" line="88"/>
         <source>Alert Message</source>
-        <translation>Messaggio di avviso</translation>
+        <translation>Upozornenie</translation>
     </message>
     <message>
         <location filename="openlp/plugins/alerts/forms/alertdialog.py" line="90"/>
         <source>Alert &amp;text:</source>
-        <translation>Avviso &amp;testo:</translation>
+        <translation>&amp;Text upozornenia:</translation>
     </message>
     <message>
         <location filename="openlp/plugins/alerts/forms/alertdialog.py" line="94"/>
         <source>&amp;New</source>
-        <translation>&amp;Nuovo</translation>
+        <translation>&amp;Nový</translation>
     </message>
     <message>
         <location filename="openlp/plugins/alerts/forms/alertdialog.py" line="96"/>
         <source>&amp;Save</source>
-        <translation>&amp;Salva</translation>
+        <translation>&amp;Uložiť</translation>
     </message>
     <message>
         <location filename="openlp/plugins/alerts/forms/alertdialog.py" line="98"/>
         <source>Displ&amp;ay</source>
-        <translation>Visualiz&amp;za</translation>
+        <translation>&amp;Zobraziť</translation>
     </message>
     <message>
         <location filename="openlp/plugins/alerts/forms/alertdialog.py" line="100"/>
         <source>Display &amp;&amp; Cl&amp;ose</source>
-        <translation>Visualizza &amp;&amp; Ch&amp;iudi</translation>
+        <translation>Zobraziť a za&amp;vrieť</translation>
     </message>
     <message>
         <location filename="openlp/plugins/alerts/forms/alertform.py" line="106"/>
         <source>New Alert</source>
-        <translation>Nuovo Avviso</translation>
+        <translation>Nové upozornenie</translation>
     </message>
     <message>
         <location filename="openlp/plugins/alerts/forms/alertform.py" line="106"/>
         <source>You haven&apos;t specified any text for your alert. Please type in some text before clicking New.</source>
-        <translation>Non è stato specificato alcun testo per l&apos;avviso. Si prega di digitare un testo prima di cliccare su Nuovo.</translation>
+        <translation>Nebyl zadaný žiadny text upozornenia. Pred klepnutím na Nový prosím zadajte nejaký text.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/alerts/forms/alertdialog.py" line="92"/>
         <source>&amp;Parameter:</source>
-        <translation>&amp;Parametro:</translation>
+        <translation>&amp;Parameter:</translation>
     </message>
     <message>
         <location filename="openlp/plugins/alerts/forms/alertform.py" line="179"/>
         <source>No Parameter Found</source>
-        <translation>Nessun parametro Trovato</translation>
+        <translation>Parameter sa nepodarilo nájsť</translation>
     </message>
     <message>
         <location filename="openlp/plugins/alerts/forms/alertform.py" line="179"/>
         <source>You have not entered a parameter to be replaced.
 Do you want to continue anyway?</source>
-        <translation>Non è stato inserito un parametro da sostituire..⏎
-Vuoi continuare comunque?</translation>
+        <translation>Nebol zadaný žiadny parameter pre nahradenie. Chcete napriek tomu pokračovat? Parameter sa nepodarilo nájsť</translation>
     </message>
     <message>
         <location filename="openlp/plugins/alerts/forms/alertform.py" line="190"/>
         <source>No Placeholder Found</source>
-        <translation>Nessun Segnaposto Trovato</translation>
+        <translation>Zástupný znak sa nepodarilo nájsť</translation>
     </message>
     <message>
         <location filename="openlp/plugins/alerts/forms/alertform.py" line="190"/>
         <source>The alert text does not contain '&lt;&gt;'.
 Do you want to continue anyway?</source>
-        <translation>Il testo di avviso non contiene &apos;&lt;&gt;&apos;.⏎
-Vuoi continuare comunque?</translation>
+        <translation>Text upozornenia neobsahuje &apos;&lt;&gt;&apos;. Chcete napriek tomu pokračovat?</translation>
     </message>
 </context>
 <context>
@@ -112,7 +110,7 @@ Vuoi continuare comunque?</translation>
     <message>
         <location filename="openlp/plugins/alerts/lib/alertsmanager.py" line="73"/>
         <source>Alert message created and displayed.</source>
-        <translation>Messaggio di avviso creato e visualizzato.</translation>
+        <translation>Upozorňovacia správa bola vytvorená a zobrazená.</translation>
     </message>
 </context>
 <context>
@@ -120,32 +118,32 @@ Vuoi continuare comunque?</translation>
     <message>
         <location filename="openlp/plugins/alerts/lib/alertstab.py" line="110"/>
         <source>Font</source>
-        <translation>Carattere</translation>
+        <translation>Písmo</translation>
     </message>
     <message>
         <location filename="openlp/plugins/alerts/lib/alertstab.py" line="112"/>
         <source>Font name:</source>
-        <translation>Nome del Carattere</translation>
+        <translation>Názov písma:</translation>
     </message>
     <message>
         <location filename="openlp/plugins/alerts/lib/alertstab.py" line="114"/>
         <source>Font color:</source>
-        <translation>Colore del Carattere</translation>
+        <translation>Farba písma:</translation>
     </message>
     <message>
         <location filename="openlp/plugins/alerts/lib/alertstab.py" line="116"/>
         <source>Background color:</source>
-        <translation>Colore di sfondo:</translation>
+        <translation>Farba pozadia:</translation>
     </message>
     <message>
         <location filename="openlp/plugins/alerts/lib/alertstab.py" line="118"/>
         <source>Font size:</source>
-        <translation>Dimensione Carattere:</translation>
+        <translation>Veľkosť písma:</translation>
     </message>
     <message>
         <location filename="openlp/plugins/alerts/lib/alertstab.py" line="121"/>
         <source>Alert timeout:</source>
-        <translation>Avviso Timeout:</translation>
+        <translation>Čas pre vypršanie upozornenia:</translation>
     </message>
 </context>
 <context>
@@ -153,145 +151,145 @@ Vuoi continuare comunque?</translation>
     <message>
         <location filename="openlp/plugins/bibles/bibleplugin.py" line="110"/>
         <source>&amp;Bible</source>
-        <translation>&amp;Bibbia</translation>
+        <translation>&amp;Biblia</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/bibleplugin.py" line="182"/>
         <source>Bible</source>
         <comment>name singular</comment>
-        <translation>Bibbia</translation>
+        <translation>Biblia</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/bibleplugin.py" line="183"/>
         <source>Bibles</source>
         <comment>name plural</comment>
-        <translation>Bibbie</translation>
+        <translation>Biblie</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/bibleplugin.py" line="187"/>
         <source>Bibles</source>
         <comment>container title</comment>
-        <translation>Bibbie</translation>
+        <translation>Biblie</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/http.py" line="543"/>
         <source>No Book Found</source>
-        <translation>Nessun libro trovato</translation>
+        <translation>Kniha sa nenašla</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/http.py" line="543"/>
         <source>No matching book could be found in this Bible. Check that you have spelled the name of the book correctly.</source>
-        <translation>Nessun libro analogo può essere trovato in questa Bibbia. Verificare di aver digitato il nome del libro in modo corretto.</translation>
+        <translation>V Bibli sa nenašla hľadaná kniha. Uistite sa, že názov knihy bol zadaný správne.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/bibleplugin.py" line="192"/>
         <source>Import a Bible.</source>
-        <translation>Importa una Bibbia.</translation>
+        <translation>Import Biblie.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/bibleplugin.py" line="193"/>
         <source>Add a new Bible.</source>
-        <translation>Aggiungi una nuova Bibbia.</translation>
+        <translation>Pridať novú Bibliu.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/bibleplugin.py" line="194"/>
         <source>Edit the selected Bible.</source>
-        <translation>Modifica la Bibbia selezionata.</translation>
+        <translation>Upraviť označenú Bibliu.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/bibleplugin.py" line="195"/>
         <source>Delete the selected Bible.</source>
-        <translation>Cancella la Bibbia selezionata</translation>
+        <translation>Zmazať označenú Bibliu.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/bibleplugin.py" line="196"/>
         <source>Preview the selected Bible.</source>
-        <translation>Anteprima della Bibbia selezionata.</translation>
+        <translation>Náhľad označenej Biblie.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/bibleplugin.py" line="198"/>
         <source>Send the selected Bible live.</source>
-        <translation>Invia la Bibbia selezionata dal vivo.</translation>
+        <translation>Zobraziť označenú Bibliu naživo.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/bibleplugin.py" line="199"/>
         <source>Add the selected Bible to the service.</source>
-        <translation>Aggiungi la Bibbia selezionata al servizio.</translation>
+        <translation>Pridať označenú Bibliu do služby.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/bibleplugin.py" line="148"/>
         <source>&lt;strong&gt;Bible Plugin&lt;/strong&gt;&lt;br /&gt;The Bible plugin provides the ability to display Bible verses from different sources during the service.</source>
-        <translation>&lt;strong&gt;Bibbia Plugin&lt;/strong&gt;&lt;br /&gt;Il plugin della Bibbia offre la possibilità di visualizzare i versetti della Bibbia da fonti diverse durante il servizio.</translation>
+        <translation>&lt;strong&gt;Modul Biblia&lt;/strong&gt;&lt;br /&gt;Modul Biblia umožňuje počay služby zobrazovať verše z rôznych zdrojov.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/bibleplugin.py" line="125"/>
         <source>&amp;Upgrade older Bibles</source>
-        <translation>&amp;Aggiornamento vecchie Bibbie</translation>
+        <translation>&amp;Aktualizovať staršie Biblie</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/bibleplugin.py" line="125"/>
         <source>Upgrade the Bible databases to the latest format.</source>
-        <translation>Aggiorna i database della Bibbia al formato più recente.</translation>
+        <translation>Aktualizovať databázu Biblie na najnovší formát.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="92"/>
         <source>Genesis</source>
-        <translation>Genesi</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="93"/>
         <source>Exodus</source>
-        <translation>Esodo</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="94"/>
         <source>Leviticus</source>
-        <translation>Levitico</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="95"/>
         <source>Numbers</source>
-        <translation>Numeri</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="96"/>
         <source>Deuteronomy</source>
-        <translation>Deuteronomio</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="97"/>
         <source>Joshua</source>
-        <translation>Giosuè</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="98"/>
         <source>Judges</source>
-        <translation>Giudici</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="99"/>
         <source>Ruth</source>
-        <translation>Ruth</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="100"/>
         <source>1 Samuel</source>
-        <translation>1 Samuele</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="101"/>
         <source>2 Samuel</source>
-        <translation>2 Samuele</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="102"/>
         <source>1 Kings</source>
-        <translation>1 Re</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="103"/>
         <source>2 Kings</source>
-        <translation>2 Re</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="104"/>
@@ -356,212 +354,212 @@ Vuoi continuare comunque?</translation>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="116"/>
         <source>Lamentations</source>
-        <translation>Lamentazioni</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="117"/>
         <source>Ezekiel</source>
-        <translation>Ezechiele</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="118"/>
         <source>Daniel</source>
-        <translation>Daniele</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="119"/>
         <source>Hosea</source>
-        <translation>Osea</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="120"/>
         <source>Joel</source>
-        <translation>Gioele</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="121"/>
         <source>Amos</source>
-        <translation>Amos</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="122"/>
         <source>Obadiah</source>
-        <translation>Abdia</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="123"/>
         <source>Jonah</source>
-        <translation>Giona</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="124"/>
         <source>Micah</source>
-        <translation>Michea</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="125"/>
         <source>Nahum</source>
-        <translation>Nahum</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="126"/>
         <source>Habakkuk</source>
-        <translation>Habacuc</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="127"/>
         <source>Zephaniah</source>
-        <translation>Sofonia</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="128"/>
         <source>Haggai</source>
-        <translation>Aggeo</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="129"/>
         <source>Zechariah</source>
-        <translation>Zaccaria</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="130"/>
         <source>Malachi</source>
-        <translation>Malachia</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="131"/>
         <source>Matthew</source>
-        <translation>Matteo</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="132"/>
         <source>Mark</source>
-        <translation>Marco</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="133"/>
         <source>Luke</source>
-        <translation>Luca</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="134"/>
         <source>John</source>
-        <translation>Giovanni</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="135"/>
         <source>Acts</source>
-        <translation>Atti degli Apostoli</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="136"/>
         <source>Romans</source>
-        <translation>Romani</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="137"/>
         <source>1 Corinthians</source>
-        <translation>1 Corinzi</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="138"/>
         <source>2 Corinthians</source>
-        <translation>2 Corinzi</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="139"/>
         <source>Galatians</source>
-        <translation>Galati</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="140"/>
         <source>Ephesians</source>
-        <translation>Efesini</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="141"/>
         <source>Philippians</source>
-        <translation>Filippesi</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="142"/>
         <source>Colossians</source>
-        <translation>Colossesi</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="143"/>
         <source>1 Thessalonians</source>
-        <translation>1 Tessalonicesi</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="144"/>
         <source>2 Thessalonians</source>
-        <translation>2 Tessalonicesi</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="145"/>
         <source>1 Timothy</source>
-        <translation>1 Timoteo</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="146"/>
         <source>2 Timothy</source>
-        <translation>2 Timoteo</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="147"/>
         <source>Titus</source>
-        <translation>Tito</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="148"/>
         <source>Philemon</source>
-        <translation>Filemone</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="149"/>
         <source>Hebrews</source>
-        <translation>Ebrei</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="150"/>
         <source>James</source>
-        <translation>Giacomo</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="151"/>
         <source>1 Peter</source>
-        <translation>1 Pietro</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="152"/>
         <source>2 Peter</source>
-        <translation>2 Pietro</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="153"/>
         <source>1 John</source>
-        <translation>1 Giovanni</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="154"/>
         <source>2 John</source>
-        <translation>2 Giovanni</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="155"/>
         <source>3 John</source>
-        <translation>3 Giovanni</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="156"/>
         <source>Jude</source>
-        <translation>Giuda</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="157"/>
         <source>Revelation</source>
-        <translation>Apocalisse</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/__init__.py" line="158"/>
@@ -710,34 +708,33 @@ be followed by one or more non-numeric characters.</source>
     <message>
         <location filename="openlp/plugins/bibles/lib/manager.py" line="429"/>
         <source>Scripture Reference Error</source>
-        <translation>Errore di Riferimento nella Scrittura</translation>
+        <translation>Chyba v odkazu Biblie</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/manager.py" line="419"/>
         <source>Web Bible cannot be used</source>
-        <translation>La Bibbia nel Web non può essere utilizzato</translation>
+        <translation>Biblia z www sa nedá použiť</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/manager.py" line="419"/>
         <source>Text Search is not available with Web Bibles.</source>
-        <translation>Cerca testo non è disponibile con La Bibbia sul Web.</translation>
+        <translation>Hľadanie textu nie je dostupné v Biblii z www.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/manager.py" line="429"/>
         <source>You did not enter a search keyword.
 You can separate different keywords by a space to search for all of your keywords and you can separate them by a comma to search for one of them.</source>
-        <translation>Non hai inserito una parola chiave di ricerca. ⏎
-È possibile separare parole chiave diverse da uno spazio per la ricerca di tutte le parole chiave e si possono separare con una virgola per la ricerca di uno di loro.</translation>
+        <translation>Nebolo zadané slovo pre vyhľadávaniu. Na vyhľadávanie textu obsahujúceho všetky slová je potrebné tieto slová oddělit medzerou. Oddelením slov čiarkou bude sa bude vyhľadávať text obsahujúcí aspoň jedno zo zadaných slov.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/manager.py" line="403"/>
         <source>There are no Bibles currently installed. Please use the Import Wizard to install one or more Bibles.</source>
-        <translation>Non ci sono Bibbie attualmente installati. Si prega di utilizzare l&apos;importazione guidata per installare uno o più Bibbie.</translation>
+        <translation>Žiadne Biblie nie sú nainštalované. Na pridanie jednej alebo viac Biblii prosím použite Sprievodcu importom.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/manager.py" line="403"/>
         <source>No Bibles Available</source>
-        <translation>Bibbia non disponibile</translation>
+        <translation>Žiadne Biblie k dispozícii.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/manager.py" line="346"/>
@@ -758,49 +755,48 @@ Book Chapter%(verse)sVerse%(range)sChapter%(verse)sVerse</source>
     <message>
         <location filename="openlp/plugins/bibles/lib/biblestab.py" line="224"/>
         <source>Verse Display</source>
-        <translation>Visualizza Versetto</translation>
+        <translation>Zobraziť verš</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/biblestab.py" line="226"/>
         <source>Only show new chapter numbers</source>
-        <translation>Mostra solo i numeri del nuovo capitolo</translation>
+        <translation>Zobraziť len číslo novej kapitoly</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/biblestab.py" line="231"/>
         <source>Bible theme:</source>
-        <translation>Tema della Bibbia</translation>
+        <translation>Motív Biblie:</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/biblestab.py" line="239"/>
         <source>No Brackets</source>
-        <translation>Senza Parentesi Quadre</translation>
+        <translation>Žiadne zátvorky</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/biblestab.py" line="241"/>
         <source>( And )</source>
-        <translation>(E)</translation>
+        <translation>(A)</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/biblestab.py" line="243"/>
         <source>{ And }</source>
-        <translation>{E}</translation>
+        <translation>{ A }</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/biblestab.py" line="245"/>
         <source>[ And ]</source>
-        <translation>[E]</translation>
+        <translation>[ A ]</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/biblestab.py" line="247"/>
         <source>Note:
 Changes do not affect verses already in the service.</source>
-        <translation>Nota: ⏎
- Le modifiche non influiscono i versetti già nel servizio.</translation>
+        <translation>Poznámka: Verše, které sú už v službe, nie sú ovplyvnené zmenami.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/biblestab.py" line="249"/>
         <source>Display second Bible verses</source>
-        <translation>Visualizza i Secondi versetti della Bibbia</translation>
+        <translation>Zobraziť druhé verše z Biblie</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/biblestab.py" line="251"/>
@@ -887,37 +883,37 @@ search results and on display:</source>
     <message>
         <location filename="openlp/plugins/bibles/forms/booknamedialog.py" line="91"/>
         <source>Select Book Name</source>
-        <translation>Seleziona il Nome del Libro</translation>
+        <translation>Vybrať názov knihy</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/booknamedialog.py" line="96"/>
         <source>Current name:</source>
-        <translation>Nome Attuale:</translation>
+        <translation>Súčasný názov:</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/booknamedialog.py" line="98"/>
         <source>Corresponding name:</source>
-        <translation>Nome corrispondente:</translation>
+        <translation>Zodpovedajúci názov:</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/booknamedialog.py" line="100"/>
         <source>Show Books From</source>
-        <translation>Mostra i Libri da</translation>
+        <translation>Zobraziť knihy od</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/booknamedialog.py" line="102"/>
         <source>Old Testament</source>
-        <translation>Vecchio Testamento</translation>
+        <translation>Starý zákon</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/booknamedialog.py" line="104"/>
         <source>New Testament</source>
-        <translation>Nuovo Testamento</translation>
+        <translation>Nový zákon</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/booknamedialog.py" line="106"/>
         <source>Apocrypha</source>
-        <translation>Libri Apocrifi</translation>
+        <translation>Apokryfy</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/booknamedialog.py" line="93"/>
@@ -930,7 +926,7 @@ search results and on display:</source>
     <message>
         <location filename="openlp/plugins/bibles/forms/booknameform.py" line="124"/>
         <source>You need to select a book.</source>
-        <translation>È necessario selezionare un libro.</translation>
+        <translation>Je potrebné vybrať knihu.</translation>
     </message>
 </context>
 <context>
@@ -938,18 +934,18 @@ search results and on display:</source>
     <message>
         <location filename="openlp/plugins/bibles/lib/csvbible.py" line="111"/>
         <source>Importing books... %s</source>
-        <translation>Importazione di libri ... %s</translation>
+        <translation>Import kníh... %s</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/csvbible.py" line="155"/>
         <source>Importing verses from %s...</source>
         <comment>Importing verses from &lt;book name&gt;...</comment>
-        <translation>Importazione dei versetti da%s...</translation>
+        <translation>Import veršov z %s...</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/csvbible.py" line="164"/>
         <source>Importing verses... done.</source>
-        <translation>Importazione dei versetti ... finito.</translation>
+        <translation>Import veršov... dokončené.</translation>
     </message>
 </context>
 <context>
@@ -1026,38 +1022,38 @@ It is not possible to customize the Book Names.</source>
     <message>
         <location filename="openlp/plugins/bibles/lib/http.py" line="457"/>
         <source>Registering Bible and loading books...</source>
-        <translation>Registrazione della Bibbia e caricamento dei libri...</translation>
+        <translation>Registrujem Bibliu a sťahujem knihy...</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/http.py" line="482"/>
         <source>Registering Language...</source>
-        <translation>Registrazione Lingua...</translation>
+        <translation>Registrujem Jazyk...</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/http.py" line="498"/>
         <source>Importing %s...</source>
         <comment>Importing &lt;book name&gt;...</comment>
-        <translation>Importazione %s...</translation>
+        <translation>Importujem %s...</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/http.py" line="665"/>
         <source>Download Error</source>
-        <translation>Errore di Download</translation>
+        <translation>Vyskytla sa chyba pri sťahovaní</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/http.py" line="665"/>
         <source>There was a problem downloading your verse selection. Please check your Internet connection, and if this error continues to occur please consider reporting a bug.</source>
-        <translation>C&apos;è stato un problema nel scaricare il versetto selezionato. Si prega di verificare la connessione internet, se questo errore persiste considera di segnalarlo.</translation>
+        <translation>Pri sťahovaní výberu veršov sa vyskytol problém. Prosím preverte svoje internetové pripojenie. Pokiaľ sa táto chyba stále objavuje, zvážte prosím nahlásenie chyby.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/http.py" line="672"/>
         <source>Parse Error</source>
-        <translation>Errore di interpretazione</translation>
+        <translation>Chyba pri spracovaní</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/http.py" line="672"/>
         <source>There was a problem extracting your verse selection. If this error continues to occur please consider reporting a bug.</source>
-        <translation>C&apos;è stato un problema di estrazione del versetto selezionato. Se questo errore persiste ti prego di segnalarlo.</translation>
+        <translation>Pri rozbalovaní výberu veršov sa vyskytol problém. Pokiaľ sa táto chyba stále objavuje, zvážte prosím nahlásenie chyby.</translation>
     </message>
 </context>
 <context>
@@ -1065,22 +1061,22 @@ It is not possible to customize the Book Names.</source>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleimportform.py" line="351"/>
         <source>Bible Import Wizard</source>
-        <translation>Importazione Guidata della Bibbia</translation>
+        <translation>Sprievodca importom Biblie</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleimportform.py" line="355"/>
         <source>This wizard will help you to import Bibles from a variety of formats. Click the next button below to start the process by selecting a format to import from.</source>
-        <translation>Questa procedura guidata consente di importare Bibbie da una varietà di formati. Clicca il pulsante sottostante per avviare il processo, selezionando un formato da cui importare.</translation>
+        <translation>Tento sprievodca uľahčí import Biblií z rôzných formátov. Proces importu sa spustí klepnutím nižšie na tlačítko ďalší. Potom vyberte formát, z ktorého sa bude Biblia importovať.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleimportform.py" line="366"/>
         <source>Web Download</source>
-        <translation>Web Download</translation>
+        <translation>Stiahnutie z webu</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleimportform.py" line="379"/>
         <source>Location:</source>
-        <translation>Località:</translation>
+        <translation>Umiestnenie:</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleimportform.py" line="381"/>
@@ -1095,12 +1091,12 @@ It is not possible to customize the Book Names.</source>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleimportform.py" line="387"/>
         <source>Bible:</source>
-        <translation>Bibbia:</translation>
+        <translation>Biblia:</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleimportform.py" line="389"/>
         <source>Download Options</source>
-        <translation>Opzione di Download</translation>
+        <translation>Voľby sťahovania</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleimportform.py" line="392"/>
@@ -1110,123 +1106,123 @@ It is not possible to customize the Book Names.</source>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleimportform.py" line="394"/>
         <source>Username:</source>
-        <translation>Nome utente:</translation>
+        <translation>Používateľské meno:</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleimportform.py" line="396"/>
         <source>Password:</source>
-        <translation>Password:</translation>
+        <translation>Heslo:</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleimportform.py" line="398"/>
         <source>Proxy Server (Optional)</source>
-        <translation>Proxy Server (Opzionale)</translation>
+        <translation>Proxy Server (Voliteľné)</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleimportform.py" line="402"/>
         <source>License Details</source>
-        <translation>Dettaglio Licenza</translation>
+        <translation>Podrobnosti licencie</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleimportform.py" line="404"/>
         <source>Set up the Bible&apos;s license details.</source>
-        <translation>Configura i dettagli nelle Licenze delle Bibbie</translation>
+        <translation>Nastaviť podrobnosti k licencii Biblie</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleimportform.py" line="407"/>
         <source>Version name:</source>
-        <translation>Nome Versione:</translation>
+        <translation>Názov verzie:</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleimportform.py" line="409"/>
         <source>Copyright:</source>
-        <translation>Copyright:</translation>
+        <translation>Autorské práva:</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleimportform.py" line="414"/>
         <source>Please wait while your Bible is imported.</source>
-        <translation>Per favore attendi mentre la tua Bibbia viene importata.</translation>
+        <translation>Prosím počkajte, kým sa Biblia importuje.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleimportform.py" line="445"/>
         <source>You need to specify a file with books of the Bible to use in the import.</source>
-        <translation>È necessario specificare un file con i libri della Bibbia da utilizzare nell&apos; importazione.</translation>
+        <translation>Je potrebné určiť súbor s knihami Biblie. Tento súbor sa použije pri importe.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleimportform.py" line="452"/>
         <source>You need to specify a file of Bible verses to import.</source>
-        <translation>È necessario specificare un file dei versetti biblici da importare.</translation>
+        <translation>Pre import je potrebné určiť súbor s veršami Biblie.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleimportform.py" line="483"/>
         <source>You need to specify a version name for your Bible.</source>
-        <translation>Devi inserire un nome per la tua Bibbia</translation>
+        <translation>Je potrebné uviesť názov verzie Biblie.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleimportform.py" line="489"/>
         <source>You need to set a copyright for your Bible. Bibles in the Public Domain need to be marked as such.</source>
-        <translation>Devi inserire un copyright per la tua Bibbia. Bibbie di pubblico dominio devono essere contrassegnate come tali.</translation>
+        <translation>K Biblii je potrebné nastaviť autorské práva, diela, ktoré sú voľné, je potrebné takto označiť.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleimportform.py" line="505"/>
         <source>Bible Exists</source>
-        <translation>La Bibbia esiste.</translation>
+        <translation>Biblia existuje</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleimportform.py" line="505"/>
         <source>This Bible already exists. Please import a different Bible or first delete the existing one.</source>
-        <translation>La bibbia esiste già. Importa una Bibbia differente o cancella quella inserita.</translation>
+        <translation>Táto Biblia už existuje. Importujte prosím inú Bibliu, alebo najprv vymažte existujúcu.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleimportform.py" line="726"/>
         <source>Your Bible import failed.</source>
-        <translation>Importazione della Bibbia fallita</translation>
+        <translation>Import Biblie sa nepodaril.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleimportform.py" line="548"/>
         <source>CSV File</source>
-        <translation>File CSV</translation>
+        <translation>CSV súbor</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleimportform.py" line="385"/>
         <source>Bibleserver</source>
-        <translation>bibleserver</translation>
+        <translation>Bibleserver</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleimportform.py" line="411"/>
         <source>Permissions:</source>
-        <translation>Permessi</translation>
+        <translation>Povolenia:</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleimportform.py" line="377"/>
         <source>Bible file:</source>
-        <translation>File della Bibbia</translation>
+        <translation>Súbor s Bibliou:</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleimportform.py" line="373"/>
         <source>Books file:</source>
-        <translation>File dei libri</translation>
+        <translation>Súbor s knihami:</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleimportform.py" line="375"/>
         <source>Verses file:</source>
-        <translation>File dei versi</translation>
+        <translation>Súbor s veršami:</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleimportform.py" line="563"/>
         <source>openlp.org 1.x Bible Files</source>
-        <translation>file openlp.org 1.x</translation>
+        <translation>Súbor s Bibliou z openlp.org 1.x</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleimportform.py" line="657"/>
         <source>Registering Bible...</source>
-        <translation>Aggigungendo la Bibbia</translation>
+        <translation>Registrujem Bibliu...</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleimportform.py" line="719"/>
         <source>Registered Bible. Please note, that verses will be downloaded on
 demand and thus an internet connection is required.</source>
-        <translation>Bibbia registrata. Attenzione, i versi saranno scaricati on demand è quindi richiesta una connessione internet</translation>
+        <translation>Registrovaná Biblia. Upozornenie: Verše budú sťahované na vyžiadanie, preto je potrebné internetové pripojenie.</translation>
     </message>
 </context>
 <context>
@@ -1234,17 +1230,17 @@ demand and thus an internet connection is required.</source>
     <message>
         <location filename="openlp/plugins/bibles/forms/languagedialog.py" line="73"/>
         <source>Select Language</source>
-        <translation>seleziona una lingua</translation>
+        <translation>Vyber jazyk</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/languagedialog.py" line="76"/>
         <source>OpenLP is unable to determine the language of this translation of the Bible. Please select the language from the list below.</source>
-        <translation>OpenLP non è riuscito a determinare la lingua della Bibbia. Selezionala dalla lista sotto</translation>
+        <translation>OpenLP nie je schopný určiť jazyk tohto prekladu Biblie. Vyberte prosím jazyk zo zoznamu nižšie.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/languagedialog.py" line="79"/>
         <source>Language:</source>
-        <translation>Lingua:</translation>
+        <translation>Jazyk:</translation>
     </message>
 </context>
 <context>
@@ -1252,7 +1248,7 @@ demand and thus an internet connection is required.</source>
     <message>
         <location filename="openlp/plugins/bibles/forms/languageform.py" line="67"/>
         <source>You need to choose a language.</source>
-        <translation>Devi scegliere una lingua.</translation>
+        <translation>Je potrebné vybrať jazyk.</translation>
     </message>
 </context>
 <context>
@@ -1260,77 +1256,77 @@ demand and thus an internet connection is required.</source>
     <message>
         <location filename="openlp/plugins/bibles/lib/mediaitem.py" line="210"/>
         <source>Quick</source>
-        <translation>Veloce</translation>
+        <translation>Rýchly</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/mediaitem.py" line="315"/>
         <source>Find:</source>
-        <translation>Cerca:</translation>
+        <translation>Hľadať:</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/mediaitem.py" line="330"/>
         <source>Book:</source>
-        <translation>Libro:</translation>
+        <translation>Kniha:</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/mediaitem.py" line="332"/>
         <source>Chapter:</source>
-        <translation>Capitolo</translation>
+        <translation>Kapitula:</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/mediaitem.py" line="334"/>
         <source>Verse:</source>
-        <translation>Verso</translation>
+        <translation>Verš:</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/mediaitem.py" line="336"/>
         <source>From:</source>
-        <translation>Da:</translation>
+        <translation>Od:</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/mediaitem.py" line="338"/>
         <source>To:</source>
-        <translation>A:</translation>
+        <translation>Do:</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/mediaitem.py" line="358"/>
         <source>Text Search</source>
-        <translation>Ricerca testo</translation>
+        <translation>Vyhľadávanie textu</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/mediaitem.py" line="341"/>
         <source>Second:</source>
-        <translation>Seconda</translation>
+        <translation>Druhý:</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/mediaitem.py" line="358"/>
         <source>Scripture Reference</source>
-        <translation>Riferimento Biblico</translation>
+        <translation>Odkaz do Biblie</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/mediaitem.py" line="350"/>
         <source>Toggle to keep or clear the previous results.</source>
-        <translation type="unfinished"/>
+        <translation>Prepnúť ponechanie alebo zmazanie predchádzajúcich výsledkov.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/mediaitem.py" line="93"/>
         <source>You cannot combine single and dual Bible verse search results. Do you want to delete your search results and start a new search?</source>
-        <translation type="unfinished"/>
+        <translation>Nie je možné kombinovať jednoduché a dvojité výsledky hľadania veršov v Bibli. Prajete si zmazať výsledky hľadania a začať s novým vyhľadávaním?</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/mediaitem.py" line="484"/>
         <source>Bible not fully loaded.</source>
-        <translation>Bibbia caricata parzialmente</translation>
+        <translation>Biblia nie je načítaná celá.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/mediaitem.py" line="792"/>
         <source>Information</source>
-        <translation>Informazioni</translation>
+        <translation>Informácie</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/mediaitem.py" line="792"/>
         <source>The second Bible does not contain all the verses that are in the main Bible. Only verses found in both Bibles will be shown. %d verses have not been included in the results.</source>
-        <translation>La seconda Bibbia non contiene tutti i versi che sono nella Bibbia principale. Saranno mostrati solo i versi trovati in entrambe le Bibbie. %d versi non sono stati inclusi nei risultati</translation>
+        <translation>Druhá Biblia neobsahuje všetky verše ako sú v hlavnej Biblii. Budú zobrazené len verše nájdené v obidvoch Bibliách. %d veršov nebolo zahrnutých vo výsledkoch. </translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/mediaitem.py" line="358"/>
@@ -1364,7 +1360,7 @@ You will need to re-import this Bible to use it again.</source>
         <location filename="openlp/plugins/bibles/lib/opensong.py" line="111"/>
         <source>Importing %s %s...</source>
         <comment>Importing &lt;book name&gt; &lt;chapter&gt;...</comment>
-        <translation>Importando %s %s...</translation>
+        <translation>Importujem %s %s...</translation>
     </message>
 </context>
 <context>
@@ -1372,13 +1368,13 @@ You will need to re-import this Bible to use it again.</source>
     <message>
         <location filename="openlp/plugins/bibles/lib/osis.py" line="88"/>
         <source>Detecting encoding (this may take a few minutes)...</source>
-        <translation type="unfinished"/>
+        <translation>Zisťujem kódovanie (môže trvat niekoľko minút)...</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/lib/osis.py" line="161"/>
         <source>Importing %s %s...</source>
         <comment>Importing &lt;book name&gt; &lt;chapter&gt;...</comment>
-        <translation>Importando %s %s...</translation>
+        <translation>Importujem %s %s...</translation>
     </message>
 </context>
 <context>
@@ -1386,148 +1382,144 @@ You will need to re-import this Bible to use it again.</source>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleupgradeform.py" line="123"/>
         <source>Select a Backup Directory</source>
-        <translation>Seleziona una cartella per il backup</translation>
+        <translation>Vybrať priečinok pre zálohu</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleupgradeform.py" line="260"/>
         <source>Bible Upgrade Wizard</source>
-        <translation type="unfinished"/>
+        <translation>Sprievodca aktualizácie Biblie</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleupgradeform.py" line="264"/>
         <source>This wizard will help you to upgrade your existing Bibles from a prior version of OpenLP 2. Click the next button below to start the upgrade process.</source>
-        <translation type="unfinished"/>
+        <translation>Tento sprievodca pomáhá s aktualizáciou existujúcich Biblií z predchádzajúcej verzie OpenLP 2. Pre spustenie aktualizácie kliknite nižšie na tlačítko Ďalej.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleupgradeform.py" line="269"/>
         <source>Select Backup Directory</source>
-        <translation>Seleziona la cartella di backup</translation>
+        <translation>Vybrať prečinok pre zálohu</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleupgradeform.py" line="272"/>
         <source>Please select a backup directory for your Bibles</source>
-        <translation>Seleziona la cartella di backup per le tue Bibbie</translation>
+        <translation>Vyberte prosím priečinok pre zálohu Biblií</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleupgradeform.py" line="275"/>
         <source>Previous releases of OpenLP 2.0 are unable to use upgraded Bibles. This will create a backup of your current Bibles so that you can simply copy the files back to your OpenLP data directory if you need to revert to a previous release of OpenLP. Instructions on how to restore the files can be found in our &lt;a href=&quot;http://wiki.openlp.org/faq&quot;&gt;Frequently Asked Questions&lt;/a&gt;.</source>
-        <translation>Le precedenti versioni di OpenLP 2.0 non sono in grado di aggiornare le Bibbie. Verrà creata una copia di backup delle Bibbie attuali in modo che basterà copiare i files di backup nella cartella dei dati di OpenLp se c&apos;è bisogno di ritornare a una vecchia versione di OpenLP. Le istruzioni su come ripristinare i files possono essere trovati nelle nostre &lt;a href=&quot;http://wiki.openlp.org/faq&quot;&gt;Frequently Asked Questions&lt;/a&gt;.</translation>
+        <translation>Predchádzajúce vydania OpenLP 2.0 nie sú schopné aktualizovať Bibliu. Bude vytvorená záloha súčasných Biblií, aby bylo možné v prípadě potreby jednoducho nakopírovať súbory späť do dátoveho pričinku aplikácie OpenLP. Inštrukcie, ako obnoviť súbory, nájdete v &lt;a href=&quot;http://wiki.openlp.org/faq&quot;&gt;často kladených otázkach&lt;/a&gt;. </translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleupgradeform.py" line="282"/>
         <source>Please select a backup location for your Bibles.</source>
-        <translation type="unfinished"/>
+        <translation>Vyberte prosím umiestenie pre zálohu Biblie.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleupgradeform.py" line="284"/>
         <source>Backup Directory:</source>
-        <translation>Cartella di backup:</translation>
+        <translation>Priečinok pre zálohu:</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleupgradeform.py" line="286"/>
         <source>There is no need to backup my Bibles</source>
-        <translation>Non eseguire il backup delle Bibbie</translation>
+        <translation>Nie je potrebné zálohovať Bibliu</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleupgradeform.py" line="289"/>
         <source>Select Bibles</source>
-        <translation>Seleziona le Bibbie</translation>
+        <translation>Vybrať Bibliu</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleupgradeform.py" line="292"/>
         <source>Please select the Bibles to upgrade</source>
-        <translation>Seleziona le Bibbie da aggiornare</translation>
+        <translation>Vyberte prosím Bibliu na aktualizáciu</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleupgradeform.py" line="295"/>
         <source>Upgrading</source>
-        <translation>Aggiornamento</translation>
+        <translation>Aktualizujuem</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleupgradeform.py" line="297"/>
         <source>Please wait while your Bibles are upgraded.</source>
-        <translation>Attendi mentre la Bibbia viene aggiornata</translation>
+        <translation>Čakajte prosím, až budú Biblie aktualizované.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleupgradeform.py" line="321"/>
         <source>The backup was not successful.
 To backup your Bibles you need permission to write to the given directory.</source>
-        <translation>Backup non riuscito. Necessari i permessi in scrittura per la cartella data.</translation>
+        <translation>Záloha nebola úspešná. Pre zálohu Biblií je potrebné oprávnenie k zápisu do zadaného priečinku.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleupgradeform.py" line="579"/>
         <source>Upgrading Bible %s of %s: &quot;%s&quot;
 Failed</source>
-        <translation>Aggiornamento della Bibbia %s di %s: &quot;%s&quot; 
-Fallito</translation>
+        <translation>Aktualizácia Biblie %s z %s: &quot;%s&quot; Zlyhala</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleupgradeform.py" line="408"/>
         <source>Upgrading Bible %s of %s: &quot;%s&quot;
 Upgrading ...</source>
-        <translation>Aggiornamento della Bibbia %s di %s: &quot;%s&quot;
-Aggiornamento</translation>
+        <translation>Aktualizujem Bibliu %s z %s: &quot;%s&quot; Aktualizujem ...</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleupgradeform.py" line="449"/>
         <source>Download Error</source>
-        <translation>Download Error</translation>
+        <translation>Chyba pri sťahovaní</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleupgradeform.py" line="449"/>
         <source>To upgrade your Web Bibles an Internet connection is required.</source>
-        <translation>Per aggiornare le Bibbie è richiesta una connessione internet</translation>
+        <translation>Pre aktualizáciu Biblií z www je potrebné internetové pripojenie.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleupgradeform.py" line="545"/>
         <source>Upgrading Bible %s of %s: &quot;%s&quot;
 Upgrading %s ...</source>
-        <translation>Aggiornamento della Bibbia %s di %s: &quot;%s&quot; 
-Aggiornamento %s</translation>
+        <translation>Aktualizujem Bibliu %s z %s: &quot;%s&quot; Aktualizujem %s ...</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleupgradeform.py" line="587"/>
         <source>Upgrading Bible %s of %s: &quot;%s&quot;
 Complete</source>
-        <translation>Aggiornamento della Bibbia %s di %s: &quot;%s&quot; 
-Completato</translation>
+        <translation>Aktualizujem Biblie %s z %s: &quot;%s&quot; Dokončené</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleupgradeform.py" line="614"/>
         <source>, %s failed</source>
-        <translation>, %s fallito</translation>
+        <translation>, %s zlyhalo</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleupgradeform.py" line="621"/>
         <source>Upgrading Bible(s): %s successful%s
 Please note that verses from Web Bibles will be downloaded on demand and so an Internet connection is required.</source>
-        <translation>Aggiornamento della\e Bibbia\e: %s riuscito %s
-Attenzione i versi delle Bibbie Online saranno scaricati on demand è quindi richiesta una connessione a internet.</translation>
+        <translation>Aktualizácia Biblií: %s úspešná%s Upozornenie: Verše z www Biblie budú stiahnuté na vyžiadanie a preto je potrebné internetové pripojenie.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleupgradeform.py" line="628"/>
         <source>Upgrading Bible(s): %s successful%s</source>
-        <translation>Aggiornamento Bibbia\e: %s completato %s</translation>
+        <translation>Aktualizácia Biblií: %s úspešná%s</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleupgradeform.py" line="633"/>
         <source>Upgrade failed.</source>
-        <translation>Aggiornamento fallito.</translation>
+        <translation>Aktualizácia zlyhala. </translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleupgradeform.py" line="313"/>
         <source>You need to specify a backup directory for your Bibles.</source>
-        <translation>Devi specificare una cartella per il backup delle Bibbie</translation>
+        <translation>Je potrebné upresniť priečinok pre zálohu Biblií.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleupgradeform.py" line="370"/>
         <source>Starting upgrade...</source>
-        <translation>Avvio aggiornamento...</translation>
+        <translation>Spúšťam aktualizáciu...</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/forms/bibleupgradeform.py" line="381"/>
         <source>There are no Bibles that need to be upgraded.</source>
-        <translation>Non ci sono Bibbie che devono essere aggiornate.</translation>
+        <translation>Nie sú žiadne , ktoré treba aktualizovať.
+</translation>
     </message>
 </context>
 <context>
@@ -1535,65 +1527,65 @@ Attenzione i versi delle Bibbie Online saranno scaricati on demand è quindi ric
     <message>
         <location filename="openlp/plugins/custom/customplugin.py" line="58"/>
         <source>&lt;strong&gt;Custom Slide Plugin&lt;/strong&gt;&lt;br /&gt;The custom slide plugin provides the ability to set up custom text slides that can be displayed on the screen the same way songs are. This plugin provides greater freedom over the songs plugin.</source>
-        <translation type="unfinished"/>
+        <translation>&lt;strong&gt;Vlastný doplnok snímku&lt;/strong&gt;&lt;br /&gt;Vlastný modul snímok  poskytuje možnosť nastaviť vlastné textové snímky, ktoré môžu byť zobrazené na obrazovke rovnako ako piesne . Tento modul poskytuje väčšie možnosti s modulmi piesní.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/custom/customplugin.py" line="99"/>
         <source>Custom Slide</source>
         <comment>name singular</comment>
-        <translation>Presentazione personalizzata</translation>
+        <translation>Vlastný snímok</translation>
     </message>
     <message>
         <location filename="openlp/plugins/custom/customplugin.py" line="101"/>
         <source>Custom Slides</source>
         <comment>name plural</comment>
-        <translation>Presentazioni personalizzate</translation>
+        <translation>Vlastné snímky</translation>
     </message>
     <message>
         <location filename="openlp/plugins/custom/customplugin.py" line="106"/>
         <source>Custom Slides</source>
         <comment>container title</comment>
-        <translation>Presentazioni Personalizzate</translation>
+        <translation>Vlastné snímky</translation>
     </message>
     <message>
         <location filename="openlp/plugins/custom/customplugin.py" line="111"/>
         <source>Load a new custom slide.</source>
-        <translation>Carica una nuova presentazione</translation>
+        <translation>Načítaj nový vlastný snímok,</translation>
     </message>
     <message>
         <location filename="openlp/plugins/custom/customplugin.py" line="112"/>
         <source>Import a custom slide.</source>
-        <translation>Importa una presentazione</translation>
+        <translation>Vlož vlastný snímok.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/custom/customplugin.py" line="113"/>
         <source>Add a new custom slide.</source>
-        <translation>Aggiungi una nuova presentazione </translation>
+        <translation>Pridaj nový vlastný snímok.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/custom/customplugin.py" line="114"/>
         <source>Edit the selected custom slide.</source>
-        <translation>Modifica la presentazione selezionata</translation>
+        <translation>Uprav vybraný vlastný snímok.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/custom/customplugin.py" line="116"/>
         <source>Delete the selected custom slide.</source>
-        <translation>Cancella la presentazione selezionata</translation>
+        <translation>Zmaž vybraný vlastný snímok.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/custom/customplugin.py" line="118"/>
         <source>Preview the selected custom slide.</source>
-        <translation>Anteprima della presentazione selezionata</translation>
+        <translation>Zobraz vybraný vlastný snímok.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/custom/customplugin.py" line="120"/>
         <source>Send the selected custom slide live.</source>
-        <translation>Manda live la presentazione selezionata</translation>
+        <translation>Teraz odošli vybraný vlastný snímok </translation>
     </message>
     <message>
         <location filename="openlp/plugins/custom/customplugin.py" line="122"/>
         <source>Add the selected custom slide to the service.</source>
-        <translation>Aggiungi la presentazione selezionata al servizio</translation>
+        <translation>Pridaj  vybraný vlastný snímok do služby</translation>
     </message>
 </context>
 <context>
@@ -1601,12 +1593,12 @@ Attenzione i versi delle Bibbie Online saranno scaricati on demand è quindi ric
     <message>
         <location filename="openlp/plugins/custom/lib/customtab.py" line="59"/>
         <source>Custom Display</source>
-        <translation type="unfinished"/>
+        <translation>Vlastné zobrazenie.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/custom/lib/customtab.py" line="61"/>
         <source>Display footer</source>
-        <translation>Mostra footer</translation>
+        <translation>Päta zobrazenia.</translation>
     </message>
 </context>
 <context>
@@ -1614,62 +1606,62 @@ Attenzione i versi delle Bibbie Online saranno scaricati on demand è quindi ric
     <message>
         <location filename="openlp/plugins/custom/forms/editcustomdialog.py" line="107"/>
         <source>Edit Custom Slides</source>
-        <translation>Modifica la presentazione</translation>
+        <translation>Uprav vlastné snímky..</translation>
     </message>
     <message>
         <location filename="openlp/plugins/custom/forms/editcustomdialog.py" line="109"/>
         <source>&amp;Title:</source>
-        <translation>&amp;Title:</translation>
+        <translation>&amp;Názov:</translation>
     </message>
     <message>
         <location filename="openlp/plugins/custom/forms/editcustomdialog.py" line="112"/>
         <source>Add a new slide at bottom.</source>
-        <translation>aggiungi una nuova diapositiva sotto</translation>
+        <translation>Pridaj nový snímok na spodok.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/custom/forms/editcustomdialog.py" line="116"/>
         <source>Edit the selected slide.</source>
-        <translation>modifica la diapositiva selezionata</translation>
+        <translation>Upraviť vybraný snímok.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/custom/forms/editcustomdialog.py" line="121"/>
         <source>Edit all the slides at once.</source>
-        <translation>Modifica tutte le diapositive</translation>
+        <translation>Upraviť všetky snímky naraz.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/custom/forms/editcustomslidedialog.py" line="58"/>
         <source>Split a slide into two by inserting a slide splitter.</source>
-        <translation>Dividi la diapositiva in due inserendo un divisore</translation>
+        <translation>Vložením oddeľovača sa snímok rozdelí na dva.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/custom/forms/editcustomdialog.py" line="124"/>
         <source>The&amp;me:</source>
-        <translation>The&amp;me:</translation>
+        <translation>&amp;Motív:</translation>
     </message>
     <message>
         <location filename="openlp/plugins/custom/forms/editcustomdialog.py" line="126"/>
         <source>&amp;Credits:</source>
-        <translation>&amp;Credits:</translation>
+        <translation>&amp;Zásluhy:</translation>
     </message>
     <message>
         <location filename="openlp/plugins/custom/forms/editcustomform.py" line="260"/>
         <source>You need to type in a title.</source>
-        <translation>Inserisci il titolo</translation>
+        <translation>Je potrebné zadať názov.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/custom/forms/editcustomform.py" line="266"/>
         <source>You need to add at least one slide</source>
-        <translation>Inserisci almeno una diapositiva</translation>
+        <translation>Je nutné pridať aspoň jeden snímok</translation>
     </message>
     <message>
         <location filename="openlp/plugins/custom/forms/editcustomdialog.py" line="119"/>
         <source>Ed&amp;it All</source>
-        <translation>Ed&amp;it Tutto</translation>
+        <translation>Upra&amp;iť všetky</translation>
     </message>
     <message>
         <location filename="openlp/plugins/custom/forms/editcustomslidedialog.py" line="56"/>
         <source>Insert Slide</source>
-        <translation>Inserisci diapositiva</translation>
+        <translation>Vložiť snímok</translation>
     </message>
 </context>
 <context>
@@ -1685,7 +1677,7 @@ Attenzione i versi delle Bibbie Online saranno scaricati on demand è quindi ric
     <message numerus="yes">
         <location filename="openlp/plugins/custom/lib/mediaitem.py" line="179"/>
         <source>Are you sure you want to delete the %n selected custom slide(s)?</source>
-        <translation type="unfinished"><numerusform></numerusform><numerusform></numerusform></translation>
+        <translation type="unfinished"><numerusform></numerusform><numerusform></numerusform><numerusform></numerusform></translation>
     </message>
 </context>
 <context>
@@ -1693,60 +1685,60 @@ Attenzione i versi delle Bibbie Online saranno scaricati on demand è quindi ric
     <message>
         <location filename="openlp/plugins/images/imageplugin.py" line="53"/>
         <source>&lt;strong&gt;Image Plugin&lt;/strong&gt;&lt;br /&gt;The image plugin provides displaying of images.&lt;br /&gt;One of the distinguishing features of this plugin is the ability to group a number of images together in the service manager, making the displaying of multiple images easier. This plugin can also make use of OpenLP&apos;s &quot;timed looping&quot; feature to create a slide show that runs automatically. In addition to this, images from the plugin can be used to override the current theme&apos;s background, which renders text-based items like songs with the selected image as a background instead of the background provided by the theme.</source>
-        <translation type="unfinished"/>
+        <translation>&lt;strong&gt;Modul obrázok&lt;/strong&gt;&lt;br /&gt;Modul obrázok sa stará o zobrazovanie obrázkov.&lt;br /&gt;Jednou z charakteristických funkcí tohto modulu je schopnosť v správcovi služby zoskúpiť niekoľko obrázkov dohromady. Táto vlastnosť zjednodušuje zobrazenie viacero obrázkov. Tento modul tiež využívá vlastnosti &quot;časová smyčka&quot; aplikace OpenLP a je tiež možné vytvoriť prezentáciu obrázkov, které pobežia samostatne. Taktiež využitím obrázkov z modulu je možné prekryť pozadie súčasného motívu.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/images/imageplugin.py" line="72"/>
         <source>Image</source>
         <comment>name singular</comment>
-        <translation>immagine</translation>
+        <translation>Obrázok</translation>
     </message>
     <message>
         <location filename="openlp/plugins/images/imageplugin.py" line="73"/>
         <source>Images</source>
         <comment>name plural</comment>
-        <translation>Immagini</translation>
+        <translation>Obrázky</translation>
     </message>
     <message>
         <location filename="openlp/plugins/images/imageplugin.py" line="77"/>
         <source>Images</source>
         <comment>container title</comment>
-        <translation>Immagini</translation>
+        <translation>Obrázky</translation>
     </message>
     <message>
         <location filename="openlp/plugins/images/imageplugin.py" line="81"/>
         <source>Load a new image.</source>
-        <translation>Carica una nuova immagine</translation>
+        <translation>Načítať nový obrázok.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/images/imageplugin.py" line="83"/>
         <source>Add a new image.</source>
-        <translation>Aggiungi una nuova immagine</translation>
+        <translation>Pridať nový obrázok.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/images/imageplugin.py" line="84"/>
         <source>Edit the selected image.</source>
-        <translation>Modifica l&apos;immagine selezionata</translation>
+        <translation>Upraviť vybraný obrázok.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/images/imageplugin.py" line="85"/>
         <source>Delete the selected image.</source>
-        <translation>Cancella l&apos;immagine selezionata</translation>
+        <translation>Zmazať vybraný obrázok.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/images/imageplugin.py" line="86"/>
         <source>Preview the selected image.</source>
-        <translation>Anteprima dell&apos;immagine selezionata</translation>
+        <translation>Náhľad vybraného obrázku.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/images/imageplugin.py" line="87"/>
         <source>Send the selected image live.</source>
-        <translation>Invia l&apos;immagine live</translation>
+        <translation>Zobraziť vybraný obrázok naživo.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/images/imageplugin.py" line="88"/>
         <source>Add the selected image to the service.</source>
-        <translation>Aggiungi l&apos;immagine selezionata al servizio</translation>
+        <translation>Pridať vybraný obrázok do služby.</translation>
     </message>
 </context>
 <context>
@@ -1754,7 +1746,7 @@ Attenzione i versi delle Bibbie Online saranno scaricati on demand è quindi ric
     <message>
         <location filename="openlp/core/ui/exceptionform.py" line="217"/>
         <source>Select Attachment</source>
-        <translation>Seleziona allegati</translation>
+        <translation>Vybrať prílohu</translation>
     </message>
 </context>
 <context>
@@ -1762,44 +1754,44 @@ Attenzione i versi delle Bibbie Online saranno scaricati on demand è quindi ric
     <message>
         <location filename="openlp/plugins/images/lib/mediaitem.py" line="61"/>
         <source>Select Image(s)</source>
-        <translation>Seleziona immagine(i)</translation>
+        <translation>Vybrať obrázky</translation>
     </message>
     <message>
         <location filename="openlp/plugins/images/lib/mediaitem.py" line="106"/>
         <source>You must select an image to delete.</source>
-        <translation>Seleziona almeno 1 immagine da eliminare</translation>
+        <translation>Pre zmazanie musíte najskôr vybrať obrázok.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/images/lib/mediaitem.py" line="222"/>
         <source>You must select an image to replace the background with.</source>
-        <translation>Devi selezionare almeno 1 immagine con cui sostituire lo sfondo</translation>
+        <translation>Pre nahradenie pozadia musíte najskôr vybrať obrázok.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/images/lib/mediaitem.py" line="190"/>
         <source>Missing Image(s)</source>
-        <translation>Immagini mancanti</translation>
+        <translation>Chýbajúce obrázky</translation>
     </message>
     <message>
         <location filename="openlp/plugins/images/lib/mediaitem.py" line="183"/>
         <source>The following image(s) no longer exist: %s</source>
-        <translation>Impossibile trovare le seguenti immagini: %s</translation>
+        <translation>Tieto obrázky už neexistujú: %s</translation>
     </message>
     <message>
         <location filename="openlp/plugins/images/lib/mediaitem.py" line="190"/>
         <source>The following image(s) no longer exist: %s
 Do you want to add the other images anyway?</source>
-        <translation>Impossibile trovare le seguenti immagini: %s
-Vuoi comunque caricare le altre immagini?</translation>
+        <translation>Nasledujúci obrázok(y) neexistujú.%s
+Chcete pridať ďaľšie obrázky?</translation>
     </message>
     <message>
         <location filename="openlp/plugins/images/lib/mediaitem.py" line="240"/>
         <source>There was a problem replacing your background, the image file &quot;%s&quot; no longer exists.</source>
-        <translation>E&apos; stato riscontrato un errore nel sostituire lo sfondo, impossibile trovare il file &quot;%s&quot;.</translation>
+        <translation>Problém s nahradením pozadia. Obrázok &quot;%s&quot; už neexistuje.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/images/lib/mediaitem.py" line="236"/>
         <source>There was no display item to amend.</source>
-        <translation>Nessun elemento visualizzato da modificare</translation>
+        <translation>Žiadna položka na zobrazenie nebola zmenená.</translation>
     </message>
 </context>
 <context>
@@ -1807,12 +1799,12 @@ Vuoi comunque caricare le altre immagini?</translation>
     <message>
         <location filename="openlp/plugins/images/lib/imagetab.py" line="70"/>
         <source>Background Color</source>
-        <translation>Colore di sfondo</translation>
+        <translation>Farba pozadia</translation>
     </message>
     <message>
         <location filename="openlp/plugins/images/lib/imagetab.py" line="72"/>
         <source>Default Color:</source>
-        <translation>Colore di default:</translation>
+        <translation>Predvolená farba:</translation>
     </message>
     <message>
         <location filename="openlp/plugins/images/lib/imagetab.py" line="74"/>
@@ -1825,60 +1817,60 @@ Vuoi comunque caricare le altre immagini?</translation>
     <message>
         <location filename="openlp/plugins/media/mediaplugin.py" line="68"/>
         <source>&lt;strong&gt;Media Plugin&lt;/strong&gt;&lt;br /&gt;The media plugin provides playback of audio and video.</source>
-        <translation>&lt;strong&gt;Media Plugin&lt;/strong&gt;&lt;br /&gt;Il plug in multimediale fornisce supporto per l&apos;audio e il video</translation>
+        <translation>&lt;strong&gt;Modul média&lt;/strong&gt;&lt;br /&gt;Modul média umožňuje prehrávať audio a video.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/media/mediaplugin.py" line="78"/>
         <source>Media</source>
         <comment>name singular</comment>
-        <translation>Media</translation>
+        <translation>Médium</translation>
     </message>
     <message>
         <location filename="openlp/plugins/media/mediaplugin.py" line="79"/>
         <source>Media</source>
         <comment>name plural</comment>
-        <translation>Media</translation>
+        <translation>Média</translation>
     </message>
     <message>
         <location filename="openlp/plugins/media/mediaplugin.py" line="83"/>
         <source>Media</source>
         <comment>container title</comment>
-        <translation>Media</translation>
+        <translation>Média</translation>
     </message>
     <message>
         <location filename="openlp/plugins/media/mediaplugin.py" line="87"/>
         <source>Load new media.</source>
-        <translation>Carica un nuovo media</translation>
+        <translation>Načítať nové médium.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/media/mediaplugin.py" line="89"/>
         <source>Add new media.</source>
-        <translation>Aggiungi un nuovo media</translation>
+        <translation>Pridať nové médium.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/media/mediaplugin.py" line="90"/>
         <source>Edit the selected media.</source>
-        <translation>modifica il media selezionato</translation>
+        <translation>Upraviť vybrané médium.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/media/mediaplugin.py" line="91"/>
         <source>Delete the selected media.</source>
-        <translation>cancella il media selezionato</translation>
+        <translation>Zmazať vybrané médium.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/media/mediaplugin.py" line="92"/>
         <source>Preview the selected media.</source>
-        <translation>Anteprima del media selezionato</translation>
+        <translation>Náhľad vybraného média.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/media/mediaplugin.py" line="93"/>
         <source>Send the selected media live.</source>
-        <translation>Manda live il media selezionato</translation>
+        <translation>Zobraziť vybrané médium naživo.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/media/mediaplugin.py" line="94"/>
         <source>Add the selected media to the service.</source>
-        <translation>Aggiungi il media selezionato al servizio</translation>
+        <translation>Pridať vybrané médium do služby.</translation>
     </message>
 </context>
 <context>
@@ -1886,32 +1878,32 @@ Vuoi comunque caricare le altre immagini?</translation>
     <message>
         <location filename="openlp/plugins/media/lib/mediaitem.py" line="97"/>
         <source>Select Media</source>
-        <translation>Seleziona media</translation>
+        <translation>Vybrať médium</translation>
     </message>
     <message>
         <location filename="openlp/plugins/media/lib/mediaitem.py" line="277"/>
         <source>You must select a media file to delete.</source>
-        <translation>Devi prima selezionare un media da cancellare</translation>
+        <translation>Pre zmazanie musíte najskôr vybrať súbor s médiom.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/media/lib/mediaitem.py" line="171"/>
         <source>You must select a media file to replace the background with.</source>
-        <translation>Devi prima selezionare un file multimediale con cui sostituire lo sfondo</translation>
+        <translation>Pre nahradenie pozadia musíte najskôr vybrať súbor s médiom.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/media/lib/mediaitem.py" line="185"/>
         <source>There was a problem replacing your background, the media file &quot;%s&quot; no longer exists.</source>
-        <translation>E&apos; stato riscontrato un errore nel sostituire lo sfondo, impossibile trovare il file &quot;%s&quot;.</translation>
+        <translation>Problém s nahradením pozadia. Súbor s médiom &quot;%s&quot; už neexistuje.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/media/lib/mediaitem.py" line="200"/>
         <source>Missing Media File</source>
-        <translation>impossibile trovare il file multimediale</translation>
+        <translation>Chybajúce súbory s médiami</translation>
     </message>
     <message>
         <location filename="openlp/plugins/media/lib/mediaitem.py" line="200"/>
         <source>The file %s no longer exists.</source>
-        <translation>Impossibile trovare il file %s</translation>
+        <translation>Súbor %s už neexistuje.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/media/lib/mediaitem.py" line="238"/>
@@ -1921,22 +1913,22 @@ Vuoi comunque caricare le altre immagini?</translation>
     <message>
         <location filename="openlp/plugins/media/lib/mediaitem.py" line="181"/>
         <source>There was no display item to amend.</source>
-        <translation>Nessun elemento visualizzato da modificare</translation>
+        <translation>Žiadna položka na zobrazenie nebola zmenená.</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/media/mediacontroller.py" line="342"/>
         <source>Unsupported File</source>
-        <translation>File non supportato</translation>
+        <translation>Nepodporovaný súbor</translation>
     </message>
     <message>
         <location filename="openlp/plugins/media/lib/mediaitem.py" line="106"/>
         <source>Automatic</source>
-        <translation>Automatico</translation>
+        <translation>Automatický</translation>
     </message>
     <message>
         <location filename="openlp/plugins/media/lib/mediaitem.py" line="108"/>
         <source>Use Player:</source>
-        <translation>Usa player:</translation>
+        <translation>Použi prehrávač:</translation>
     </message>
 </context>
 <context>
@@ -1944,17 +1936,17 @@ Vuoi comunque caricare le altre immagini?</translation>
     <message>
         <location filename="openlp/plugins/media/lib/mediatab.py" line="119"/>
         <source>Available Media Players</source>
-        <translation>Media player disponibili</translation>
+        <translation>Dostupné prehrávače médií</translation>
     </message>
     <message>
         <location filename="openlp/plugins/media/lib/mediatab.py" line="128"/>
         <source>%s (unavailable)</source>
-        <translation>%s (non disponibile)</translation>
+        <translation>%s (nedostupné)</translation>
     </message>
     <message>
         <location filename="openlp/plugins/media/lib/mediatab.py" line="131"/>
         <source>Player Order</source>
-        <translation>Ordine di riproduzione</translation>
+        <translation>Poradie hráčov</translation>
     </message>
     <message>
         <location filename="openlp/plugins/media/lib/mediatab.py" line="134"/>
@@ -1967,21 +1959,21 @@ Vuoi comunque caricare le altre immagini?</translation>
     <message>
         <location filename="openlp/core/utils/__init__.py" line="361"/>
         <source>Image Files</source>
-        <translation>File immagine</translation>
+        <translation>Súbory obrázkov</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/bibleplugin.py" line="88"/>
         <source>Information</source>
-        <translation>Informazione</translation>
+        <translation>Informácie</translation>
     </message>
     <message>
         <location filename="openlp/plugins/bibles/bibleplugin.py" line="88"/>
         <source>Bible format has changed.
 You have to upgrade your existing Bibles.
 Should OpenLP upgrade now?</source>
-        <translation>Il formato della Bibbia è stato modificato.
-Aggiorna le Bibbie esistenti.
-OpenLP deve aggiornarle ora?</translation>
+        <translation>Formát Biblie sa zmenil.
+Je nutné upgradovať existujúcu Bibliu.
+Má OpenLP upgradovať teraz?</translation>
     </message>
 </context>
 <context>
@@ -1989,32 +1981,32 @@ OpenLP deve aggiornarle ora?</translation>
     <message>
         <location filename="openlp/core/ui/aboutdialog.py" line="220"/>
         <source>Credits</source>
-        <translation>Crediti</translation>
+        <translation>Kredity</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/aboutdialog.py" line="615"/>
         <source>License</source>
-        <translation>Licensa</translation>
+        <translation>Licencia</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/aboutdialog.py" line="618"/>
         <source>Contribute</source>
-        <translation>Contributi</translation>
+        <translation>Prispieť</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/aboutform.py" line="51"/>
         <source> build %s</source>
-        <translation>build %s</translation>
+        <translation>stavba %s</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/aboutdialog.py" line="232"/>
         <source>This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; version 2 of the License.</source>
-        <translation type="unfinished"/>
+        <translation>Tento program je slobodný softvér, môžete ho šíriť a / alebo modifikovať podľa ustanovení GNU General Public License, vydávanej Free Software Foundation, verzia 2 tejto licencie.</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/aboutdialog.py" line="237"/>
         <source>This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See below for more details.</source>
-        <translation type="unfinished"/>
+        <translation>Tento program je rozširovaný v nádeji, že bude užitočný, ale BEZ AKEJKOĽVEK ZÁRUKY; neposkytujú sa ani odvodené záruky PREDAJNOSTI alebo VHODNOSTI PRE URČITÝ ÚČEL. Pozri dole pre ďalšie podrobnosti.</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/aboutdialog.py" line="144"/>
@@ -2079,22 +2071,22 @@ Final Credit
     on the cross, setting us free from sin. We
     bring this software to you for free because
     He has set us free.</source>
-        <translation>Project Lead
+        <translation>Projekt líder
     %s
 
-Developers
+Vývojári
     %s
 
-Contributors
+Prispievatelia
     %s
 
-Testers
+Testeri
     %s
 
-Packagers
+Baliči
     %s
 
-Translators
+Prekladatelia
     Afrikaans (af)
         %s
     German (de)
@@ -2120,26 +2112,26 @@ Translators
     Russian (ru)
         %s
 
-Documentation
+Dokumentáacia
     %s
 
-Built With
+Vytvorené v 
     Python: http://www.python.org/
     Qt4: http://qt.nokia.com/
     PyQt4: http://www.riverbankcomputing.co.uk/software/pyqt/intro
     Oxygen Icons: http://oxygen-icons.org/
 
-Final Credit
-    &quot;For God so loved the world that He gave
-    His one and only Son, so that whoever
-    believes in Him will not perish but inherit
-    eternal life.&quot;  -- John 3:16
+Poďakovanie
+    &quot;Lebo Boh tak miloval svet, že dal
+     svojho jediného syna, aby ten, kto
+     verí v neho, nezahynul, ale mal
+     posmrtný život.&quot;  -- Ján 3:16
 
-    And last but not least, final credit goes to
-    God our Father, for sending His Son to die
-    on the cross, setting us free from sin. We
-    bring this software to you for free because
-    He has set us free.</translation>
+     A v neposlednom rade ide poďakovanie
+     Bohu, nášmu Otcovi, pre zaslanie svojho Syna na smrť
+     na kríži, ktorým nás oslobodzuje od hriechu. My
+     vám dávame tento softvér pre vás zdarma, pretože
+     On nás oslobodil.</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/aboutdialog.py" line="85"/>
@@ -2150,7 +2142,13 @@ OpenLP is free church presentation software, or lyrics projection software, used
 Find out more about OpenLP: http://openlp.org/
 
 OpenLP is written and maintained by volunteers. If you would like to see more free Christian software being written, please consider contributing by using the button below.</source>
-        <translation type="unfinished"/>
+        <translation>OpenLP &lt;version&gt;&lt;revision&gt; - Open Source Lyrics Projection
+
+OpenLP je bezplatný kostolný prezentačný softvér, alebo textový projekčný softvér, ktorý sa používa na zobrazenie snímok z piesní, biblických veršov, videí, obrázkov, a dokonca aj prezentácií (ak zapôsobí, PowerPoint alebo PowerPoint Viewer je nainštalovaný) na kostolné chvály s použitím počítača a dátového projektora.
+
+Nájdi viac o  OpenLP: http://openlp.org/
+
+OpenLP je napísaný a udržiavaný dobrovoľníkmi. Ak by ste chceli mať viac voľného kresťanského softvéru, zvážte prosím prispievať pomocou tlačidla nižšie.</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/aboutdialog.py" line="223"/>
@@ -2164,87 +2162,87 @@ Portions copyright © 2004-2012 %s</source>
     <message>
         <location filename="openlp/core/ui/advancedtab.py" line="342"/>
         <source>UI Settings</source>
-        <translation type="unfinished"/>
+        <translation>Nastavenia používateľského rozhrania</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/advancedtab.py" line="346"/>
         <source>Number of recent files to display:</source>
-        <translation>Numero di files recenti da visualizzare</translation>
+        <translation>Počet zobrazených posledných súborov:</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/advancedtab.py" line="349"/>
         <source>Remember active media manager tab on startup</source>
-        <translation type="unfinished"/>
+        <translation>Zapamätanie si karty akívneho manažéra médií pri spustení</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/advancedtab.py" line="351"/>
         <source>Double-click to send items straight to live</source>
-        <translation>Doppio click, invia direttamente al live</translation>
+        <translation>Dvakrát klikni pre live zobrazenie položiek</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/advancedtab.py" line="355"/>
         <source>Expand new service items on creation</source>
-        <translation>Espandi i nuovi elementi del servizio alla creazione</translation>
+        <translation>Zobraz nové pomocné položky na tvorbu </translation>
     </message>
     <message>
         <location filename="openlp/core/ui/advancedtab.py" line="357"/>
         <source>Enable application exit confirmation</source>
-        <translation>Chiedi prima di uscire</translation>
+        <translation>Sprístupni potvrdenie ukončenia aplikácie</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/advancedtab.py" line="393"/>
         <source>Mouse Cursor</source>
-        <translation>Cursore del mouse</translation>
+        <translation>Kurzor myši</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/advancedtab.py" line="395"/>
         <source>Hide mouse cursor when over display window</source>
-        <translation>Nascondi il cursore del mouse sopra la finestra di visualizzazione</translation>
+        <translation>Skry kurzor myši počas prechodu cez okno zobrazenia</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/advancedtab.py" line="397"/>
         <source>Default Image</source>
-        <translation>Immagine di default</translation>
+        <translation>Pôvodný obrázok</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/advancedtab.py" line="399"/>
         <source>Background color:</source>
-        <translation>Colore di sfondo:</translation>
+        <translation>Farba pozadia:</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/advancedtab.py" line="403"/>
         <source>Image file:</source>
-        <translation>File immagine:</translation>
+        <translation>Obrázok:</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/advancedtab.py" line="658"/>
         <source>Open File</source>
-        <translation>Apri file</translation>
+        <translation>Otvor súbor</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/advancedtab.py" line="71"/>
         <source>Advanced</source>
-        <translation>Avanzate</translation>
+        <translation>Pokročilé</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/advancedtab.py" line="353"/>
         <source>Preview items when clicked in Media Manager</source>
-        <translation>Anteprima degli elementi clikkati in media manager</translation>
+        <translation>Obrázky zobrazíš kliknutím na manažér médií</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/advancedtab.py" line="401"/>
         <source>Click to select a color.</source>
-        <translation>Click per scegliere un colore</translation>
+        <translation>Klikni pre vybratie farby.</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/advancedtab.py" line="405"/>
         <source>Browse for an image file to display.</source>
-        <translation>Scegli un&apos;immagine da visualizzare</translation>
+        <translation>Prehľadávaj obrázky na zobrazenie.</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/advancedtab.py" line="407"/>
         <source>Revert to the default OpenLP logo.</source>
-        <translation>Ritorna al logo di openLP di default</translation>
+        <translation>Obnov pôvodné OpenLP logo.</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/servicemanager.py" line="611"/>
@@ -2428,7 +2426,7 @@ This location will be used after OpenLP is closed.</source>
     <message>
         <location filename="openlp/core/ui/advancedtab.py" line="746"/>
         <source>Overwrite Existing Data</source>
-        <translation type="unfinished"/>
+        <translation>Prepísať existujúce údaje</translation>
     </message>
 </context>
 <context>
@@ -2436,39 +2434,39 @@ This location will be used after OpenLP is closed.</source>
     <message>
         <location filename="openlp/core/ui/exceptiondialog.py" line="86"/>
         <source>Error Occurred</source>
-        <translation>Errore</translation>
+        <translation>Vyskytla sa chyba</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/exceptiondialog.py" line="91"/>
         <source>Oops! OpenLP hit a problem, and couldn&apos;t recover. The text in the box below contains information that might be helpful to the OpenLP developers, so please e-mail it to bugs@openlp.org, along with a detailed description of what you were doing when the problem occurred.</source>
-        <translation type="unfinished"/>
+        <translation>Ups! V OpenLP  sa vyskytol problém a nemohol sa obnoviť. Text v poli nižšie obsahuje informácie, ktoré by mohli byť užitočné pre OpenLP vývojárov, takže prosím pošlite e-mail na bugs@openlp.org  spolu s podrobným popisom toho, čo ste robili, keď sa problém vyskytol.</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/exceptiondialog.py" line="97"/>
         <source>Send E-Mail</source>
-        <translation>Invia una E-Mail</translation>
+        <translation>Pošli email.</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/exceptiondialog.py" line="99"/>
         <source>Save to File</source>
-        <translation>Save to File</translation>
+        <translation>Uložiť do súboru</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/exceptiondialog.py" line="88"/>
         <source>Please enter a description of what you were doing to cause this error 
 (Minimum 20 characters)</source>
-        <translation>Inserisci una descrizione di quello che stavi facendo quando si è verificato l&apos;errore 
-(minimo 20 caratteri)</translation>
+        <translation>Prosím, popíšte, čo ste robili, keď sa vyskytla chyba
+(najmenej 20 znakov)</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/exceptiondialog.py" line="101"/>
         <source>Attach File</source>
-        <translation>Allega file</translation>
+        <translation>Pripoj súbor</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/exceptionform.py" line="212"/>
         <source>Description characters to enter : %s</source>
-        <translation>Descrizione dei caratteri da inserire: %s</translation>
+        <translation>Popisné znaky na potvrdenie : %s</translation>
     </message>
 </context>
 <context>
@@ -2477,18 +2475,18 @@ This location will be used after OpenLP is closed.</source>
         <location filename="openlp/core/ui/exceptionform.py" line="116"/>
         <source>Platform: %s
 </source>
-        <translation>Platform: %s
+        <translation>Platforma: %s
 </translation>
     </message>
     <message>
         <location filename="openlp/core/ui/exceptionform.py" line="150"/>
         <source>Save Crash Report</source>
-        <translation>Salva il report dei crash</translation>
+        <translation>Ulož správu o zlyhaní</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/exceptionform.py" line="150"/>
         <source>Text files (*.txt *.log *.text)</source>
-        <translation>File di testo (*.txt *.log *.text)</translation>
+        <translation>Textové súbory (*.txt *.log *.text)</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/exceptionform.py" line="143"/>
@@ -2533,17 +2531,17 @@ Version: %s
     <message>
         <location filename="openlp/core/ui/filerenameform.py" line="51"/>
         <source>File Rename</source>
-        <translation>Rinomina file</translation>
+        <translation>Premenovanie súboru</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/filerenamedialog.py" line="55"/>
         <source>New File Name:</source>
-        <translation>Nuovo nome file</translation>
+        <translation>Nový názov súboru:</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/filerenameform.py" line="48"/>
         <source>File Copy</source>
-        <translation>copia file</translation>
+        <translation>Kopírovanie súboru</translation>
     </message>
 </context>
 <context>
@@ -2551,17 +2549,17 @@ Version: %s
     <message>
         <location filename="openlp/core/ui/firsttimelanguagedialog.py" line="64"/>
         <source>Select Translation</source>
-        <translation>Seleziona Traduzione</translation>
+        <translation>Vyber preklad</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/firsttimelanguagedialog.py" line="66"/>
         <source>Choose the translation you&apos;d like to use in OpenLP.</source>
-        <translation>Seleziona la traduzione che vuoi usare in OpenLP</translation>
+        <translation>Vyber preklad, ktorý chceš použiť v OpenLP.</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/firsttimelanguagedialog.py" line="68"/>
         <source>Translation:</source>
-        <translation>Traduzione:</translation>
+        <translation>Preklad:</translation>
     </message>
 </context>
 <context>
@@ -2569,142 +2567,142 @@ Version: %s
     <message>
         <location filename="openlp/core/ui/firsttimewizard.py" line="211"/>
         <source>Songs</source>
-        <translation>Canti</translation>
+        <translation>Piesne</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/firsttimewizard.py" line="198"/>
         <source>First Time Wizard</source>
-        <translation type="unfinished"/>
+        <translation>Sprievodca prvým použitím</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/firsttimewizard.py" line="200"/>
         <source>Welcome to the First Time Wizard</source>
-        <translation type="unfinished"/>
+        <translation>Vitajte v sprievodcovi prvým použitím</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/firsttimewizard.py" line="207"/>
         <source>Activate required Plugins</source>
-        <translation>Attiva i plug in richiesti</translation>
+        <translation>Aktivácia požadovaných pluginov</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/firsttimewizard.py" line="209"/>
         <source>Select the Plugins you wish to use. </source>
-        <translation>Seleziona i plugin che vuoi usare</translation>
+        <translation>Vyberte pluginy, ktoré chcete použiť.</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/firsttimewizard.py" line="214"/>
         <source>Bible</source>
-        <translation>Bibbia</translation>
+        <translation>Biblia</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/firsttimewizard.py" line="215"/>
         <source>Images</source>
-        <translation>Immagini</translation>
+        <translation>Obrázky</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/firsttimewizard.py" line="217"/>
         <source>Presentations</source>
-        <translation>Presentazioni</translation>
+        <translation>Prezentácie</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/firsttimewizard.py" line="221"/>
         <source>Media (Audio and Video)</source>
-        <translation>Media (audio e video)</translation>
+        <translation>Médiá(Zvuk a Video)</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/firsttimewizard.py" line="223"/>
         <source>Allow remote access</source>
-        <translation>Permetti accesso remoto</translation>
+        <translation>Povolenie vzdialeného prístupu</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/firsttimewizard.py" line="225"/>
         <source>Monitor Song Usage</source>
-        <translation type="unfinished"/>
+        <translation>Monitorovanie použitia piesní</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/firsttimewizard.py" line="227"/>
         <source>Allow Alerts</source>
-        <translation>Permetti avvertimenti</translation>
+        <translation>Povolenie upozornení</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/firsttimewizard.py" line="257"/>
         <source>Default Settings</source>
-        <translation>Impostazioni di default</translation>
+        <translation>Pôvodné nastavenia.</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/firsttimeform.py" line="96"/>
         <source>Downloading %s...</source>
-        <translation>Downloading %s...</translation>
+        <translation>Sťahovanie %s...</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/firsttimeform.py" line="396"/>
         <source>Download complete. Click the finish button to start OpenLP.</source>
-        <translation>Download completato. Click il pulsante fine per avviare OpenLP</translation>
+        <translation>Sťahovanie dokončené. Kliknutím na tlačítko finish spustíte OpenLP:</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/firsttimeform.py" line="417"/>
         <source>Enabling selected plugins...</source>
-        <translation>Abilito i plugin selezionati...</translation>
+        <translation>Povoľovanie vybratých pluginov...</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/firsttimewizard.py" line="229"/>
         <source>No Internet Connection</source>
-        <translation>Nessuna connessione a internet</translation>
+        <translation>Žiadne internetové pripojenie</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/firsttimewizard.py" line="231"/>
         <source>Unable to detect an Internet connection.</source>
-        <translation>Impossibile rilevare una connessione internet</translation>
+        <translation>Nedá sa zistiť internetové pripojenie.</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/firsttimewizard.py" line="245"/>
         <source>Sample Songs</source>
-        <translation>Canti di esempio</translation>
+        <translation>Ukážkové piesne</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/firsttimewizard.py" line="247"/>
         <source>Select and download public domain songs.</source>
-        <translation>Seleziona e scarica canti di pubblico dominio</translation>
+        <translation>Vyber a stiahni verejne prístupné piesne.</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/firsttimewizard.py" line="249"/>
         <source>Sample Bibles</source>
-        <translation>Bibbie campione</translation>
+        <translation>Ukážkové Biblie.</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/firsttimewizard.py" line="251"/>
         <source>Select and download free Bibles.</source>
-        <translation>Seleziona e scarica Bibbie free</translation>
+        <translation type="unfinished"/>
     </message>
     <message>
         <location filename="openlp/core/ui/firsttimewizard.py" line="253"/>
         <source>Sample Themes</source>
-        <translation>Themi campione</translation>
+        <translation>Ukážkové témy</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/firsttimewizard.py" line="255"/>
         <source>Select and download sample themes.</source>
-        <translation>Seleziona e scarica i temi campione</translation>
+        <translation>Vyber a stiahni ukážkové témy.</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/firsttimewizard.py" line="259"/>
         <source>Set up default settings to be used by OpenLP.</source>
-        <translation>Impostazioni di default per OpenLP</translation>
+        <translation>Nastav pôvodné nastavenia použité v OpenLP</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/firsttimewizard.py" line="261"/>
         <source>Default output display:</source>
-        <translation>Schermo di output predefinito</translation>
+        <translation>Pôvodné výstupné zobrazenie:</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/firsttimewizard.py" line="263"/>
         <source>Select default theme:</source>
-        <translation>Seleziona il tema di default</translation>
+        <translation>Vyber základnú tému.</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/firsttimewizard.py" line="265"/>
         <source>Starting configuration process...</source>
-        <translation type="unfinished"/>
+        <translation>Začínanie konfiguračného procesu...</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/firsttimewizard.py" line="204"/>
@@ -3412,7 +3410,7 @@ You can download the latest version from http://openlp.org/.</source>
         <location filename="openlp/core/utils/languagemanager.py" line="98"/>
         <source>English</source>
         <comment>Please add the name of your language here</comment>
-        <translation>Italian</translation>
+        <translation>Slovak</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/mainwindow.py" line="443"/>
@@ -4125,12 +4123,12 @@ The content encoding is not UTF-8.</source>
     <message>
         <location filename="openlp/core/ui/servicemanager.py" line="566"/>
         <source>Error Saving File</source>
-        <translation type="unfinished"/>
+        <translation>Chyba pri ukladaní súboru.</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/servicemanager.py" line="566"/>
         <source>There was an error saving your file.</source>
-        <translation type="unfinished"/>
+        <translation>Chyba pri ukladaní súboru.</translation>
     </message>
 </context>
 <context>
@@ -5579,42 +5577,42 @@ The content encoding is not UTF-8.</source>
         <location filename="openlp/core/lib/ui.py" line="84"/>
         <source>Invalid Folder Selected</source>
         <comment>Singular</comment>
-        <translation type="unfinished"/>
+        <translation>Vybrali ste nesprávny priečinok</translation>
     </message>
     <message>
         <location filename="openlp/core/lib/ui.py" line="86"/>
         <source>Invalid File Selected</source>
         <comment>Singular</comment>
-        <translation type="unfinished"/>
+        <translation>Vybrali ste nesprávny súbor</translation>
     </message>
     <message>
         <location filename="openlp/core/lib/ui.py" line="87"/>
         <source>Invalid Files Selected</source>
         <comment>Plural</comment>
-        <translation type="unfinished"/>
+        <translation>Vybrali ste nesprávne súbory</translation>
     </message>
     <message>
         <location filename="openlp/core/lib/ui.py" line="102"/>
         <source>No Folder Selected</source>
         <comment>Singular</comment>
-        <translation type="unfinished"/>
+        <translation>Nevybrali ste žiadny priečinok</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/wizard.py" line="65"/>
         <source>Open %s Folder</source>
-        <translation type="unfinished"/>
+        <translation>Otvorte %s Priečinok</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/wizard.py" line="69"/>
         <source>You need to specify one %s file to import from.</source>
         <comment>A file type e.g. OpenSong</comment>
-        <translation type="unfinished"/>
+        <translation>Určte jeden %s súbor z kade sa bude importovať.</translation>
     </message>
     <message>
         <location filename="openlp/core/ui/wizard.py" line="73"/>
         <source>You need to specify one %s folder to import from.</source>
         <comment>A song format e.g. PowerSong</comment>
-        <translation type="unfinished"/>
+        <translation>Určte jeden %s priečinok z kade sa bude importovať.</translation>
     </message>
 </context>
 <context>
@@ -5740,12 +5738,12 @@ The content encoding is not UTF-8.</source>
     <message>
         <location filename="openlp/plugins/presentations/lib/mediaitem.py" line="294"/>
         <source>The presentation %s is incomplete, please reload.</source>
-        <translation type="unfinished"/>
+        <translation>Prezentácia %s nie je kompletná, opäť ju načítajte.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/presentations/lib/mediaitem.py" line="305"/>
         <source>The presentation %s no longer exists.</source>
-        <translation type="unfinished"/>
+        <translation>Prezentácia %s už neexistuje.</translation>
     </message>
 </context>
 <context>
@@ -6799,22 +6797,22 @@ The encoding is responsible for the correct character representation.</source>
     <message>
         <location filename="openlp/plugins/songs/lib/importer.py" line="229"/>
         <source>DreamBeam Song Files</source>
-        <translation type="unfinished"/>
+        <translation>Súbory Piesní DreamBeam</translation>
     </message>
     <message>
         <location filename="openlp/plugins/songs/lib/importer.py" line="278"/>
         <source>You need to specify a valid PowerSong 1.0 database folder.</source>
-        <translation type="unfinished"/>
+        <translation>Musíte upresniť správny priečinok PowerSong 1.0 databázy.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/songs/lib/importer.py" line="336"/>
         <source>ZionWorx (CSV)</source>
-        <translation type="unfinished"/>
+        <translation>ZionWorx (CSV)</translation>
     </message>
     <message>
         <location filename="openlp/plugins/songs/lib/importer.py" line="338"/>
         <source>First convert your ZionWorx database to a CSV text file, as explained in the &lt;a href=&quot;http://manual.openlp.org/songs.html#importing-from-zionworx&quot;&gt;User Manual&lt;/a&gt;.</source>
-        <translation type="unfinished"/>
+        <translation>Najprv prekonvertuj tvoju ZionWorx databázu na CSV textový súbor, ako je to vysvetlené v &lt;a href=&quot;http://manual.openlp.org/songs.html#importing-from-zionworx&quot;&gt;Užívateľskom Manuály&lt;/a&gt;.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/songs/lib/importer.py" line="321"/>
@@ -6890,7 +6888,7 @@ The encoding is responsible for the correct character representation.</source>
     <message numerus="yes">
         <location filename="openlp/plugins/songs/lib/mediaitem.py" line="404"/>
         <source>Are you sure you want to delete the %n selected song(s)?</source>
-        <translation type="unfinished"><numerusform></numerusform><numerusform></numerusform></translation>
+        <translation type="unfinished"><numerusform></numerusform><numerusform></numerusform><numerusform></numerusform></translation>
     </message>
     <message>
         <location filename="openlp/plugins/songs/lib/mediaitem.py" line="150"/>
@@ -6966,12 +6964,12 @@ The encoding is responsible for the correct character representation.</source>
     <message>
         <location filename="openlp/plugins/songs/lib/powersongimport.py" line="103"/>
         <source>No songs to import.</source>
-        <translation type="unfinished"/>
+        <translation>Žiadne piesne nie sú na vloženie.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/songs/lib/powersongimport.py" line="155"/>
         <source>Verses not found. Missing &quot;PART&quot; header.</source>
-        <translation type="unfinished"/>
+        <translation>Verše neboli nájdené. Chýba &quot;ČASŤ&quot; hlavička.</translation>
     </message>
 </context>
 <context>
@@ -7235,12 +7233,12 @@ The encoding is responsible for the correct character representation.</source>
     <message>
         <location filename="openlp/plugins/songs/lib/zionworximport.py" line="91"/>
         <source>Error reading CSV file.</source>
-        <translation type="unfinished"/>
+        <translation>Chyba pri čítaní CSV súboru.</translation>
     </message>
     <message>
         <location filename="openlp/plugins/songs/lib/zionworximport.py" line="117"/>
         <source>File not valid ZionWorx CSV format.</source>
-        <translation type="unfinished"/>
+        <translation>Súbor nie je validný ZionWorx CSV formátu.</translation>
     </message>
 </context>
 </TS>
