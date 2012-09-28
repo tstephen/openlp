@@ -25,42 +25,10 @@
 # with this program; if not, write to the Free Software Foundation, Inc., 59  #
 # Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
 ###############################################################################
+"""
+The :mod:`resources` module contains a bunch of resources for OpenLP.
 
-from PyQt4 import QtCore, QtGui
+DO NOT REMOVE THIS FILE, IT IS REQUIRED FOR INCLUDING THE RESOURCES ON SOME
+PLATFORMS!
+"""
 
-from aboutdialog import Ui_AboutDialog
-from openlp.core.lib import translate
-from openlp.core.utils import get_application_version
-
-class AboutForm(QtGui.QDialog, Ui_AboutDialog):
-    """
-    The About dialog
-    """
-
-    def __init__(self, parent):
-        """
-        Do some initialisation stuff
-        """
-        QtGui.QDialog.__init__(self, parent)
-        applicationVersion = get_application_version()
-        self.setupUi(self)
-        about_text = self.aboutTextEdit.toPlainText()
-        about_text = about_text.replace(u'<version>',
-            applicationVersion[u'version'])
-        if applicationVersion[u'build']:
-            build_text = unicode(translate('OpenLP.AboutForm', ' build %s')) % \
-                applicationVersion[u'build']
-        else:
-            build_text = u''
-        about_text = about_text.replace(u'<revision>', build_text)
-        self.aboutTextEdit.setPlainText(about_text)
-        QtCore.QObject.connect(self.volunteerButton,
-            QtCore.SIGNAL(u'clicked()'), self.onVolunteerButtonClicked)
-
-    def onVolunteerButtonClicked(self):
-        """
-        Launch a web browser and go to the contribute page on the site.
-        """
-        import webbrowser
-        url = u'http://openlp.org/en/documentation/introduction/contributing'
-        webbrowser.open_new(url)
