@@ -27,7 +27,7 @@
 # Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
 ###############################################################################
 """
-Extend QTreeWidget to handle drag and drop functionality
+Extend QListWidget to handle drag and drop functionality
 """
 import os
 
@@ -36,21 +36,16 @@ from PyQt4 import QtCore, QtGui
 from openlp.core.lib import Receiver
 
 
-class TreeWidgetWithDnD(QtGui.QTreeWidget):
+class ListWidgetWithDnD(QtGui.QListWidget):
     """
-    Provide a tree widget to store objects and handle drag and drop events
+    Provide a list widget to store objects and handle drag and drop events
     """
     def __init__(self, parent=None, name=u''):
         """
-        Initialise the tree widget
+        Initialise the list widget
         """
-        QtGui.QTreeWidget.__init__(self, parent)
+        QtGui.QListWidget.__init__(self, parent)
         self.mimeDataText = name
-        self.allow_internal_dnd = False
-        self.header().close()
-        self.defaultIndentation = self.indentation()
-        self.setIndentation(0)
-        self.setAnimated(True)
         assert(self.mimeDataText)
 
     def activateDnD(self):
@@ -61,14 +56,11 @@ class TreeWidgetWithDnD(QtGui.QTreeWidget):
         self.setDragDropMode(QtGui.QAbstractItemView.DragDrop)
         QtCore.QObject.connect(Receiver.get_receiver(), QtCore.SIGNAL(u'%s_dnd' % self.mimeDataText),
             self.parent().loadFile)
-        QtCore.QObject.connect(Receiver.get_receiver(), QtCore.SIGNAL(u'%s_dnd_internal' % self.mimeDataText),
-            self.parent().dnd_move_internal)
 
     def mouseMoveEvent(self, event):
         """
-        Drag and drop event does not care what data is selected
-        as the recipient will use events to request the data move
-        just tell it what plugin to call
+        Drag and drop event does not care what data is selected as the recipient will use events to request the data
+        move just tell it what plugin to call
         """
         if event.buttons() != QtCore.Qt.LeftButton:
             event.ignore()
@@ -83,19 +75,19 @@ class TreeWidgetWithDnD(QtGui.QTreeWidget):
         drag.start(QtCore.Qt.CopyAction)
 
     def dragEnterEvent(self, event):
+        """
+        When something is dragged into this object, check if you should be able to drop it in here.
+        """
         if event.mimeData().hasUrls():
-            event.accept()
-        elif self.allow_internal_dnd:
             event.accept()
         else:
             event.ignore()
 
     def dragMoveEvent(self, event):
-        QtGui.QTreeWidget.dragMoveEvent(self, event)
+        """
+        Make an object droppable, and set it to copy the contents of the object, not move it.
+        """
         if event.mimeData().hasUrls():
-            event.setDropAction(QtCore.Qt.CopyAction)
-            event.accept()
-        elif self.allow_internal_dnd:
             event.setDropAction(QtCore.Qt.CopyAction)
             event.accept()
         else:
@@ -103,7 +95,7 @@ class TreeWidgetWithDnD(QtGui.QTreeWidget):
 
     def dropEvent(self, event):
         """
-        Receive drop event, check if it is a file or internal object and process it if it is.
+        Receive drop event check if it is a file and process it if it is.
 
         ``event``
             Handle of the event pint passed
@@ -118,22 +110,8 @@ class TreeWidgetWithDnD(QtGui.QTreeWidget):
                     files.append(localFile)
                 elif os.path.isdir(localFile):
                     listing = os.listdir(localFile)
-                    for file_name in listing:
-                        files.append(os.path.join(localFile, file_name))
-            Receiver.send_message(u'%s_dnd' % self.mimeDataText, {'files': files, 'target': self.itemAt(event.pos())})
-        elif self.allow_internal_dnd:
-            event.setDropAction(QtCore.Qt.CopyAction)
-            event.accept()
-            Receiver.send_message(u'%s_dnd_internal' % self.mimeDataText, self.itemAt(event.pos()))
+                    for file in listing:
+                        files.append(os.path.join(localFile, file))
+            Receiver.send_message(u'%s_dnd' % self.mimeDataText, files)
         else:
             event.ignore()
-
-    # Convenience methods for emulating a QListWidget. This helps keeping MediaManagerItem simple.
-    def addItem(self, item):
-        self.addTopLevelItem(item)
-
-    def count(self):
-        return self.topLevelItemCount()
-
-    def item(self, index):
-        return self.topLevelItem(index)
