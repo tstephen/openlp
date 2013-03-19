@@ -27,48 +27,73 @@
 # Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
 ###############################################################################
 """
-This module contains the song book form
+The :mod:`db` module provides the database and schema that is the backend for the Images plugin
 """
 
-from PyQt4 import QtGui
+from sqlalchemy import Column, ForeignKey, Table, types
+from sqlalchemy.orm import mapper, relation, reconstructor
 
-from openlp.core.lib import translate
-from openlp.core.lib.ui import critical_error_message_box
-from openlp.plugins.songs.forms.songbookdialog import Ui_SongBookDialog
+from openlp.core.lib.db import BaseModel, init_db
 
 
-class SongBookForm(QtGui.QDialog, Ui_SongBookDialog):
+class ImageGroups(BaseModel):
     """
-    Class documentation goes here.
+    ImageGroups model
     """
-    def __init__(self, parent=None):
-        """
-        Constructor
-        """
-        super(SongBookForm, self).__init__(parent)
-        self.setupUi(self)
+    pass
 
-    def exec_(self, clear=True):
-        """
-        Execute the song book form.
 
-        ``clear``
-            Clear the fields on the form before displaying it.
-        """
-        if clear:
-            self.name_edit.clear()
-            self.publisher_edit.clear()
-        self.name_edit.setFocus()
-        return QtGui.QDialog.exec_(self)
+class ImageFilenames(BaseModel):
+    """
+    ImageFilenames model
+    """
+    pass
 
-    def accept(self):
-        """
-        Override the inherited method to check that the name of the book has been typed in.
-        """
-        if not self.name_edit.text():
-            critical_error_message_box(
-                message=translate('SongsPlugin.SongBookForm', 'You need to type in a name for the book.'))
-            self.name_edit.setFocus()
-            return False
-        else:
-            return QtGui.QDialog.accept(self)
+
+def init_schema(url):
+    """
+    Setup the images database connection and initialise the database schema.
+
+    ``url``
+        The database to setup
+
+    The images database contains the following tables:
+
+        * image_groups
+        * image_filenames
+
+    **image_groups Table**
+        This table holds the names of the images groups. It has the following columns:
+
+        * id
+        * parent_id
+        * group_name
+
+    **image_filenames Table**
+        This table holds the filenames of the images and the group they belong to. It has the following columns:
+
+        * id
+        * group_id
+        * filename
+    """
+    session, metadata = init_db(url)
+
+    # Definition of the "image_groups" table
+    image_groups_table = Table(u'image_groups', metadata,
+        Column(u'id', types.Integer(), primary_key=True),
+        Column(u'parent_id', types.Integer()),
+        Column(u'group_name', types.Unicode(128))
+    )
+
+    # Definition of the "image_filenames" table
+    image_filenames_table = Table(u'image_filenames', metadata,
+        Column(u'id', types.Integer(), primary_key=True),
+        Column(u'group_id', types.Integer(), ForeignKey(u'image_groups.id'), default=None),
+        Column(u'filename', types.Unicode(255), nullable=False)
+    )
+
+    mapper(ImageGroups, image_groups_table)
+    mapper(ImageFilenames, image_filenames_table)
+
+    metadata.create_all(checkfirst=True)
+    return session

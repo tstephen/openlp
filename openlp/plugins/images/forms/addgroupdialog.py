@@ -26,49 +26,39 @@
 # with this program; if not, write to the Free Software Foundation, Inc., 59  #
 # Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
 ###############################################################################
-"""
-This module contains the song book form
-"""
 
 from PyQt4 import QtGui
 
 from openlp.core.lib import translate
-from openlp.core.lib.ui import critical_error_message_box
-from openlp.plugins.songs.forms.songbookdialog import Ui_SongBookDialog
+from openlp.core.lib.ui import create_button_box
 
 
-class SongBookForm(QtGui.QDialog, Ui_SongBookDialog):
-    """
-    Class documentation goes here.
-    """
-    def __init__(self, parent=None):
-        """
-        Constructor
-        """
-        super(SongBookForm, self).__init__(parent)
-        self.setupUi(self)
+class Ui_AddGroupDialog(object):
+    def setupUi(self, add_group_dialog):
+        add_group_dialog.setObjectName(u'add_group_dialog')
+        add_group_dialog.resize(300, 10)
+        self.dialog_layout = QtGui.QVBoxLayout(add_group_dialog)
+        self.dialog_layout.setObjectName(u'dialog_layout')
+        self.name_layout = QtGui.QFormLayout()
+        self.name_layout.setObjectName(u'name_layout')
+        self.parent_group_label = QtGui.QLabel(add_group_dialog)
+        self.parent_group_label.setObjectName(u'parent_group_label')
+        self.parent_group_combobox = QtGui.QComboBox(add_group_dialog)
+        self.parent_group_combobox.setObjectName(u'parent_group_combobox')
+        self.name_layout.addRow(self.parent_group_label, self.parent_group_combobox)
+        self.name_label = QtGui.QLabel(add_group_dialog)
+        self.name_label.setObjectName(u'name_label')
+        self.name_edit = QtGui.QLineEdit(add_group_dialog)
+        self.name_edit.setObjectName(u'name_edit')
+        self.name_label.setBuddy(self.name_edit)
+        self.name_layout.addRow(self.name_label, self.name_edit)
+        self.dialog_layout.addLayout(self.name_layout)
+        self.button_box = create_button_box(add_group_dialog, u'button_box', [u'cancel', u'save'])
+        self.dialog_layout.addWidget(self.button_box)
+        self.retranslateUi(add_group_dialog)
+        add_group_dialog.setMaximumHeight(add_group_dialog.sizeHint().height())
 
-    def exec_(self, clear=True):
-        """
-        Execute the song book form.
-
-        ``clear``
-            Clear the fields on the form before displaying it.
-        """
-        if clear:
-            self.name_edit.clear()
-            self.publisher_edit.clear()
-        self.name_edit.setFocus()
-        return QtGui.QDialog.exec_(self)
-
-    def accept(self):
-        """
-        Override the inherited method to check that the name of the book has been typed in.
-        """
-        if not self.name_edit.text():
-            critical_error_message_box(
-                message=translate('SongsPlugin.SongBookForm', 'You need to type in a name for the book.'))
-            self.name_edit.setFocus()
-            return False
-        else:
-            return QtGui.QDialog.accept(self)
+    def retranslateUi(self, add_group_dialog):
+        add_group_dialog.setWindowTitle(translate('ImagePlugin.AddGroupForm', 'Add group'))
+        self.parent_group_label.setText(translate('ImagePlugin.AddGroupForm', 'Parent group:'))
+        self.name_label.setText(translate('ImagePlugin.AddGroupForm', 'Group name:'))

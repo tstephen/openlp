@@ -26,49 +26,32 @@
 # with this program; if not, write to the Free Software Foundation, Inc., 59  #
 # Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
 ###############################################################################
-"""
-This module contains the song book form
-"""
 
 from PyQt4 import QtGui
 
-from openlp.core.lib import translate
-from openlp.core.lib.ui import critical_error_message_box
-from openlp.plugins.songs.forms.songbookdialog import Ui_SongBookDialog
+from openlp.plugins.images.forms.choosegroupdialog import Ui_ChooseGroupDialog
 
 
-class SongBookForm(QtGui.QDialog, Ui_SongBookDialog):
+class ChooseGroupForm(QtGui.QDialog, Ui_ChooseGroupDialog):
     """
-    Class documentation goes here.
+    This class implements the 'Choose group' form for the Images plugin.
     """
     def __init__(self, parent=None):
         """
         Constructor
         """
-        super(SongBookForm, self).__init__(parent)
+        QtGui.QDialog.__init__(self, parent)
         self.setupUi(self)
 
-    def exec_(self, clear=True):
+    def exec_(self, selected_group=None):
         """
-        Execute the song book form.
+        Show the form
 
-        ``clear``
-            Clear the fields on the form before displaying it.
+        ``selected_group``
+            The ID of the group that should be selected by default when showing the dialog
         """
-        if clear:
-            self.name_edit.clear()
-            self.publisher_edit.clear()
-        self.name_edit.setFocus()
+        if selected_group is not None:
+            for i in range(self.group_combobox.count()):
+                if self.group_combobox.itemData(i) == selected_group:
+                    self.group_combobox.setCurrentIndex(i)
         return QtGui.QDialog.exec_(self)
-
-    def accept(self):
-        """
-        Override the inherited method to check that the name of the book has been typed in.
-        """
-        if not self.name_edit.text():
-            critical_error_message_box(
-                message=translate('SongsPlugin.SongBookForm', 'You need to type in a name for the book.'))
-            self.name_edit.setFocus()
-            return False
-        else:
-            return QtGui.QDialog.accept(self)

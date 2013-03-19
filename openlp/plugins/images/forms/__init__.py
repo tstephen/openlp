@@ -27,48 +27,31 @@
 # Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
 ###############################################################################
 """
-This module contains the song book form
+Forms in OpenLP are made up of two classes. One class holds all the graphical
+elements, like buttons and lists, and the other class holds all the functional
+code, like slots and loading and saving.
+
+The first class, commonly known as the **Dialog** class, is typically named
+``Ui_<name>Dialog``. It is a slightly modified version of the class that the
+``pyuic4`` command produces from Qt4's .ui file. Typical modifications will be
+converting most strings from "" to u'' and using OpenLP's ``translate()``
+function for translating strings.
+
+The second class, commonly known as the **Form** class, is typically named
+``<name>Form``. This class is the one which is instantiated and used. It uses
+dual inheritance to inherit from (usually) QtGui.QDialog and the Ui class
+mentioned above, like so::
+
+    class AuthorsForm(QtGui.QDialog, Ui_AuthorsDialog):
+
+        def __init__(self, parent=None):
+            QtGui.QDialog.__init__(self, parent)
+            self.setupUi(self)
+
+This allows OpenLP to use ``self.object`` for all the GUI elements while keeping
+them separate from the functionality, so that it is easier to recreate the GUI
+from the .ui files later if necessary.
 """
 
-from PyQt4 import QtGui
-
-from openlp.core.lib import translate
-from openlp.core.lib.ui import critical_error_message_box
-from openlp.plugins.songs.forms.songbookdialog import Ui_SongBookDialog
-
-
-class SongBookForm(QtGui.QDialog, Ui_SongBookDialog):
-    """
-    Class documentation goes here.
-    """
-    def __init__(self, parent=None):
-        """
-        Constructor
-        """
-        super(SongBookForm, self).__init__(parent)
-        self.setupUi(self)
-
-    def exec_(self, clear=True):
-        """
-        Execute the song book form.
-
-        ``clear``
-            Clear the fields on the form before displaying it.
-        """
-        if clear:
-            self.name_edit.clear()
-            self.publisher_edit.clear()
-        self.name_edit.setFocus()
-        return QtGui.QDialog.exec_(self)
-
-    def accept(self):
-        """
-        Override the inherited method to check that the name of the book has been typed in.
-        """
-        if not self.name_edit.text():
-            critical_error_message_box(
-                message=translate('SongsPlugin.SongBookForm', 'You need to type in a name for the book.'))
-            self.name_edit.setFocus()
-            return False
-        else:
-            return QtGui.QDialog.accept(self)
+from addgroupform import AddGroupForm
+from choosegroupform import ChooseGroupForm
