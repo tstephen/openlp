@@ -26,33 +26,24 @@
 # with this program; if not, write to the Free Software Foundation, Inc., 59  #
 # Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
 ###############################################################################
+"""
+The :mod:`osdinteraction` provides miscellaneous functions for interacting with
+OSD files.
+"""
 
-from PyQt4 import QtGui
+import os
+import cPickle
 
-from openlp.plugins.images.forms.choosegroupdialog import Ui_ChooseGroupDialog
+from tests.utils.constants import TEST_RESOURCES_PATH
 
 
-class ChooseGroupForm(QtGui.QDialog, Ui_ChooseGroupDialog):
+def read_service_from_file(file_name):
     """
-    This class implements the 'Choose group' form for the Images plugin.
+    Reads an OSD file and returns the first service item found therein.
+    @param file_name: File name of an OSD file residing in the tests/resources folder.
+    @return: The service contained in the file.
     """
-    def __init__(self, parent=None):
-        """
-        Constructor
-        """
-        QtGui.QDialog.__init__(self, parent)
-        self.setupUi(self)
-
-    def exec_(self, selected_group=None):
-        """
-        Show the form
-
-        ``selected_group``
-            The ID of the group that should be selected by default when showing the dialog.
-        """
-        self.new_group_edit.clear()
-        if selected_group is not None:
-            for index in range(self.group_combobox.count()):
-                if self.group_combobox.itemData(index) == selected_group:
-                    self.group_combobox.setCurrentIndex(index)
-        return QtGui.QDialog.exec_(self)
+    service_file = os.path.join(TEST_RESOURCES_PATH, file_name)
+    with open(service_file, u'r') as open_file:
+        service = cPickle.load(open_file)
+    return service
