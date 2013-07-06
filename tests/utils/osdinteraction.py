@@ -27,52 +27,23 @@
 # Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
 ###############################################################################
 """
-The :mod:`db` module provides the database and schema that is the backend for
-the Custom plugin
+The :mod:`osdinteraction` provides miscellaneous functions for interacting with
+OSD files.
 """
 
-from sqlalchemy import Column, Table, types
-from sqlalchemy.orm import mapper
+import os
+import cPickle
 
-from openlp.core.lib.db import BaseModel, init_db
-from openlp.core.utils import get_locale_key
+from tests.utils.constants import TEST_RESOURCES_PATH
 
-class CustomSlide(BaseModel):
+
+def read_service_from_file(file_name):
     """
-    CustomSlide model
+    Reads an OSD file and returns the first service item found therein.
+    @param file_name: File name of an OSD file residing in the tests/resources folder.
+    @return: The service contained in the file.
     """
-    # By default sort the customs by its title considering language specific characters.
-    def __lt__(self, other):
-        return get_locale_key(self.title) < get_locale_key(other.title)
-
-    def __eq__(self, other):
-        return get_locale_key(self.title) == get_locale_key(other.title)
-
-    def __hash__(self):
-        """
-        Return the hash for a custom slide.
-        """
-        return self.id
-
-
-def init_schema(url):
-    """
-    Setup the custom database connection and initialise the database schema
-
-    ``url``
-        The database to setup
-    """
-    session, metadata = init_db(url)
-
-    custom_slide_table = Table(u'custom_slide', metadata,
-        Column(u'id', types.Integer(), primary_key=True),
-        Column(u'title', types.Unicode(255), nullable=False),
-        Column(u'text', types.UnicodeText, nullable=False),
-        Column(u'credits', types.UnicodeText),
-        Column(u'theme_name', types.Unicode(128))
-    )
-
-    mapper(CustomSlide, custom_slide_table)
-
-    metadata.create_all(checkfirst=True)
-    return session
+    service_file = os.path.join(TEST_RESOURCES_PATH, file_name)
+    with open(service_file, u'r') as open_file:
+        service = cPickle.load(open_file)
+    return service
