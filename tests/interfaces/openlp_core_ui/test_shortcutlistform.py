@@ -27,25 +27,52 @@
 # Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
 ###############################################################################
 """
-The :mod:`openlp.plugins.songs.lib.ui` module provides standard UI components
-for the songs plugin.
+Package to test the openlp.core.ui.shortcutform package.
 """
-from openlp.core.lib import translate
+from unittest import TestCase
+
+from PyQt4 import QtCore, QtGui, QtTest
+
+from openlp.core.common import Registry
+from openlp.core.ui.shortcutlistform import ShortcutListForm
+from tests.interfaces import patch
+from tests.helpers.testmixin import TestMixin
 
 
-class SongStrings(object):
-    """
-    Provide standard strings for use throughout the songs plugin.
-    """
-    # These strings should need a good reason to be retranslated elsewhere.
-    Author = translate('OpenLP.Ui', 'Author', 'Singular')
-    Authors = translate('OpenLP.Ui', 'Authors', 'Plural')
-    AuthorUnknown = translate('OpenLP.Ui', 'Author Unknown')  # Used to populate the database.
-    CopyrightSymbol = translate('OpenLP.Ui', '\xa9', 'Copyright symbol.')
-    SongBook = translate('OpenLP.Ui', 'Song Book', 'Singular')
-    SongBooks = translate('OpenLP.Ui', 'Song Books', 'Plural')
-    SongIncomplete = translate('OpenLP.Ui', 'Title and/or verses not found')
-    SongMaintenance = translate('OpenLP.Ui', 'Song Maintenance')
-    Topic = translate('OpenLP.Ui', 'Topic', 'Singular')
-    Topics = translate('OpenLP.Ui', 'Topics', 'Plural')
-    XMLSyntaxError = translate('OpenLP.Ui', 'XML syntax error')
+class TestShortcutform(TestCase, TestMixin):
+
+    def setUp(self):
+        """
+        Create the UI
+        """
+        Registry.create()
+        self.get_application()
+        self.main_window = QtGui.QMainWindow()
+        Registry().register('main_window', self.main_window)
+        self.form = ShortcutListForm()
+
+    def tearDown(self):
+        """
+        Delete all the C++ objects at the end so that we don't have a segfault
+        """
+        del self.form
+        del self.main_window
+
+    def adjust_button_test(self):
+        """
+        Test the _adjust_button() method
+        """
+        # GIVEN: A button.
+        button = QtGui.QPushButton()
+        checked = True
+        enabled = True
+        text = "new!"
+
+        # WHEN: Call the method.
+        with patch('PyQt4.QtGui.QPushButton.setChecked') as mocked_check_method:
+            self.form._adjust_button(button, checked, enabled, text)
+
+            # THEN: The button should be changed.
+            self.assertEqual(button.text(), text, "The text should match.")
+            mocked_check_method.assert_called_once_with(True)
+            self.assertEqual(button.isEnabled(), enabled, "The button should be disabled.")
