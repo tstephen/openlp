@@ -26,26 +26,3 @@
 # with this program; if not, write to the Free Software Foundation, Inc., 59  #
 # Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
 ###############################################################################
-"""
-The :mod:`openlp.plugins.songs.lib.ui` module provides standard UI components
-for the songs plugin.
-"""
-from openlp.core.lib import translate
-
-
-class SongStrings(object):
-    """
-    Provide standard strings for use throughout the songs plugin.
-    """
-    # These strings should need a good reason to be retranslated elsewhere.
-    Author = translate('OpenLP.Ui', 'Author', 'Singular')
-    Authors = translate('OpenLP.Ui', 'Authors', 'Plural')
-    AuthorUnknown = translate('OpenLP.Ui', 'Author Unknown')  # Used to populate the database.
-    CopyrightSymbol = translate('OpenLP.Ui', '\xa9', 'Copyright symbol.')
-    SongBook = translate('OpenLP.Ui', 'Song Book', 'Singular')
-    SongBooks = translate('OpenLP.Ui', 'Song Books', 'Plural')
-    SongIncomplete = translate('OpenLP.Ui', 'Title and/or verses not found')
-    SongMaintenance = translate('OpenLP.Ui', 'Song Maintenance')
-    Topic = translate('OpenLP.Ui', 'Topic', 'Singular')
-    Topics = translate('OpenLP.Ui', 'Topics', 'Plural')
-    XMLSyntaxError = translate('OpenLP.Ui', 'XML syntax error')
