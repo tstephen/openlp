@@ -4,8 +4,8 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2013 Raoul Snyman                                        #
-# Portions copyright (c) 2008-2013 Tim Bentley, Gerald Britton, Jonathan      #
+# Copyright (c) 2008-2014 Raoul Snyman                                        #
+# Portions copyright (c) 2008-2014 Tim Bentley, Gerald Britton, Jonathan      #
 # Corwin, Samuel Findlay, Michael Gorven, Scott Guerrieri, Matthias Hub,      #
 # Meinert Jordan, Armin Köhler, Erik Lundin, Edwin Lunando, Brian T. Meyer.   #
 # Joshua Miller, Stevan Pettit, Andreas Preikschat, Mattias Põldaru,          #
@@ -26,33 +26,64 @@
 # with this program; if not, write to the Free Software Foundation, Inc., 59  #
 # Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
 ###############################################################################
+
 """
-The :mod:`worshipassistantimport` module provides the functionality for importing
-WorshipAssistant song files into the current installation database.
+Provide a custom widget based on QPushButton for the selection of colors
 """
+from PyQt4 import QtCore, QtGui
 
-import os
-
-from tests.helpers.songfileimport import SongImportTestHelper
-
-TEST_PATH = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), '..', '..', '..', 'resources', 'worshipassistantsongs'))
+from openlp.core.common import translate
 
 
-class TestWorshipAssistantFileImport(SongImportTestHelper):
+class ColorButton(QtGui.QPushButton):
+    """
+    Subclasses QPushbutton to create a "Color Chooser" button
+    """
 
-    def __init__(self, *args, **kwargs):
-        self.importer_class_name = 'WorshipAssistantImport'
-        self.importer_module_name = 'worshipassistant'
-        super(TestWorshipAssistantFileImport, self).__init__(*args, **kwargs)
+    colorChanged = QtCore.pyqtSignal(str)
 
-    def test_song_import(self):
+    def __init__(self, parent=None):
         """
-        Test that loading an Worship Assistant file works correctly
+        Initialise the ColorButton
         """
-        self.file_import(os.path.join(TEST_PATH, 'du_herr.csv'),
-                         self.load_external_result_data(os.path.join(TEST_PATH, 'du_herr.json')))
-        self.file_import(os.path.join(TEST_PATH, 'would_you_be_free.csv'),
-                         self.load_external_result_data(os.path.join(TEST_PATH, 'would_you_be_free.json')))
-        self.file_import(os.path.join(TEST_PATH, 'would_you_be_free2.csv'),
-                         self.load_external_result_data(os.path.join(TEST_PATH, 'would_you_be_free.json')))
+        super(ColorButton, self).__init__()
+        self.parent = parent
+        self.change_color('#ffffff')
+        self.setToolTip(translate('OpenLP.ColorButton', 'Click to select a color.'))
+        self.clicked.connect(self.on_clicked)
+
+    def change_color(self, color):
+        """
+        Sets the _color variable and the background color.
+
+        :param color:  String representation of a hexidecimal color
+        """
+        self._color = color
+        self.setStyleSheet('background-color: %s' % color)
+
+    @property
+    def color(self):
+        """
+        Property method to return the color variable
+
+        :return:  String representation of a hexidecimal color
+        """
+        return self._color
+
+    @color.setter
+    def color(self, color):
+        """
+        Property setter to change the imstamce color
+
+        :param color:  String representation of a hexidecimal color
+        """
+        self.change_color(color)
+
+    def on_clicked(self):
+        """
+        Handle the PushButton clicked signal, showing the ColorDialog and validating the input
+        """
+        new_color = QtGui.QColorDialog.getColor(QtGui.QColor(self._color), self.parent)
+        if new_color.isValid() and self._color != new_color.name():
+            self.change_color(new_color.name())
+            self.colorChanged.emit(new_color.name())
