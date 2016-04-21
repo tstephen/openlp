@@ -232,7 +232,7 @@ class PresentationDocument(object):
         Triggers the next effect of slide on the running presentation. This might be the next animation on the current
         slide, or the next slide
         """
-        pass
+        return False
 
     def previous_step(self):
         """

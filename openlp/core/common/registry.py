@@ -135,7 +135,7 @@ class Registry(object):
             for function in self.functions_list[event]:
                 try:
                     result = function(*args, **kwargs)
-                    if result:
+                    if result is not None:
                         results.append(result)
                 except TypeError:
                     # Who has called me can help in debugging

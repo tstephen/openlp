@@ -1170,8 +1170,17 @@ class SlideController(DisplayController, RegistryProperties):
         if not self.service_item:
             return
         if self.service_item.is_command():
-            Registry().execute('%s_next' % self.service_item.name.lower(), [self.service_item, self.is_live])
-            if self.is_live:
+            past_end = Registry().execute('%s_next' % self.service_item.name.lower(), [self.service_item, self.is_live])
+            # Check if we have gone past the end of the last slide
+            if self.is_live and past_end and past_end[0]:
+                if wrap is None:
+                    if self.slide_limits == SlideLimits.Wrap:
+                        self.on_slide_selected_index([0])
+                    elif self.is_live and self.slide_limits == SlideLimits.Next:
+                        self.service_next()
+                elif wrap:
+                    self.on_slide_selected_index([0])
+            else:
                 self.update_preview()
         else:
             row = self.preview_widget.current_slide_number() + 1

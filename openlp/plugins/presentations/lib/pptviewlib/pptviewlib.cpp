@@ -518,16 +518,18 @@ DllExport int GetCurrentSlide(int id)
 }
 
 // Take a step forwards through the show
-DllExport void NextStep(int id)
+DllExport int NextStep(int id)
 {
     DEBUG(L"NextStep:%d (%d)\n", id, pptView[id].currentSlide);
-    if (pptView[id].currentSlide > pptView[id].slideCount) return;
+    // Return 1 to signal that the slideshow has gone past the end
+    if (pptView[id].currentSlide > pptView[id].slideCount) return 1;
     if (pptView[id].currentSlide < pptView[id].slideCount)
     {
         pptView[id].guess = pptView[id].currentSlide + 1;
     }
     PostMessage(pptView[id].hWnd2, WM_MOUSEWHEEL, MAKEWPARAM(0, -WHEEL_DELTA),
         0);
+    return 0;
 }
 
 // Take a step backwards through the show

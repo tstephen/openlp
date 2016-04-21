@@ -416,11 +416,14 @@ class ImpressDocument(PresentationDocument):
         """
         Triggers the next effect of slide on the running presentation.
         """
+        past_end = False
         is_paused = self.control.isPaused()
         self.control.gotoNextEffect()
         time.sleep(0.1)
         if not is_paused and self.control.isPaused():
             self.control.gotoPreviousEffect()
+            past_end = True
+        return past_end
 
     def previous_step(self):
         """

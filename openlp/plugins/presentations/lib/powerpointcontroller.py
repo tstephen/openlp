@@ -433,6 +433,7 @@ class PowerpointDocument(PresentationDocument):
         Triggers the next effect of slide on the running presentation.
         """
         log.debug('next_step')
+        past_end = False
         try:
             self.presentation.SlideShowWindow.Activate()
             self.presentation.SlideShowWindow.View.Next()
@@ -441,16 +442,18 @@ class PowerpointDocument(PresentationDocument):
             log.exception(e)
             trace_error_handler(log)
             self.show_error_msg()
-            return
+            return past_end
         if self.get_slide_number() > self.get_slide_count():
             log.debug('past end, stepping back to previous')
             self.previous_step()
+            past_end = True
         # Stop powerpoint from flashing in the taskbar
         if self.presentation_hwnd:
             win32gui.FlashWindowEx(self.presentation_hwnd, win32con.FLASHW_STOP, 0, 0)
         # Make sure powerpoint doesn't steal focus, unless we're on a single screen setup
         if len(ScreenList().screen_list) > 1:
             Registry().get('main_window').activateWindow()
+        return past_end
 
     def previous_step(self):
         """

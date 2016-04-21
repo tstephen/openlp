@@ -30,7 +30,7 @@ DllExport BOOL CheckInstalled();
 DllExport void ClosePPT(int id);
 DllExport int GetCurrentSlide(int id);
 DllExport int GetSlideCount(int id);
-DllExport void NextStep(int id);
+DllExport int NextStep(int id);
 DllExport void PrevStep(int id);
 DllExport void GotoSlide(int id, int slide_no);
 DllExport void RestartShow(int id);

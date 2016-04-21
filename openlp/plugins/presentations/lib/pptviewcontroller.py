@@ -302,7 +302,10 @@ class PptviewDocument(PresentationDocument):
         """
         Triggers the next effect of slide on the running presentation.
         """
-        self.controller.process.NextStep(self.ppt_id)
+        if self.controller.process.NextStep(self.ppt_id) == 0:
+            return False
+        else:
+            return True
 
     def previous_step(self):
         """
