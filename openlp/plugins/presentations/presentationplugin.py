@@ -36,18 +36,20 @@ from openlp.plugins.presentations.lib import PresentationController, Presentatio
 log = logging.getLogger(__name__)
 
 
-__default_settings__ = {'presentations/override app': QtCore.Qt.Unchecked,
-                        'presentations/enable_pdf_program': QtCore.Qt.Unchecked,
-                        'presentations/pdf_program': '',
-                        'presentations/Impress': QtCore.Qt.Checked,
-                        'presentations/Powerpoint': QtCore.Qt.Checked,
-                        'presentations/Powerpoint Viewer': QtCore.Qt.Checked,
-                        'presentations/Pdf': QtCore.Qt.Checked,
-                        'presentations/presentations files': [],
-                        'presentations/thumbnail_scheme': '',
-                        'presentations/powerpoint slide click advance': QtCore.Qt.Unchecked,
-                        'presentations/powerpoint control window': QtCore.Qt.Unchecked
-                        }
+__default_settings__ = {
+    'presentations/override app': QtCore.Qt.Unchecked,
+    'presentations/enable_pdf_program': QtCore.Qt.Unchecked,
+    'presentations/pdf_program': '',
+    'presentations/MacLO': QtCore.Qt.Checked,
+    'presentations/Impress': QtCore.Qt.Checked,
+    'presentations/Powerpoint': QtCore.Qt.Checked,
+    'presentations/Powerpoint Viewer': QtCore.Qt.Checked,
+    'presentations/Pdf': QtCore.Qt.Checked,
+    'presentations/presentations files': [],
+    'presentations/thumbnail_scheme': '',
+    'presentations/powerpoint slide click advance': QtCore.Qt.Unchecked,
+    'presentations/powerpoint control window': QtCore.Qt.Unchecked
+}
 
 
 class PresentationPlugin(Plugin):
@@ -87,7 +89,7 @@ class PresentationPlugin(Plugin):
                 try:
                     self.controllers[controller].start_process()
                 except Exception:
-                    log.warning('Failed to start controller process')
+                    log.exception('Failed to start controller process')
                     self.controllers[controller].available = False
         self.media_item.build_file_mask_string()
 
@@ -132,7 +134,7 @@ class PresentationPlugin(Plugin):
                     try:
                         __import__(module_name, globals(), locals(), [])
                     except ImportError:
-                        log.warning('Failed to import {name} on path {path}'.format(name=module_name, path=path))
+                        log.exception('Failed to import {name} on path {path}'.format(name=module_name, path=path))
         controller_classes = PresentationController.__subclasses__()
         for controller_class in controller_classes:
             controller = controller_class(self)

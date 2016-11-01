@@ -9,10 +9,10 @@ import logging
 # Add the vendor directory to sys.path so that we can load Pyro4
 sys.path.append(os.path.join(os.path.dirname(__file__), 'vendor'))
 
-from Pyro4 import Daemon, expose, locateNS
+import uno
 from com.sun.star.beans import PropertyValue
 from com.sun.star.task import ErrorCodeIOException
-import uno
+from Pyro4 import Daemon, expose, locateNS
 
 logging.basicConfig(filename=os.path.dirname(__file__) + '/libreofficeserver.log', level=logging.INFO)
 log = logging.getLogger(__name__)
@@ -34,11 +34,15 @@ class LibreOfficeServer(object):
     """
     def __init__(self):
         """
-        Set up the LibreOffice server
+        Set up the server
         """
-        self._init_impress()
+        self._desktop = None
+        self._document = None
+        self._control = None
+        self._presentation = None
+        self._process = None
 
-    def _init_impress(self)
+    def start_process(self):
         """
         Initialise Impress
         """
@@ -49,23 +53,31 @@ class LibreOfficeServer(object):
             '--minimized',
             '--nodefault',
             '--nofirststartwizard',
-            '"--accept=pipe,name=openlp_pipe;urp;"'
+            '--accept=socket,port=2002;urp;'
         ]
         self._process = Popen(uno_command)
+
+    def setup_desktop(self):
+        """
+        Set up an UNO desktop instance
+        """
+        if self.has_desktop():
+            return
         uno_instance = None
         context = uno.getComponentContext()
         resolver = context.ServiceManager.createInstanceWithContext('com.sun.star.bridge.UnoUrlResolver', context)
+        loop = 0
         while uno_instance is None and loop < 3:
             try:
-                uno_instance = resolver.resolve('uno:pipe,name=openlp_pipe;urp;StarOffice.ComponentContext')
-            except:
+                uno_instance = resolver.resolve('uno:socket,port=2002;urp;StarOffice.ComponentContext')
+            except Exception as e:
                 log.warning('Unable to find running instance ')
                 loop += 1
         try:
             self._manager = uno_instance.ServiceManager
             log.debug('get UNO Desktop Openoffice - createInstanceWithContext - Desktop')
-            self._desktop = self.manager.createInstanceWithContext("com.sun.star.frame.Desktop", uno_instance)
-        except:
+            self._desktop = self._manager.createInstanceWithContext("com.sun.star.frame.Desktop", uno_instance)
+        except Exception as e:
             log.warning('Failed to get UNO desktop')
 
     def _create_property(self, name, value):
@@ -106,32 +118,35 @@ class LibreOfficeServer(object):
         """
         Say if we have a desktop object
         """
-        return self._desktop is not None
+        return hasattr(self, '_desktop') and self._desktop is not None
 
     def shutdown(self):
         """
         Shut down the server
         """
-        while self._docs:
-            self._docs[0].close_presentation()
-        if not self._desktop:
-            return
-        docs = self._desktop.getComponents()
-        count = 0
-        if docs.hasElements():
-            list_elements = docs.createEnumeration()
-            while list_elements.hasMoreElements():
-                doc = list_elements.nextElement()
-                if doc.getImplementationName() != 'com.sun.star.comp.framework.BackingComp':
-                    count += 1
-        if count > 0:
-            log.debug('LibreOffice not terminated as docs are still open')
-        else:
-            try:
-                self._desktop.terminate()
-                log.debug('LibreOffice killed')
-            except:
-                log.warning('Failed to terminate LibreOffice')
+        if hasattr(self, '_docs'):
+            while self._docs:
+                self._docs[0].close_presentation()
+        if self.has_desktop():
+            docs = self._desktop.getComponents()
+            count = 0
+            if docs.hasElements():
+                list_elements = docs.createEnumeration()
+                while list_elements.hasMoreElements():
+                    doc = list_elements.nextElement()
+                    if doc.getImplementationName() != 'com.sun.star.comp.framework.BackingComp':
+                        count += 1
+            if count > 0:
+                log.debug('LibreOffice not terminated as docs are still open')
+            else:
+                try:
+                    self._desktop.terminate()
+                    log.debug('LibreOffice killed')
+                except:
+                    log.warning('Failed to terminate LibreOffice')
+        if getattr(self, '_process'):
+            self._process.kill()
+
 
     def load_presentation(self, file_path, screen_number):
         """
@@ -148,35 +163,33 @@ class LibreOfficeServer(object):
         self._presentation = self._document.getPresentation()
         self._presentation.Display = screen_number
         self._control = None
-        self.create_thumbnails()
-        self.create_titles_and_notes()
         return True
 
-    def create_thumbnails(self, temp_folder):
+    def extract_thumbnails(self, temp_folder):
         """
         Create thumbnails for the presentation
         """
+        thumbnails = []
         thumb_dir_url = uno.systemPathToFileUrl(temp_folder)
         properties = (self._create_property('FilterName', 'impress_png_Export'),)
-        doc = self.document
-        pages = doc.getDrawPages()
+        pages = self._document.getDrawPages()
         if not pages:
             return
         if not os.path.isdir(temp_folder):
             os.makedirs(temp_folder)
         for index in range(pages.getCount()):
             page = pages.getByIndex(index)
-            doc.getCurrentController().setCurrentPage(page)
+            self._document.getCurrentController().setCurrentPage(page)
             url_path = '{path}/{name}.png'.format(path=thumb_dir_url, name=str(index + 1))
-            path = os.path.join(self.get_temp_folder(), str(index + 1) + '.png')
+            path = os.path.join(temp_folder, str(index + 1) + '.png')
             try:
-                doc.storeToURL(url_path, properties)
-                self.convert_thumbnail(path, index + 1)
-                delete_file(path)
+                self._document.storeToURL(url_path, properties)
+                thumbnails.append(path)
             except ErrorCodeIOException as exception:
                 log.exception('ERROR! ErrorCodeIOException {error:d}'.format(error=exception.ErrCode))
             except:
                 log.exception('{path} - Unable to store openoffice preview'.format(path=path))
+        return thumbnails
 
     def get_title_and_notes(self):
         """
@@ -346,10 +359,8 @@ def main():
     """
     The main function which runs the server
     """
-    daemon = Daemon()
-    ns = locateNS()
-    uri = daemon.register(LibreOfficeServer)
-    ns.register('openlp.libreofficeserver', uri)
+    daemon = Daemon(host='localhost', port=4310)
+    uri = daemon.register(LibreOfficeServer, 'openlp.libreofficeserver')
     try:
         daemon.requestLoop()
     finally:

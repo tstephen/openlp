@@ -35,36 +35,22 @@ import logging
 import os
 import time
 from subprocess import Popen
-from multiprocessing import Process
 
-from openlp.core.common import is_mac, Registry, delete_file
+from openlp.core.common import is_macosx, Registry, delete_file
 
-if is_mac() and os.path.exists('/Applications/LibreOffice.app'):
+if is_macosx() and os.path.exists('/Applications/LibreOffice.app'):
     macuno_available = True
 else:
     macuno_available = False
 
 from PyQt5 import QtCore
 from Pyro4 import Proxy
-from Pyro4.naming import NameServerDaemon
 
 from openlp.core.lib import ScreenList
 from .presentationcontroller import PresentationController, PresentationDocument, TextType
 
 
 log = logging.getLogger(__name__)
-
-
-def run_nameserver():
-    """
-    Run a Pyro4 nameserver
-    """
-    ns_daemon = NameServerDaemon()
-    ns_daemon._pyroHmacKey = 'openlp-libreoffice'
-    try:
-        ns_daemon.requestLoop()
-    finally:
-        ns_daemon.close()
 
 
 class MacLOController(PresentationController):
@@ -83,18 +69,8 @@ class MacLOController(PresentationController):
         self.supports = ['odp']
         self.also_supports = ['ppt', 'pps', 'pptx', 'ppsx', 'pptm']
         self.server_process = None
-        self.nameserver_process = None
-        self.client = None
-        self._start_nameserver()
+        self._client = None
         self._start_server()
-        self._setup_client()
-
-    def _start_nameserver(self):
-        """
-        Start the Pyro4 nameserver
-        """
-        self.nameserver_process = Process(run_nameserver)
-        self.nameserver_process.start()
 
     def _start_server(self):
         """
@@ -104,11 +80,16 @@ class MacLOController(PresentationController):
         libreoffice_server = os.path.join(os.path.dirname(__file__), 'libreofficeserver.py')
         self.server_process = Popen([libreoffice_python, libreoffice_server])
 
-    def _setup_client(self):
+    @property
+    def client(self):
         """
         Set up a Pyro4 client so that we can talk to the LibreOfficeServer
         """
-        self.client = Proxy('PYRONAME:openlp.libreofficeserver')
+        if not self._client:
+            self._client = Proxy('PYRO:openlp.libreofficeserver@localhost:4310')
+        if not self._client._pyroConnection:
+            self._client._pyroReconnect()
+        return self._client
 
     def check_available(self):
         """
@@ -119,19 +100,11 @@ class MacLOController(PresentationController):
 
     def start_process(self):
         """
-        Loads a running version of LibreOffice in the background. It is not displayed to the user but is available to the
-        UNO interface when required.
+        Loads a running version of LibreOffice in the background. It is not displayed to the user but is available to
+        the UNO interface when required.
         """
-        log.debug('start process Openoffice')
-        if is_win():
-            self.manager = self.get_com_servicemanager()
-            self.manager._FlagAsMethod('Bridge_GetStruct')
-            self.manager._FlagAsMethod('Bridge_GetValueObject')
-        else:
-            # -headless
-            cmd = get_uno_command()
-            self.process = QtCore.QProcess()
-            self.process.startDetached(cmd)
+        log.debug('Started automatically by the Pyro server')
+        self.client.start_process()
 
     def kill(self):
         """
@@ -139,8 +112,7 @@ class MacLOController(PresentationController):
         """
         log.debug('Kill LibreOffice')
         self.client.shutdown()
-        self.server_process.terminate()
-        self.nameserver_process.terminate()
+        self.server_process.kill()
 
 
 class MacLODocument(PresentationDocument):
@@ -155,9 +127,6 @@ class MacLODocument(PresentationDocument):
         log.debug('Init Presentation LibreOffice')
         super(MacLODocument, self).__init__(controller, presentation)
         self.client = controller.client
-        self.document = None
-        self.presentation = None
-        self.control = None
 
     def load_presentation(self):
         """
@@ -166,12 +135,13 @@ class MacLODocument(PresentationDocument):
         is available the presentation is loaded and started.
         """
         log.debug('Load Presentation LibreOffice')
+        self.client.setup_desktop()
         if not self.client.has_desktop():
             return False
         if not self.client.load_presentation(self.file_path, ScreenList().current['number'] + 1):
             return False
         self.create_thumbnails()
-        self.client.create_titles_and_notes()
+        self.create_titles_and_notes()
         return True
 
     def create_thumbnails(self):
@@ -181,7 +151,10 @@ class MacLODocument(PresentationDocument):
         log.debug('create thumbnails LibreOffice')
         if self.check_thumbnails():
             return
-        self.client.create_thumbnails(self.get_temp_folder())
+        temp_thumbnails = self.client.extract_thumbnails(self.get_temp_folder())
+        for index, temp_thumb in enumerate(temp_thumbnails):
+            self.convert_thumbnail(temp_thumb, index + 1)
+            delete_file(temp_thumb)
 
     def create_titles_and_notes(self):
         """
