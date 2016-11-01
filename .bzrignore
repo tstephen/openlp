@@ -47,3 +47,5 @@ coverage
 tags
 output
 htmlcov
+openlp/plugins/presentations/lib/vendor/Pyro4
+openlp/plugins/presentations/lib/vendor/serpent.py
