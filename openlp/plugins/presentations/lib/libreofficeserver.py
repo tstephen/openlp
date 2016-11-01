@@ -53,7 +53,7 @@ class LibreOfficeServer(object):
             '--minimized',
             '--nodefault',
             '--nofirststartwizard',
-            '--accept=socket,port=2002;urp;'
+            '--accept=pipe,name=openlp_pipe;urp;'
         ]
         self._process = Popen(uno_command)
 
@@ -69,7 +69,7 @@ class LibreOfficeServer(object):
         loop = 0
         while uno_instance is None and loop < 3:
             try:
-                uno_instance = resolver.resolve('uno:socket,port=2002;urp;StarOffice.ComponentContext')
+                uno_instance = resolver.resolve('uno:pipe,name=openlp_pipe;urp;StarOffice.ComponentContext')
             except Exception as e:
                 log.warning('Unable to find running instance ')
                 loop += 1
