@@ -5,6 +5,7 @@ from subprocess import Popen
 import sys
 import os
 import logging
+import time
 
 # Add the vendor directory to sys.path so that we can load Pyro4
 sys.path.append(os.path.join(os.path.dirname(__file__), 'vendor'))
@@ -191,7 +192,7 @@ class LibreOfficeServer(object):
                 log.exception('{path} - Unable to store openoffice preview'.format(path=path))
         return thumbnails
 
-    def get_title_and_notes(self):
+    def get_titles_and_notes(self):
         """
         Writes the list of titles (one per slide) to 'titles.txt' and the notes to 'slideNotes[x].txt'
         in the thumbnails directory
