@@ -10,12 +10,24 @@ import time
 # Add the vendor directory to sys.path so that we can load Pyro4
 sys.path.append(os.path.join(os.path.dirname(__file__), 'vendor'))
 
-import uno
-from com.sun.star.beans import PropertyValue
-from com.sun.star.task import ErrorCodeIOException
-from Pyro4 import Daemon, expose, locateNS
+from Pyro4 import Daemon, expose
 
-logging.basicConfig(filename=os.path.dirname(__file__) + '/libreofficeserver.log', level=logging.INFO)
+try:
+    # Wrap these imports in a try so that we can run the tests on macOS
+    import uno
+    from com.sun.star.beans import PropertyValue
+    from com.sun.star.task import ErrorCodeIOException
+except:
+    # But they need to be defined for mocking
+    uno = None
+    PropertyValue = None
+    ErrorCodeIOException = Exception
+
+if sys.platform.startswith('darwin') and uno is not None:
+    # Only make the log file on OS X when running as a server
+    logfile = os.path.join(str(os.getenv('HOME')), 'Library', 'Application Support', 'openlp', 'libreofficeserver.log')
+    logging.basicConfig(filename=logfile, level=logging.INFO)
+
 log = logging.getLogger(__name__)
 
 
@@ -37,9 +49,9 @@ class LibreOfficeServer(object):
         """
         Set up the server
         """
+        self._control = None
         self._desktop = None
         self._document = None
-        self._control = None
         self._presentation = None
         self._process = None
 
@@ -77,7 +89,7 @@ class LibreOfficeServer(object):
         try:
             self._manager = uno_instance.ServiceManager
             log.debug('get UNO Desktop Openoffice - createInstanceWithContext - Desktop')
-            self._desktop = self._manager.createInstanceWithContext("com.sun.star.frame.Desktop", uno_instance)
+            self._desktop = self._manager.createInstanceWithContext('com.sun.star.frame.Desktop', uno_instance)
         except Exception as e:
             log.warning('Failed to get UNO desktop')
 
@@ -109,9 +121,9 @@ class LibreOfficeServer(object):
                 for index in range(page.getCount()):
                     shape = page.getByIndex(index)
                     shape_type = shape.getShapeType()
-                    if shape.supportsService("com.sun.star.drawing.Text"):
+                    if shape.supportsService('com.sun.star.drawing.Text'):
                         # if they requested title, make sure it is the title
-                        if text_type != TextType.Title or shape_type == "com.sun.star.presentation.TitleTextShape":
+                        if text_type != TextType.Title or shape_type == 'com.sun.star.presentation.TitleTextShape':
                             text += shape.getString() + '\n'
         return text
 
