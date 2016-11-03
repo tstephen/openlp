@@ -42,11 +42,11 @@ class TestLibreOfficeServer(TestCase):
         server = LibreOfficeServer()
 
         # THEN: The server should have been set up correctly
-        self.assertIsNone(server._control)
-        self.assertIsNone(server._desktop)
-        self.assertIsNone(server._document)
-        self.assertIsNone(server._presentation)
-        self.assertIsNone(server._process)
+        assert server._control is None
+        assert server._desktop is None
+        assert server._document is None
+        assert server._presentation is None
+        assert server._process is None
 
     @patch('openlp.plugins.presentations.lib.libreofficeserver.Popen')
     def test_start_process(self, MockedPopen):
@@ -71,7 +71,7 @@ class TestLibreOfficeServer(TestCase):
             '--nofirststartwizard',
             '--accept=pipe,name=openlp_pipe;urp;'
         ])
-        self.assertEqual(mocked_process, server._process)
+        assert server._process is mocked_process
 
     @patch('openlp.plugins.presentations.lib.libreofficeserver.uno')
     def test_setup_desktop(self, mocked_uno):
@@ -107,8 +107,8 @@ class TestLibreOfficeServer(TestCase):
         )
         MockedServiceManager.createInstanceWithContext.assert_called_once_with(
                 'com.sun.star.frame.Desktop', mocked_uno_instance)
-        self.assertEqual(MockedServiceManager, server._manager)
-        self.assertEqual(mocked_desktop, server._desktop)
+        assert server._manager is MockedServiceManager
+        assert server._desktop is mocked_desktop
 
     @patch('openlp.plugins.presentations.lib.libreofficeserver.PropertyValue')
     def test_create_property(self, MockedPropertyValue):
@@ -124,8 +124,8 @@ class TestLibreOfficeServer(TestCase):
         prop = server._create_property(name, value)
 
         # THEN: The property should have the correct attributes
-        self.assertEqual(name, prop.Name)
-        self.assertEqual(value, prop.Value)
+        assert prop.Name == name
+        assert prop.Value == value
 
     def test_get_text_from_page_slide_text(self):
         """
@@ -151,7 +151,7 @@ class TestLibreOfficeServer(TestCase):
         text = server._get_text_from_page(slide_no, text_type)
 
         # THE: The text is correct
-        self.assertEqual('Page Text\n', text)
+        assert text == 'Page Text\n'
 
     def test_get_text_from_page_title(self):
         """
@@ -177,7 +177,7 @@ class TestLibreOfficeServer(TestCase):
         text = server._get_text_from_page(slide_no, text_type)
 
         # THEN: The text should be correct
-        self.assertEqual('Page Title\n', text)
+        assert text == 'Page Title\n'
 
     def test_get_text_from_page_notes(self):
         """
@@ -205,7 +205,7 @@ class TestLibreOfficeServer(TestCase):
         text = server._get_text_from_page(slide_no, text_type)
 
         # THEN: The text should be correct
-        self.assertEqual('Page Notes\n', text)
+        assert text == 'Page Notes\n'
 
     def test_has_desktop_no_desktop(self):
         """
@@ -218,7 +218,7 @@ class TestLibreOfficeServer(TestCase):
         result = server.has_desktop()
 
         # THEN: The result should be False
-        self.assertFalse(result)
+        assert result is False
 
     def test_has_desktop(self):
         """
@@ -232,7 +232,7 @@ class TestLibreOfficeServer(TestCase):
         result = server.has_desktop()
 
         # THEN: The result should be True
-        self.assertTrue(result)
+        assert result is True
 
     def test_shutdown(self):
         """
@@ -266,8 +266,83 @@ class TestLibreOfficeServer(TestCase):
         mocked_desktop.getComponents.assert_called_once_with()
         mocked_docs.hasElements.assert_called_once_with()
         mocked_docs.createEnumeration.assert_called_once_with()
-        self.assertEqual(2, mocked_list.hasMoreElements.call_count)
+        assert mocked_list.hasMoreElements.call_count == 2
         mocked_list.nextElement.assert_called_once_with()
         mocked_element_doc.getImplementationName.assert_called_once_with()
         mocked_desktop.terminate.assert_called_once_with()
         server._process.kill.assert_called_once_with()
+
+    @patch('openlp.plugins.presentations.lib.libreofficeserver.uno')
+    def test_load_presentation(self, mocked_uno):
+        """
+        Test the load_presentation() method
+        """
+        # GIVEN: A LibreOfficeServer object
+        presentation_file = '/path/to/presentation.odp'
+        screen_number = 1
+        server = LibreOfficeServer()
+        mocked_desktop = MagicMock()
+        mocked_document = MagicMock()
+        mocked_presentation = MagicMock()
+        mocked_uno.systemPathToFileUrl.side_effect = lambda x: x
+        server._desktop = mocked_desktop
+        mocked_desktop.loadComponentFromURL.return_value = mocked_document
+        mocked_document.getPresentation.return_value = mocked_presentation
+
+        # WHEN: load_presentation() is called
+        with patch.object(server, '_create_property') as mocked_create_property:
+            mocked_create_property.side_effect = lambda x, y: {x: y}
+            result = server.load_presentation(presentation_file, screen_number)
+
+        # THEN: A presentation is loaded
+        assert result is True
+        mocked_uno.systemPathToFileUrl.assert_called_once_with(presentation_file)
+        mocked_create_property.assert_called_once_with('Hidden', True)
+        mocked_desktop.loadComponentFromURL.assert_called_once_with(
+            presentation_file, '_blank', 0, ({'Hidden': True},))
+        assert server._document is mocked_document
+        mocked_document.getPresentation.assert_called_once_with()
+        assert server._presentation is mocked_presentation
+        assert server._presentation.Display == screen_number
+        assert server._control is None
+
+    @patch('openlp.plugins.presentations.lib.libreofficeserver.uno')
+    @patch('openlp.plugins.presentations.lib.libreofficeserver.os')
+    def test_extract_thumbnails(self, mocked_os, mocked_uno):
+        """
+        Test the extract_thumbnails() method
+        """
+        # GIVEN: A LibreOfficeServer instance
+        temp_folder = '/tmp'
+        server = LibreOfficeServer()
+        mocked_document = MagicMock()
+        mocked_pages = MagicMock()
+        mocked_page_1 = MagicMock()
+        mocked_page_2 = MagicMock()
+        mocked_controller = MagicMock()
+        server._document = mocked_document
+        mocked_uno.systemPathToFileUrl.side_effect = lambda x: x
+        mocked_document.getDrawPages.return_value = mocked_pages
+        mocked_os.path.isdir.return_value = False
+        mocked_pages.getCount.return_value = 2
+        mocked_pages.getByIndex.side_effect = [mocked_page_1, mocked_page_2]
+        mocked_document.getCurrentController.return_value = mocked_controller
+        mocked_os.path.join.side_effect = lambda *x: '/'.join(x)
+
+        # WHEN: The extract_thumbnails() method is called
+        with patch.object(server, '_create_property') as mocked_create_property:
+            mocked_create_property.side_effect = lambda x, y: {x: y}
+            thumbnails = server.extract_thumbnails(temp_folder)
+
+        # THEN: Thumbnails have been extracted
+        mocked_uno.systemPathToFileUrl.assert_called_once_with(temp_folder)
+        mocked_create_property.assert_called_once_with('FilterName', 'impress_png_Export')
+        mocked_document.getDrawPages.assert_called_once_with()
+        mocked_pages.getCount.assert_called_once_with()
+        assert mocked_pages.getByIndex.call_args_list == [call(0), call(1)]
+        assert mocked_controller.setCurrentPage.call_args_list == \
+            [call(mocked_page_1), call(mocked_page_2)]
+        assert mocked_document.storeToURL.call_args_list == \
+            [call('/tmp/1.png', ({'FilterName': 'impress_png_Export'},)),
+             call('/tmp/2.png', ({'FilterName': 'impress_png_Export'},))]
+        assert thumbnails == ['/tmp/1.png', '/tmp/2.png']
