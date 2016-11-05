@@ -159,6 +159,7 @@ class LibreOfficeServer(object):
         """
         Shut down the server
         """
+        can_kill = True
         if hasattr(self, '_docs'):
             while self._docs:
                 self._docs[0].close_presentation()
@@ -173,13 +174,14 @@ class LibreOfficeServer(object):
                         count += 1
             if count > 0:
                 log.debug('LibreOffice not terminated as docs are still open')
+                can_kill = False
             else:
                 try:
                     self._desktop.terminate()
                     log.debug('LibreOffice killed')
                 except:
                     log.warning('Failed to terminate LibreOffice')
-        if getattr(self, '_process'):
+        if getattr(self, '_process') and can_kill:
             self._process.kill()
 
 
@@ -209,7 +211,7 @@ class LibreOfficeServer(object):
         properties = (self._create_property('FilterName', 'impress_png_Export'),)
         pages = self._document.getDrawPages()
         if not pages:
-            return
+            return []
         if not os.path.isdir(temp_folder):
             os.makedirs(temp_folder)
         for index in range(pages.getCount()):
@@ -393,7 +395,7 @@ def main():
     The main function which runs the server
     """
     daemon = Daemon(host='localhost', port=4310)
-    uri = daemon.register(LibreOfficeServer, 'openlp.libreofficeserver')
+    daemon.register(LibreOfficeServer, 'openlp.libreofficeserver')
     try:
         daemon.requestLoop()
     finally:

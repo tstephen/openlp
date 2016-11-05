@@ -22,7 +22,7 @@
 """
 Functional tests to test the LibreOffice Pyro server
 """
-from openlp.plugins.presentations.lib.libreofficeserver import LibreOfficeServer, TextType
+from openlp.plugins.presentations.lib.libreofficeserver import LibreOfficeServer, TextType, main
 
 from tests.functional import MagicMock, patch, call
 
@@ -83,6 +83,42 @@ def test_setup_desktop_already_has_desktop(mocked_uno):
 
     # THEN: setup_desktop() exits early
     assert server._manager is None
+
+
+@patch('openlp.plugins.presentations.lib.libreofficeserver.uno')
+def test_setup_desktop_exception(mocked_uno):
+    """
+    Test that setting up the desktop works correctly when an exception occurs
+    """
+    # GIVEN: A LibreOfficeServer instance
+    server = LibreOfficeServer()
+    mocked_context = MagicMock()
+    mocked_resolver = MagicMock()
+    mocked_uno_instance = MagicMock()
+    MockedServiceManager = MagicMock()
+    mocked_desktop = MagicMock()
+    mocked_uno.getComponentContext.return_value = mocked_context
+    mocked_context.ServiceManager.createInstanceWithContext.return_value = mocked_resolver
+    mocked_resolver.resolve.side_effect = [Exception, mocked_uno_instance]
+    mocked_uno_instance.ServiceManager = MockedServiceManager
+    MockedServiceManager.createInstanceWithContext.side_effect = Exception()
+
+    # WHEN: setup_desktop() is called
+    server.setup_desktop()
+
+    # THEN: A desktop object was created
+    mocked_uno.getComponentContext.assert_called_once_with()
+    mocked_context.ServiceManager.createInstanceWithContext.assert_called_once_with(
+            'com.sun.star.bridge.UnoUrlResolver', mocked_context)
+    expected_calls = [
+        call('uno:pipe,name=openlp_pipe;urp;StarOffice.ComponentContext'),
+        call('uno:pipe,name=openlp_pipe;urp;StarOffice.ComponentContext')
+    ]
+    assert mocked_resolver.resolve.call_args_list == expected_calls
+    MockedServiceManager.createInstanceWithContext.assert_called_once_with(
+            'com.sun.star.frame.Desktop', mocked_uno_instance)
+    assert server._manager is MockedServiceManager
+    assert server._desktop is None
 
 
 @patch('openlp.plugins.presentations.lib.libreofficeserver.uno')
@@ -251,6 +287,48 @@ def test_has_desktop():
     assert result is True
 
 
+def test_shutdown_other_docs():
+    """
+    Test the shutdown method while other documents are open in LibreOffice
+    """
+    # GIVEN: An up an running LibreOfficeServer
+    server = LibreOfficeServer()
+    mocked_doc = MagicMock()
+    mocked_desktop = MagicMock()
+    mocked_docs = MagicMock()
+    mocked_list = MagicMock()
+    mocked_element_doc = MagicMock()
+    server._docs = [mocked_doc]
+    server._desktop = mocked_desktop
+    server._process = MagicMock()
+    def close_docs():
+        server._docs = []
+    mocked_doc.close_presentation.side_effect = close_docs
+    mocked_desktop.getComponents.return_value = mocked_docs
+    mocked_docs.hasElements.return_value = True
+    mocked_docs.createEnumeration.return_value = mocked_list
+    mocked_list.hasMoreElements.side_effect = [True, False]
+    mocked_list.nextElement.return_value = mocked_element_doc
+    mocked_element_doc.getImplementationName.side_effect = [
+        'org.openlp.Nothing',
+        'com.sun.star.comp.framework.BackingComp'
+    ]
+
+    # WHEN: shutdown() is called
+    server.shutdown()
+
+    # THEN: The right methods are called and everything works
+    mocked_doc.close_presentation.assert_called_once_with()
+    mocked_desktop.getComponents.assert_called_once_with()
+    mocked_docs.hasElements.assert_called_once_with()
+    mocked_docs.createEnumeration.assert_called_once_with()
+    assert mocked_list.hasMoreElements.call_count == 2
+    mocked_list.nextElement.assert_called_once_with()
+    mocked_element_doc.getImplementationName.assert_called_once_with()
+    assert mocked_desktop.terminate.call_count == 0
+    assert server._process.kill.call_count == 0
+
+
 def test_shutdown():
     """
     Test the shutdown method
@@ -291,6 +369,29 @@ def test_shutdown():
 
 
 @patch('openlp.plugins.presentations.lib.libreofficeserver.uno')
+def test_load_presentation_exception(mocked_uno):
+    """
+    Test the load_presentation() method when an exception occurs
+    """
+    # GIVEN: A LibreOfficeServer object
+    presentation_file = '/path/to/presentation.odp'
+    screen_number = 1
+    server = LibreOfficeServer()
+    mocked_desktop = MagicMock()
+    mocked_uno.systemPathToFileUrl.side_effect = lambda x: x
+    server._desktop = mocked_desktop
+    mocked_desktop.loadComponentFromURL.side_effect = Exception()
+
+    # WHEN: load_presentation() is called
+    with patch.object(server, '_create_property') as mocked_create_property:
+        mocked_create_property.side_effect = lambda x, y: {x: y}
+        result = server.load_presentation(presentation_file, screen_number)
+
+    # THEN: A presentation is loaded
+    assert result is False
+
+
+@patch('openlp.plugins.presentations.lib.libreofficeserver.uno')
 def test_load_presentation(mocked_uno):
     """
     Test the load_presentation() method
@@ -323,6 +424,32 @@ def test_load_presentation(mocked_uno):
     assert server._presentation is mocked_presentation
     assert server._presentation.Display == screen_number
     assert server._control is None
+
+
+@patch('openlp.plugins.presentations.lib.libreofficeserver.uno')
+def test_extract_thumbnails_no_pages(mocked_uno):
+    """
+    Test the extract_thumbnails() method when there are no pages
+    """
+    # GIVEN: A LibreOfficeServer instance
+    temp_folder = '/tmp'
+    server = LibreOfficeServer()
+    mocked_document = MagicMock()
+    mocked_pages = MagicMock()
+    server._document = mocked_document
+    mocked_uno.systemPathToFileUrl.side_effect = lambda x: x
+    mocked_document.getDrawPages.return_value = None
+
+    # WHEN: The extract_thumbnails() method is called
+    with patch.object(server, '_create_property') as mocked_create_property:
+        mocked_create_property.side_effect = lambda x, y: {x: y}
+        thumbnails = server.extract_thumbnails(temp_folder)
+
+    # THEN: Thumbnails have been extracted
+    mocked_uno.systemPathToFileUrl.assert_called_once_with(temp_folder)
+    mocked_create_property.assert_called_once_with('FilterName', 'impress_png_Export')
+    mocked_document.getDrawPages.assert_called_once_with()
+    assert thumbnails == []
 
 
 @patch('openlp.plugins.presentations.lib.libreofficeserver.uno')
@@ -456,6 +583,25 @@ def test_is_loaded_no_presentation():
     mocked_document.getPresentation.assert_called_once_with()
 
 
+def test_is_loaded_exception():
+    """
+    Test the is_loaded() method when an exception is thrown
+    """
+    # GIVEN: A LibreOfficeServer instance and a bunch of mocks
+    server = LibreOfficeServer()
+    mocked_document = MagicMock()
+    server._document = mocked_document
+    server._presentation = MagicMock()
+    mocked_document.getPresentation.side_effect = Exception()
+
+    # WHEN: The is_loaded() method is called
+    result = server.is_loaded()
+
+    # THEN: The result should be false
+    assert result is False
+    mocked_document.getPresentation.assert_called_once_with()
+
+
 def test_is_loaded():
     """
     Test the is_loaded() method
@@ -484,7 +630,9 @@ def test_is_active_not_loaded():
     server = LibreOfficeServer()
 
     # WHEN: is_active() is called with is_loaded() returns False
-    result = server.is_loaded()
+    with patch.object(server, 'is_loaded') as mocked_is_loaded:
+        mocked_is_loaded.return_value = False
+        result = server.is_active()
 
     # THEN: It should have returned False
     assert result is False
@@ -807,3 +955,22 @@ def test_get_slide_notes():
     # THEN: The text should be returned
     mocked_get_text_from_page.assert_called_once_with(3, TextType.Notes)
     assert result == 'Installing is a drag-and-drop affair'
+
+
+@patch('openlp.plugins.presentations.lib.libreofficeserver.Daemon')
+def test_main(MockedDaemon):
+    """
+    Test the main() function
+    """
+    # GIVEN: Mocked out Pyro objects
+    mocked_daemon = MagicMock()
+    MockedDaemon.return_value = mocked_daemon
+
+    # WHEN: main() is run
+    main()
+
+    # THEN: The correct calls are made
+    MockedDaemon.assert_called_once_with(host='localhost', port=4310)
+    mocked_daemon.register.assert_called_once_with(LibreOfficeServer, 'openlp.libreofficeserver')
+    mocked_daemon.requestLoop.assert_called_once_with()
+    mocked_daemon.close.assert_called_once_with()
