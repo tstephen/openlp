@@ -22,8 +22,6 @@
 """
 Functional tests to test the LibreOffice Pyro server
 """
-from unittest import TestCase
-
 from openlp.plugins.presentations.lib.libreofficeserver import LibreOfficeServer, TextType
 
 from tests.functional import MagicMock, patch, call
@@ -43,6 +41,7 @@ def test_constructor():
     assert server._document is None
     assert server._presentation is None
     assert server._process is None
+
 
 @patch('openlp.plugins.presentations.lib.libreofficeserver.Popen')
 def test_start_process(MockedPopen):
@@ -68,6 +67,23 @@ def test_start_process(MockedPopen):
         '--accept=pipe,name=openlp_pipe;urp;'
     ])
     assert server._process is mocked_process
+
+
+@patch('openlp.plugins.presentations.lib.libreofficeserver.uno')
+def test_setup_desktop_already_has_desktop(mocked_uno):
+    """
+    Test that setup_desktop() exits early when there's already a desktop
+    """
+    # GIVEN: A LibreOfficeServer instance
+    server = LibreOfficeServer()
+    server._desktop = MagicMock()
+
+    # WHEN: setup_desktop() is called
+    server.setup_desktop()
+
+    # THEN: setup_desktop() exits early
+    assert server._manager is None
+
 
 @patch('openlp.plugins.presentations.lib.libreofficeserver.uno')
 def test_setup_desktop(mocked_uno):
@@ -104,6 +120,7 @@ def test_setup_desktop(mocked_uno):
     assert server._manager is MockedServiceManager
     assert server._desktop is mocked_desktop
 
+
 @patch('openlp.plugins.presentations.lib.libreofficeserver.PropertyValue')
 def test_create_property(MockedPropertyValue):
     """
@@ -120,6 +137,7 @@ def test_create_property(MockedPropertyValue):
     # THEN: The property should have the correct attributes
     assert prop.Name == name
     assert prop.Value == value
+
 
 def test_get_text_from_page_slide_text():
     """
@@ -147,6 +165,7 @@ def test_get_text_from_page_slide_text():
     # THE: The text is correct
     assert text == 'Page Text\n'
 
+
 def test_get_text_from_page_title():
     """
     Test that the _get_text_from_page() method gives us the text from the titles
@@ -172,6 +191,7 @@ def test_get_text_from_page_title():
 
     # THEN: The text should be correct
     assert text == 'Page Title\n'
+
 
 def test_get_text_from_page_notes():
     """
@@ -201,6 +221,7 @@ def test_get_text_from_page_notes():
     # THEN: The text should be correct
     assert text == 'Page Notes\n'
 
+
 def test_has_desktop_no_desktop():
     """
     Test the has_desktop() method when there's no desktop
@@ -213,6 +234,7 @@ def test_has_desktop_no_desktop():
 
     # THEN: The result should be False
     assert result is False
+
 
 def test_has_desktop():
     """
@@ -227,6 +249,7 @@ def test_has_desktop():
 
     # THEN: The result should be True
     assert result is True
+
 
 def test_shutdown():
     """
@@ -266,6 +289,7 @@ def test_shutdown():
     mocked_desktop.terminate.assert_called_once_with()
     server._process.kill.assert_called_once_with()
 
+
 @patch('openlp.plugins.presentations.lib.libreofficeserver.uno')
 def test_load_presentation(mocked_uno):
     """
@@ -299,6 +323,7 @@ def test_load_presentation(mocked_uno):
     assert server._presentation is mocked_presentation
     assert server._presentation.Display == screen_number
     assert server._control is None
+
 
 @patch('openlp.plugins.presentations.lib.libreofficeserver.uno')
 @patch('openlp.plugins.presentations.lib.libreofficeserver.os')
@@ -340,3 +365,445 @@ def test_extract_thumbnails(mocked_os, mocked_uno):
         [call('/tmp/1.png', ({'FilterName': 'impress_png_Export'},)),
          call('/tmp/2.png', ({'FilterName': 'impress_png_Export'},))]
     assert thumbnails == ['/tmp/1.png', '/tmp/2.png']
+
+
+def test_get_titles_and_notes():
+    """
+    Test the get_titles_and_notes() method
+    """
+    # GIVEN: A LibreOfficeServer object and a bunch of mocks
+    server = LibreOfficeServer()
+    mocked_document = MagicMock()
+    mocked_pages = MagicMock()
+    server._document = mocked_document
+    mocked_document.getDrawPages.return_value = mocked_pages
+    mocked_pages.getCount.return_value = 2
+
+    # WHEN: get_titles_and_notes() is called
+    with patch.object(server, '_get_text_from_page') as mocked_get_text_from_page:
+        mocked_get_text_from_page.side_effect = [
+            'OpenLP on Mac OS X',
+            '',
+            '',
+            'Installing is a drag-and-drop affair'
+        ]
+        titles, notes = server.get_titles_and_notes()
+
+    # THEN: The right calls are made and the right stuff returned
+    mocked_document.getDrawPages.assert_called_once_with()
+    mocked_pages.getCount.assert_called_once_with()
+    assert mocked_get_text_from_page.call_count == 4
+    expected_calls = [
+        call(1, TextType.Title), call(1, TextType.Notes),
+        call(2, TextType.Title), call(2, TextType.Notes),
+    ]
+    assert mocked_get_text_from_page.call_args_list == expected_calls
+    assert titles == ['OpenLP on Mac OS X\n', '\n'], titles
+    assert notes == [' ', 'Installing is a drag-and-drop affair'], notes
+
+
+def test_close_presentation():
+    """
+    Test that closing the presentation cleans things up correctly
+    """
+    # GIVEN: A LibreOfficeServer instance and a bunch of mocks
+    server = LibreOfficeServer()
+    mocked_document = MagicMock()
+    mocked_presentation = MagicMock()
+    server._document = mocked_document
+    server._presentation = mocked_presentation
+
+    # WHEN: close_presentation() is called
+    server.close_presentation()
+
+    # THEN: The presentation and document should be closed
+    mocked_presentation.end.assert_called_once_with()
+    mocked_document.dispose.assert_called_once_with()
+    assert server._document is None
+    assert server._presentation is None
+
+
+def test_is_loaded_no_objects():
+    """
+    Test the is_loaded() method when there's no document or presentation
+    """
+    # GIVEN: A LibreOfficeServer instance and a bunch of mocks
+    server = LibreOfficeServer()
+
+    # WHEN: The is_loaded() method is called
+    result = server.is_loaded()
+
+    # THEN: The result should be false
+    assert result is False
+
+
+def test_is_loaded_no_presentation():
+    """
+    Test the is_loaded() method when there's no presentation
+    """
+    # GIVEN: A LibreOfficeServer instance and a bunch of mocks
+    server = LibreOfficeServer()
+    mocked_document = MagicMock()
+    server._document = mocked_document
+    server._presentation = MagicMock()
+    mocked_document.getPresentation.return_value = None
+
+    # WHEN: The is_loaded() method is called
+    result = server.is_loaded()
+
+    # THEN: The result should be false
+    assert result is False
+    mocked_document.getPresentation.assert_called_once_with()
+
+
+def test_is_loaded():
+    """
+    Test the is_loaded() method
+    """
+    # GIVEN: A LibreOfficeServer instance and a bunch of mocks
+    server = LibreOfficeServer()
+    mocked_document = MagicMock()
+    mocked_presentation = MagicMock()
+    server._document = mocked_document
+    server._presentation = mocked_presentation
+    mocked_document.getPresentation.return_value = mocked_presentation
+
+    # WHEN: The is_loaded() method is called
+    result = server.is_loaded()
+
+    # THEN: The result should be false
+    assert result is True
+    mocked_document.getPresentation.assert_called_once_with()
+
+
+def test_is_active_not_loaded():
+    """
+    Test is_active() when is_loaded() returns False
+    """
+    # GIVEN: A LibreOfficeServer instance and a bunch of mocks
+    server = LibreOfficeServer()
+
+    # WHEN: is_active() is called with is_loaded() returns False
+    result = server.is_loaded()
+
+    # THEN: It should have returned False
+    assert result is False
+
+
+def test_is_active_no_control():
+    """
+    Test is_active() when is_loaded() returns True but there's no control
+    """
+    # GIVEN: A LibreOfficeServer instance and a bunch of mocks
+    server = LibreOfficeServer()
+
+    # WHEN: is_active() is called with is_loaded() returns False
+    with patch.object(server, 'is_loaded') as mocked_is_loaded:
+        mocked_is_loaded.return_value = True
+        result = server.is_active()
+
+    # THEN: The result should be False
+    assert result is False
+    mocked_is_loaded.assert_called_once_with()
+
+
+def test_is_active():
+    """
+    Test is_active()
+    """
+    # GIVEN: A LibreOfficeServer instance and a bunch of mocks
+    server = LibreOfficeServer()
+    mocked_control = MagicMock()
+    server._control = mocked_control
+    mocked_control.isRunning.return_value = True
+
+    # WHEN: is_active() is called with is_loaded() returns False
+    with patch.object(server, 'is_loaded') as mocked_is_loaded:
+        mocked_is_loaded.return_value = True
+        result = server.is_active()
+
+    # THEN: The result should be False
+    assert result is True
+    mocked_is_loaded.assert_called_once_with()
+    mocked_control.isRunning.assert_called_once_with()
+
+
+def test_unblank_screen():
+    """
+    Test the unblank_screen() method
+    """
+    # GIVEN: A LibreOfficeServer instance and a bunch of mocks
+    server = LibreOfficeServer()
+    mocked_control = MagicMock()
+    server._control = mocked_control
+
+    # WHEN: unblank_screen() is run
+    server.unblank_screen()
+
+    # THEN: The resume method should have been called
+    mocked_control.resume.assert_called_once_with()
+
+
+def test_blank_screen():
+    """
+    Test the blank_screen() method
+    """
+    # GIVEN: A LibreOfficeServer instance and a bunch of mocks
+    server = LibreOfficeServer()
+    mocked_control = MagicMock()
+    server._control = mocked_control
+
+    # WHEN: blank_screen() is run
+    server.blank_screen()
+
+    # THEN: The resume method should have been called
+    mocked_control.blankScreen.assert_called_once_with(0)
+
+
+def test_is_blank_no_control():
+    """
+    Test the is_blank() method when there's no control
+    """
+    # GIVEN: A LibreOfficeServer instance and a bunch of mocks
+    server = LibreOfficeServer()
+
+    # WHEN: is_blank() is called
+    result = server.is_blank()
+
+    # THEN: It should have returned False
+    assert result is False
+
+
+def test_is_blank_control_is_running():
+    """
+    Test the is_blank() method when the control is running
+    """
+    # GIVEN: A LibreOfficeServer instance and a bunch of mocks
+    server = LibreOfficeServer()
+    mocked_control = MagicMock()
+    server._control = mocked_control
+    mocked_control.isRunning.return_value = True
+    mocked_control.isPaused.return_value = True
+
+    # WHEN: is_blank() is called
+    result = server.is_blank()
+
+    # THEN: It should have returned False
+    assert result is True
+    mocked_control.isRunning.assert_called_once_with()
+    mocked_control.isPaused.assert_called_once_with()
+
+
+def test_stop_presentation():
+    """
+    Test the stop_presentation() method
+    """
+    # GIVEN: A LibreOfficeServer instance and a mocked presentation
+    server = LibreOfficeServer()
+    mocked_presentation = MagicMock()
+    mocked_control = MagicMock()
+    server._presentation = mocked_presentation
+    server._control = mocked_control
+
+    # WHEN: stop_presentation() is called
+    server.stop_presentation()
+
+    # THEN: The presentation is ended and the control is removed
+    mocked_presentation.end.assert_called_once_with()
+    assert server._control is None
+
+
+@patch('openlp.plugins.presentations.lib.libreofficeserver.time.sleep')
+def test_start_presentation_no_control(mocked_sleep):
+    """
+    Test the start_presentation() method when there's no control
+    """
+    # GIVEN: A LibreOfficeServer instance and some mocks
+    server = LibreOfficeServer()
+    mocked_control = MagicMock()
+    mocked_document = MagicMock()
+    mocked_presentation = MagicMock()
+    mocked_controller = MagicMock()
+    mocked_frame = MagicMock()
+    mocked_window = MagicMock()
+    server._document = mocked_document
+    server._presentation = mocked_presentation
+    mocked_document.getCurrentController.return_value = mocked_controller
+    mocked_controller.getFrame.return_value = mocked_frame
+    mocked_frame.getContainerWindow.return_value = mocked_window
+    mocked_presentation.getController.side_effect = [None, mocked_control]
+
+    # WHEN: start_presentation() is called
+    server.start_presentation()
+
+    # THEN: The slide number should be correct
+    mocked_document.getCurrentController.assert_called_once_with()
+    mocked_controller.getFrame.assert_called_once_with()
+    mocked_frame.getContainerWindow.assert_called_once_with()
+    mocked_presentation.start.assert_called_once_with()
+    assert mocked_presentation.getController.call_count == 2
+    mocked_sleep.assert_called_once_with(0.1)
+    assert mocked_window.setVisible.call_args_list == [call(True), call(False)]
+    assert server._control is mocked_control
+
+
+def test_start_presentation():
+    """
+    Test the start_presentation() method when there's a control
+    """
+    # GIVEN: A LibreOfficeServer instance and some mocks
+    server = LibreOfficeServer()
+    mocked_control = MagicMock()
+    server._control = mocked_control
+
+    # WHEN: start_presentation() is called
+    with patch.object(server, 'goto_slide') as mocked_goto_slide:
+        server.start_presentation()
+
+    # THEN: The control should have been activated and the first slide selected
+    mocked_control.activate.assert_called_once_with()
+    mocked_goto_slide.assert_called_once_with(1)
+
+
+def test_get_slide_number():
+    """
+    Test the get_slide_number() method
+    """
+    # GIVEN: A LibreOfficeServer instance and some mocks
+    server = LibreOfficeServer()
+    mocked_control = MagicMock()
+    mocked_control.getCurrentSlideIndex.return_value = 3
+    server._control = mocked_control
+
+    # WHEN: get_slide_number() is called
+    result = server.get_slide_number()
+
+    # THEN: The slide number should be correct
+    assert result == 4
+
+
+def test_get_slide_count():
+    """
+    Test the get_slide_count() method
+    """
+    # GIVEN: A LibreOfficeServer instance and some mocks
+    server = LibreOfficeServer()
+    mocked_document = MagicMock()
+    mocked_pages = MagicMock()
+    server._document = mocked_document
+    mocked_document.getDrawPages.return_value = mocked_pages
+    mocked_pages.getCount.return_value = 2
+
+    # WHEN: get_slide_count() is called
+    result = server.get_slide_count()
+
+    # THEN: The slide count should be correct
+    assert result == 2
+
+
+def test_goto_slide():
+    """
+    Test the goto_slide() method
+    """
+    # GIVEN: A LibreOfficeServer instance and some mocks
+    server = LibreOfficeServer()
+    mocked_control = MagicMock()
+    server._control = mocked_control
+
+    # WHEN: goto_slide() is called
+    result = server.goto_slide(1)
+
+    # THEN: The slide number should be correct
+    mocked_control.gotoSlideIndex.assert_called_once_with(0)
+
+
+@patch('openlp.plugins.presentations.lib.libreofficeserver.time.sleep')
+def test_next_step_when_paused(mocked_sleep):
+    """
+    Test the next_step() method when paused
+    """
+    # GIVEN: A LibreOfficeServer instance and a mocked control
+    server = LibreOfficeServer()
+    mocked_control = MagicMock()
+    server._control = mocked_control
+    mocked_control.isPaused.side_effect = [False, True]
+
+    # WHEN: next_step() is called
+    result = server.next_step()
+
+    # THEN: The correct call should be made
+    mocked_control.gotoNextEffect.assert_called_once_with()
+    mocked_sleep.assert_called_once_with(0.1)
+    assert mocked_control.isPaused.call_count == 2
+    mocked_control.gotoPreviousEffect.assert_called_once_with()
+
+
+@patch('openlp.plugins.presentations.lib.libreofficeserver.time.sleep')
+def test_next_step(mocked_sleep):
+    """
+    Test the next_step() method when paused
+    """
+    # GIVEN: A LibreOfficeServer instance and a mocked control
+    server = LibreOfficeServer()
+    mocked_control = MagicMock()
+    server._control = mocked_control
+    mocked_control.isPaused.side_effect = [True, True]
+
+    # WHEN: next_step() is called
+    result = server.next_step()
+
+    # THEN: The correct call should be made
+    mocked_control.gotoNextEffect.assert_called_once_with()
+    mocked_sleep.assert_called_once_with(0.1)
+    assert mocked_control.isPaused.call_count == 1
+    assert mocked_control.gotoPreviousEffect.call_count == 0
+
+
+def test_previous_step():
+    """
+    Test the previous_step() method
+    """
+    # GIVEN: A LibreOfficeServer instance and a mocked control
+    server = LibreOfficeServer()
+    mocked_control = MagicMock()
+    server._control = mocked_control
+
+    # WHEN: previous_step() is called
+    result = server.previous_step()
+
+    # THEN: The correct call should be made
+    mocked_control.gotoPreviousEffect.assert_called_once_with()
+
+
+def test_get_slide_text():
+    """
+    Test the get_slide_text() method
+    """
+    # GIVEN: A LibreOfficeServer instance
+    server = LibreOfficeServer()
+
+    # WHEN: get_slide_text() is called for a particular slide
+    with patch.object(server, '_get_text_from_page') as mocked_get_text_from_page:
+        mocked_get_text_from_page.return_value = 'OpenLP on Mac OS X'
+        result = server.get_slide_text(5)
+
+    # THEN: The text should be returned
+    mocked_get_text_from_page.assert_called_once_with(5)
+    assert result == 'OpenLP on Mac OS X'
+
+
+def test_get_slide_notes():
+    """
+    Test the get_slide_notes() method
+    """
+    # GIVEN: A LibreOfficeServer instance
+    server = LibreOfficeServer()
+
+    # WHEN: get_slide_notes() is called for a particular slide
+    with patch.object(server, '_get_text_from_page') as mocked_get_text_from_page:
+        mocked_get_text_from_page.return_value = 'Installing is a drag-and-drop affair'
+        result = server.get_slide_notes(3)
+
+    # THEN: The text should be returned
+    mocked_get_text_from_page.assert_called_once_with(3, TextType.Notes)
+    assert result == 'Installing is a drag-and-drop affair'

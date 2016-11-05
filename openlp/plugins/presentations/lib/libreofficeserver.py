@@ -1,3 +1,24 @@
+# -*- coding: utf-8 -*-
+# vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
+
+###############################################################################
+# OpenLP - Open Source Lyrics Projection                                      #
+# --------------------------------------------------------------------------- #
+# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# --------------------------------------------------------------------------- #
+# This program is free software; you can redistribute it and/or modify it     #
+# under the terms of the GNU General Public License as published by the Free  #
+# Software Foundation; version 2 of the License.                              #
+#                                                                             #
+# This program is distributed in the hope that it will be useful, but WITHOUT #
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
+# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
+# more details.                                                               #
+#                                                                             #
+# You should have received a copy of the GNU General Public License along     #
+# with this program; if not, write to the Free Software Foundation, Inc., 59  #
+# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
+###############################################################################
 """
 This module runs a Pyro4 server using LibreOffice's version of Python
 """
@@ -54,6 +75,41 @@ class LibreOfficeServer(object):
         self._document = None
         self._presentation = None
         self._process = None
+        self._manager = None
+
+    def _create_property(self, name, value):
+        """
+        Create an OOo style property object which are passed into some Uno methods.
+        """
+        log.debug('create property')
+        property_object = PropertyValue()
+        property_object.Name = name
+        property_object.Value = value
+        return property_object
+
+    def _get_text_from_page(self, slide_no, text_type=TextType.SlideText):
+        """
+        Return any text extracted from the presentation page.
+
+        :param slide_no: The slide the notes are required for, starting at 1
+        :param notes: A boolean. If set the method searches the notes of the slide.
+        :param text_type: A TextType. Enumeration of the types of supported text.
+        """
+        text = ''
+        if TextType.Title <= text_type <= TextType.Notes:
+            pages = self._document.getDrawPages()
+            if 0 < slide_no <= pages.getCount():
+                page = pages.getByIndex(slide_no - 1)
+                if text_type == TextType.Notes:
+                    page = page.getNotesPage()
+                for index in range(page.getCount()):
+                    shape = page.getByIndex(index)
+                    shape_type = shape.getShapeType()
+                    if shape.supportsService('com.sun.star.drawing.Text'):
+                        # if they requested title, make sure it is the title
+                        if text_type != TextType.Title or shape_type == 'com.sun.star.presentation.TitleTextShape':
+                            text += shape.getString() + '\n'
+        return text
 
     def start_process(self):
         """
@@ -92,40 +148,6 @@ class LibreOfficeServer(object):
             self._desktop = self._manager.createInstanceWithContext('com.sun.star.frame.Desktop', uno_instance)
         except Exception as e:
             log.warning('Failed to get UNO desktop')
-
-    def _create_property(self, name, value):
-        """
-        Create an OOo style property object which are passed into some Uno methods.
-        """
-        log.debug('create property')
-        property_object = PropertyValue()
-        property_object.Name = name
-        property_object.Value = value
-        return property_object
-
-    def _get_text_from_page(self, slide_no, text_type=TextType.SlideText):
-        """
-        Return any text extracted from the presentation page.
-
-        :param slide_no: The slide the notes are required for, starting at 1
-        :param notes: A boolean. If set the method searches the notes of the slide.
-        :param text_type: A TextType. Enumeration of the types of supported text.
-        """
-        text = ''
-        if TextType.Title <= text_type <= TextType.Notes:
-            pages = self._document.getDrawPages()
-            if 0 < slide_no <= pages.getCount():
-                page = pages.getByIndex(slide_no - 1)
-                if text_type == TextType.Notes:
-                    page = page.getNotesPage()
-                for index in range(page.getCount()):
-                    shape = page.getByIndex(index)
-                    shape_type = shape.getShapeType()
-                    if shape.supportsService('com.sun.star.drawing.Text'):
-                        # if they requested title, make sure it is the title
-                        if text_type != TextType.Title or shape_type == 'com.sun.star.presentation.TitleTextShape':
-                            text += shape.getString() + '\n'
-        return text
 
     def has_desktop(self):
         """
@@ -206,8 +228,7 @@ class LibreOfficeServer(object):
 
     def get_titles_and_notes(self):
         """
-        Writes the list of titles (one per slide) to 'titles.txt' and the notes to 'slideNotes[x].txt'
-        in the thumbnails directory
+        Extract the titles and the notes from the slides.
         """
         titles = []
         notes = []
@@ -222,8 +243,7 @@ class LibreOfficeServer(object):
 
     def close_presentation(self):
         """
-        Close presentation and clean up objects. Triggered by new object being added to SlideController or OpenLP being
-        shutdown.
+        Close presentation and clean up objects.
         """
         log.debug('close Presentation LibreOffice')
         if self._document:
