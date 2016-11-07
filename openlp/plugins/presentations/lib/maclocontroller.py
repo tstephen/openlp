@@ -20,17 +20,6 @@
 # Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
 ###############################################################################
 
-# OOo API documentation:
-# http://api.openoffice.org/docs/common/ref/com/sun/star/presentation/XSlideShowController.html
-# http://wiki.services.openoffice.org/wiki/Documentation/DevGuide/ProUNO/Basic
-#                          /Getting_Information_about_UNO_Objects#Inspecting_interfaces_during_debugging
-# http://docs.go-oo.org/sd/html/classsd_1_1SlideShow.html
-# http://www.oooforum.org/forum/viewtopic.phtml?t=5252
-# http://wiki.services.openoffice.org/wiki/Documentation/DevGuide/Working_with_Presentations
-# http://mail.python.org/pipermail/python-win32/2008-January/006676.html
-# http://www.linuxjournal.com/content/starting-stopping-and-connecting-openoffice-python
-# http://nxsy.org/comparing-documents-with-openoffice-and-python
-
 import logging
 import os
 import time
@@ -65,7 +54,7 @@ class MacLOController(PresentationController):
         Initialise the class
         """
         log.debug('Initialising')
-        super(MacLOController, self).__init__(plugin, 'MacLO', MacLODocument)
+        super(MacLOController, self).__init__(plugin, 'Impress on macOS', MacLODocument)
         self.supports = ['odp']
         self.also_supports = ['ppt', 'pps', 'pptx', 'ppsx', 'pptm']
         self.server_process = None
