@@ -54,7 +54,7 @@ class MacLOController(PresentationController):
         Initialise the class
         """
         log.debug('Initialising')
-        super(MacLOController, self).__init__(plugin, 'Impress on macOS', MacLODocument)
+        super(MacLOController, self).__init__(plugin, 'maclo', MacLODocument, 'Impress on macOS')
         self.supports = ['odp']
         self.also_supports = ['ppt', 'pps', 'pptx', 'ppsx', 'pptm']
         self.server_process = None

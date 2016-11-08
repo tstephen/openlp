@@ -77,8 +77,10 @@ class TestMacLOController(TestCase, TestMixin):
         controller = MacLOController(plugin=self.mock_plugin)
 
         # THEN: The name of the presentation controller should be correct
-        assert controller.name == 'Impress on macOS', \
+        assert controller.name == 'maclo', \
             'The name of the presentation controller should be correct'
+        assert controller.display_name == 'Impress on macOS', \
+            'The display name of the presentation controller should be correct'
         MockedPopen.assert_called_once_with(['/Applications/LibreOffice.app/Contents/Resources/python',
                                              '/libreofficeserver.py'])
         assert controller.server_process == mocked_process

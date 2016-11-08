@@ -40,7 +40,7 @@ __default_settings__ = {
     'presentations/override app': QtCore.Qt.Unchecked,
     'presentations/enable_pdf_program': QtCore.Qt.Unchecked,
     'presentations/pdf_program': '',
-    'presentations/Impress on macOS': QtCore.Qt.Checked,
+    'presentations/maclo': QtCore.Qt.Checked,
     'presentations/Impress': QtCore.Qt.Checked,
     'presentations/Powerpoint': QtCore.Qt.Checked,
     'presentations/Powerpoint Viewer': QtCore.Qt.Checked,
