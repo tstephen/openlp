@@ -120,9 +120,7 @@ class MacLODocument(PresentationDocument):
 
     def load_presentation(self):
         """
-        Called when a presentation is added to the SlideController. It builds the environment, starts communcations with
-        the background LibreOffice task started earlier. If LibreOffice is not present is is started. Once the environment
-        is available the presentation is loaded and started.
+        Tell the LibreOfficeServer to start the presentation.
         """
         log.debug('Load Presentation LibreOffice')
         self.client.setup_desktop()
@@ -262,4 +260,3 @@ class MacLODocument(PresentationDocument):
         :param slide_no: The slide the notes are required for, starting at 1
         """
         return self.client.get_slide_notes(slide_no)
-

@@ -134,7 +134,6 @@ class TestMacLOController(TestCase, TestMixin):
         # THEN: The client's start_process() should have been called
         controller._client.start_process.assert_called_once_with()
 
-
     @patch('openlp.plugins.presentations.lib.maclocontroller.MacLOController._start_server')
     def test_kill(self, mocked_start_server):
         """

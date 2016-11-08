@@ -109,14 +109,14 @@ def test_setup_desktop_exception(mocked_uno):
     # THEN: A desktop object was created
     mocked_uno.getComponentContext.assert_called_once_with()
     mocked_context.ServiceManager.createInstanceWithContext.assert_called_once_with(
-            'com.sun.star.bridge.UnoUrlResolver', mocked_context)
+        'com.sun.star.bridge.UnoUrlResolver', mocked_context)
     expected_calls = [
         call('uno:pipe,name=openlp_pipe;urp;StarOffice.ComponentContext'),
         call('uno:pipe,name=openlp_pipe;urp;StarOffice.ComponentContext')
     ]
     assert mocked_resolver.resolve.call_args_list == expected_calls
     MockedServiceManager.createInstanceWithContext.assert_called_once_with(
-            'com.sun.star.frame.Desktop', mocked_uno_instance)
+        'com.sun.star.frame.Desktop', mocked_uno_instance)
     assert server._manager is MockedServiceManager
     assert server._desktop is None
 
@@ -145,14 +145,14 @@ def test_setup_desktop(mocked_uno):
     # THEN: A desktop object was created
     mocked_uno.getComponentContext.assert_called_once_with()
     mocked_context.ServiceManager.createInstanceWithContext.assert_called_once_with(
-            'com.sun.star.bridge.UnoUrlResolver', mocked_context)
+        'com.sun.star.bridge.UnoUrlResolver', mocked_context)
     expected_calls = [
         call('uno:pipe,name=openlp_pipe;urp;StarOffice.ComponentContext'),
         call('uno:pipe,name=openlp_pipe;urp;StarOffice.ComponentContext')
     ]
     assert mocked_resolver.resolve.call_args_list == expected_calls
     MockedServiceManager.createInstanceWithContext.assert_called_once_with(
-            'com.sun.star.frame.Desktop', mocked_uno_instance)
+        'com.sun.star.frame.Desktop', mocked_uno_instance)
     assert server._manager is MockedServiceManager
     assert server._desktop is mocked_desktop
 
@@ -291,6 +291,9 @@ def test_shutdown_other_docs():
     """
     Test the shutdown method while other documents are open in LibreOffice
     """
+    def close_docs():
+        server._docs = []
+
     # GIVEN: An up an running LibreOfficeServer
     server = LibreOfficeServer()
     mocked_doc = MagicMock()
@@ -301,8 +304,6 @@ def test_shutdown_other_docs():
     server._docs = [mocked_doc]
     server._desktop = mocked_desktop
     server._process = MagicMock()
-    def close_docs():
-        server._docs = []
     mocked_doc.close_presentation.side_effect = close_docs
     mocked_desktop.getComponents.return_value = mocked_docs
     mocked_docs.hasElements.return_value = True
@@ -333,6 +334,9 @@ def test_shutdown():
     """
     Test the shutdown method
     """
+    def close_docs():
+        server._docs = []
+
     # GIVEN: An up an running LibreOfficeServer
     server = LibreOfficeServer()
     mocked_doc = MagicMock()
@@ -343,8 +347,6 @@ def test_shutdown():
     server._docs = [mocked_doc]
     server._desktop = mocked_desktop
     server._process = MagicMock()
-    def close_docs():
-        server._docs = []
     mocked_doc.close_presentation.side_effect = close_docs
     mocked_desktop.getComponents.return_value = mocked_docs
     mocked_docs.hasElements.return_value = True

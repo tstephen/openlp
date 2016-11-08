@@ -184,7 +184,6 @@ class LibreOfficeServer(object):
         if getattr(self, '_process') and can_kill:
             self._process.kill()
 
-
     def load_presentation(self, file_path, screen_number):
         """
         Load a presentation
@@ -404,4 +403,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
