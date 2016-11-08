@@ -67,7 +67,8 @@ class MacLOController(PresentationController):
         """
         libreoffice_python = '/Applications/LibreOffice.app/Contents/Resources/python'
         libreoffice_server = os.path.join(os.path.dirname(__file__), 'libreofficeserver.py')
-        self.server_process = Popen([libreoffice_python, libreoffice_server])
+        if os.path.exists(libreoffice_python):
+            self.server_process = Popen([libreoffice_python, libreoffice_server])
 
     @property
     def client(self):

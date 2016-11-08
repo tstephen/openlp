@@ -70,6 +70,7 @@ class TestMacLOController(TestCase, TestMixin):
         mocked_process = MagicMock()
         mocked_os.path.join.side_effect = lambda *x: '/'.join(x)
         mocked_os.path.dirname.return_value = ''
+        mocked_os.path.exists.return_value = True
         MockedPopen.return_value = mocked_process
 
         # WHEN: The presentation controller object is created
