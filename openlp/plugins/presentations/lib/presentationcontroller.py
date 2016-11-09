@@ -393,7 +393,7 @@ class PresentationController(object):
     log.info('PresentationController loaded')
 
     def __init__(self, plugin=None, name='PresentationController', document_class=PresentationDocument,
-        display_name=None):
+                 display_name=None):
         """
         This is the constructor for the presentationcontroller object. This provides an easy way for descendent plugins
 
