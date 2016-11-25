@@ -59,15 +59,17 @@ class TestMacLOController(TestCase, TestMixin):
         self.destroy_settings()
         shutil.rmtree(self.temp_folder)
 
+    @patch('openlp.plugins.presentations.lib.maclocontroller.AppLocation.get_directory')
     @patch('openlp.plugins.presentations.lib.maclocontroller.os')
     @patch('openlp.plugins.presentations.lib.maclocontroller.Popen')
-    def test_constructor(self, MockedPopen, mocked_os):
+    def test_constructor(self, MockedPopen, mocked_os, mocked_get_directory):
         """
         Test the Constructor from the MacLOController
         """
         # GIVEN: No presentation controller
         controller = None
         mocked_process = MagicMock()
+        mocked_get_directory.return_value = 'plugins'
         mocked_os.path.join.side_effect = lambda *x: '/'.join(x)
         mocked_os.path.dirname.return_value = ''
         mocked_os.path.exists.return_value = True
@@ -82,7 +84,7 @@ class TestMacLOController(TestCase, TestMixin):
         assert controller.display_name == 'Impress on macOS', \
             'The display name of the presentation controller should be correct'
         MockedPopen.assert_called_once_with(['/Applications/LibreOffice.app/Contents/Resources/python',
-                                             '/libreofficeserver.py'])
+                                             'plugins/presentations/lib/libreofficeserver.py'])
         assert controller.server_process == mocked_process
 
     @patch('openlp.plugins.presentations.lib.maclocontroller.MacLOController._start_server')
