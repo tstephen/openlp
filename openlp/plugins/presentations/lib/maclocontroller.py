@@ -25,7 +25,7 @@ import os
 import time
 from subprocess import Popen
 
-from openlp.core.common import is_macosx, Registry, delete_file
+from openlp.core.common import AppLocation, Registry, delete_file, is_macosx
 
 if is_macosx() and os.path.exists('/Applications/LibreOffice.app'):
     macuno_available = True
@@ -66,7 +66,8 @@ class MacLOController(PresentationController):
         Start a LibreOfficeServer
         """
         libreoffice_python = '/Applications/LibreOffice.app/Contents/Resources/python'
-        libreoffice_server = os.path.join(os.path.dirname(__file__), 'libreofficeserver.py')
+        libreoffice_server = os.path.join(AppLocation.get_directory(AppLocation.PluginsDir),
+                                          'lib', 'libreofficeserver.py')
         if os.path.exists(libreoffice_python):
             self.server_process = Popen([libreoffice_python, libreoffice_server])
 
