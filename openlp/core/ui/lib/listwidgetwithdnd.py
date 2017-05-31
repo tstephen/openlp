@@ -40,6 +40,10 @@ class ListWidgetWithDnD(QtWidgets.QListWidget):
         super().__init__(parent)
         self.mime_data_text = name
         self.no_results_text = UiStrings().NoResults
+        self.setSpacing(1)
+        self.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
+        self.setAlternatingRowColors(True)
+        self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
 
     def activateDnD(self):
         """
@@ -120,6 +124,15 @@ class ListWidgetWithDnD(QtWidgets.QListWidget):
                                {'files': files, 'target': self.itemAt(event.pos())})
         else:
             event.ignore()
+
+    def allItems(self):
+        """
+        An generator to list all the items in the widget
+
+        :return: a generator
+        """
+        for row in range(self.count()):
+            yield self.item(row)
 
     def paintEvent(self, event):
         """

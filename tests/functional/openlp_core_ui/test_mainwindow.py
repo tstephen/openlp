@@ -23,8 +23,8 @@
 Package to test openlp.core.ui.mainwindow package.
 """
 import os
-
 from unittest import TestCase
+from unittest.mock import MagicMock, patch
 
 from PyQt5 import QtWidgets
 
@@ -32,7 +32,6 @@ from openlp.core.ui.mainwindow import MainWindow
 from openlp.core.lib.ui import UiStrings
 from openlp.core.common.registry import Registry
 
-from tests.functional import MagicMock, patch
 from tests.helpers.testmixin import TestMixin
 from tests.utils.constants import TEST_RESOURCES_PATH
 
@@ -157,6 +156,15 @@ class TestMainWindow(TestCase, TestMixin):
                                                                           'registered.')
         self.assertTrue('plugin_manager' in self.registry.service_list,
                         'The plugin_manager should have been registered.')
+
+    def test_projector_manager_hidden_on_startup(self):
+        """
+        Test that the projector manager is hidden on startup
+        """
+        # GIVEN: A built main window
+        # WHEN: OpenLP is started
+        # THEN: The projector manager should be hidden
+        self.main_window.projector_manager_dock.setVisible.assert_called_once_with(False)
 
     def test_on_search_shortcut_triggered_shows_media_manager(self):
         """

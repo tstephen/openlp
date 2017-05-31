@@ -176,6 +176,7 @@ class Ui_MainWindow(object):
         self.projector_manager_contents = ProjectorManager(self.projector_manager_dock)
         self.projector_manager_contents.setObjectName('projector_manager_contents')
         self.projector_manager_dock.setWidget(self.projector_manager_contents)
+        self.projector_manager_dock.setVisible(False)
         main_window.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.projector_manager_dock)
         # Create the menu items
         action_list = ActionList.get_instance()
@@ -765,7 +766,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, RegistryProperties):
         Use the Online manual in other cases. (Linux)
         """
         if is_macosx() or is_win():
-            QtGui.QDesktopServices.openUrl(QtCore.QUrl("file:///" + self.local_help_file))
+            QtGui.QDesktopServices.openUrl(QtCore.QUrl.fromLocalFile(self.local_help_file))
         else:
             import webbrowser
             webbrowser.open_new('http://manual.openlp.org/')
@@ -788,7 +789,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, RegistryProperties):
         Open data folder
         """
         path = AppLocation.get_data_path()
-        QtGui.QDesktopServices.openUrl(QtCore.QUrl("file:///" + path))
+        QtGui.QDesktopServices.openUrl(QtCore.QUrl.fromLocalFile(path))
 
     def on_update_theme_images(self):
         """
@@ -1392,7 +1393,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, RegistryProperties):
         if event.timerId() == self.timer_id:
             self.timer_id = 0
             self.load_progress_bar.hide()
-            self.application.process_events()
+            # Sometimes the timer goes off as OpenLP is shutting down, and the application has already been deleted
+            if self.application:
+                self.application.process_events()
 
     def set_new_data_path(self, new_data_path):
         """

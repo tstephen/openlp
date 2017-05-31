@@ -230,7 +230,7 @@ def update_reference_separators():
     REFERENCE_MATCHES['range_separator'] = re.compile(REFERENCE_SEPARATORS['sep_l'], re.UNICODE)
     # full reference match: <book>(<range>(,(?!$)|(?=$)))+
     REFERENCE_MATCHES['full'] = \
-        re.compile('^\s*(?!\s)(?P<book>[\d]*[^\d]+)(?<!\s)\s*'
+        re.compile('^\s*(?!\s)(?P<book>[\d]*[^\d\.]+)\.*(?<!\s)\s*'
                    '(?P<ranges>(?:%(range_regex)s(?:%(sep_l)s(?!\s*$)|(?=\s*$)))+)\s*$'
                    % dict(list(REFERENCE_SEPARATORS.items()) + [('range_regex', range_regex)]), re.UNICODE)
 
@@ -326,7 +326,7 @@ def parse_reference(reference, bible, language_selection, book_ref_id=False):
 
     ``^\s*(?!\s)(?P<book>[\d]*[^\d]+)(?<!\s)\s*``
         The ``book`` group starts with the first non-whitespace character. There are optional leading digits followed by
-        non-digits. The group ends before the whitspace in front of the next digit.
+        non-digits. The group ends before the whitspace, or a full stop in front of the next digit.
 
     ``(?P<ranges>(?:%(range_regex)s(?:%(sep_l)s(?!\s*$)|(?=\s*$)))+)\s*$``
         The second group contains all ``ranges``. This can be multiple declarations of range_regex separated by a list
@@ -341,10 +341,10 @@ def parse_reference(reference, bible, language_selection, book_ref_id=False):
         if not book_ref_id:
             book_ref_id = bible.get_book_ref_id_by_localised_name(book, language_selection)
         elif not bible.get_book_by_book_ref_id(book_ref_id):
-            return False
+            return []
         # We have not found the book so do not continue
         if not book_ref_id:
-            return False
+            return []
         ranges = match.group('ranges')
         range_list = get_reference_match('range_separator').split(ranges)
         ref_list = []
@@ -403,7 +403,7 @@ def parse_reference(reference, bible, language_selection, book_ref_id=False):
         return ref_list
     else:
         log.debug('Invalid reference: {text}'.format(text=reference))
-        return None
+        return []
 
 
 class SearchResults(object):

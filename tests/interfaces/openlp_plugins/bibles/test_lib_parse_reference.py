@@ -23,7 +23,7 @@
 This module contains tests for the lib submodule of the Bibles plugin.
 """
 from unittest import TestCase
-from tests.interfaces import MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 from openlp.core.common import Registry, Settings
 from openlp.plugins.bibles.lib import BibleManager, parse_reference, LanguageSelection
@@ -108,7 +108,7 @@ class TestBibleManager(TestCase, TestMixin):
         # WHEN asking to parse the bible reference
         results = parse_reference('Raoul 1', self.manager.db_cache['tests'], MagicMock())
         # THEN a verse array should be returned
-        self.assertEqual(False, results, "The bible Search should return False")
+        self.assertEqual([], results, "The bible Search should return an empty list")
 
     def test_parse_reference_five(self):
         """
