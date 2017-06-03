@@ -471,8 +471,8 @@ class MainDisplay(OpenLPMixin, Display, RegistryProperties):
         created_html = build_html(self.service_item, self.screen, self.is_live, background, image_bytes,
                                   plugins=self.plugin_manager.plugins)
         self.web_view.setHtml(created_html)
-        if service_item.foot_text:
-            self.footer(service_item.foot_text)
+        if service_item.footer_html:
+            self.footer(service_item.footer_html)
         # if was hidden keep it hidden
         if self.hide_mode and self.is_live and not service_item.is_media():
             if Settings().value('core/auto unblank'):

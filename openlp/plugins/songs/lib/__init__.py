@@ -664,3 +664,17 @@ def transpose_chord(chord, transpose_value, notation):
             else:
                 transposed_chord += note + rest
     return transposed_chord
+
+
+def make_list(array):
+    if len(array) > 0:
+        result = []
+        for i in range(len(array)):
+            result.append({'entry': array[i]})
+            if i == 0:
+                result[i]['first'] = True
+            if i == len(array) - 1:
+                result[i]['last'] = True
+        return result
+    else:
+        return False

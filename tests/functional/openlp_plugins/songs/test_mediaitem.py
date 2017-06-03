@@ -34,6 +34,49 @@ from openlp.plugins.songs.lib.mediaitem import SongMediaItem
 
 from tests.helpers.testmixin import TestMixin
 
+__default_settings__ = {
+    'songs/footer template': """{{title}}<br/>
+
+{{#authors_none}}
+ {{#first}}{{authors_none_label}}:&nbsp;{{/first}}
+ {{entry}}{{^last}},&nbsp;{{/last}}
+ {{#last}}<br/>{{/last}}
+{{/authors_none}}
+{{#authors_words_music}}
+ {{#first}}{{authors_words_music_label}}:&nbsp;{{/first}}
+ {{entry}}{{^last}},&nbsp;{{/last}}
+ {{#last}}<br/>{{/last}}
+{{/authors_words_music}}
+{{#authors_words}}
+ {{#first}}{{authors_words_label}}:&nbsp;{{/first}}
+ {{entry}}{{^last}},&nbsp;{{/last}}
+ {{#last}}<br/>{{/last}}
+{{/authors_words}}
+{{#authors_music}}
+ {{#first}}{{authors_music_label}}:&nbsp;{{/first}}
+ {{entry}}{{^last}},&nbsp;{{/last}}
+ {{#last}}<br/>{{/last}}
+{{/authors_music}}
+{{#authors_translation}}
+ {{#first}}{{authors_translation_label}}:&nbsp;{{/first}}
+ {{entry}}{{^last}},&nbsp;{{/last}}
+ {{#last}}<br/>{{/last}}
+{{/authors_translation}}
+
+{{#copyright}}
+  &copy;&nbsp;{{copyright}}<br/>
+{{/copyright}}
+
+{{#songbook_entries}}
+ {{entry}}{{^last}},&nbsp;{{/last}}
+ {{#last}}<br/>{{/last}}
+{{/songbook_entries}}
+
+{{#ccli_license}}
+ {{ccli_license_label}}:&nbsp;{{ccli_license}}<br/>
+{{/ccli_license}}"""
+}
+
 
 class TestMediaItem(TestCase, TestMixin):
     """
@@ -60,6 +103,7 @@ class TestMediaItem(TestCase, TestMixin):
             self.media_item.display_copyright_symbol = False
         self.setup_application()
         self.build_settings()
+        Settings().extend_default_settings(__default_settings__)
         QtCore.QLocale.setDefault(QtCore.QLocale('en_GB'))
 
     def tearDown(self):
@@ -304,61 +348,43 @@ class TestMediaItem(TestCase, TestMixin):
         # and False for 'core/ccli number' (ccli will cause traceback if true)
 
         mocked_settings = MagicMock()
-        mocked_settings.value.side_effect = [True, False]
+        mocked_settings.value.side_effect = [False, "", "0"]
         MockedSettings.return_value = mocked_settings
 
-        mock_song = MagicMock()
-        mock_song.title = 'My Song'
-        mock_song.authors_songs = []
-        mock_author = MagicMock()
-        mock_author.display_name = 'my author'
-        mock_author_song = MagicMock()
-        mock_author_song.author = mock_author
-        mock_song.authors_songs.append(mock_author_song)
-        mock_song.copyright = 'My copyright'
-        service_item = ServiceItem(None)
+        with patch('pystache.Renderer.render') as MockedRenderer:
+            mock_song = MagicMock()
+            mock_song.title = 'My Song'
+            mock_song.authors_songs = []
+            mock_author = MagicMock()
+            mock_author.display_name = 'my author'
+            mock_author_song = MagicMock()
+            mock_author_song.author = mock_author
+            mock_song.authors_songs.append(mock_author_song)
+            mock_song.copyright = 'My copyright'
+            mock_song.songbook_entries = []
+            service_item = ServiceItem(None)
+            MockedRenderer.return_value = ""
 
-        # WHEN: I generate the Footer with default settings
-        author_list = self.media_item.generate_footer(service_item, mock_song)
+            # WHEN: I generate the Footer with default settings
+            author_list = self.media_item.generate_footer(service_item, mock_song)
 
-        # THEN: I get the following Array returned
-        self.assertEqual(service_item.raw_footer, ['My Song', 'Written by: my author', 'My copyright'],
-                         'The array should be returned correctly with a song, one author and copyright')
-        self.assertEqual(author_list, ['my author'],
-                         'The author list should be returned correctly with one author')
+            # THEN: I get nothing real returned
+            self.assertEqual(service_item.footer_html, "", 'pystache isnt in scope')
 
-    @patch(u'openlp.plugins.songs.lib.mediaitem.Settings')
-    def test_build_song_footer_one_author_hide_written_by(self, MockedSettings):
-        """
-        Test build songs footer with basic song and one author
-        """
-        # GIVEN: A Song and a Service Item, mocked settings: False for 'songs/display written by'
-        # and False for 'core/ccli number' (ccli will cause traceback if true)
-
-        mocked_settings = MagicMock()
-        mocked_settings.value.side_effect = [False, False]
-        MockedSettings.return_value = mocked_settings
-
-        mock_song = MagicMock()
-        mock_song.title = 'My Song'
-        mock_song.authors_songs = []
-        mock_author = MagicMock()
-        mock_author.display_name = 'my author'
-        mock_author_song = MagicMock()
-        mock_author_song.author = mock_author
-        mock_song.authors_songs.append(mock_author_song)
-        mock_song.copyright = 'My copyright'
-        service_item = ServiceItem(None)
-
-        # WHEN: I generate the Footer with default settings
-        author_list = self.media_item.generate_footer(service_item, mock_song)
-
-        # THEN: I get the following Array returned
-        self.assertEqual(service_item.raw_footer, ['My Song', 'my author', 'My copyright'],
-                         'The array should be returned correctly with a song, one author and copyright,'
-                         'text Written by should not be part of the text.')
-        self.assertEqual(author_list, ['my author'],
-                         'The author list should be returned correctly with one author')
+            # AND: The psytache function was called with the following arguments
+            MockedRenderer.assert_called_once_with('', {'authors_music_label': 'Music',
+                                                        'authors_none': [{'first': True, 'entry': 'my author',
+                                                                          'last': True}], 'authors_words_music': False,
+                                                        'authors_words': False, 'authors_music': False,
+                                                        'authors_translation_label': 'Translation',
+                                                        'authors_words_music_label': 'Words and Music',
+                                                        'title': 'My Song', 'ccli_license': "0",
+                                                        'copyright': 'My copyright', 'authors_none_label': 'Written by',
+                                                        'ccli_license_label': 'CCLI License',
+                                                        'authors_translation': False, 'authors_words_label': 'Words',
+                                                        'songbook_entries': False})
+            self.assertEqual(author_list, ['my author'],
+                             'The author list should be returned correctly with one author')
 
     def test_build_song_footer_two_authors(self):
         """
@@ -387,6 +413,7 @@ class TestMediaItem(TestCase, TestMixin):
         mock_author_song.author_type = AuthorType.Translation
         mock_song.authors_songs.append(mock_author_song)
         mock_song.copyright = 'My copyright'
+        mock_song.songbook_entries = []
         service_item = ServiceItem(None)
 
         # WHEN: I generate the Footer with default settings
@@ -394,7 +421,7 @@ class TestMediaItem(TestCase, TestMixin):
 
         # THEN: I get the following Array returned
         self.assertEqual(service_item.raw_footer, ['My Song', 'Words: another author', 'Music: my author',
-                                                   'Translation: translator', 'My copyright'],
+                                                   'Translation: translator', '© My copyright'],
                          'The array should be returned correctly with a song, two authors and copyright')
         self.assertEqual(author_list, ['another author', 'my author', 'translator'],
                          'The author list should be returned correctly with two authors')
@@ -407,6 +434,7 @@ class TestMediaItem(TestCase, TestMixin):
         mock_song = MagicMock()
         mock_song.title = 'My Song'
         mock_song.copyright = 'My copyright'
+        mock_song.songbook_entries = []
         service_item = ServiceItem(None)
         Settings().setValue('core/ccli number', '1234')
 
@@ -414,7 +442,7 @@ class TestMediaItem(TestCase, TestMixin):
         self.media_item.generate_footer(service_item, mock_song)
 
         # THEN: I get the following Array returned
-        self.assertEqual(service_item.raw_footer, ['My Song', 'My copyright', 'CCLI License: 1234'],
+        self.assertEqual(service_item.raw_footer, ['My Song', '© My copyright', 'CCLI License: 1234'],
                          'The array should be returned correctly with a song, an author, copyright and ccli')
 
         # WHEN: I amend the CCLI value
@@ -422,7 +450,7 @@ class TestMediaItem(TestCase, TestMixin):
         self.media_item.generate_footer(service_item, mock_song)
 
         # THEN: I would get an amended footer string
-        self.assertEqual(service_item.raw_footer, ['My Song', 'My copyright', 'CCLI License: 4321'],
+        self.assertEqual(service_item.raw_footer, ['My Song', '© My copyright', 'CCLI License: 4321'],
                          'The array should be returned correctly with a song, an author, copyright and amended ccli')
 
     def test_build_song_footer_base_songbook(self):
@@ -448,15 +476,8 @@ class TestMediaItem(TestCase, TestMixin):
         # WHEN: I generate the Footer with default settings
         self.media_item.generate_footer(service_item, song)
 
-        # THEN: The songbook should not be in the footer
-        self.assertEqual(service_item.raw_footer, ['My Song', 'My copyright'])
-
-        # WHEN: I activate the "display songbook" option
-        self.media_item.display_songbook = True
-        self.media_item.generate_footer(service_item, song)
-
         # THEN: The songbook should be in the footer
-        self.assertEqual(service_item.raw_footer, ['My Song', 'My copyright', 'My songbook #12, Thy songbook #502A'])
+        self.assertEqual(service_item.raw_footer, ['My Song', '© My copyright', 'My songbook #12, Thy songbook #502A'])
 
     def test_build_song_footer_copyright_enabled(self):
         """
@@ -467,6 +488,7 @@ class TestMediaItem(TestCase, TestMixin):
         mock_song = MagicMock()
         mock_song.title = 'My Song'
         mock_song.copyright = 'My copyright'
+        mock_song.songbook_entries = []
         service_item = ServiceItem(None)
 
         # WHEN: I generate the Footer with default settings
@@ -483,13 +505,14 @@ class TestMediaItem(TestCase, TestMixin):
         mock_song = MagicMock()
         mock_song.title = 'My Song'
         mock_song.copyright = 'My copyright'
+        mock_song.songbook_entries = []
         service_item = ServiceItem(None)
 
         # WHEN: I generate the Footer with default settings
         self.media_item.generate_footer(service_item, mock_song)
 
         # THEN: The copyright symbol should not be in the footer
-        self.assertEqual(service_item.raw_footer, ['My Song', 'My copyright'])
+        self.assertEqual(service_item.raw_footer, ['My Song', '© My copyright'])
 
     def test_authors_match(self):
         """

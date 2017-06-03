@@ -163,7 +163,8 @@ class ServiceItem(RegistryProperties):
         self.items = []
         self.iconic_representation = None
         self.raw_footer = []
-        self.foot_text = ''
+        # Plugins can set footer_html themselves. If they don't, it will be generated from raw_footer.
+        self.footer_html = ''
         self.theme = None
         self.service_item_type = None
         self._raw_frames = []
@@ -276,12 +277,9 @@ class ServiceItem(RegistryProperties):
         else:
             log.error('Invalid value renderer: {item}'.format(item=self.service_item_type))
         self.title = clean_tags(self.title)
-        # The footer should never be None, but to be compatible with a few
-        # nightly builds between 1.9.4 and 1.9.5, we have to correct this to
-        # avoid tracebacks.
-        if self.raw_footer is None:
-            self.raw_footer = []
-        self.foot_text = '<br>'.join([_f for _f in self.raw_footer if _f])
+
+        if not self.footer_html:
+            self.footer_html = '<br>'.join([_f for _f in self.raw_footer if _f])
 
     def add_from_image(self, path, title, background=None, thumbnail=None):
         """

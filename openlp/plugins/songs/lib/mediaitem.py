@@ -23,6 +23,7 @@
 import logging
 import os
 import shutil
+import pystache
 
 from PyQt5 import QtCore, QtWidgets
 from sqlalchemy.sql import and_, or_
@@ -36,7 +37,7 @@ from openlp.plugins.songs.forms.editsongform import EditSongForm
 from openlp.plugins.songs.forms.songmaintenanceform import SongMaintenanceForm
 from openlp.plugins.songs.forms.songimportform import SongImportForm
 from openlp.plugins.songs.forms.songexportform import SongExportForm
-from openlp.plugins.songs.lib import VerseType, clean_string, delete_song
+from openlp.plugins.songs.lib import VerseType, clean_string, delete_song, make_list
 from openlp.plugins.songs.lib.db import Author, AuthorType, Song, Book, MediaFile, SongBookEntry, Topic
 from openlp.plugins.songs.lib.ui import SongStrings
 from openlp.plugins.songs.lib.openlyricsxml import OpenLyrics, SongXML
@@ -125,9 +126,6 @@ class SongMediaItem(MediaManagerItem):
         self.is_search_as_you_type_enabled = Settings().value('advanced/search as type')
         self.update_service_on_edit = Settings().value(self.settings_section + '/update service on edit')
         self.add_song_from_service = Settings().value(self.settings_section + '/add song from service')
-        self.display_songbook = Settings().value(self.settings_section + '/display songbook')
-        self.display_written_by_text = Settings().value(self.settings_section + '/display written by')
-        self.display_copyright_symbol = Settings().value(self.settings_section + '/display copyright symbol')
 
     def retranslateUi(self):
         self.search_text_label.setText('{text}:'.format(text=UiStrings().Search))
@@ -641,12 +639,8 @@ class SongMediaItem(MediaManagerItem):
         item.raw_footer = []
         item.raw_footer.append(song.title)
         if authors_none:
-            # If the setting for showing "Written by:" is enabled, show it before unspecified authors.
-            if Settings().value('songs/display written by'):
-                item.raw_footer.append("{text}: {authors}".format(text=translate('OpenLP.Ui', 'Written by'),
-                                                                  authors=create_separated_list(authors_none)))
-            else:
-                item.raw_footer.append("{authors}".format(authors=create_separated_list(authors_none)))
+            item.raw_footer.append("{text}: {authors}".format(text=translate('OpenLP.Ui', 'Written by'),
+                                                              authors=create_separated_list(authors_none)))
         if authors_words_music:
             item.raw_footer.append("{text}: {authors}".format(text=AuthorType.Types[AuthorType.WordsAndMusic],
                                                               authors=create_separated_list(authors_words_music)))
@@ -660,17 +654,35 @@ class SongMediaItem(MediaManagerItem):
             item.raw_footer.append("{text}: {authors}".format(text=AuthorType.Types[AuthorType.Translation],
                                                               authors=create_separated_list(authors_translation)))
         if song.copyright:
-            if self.display_copyright_symbol:
-                item.raw_footer.append("{symbol} {song}".format(symbol=SongStrings.CopyrightSymbol,
-                                                                song=song.copyright))
-            else:
-                item.raw_footer.append(song.copyright)
-        if self.display_songbook and song.songbook_entries:
-            songbooks = [str(songbook_entry) for songbook_entry in song.songbook_entries]
+            item.raw_footer.append("{symbol} {song}".format(symbol=SongStrings.CopyrightSymbol,
+                                                            song=song.copyright))
+        songbooks = [str(songbook_entry) for songbook_entry in song.songbook_entries]
+        if song.songbook_entries:
             item.raw_footer.append(", ".join(songbooks))
         if Settings().value('core/ccli number'):
-            item.raw_footer.append(translate('SongsPlugin.MediaItem',
-                                             'CCLI License: ') + Settings().value('core/ccli number'))
+            item.raw_footer.append(translate('SongsPlugin.MediaItem', 'CCLI License: ') +
+                                   Settings().value('core/ccli number'))
+
+        footer_template = Settings().value('songs/footer template').replace('\n', '').replace(' ', '')
+        # Keep this in sync with the list in songstab.py
+        item.footer_html = pystache.render(footer_template, {
+            'title': song.title,
+            'authors_none_label': translate('OpenLP.Ui', 'Written by'),
+            'authors_none': make_list(authors_none),
+            'authors_words_label': AuthorType.Types[AuthorType.Words],
+            'authors_words': make_list(authors_words),
+            'authors_music_label': AuthorType.Types[AuthorType.Music],
+            'authors_music': make_list(authors_music),
+            'authors_words_music_label': AuthorType.Types[AuthorType.WordsAndMusic],
+            'authors_words_music': make_list(authors_words_music),
+            'authors_translation_label': AuthorType.Types[AuthorType.Translation],
+            'authors_translation': make_list(authors_translation),
+            'copyright': song.copyright,
+            'songbook_entries': make_list(songbooks),
+            'ccli_license': Settings().value('core/ccli number'),
+            'ccli_license_label': translate('SongsPlugin.MediaItem', 'CCLI License')
+        })
+
         return authors_all
 
     def service_load(self, item):

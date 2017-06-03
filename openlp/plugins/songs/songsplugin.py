@@ -59,9 +59,6 @@ __default_settings__ = {
     'songs/update service on edit': False,
     'songs/add song from service': True,
     'songs/display songbar': True,
-    'songs/display songbook': False,
-    'songs/display written by': True,
-    'songs/display copyright symbol': False,
     'songs/last directory import': '',
     'songs/last directory export': '',
     'songs/songselect username': '',
@@ -71,6 +68,46 @@ __default_settings__ = {
     'songs/chord notation': 'english',  # Can be english, german or neo-latin
     'songs/mainview chords': False,
     'songs/disable chords import': False,
+    'songs/footer template': """{{title}}<br/>
+
+{{#authors_none}}
+ {{#first}}{{authors_none_label}}:&nbsp;{{/first}}
+ {{entry}}{{^last}},&nbsp;{{/last}}
+ {{#last}}<br/>{{/last}}
+{{/authors_none}}
+{{#authors_words_music}}
+ {{#first}}{{authors_words_music_label}}:&nbsp;{{/first}}
+ {{entry}}{{^last}},&nbsp;{{/last}}
+ {{#last}}<br/>{{/last}}
+{{/authors_words_music}}
+{{#authors_words}}
+ {{#first}}{{authors_words_label}}:&nbsp;{{/first}}
+ {{entry}}{{^last}},&nbsp;{{/last}}
+ {{#last}}<br/>{{/last}}
+{{/authors_words}}
+{{#authors_music}}
+ {{#first}}{{authors_music_label}}:&nbsp;{{/first}}
+ {{entry}}{{^last}},&nbsp;{{/last}}
+ {{#last}}<br/>{{/last}}
+{{/authors_music}}
+{{#authors_translation}}
+ {{#first}}{{authors_translation_label}}:&nbsp;{{/first}}
+ {{entry}}{{^last}},&nbsp;{{/last}}
+ {{#last}}<br/>{{/last}}
+{{/authors_translation}}
+
+{{#copyright}}
+  &copy;&nbsp;{{copyright}}<br/>
+{{/copyright}}
+
+{{#songbook_entries}}
+ {{entry}}{{^last}},&nbsp;{{/last}}
+ {{#last}}<br/>{{/last}}
+{{/songbook_entries}}
+
+{{#ccli_license}}
+ {{ccli_license_label}}:&nbsp;{{ccli_license}}<br/>
+{{/ccli_license}}""",
 }
 
 
