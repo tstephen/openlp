@@ -682,6 +682,7 @@ class SongMediaItem(MediaManagerItem):
             'songbook_entries': make_list(songbooks),
             'ccli_license': Settings().value('core/ccli number'),
             'ccli_license_label': translate('SongsPlugin.MediaItem', 'CCLI License'),
+            'ccli_number': song.ccli_number,
             'topics': make_list([topic.name for topic in song.topics])
         })
 
