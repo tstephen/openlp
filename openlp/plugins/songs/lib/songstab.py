@@ -138,19 +138,20 @@ class SongsTab(SettingsTab):
             ['title', translate('SongsPlugin.SongsTab', 'Song Title'), False, False],
             ['alternate_title', translate('SongsPlugin.SongsTab', 'Alternate Title'), False, False],
             ['written_by', const.format(translate('SongsPlugin.SongsTab', 'Written By')), True, False],
-            ['authors_none', translate('SongsPlugin.SongsTab', 'Authors when type is not set'), True, True],
+            ['authors_none', translate('SongsPlugin.SongsTab', 'Authors when type is not set'), False, True],
             ['authors_words_label', const.format(AuthorType.Types[AuthorType.Words]), False, False],
-            ['authors_words', translate('SongsPlugin.SongsTab', 'Authors (Type Words)'), True, True],
+            ['authors_words', translate('SongsPlugin.SongsTab', 'Authors (Type Words)'), False, True],
             ['authors_music_label', const.format(AuthorType.Types[AuthorType.Music]), False, False],
-            ['authors_music', translate('SongsPlugin.SongsTab', 'Authors (Type Music)'), True, True],
+            ['authors_music', translate('SongsPlugin.SongsTab', 'Authors (Type Music)'), False, True],
             ['authors_words_music_label', const.format(AuthorType.Types[AuthorType.WordsAndMusic]), False, False],
-            ['authors_words_music', translate('SongsPlugin.SongsTab', 'Authors (Type Words and Music)'), True, True],
+            ['authors_words_music', translate('SongsPlugin.SongsTab', 'Authors (Type Words and Music)'), False, True],
             ['authors_translation_label', const.format(AuthorType.Types[AuthorType.Translation]), False, False],
-            ['authors_translation', translate('SongsPlugin.SongsTab', 'Authors (Type Translation)'), True, True],
+            ['authors_translation', translate('SongsPlugin.SongsTab', 'Authors (Type Translation)'), False, True],
             ['copyright', translate('SongsPlugin.SongsTab', 'Copyright information'), True, False],
-            ['songbook_entries', translate('SongsPlugin.SongsTab', 'Songbook Entries'), True, True],
+            ['songbook_entries', translate('SongsPlugin.SongsTab', 'Songbook Entries'), False, True],
             ['ccli_license', translate('SongsPlugin.SongsTab', 'CCLI License'), True, False],
             ['ccli_license_label', const.format(translate('SongsPlugin.SongsTab', 'CCLI License')), False, False],
+            ['topics', translate('SongsPlugin.SongsTab', 'Topics'), False, True],
         ]
 
         placeholder_info = '<table style="background: #eee">\n<tr><th><b>{ph}</b></th><th><b>{desc}</b></th></tr>\n'\
@@ -164,7 +165,7 @@ class SongsTab(SettingsTab):
         placeholder_info += '\n<br/>¹ {}'.format(translate('SongsPlugin.SongsTab', 'can be empty'))
         placeholder_info += '\n<br/>² {}:<pre>{{#first}} <i>True</i> {}<br/>{{entry}} {}<br/>' \
                             '{{#last}} <i>True</i> {}</pre>'\
-                            .format(translate('SongsPlugin.SongsTab', 'list of entries'),
+                            .format(translate('SongsPlugin.SongsTab', 'list of entries, can be empty'),
                                     translate('SongsPlugin.SongsTab', 'for first element of list'),
                                     translate('SongsPlugin.SongsTab', 'iterates over all entries'),
                                     translate('SongsPlugin.SongsTab', 'for last element'))

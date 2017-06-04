@@ -681,7 +681,8 @@ class SongMediaItem(MediaManagerItem):
             'copyright': song.copyright,
             'songbook_entries': make_list(songbooks),
             'ccli_license': Settings().value('core/ccli number'),
-            'ccli_license_label': translate('SongsPlugin.MediaItem', 'CCLI License')
+            'ccli_license_label': translate('SongsPlugin.MediaItem', 'CCLI License'),
+            'topics': make_list([topic.name for topic in song.topics])
         })
 
         return authors_all
