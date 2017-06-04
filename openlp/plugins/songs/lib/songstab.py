@@ -134,7 +134,9 @@ class SongsTab(SettingsTab):
         # Keep this in sync with the list in mediaitem.py
         const = '<code>"{}"</code>'
         placeholders = [
+            # placeholder, description, can be empty, is a list
             ['title', translate('SongsPlugin.SongsTab', 'Song Title'), False, False],
+            ['alternate_title', translate('SongsPlugin.SongsTab', 'Alternate Title'), False, False],
             ['written_by', const.format(translate('SongsPlugin.SongsTab', 'Written By')), True, False],
             ['authors_none', translate('SongsPlugin.SongsTab', 'Authors when type is not set'), True, True],
             ['authors_words_label', const.format(AuthorType.Types[AuthorType.Words]), False, False],

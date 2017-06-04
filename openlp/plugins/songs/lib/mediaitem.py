@@ -667,6 +667,7 @@ class SongMediaItem(MediaManagerItem):
         # Keep this in sync with the list in songstab.py
         item.footer_html = pystache.render(footer_template, {
             'title': song.title,
+            'alternate_title': song.alternate_title,
             'authors_none_label': translate('OpenLP.Ui', 'Written by'),
             'authors_none': make_list(authors_none),
             'authors_words_label': AuthorType.Types[AuthorType.Words],
