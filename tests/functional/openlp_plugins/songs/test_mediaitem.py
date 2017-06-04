@@ -354,6 +354,8 @@ class TestMediaItem(TestCase, TestMixin):
         with patch('pystache.Renderer.render') as MockedRenderer:
             mock_song = MagicMock()
             mock_song.title = 'My Song'
+            mock_song.alternate_title = ''
+            mock_song.ccli_number = ''
             mock_song.authors_songs = []
             mock_author = MagicMock()
             mock_author.display_name = 'my author'
@@ -372,17 +374,18 @@ class TestMediaItem(TestCase, TestMixin):
             self.assertEqual(service_item.footer_html, "", 'pystache isnt in scope')
 
             # AND: The psytache function was called with the following arguments
-            MockedRenderer.assert_called_once_with('', {'authors_music_label': 'Music',
-                                                        'authors_none': [{'first': True, 'entry': 'my author',
-                                                                          'last': True}], 'authors_words_music': False,
-                                                        'authors_words': False, 'authors_music': False,
-                                                        'authors_translation_label': 'Translation',
+            MockedRenderer.assert_called_once_with('', {'authors_translation': [], 'authors_music_label': 'Music',
+                                                        'copyright': 'My copyright', 'songbook_entries': [],
+                                                        'alternate_title': '', 'topics': [], 'authors_music_all': [],
+                                                        'authors_words_label': 'Words', 'authors_music': [],
+                                                        'authors_words_music': [], 'ccli_number': '',
+                                                        'authors_none_label': 'Written by', 'title': 'My Song',
                                                         'authors_words_music_label': 'Words and Music',
-                                                        'title': 'My Song', 'ccli_license': "0",
-                                                        'copyright': 'My copyright', 'authors_none_label': 'Written by',
-                                                        'ccli_license_label': 'CCLI License',
-                                                        'authors_translation': False, 'authors_words_label': 'Words',
-                                                        'songbook_entries': False})
+                                                        'authors_none': [{'last_or_penultimate': True, 'last': True,
+                                                                          'entry': 'my author', 'first': True}],
+                                                        'ccli_license_label': 'CCLI License', 'authors_words': [],
+                                                        'ccli_license': '0', 'authors_translation_label': 'Translation',
+                                                        'authors_words_all': []})
             self.assertEqual(author_list, ['my author'],
                              'The author list should be returned correctly with one author')
 
@@ -463,6 +466,8 @@ class TestMediaItem(TestCase, TestMixin):
         song.copyright = 'My copyright'
         song.authors_songs = []
         song.songbook_entries = []
+        song.alternate_title = ''
+        song.topics = []
         song.ccli_number = ''
         book1 = MagicMock()
         book1.name = "My songbook"

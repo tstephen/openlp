@@ -98,7 +98,6 @@ class SongsTab(SettingsTab):
         self.footer_layout.addWidget(self.footer_reset_button, alignment=QtCore.Qt.AlignRight)
         self.right_layout.addWidget(self.footer_group_box)
 
-
         self.left_layout.addStretch()
         self.right_layout.addStretch()
         self.tool_bar_active_check_box.stateChanged.connect(self.on_tool_bar_active_check_box_changed)
@@ -140,13 +139,17 @@ class SongsTab(SettingsTab):
             ['written_by', const.format(translate('SongsPlugin.SongsTab', 'Written By')), True, False],
             ['authors_none', translate('SongsPlugin.SongsTab', 'Authors when type is not set'), False, True],
             ['authors_words_label', const.format(AuthorType.Types[AuthorType.Words]), False, False],
-            ['authors_words', translate('SongsPlugin.SongsTab', 'Authors (Type Words)'), False, True],
+            ['authors_words', translate('SongsPlugin.SongsTab', 'Authors (Type "Words")'), False, True],
             ['authors_music_label', const.format(AuthorType.Types[AuthorType.Music]), False, False],
-            ['authors_music', translate('SongsPlugin.SongsTab', 'Authors (Type Music)'), False, True],
+            ['authors_music', translate('SongsPlugin.SongsTab', 'Authors (Type "Music")'), False, True],
             ['authors_words_music_label', const.format(AuthorType.Types[AuthorType.WordsAndMusic]), False, False],
-            ['authors_words_music', translate('SongsPlugin.SongsTab', 'Authors (Type Words and Music)'), False, True],
+            ['authors_words_music', translate('SongsPlugin.SongsTab', 'Authors (Type "Words and Music")'), False, True],
             ['authors_translation_label', const.format(AuthorType.Types[AuthorType.Translation]), False, False],
-            ['authors_translation', translate('SongsPlugin.SongsTab', 'Authors (Type Translation)'), False, True],
+            ['authors_translation', translate('SongsPlugin.SongsTab', 'Authors (Type "Translation")'), False, True],
+            ['authors_words_all', translate('SongsPlugin.SongsTab', 'Authors (Type "Words" & "Words and Music")'),
+             False, True],
+            ['authors_music_all', translate('SongsPlugin.SongsTab', 'Authors (Type "Music" & "Words and Music")'),
+             False, True],
             ['copyright', translate('SongsPlugin.SongsTab', 'Copyright information'), True, False],
             ['songbook_entries', translate('SongsPlugin.SongsTab', 'Songbook Entries'), False, True],
             ['ccli_license', translate('SongsPlugin.SongsTab', 'CCLI License'), True, False],
@@ -166,16 +169,19 @@ class SongsTab(SettingsTab):
         placeholder_info += '</table>'
         placeholder_info += '\n<br/>¹ {}'.format(translate('SongsPlugin.SongsTab', 'can be empty'))
         placeholder_info += '\n<br/>² {}:<pre>{{#first}} <i>True</i> {}<br/>{{entry}} {}<br/>' \
-                            '{{#last}} <i>True</i> {}</pre>'\
+                            '{{#last}} <i>True</i> {}<br/>{{#last_or_penultimate}} <i>True</i> {}</pre>'\
                             .format(translate('SongsPlugin.SongsTab', 'list of entries, can be empty'),
                                     translate('SongsPlugin.SongsTab', 'for first element of list'),
                                     translate('SongsPlugin.SongsTab', 'iterates over all entries'),
-                                    translate('SongsPlugin.SongsTab', 'for last element'))
+                                    translate('SongsPlugin.SongsTab', 'for last element'),
+                                    translate('SongsPlugin.SongsTab', 'for last and second to last element'))
         self.footer_placeholder_info.setHtml(placeholder_info)
         self.footer_placeholder_info.setReadOnly(True)
-        
+
         self.footer_info_label.setText(translate('SongsPlugin.SongsTab', 'How to use Footers:'))
-        self.footer_desc_label.setText(translate('SongsPlugin.SongsTab', 'Footer Template (Mustache Syntax):'))
+        self.footer_desc_label.setText('{} (<a href="http://mustache.github.io/mustache.5.html">{}</a>):'
+                                       .format(translate('SongsPlugin.SongsTab', 'Footer Template'),
+                                               translate('SongsPlugin.SongsTab', 'Mustache Syntax')))
         self.footer_reset_button.setText(translate('SongsPlugin.SongsTab', 'Reset Template'))
 
     def on_search_as_type_check_box_changed(self, check_state):
@@ -206,7 +212,7 @@ class SongsTab(SettingsTab):
         self.chord_notation = 'neo-latin'
 
     def on_footer_reset_button_clicked(self):
-        self.footer_edit_box.setPlainText(Settings().get_default_value('songs/footer template'));
+        self.footer_edit_box.setPlainText(Settings().get_default_value('songs/footer template'))
 
     def load(self):
         settings = Settings()

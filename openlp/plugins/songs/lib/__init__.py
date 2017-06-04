@@ -667,14 +667,23 @@ def transpose_chord(chord, transpose_value, notation):
 
 
 def make_list(array):
-    if len(array) > 0:
-        result = []
-        for i in range(len(array)):
-            result.append({'entry': array[i]})
-            if i == 0:
-                result[i]['first'] = True
-            if i == len(array) - 1:
-                result[i]['last'] = True
-        return result
-    else:
+    """
+    converts an ordinary list into a mustache ready dict construct augmented with some information to enable special
+    formatting features with the first, second to last and last element.
+
+    :param array: input list
+    :return: mustache ready and augmented dict
+    """
+    if len(array) < 0:
         return False
+
+    result = []
+    for i in range(len(array)):
+        result.append({'entry': array[i]})
+        if i == 0:
+            result[i]['first'] = True
+        if i == len(array) - 1:
+            result[i]['last'] = True
+        if i == len(array) - 1 or i == len(array) - 2:
+            result[i]['last_or_penultimate'] = True
+    return result

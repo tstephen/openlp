@@ -678,6 +678,8 @@ class SongMediaItem(MediaManagerItem):
             'authors_words_music': make_list(authors_words_music),
             'authors_translation_label': AuthorType.Types[AuthorType.Translation],
             'authors_translation': make_list(authors_translation),
+            'authors_words_all': make_list(authors_words + authors_words_music),
+            'authors_music_all': make_list(authors_music + authors_words_music),
             'copyright': song.copyright,
             'songbook_entries': make_list(songbooks),
             'ccli_license': Settings().value('core/ccli number'),

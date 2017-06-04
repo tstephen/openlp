@@ -93,7 +93,8 @@ MODULES = [
     'bs4',
     'mako',
     'uno',
-    'six'
+    'six',
+    'pystache'
 ]
 
 
