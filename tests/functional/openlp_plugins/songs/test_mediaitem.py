@@ -35,46 +35,59 @@ from openlp.plugins.songs.lib.mediaitem import SongMediaItem
 from tests.helpers.testmixin import TestMixin
 
 __default_settings__ = {
-    'songs/footer template': """{{title}}<br/>
+    'songs/footer template': """
+${title}<br/>
 
-{{#authors_none}}
- {{#first}}{{authors_none_label}}:&nbsp;{{/first}}
- {{entry}}{{^last}},&nbsp;{{/last}}
- {{#last}}<br/>{{/last}}
-{{/authors_none}}
-{{#authors_words_music}}
- {{#first}}{{authors_words_music_label}}:&nbsp;{{/first}}
- {{entry}}{{^last}},&nbsp;{{/last}}
- {{#last}}<br/>{{/last}}
-{{/authors_words_music}}
-{{#authors_words}}
- {{#first}}{{authors_words_label}}:&nbsp;{{/first}}
- {{entry}}{{^last}},&nbsp;{{/last}}
- {{#last}}<br/>{{/last}}
-{{/authors_words}}
-{{#authors_music}}
- {{#first}}{{authors_music_label}}:&nbsp;{{/first}}
- {{entry}}{{^last}},&nbsp;{{/last}}
- {{#last}}<br/>{{/last}}
-{{/authors_music}}
-{{#authors_translation}}
- {{#first}}{{authors_translation_label}}:&nbsp;{{/first}}
- {{entry}}{{^last}},&nbsp;{{/last}}
- {{#last}}<br/>{{/last}}
-{{/authors_translation}}
+%if authors_none:
+  <%
+    authors = ", ".join(authors_none) 
+  %>
+  ${authors_none_label}:&nbsp;${authors}<br/>
+%endif
 
-{{#copyright}}
-  &copy;&nbsp;{{copyright}}<br/>
-{{/copyright}}
+%if authors_words_music:
+  <%
+    authors = ", ".join(authors_words_music) 
+  %>
+  ${authors_words_music_label}:&nbsp;${authors}<br/>
+%endif
 
-{{#songbook_entries}}
- {{entry}}{{^last}},&nbsp;{{/last}}
- {{#last}}<br/>{{/last}}
-{{/songbook_entries}}
+%if authors_words:
+  <%
+    authors = ", ".join(authors_words) 
+  %>
+  ${authors_words_label}:&nbsp;${authors}<br/>
+%endif
 
-{{#ccli_license}}
- {{ccli_license_label}}:&nbsp;{{ccli_license}}<br/>
-{{/ccli_license}}"""
+%if authors_music:
+  <%
+    authors = ", ".join(authors_music) 
+  %>
+  ${authors_music_label}:&nbsp;${authors}<br/>
+%endif
+
+%if authors_translation:
+  <%
+    authors = ", ".join(authors_translation) 
+  %>
+  ${authors_translation_label}:&nbsp;${authors}<br/>
+%endif
+
+%if copyright:
+  &copy;&nbsp;${copyright}<br/>
+%endif
+
+%if songbook_entries:
+  <%
+    entries = ", ".join(songbook_entries)
+  %>
+  ${entries}<br/>
+%endif
+
+%if ccli_license:
+  ${ccli_license_label}&nbsp;${ccli_license}<br/>
+%endif
+"""
 }
 
 
@@ -344,14 +357,13 @@ class TestMediaItem(TestCase, TestMixin):
         """
         Test build songs footer with basic song and one author
         """
-        # GIVEN: A Song and a Service Item, mocked settings: True for 'songs/display written by'
-        # and False for 'core/ccli number' (ccli will cause traceback if true)
+        # GIVEN: A Song and a Service Item, mocked settings
 
         mocked_settings = MagicMock()
         mocked_settings.value.side_effect = [False, "", "0"]
         MockedSettings.return_value = mocked_settings
 
-        with patch('pystache.Renderer.render') as MockedRenderer:
+        with patch('mako.template.Template.render_unicode') as MockedRenderer:
             mock_song = MagicMock()
             mock_song.title = 'My Song'
             mock_song.alternate_title = ''
@@ -365,27 +377,23 @@ class TestMediaItem(TestCase, TestMixin):
             mock_song.copyright = 'My copyright'
             mock_song.songbook_entries = []
             service_item = ServiceItem(None)
-            MockedRenderer.return_value = ""
 
             # WHEN: I generate the Footer with default settings
             author_list = self.media_item.generate_footer(service_item, mock_song)
 
-            # THEN: I get nothing real returned
-            self.assertEqual(service_item.footer_html, "", 'pystache isnt in scope')
-
-            # AND: The psytache function was called with the following arguments
-            MockedRenderer.assert_called_once_with('', {'authors_translation': [], 'authors_music_label': 'Music',
-                                                        'copyright': 'My copyright', 'songbook_entries': [],
-                                                        'alternate_title': '', 'topics': [], 'authors_music_all': [],
-                                                        'authors_words_label': 'Words', 'authors_music': [],
-                                                        'authors_words_music': [], 'ccli_number': '',
-                                                        'authors_none_label': 'Written by', 'title': 'My Song',
-                                                        'authors_words_music_label': 'Words and Music',
-                                                        'authors_none': [{'last_or_penultimate': True, 'last': True,
-                                                                          'entry': 'my author', 'first': True}],
-                                                        'ccli_license_label': 'CCLI License', 'authors_words': [],
-                                                        'ccli_license': '0', 'authors_translation_label': 'Translation',
-                                                        'authors_words_all': []})
+            # THEN: The mako function was called with the following arguments
+            args = {'authors_translation': [], 'authors_music_label': 'Music',
+                    'copyright': 'My copyright', 'songbook_entries': [],
+                    'alternate_title': '', 'topics': [], 'authors_music_all': [],
+                    'authors_words_label': 'Words', 'authors_music': [],
+                    'authors_words_music': [], 'ccli_number': '',
+                    'authors_none_label': 'Written by', 'title': 'My Song',
+                    'authors_words_music_label': 'Words and Music',
+                    'authors_none': ['my author'],
+                    'ccli_license_label': 'CCLI License', 'authors_words': [],
+                    'ccli_license': '0', 'authors_translation_label': 'Translation',
+                    'authors_words_all': []}
+            MockedRenderer.assert_called_once_with(**args)
             self.assertEqual(author_list, ['my author'],
                              'The author list should be returned correctly with one author')
 
