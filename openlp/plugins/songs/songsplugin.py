@@ -68,46 +68,59 @@ __default_settings__ = {
     'songs/chord notation': 'english',  # Can be english, german or neo-latin
     'songs/mainview chords': False,
     'songs/disable chords import': False,
-    'songs/footer template': """{{title}}<br/>
+    'songs/footer template': """\
+${title}<br/>
 
-{{#authors_none}}
- {{#first}}{{authors_none_label}}:&nbsp;{{/first}}
- {{entry}}{{^last}},&nbsp;{{/last}}
- {{#last}}<br/>{{/last}}
-{{/authors_none}}
-{{#authors_words_music}}
- {{#first}}{{authors_words_music_label}}:&nbsp;{{/first}}
- {{entry}}{{^last}},&nbsp;{{/last}}
- {{#last}}<br/>{{/last}}
-{{/authors_words_music}}
-{{#authors_words}}
- {{#first}}{{authors_words_label}}:&nbsp;{{/first}}
- {{entry}}{{^last}},&nbsp;{{/last}}
- {{#last}}<br/>{{/last}}
-{{/authors_words}}
-{{#authors_music}}
- {{#first}}{{authors_music_label}}:&nbsp;{{/first}}
- {{entry}}{{^last}},&nbsp;{{/last}}
- {{#last}}<br/>{{/last}}
-{{/authors_music}}
-{{#authors_translation}}
- {{#first}}{{authors_translation_label}}:&nbsp;{{/first}}
- {{entry}}{{^last}},&nbsp;{{/last}}
- {{#last}}<br/>{{/last}}
-{{/authors_translation}}
+%if authors_none:
+  <%
+    authors = ", ".join(authors_none) 
+  %>
+  ${authors_none_label}:&nbsp;${authors}<br/>
+%endif
 
-{{#copyright}}
-  &copy;&nbsp;{{copyright}}<br/>
-{{/copyright}}
+%if authors_words_music:
+  <%
+    authors = ", ".join(authors_words_music) 
+  %>
+  ${authors_words_music_label}:&nbsp;${authors}<br/>
+%endif
 
-{{#songbook_entries}}
- {{entry}}{{^last}},&nbsp;{{/last}}
- {{#last}}<br/>{{/last}}
-{{/songbook_entries}}
+%if authors_words:
+  <%
+    authors = ", ".join(authors_words) 
+  %>
+  ${authors_words_label}:&nbsp;${authors}<br/>
+%endif
 
-{{#ccli_license}}
- {{ccli_license_label}}:&nbsp;{{ccli_license}}<br/>
-{{/ccli_license}}""",
+%if authors_music:
+  <%
+    authors = ", ".join(authors_music) 
+  %>
+  ${authors_music_label}:&nbsp;${authors}<br/>
+%endif
+
+%if authors_translation:
+  <%
+    authors = ", ".join(authors_translation) 
+  %>
+  ${authors_translation_label}:&nbsp;${authors}<br/>
+%endif
+
+%if copyright:
+  &copy;&nbsp;${copyright}<br/>
+%endif
+
+%if songbook_entries:
+  <%
+    entries = ", ".join(songbook_entries)
+  %>
+  ${entries}<br/>
+%endif
+
+%if ccli_license:
+  ${ccli_license_label}&nbsp;${ccli_license}<br/>
+%endif
+""",
 }
 
 

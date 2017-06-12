@@ -135,7 +135,7 @@ class SongsTab(SettingsTab):
         placeholders = [
             # placeholder, description, can be empty, is a list
             ['title', translate('SongsPlugin.SongsTab', 'Song Title'), False, False],
-            ['alternate_title', translate('SongsPlugin.SongsTab', 'Alternate Title'), False, False],
+            ['alternate_title', translate('SongsPlugin.SongsTab', 'Alternate Title'), True, False],
             ['written_by', const.format(translate('SongsPlugin.SongsTab', 'Written By')), True, False],
             ['authors_none', translate('SongsPlugin.SongsTab', 'Authors when type is not set'), False, True],
             ['authors_words_label', const.format(AuthorType.Types[AuthorType.Words]), False, False],
@@ -168,20 +168,14 @@ class SongsTab(SettingsTab):
                                             ('&nbsp;²' if placeholder[3] else ''))
         placeholder_info += '</table>'
         placeholder_info += '\n<br/>¹ {}'.format(translate('SongsPlugin.SongsTab', 'can be empty'))
-        placeholder_info += '\n<br/>² {}:<pre>{{#first}} <i>True</i> {}<br/>{{entry}} {}<br/>' \
-                            '{{#last}} <i>True</i> {}<br/>{{#last_or_penultimate}} <i>True</i> {}</pre>'\
-                            .format(translate('SongsPlugin.SongsTab', 'list of entries, can be empty'),
-                                    translate('SongsPlugin.SongsTab', 'for first element of list'),
-                                    translate('SongsPlugin.SongsTab', 'iterates over all entries'),
-                                    translate('SongsPlugin.SongsTab', 'for last element'),
-                                    translate('SongsPlugin.SongsTab', 'for last and second to last element'))
+        placeholder_info += '\n<br/>² {}'.format(translate('SongsPlugin.SongsTab', 'list of entries, can be empty'))
         self.footer_placeholder_info.setHtml(placeholder_info)
         self.footer_placeholder_info.setReadOnly(True)
 
         self.footer_info_label.setText(translate('SongsPlugin.SongsTab', 'How to use Footers:'))
-        self.footer_desc_label.setText('{} (<a href="http://mustache.github.io/mustache.5.html">{}</a>):'
+        self.footer_desc_label.setText('{} (<a href="http://docs.makotemplates.org">{}</a>):'
                                        .format(translate('SongsPlugin.SongsTab', 'Footer Template'),
-                                               translate('SongsPlugin.SongsTab', 'Mustache Syntax')))
+                                               translate('SongsPlugin.SongsTab', 'Mako Syntax')))
         self.footer_reset_button.setText(translate('SongsPlugin.SongsTab', 'Reset Template'))
 
     def on_search_as_type_check_box_changed(self, check_state):

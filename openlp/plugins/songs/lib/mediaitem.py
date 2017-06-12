@@ -23,7 +23,7 @@
 import logging
 import os
 import shutil
-import pystache
+import mako
 
 from PyQt5 import QtCore, QtWidgets
 from sqlalchemy.sql import and_, or_
@@ -31,13 +31,13 @@ from sqlalchemy.sql import and_, or_
 from openlp.core.common import Registry, AppLocation, Settings, check_directory_exists, UiStrings, translate
 from openlp.core.lib import MediaManagerItem, ItemCapabilities, PluginStatus, ServiceItemContext, \
     check_item_selected, create_separated_list
-from openlp.core.lib.ui import create_widget_action
+from openlp.core.lib.ui import create_widget_action, critical_error_message_box
 from openlp.core.common.languagemanager import get_natural_key
 from openlp.plugins.songs.forms.editsongform import EditSongForm
 from openlp.plugins.songs.forms.songmaintenanceform import SongMaintenanceForm
 from openlp.plugins.songs.forms.songimportform import SongImportForm
 from openlp.plugins.songs.forms.songexportform import SongExportForm
-from openlp.plugins.songs.lib import VerseType, clean_string, delete_song, make_list
+from openlp.plugins.songs.lib import VerseType, clean_string, delete_song
 from openlp.plugins.songs.lib.db import Author, AuthorType, Song, Book, MediaFile, SongBookEntry, Topic
 from openlp.plugins.songs.lib.ui import SongStrings
 from openlp.plugins.songs.lib.openlyricsxml import OpenLyrics, SongXML
@@ -663,30 +663,37 @@ class SongMediaItem(MediaManagerItem):
             item.raw_footer.append(translate('SongsPlugin.MediaItem', 'CCLI License: ') +
                                    Settings().value('core/ccli number'))
 
-        footer_template = Settings().value('songs/footer template').replace('\n', '').replace(' ', '')
+        footer_template = Settings().value('songs/footer template')
         # Keep this in sync with the list in songstab.py
-        item.footer_html = pystache.render(footer_template, {
+        vars = {
             'title': song.title,
             'alternate_title': song.alternate_title,
             'authors_none_label': translate('OpenLP.Ui', 'Written by'),
-            'authors_none': make_list(authors_none),
+            'authors_none': authors_none,
             'authors_words_label': AuthorType.Types[AuthorType.Words],
-            'authors_words': make_list(authors_words),
+            'authors_words': authors_words,
             'authors_music_label': AuthorType.Types[AuthorType.Music],
-            'authors_music': make_list(authors_music),
+            'authors_music': authors_music,
             'authors_words_music_label': AuthorType.Types[AuthorType.WordsAndMusic],
-            'authors_words_music': make_list(authors_words_music),
+            'authors_words_music': authors_words_music,
             'authors_translation_label': AuthorType.Types[AuthorType.Translation],
-            'authors_translation': make_list(authors_translation),
-            'authors_words_all': make_list(authors_words + authors_words_music),
-            'authors_music_all': make_list(authors_music + authors_words_music),
+            'authors_translation': authors_translation,
+            'authors_words_all': authors_words + authors_words_music,
+            'authors_music_all': authors_music + authors_words_music,
             'copyright': song.copyright,
-            'songbook_entries': make_list(songbooks),
+            'songbook_entries': songbooks,
             'ccli_license': Settings().value('core/ccli number'),
             'ccli_license_label': translate('SongsPlugin.MediaItem', 'CCLI License'),
             'ccli_number': song.ccli_number,
-            'topics': make_list([topic.name for topic in song.topics])
-        })
+            'topics': [topic.name for topic in song.topics]
+        }
+
+        try:
+            item.footer_html = mako.template.Template(footer_template).render_unicode(**vars).replace('\n', '')
+        except mako.exceptions.SyntaxException:
+            log.error('Failed to render Song footer html:\n' + mako.exceptions.text_error_template().render())
+            critical_error_message_box(message=translate('SongsPlugin.MediaItem',
+                                                         'Failed to render Song footer html.\nSee log for details'))
 
         return authors_all
 
