@@ -277,7 +277,6 @@ class ServiceItem(RegistryProperties):
         else:
             log.error('Invalid value renderer: {item}'.format(item=self.service_item_type))
         self.title = clean_tags(self.title)
-
         if not self.footer_html:
             self.footer_html = '<br>'.join([_f for _f in self.raw_footer if _f])
 

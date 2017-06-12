@@ -129,7 +129,6 @@ class SongsTab(SettingsTab):
         self.neolatin_notation_radio_button.setText(
             translate('SongsPlugin.SongsTab', 'Neo-Latin') + ' (Do-Re-Mi-Fa-Sol-La-Si)')
         self.footer_group_box.setTitle(translate('SongsPlugin.SongsTab', 'Footer'))
-
         # Keep this in sync with the list in mediaitem.py
         const = '<code>"{}"</code>'
         placeholders = [
@@ -157,7 +156,6 @@ class SongsTab(SettingsTab):
             ['ccli_number', translate('SongsPlugin.SongsTab', 'Song CCLI Number'), True, False],
             ['topics', translate('SongsPlugin.SongsTab', 'Topics'), False, True],
         ]
-
         placeholder_info = '<table style="background: #eee">\n<tr><th><b>{ph}</b></th><th><b>{desc}</b></th></tr>\n'\
             .format(ph=translate('SongsPlugin.SongsTab', 'Placeholder'),
                     desc=translate('SongsPlugin.SongsTab', 'Description'))
