@@ -73,35 +73,35 @@ ${title}<br/>
 
 %if authors_none:
   <%
-    authors = ", ".join(authors_none) 
+    authors = ", ".join(authors_none)
   %>
   ${authors_none_label}:&nbsp;${authors}<br/>
 %endif
 
 %if authors_words_music:
   <%
-    authors = ", ".join(authors_words_music) 
+    authors = ", ".join(authors_words_music)
   %>
   ${authors_words_music_label}:&nbsp;${authors}<br/>
 %endif
 
 %if authors_words:
   <%
-    authors = ", ".join(authors_words) 
+    authors = ", ".join(authors_words)
   %>
   ${authors_words_label}:&nbsp;${authors}<br/>
 %endif
 
 %if authors_music:
   <%
-    authors = ", ".join(authors_music) 
+    authors = ", ".join(authors_music)
   %>
   ${authors_music_label}:&nbsp;${authors}<br/>
 %endif
 
 %if authors_translation:
   <%
-    authors = ", ".join(authors_translation) 
+    authors = ", ".join(authors_translation)
   %>
   ${authors_translation_label}:&nbsp;${authors}<br/>
 %endif
