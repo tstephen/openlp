@@ -241,7 +241,9 @@ class SongsTab(SettingsTab):
         settings.setValue('mainview chords', self.mainview_chords)
         settings.setValue('disable chords import', self.disable_chords_import)
         settings.setValue('chord notation', self.chord_notation)
-        settings.setValue('footer template', self.footer_edit_box.toPlainText())
+        # Only save footer template if it has been changed. This allows future updates
+        if self.footer_edit_box.toPlainText() != Settings().get_default_value('songs/footer template'):
+            settings.setValue('footer template', self.footer_edit_box.toPlainText())
         settings.endGroup()
         if self.tab_visited:
             self.settings_form.register_post_process('songs_config_updated')
