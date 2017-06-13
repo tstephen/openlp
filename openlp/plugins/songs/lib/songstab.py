@@ -160,7 +160,7 @@ class SongsTab(SettingsTab):
             .format(ph=translate('SongsPlugin.SongsTab', 'Placeholder'),
                     desc=translate('SongsPlugin.SongsTab', 'Description'))
         for placeholder in placeholders:
-            placeholder_info += '<tr><td>{{{{{pl}}}}}</td><td>{des}{opt}</td></tr>\n'\
+            placeholder_info += '<tr><td>${{{pl}}}</td><td>{des}{opt}</td></tr>\n'\
                                 .format(pl=placeholder[0], des=placeholder[1],
                                         opt=('&nbsp;¹' if placeholder[2] else '') +
                                             ('&nbsp;²' if placeholder[3] else ''))
