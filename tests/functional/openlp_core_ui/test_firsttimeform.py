@@ -29,6 +29,7 @@ from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
 from openlp.core.common import Registry
+from openlp.core.common.path import Path
 from openlp.core.ui.firsttimeform import FirstTimeForm
 
 from tests.helpers.testmixin import TestMixin
@@ -116,7 +117,7 @@ class TestFirstTimeForm(TestCase, TestMixin):
             mocked_settings.value.return_value = True
             MockedSettings.return_value = mocked_settings
             mocked_gettempdir.return_value = 'temp'
-            expected_temp_path = os.path.join('temp', 'openlp')
+            expected_temp_path = Path('temp', 'openlp')
 
             # WHEN: The set_defaults() method is run
             frw.set_defaults()

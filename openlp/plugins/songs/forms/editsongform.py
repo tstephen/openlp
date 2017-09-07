@@ -32,8 +32,10 @@ import shutil
 from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.common import Registry, RegistryProperties, AppLocation, UiStrings, check_directory_exists, translate
-from openlp.core.lib import FileDialog, PluginStatus, MediaType, create_separated_list
+from openlp.core.common.path import Path, path_to_str
+from openlp.core.lib import PluginStatus, MediaType, create_separated_list
 from openlp.core.lib.ui import set_case_insensitive_completer, critical_error_message_box, find_and_set_in_combo_box
+from openlp.core.ui.lib.filedialog import FileDialog
 from openlp.core.common.languagemanager import get_natural_key
 from openlp.plugins.songs.lib import VerseType, clean_song
 from openlp.plugins.songs.lib.db import Book, Song, Author, AuthorType, Topic, MediaFile, SongBookEntry
@@ -56,7 +58,8 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
         """
         Constructor
         """
-        super(EditSongForm, self).__init__(parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint)
+        super(EditSongForm, self).__init__(parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint |
+                                           QtCore.Qt.WindowCloseButtonHint)
         self.media_item = media_item
         self.song = None
         # can this be automated?
@@ -203,8 +206,7 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
                                 'There is no verse corresponding to "{invalid}". Valid entries are {valid}.\n'
                                 'Please enter the verses separated by spaces.').format(invalid=invalid_verses[0],
                                                                                        valid=valid)
-            critical_error_message_box(title=translate('SongsPlugin.EditSongForm', 'Invalid Verse Order'),
-                                       message=msg)
+            critical_error_message_box(title=translate('SongsPlugin.EditSongForm', 'Invalid Verse Order'), message=msg)
         return len(invalid_verses) == 0
 
     def _validate_song(self):
@@ -579,8 +581,7 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
                     self,
                     translate('SongsPlugin.EditSongForm', 'Add Author'),
                     translate('SongsPlugin.EditSongForm', 'This author does not exist, do you want to add them?'),
-                    QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
-                    QtWidgets.QMessageBox.Yes) == QtWidgets.QMessageBox.Yes:
+                    defaultButton=QtWidgets.QMessageBox.Yes) == QtWidgets.QMessageBox.Yes:
                 if text.find(' ') == -1:
                     author = Author.populate(first_name='', last_name='', display_name=text)
                 else:
@@ -658,8 +659,7 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
             if QtWidgets.QMessageBox.question(
                     self, translate('SongsPlugin.EditSongForm', 'Add Topic'),
                     translate('SongsPlugin.EditSongForm', 'This topic does not exist, do you want to add it?'),
-                    QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
-                    QtWidgets.QMessageBox.Yes) == QtWidgets.QMessageBox.Yes:
+                    defaultButton=QtWidgets.QMessageBox.Yes) == QtWidgets.QMessageBox.Yes:
                 topic = Topic.populate(name=text)
                 self.manager.save_object(topic)
                 topic_item = QtWidgets.QListWidgetItem(str(topic.name))
@@ -705,8 +705,7 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
             if QtWidgets.QMessageBox.question(
                     self, translate('SongsPlugin.EditSongForm', 'Add Songbook'),
                     translate('SongsPlugin.EditSongForm', 'This Songbook does not exist, do you want to add it?'),
-                    QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
-                    QtWidgets.QMessageBox.Yes) == QtWidgets.QMessageBox.Yes:
+                    defaultButton=QtWidgets.QMessageBox.Yes) == QtWidgets.QMessageBox.Yes:
                 songbook = Book.populate(name=text)
                 self.manager.save_object(songbook)
                 self.add_songbook_entry_to_list(songbook.id, songbook.name, self.songbook_entry_edit.text())
@@ -928,9 +927,10 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
         Loads file(s) from the filesystem.
         """
         filters = '{text} (*)'.format(text=UiStrings().AllFiles)
-        file_names = FileDialog.getOpenFileNames(self, translate('SongsPlugin.EditSongForm', 'Open File(s)'), '',
-                                                 filters)
-        for filename in file_names:
+        file_paths, selected_filter = FileDialog.getOpenFileNames(
+            self, translate('SongsPlugin.EditSongForm', 'Open File(s)'), Path(), filters)
+        for file_path in file_paths:
+            filename = path_to_str(file_path)
             item = QtWidgets.QListWidgetItem(os.path.split(str(filename))[1])
             item.setData(QtCore.Qt.UserRole, filename)
             self.audio_list_widget.addItem(item)
@@ -1068,9 +1068,9 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
         self.manager.save_object(self.song)
         audio_files = [a.file_name for a in self.song.media_files]
         log.debug(audio_files)
-        save_path = os.path.join(AppLocation.get_section_data_path(self.media_item.plugin.name), 'audio',
+        save_path = os.path.join(str(AppLocation.get_section_data_path(self.media_item.plugin.name)), 'audio',
                                  str(self.song.id))
-        check_directory_exists(save_path)
+        check_directory_exists(Path(save_path))
         self.song.media_files = []
         files = []
         for row in range(self.audio_list_widget.count()):

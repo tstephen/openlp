@@ -22,14 +22,14 @@
 """
 Package to test the openlp.core.lib.projector.constants package.
 """
-from unittest import TestCase, skip
+from unittest import TestCase
 
 
 class TestProjectorConstants(TestCase):
     """
     Test specific functions in the projector constants module.
     """
-    def build_pjlink_video_label_test(self):
+    def test_build_pjlink_video_label(self):
         """
         Test building PJLINK_DEFAULT_CODES dictionary
         """
@@ -40,4 +40,4 @@ class TestProjectorConstants(TestCase):
         from openlp.core.lib.projector.constants import PJLINK_DEFAULT_CODES
 
         # THEN: Verify dictionary was build correctly
-        self.assertEquals(PJLINK_DEFAULT_CODES, TEST_VIDEO_CODES, 'PJLink video strings should match')
+        self.assertEqual(PJLINK_DEFAULT_CODES, TEST_VIDEO_CODES, 'PJLink video strings should match')

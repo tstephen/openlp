@@ -31,12 +31,15 @@ from tempfile import gettempdir
 
 from PyQt5 import QtCore, QtWidgets
 
+from openlp.core.api.http import register_endpoint
 from openlp.core.common import UiStrings, Registry, translate
 from openlp.core.common.actions import ActionList
 from openlp.core.lib import Plugin, StringContent, build_icon
 from openlp.core.lib.db import Manager
 from openlp.core.lib.ui import create_action
+
 from openlp.plugins.songs import reporting
+from openlp.plugins.songs.endpoint import api_songs_endpoint, songs_endpoint
 from openlp.plugins.songs.forms.duplicatesongremovalform import DuplicateSongRemovalForm
 from openlp.plugins.songs.forms.songselectform import SongSelectForm
 from openlp.plugins.songs.lib import clean_song, upgrade
@@ -47,6 +50,7 @@ from openlp.plugins.songs.lib.mediaitem import SongMediaItem
 from openlp.plugins.songs.lib.mediaitem import SongSearch
 from openlp.plugins.songs.lib.songstab import SongsTab
 
+
 log = logging.getLogger(__name__)
 __default_settings__ = {
     'songs/db type': 'sqlite',
@@ -54,7 +58,7 @@ __default_settings__ = {
     'songs/db password': '',
     'songs/db hostname': '',
     'songs/db database': '',
-    'songs/last search type': SongSearch.Entire,
+    'songs/last used search type': SongSearch.Entire,
     'songs/last import type': SongFormat.OpenLyrics,
     'songs/update service on edit': False,
     'songs/add song from service': True,
@@ -62,8 +66,8 @@ __default_settings__ = {
     'songs/display songbook': False,
     'songs/display written by': True,
     'songs/display copyright symbol': False,
-    'songs/last directory import': '',
-    'songs/last directory export': '',
+    'songs/last directory import': None,
+    'songs/last directory export': None,
     'songs/songselect username': '',
     'songs/songselect password': '',
     'songs/songselect searches': '',
@@ -91,6 +95,8 @@ class SongsPlugin(Plugin):
         self.icon_path = ':/plugins/plugin_songs.png'
         self.icon = build_icon(self.icon_path)
         self.songselect_form = None
+        register_endpoint(songs_endpoint)
+        register_endpoint(api_songs_endpoint)
 
     def check_pre_conditions(self):
         """
@@ -326,8 +332,8 @@ class SongsPlugin(Plugin):
         self.application.process_events()
         progress = QtWidgets.QProgressDialog(self.main_window)
         progress.setWindowModality(QtCore.Qt.WindowModal)
-        progress.setWindowTitle(translate('OpenLP.Ui', 'Importing Songs'))
-        progress.setLabelText(translate('OpenLP.Ui', 'Starting import...'))
+        progress.setWindowTitle(translate('SongsPlugin', 'Importing Songs'))
+        progress.setLabelText(UiStrings().StartingImport)
         progress.setCancelButton(None)
         progress.setRange(0, song_count)
         progress.setMinimumDuration(0)

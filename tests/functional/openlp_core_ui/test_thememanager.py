@@ -90,7 +90,7 @@ class TestThemeManager(TestCase):
         #        theme, check_directory_exists and thememanager-attributes.
         with patch('builtins.open') as mocked_open, \
                 patch('openlp.core.ui.thememanager.shutil.copyfile') as mocked_copyfile, \
-                patch('openlp.core.ui.thememanager.check_directory_exists') as mocked_check_directory_exists:
+                patch('openlp.core.ui.thememanager.check_directory_exists'):
             mocked_open.return_value = MagicMock()
             theme_manager = ThemeManager(None)
             theme_manager.old_background_image = None
@@ -118,7 +118,7 @@ class TestThemeManager(TestCase):
         #        theme, check_directory_exists and thememanager-attributes.
         with patch('builtins.open') as mocked_open, \
                 patch('openlp.core.ui.thememanager.shutil.copyfile') as mocked_copyfile, \
-                patch('openlp.core.ui.thememanager.check_directory_exists') as mocked_check_directory_exists:
+                patch('openlp.core.ui.thememanager.check_directory_exists'):
             mocked_open.return_value = MagicMock()
             theme_manager = ThemeManager(None)
             theme_manager.old_background_image = None
@@ -176,7 +176,7 @@ class TestThemeManager(TestCase):
             self.assertTrue(result)
             mocked_qmessagebox_question.assert_called_once_with(
                 theme_manager, 'Theme Already Exists', 'Theme Theme Name already exists. Do you want to replace it?',
-                ANY, ANY)
+                defaultButton=ANY)
 
     def test_over_write_message_box_no(self):
         """
@@ -196,7 +196,7 @@ class TestThemeManager(TestCase):
             self.assertFalse(result)
             mocked_qmessagebox_question.assert_called_once_with(
                 theme_manager, 'Theme Already Exists', 'Theme Theme Name already exists. Do you want to replace it?',
-                ANY, ANY)
+                defaultButton=ANY)
 
     def test_unzip_theme(self):
         """

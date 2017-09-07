@@ -28,6 +28,7 @@ from subprocess import check_output, CalledProcessError
 
 from openlp.core.common import AppLocation, check_binary_exists
 from openlp.core.common import Settings, is_win
+from openlp.core.common.path import Path, path_to_str
 from openlp.core.lib import ScreenList
 from openlp.plugins.presentations.lib.presentationcontroller import PresentationController, PresentationDocument
 
@@ -69,7 +70,7 @@ class PdfController(PresentationController):
         :return: Type of the binary, 'gs' if ghostscript, 'mudraw' if mudraw, None if invalid.
         """
         program_type = None
-        runlog = check_binary_exists(program_path)
+        runlog = check_binary_exists(Path(program_path))
         # Analyse the output to see it the program is mudraw, ghostscript or neither
         for line in runlog.splitlines():
             decoded_line = line.decode()
@@ -112,7 +113,7 @@ class PdfController(PresentationController):
         self.also_supports = []
         # Use the user defined program if given
         if Settings().value('presentations/enable_pdf_program'):
-            pdf_program = Settings().value('presentations/pdf_program')
+            pdf_program = path_to_str(Settings().value('presentations/pdf_program'))
             program_type = self.process_check_binary(pdf_program)
             if program_type == 'gs':
                 self.gsbin = pdf_program
@@ -122,10 +123,10 @@ class PdfController(PresentationController):
                 self.mutoolbin = pdf_program
         else:
             # Fallback to autodetection
-            application_path = AppLocation.get_directory(AppLocation.AppDir)
+            application_path = str(AppLocation.get_directory(AppLocation.AppDir))
             if is_win():
                 # for windows we only accept mudraw.exe or mutool.exe in the base folder
-                application_path = AppLocation.get_directory(AppLocation.AppDir)
+                application_path = str(AppLocation.get_directory(AppLocation.AppDir))
                 if os.path.isfile(os.path.join(application_path, 'mudraw.exe')):
                     self.mudrawbin = os.path.join(application_path, 'mudraw.exe')
                 elif os.path.isfile(os.path.join(application_path, 'mutool.exe')):
@@ -142,7 +143,7 @@ class PdfController(PresentationController):
                         self.gsbin = which('gs')
                 # Last option: check if mudraw or mutool is placed in OpenLP base folder
                 if not self.mudrawbin and not self.mutoolbin and not self.gsbin:
-                    application_path = AppLocation.get_directory(AppLocation.AppDir)
+                    application_path = str(AppLocation.get_directory(AppLocation.AppDir))
                     if os.path.isfile(os.path.join(application_path, 'mudraw')):
                         self.mudrawbin = os.path.join(application_path, 'mudraw')
                     elif os.path.isfile(os.path.join(application_path, 'mutool')):
@@ -199,8 +200,8 @@ class PdfDocument(PresentationDocument):
         :return: The resolution dpi to be used.
         """
         # Use a postscript script to get size of the pdf. It is assumed that all pages have same size
-        gs_resolution_script = AppLocation.get_directory(
-            AppLocation.PluginsDir) + '/presentations/lib/ghostscript_get_resolution.ps'
+        gs_resolution_script = str(AppLocation.get_directory(
+            AppLocation.PluginsDir)) + '/presentations/lib/ghostscript_get_resolution.ps'
         # Run the script on the pdf to get the size
         runlog = []
         try:
@@ -253,15 +254,14 @@ class PdfDocument(PresentationDocument):
         try:
             if not os.path.isdir(self.get_temp_folder()):
                 os.makedirs(self.get_temp_folder())
+            # The %03d in the file name is handled by each binary
             if self.controller.mudrawbin:
                 log.debug('loading presentation using mudraw')
-                # TODO: Find out where the string conversion actually happens
                 runlog = check_output([self.controller.mudrawbin, '-w', str(size.width()), '-h', str(size.height()),
                                        '-o', os.path.join(self.get_temp_folder(), 'mainslide%03d.png'), self.file_path],
                                       startupinfo=self.startupinfo)
             elif self.controller.mutoolbin:
                 log.debug('loading presentation using mutool')
-                # TODO: Find out where the string convertsion actually happens
                 runlog = check_output([self.controller.mutoolbin, 'draw', '-w', str(size.width()), '-h',
                                        str(size.height()),
                                        '-o', os.path.join(self.get_temp_folder(), 'mainslide%03d.png'), self.file_path],
@@ -269,7 +269,6 @@ class PdfDocument(PresentationDocument):
             elif self.controller.gsbin:
                 log.debug('loading presentation using gs')
                 resolution = self.gs_get_resolution(size)
-                # TODO: Find out where the string conversion actually happens
                 runlog = check_output([self.controller.gsbin, '-dSAFER', '-dNOPAUSE', '-dBATCH', '-sDEVICE=png16m',
                                        '-r' + str(resolution), '-dTextAlphaBits=4', '-dGraphicsAlphaBits=4',
                                        '-sOutputFile=' + os.path.join(self.get_temp_folder(), 'mainslide%03d.png'),

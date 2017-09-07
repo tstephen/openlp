@@ -29,13 +29,14 @@ import time
 import urllib.request
 import urllib.parse
 import urllib.error
+from configparser import ConfigParser, MissingSectionHeaderError, NoOptionError, NoSectionError
 from tempfile import gettempdir
-from configparser import ConfigParser, MissingSectionHeaderError, NoSectionError, NoOptionError
 
 from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.common import Registry, RegistryProperties, AppLocation, Settings, check_directory_exists, \
     translate, clean_button_text, trace_error_handler
+from openlp.core.common.path import Path
 from openlp.core.lib import PluginStatus, build_icon
 from openlp.core.lib.ui import critical_error_message_box
 from openlp.core.common.httputils import get_web_page, get_url_file_size, url_get_file, CONNECTION_TIMEOUT
@@ -202,11 +203,10 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
                 self.themes_url = self.web + self.config.get('themes', 'directory') + '/'
                 self.web_access = True
             except (NoSectionError, NoOptionError, MissingSectionHeaderError):
-                log.debug('A problem occured while parsing the downloaded config file')
+                log.debug('A problem occurred while parsing the downloaded config file')
                 trace_error_handler(log)
         self.update_screen_list_combo()
         self.application.process_events()
-        # TODO: Tested at home
         self.downloading = translate('OpenLP.FirstTimeWizard', 'Downloading {name}...')
         if self.has_run_wizard:
             self.songs_check_box.setChecked(self.plugin_manager.get_plugin_by_name('songs').is_active())
@@ -214,7 +214,6 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
             self.presentation_check_box.setChecked(self.plugin_manager.get_plugin_by_name('presentations').is_active())
             self.image_check_box.setChecked(self.plugin_manager.get_plugin_by_name('images').is_active())
             self.media_check_box.setChecked(self.plugin_manager.get_plugin_by_name('media').is_active())
-            self.remote_check_box.setChecked(self.plugin_manager.get_plugin_by_name('remotes').is_active())
             self.custom_check_box.setChecked(self.plugin_manager.get_plugin_by_name('custom').is_active())
             self.song_usage_check_box.setChecked(self.plugin_manager.get_plugin_by_name('songusage').is_active())
             self.alert_check_box.setChecked(self.plugin_manager.get_plugin_by_name('alerts').is_active())
@@ -284,7 +283,7 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
         self.no_internet_cancel_button.setVisible(False)
         # Check if this is a re-run of the wizard.
         self.has_run_wizard = Settings().value('core/has run wizard')
-        check_directory_exists(os.path.join(gettempdir(), 'openlp'))
+        check_directory_exists(Path(gettempdir(), 'openlp'))
 
     def update_screen_list_combo(self):
         """
@@ -531,7 +530,6 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
         self._set_plugin_status(self.presentation_check_box, 'presentations/status')
         self._set_plugin_status(self.image_check_box, 'images/status')
         self._set_plugin_status(self.media_check_box, 'media/status')
-        self._set_plugin_status(self.remote_check_box, 'remotes/status')
         self._set_plugin_status(self.custom_check_box, 'custom/status')
         self._set_plugin_status(self.song_usage_check_box, 'songusage/status')
         self._set_plugin_status(self.alert_check_box, 'alerts/status')
@@ -555,15 +553,14 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
         """
         # Build directories for downloads
         songs_destination = os.path.join(gettempdir(), 'openlp')
-        bibles_destination = AppLocation.get_section_data_path('bibles')
-        themes_destination = AppLocation.get_section_data_path('themes')
+        bibles_destination = str(AppLocation.get_section_data_path('bibles'))
+        themes_destination = str(AppLocation.get_section_data_path('themes'))
         missed_files = []
         # Download songs
         for i in range(self.songs_list_widget.count()):
             item = self.songs_list_widget.item(i)
             if item.checkState() == QtCore.Qt.Checked:
                 filename, sha256 = item.data(QtCore.Qt.UserRole)
-                # TODO: Tested at home
                 self._increment_progress_bar(self.downloading.format(name=filename), 0)
                 self.previous_size = 0
                 destination = os.path.join(songs_destination, str(filename))
@@ -576,7 +573,6 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
             item = bibles_iterator.value()
             if item.parent() and item.checkState(0) == QtCore.Qt.Checked:
                 bible, sha256 = item.data(0, QtCore.Qt.UserRole)
-                # TODO: Tested at home
                 self._increment_progress_bar(self.downloading.format(name=bible), 0)
                 self.previous_size = 0
                 if not url_get_file(self, '{path}{name}'.format(path=self.bibles_url, name=bible),
@@ -589,7 +585,6 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
             item = self.themes_list_widget.item(i)
             if item.checkState() == QtCore.Qt.Checked:
                 theme, sha256 = item.data(QtCore.Qt.UserRole)
-                # TODO: Tested at home
                 self._increment_progress_bar(self.downloading.format(name=theme), 0)
                 self.previous_size = 0
                 if not url_get_file(self, '{path}{name}'.format(path=self.themes_url, name=theme),

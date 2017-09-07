@@ -27,6 +27,7 @@ import logging
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from openlp.core.common import Registry, Settings, UiStrings, translate, get_images_filter
+from openlp.core.common.path import Path, path_to_str, str_to_path
 from openlp.core.lib import SettingsTab, ScreenList
 from openlp.core.ui.lib import ColorButton, PathEdit
 
@@ -172,7 +173,8 @@ class GeneralTab(SettingsTab):
         self.logo_layout.setObjectName('logo_layout')
         self.logo_file_label = QtWidgets.QLabel(self.logo_group_box)
         self.logo_file_label.setObjectName('logo_file_label')
-        self.logo_file_path_edit = PathEdit(self.logo_group_box, default_path=':/graphics/openlp-splash-screen.png')
+        self.logo_file_path_edit = PathEdit(self.logo_group_box,
+                                            default_path=Path(':/graphics/openlp-splash-screen.png'))
         self.logo_layout.addRow(self.logo_file_label, self.logo_file_path_edit)
         self.logo_color_label = QtWidgets.QLabel(self.logo_group_box)
         self.logo_color_label.setObjectName('logo_color_label')
@@ -266,7 +268,7 @@ class GeneralTab(SettingsTab):
         self.audio_group_box.setTitle(translate('OpenLP.GeneralTab', 'Background Audio'))
         self.start_paused_check_box.setText(translate('OpenLP.GeneralTab', 'Start background audio paused'))
         self.repeat_list_check_box.setText(translate('OpenLP.GeneralTab', 'Repeat track list'))
-        self.logo_file_path_edit.dialog_caption = dialog_caption = translate('OpenLP.AdvancedTab', 'Select Logo File')
+        self.logo_file_path_edit.dialog_caption = translate('OpenLP.AdvancedTab', 'Select Logo File')
         self.logo_file_path_edit.filters = '{text};;{names} (*)'.format(
             text=get_images_filter(), names=UiStrings().AllFiles)
 

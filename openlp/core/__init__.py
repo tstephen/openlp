@@ -33,12 +33,14 @@ import os
 import shutil
 import sys
 import time
+from datetime import datetime
 from traceback import format_exception
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from openlp.core.common import Registry, OpenLPMixin, AppLocation, LanguageManager, Settings, UiStrings, \
     check_directory_exists, is_macosx, is_win, translate
+from openlp.core.common.path import Path
 from openlp.core.common.versionchecker import VersionThread, get_application_version
 from openlp.core.lib import ScreenList
 from openlp.core.resources import qInitResources
@@ -153,10 +155,8 @@ class OpenLP(OpenLPMixin, QtWidgets.QApplication):
         self.processEvents()
         if not has_run_wizard:
             self.main_window.first_time()
-        # update_check = Settings().value('core/update check')
-        # if update_check:
-        #     version = VersionThread(self.main_window)
-        #     version.start()
+        version = VersionThread(self.main_window)
+        version.start()
         self.main_window.is_display_blank()
         self.main_window.app_startup()
         return self.exec()
@@ -181,7 +181,7 @@ class OpenLP(OpenLPMixin, QtWidgets.QApplication):
         """
         Check if the data folder path exists.
         """
-        data_folder_path = AppLocation.get_data_path()
+        data_folder_path = str(AppLocation.get_data_path())
         if not os.path.exists(data_folder_path):
             log.critical('Database was not found in: ' + data_folder_path)
             status = QtWidgets.QMessageBox.critical(None, translate('OpenLP', 'Data Directory Error'),
@@ -251,10 +251,9 @@ class OpenLP(OpenLPMixin, QtWidgets.QApplication):
             if QtWidgets.QMessageBox.question(None, translate('OpenLP', 'Backup'),
                                               translate('OpenLP', 'OpenLP has been upgraded, do you want to create\n'
                                                                   'a backup of the old data folder?'),
-                                              QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
-                                              QtWidgets.QMessageBox.Yes) == QtWidgets.QMessageBox.Yes:
+                                              defaultButton=QtWidgets.QMessageBox.Yes) == QtWidgets.QMessageBox.Yes:
                 # Create copy of data folder
-                data_folder_path = AppLocation.get_data_path()
+                data_folder_path = str(AppLocation.get_data_path())
                 timestamp = time.strftime("%Y%m%d-%H%M%S")
                 data_folder_backup_path = data_folder_path + '-' + timestamp
                 try:
@@ -338,6 +337,8 @@ def parse_options(args=None):
     parser.add_argument('-d', '--dev-version', dest='dev_version', action='store_true',
                         help='Ignore the version file and pull the version directly from Bazaar')
     parser.add_argument('-s', '--style', dest='style', help='Set the Qt5 style (passed directly to Qt5).')
+    parser.add_argument('-w', '--no-web-server', dest='no_web_server', action='store_false',
+                        help='Turn off the Web and Socket Server ')
     parser.add_argument('rargs', nargs='?', default=[])
     # Parse command line options and deal with them. Use args supplied pragmatically if possible.
     return parser.parse_args(args) if args else parser.parse_args()
@@ -347,15 +348,17 @@ def set_up_logging(log_path):
     """
     Setup our logging using log_path
 
-    :param log_path: the path
+    :param openlp.core.common.path.Path log_path: The file to save the log to.
+    :rtype: None
     """
     check_directory_exists(log_path, True)
-    filename = os.path.join(log_path, 'openlp.log')
-    logfile = logging.FileHandler(filename, 'w', encoding="UTF-8")
+    file_path = log_path / 'openlp.log'
+    # TODO: FileHandler accepts a Path object in Py3.6
+    logfile = logging.FileHandler(str(file_path), 'w', encoding='UTF-8')
     logfile.setFormatter(logging.Formatter('%(asctime)s %(name)-55s %(levelname)-8s %(message)s'))
     log.addHandler(logfile)
     if log.isEnabledFor(logging.DEBUG):
-        print('Logging to: {name}'.format(name=filename))
+        print('Logging to: {name}'.format(name=file_path))
 
 
 def main(args=None):
@@ -391,16 +394,16 @@ def main(args=None):
         application.setApplicationName('OpenLPPortable')
         Settings.setDefaultFormat(Settings.IniFormat)
         # Get location OpenLPPortable.ini
-        application_path = AppLocation.get_directory(AppLocation.AppDir)
-        set_up_logging(os.path.abspath(os.path.join(application_path, '..', '..', 'Other')))
+        portable_path = (AppLocation.get_directory(AppLocation.AppDir) / '..' / '..').resolve()
+        data_path = portable_path / 'Data'
+        set_up_logging(portable_path / 'Other')
         log.info('Running portable')
-        portable_settings_file = os.path.abspath(os.path.join(application_path, '..', '..', 'Data', 'OpenLP.ini'))
+        portable_settings_path = data_path / 'OpenLP.ini'
         # Make this our settings file
-        log.info('INI file: {name}'.format(name=portable_settings_file))
-        Settings.set_filename(portable_settings_file)
+        log.info('INI file: {name}'.format(name=portable_settings_path))
+        Settings.set_filename(str(portable_settings_path))
         portable_settings = Settings()
         # Set our data path
-        data_path = os.path.abspath(os.path.join(application_path, '..', '..', 'Data',))
         log.info('Data path: {name}'.format(name=data_path))
         # Point to our data path
         portable_settings.setValue('advanced/data path', data_path)
@@ -411,6 +414,7 @@ def main(args=None):
         set_up_logging(AppLocation.get_directory(AppLocation.CacheDir))
     Registry.create()
     Registry().register('application', application)
+    Registry().set_flag('no_web_server', args.no_web_server)
     application.setApplicationVersion(get_application_version()['version'])
     # Check if an instance of OpenLP is already running. Quit if there is a running instance and the user only wants one
     if application.is_already_running():
@@ -419,8 +423,21 @@ def main(args=None):
     if application.is_data_path_missing():
         application.shared_memory.detach()
         sys.exit()
-    # Remove/convert obsolete settings.
-    Settings().remove_obsolete_settings()
+    # Upgrade settings.
+    settings = Settings()
+    if settings.can_upgrade():
+        now = datetime.now()
+        # Only back up if OpenLP has previously run.
+        if settings.value('core/has run wizard'):
+            back_up_path = AppLocation.get_data_path() / (now.strftime('%Y-%m-%d %H-%M') + '.conf')
+            log.info('Settings about to be upgraded. Existing settings are being backed up to {back_up_path}'
+                     .format(back_up_path=back_up_path))
+            QtWidgets.QMessageBox.information(
+                None, translate('OpenLP', 'Settings Upgrade'),
+                translate('OpenLP', 'Your settings are about to upgraded. A backup will be created at {back_up_path}')
+                     .format(back_up_path=back_up_path))
+            settings.export(back_up_path)
+        settings.upgrade_settings()
     # First time checks in settings
     if not Settings().value('core/has run wizard'):
         if not FirstTimeLanguageForm().exec():

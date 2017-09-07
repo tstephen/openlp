@@ -29,8 +29,9 @@ import os
 from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.common import RegistryProperties, Settings, UiStrings, translate
-from openlp.core.lib import FileDialog
+from openlp.core.common.path import path_to_str, str_to_path
 from openlp.core.lib.ui import critical_error_message_box
+from openlp.core.ui.lib.filedialog import FileDialog
 from openlp.core.ui.lib.wizard import OpenLPWizard, WizardStrings
 from openlp.plugins.songs.lib.importer import SongFormat, SongFormatSelect
 
@@ -132,9 +133,8 @@ class SongImportForm(OpenLPWizard, RegistryProperties):
         Song wizard localisation.
         """
         self.setWindowTitle(translate('SongsPlugin.ImportWizardForm', 'Song Import Wizard'))
-        # TODO: Verify format() with template variables
-        self.title_label.setText(WizardStrings.HeaderStyle % translate('OpenLP.Ui',
-                                                                       'Welcome to the Song Import Wizard'))
+        self.title_label.setText(
+            WizardStrings.HeaderStyle.format(text=translate('OpenLP.Ui', 'Welcome to the Song Import Wizard')))
         self.information_label.setText(
             translate('SongsPlugin.ImportWizardForm',
                       'This wizard will help you to import songs from a variety of formats. Click the next button '
@@ -238,13 +238,12 @@ class SongImportForm(OpenLPWizard, RegistryProperties):
         if filters:
             filters += ';;'
         filters += '{text} (*)'.format(text=UiStrings().AllFiles)
-        file_names = FileDialog.getOpenFileNames(
-            self, title,
-            Settings().value(self.plugin.settings_section + '/last directory import'), filters)
-        if file_names:
+        file_paths, selected_filter = FileDialog.getOpenFileNames(
+            self, title, Settings().value(self.plugin.settings_section + '/last directory import'), filters)
+        if file_paths:
+            file_names = [path_to_str(file_path) for file_path in file_paths]
             listbox.addItems(file_names)
-            Settings().setValue(self.plugin.settings_section + '/last directory import',
-                                os.path.split(str(file_names[0]))[0])
+            Settings().setValue(self.plugin.settings_section + '/last directory import', file_paths[0].parent)
 
     def get_list_of_files(self, list_box):
         """
@@ -272,12 +271,11 @@ class SongImportForm(OpenLPWizard, RegistryProperties):
         select_mode, format_name, ext_filter = SongFormat.get(this_format, 'selectMode', 'name', 'filter')
         file_path_edit = self.format_widgets[this_format]['file_path_edit']
         if select_mode == SongFormatSelect.SingleFile:
-            # TODO: Verify format() with template variables
-            self.get_file_name(
-                WizardStrings.OpenTypeFile % format_name, file_path_edit, 'last directory import', ext_filter)
+            self.get_file_name(WizardStrings.OpenTypeFile.format(file_type=format_name),
+                               file_path_edit, 'last directory import', ext_filter)
         elif select_mode == SongFormatSelect.SingleFolder:
-            # TODO: Verify format() with template variables
-            self.get_folder(WizardStrings.OpenTypeFolder % format_name, file_path_edit, 'last directory import')
+            self.get_folder(
+                WizardStrings.OpenTypeFolder.format(folder_name=format_name), file_path_edit, 'last directory import')
 
     def on_add_button_clicked(self):
         """
@@ -286,8 +284,7 @@ class SongImportForm(OpenLPWizard, RegistryProperties):
         this_format = self.current_format
         select_mode, format_name, ext_filter, custom_title = \
             SongFormat.get(this_format, 'selectMode', 'name', 'filter', 'getFilesTitle')
-        # TODO: Verify format() with template variables
-        title = custom_title if custom_title else WizardStrings.OpenTypeFile % format_name
+        title = custom_title if custom_title else WizardStrings.OpenTypeFile.format(file_type=format_name)
         if select_mode == SongFormatSelect.MultipleFiles:
             self.get_files(title, self.format_widgets[this_format]['file_list_widget'], ext_filter)
             self.source_page.completeChanged.emit()
@@ -364,14 +361,15 @@ class SongImportForm(OpenLPWizard, RegistryProperties):
     def on_error_save_to_button_clicked(self):
         """
         Save the error report to a file.
+
+        :rtype: None
         """
-        filename, filter_used = QtWidgets.QFileDialog.getSaveFileName(
+        file_path, filter_used = FileDialog.getSaveFileName(
             self, Settings().value(self.plugin.settings_section + '/last directory import'))
-        if not filename:
+        if not file_path:
             return
-        report_file = codecs.open(filename, 'w', 'utf-8')
-        report_file.write(self.error_report_text_edit.toPlainText())
-        report_file.close()
+        with file_path.open('w', encoding='utf-8') as report_file:
+            report_file.write(self.error_report_text_edit.toPlainText())
 
     def add_file_select_item(self):
         """

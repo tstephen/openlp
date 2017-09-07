@@ -125,8 +125,8 @@ class PrintServiceForm(QtWidgets.QDialog, Ui_PrintServiceDialog, RegistryPropert
         """
         Constructor
         """
-        super(PrintServiceForm, self).__init__(Registry().get('main_window'),
-                                               QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint)
+        super(PrintServiceForm, self).__init__(Registry().get('main_window'), QtCore.Qt.WindowSystemMenuHint |
+                                               QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowCloseButtonHint)
         self.printer = QtPrintSupport.QPrinter()
         self.print_dialog = QtPrintSupport.QPrintDialog(self.printer, self)
         self.document = QtGui.QTextDocument()
@@ -176,7 +176,7 @@ class PrintServiceForm(QtWidgets.QDialog, Ui_PrintServiceDialog, RegistryPropert
         html_data = self._add_element('html')
         self._add_element('head', parent=html_data)
         self._add_element('title', self.title_line_edit.text(), html_data.head)
-        css_path = os.path.join(AppLocation.get_data_path(), 'serviceprint', 'service_print.css')
+        css_path = AppLocation.get_data_path() / 'serviceprint' / 'service_print.css'
         custom_css = get_text_file_string(css_path)
         if not custom_css:
             custom_css = DEFAULT_CSS

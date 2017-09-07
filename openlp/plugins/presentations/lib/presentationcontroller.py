@@ -27,6 +27,7 @@ import shutil
 from PyQt5 import QtCore
 
 from openlp.core.common import Registry, AppLocation, Settings, check_directory_exists, md5_hash
+from openlp.core.common.path import Path
 from openlp.core.lib import create_thumb, validate_thumb
 
 log = logging.getLogger(__name__)
@@ -98,7 +99,7 @@ class PresentationDocument(object):
         """
         self.slide_number = 0
         self.file_path = name
-        check_directory_exists(self.get_thumbnail_folder())
+        check_directory_exists(Path(self.get_thumbnail_folder()))
 
     def load_presentation(self):
         """
@@ -417,11 +418,12 @@ class PresentationController(object):
         self.document_class = document_class
         self.settings_section = self.plugin.settings_section
         self.available = None
-        self.temp_folder = os.path.join(AppLocation.get_section_data_path(self.settings_section), name)
-        self.thumbnail_folder = os.path.join(AppLocation.get_section_data_path(self.settings_section), 'thumbnails')
+        self.temp_folder = os.path.join(str(AppLocation.get_section_data_path(self.settings_section)), name)
+        self.thumbnail_folder = os.path.join(
+            str(AppLocation.get_section_data_path(self.settings_section)), 'thumbnails')
         self.thumbnail_prefix = 'slide'
-        check_directory_exists(self.thumbnail_folder)
-        check_directory_exists(self.temp_folder)
+        check_directory_exists(Path(self.thumbnail_folder))
+        check_directory_exists(Path(self.temp_folder))
 
     def enabled(self):
         """

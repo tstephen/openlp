@@ -29,6 +29,7 @@ import os
 from lxml import etree
 
 from openlp.core.common import RegistryProperties, check_directory_exists, translate, clean_filename
+from openlp.core.common.path import Path
 from openlp.plugins.songs.lib.openlyricsxml import OpenLyrics
 
 log = logging.getLogger(__name__)
@@ -47,7 +48,7 @@ class OpenLyricsExport(RegistryProperties):
         self.manager = parent.plugin.manager
         self.songs = songs
         self.save_path = save_path
-        check_directory_exists(self.save_path)
+        check_directory_exists(Path(self.save_path))
 
     def do_export(self):
         """

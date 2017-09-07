@@ -21,9 +21,9 @@
 ###############################################################################
 
 import logging
-import os
 
 from openlp.core.common import AppLocation, OpenLPMixin, RegistryProperties, Settings, translate, delete_file, UiStrings
+from openlp.core.common.path import Path
 from openlp.plugins.bibles.lib import LanguageSelection, parse_reference
 from openlp.plugins.bibles.lib.db import BibleDB, BibleMeta
 from .importers.csvbible import CSVBible
@@ -111,7 +111,7 @@ class BibleManager(OpenLPMixin, RegistryProperties):
         self.settings_section = 'bibles'
         self.web = 'Web'
         self.db_cache = None
-        self.path = AppLocation.get_section_data_path(self.settings_section)
+        self.path = str(AppLocation.get_section_data_path(self.settings_section))
         self.proxy_name = Settings().value(self.settings_section + '/proxy name')
         self.suffix = '.sqlite'
         self.import_wizard = None
@@ -124,7 +124,7 @@ class BibleManager(OpenLPMixin, RegistryProperties):
         of HTTPBible is loaded instead of the BibleDB class.
         """
         log.debug('Reload bibles')
-        files = AppLocation.get_files(self.settings_section, self.suffix)
+        files = [str(file) for file in AppLocation.get_files(self.settings_section, self.suffix)]
         if 'alternative_book_names.sqlite' in files:
             files.remove('alternative_book_names.sqlite')
         log.debug('Bible Files {text}'.format(text=files))
@@ -137,7 +137,7 @@ class BibleManager(OpenLPMixin, RegistryProperties):
             # Remove corrupted files.
             if name is None:
                 bible.session.close_all()
-                delete_file(os.path.join(self.path, filename))
+                delete_file(Path(self.path, filename))
                 continue
             log.debug('Bible Name: "{name}"'.format(name=name))
             self.db_cache[name] = bible
@@ -185,7 +185,7 @@ class BibleManager(OpenLPMixin, RegistryProperties):
         bible = self.db_cache[name]
         bible.session.close_all()
         bible.session = None
-        return delete_file(os.path.join(bible.path, bible.file))
+        return delete_file(Path(bible.path, bible.file))
 
     def get_bibles(self):
         """
@@ -305,13 +305,10 @@ class BibleManager(OpenLPMixin, RegistryProperties):
         """
         Does a verse search for the given bible and text.
 
-        :param bible: The bible to search
-        :type bible: str
-        :param text: The text to search for
-        :type text: str
-
+        :param str bible: The bible to search
+        :param str text: The text to search for
         :return: The search results if valid, or None if the search is invalid.
-        :rtype: None, list
+        :rtype: None | list
         """
         log.debug('BibleManager.verse_search("{bible}", "{text}")'.format(bible=bible, text=text))
         if not text:

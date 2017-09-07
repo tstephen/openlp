@@ -25,11 +25,12 @@ The :mod:``wizard`` module provides generic wizard tools for OpenLP.
 import logging
 import os
 
-from PyQt5 import QtGui, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from openlp.core.common import Registry, RegistryProperties, Settings, UiStrings, translate, is_macosx
 from openlp.core.lib import build_icon
 from openlp.core.lib.ui import add_welcome_page
+from openlp.core.ui.lib.filedialog import FileDialog
 
 log = logging.getLogger(__name__)
 
@@ -50,13 +51,13 @@ class WizardStrings(object):
     # These strings should need a good reason to be retranslated elsewhere.
     FinishedImport = translate('OpenLP.Ui', 'Finished import.')
     FormatLabel = translate('OpenLP.Ui', 'Format:')
-    HeaderStyle = '<span style="font-size:14pt; font-weight:600;">%s</span>'
+    HeaderStyle = '<span style="font-size:14pt; font-weight:600;">{text}</span>'
     Importing = translate('OpenLP.Ui', 'Importing')
-    ImportingType = translate('OpenLP.Ui', 'Importing "%s"...')
+    ImportingType = translate('OpenLP.Ui', 'Importing "{source}"...')
     ImportSelect = translate('OpenLP.Ui', 'Select Import Source')
     ImportSelectLong = translate('OpenLP.Ui', 'Select the import format and the location to import from.')
-    OpenTypeFile = translate('OpenLP.Ui', 'Open %s File')
-    OpenTypeFolder = translate('OpenLP.Ui', 'Open %s Folder')
+    OpenTypeFile = translate('OpenLP.Ui', 'Open {file_type} File')
+    OpenTypeFolder = translate('OpenLP.Ui', 'Open {folder_name} Folder')
     PercentSymbolFormat = translate('OpenLP.Ui', '%p%')
     Ready = translate('OpenLP.Ui', 'Ready.')
     StartingImport = translate('OpenLP.Ui', 'Starting import...')
@@ -93,7 +94,10 @@ class OpenLPWizard(QtWidgets.QWizard, RegistryProperties):
         """
         Constructor
         """
-        super(OpenLPWizard, self).__init__(parent)
+        # QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint  remove the "?" buttons from windows,
+        # QtCore.Qt.WindowCloseButtonHint enables the "x" button to close these windows.
+        super(OpenLPWizard, self).__init__(parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint |
+                                           QtCore.Qt.WindowCloseButtonHint)
         self.plugin = plugin
         self.with_progress_page = add_progress_page
         self.setFixedWidth(640)
@@ -275,37 +279,38 @@ class OpenLPWizard(QtWidgets.QWizard, RegistryProperties):
 
     def get_file_name(self, title, editbox, setting_name, filters=''):
         """
-        Opens a QFileDialog and saves the filename to the given editbox.
+        Opens a FileDialog and saves the filename to the given editbox.
 
-        :param title: The title of the dialog (unicode).
-        :param editbox:  An editbox (QLineEdit).
-        :param setting_name: The place where to save the last opened directory.
-        :param filters: The file extension filters. It should contain the file description
+        :param str title: The title of the dialog.
+        :param QtWidgets.QLineEdit editbox:  An QLineEdit.
+        :param str setting_name: The place where to save the last opened directory.
+        :param str filters: The file extension filters. It should contain the file description
             as well as the file extension. For example::
 
                 'OpenLP 2 Databases (*.sqlite)'
+        :rtype: None
         """
         if filters:
             filters += ';;'
         filters += '%s (*)' % UiStrings().AllFiles
-        filename, filter_used = QtWidgets.QFileDialog.getOpenFileName(
-            self, title, os.path.dirname(Settings().value(self.plugin.settings_section + '/' + setting_name)),
-            filters)
-        if filename:
-            editbox.setText(filename)
-        Settings().setValue(self.plugin.settings_section + '/' + setting_name, filename)
+        file_path, filter_used = FileDialog.getOpenFileName(
+            self, title, Settings().value(self.plugin.settings_section + '/' + setting_name), filters)
+        if file_path:
+            editbox.setText(str(file_path))
+            Settings().setValue(self.plugin.settings_section + '/' + setting_name, file_path.parent)
 
     def get_folder(self, title, editbox, setting_name):
         """
-        Opens a QFileDialog and saves the selected folder to the given editbox.
+        Opens a FileDialog and saves the selected folder to the given editbox.
 
-        :param title: The title of the dialog (unicode).
-        :param editbox: An editbox (QLineEdit).
-        :param setting_name: The place where to save the last opened directory.
+        :param str title: The title of the dialog.
+        :param QtWidgets.QLineEdit editbox: An QLineEditbox.
+        :param str setting_name: The place where to save the last opened directory.
+        :rtype: None
         """
-        folder = QtWidgets.QFileDialog.getExistingDirectory(
+        folder_path = FileDialog.getExistingDirectory(
             self, title, Settings().value(self.plugin.settings_section + '/' + setting_name),
             QtWidgets.QFileDialog.ShowDirsOnly)
-        if folder:
-            editbox.setText(folder)
-        Settings().setValue(self.plugin.settings_section + '/' + setting_name, folder)
+        if folder_path:
+            editbox.setText(str(folder_path))
+            Settings().setValue(self.plugin.settings_section + '/' + setting_name, folder_path)

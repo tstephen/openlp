@@ -34,12 +34,15 @@ from tempfile import gettempdir
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from openlp.core.common import Registry, RegistryProperties, AppLocation, LanguageManager, Settings, \
+from openlp.core.api import websockets
+from openlp.core.api.http import server
+from openlp.core.common import Registry, RegistryProperties, AppLocation, LanguageManager, Settings, UiStrings, \
     check_directory_exists, translate, is_win, is_macosx, add_actions
 from openlp.core.common.actions import ActionList, CategoryOrder
+from openlp.core.common.path import Path, path_to_str, str_to_path
 from openlp.core.common.versionchecker import get_application_version
 from openlp.core.lib import Renderer, PluginManager, ImageManager, PluginStatus, ScreenList, build_icon
-from openlp.core.lib.ui import UiStrings, create_action
+from openlp.core.lib.ui import create_action
 from openlp.core.ui import AboutForm, SettingsForm, ServiceManager, ThemeManager, LiveController, PluginForm, \
     ShortcutListForm, FormattingTagForm, PreviewController
 from openlp.core.ui.firsttimeform import FirstTimeForm
@@ -47,7 +50,9 @@ from openlp.core.ui.media import MediaController
 from openlp.core.ui.printserviceform import PrintServiceForm
 from openlp.core.ui.projector.manager import ProjectorManager
 from openlp.core.ui.lib.dockwidget import OpenLPDockWidget
+from openlp.core.ui.lib.filedialog import FileDialog
 from openlp.core.ui.lib.mediadockmanager import MediaDockManager
+
 
 log = logging.getLogger(__name__)
 
@@ -305,9 +310,9 @@ class Ui_MainWindow(object):
         # Give QT Extra Hint that this is an About Menu Item
         self.about_item.setMenuRole(QtWidgets.QAction.AboutRole)
         if is_win():
-            self.local_help_file = os.path.join(AppLocation.get_directory(AppLocation.AppDir), 'OpenLP.chm')
+            self.local_help_file = os.path.join(str(AppLocation.get_directory(AppLocation.AppDir)), 'OpenLP.chm')
         elif is_macosx():
-            self.local_help_file = os.path.join(AppLocation.get_directory(AppLocation.AppDir),
+            self.local_help_file = os.path.join(str(AppLocation.get_directory(AppLocation.AppDir)),
                                                 '..', 'Resources', 'OpenLP.help')
         self.user_manual_item = create_action(main_window, 'userManualItem', icon=':/system/system_help_contents.png',
                                               can_shortcuts=True, category=UiStrings().Help,
@@ -370,7 +375,7 @@ class Ui_MainWindow(object):
         """
         Set up the translation system
         """
-        main_window.setWindowTitle(UiStrings().OLP)
+        main_window.setWindowTitle(UiStrings().OpenLP)
         self.file_menu.setTitle(translate('OpenLP.MainWindow', '&File'))
         self.file_import_menu.setTitle(translate('OpenLP.MainWindow', '&Import'))
         self.file_export_menu.setTitle(translate('OpenLP.MainWindow', '&Export'))
@@ -513,6 +518,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, RegistryProperties):
         Settings().set_up_default_values()
         self.about_form = AboutForm(self)
         MediaController()
+        if Registry().get_flag('no_web_server'):
+            websockets.WebSocketServer()
+            server.HttpServer()
         SettingsForm(self)
         self.formatting_tag_form = FormattingTagForm(self)
         self.shortcut_form = ShortcutListForm(self)
@@ -540,7 +548,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, RegistryProperties):
         self.tools_first_time_wizard.triggered.connect(self.on_first_time_wizard_clicked)
         self.update_theme_images.triggered.connect(self.on_update_theme_images)
         self.formatting_tag_item.triggered.connect(self.on_formatting_tag_item_clicked)
-        self.settings_configure_item.triggered.connect(self.on_settings_configure_iem_clicked)
+        self.settings_configure_item.triggered.connect(self.on_settings_configure_item_clicked)
         self.settings_shortcuts_item.triggered.connect(self.on_settings_shortcuts_item_clicked)
         self.settings_import_item.triggered.connect(self.on_settings_import_item_clicked)
         self.settings_export_item.triggered.connect(self.on_settings_export_item_clicked)
@@ -788,7 +796,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, RegistryProperties):
         """
         Open data folder
         """
-        path = AppLocation.get_data_path()
+        path = str(AppLocation.get_data_path())
         QtGui.QDesktopServices.openUrl(QtCore.QUrl.fromLocalFile(path))
 
     def on_update_theme_images(self):
@@ -803,7 +811,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, RegistryProperties):
         """
         self.formatting_tag_form.exec()
 
-    def on_settings_configure_iem_clicked(self):
+    def on_settings_configure_item_clicked(self):
         """
         Show the Settings dialog
         """
@@ -864,16 +872,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, RegistryProperties):
         setting_sections.extend([plugin.name for plugin in self.plugin_manager.plugins])
         # Copy the settings file to the tmp dir, because we do not want to change the original one.
         temp_directory = os.path.join(str(gettempdir()), 'openlp')
-        check_directory_exists(temp_directory)
+        check_directory_exists(Path(temp_directory))
         temp_config = os.path.join(temp_directory, os.path.basename(import_file_name))
         shutil.copyfile(import_file_name, temp_config)
         settings = Settings()
         import_settings = Settings(temp_config, Settings.IniFormat)
-        # Convert image files
+
         log.info('hook upgrade_plugin_settings')
         self.plugin_manager.hook_upgrade_plugin_settings(import_settings)
-        # Remove/rename old settings to prepare the import.
-        import_settings.remove_obsolete_settings()
+        # Upgrade settings to prepare the import.
+        if import_settings.can_upgrade():
+            import_settings.upgrade_settings()
         # Lets do a basic sanity check. If it contains this string we can assume it was created by OpenLP and so we'll
         # load what we can from it, and just silently ignore anything we don't recognise.
         if import_settings.value('SettingsImport/type') != 'OpenLP_settings_export':
@@ -920,8 +929,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, RegistryProperties):
         QtWidgets.QMessageBox.information(self, translate('OpenLP.MainWindow', 'Import settings'),
                                           translate('OpenLP.MainWindow',
                                                     'OpenLP will now close.  Imported settings will '
-                                                    'be applied the next time you start OpenLP.'),
-                                          QtWidgets.QMessageBox.StandardButtons(QtWidgets.QMessageBox.Ok))
+                                                    'be applied the next time you start OpenLP.'))
         self.settings_imported = True
         self.clean_up()
         QtCore.QCoreApplication.exit()
@@ -930,89 +938,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, RegistryProperties):
         """
         Export settings to a .conf file in INI format
         """
-        export_file_name, filter_used = QtWidgets.QFileDialog.getSaveFileName(
+        export_file_path, filter_used = FileDialog.getSaveFileName(
             self,
             translate('OpenLP.MainWindow', 'Export Settings File'),
-            '',
+            None,
             translate('OpenLP.MainWindow', 'OpenLP Settings (*.conf)'))
-        if not export_file_name:
+        if not export_file_path:
             return
-            # Make sure it's a .conf file.
-        if not export_file_name.endswith('conf'):
-            export_file_name += '.conf'
-        temp_file = os.path.join(gettempdir(), 'openlp', 'exportConf.tmp')
+        # Make sure it's a .conf file.
+        export_file_path = export_file_path.with_suffix('.conf')
         self.save_settings()
-        setting_sections = []
-        # Add main sections.
-        setting_sections.extend([self.general_settings_section])
-        setting_sections.extend([self.advanced_settings_section])
-        setting_sections.extend([self.ui_settings_section])
-        setting_sections.extend([self.shortcuts_settings_section])
-        setting_sections.extend([self.service_manager_settings_section])
-        setting_sections.extend([self.themes_settings_section])
-        setting_sections.extend([self.display_tags_section])
-        # Add plugin sections.
-        for plugin in self.plugin_manager.plugins:
-            setting_sections.extend([plugin.name])
-        # Delete old files if found.
-        if os.path.exists(temp_file):
-            os.remove(temp_file)
-        if os.path.exists(export_file_name):
-            os.remove(export_file_name)
-        settings = Settings()
-        settings.remove(self.header_section)
-        # Get the settings.
-        keys = settings.allKeys()
-        export_settings = Settings(temp_file, Settings.IniFormat)
-        # Add a header section.
-        # This is to insure it's our conf file for import.
-        now = datetime.now()
-        application_version = get_application_version()
-        # Write INI format using Qsettings.
-        # Write our header.
-        export_settings.beginGroup(self.header_section)
-        export_settings.setValue('Make_Changes', 'At_Own_RISK')
-        export_settings.setValue('type', 'OpenLP_settings_export')
-        export_settings.setValue('file_date_created', now.strftime("%Y-%m-%d %H:%M"))
-        export_settings.setValue('version', application_version['full'])
-        export_settings.endGroup()
-        # Write all the sections and keys.
-        for section_key in keys:
-            # FIXME: We are conflicting with the standard "General" section.
-            if 'eneral' in section_key:
-                section_key = section_key.lower()
-            try:
-                key_value = settings.value(section_key)
-            except KeyError:
-                QtWidgets.QMessageBox.critical(self, translate('OpenLP.MainWindow', 'Export setting error'),
-                                               translate('OpenLP.MainWindow', 'The key "{key}" does not have a default '
-                                                                              'value so it will be skipped in this '
-                                                                              'export.').format(key=section_key),
-                                               QtWidgets.QMessageBox.StandardButtons(QtWidgets.QMessageBox.Ok))
-                key_value = None
-            if key_value is not None:
-                export_settings.setValue(section_key, key_value)
-        export_settings.sync()
-        # Temp CONF file has been written.  Blanks in keys are now '%20'.
-        # Read the  temp file and output the user's CONF file with blanks to
-        # make it more readable.
-        temp_conf = open(temp_file, 'r')
-        try:
-            export_conf = open(export_file_name, 'w')
-            for file_record in temp_conf:
-                # Get rid of any invalid entries.
-                if file_record.find('@Invalid()') == -1:
-                    file_record = file_record.replace('%20', ' ')
-                    export_conf.write(file_record)
-            temp_conf.close()
-            export_conf.close()
-            os.remove(temp_file)
-        except OSError as ose:
-                QtWidgets.QMessageBox.critical(self, translate('OpenLP.MainWindow', 'Export setting error'),
-                                               translate('OpenLP.MainWindow',
-                                                         'An error occurred while exporting the '
-                                                         'settings: {err}').format(err=ose.strerror),
-                                               QtWidgets.QMessageBox.StandardButtons(QtWidgets.QMessageBox.Ok))
+        Settings().export(export_file_path)
 
     def on_mode_default_item_clicked(self):
         """
@@ -1151,9 +1087,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, RegistryProperties):
         :param file_name: The file name of the service file.
         """
         if modified:
-            title = '{title} - {name}*'.format(title=UiStrings().OLP, name=file_name)
+            title = '{title} - {name}*'.format(title=UiStrings().OpenLP, name=file_name)
         else:
-            title = '{title} - {name}'.format(title=UiStrings().OLP, name=file_name)
+            title = '{title} - {name}'.format(title=UiStrings().OpenLP, name=file_name)
         self.setWindowTitle(title)
 
     def show_status_message(self, message):
@@ -1271,7 +1207,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, RegistryProperties):
         settings.remove('custom slide')
         settings.remove('service')
         settings.beginGroup(self.general_settings_section)
-        self.recent_files = settings.value('recent files')
+        self.recent_files = [path_to_str(file_path) for file_path in settings.value('recent files')]
         settings.endGroup()
         settings.beginGroup(self.ui_settings_section)
         self.move(settings.value('main window position'))
@@ -1295,7 +1231,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, RegistryProperties):
         log.debug('Saving QSettings')
         settings = Settings()
         settings.beginGroup(self.general_settings_section)
-        settings.setValue('recent files', self.recent_files)
+        settings.setValue('recent files', [str_to_path(file) for file in self.recent_files])
         settings.endGroup()
         settings.beginGroup(self.ui_settings_section)
         settings.setValue('main window position', self.pos())
@@ -1316,7 +1252,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, RegistryProperties):
         self.recent_files_menu.clear()
         for file_id, filename in enumerate(recent_files_to_display):
             log.debug('Recent file name: {name}'.format(name=filename))
-            # TODO: Should be good
             action = create_action(self, '',
                                    text='&{n} {name}'.format(n=file_id + 1,
                                                              name=os.path.splitext(os.path.basename(str(filename)))[0]),
@@ -1438,9 +1373,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, RegistryProperties):
             log.info('No data copy requested')
         # Change the location of data directory in config file.
         settings = QtCore.QSettings()
-        settings.setValue('advanced/data path', self.new_data_path)
+        settings.setValue('advanced/data path', Path(self.new_data_path))
         # Check if the new data path is our default.
-        if self.new_data_path == AppLocation.get_directory(AppLocation.DataDir):
+        if self.new_data_path == str(AppLocation.get_directory(AppLocation.DataDir)):
             settings.remove('advanced/data path')
         self.application.set_normal_cursor()
 

@@ -27,6 +27,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 from openlp.core.common import Registry, AppLocation, Settings, UiStrings, check_directory_exists, translate, \
     delete_file, get_images_filter
+from openlp.core.common.path import Path
 from openlp.core.lib import ItemCapabilities, MediaManagerItem, ServiceItemContext, StringContent, build_icon, \
     check_item_selected, create_thumb, validate_thumb
 from openlp.core.lib.ui import create_widget_action, critical_error_message_box
@@ -98,8 +99,8 @@ class ImageMediaItem(MediaManagerItem):
         self.list_view.setIconSize(QtCore.QSize(88, 50))
         self.list_view.setIndentation(self.list_view.default_indentation)
         self.list_view.allow_internal_dnd = True
-        self.service_path = os.path.join(AppLocation.get_section_data_path(self.settings_section), 'thumbnails')
-        check_directory_exists(self.service_path)
+        self.service_path = os.path.join(str(AppLocation.get_section_data_path(self.settings_section)), 'thumbnails')
+        check_directory_exists(Path(self.service_path))
         # Load images from the database
         self.load_full_list(
             self.manager.get_all_objects(ImageFilenames, order_by_ref=ImageFilenames.filename), initial_load=True)
@@ -210,8 +211,8 @@ class ImageMediaItem(MediaManagerItem):
         """
         images = self.manager.get_all_objects(ImageFilenames, ImageFilenames.group_id == image_group.id)
         for image in images:
-            delete_file(os.path.join(self.service_path, os.path.split(image.filename)[1]))
-            delete_file(self.generate_thumbnail_path(image))
+            delete_file(Path(self.service_path, os.path.split(image.filename)[1]))
+            delete_file(Path(self.generate_thumbnail_path(image)))
             self.manager.delete_object(ImageFilenames, image.id)
         image_groups = self.manager.get_all_objects(ImageGroups, ImageGroups.parent_id == image_group.id)
         for group in image_groups:
@@ -233,8 +234,8 @@ class ImageMediaItem(MediaManagerItem):
                 if row_item:
                     item_data = row_item.data(0, QtCore.Qt.UserRole)
                     if isinstance(item_data, ImageFilenames):
-                        delete_file(os.path.join(self.service_path, row_item.text(0)))
-                        delete_file(self.generate_thumbnail_path(item_data))
+                        delete_file(Path(self.service_path, row_item.text(0)))
+                        delete_file(Path(self.generate_thumbnail_path(item_data)))
                         if item_data.group_id == 0:
                             self.list_view.takeTopLevelItem(self.list_view.indexOfTopLevelItem(row_item))
                         else:
@@ -246,9 +247,7 @@ class ImageMediaItem(MediaManagerItem):
                                 translate('ImagePlugin.MediaItem', 'Remove group'),
                                 translate('ImagePlugin.MediaItem',
                                           'Are you sure you want to remove "{name}" and everything in it?'
-                                          ).format(name=item_data.group_name),
-                                QtWidgets.QMessageBox.StandardButtons(QtWidgets.QMessageBox.Yes |
-                                                                      QtWidgets.QMessageBox.No)
+                                          ).format(name=item_data.group_name)
                         ) == QtWidgets.QMessageBox.Yes:
                             self.recursively_delete_group(item_data)
                             self.manager.delete_object(ImageGroups, row_item.data(0, QtCore.Qt.UserRole).id)
@@ -391,7 +390,7 @@ class ImageMediaItem(MediaManagerItem):
         self.application.set_normal_cursor()
         self.load_list(files, target_group)
         last_dir = os.path.split(files[0])[0]
-        Settings().setValue(self.settings_section + '/last directory', last_dir)
+        Settings().setValue(self.settings_section + '/last directory', Path(last_dir))
 
     def load_list(self, images, target_group=None, initial_load=False):
         """
@@ -597,8 +596,7 @@ class ImageMediaItem(MediaManagerItem):
                 self, translate('ImagePlugin.MediaItem', 'Missing Image(s)'),
                 translate('ImagePlugin.MediaItem', 'The following image(s) no longer exist: {names}\n'
                           'Do you want to add the other images anyway?'
-                          ).format(names='\n'.join(missing_items_file_names)),
-                QtWidgets.QMessageBox.StandardButtons(QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Yes)) == \
+                          ).format(names='\n'.join(missing_items_file_names))) == \
                 QtWidgets.QMessageBox.No:
             return False
         # Continue with the existing images.

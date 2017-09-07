@@ -26,12 +26,14 @@ import logging
 import os
 import re
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.common import Registry, RegistryProperties, Settings, UiStrings, translate
-from openlp.core.lib import FileDialog, ServiceItem, StringContent, ServiceItemContext
+from openlp.core.common.path import Path, path_to_str, str_to_path
+from openlp.core.lib import ServiceItem, StringContent, ServiceItemContext
 from openlp.core.lib.searchedit import SearchEdit
 from openlp.core.lib.ui import create_widget_action, critical_error_message_box
+from openlp.core.ui.lib.filedialog import FileDialog
 from openlp.core.ui.lib.listwidgetwithdnd import ListWidgetWithDnD
 from openlp.core.ui.lib.toolbar import OpenLPToolbar
 
@@ -309,13 +311,14 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
         """
         Add a file to the list widget to make it available for showing
         """
-        files = FileDialog.getOpenFileNames(self, self.on_new_prompt,
-                                            Settings().value(self.settings_section + '/last directory'),
-                                            self.on_new_file_masks)
-        log.info('New files(s) {files}'.format(files=files))
-        if files:
+        file_paths, selected_filter = FileDialog.getOpenFileNames(
+            self, self.on_new_prompt,
+            Settings().value(self.settings_section + '/last directory'),
+            self.on_new_file_masks)
+        log.info('New files(s) {file_paths}'.format(file_paths=file_paths))
+        if file_paths:
             self.application.set_busy_cursor()
-            self.validate_and_load(files)
+            self.validate_and_load([path_to_str(path) for path in file_paths])
         self.application.set_normal_cursor()
 
     def load_file(self, data):
@@ -374,9 +377,8 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
                 self.list_view.clear()
             self.load_list(full_list, target_group)
             last_dir = os.path.split(files[0])[0]
-            Settings().setValue(self.settings_section + '/last directory', last_dir)
-            Settings().setValue('{section}/{section} files'.format(section=self.settings_section),
-                                self.get_file_list())
+            Settings().setValue(self.settings_section + '/last directory', Path(last_dir))
+            Settings().setValue('{section}/{section} files'.format(section=self.settings_section), self.get_file_list())
         if duplicates_found:
             critical_error_message_box(UiStrings().Duplicate,
                                        translate('OpenLP.MediaManagerItem',
@@ -397,13 +399,15 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
     def get_file_list(self):
         """
         Return the current list of files
+
+        :rtype: list[openlp.core.common.path.Path]
         """
-        file_list = []
+        file_paths = []
         for index in range(self.list_view.count()):
             list_item = self.list_view.item(index)
             filename = list_item.data(QtCore.Qt.UserRole)
-            file_list.append(filename)
-        return file_list
+            file_paths.append(str_to_path(filename))
+        return file_paths
 
     def load_list(self, load_list, target_group):
         """

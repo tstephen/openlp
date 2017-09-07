@@ -28,6 +28,7 @@ import os
 from PyQt5 import QtCore
 
 from openlp.core.common import Registry, AppLocation, check_directory_exists, translate
+from openlp.core.common.path import Path
 from openlp.core.ui.lib.wizard import WizardStrings
 from openlp.plugins.songs.lib import clean_song, VerseType
 from openlp.plugins.songs.lib.db import Song, Author, Topic, Book, MediaFile
@@ -347,8 +348,7 @@ class SongImport(QtCore.QObject):
         song = Song()
         song.title = self.title
         if self.import_wizard is not None:
-            # TODO: Verify format() with template variables
-            self.import_wizard.increment_progress_bar(WizardStrings.ImportingType % song.title)
+            self.import_wizard.increment_progress_bar(WizardStrings.ImportingType.format(source=song.title))
         song.alternate_title = self.alternate_title
         # Values will be set when cleaning the song.
         song.search_title = ''
@@ -422,9 +422,9 @@ class SongImport(QtCore.QObject):
         :param filename: The file to copy.
         """
         if not hasattr(self, 'save_path'):
-            self.save_path = os.path.join(AppLocation.get_section_data_path(self.import_wizard.plugin.name),
+            self.save_path = os.path.join(str(AppLocation.get_section_data_path(self.import_wizard.plugin.name)),
                                           'audio', str(song_id))
-        check_directory_exists(self.save_path)
+        check_directory_exists(Path(self.save_path))
         if not filename.startswith(self.save_path):
             old_file, filename = filename, os.path.join(self.save_path, os.path.split(filename)[1])
             shutil.copyfile(old_file, filename)

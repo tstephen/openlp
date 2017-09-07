@@ -28,12 +28,13 @@ import os
 import datetime
 from PyQt5 import QtCore, QtWidgets
 
+from openlp.core.api.http import register_endpoint
 from openlp.core.common import OpenLPMixin, Registry, RegistryMixin, RegistryProperties, Settings, UiStrings, \
     extension_loader, translate
 from openlp.core.lib import ItemCapabilities
 from openlp.core.lib.ui import critical_error_message_box
-from openlp.core.common import AppLocation
 from openlp.core.ui import DisplayControllerType
+from openlp.core.ui.media.endpoint import media_endpoint
 from openlp.core.ui.media.vendor.mediainfoWrapper import MediaInfoWrapper
 from openlp.core.ui.media.mediaplayer import MediaPlayer
 from openlp.core.ui.media import MediaState, MediaInfo, MediaType, get_media_players, set_media_players,\
@@ -127,9 +128,11 @@ class MediaController(RegistryMixin, OpenLPMixin, RegistryProperties):
         Registry().register_function('media_unblank', self.media_unblank)
         # Signals for background video
         Registry().register_function('songs_hide', self.media_hide)
+        Registry().register_function('songs_blank', self.media_blank)
         Registry().register_function('songs_unblank', self.media_unblank)
         Registry().register_function('mediaitem_media_rebuild', self._set_active_players)
         Registry().register_function('mediaitem_suffixes', self._generate_extensions_lists)
+        register_endpoint(media_endpoint)
 
     def _set_active_players(self):
         """
@@ -174,7 +177,7 @@ class MediaController(RegistryMixin, OpenLPMixin, RegistryProperties):
         Check to see if we have any media Player's available.
         """
         log.debug('_check_available_media_players')
-        controller_dir = os.path.join('openlp', 'core', 'ui', 'media')
+        controller_dir = os.path.join('core', 'ui', 'media')
         glob_pattern = os.path.join(controller_dir, '*player.py')
         extension_loader(glob_pattern, ['mediaplayer.py'])
         player_classes = MediaPlayer.__subclasses__()
@@ -294,7 +297,9 @@ class MediaController(RegistryMixin, OpenLPMixin, RegistryProperties):
                                                triggers=controller.send_to_plugins)
         controller.position_label = QtWidgets.QLabel()
         controller.position_label.setText(' 00:00 / 00:00')
+        controller.position_label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         controller.position_label.setToolTip(translate('OpenLP.SlideController', 'Video timer.'))
+        controller.position_label.setMinimumSize(90, 0)
         controller.position_label.setObjectName('position_label')
         controller.mediabar.add_toolbar_widget(controller.position_label)
         # Build the seek_slider.
@@ -430,7 +435,7 @@ class MediaController(RegistryMixin, OpenLPMixin, RegistryProperties):
         log.debug('video mediatype: ' + str(controller.media_info.media_type))
         # dont care about actual theme, set a black background
         if controller.is_live and not controller.media_info.is_background:
-            display.frame.evaluateJavaScript('show_video( "setBackBoard", null, null, null,"visible");')
+            display.frame.evaluateJavaScript('show_video("setBackBoard", null, null,"visible");')
         # now start playing - Preview is autoplay!
         autoplay = False
         # Preview requested
@@ -466,9 +471,10 @@ class MediaController(RegistryMixin, OpenLPMixin, RegistryProperties):
         player = self.media_players[used_players[0]]
         if suffix not in player.video_extensions_list and suffix not in player.audio_extensions_list:
             # Media could not be loaded correctly
-            critical_error_message_box(translate('MediaPlugin.MediaItem', 'Unsupported Media File'),
-                                       translate('MediaPlugin.MediaItem', 'File %s not supported using player %s') %
-                                       (service_item.get_frame_path(), used_players[0]))
+            critical_error_message_box(
+                translate('MediaPlugin.MediaItem', 'Unsupported Media File'),
+                translate('MediaPlugin.MediaItem', 'File {file_path} not supported using player {player_name}'
+                          ).format(file_path=service_item.get_frame_path(), player_name=used_players[0]))
             return False
         media_data = MediaInfoWrapper.parse(service_item.get_frame_path())
         # duration returns in milli seconds
@@ -610,6 +616,14 @@ class MediaController(RegistryMixin, OpenLPMixin, RegistryProperties):
         """
         self.media_play(msg[0], status)
 
+    def on_media_play(self):
+        """
+        Responds to the request to play a loaded video from the web.
+
+        :param msg: First element is the controller which should be used
+        """
+        self.media_play(Registry().get('live_controller'), False)
+
     def media_play(self, controller, first_time=True):
         """
         Responds to the request to play a loaded video
@@ -684,6 +698,14 @@ class MediaController(RegistryMixin, OpenLPMixin, RegistryProperties):
         """
         self.media_pause(msg[0])
 
+    def on_media_pause(self):
+        """
+        Responds to the request to pause a loaded video from the web.
+
+        :param msg: First element is the controller which should be used
+        """
+        self.media_pause(Registry().get('live_controller'))
+
     def media_pause(self, controller):
         """
         Responds to the request to pause a loaded video
@@ -724,6 +746,14 @@ class MediaController(RegistryMixin, OpenLPMixin, RegistryProperties):
         """
         self.media_stop(msg[0])
 
+    def on_media_stop(self):
+        """
+        Responds to the request to stop a loaded video from the web.
+
+        :param msg: First element is the controller which should be used
+        """
+        self.media_stop(Registry().get('live_controller'))
+
     def media_stop(self, controller, looping_background=False):
         """
         Responds to the request to stop a loaded video
@@ -738,6 +768,11 @@ class MediaController(RegistryMixin, OpenLPMixin, RegistryProperties):
             self.current_media_players[controller.controller_type].stop(display)
             self.current_media_players[controller.controller_type].set_visible(display, False)
             controller.seek_slider.setSliderPosition(0)
+            total_seconds = controller.media_info.length // 1000
+            total_minutes = total_seconds // 60
+            total_seconds %= 60
+            controller.position_label.setText(' %02d:%02d / %02d:%02d' %
+                                              (0, 0, total_minutes, total_seconds))
             controller.mediabar.actions['playbackPlay'].setVisible(True)
             controller.mediabar.actions['playbackStop'].setDisabled(True)
             controller.mediabar.actions['playbackPause'].setVisible(False)
@@ -800,7 +835,7 @@ class MediaController(RegistryMixin, OpenLPMixin, RegistryProperties):
             display.override = {}
             self.current_media_players[controller.controller_type].reset(display)
             self.current_media_players[controller.controller_type].set_visible(display, False)
-            display.frame.evaluateJavaScript('show_video( "setBackBoard", null, null, null,"hidden");')
+            display.frame.evaluateJavaScript('show_video("setBackBoard", null, null, "hidden");')
             del self.current_media_players[controller.controller_type]
 
     def media_hide(self, msg):
@@ -815,7 +850,7 @@ class MediaController(RegistryMixin, OpenLPMixin, RegistryProperties):
         display = self._define_display(self.live_controller)
         if self.live_controller.controller_type in self.current_media_players and \
                 self.current_media_players[self.live_controller.controller_type].get_live_state() == MediaState.Playing:
-            self.current_media_players[self.live_controller.controller_type].pause(display)
+            self.media_pause(display.controller)
             self.current_media_players[self.live_controller.controller_type].set_visible(display, False)
 
     def media_blank(self, msg):
@@ -833,7 +868,7 @@ class MediaController(RegistryMixin, OpenLPMixin, RegistryProperties):
         display = self._define_display(self.live_controller)
         if self.live_controller.controller_type in self.current_media_players and \
                 self.current_media_players[self.live_controller.controller_type].get_live_state() == MediaState.Playing:
-            self.current_media_players[self.live_controller.controller_type].pause(display)
+            self.media_pause(display.controller)
             self.current_media_players[self.live_controller.controller_type].set_visible(display, False)
 
     def media_unblank(self, msg):
@@ -851,7 +886,7 @@ class MediaController(RegistryMixin, OpenLPMixin, RegistryProperties):
         if self.live_controller.controller_type in self.current_media_players and \
                 self.current_media_players[self.live_controller.controller_type].get_live_state() != \
                 MediaState.Playing:
-            if self.current_media_players[self.live_controller.controller_type].play(display):
+            if self.media_play(display.controller):
                 self.current_media_players[self.live_controller.controller_type].set_visible(display, True)
                 # Start Timer for ui updates
                 if not self.live_timer.isActive():

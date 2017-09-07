@@ -28,6 +28,7 @@ from PyQt5 import QtCore, QtWidgets
 from sqlalchemy.sql import and_, or_
 
 from openlp.core.common import Registry, AppLocation, Settings, check_directory_exists, UiStrings, translate
+from openlp.core.common.path import Path
 from openlp.core.lib import MediaManagerItem, ItemCapabilities, PluginStatus, ServiceItemContext, \
     check_item_selected, create_separated_list
 from openlp.core.lib.ui import create_widget_action
@@ -88,9 +89,9 @@ class SongMediaItem(MediaManagerItem):
         song.media_files = []
         for i, bga in enumerate(item.background_audio):
             dest_file = os.path.join(
-                AppLocation.get_section_data_path(self.plugin.name), 'audio', str(song.id), os.path.split(bga)[1])
-            check_directory_exists(os.path.split(dest_file)[0])
-            shutil.copyfile(os.path.join(AppLocation.get_section_data_path('servicemanager'), bga), dest_file)
+                str(AppLocation.get_section_data_path(self.plugin.name)), 'audio', str(song.id), os.path.split(bga)[1])
+            check_directory_exists(Path(os.path.split(dest_file)[0]))
+            shutil.copyfile(os.path.join(str(AppLocation.get_section_data_path('servicemanager')), bga), dest_file)
             song.media_files.append(MediaFile.populate(weight=i, file_name=dest_file))
         self.plugin.manager.save_object(song, True)
 
@@ -231,9 +232,14 @@ class SongMediaItem(MediaManagerItem):
 
     def search_entire(self, search_keywords):
         search_string = '%{text}%'.format(text=clean_string(search_keywords))
-        return self.plugin.manager.get_all_objects(
-            Song, or_(Song.search_title.like(search_string), Song.search_lyrics.like(search_string),
-                      Song.comments.like(search_string)))
+        return self.plugin.manager.session.query(Song) \
+            .join(SongBookEntry, isouter=True) \
+            .join(Book, isouter=True) \
+            .filter(or_(Book.name.like(search_string), SongBookEntry.entry.like(search_string),
+                        # hint: search_title contains alternate title
+                        Song.search_title.like(search_string), Song.search_lyrics.like(search_string),
+                        Song.comments.like(search_string))) \
+            .all()
 
     def on_song_list_load(self):
         """
@@ -500,8 +506,7 @@ class SongMediaItem(MediaManagerItem):
                     translate('SongsPlugin.MediaItem',
                               'Are you sure you want to delete the "{items:d}" '
                               'selected song(s)?').format(items=len(items)),
-                    QtWidgets.QMessageBox.StandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No),
-                    QtWidgets.QMessageBox.Yes) == QtWidgets.QMessageBox.No:
+                    defaultButton=QtWidgets.QMessageBox.Yes) == QtWidgets.QMessageBox.No:
                 return
             self.application.set_busy_cursor()
             self.main_window.display_progress_bar(len(items))
@@ -529,8 +534,9 @@ class SongMediaItem(MediaManagerItem):
                                                                       'copy', 'For song cloning'))
             # Copy audio files from the old to the new song
             if len(old_song.media_files) > 0:
-                save_path = os.path.join(AppLocation.get_section_data_path(self.plugin.name), 'audio', str(new_song.id))
-                check_directory_exists(save_path)
+                save_path = os.path.join(
+                    str(AppLocation.get_section_data_path(self.plugin.name)), 'audio', str(new_song.id))
+                check_directory_exists(Path(save_path))
                 for media_file in old_song.media_files:
                     new_media_file_name = os.path.join(save_path, os.path.basename(media_file.file_name))
                     shutil.copyfile(media_file.file_name, new_media_file_name)
@@ -598,7 +604,7 @@ class SongMediaItem(MediaManagerItem):
                         else:
                             verse_index = VerseType.from_tag(verse[0]['type'])
                         verse_tag = VerseType.translated_tags[verse_index]
-                        verse_def = '{tag}{text}'.format(tag=verse_tag, text=verse[0]['label'])
+                        verse_def = '{tag}{label}'.format(tag=verse_tag, label=verse[0]['label'])
                         service_item.add_from_text(verse[1], verse_def)
         service_item.title = song.title
         author_list = self.generate_footer(service_item, song)
