@@ -61,6 +61,13 @@ class TextType(object):
     Notes = 2
 
 
+class LibreOfficeException(Exception):
+    """
+    A specific exception for LO
+    """
+    pass
+
+
 @expose
 class LibreOfficeServer(object):
     """
@@ -71,7 +78,6 @@ class LibreOfficeServer(object):
         Set up the server
         """
         self._control = None
-        self._desktop = None
         self._document = None
         self._presentation = None
         self._process = None
@@ -122,38 +128,34 @@ class LibreOfficeServer(object):
             '--minimized',
             '--nodefault',
             '--nofirststartwizard',
-            '--accept=pipe,name=openlp_pipe;urp;'
+            '--accept=socket,host=localhost,port=2002;urp;StarOffice.ServiceManager'
         ]
         self._process = Popen(uno_command)
 
-    def setup_desktop(self):
+    @property
+    def desktop(self):
         """
         Set up an UNO desktop instance
         """
-        if self.has_desktop():
-            return
         uno_instance = None
         context = uno.getComponentContext()
         resolver = context.ServiceManager.createInstanceWithContext('com.sun.star.bridge.UnoUrlResolver', context)
         loop = 0
         while uno_instance is None and loop < 3:
             try:
-                uno_instance = resolver.resolve('uno:pipe,name=openlp_pipe;urp;StarOffice.ComponentContext')
+                uno_instance = resolver.resolve('uno:socket,host=localhost,port=2002;urp;StarOffice.ComponentContext')
             except Exception as e:
                 log.warning('Unable to find running instance ')
                 loop += 1
         try:
-            self._manager = uno_instance.ServiceManager
+            manager = uno_instance.ServiceManager
             log.debug('get UNO Desktop Openoffice - createInstanceWithContext - Desktop')
-            self._desktop = self._manager.createInstanceWithContext('com.sun.star.frame.Desktop', uno_instance)
+            desktop = manager.createInstanceWithContext('com.sun.star.frame.Desktop', uno_instance)
+            if not desktop:
+                raise Exception('Failed to get UNO desktop')
+            return desktop
         except Exception as e:
             log.warning('Failed to get UNO desktop')
-
-    def has_desktop(self):
-        """
-        Say if we have a desktop object
-        """
-        return hasattr(self, '_desktop') and self._desktop is not None
 
     def shutdown(self):
         """
@@ -163,24 +165,23 @@ class LibreOfficeServer(object):
         if hasattr(self, '_docs'):
             while self._docs:
                 self._docs[0].close_presentation()
-        if self.has_desktop():
-            docs = self._desktop.getComponents()
-            count = 0
-            if docs.hasElements():
-                list_elements = docs.createEnumeration()
-                while list_elements.hasMoreElements():
-                    doc = list_elements.nextElement()
-                    if doc.getImplementationName() != 'com.sun.star.comp.framework.BackingComp':
-                        count += 1
-            if count > 0:
-                log.debug('LibreOffice not terminated as docs are still open')
-                can_kill = False
-            else:
-                try:
-                    self._desktop.terminate()
-                    log.debug('LibreOffice killed')
-                except:
-                    log.warning('Failed to terminate LibreOffice')
+        docs = self.desktop.getComponents()
+        count = 0
+        if docs.hasElements():
+            list_elements = docs.createEnumeration()
+            while list_elements.hasMoreElements():
+                doc = list_elements.nextElement()
+                if doc.getImplementationName() != 'com.sun.star.comp.framework.BackingComp':
+                    count += 1
+        if count > 0:
+            log.debug('LibreOffice not terminated as docs are still open')
+            can_kill = False
+        else:
+            try:
+                self.desktop.terminate()
+                log.debug('LibreOffice killed')
+            except:
+                log.warning('Failed to terminate LibreOffice')
         if getattr(self, '_process') and can_kill:
             self._process.kill()
 
@@ -191,8 +192,10 @@ class LibreOfficeServer(object):
         self._file_path = file_path
         url = uno.systemPathToFileUrl(file_path)
         properties = (self._create_property('Hidden', True),)
+        retries = 0
+        self._document = None
         try:
-            self._document = self._desktop.loadComponentFromURL(url, '_blank', 0, properties)
+            self._document = self.desktop.loadComponentFromURL(url, '_blank', 0, properties)
         except:
             log.warning('Failed to load presentation {url}'.format(url=url))
             return False

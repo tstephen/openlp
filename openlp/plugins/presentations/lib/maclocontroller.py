@@ -23,6 +23,7 @@
 import logging
 import os
 import time
+from pathlib import Path
 from subprocess import Popen
 
 from openlp.core.common import AppLocation, Registry, delete_file, is_macosx
@@ -65,11 +66,11 @@ class MacLOController(PresentationController):
         """
         Start a LibreOfficeServer
         """
-        libreoffice_python = '/Applications/LibreOffice.app/Contents/Resources/python'
-        libreoffice_server = os.path.join(AppLocation.get_directory(AppLocation.PluginsDir),
-                                          'presentations', 'lib', 'libreofficeserver.py')
-        if os.path.exists(libreoffice_python):
-            self.server_process = Popen([libreoffice_python, libreoffice_server])
+        libreoffice_python = Path('/Applications/LibreOffice.app/Contents/Resources/python')
+        libreoffice_server = AppLocation.get_directory(AppLocation.PluginsDir).joinpath('presentations', 'lib',
+                                                                                        'libreofficeserver.py')
+        if libreoffice_python.exists():
+            self.server_process = Popen([str(libreoffice_python), str(libreoffice_server)])
 
     @property
     def client(self):
@@ -124,9 +125,6 @@ class MacLODocument(PresentationDocument):
         Tell the LibreOfficeServer to start the presentation.
         """
         log.debug('Load Presentation LibreOffice')
-        self.client.setup_desktop()
-        if not self.client.has_desktop():
-            return False
         if not self.client.load_presentation(self.file_path, ScreenList().current['number'] + 1):
             return False
         self.create_thumbnails()

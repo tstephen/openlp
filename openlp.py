@@ -20,12 +20,14 @@
 # with this program; if not, write to the Free Software Foundation, Inc., 59  #
 # Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
 ###############################################################################
-
-import sys
+import faulthandler
 import multiprocessing
+import sys
 
 from openlp.core.common import is_win, is_macosx
 from openlp.core import main
+
+faulthandler.enable()
 
 
 if __name__ == '__main__':

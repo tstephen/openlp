@@ -37,6 +37,8 @@ def path_to_str(path=None):
     :return: An empty string if :param:`path` is None, else a string representation of the :param:`path`
     :rtype: str
     """
+    if isinstance(path, str):
+        return path
     if not isinstance(path, Path) and path is not None:
         raise TypeError('parameter \'path\' must be of type Path or NoneType')
     if path is None:
