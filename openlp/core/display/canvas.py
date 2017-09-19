@@ -20,7 +20,7 @@
 # Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
 ###############################################################################
 """
-The :mod:`maindisplay` module provides the functionality to display screens and play multimedia within OpenLP.
+The :mod:`canvas` module provides the functionality to display screens and play multimedia within OpenLP.
 
 Some of the code for this form is based on the examples at:
 
@@ -72,7 +72,7 @@ QGraphicsView {
 """
 
 
-class Display(QtWidgets.QGraphicsView):
+class Canvas(QtWidgets.QGraphicsView):
     """
     This is a general display screen class. Here the general display settings will done. It will be used as
     specialized classes by Main Display and Preview display.
@@ -86,7 +86,7 @@ class Display(QtWidgets.QGraphicsView):
             self.is_live = True
         if self.is_live:
             self.parent = lambda: parent
-        super(Display, self).__init__()
+        super(Canvas, self).__init__()
         self.controller = parent
         self.screen = {}
 
@@ -128,7 +128,7 @@ class Display(QtWidgets.QGraphicsView):
         self.web_loaded = True
 
 
-class MainDisplay(OpenLPMixin, Display, RegistryProperties):
+class MainCanvas(OpenLPMixin, Display, RegistryProperties):
     """
     This is the display screen as a specialized class from the Display class
     """
@@ -136,7 +136,7 @@ class MainDisplay(OpenLPMixin, Display, RegistryProperties):
         """
         Constructor
         """
-        super(MainDisplay, self).__init__(parent)
+        super(MainCanvas, self).__init__(parent)
         self.screens = ScreenList()
         self.rebuild_css = False
         self.hide_mode = None
@@ -175,7 +175,7 @@ class MainDisplay(OpenLPMixin, Display, RegistryProperties):
                 pythonapi.PyCapsule_SetName(nsview_pointer, c_char_p(b"objc.__object__"))
                 # Covert the NSView pointer into a pyobjc NSView object
                 self.pyobjc_nsview = objc_object(cobject=nsview_pointer)
-                # Set the window level so that the MainDisplay is above the menu bar and dock
+                # Set the window level so that the MainCanvas is above the menu bar and dock
                 self.pyobjc_nsview.window().setLevel_(NSMainMenuWindowLevel + 2)
                 # Set the collection behavior so the window is visible when Mission Control is activated
                 self.pyobjc_nsview.window().setCollectionBehavior_(NSWindowCollectionBehaviorManaged)
@@ -244,16 +244,16 @@ class MainDisplay(OpenLPMixin, Display, RegistryProperties):
         """
         Setup the interface translation strings.
         """
-        self.setWindowTitle(translate('OpenLP.MainDisplay', 'OpenLP Display'))
+        self.setWindowTitle(translate('OpenLP.MainCanvas', 'OpenLP Display'))
 
     def setup(self):
         """
         Set up and build the output screen
         """
-        self.log_debug('Start MainDisplay setup (live = {islive})'.format(islive=self.is_live))
+        self.log_debug('Start MainCanvas setup (live = {islive})'.format(islive=self.is_live))
         self.screen = self.screens.current
         self.setVisible(False)
-        Display.setup(self)
+        Canvas.setup(self)
         if self.is_live:
             # Build the initial frame.
             background_color = QtGui.QColor()

@@ -29,7 +29,7 @@ from openlp.core.common import Registry, RegistryProperties, OpenLPMixin, Regist
 from openlp.core.lib import FormattingTags, ImageSource, ItemCapabilities, ScreenList, ServiceItem, expand_tags, \
     build_lyrics_format_css, build_lyrics_outline_css, build_chords_css
 from openlp.core.common import ThemeLevel
-from openlp.core.ui import MainDisplay
+from openlp.core.display.canvas import MainCanvas
 
 VERSE = 'The Lord said to {r}Noah{/r}: \n' \
     'There\'s gonna be a {su}floody{/su}, {sb}floody{/sb}\n' \
@@ -53,7 +53,7 @@ class Renderer(OpenLPMixin, RegistryMixin, RegistryProperties):
         Initialise the renderer.
         """
         super(Renderer, self).__init__(None)
-        # Need live behaviour if this is also working as a pseudo MainDisplay.
+        # Need live behaviour if this is also working as a pseudo MainCanvas.
         self.screens = ScreenList()
         self.theme_level = ThemeLevel.Global
         self.global_theme_name = ''
@@ -71,18 +71,18 @@ class Renderer(OpenLPMixin, RegistryMixin, RegistryProperties):
         """
         Initialise functions
         """
-        self.display = MainDisplay(self)
-        self.display.setup()
+        self.canvas = MainCanvas(self)
+        self.canvas.setup()
 
     def update_display(self):
         """
         Updates the renderer's information about the current screen.
         """
         self._calculate_default()
-        if self.display:
-            self.display.close()
-        self.display = MainDisplay(self)
-        self.display.setup()
+        if self.canvas:
+            self.canvas.close()
+        self.canvas = MainCanvas(self)
+        self.canvas.setup()
         self._theme_dimensions = {}
 
     def update_theme(self, theme_name, old_theme_name=None, only_delete=False):
@@ -215,10 +215,10 @@ class Renderer(OpenLPMixin, RegistryMixin, RegistryProperties):
         service_item.footer = footer
         service_item.render(True)
         if not self.force_page:
-            self.display.build_html(service_item)
+            self.canvas.build_html(service_item)
             raw_html = service_item.get_rendered_frame(0)
-            self.display.text(raw_html, False)
-            preview = self.display.preview()
+            self.canvas.text(raw_html, False)
+            preview = self.canvas.preview()
             return preview
         self.force_page = False
 
