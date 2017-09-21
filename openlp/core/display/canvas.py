@@ -97,11 +97,11 @@ class Canvas(QtWidgets.QGraphicsView):
         Set up and build the screen base
         """
         self.setGeometry(self.screen['size'])
-        self.web_view = QtWebKitWidgets.QWebView(self)
-        self.web_view.setGeometry(0, 0, self.screen['size'].width(), self.screen['size'].height())
-        self.web_view.settings().setAttribute(QtWebKit.QWebSettings.PluginsEnabled, True)
-        palette = self.web_view.palette()
-        palette.setBrush(QtGui.QPalette.Base, QtCore.Qt.transparent)
+        #self.web_view = QtWebKitWidgets.QWebView(self)
+        #self.web_view.setGeometry(0, 0, self.screen['size'].width(), self.screen['size'].height())
+        #self.web_view.settings().setAttribute(QtWebKit.QWebSettings.PluginsEnabled, True)
+        #palette = self.web_view.palette()
+        #palette.setBrush(QtGui.QPalette.Base, QtCore.Qt.transparent)
         #self.web_view.page().setPalette(palette)
         #self.web_view.setAttribute(QtCore.Qt.WA_OpaquePaintEvent, False)
         #self.page = self.web_view.page()
@@ -111,6 +111,8 @@ class Canvas(QtWidgets.QGraphicsView):
         #self.web_view.loadFinished.connect(self.is_web_loaded)
 
         self.webview = WebEngineView(self)
+        self.webview.setGeometry(0, 0, self.screen['size'].width(), self.screen['size'].height())
+        self.webview.settings().setAttribute(QtWebEngineWidgets.QWebEngineSettings.PluginsEnabled, True)
         self.layout.addWidget(self.webview)
         self.webview.loadFinished.connect(self.after_loaded)
         self.set_url(QtCore.QUrl('file://' + os.getcwd() + '/display.html'))
@@ -121,8 +123,6 @@ class Canvas(QtWidgets.QGraphicsView):
 
         self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        self.frame.setScrollBarPolicy(QtCore.Qt.Vertical, QtCore.Qt.ScrollBarAlwaysOff)
-        self.frame.setScrollBarPolicy(QtCore.Qt.Horizontal, QtCore.Qt.ScrollBarAlwaysOff)
 
     def after_loaded(self):
         """
@@ -415,9 +415,6 @@ class MainCanvas(OpenLPMixin, Canvas, RegistryProperties):
             else:
                 self.setVisible(False)
                 self.setGeometry(self.screen['size'])
-        # Workaround for bug #1531319, should not be needed with PyQt 5.6.
-        if is_win():
-            self.shake_web_view()
 
     def direct_image(self, path, background):
         """
@@ -487,17 +484,8 @@ class MainCanvas(OpenLPMixin, Canvas, RegistryProperties):
             # Wait for the fade to finish before geting the preview.
             # Important otherwise preview will have incorrect text if at all!
             if self.service_item.theme_data and self.service_item.theme_data.display_slide_transition:
-                # Workaround for bug #1531319, should not be needed with PyQt 5.6.
-                if is_win():
-                    fade_shake_timer = QtCore.QTimer(self)
-                    fade_shake_timer.setInterval(25)
-                    fade_shake_timer.timeout.connect(self.shake_web_view)
-                    fade_shake_timer.start()
                 while not self.frame.evaluateJavaScript('show_text_completed()'):
                     self.application.process_events()
-                # Workaround for bug #1531319, should not be needed with PyQt 5.6.
-                if is_win():
-                    fade_shake_timer.stop()
         # Wait for the webview to update before getting the preview.
         # Important otherwise first preview will miss the background !
         while not self.web_loaded:
@@ -515,9 +503,6 @@ class MainCanvas(OpenLPMixin, Canvas, RegistryProperties):
                         self.setVisible(True)
                 else:
                     self.setVisible(True)
-        # Workaround for bug #1531319, should not be needed with PyQt 5.6.
-        if is_win():
-            self.shake_web_view()
         return self.grab()
 
     def build_html(self, service_item, image_path=''):
@@ -608,9 +593,6 @@ class MainCanvas(OpenLPMixin, Canvas, RegistryProperties):
             if self.isHidden():
                 self.setVisible(True)
                 self.web_view.setVisible(True)
-            # Workaround for bug #1531319, should not be needed with PyQt 5.6.
-            if is_win():
-                self.shake_web_view()
         self.hide_mode = mode
 
     def show_display(self):
@@ -631,9 +613,6 @@ class MainCanvas(OpenLPMixin, Canvas, RegistryProperties):
         # Trigger actions when display is active again.
         if self.is_live:
             Registry().execute('live_display_active')
-            # Workaround for bug #1531319, should not be needed with PyQt 5.6.
-            if is_win():
-                self.shake_web_view()
 
     def _hide_mouse(self):
         """
