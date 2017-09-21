@@ -33,11 +33,13 @@ import html
 import logging
 import os
 
-from PyQt5 import QtCore, QtWidgets, QtWebKit, QtWebKitWidgets, QtGui, QtMultimedia
+from PyQt5 import QtCore, QtWidgets, QtWebKit, QtWebKitWidgets, QtGui, QtMultimedia, QtWebChannel, QtWebEngineWidgets
 
 from openlp.core.common import AppLocation, Registry, RegistryProperties, OpenLPMixin, Settings, translate,\
     is_macosx, is_win
 from openlp.core.common.path import path_to_str
+from openlp.core.display.webengine import WebEngineView
+from openlp.core.display.window import MediaWatcher
 from openlp.core.lib import ServiceItem, ImageSource, ScreenList, build_html, expand_tags, image_to_byte
 from openlp.core.lib.theme import BackgroundType
 from openlp.core.ui import HideMode, AlertLocation, DisplayControllerType
@@ -100,17 +102,33 @@ class Canvas(QtWidgets.QGraphicsView):
         self.web_view.settings().setAttribute(QtWebKit.QWebSettings.PluginsEnabled, True)
         palette = self.web_view.palette()
         palette.setBrush(QtGui.QPalette.Base, QtCore.Qt.transparent)
-        self.web_view.page().setPalette(palette)
-        self.web_view.setAttribute(QtCore.Qt.WA_OpaquePaintEvent, False)
-        self.page = self.web_view.page()
-        self.frame = self.page.mainFrame()
-        if self.is_live and log.getEffectiveLevel() == logging.DEBUG:
-            self.web_view.settings().setAttribute(QtWebKit.QWebSettings.DeveloperExtrasEnabled, True)
-        self.web_view.loadFinished.connect(self.is_web_loaded)
+        #self.web_view.page().setPalette(palette)
+        #self.web_view.setAttribute(QtCore.Qt.WA_OpaquePaintEvent, False)
+        #self.page = self.web_view.page()
+        #self.frame = self.page.mainFrame()
+        #if self.is_live and log.getEffectiveLevel() == logging.DEBUG:
+        #    self.web_view.settings().setAttribute(QtWebKit.QWebSettings.DeveloperExtrasEnabled, True)
+        #self.web_view.loadFinished.connect(self.is_web_loaded)
+
+        self.webview = WebEngineView(self)
+        self.layout.addWidget(self.webview)
+        self.webview.loadFinished.connect(self.after_loaded)
+        self.set_url(QtCore.QUrl('file://' + os.getcwd() + '/display.html'))
+        self.media_watcher = MediaWatcher(self)
+        self.channel = QtWebChannel.QWebChannel(self)
+        self.channel.registerObject('mediaWatcher', self.media_watcher)
+        self.webview.page().setWebChannel(self.channel)
+
         self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.frame.setScrollBarPolicy(QtCore.Qt.Vertical, QtCore.Qt.ScrollBarAlwaysOff)
         self.frame.setScrollBarPolicy(QtCore.Qt.Horizontal, QtCore.Qt.ScrollBarAlwaysOff)
+
+    def after_loaded(self):
+        """
+        Add stuff after page initialisation
+        """
+        self.run_javascript('Display.init();')
 
     def resizeEvent(self, event):
         """
@@ -127,8 +145,74 @@ class Canvas(QtWidgets.QGraphicsView):
         """
         self.web_loaded = True
 
+    def set_url(self, url):
+        """
+        Set the URL of the webview
+        """
+        if not isinstance(url, QtCore.QUrl):
+            url = QtCore.QUrl(url)
+        self.webview.setUrl(url)
 
-class MainCanvas(OpenLPMixin, Display, RegistryProperties):
+    def set_html(self, html):
+        """
+        Set the html
+        """
+        self.webview.setHtml(html)
+
+    def after_loaded(self):
+        """
+        Add stuff after page initialisation
+        """
+        self.run_javascript('Display.init();')
+
+    def add_script_source(self, fname, source):
+        """
+        Add a script of source code
+        """
+        js = QtWebEngineWidgets.QWebEngineScript()
+        js.setSourceCode(source)
+        js.setName(fname)
+        js.setWorldId(QtWebEngineWidgets.QWebEngineScript.MainWorld)
+        self.webview.page().scripts().insert(js)
+
+    def add_script(self, fname):
+        """
+        Add a script to the page
+        """
+        js_file = QtCore.QFile(fname)
+        if not js_file.open(QtCore.QIODevice.ReadOnly):
+            log.warning('Could not open %s: %s', fname, js_file.errorString())
+            return
+        self.add_script_source(os.path.basename(fname), str(bytes(js_file.readAll()), 'utf-8'))
+
+    def run_javascript(self, script, is_sync=False):
+        """
+        Run some Javascript in the WebView
+
+        :param script: The script to run, a string
+        :param is_sync: Run the script synchronously. Defaults to False
+        """
+        if not is_sync:
+            self.webview.page().runJavaScript(script)
+        else:
+            self.__script_done = False
+            self.__script_result = None
+
+            def handle_result(result):
+                """
+                Handle the result from the asynchronous call
+                """
+                self.__script_done = True
+                self.__script_result = result
+
+            self.webview.page().runJavaScript(script, handle_result)
+            while not self.__script_done:
+                # TODO: Figure out how to break out of a potentially infinite loop
+                QtWidgets.QApplication.instance().processEvents()
+            return self.__script_result
+
+
+class MainCanvas(OpenLPMixin, Canvas, RegistryProperties):
     """
     This is the display screen as a specialized class from the Display class
     """
@@ -591,13 +675,6 @@ class MainCanvas(OpenLPMixin, Display, RegistryProperties):
                     # If we are trying to focus the main window raise it now to complete the focus change.
                     if window_id == main_window_id:
                         self.main_window.raise_()
-
-    def shake_web_view(self):
-        """
-        Resizes the web_view a bit to force an update. Workaround for bug #1531319, should not be needed with PyQt 5.6.
-        """
-        self.web_view.setGeometry(0, 0, self.width(), self.height() - 1)
-        self.web_view.setGeometry(0, 0, self.width(), self.height())
 
 
 class AudioPlayer(OpenLPMixin, QtCore.QObject):
