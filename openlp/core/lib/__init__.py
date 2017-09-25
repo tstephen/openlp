@@ -644,7 +644,6 @@ from .settingstab import SettingsTab
 from .serviceitem import ServiceItem, ServiceItemType, ItemCapabilities
 from .htmlbuilder import build_html, build_lyrics_format_css, build_lyrics_outline_css, build_chords_css
 from .imagemanager import ImageManager
-from .renderer import Renderer
 from .mediamanageritem import MediaManagerItem
 from .projector.db import ProjectorDB, Projector
 from .projector.pjlink import PJLink

@@ -22,3 +22,5 @@
 """
 The Display module.
 """
+from .canvas import MainCanvas, Canvas, DisplayControllerType
+from .renderer import Renderer

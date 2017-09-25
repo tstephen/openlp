@@ -38,7 +38,8 @@ from openlp.core.lib import ItemCapabilities, ServiceItem, ImageSource, ServiceI
 from openlp.core.lib.ui import create_action
 from openlp.core.ui.lib.toolbar import OpenLPToolbar
 from openlp.core.ui.lib.listpreviewwidget import ListPreviewWidget
-from openlp.core.ui import HideMode, MainDisplay, Display, DisplayControllerType
+from openlp.core.ui import HideMode, DisplayControllerType
+from openlp.core.display import MainCanvas, Canvas
 
 
 # Threshold which has to be trespassed to toggle.
@@ -370,7 +371,7 @@ class SlideController(DisplayController, RegistryProperties):
         self.slide_layout.setSpacing(0)
         self.slide_layout.setContentsMargins(0, 0, 0, 0)
         self.slide_layout.setObjectName('SlideLayout')
-        self.preview_display = Display(self)
+        self.preview_display = Canvas(self)
         self.slide_layout.insertWidget(0, self.preview_display)
         self.preview_display.hide()
         # Actual preview screen
@@ -580,7 +581,7 @@ class SlideController(DisplayController, RegistryProperties):
         # rebuild display as screen size changed
         if self.display:
             self.display.close()
-        self.display = MainDisplay(self)
+        self.display = MainCanvas(self)
         self.display.setup()
         if self.is_live:
             self.__add_actions_to_widget(self.display)
@@ -596,7 +597,7 @@ class SlideController(DisplayController, RegistryProperties):
         self.preview_widget.screen_size_changed(self.ratio)
         self.preview_display.setup()
         service_item = ServiceItem()
-        self.preview_display.web_view.setHtml(build_html(service_item, self.preview_display.screen, None, self.is_live,
+        self.preview_display.webview.setHtml(build_html(service_item, self.preview_display.screen, None, self.is_live,
                                               plugins=self.plugin_manager.plugins))
         self.media_controller.setup_display(self.preview_display, True)
         if self.service_item:

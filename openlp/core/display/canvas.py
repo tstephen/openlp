@@ -30,6 +30,7 @@ Some of the code for this form is based on the examples at:
 """
 
 import html
+import json
 import logging
 import os
 
@@ -113,6 +114,8 @@ class Canvas(QtWidgets.QGraphicsView):
         self.webview = WebEngineView(self)
         self.webview.setGeometry(0, 0, self.screen['size'].width(), self.screen['size'].height())
         self.webview.settings().setAttribute(QtWebEngineWidgets.QWebEngineSettings.PluginsEnabled, True)
+        self.layout = QtWidgets.QVBoxLayout(self)
+        self.layout.setContentsMargins(0, 0, 0, 0)
         self.layout.addWidget(self.webview)
         self.webview.loadFinished.connect(self.after_loaded)
         self.set_url(QtCore.QUrl('file://' + os.getcwd() + '/display.html'))
@@ -123,12 +126,6 @@ class Canvas(QtWidgets.QGraphicsView):
 
         self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-
-    def after_loaded(self):
-        """
-        Add stuff after page initialisation
-        """
-        self.run_javascript('Display.init();')
 
     def resizeEvent(self, event):
         """
@@ -159,7 +156,7 @@ class Canvas(QtWidgets.QGraphicsView):
         """
         self.webview.setHtml(html)
 
-    def after_loaded(self):
+    def after_loaded(self, state):
         """
         Add stuff after page initialisation
         """
@@ -359,7 +356,7 @@ class MainCanvas(OpenLPMixin, Canvas, RegistryProperties):
                 splash_image)
             service_item = ServiceItem()
             service_item.bg_image_bytes = image_to_byte(self.initial_fame)
-            self.web_view.setHtml(build_html(service_item, self.screen, self.is_live, None,
+            self.webview.setHtml(build_html(service_item, self.screen, self.is_live, None,
                                   plugins=self.plugin_manager.plugins))
             self._hide_mouse()
 
@@ -374,17 +371,20 @@ class MainCanvas(OpenLPMixin, Canvas, RegistryProperties):
         while not self.web_loaded:
             self.application.process_events()
         self.setGeometry(self.screen['size'])
-        if animate:
-            # NOTE: Verify this works with ''.format()
-            _text = slide.replace('\\', '\\\\').replace('\"', '\\\"')
-            self.frame.evaluateJavaScript('show_text("{text}")'.format(text=_text))
-        else:
-            # This exists for https://bugs.launchpad.net/openlp/+bug/1016843
-            # For unknown reasons if evaluateJavaScript is called
-            # from the themewizard, then it causes a crash on
-            # Windows if there are many items in the service to re-render.
-            # Setting the div elements direct seems to solve the issue
-            self.frame.findFirstElement("#lyricsmain").setInnerXml(slide)
+        json_verses = json.dumps(slide)
+        print(json_verses)
+        self.run_javascript('Display.setTextSlides({verses});'.format(verses=json_verses))
+        #if animate:
+        #    # NOTE: Verify this works with ''.format()
+        #    _text = slide.replace('\\', '\\\\').replace('\"', '\\\"')
+        #    self.frame.evaluateJavaScript('show_text("{text}")'.format(text=_text))
+        #else:
+        #    # This exists for https://bugs.launchpad.net/openlp/+bug/1016843
+        #    # For unknown reasons if evaluateJavaScript is called
+        #    # from the themewizard, then it causes a crash on
+        #    # Windows if there are many items in the service to re-render.
+        #    # Setting the div elements direct seems to solve the issue
+        #    self.frame.findFirstElement("#lyricsmain").setInnerXml(slide)
 
     def alert(self, text, location):
         """
@@ -402,7 +402,7 @@ class MainCanvas(OpenLPMixin, Canvas, RegistryProperties):
         else:
             shrink = False
             js = 'show_alert("{text}", "")'.format(text=text_prepared)
-        height = self.frame.evaluateJavaScript(js)
+        height = self.run_javascript(js)
         if shrink:
             if text:
                 alert_height = int(height)
@@ -453,11 +453,17 @@ class MainCanvas(OpenLPMixin, Canvas, RegistryProperties):
         :param image: The image to be displayed
         """
         self.setGeometry(self.screen['size'])
-        if image:
-            js = 'show_image("data:image/png;base64,{image}");'.format(image=image)
-        else:
-            js = 'show_image("");'
-        self.frame.evaluateJavaScript(js)
+        #if image:
+        #    self.set_im
+        #    js = 'show_image("data:image/png;base64,{image}");'.format(image=image)
+        #else:
+        #    js = 'show_image("");'
+        #self.frame.evaluateJavaScript(js)
+        if not image['file'].startswith('file://'):
+            image['file'] = 'file://' + image['file']
+        json_images = json.dumps(images)
+        self.run_javascript('Display.setImageSlides({images});'.format(images=json_images))
+
 
     def reset_image(self):
         """
@@ -484,7 +490,7 @@ class MainCanvas(OpenLPMixin, Canvas, RegistryProperties):
             # Wait for the fade to finish before geting the preview.
             # Important otherwise preview will have incorrect text if at all!
             if self.service_item.theme_data and self.service_item.theme_data.display_slide_transition:
-                while not self.frame.evaluateJavaScript('show_text_completed()'):
+                while not self.run_javascript('show_text_completed()'):
                     self.application.process_events()
         # Wait for the webview to update before getting the preview.
         # Important otherwise first preview will miss the background !
@@ -540,7 +546,7 @@ class MainCanvas(OpenLPMixin, Canvas, RegistryProperties):
                 image_bytes = self.image_manager.get_image_bytes(image_path, ImageSource.ImagePlugin)
         created_html = build_html(self.service_item, self.screen, self.is_live, background, image_bytes,
                                   plugins=self.plugin_manager.plugins)
-        self.web_view.setHtml(created_html)
+        self.webview.setHtml(created_html)
         if service_item.foot_text:
             self.footer(service_item.foot_text)
         # if was hidden keep it hidden
@@ -569,7 +575,7 @@ class MainCanvas(OpenLPMixin, Canvas, RegistryProperties):
         :param text: footer text to be displayed
         """
         js = 'show_footer(\'' + text.replace('\\', '\\\\').replace('\'', '\\\'') + '\')'
-        self.frame.evaluateJavaScript(js)
+        self.run_javascript(js)
 
     def hide_display(self, mode=HideMode.Screen):
         """
@@ -583,16 +589,16 @@ class MainCanvas(OpenLPMixin, Canvas, RegistryProperties):
             if not Settings().value('core/display on monitor'):
                 return
         if mode == HideMode.Screen:
-            self.frame.evaluateJavaScript('show_blank("desktop");')
+            self.run_javascript('show_blank("desktop");')
             self.setVisible(False)
         elif mode == HideMode.Blank or self.initial_fame:
-            self.frame.evaluateJavaScript('show_blank("black");')
+            self.run_javascript('show_blank("black");')
         else:
-            self.frame.evaluateJavaScript('show_blank("theme");')
+            self.run_javascript('show_blank("theme");')
         if mode != HideMode.Screen:
             if self.isHidden():
                 self.setVisible(True)
-                self.web_view.setVisible(True)
+                self.webview.setVisible(True)
         self.hide_mode = mode
 
     def show_display(self):
@@ -604,7 +610,7 @@ class MainCanvas(OpenLPMixin, Canvas, RegistryProperties):
             # Only make visible if setting enabled.
             if not Settings().value('core/display on monitor'):
                 return
-        self.frame.evaluateJavaScript('show_blank("show");')
+        self.run_javascript('show_blank("show");')
         # Check if setting for hiding logo on startup is enabled.
         # If it is, display should remain hidden, otherwise logo is shown. (from def setup)
         if self.isHidden() and not Settings().value('core/logo hide on startup'):
@@ -620,10 +626,10 @@ class MainCanvas(OpenLPMixin, Canvas, RegistryProperties):
         """
         if Settings().value('advanced/hide mouse'):
             self.setCursor(QtCore.Qt.BlankCursor)
-            self.frame.evaluateJavaScript('document.body.style.cursor = "none"')
+            self.run_javascript('document.body.style.cursor = "none"')
         else:
             self.setCursor(QtCore.Qt.ArrowCursor)
-            self.frame.evaluateJavaScript('document.body.style.cursor = "auto"')
+            self.run_javascript('document.body.style.cursor = "auto"')
 
     def change_window_level(self, window):
         """

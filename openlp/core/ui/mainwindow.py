@@ -41,7 +41,7 @@ from openlp.core.common import Registry, RegistryProperties, AppLocation, Langua
 from openlp.core.common.actions import ActionList, CategoryOrder
 from openlp.core.common.path import Path, path_to_str, str_to_path
 from openlp.core.common.versionchecker import get_application_version
-from openlp.core.lib import Renderer, PluginManager, ImageManager, PluginStatus, ScreenList, build_icon
+from openlp.core.lib import PluginManager, ImageManager, PluginStatus, ScreenList, build_icon
 from openlp.core.lib.ui import create_action
 from openlp.core.ui import AboutForm, SettingsForm, ServiceManager, ThemeManager, LiveController, PluginForm, \
     ShortcutListForm, FormattingTagForm, PreviewController
@@ -52,7 +52,7 @@ from openlp.core.ui.projector.manager import ProjectorManager
 from openlp.core.ui.lib.dockwidget import OpenLPDockWidget
 from openlp.core.ui.lib.filedialog import FileDialog
 from openlp.core.ui.lib.mediadockmanager import MediaDockManager
-
+from openlp.core.display import Renderer
 
 log = logging.getLogger(__name__)
 
