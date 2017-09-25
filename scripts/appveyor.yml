@@ -13,7 +13,6 @@ environment:
 install:
   # Install dependencies from pypi
   - "%PYTHON%\\python.exe -m pip install sqlalchemy alembic chardet beautifulsoup4 Mako nose mock pyodbc psycopg2 pypiwin32 pyenchant websockets asyncio waitress six webob requests pyqt5 lxml PyInstaller"
-  - "%PYTHON%\\python.exe -m pip show -f PyInstaller
   # Install mysql dependency
   - appveyor DownloadFile http://cdn.mysql.com/Downloads/Connector-Python/mysql-connector-python-2.1.7.zip
   - 7z x mysql-connector-python-2.1.7.zip
@@ -80,7 +79,7 @@ after_test:
         &"$env:PYTHON\python.exe" builders/windows-builder.py --skip-update -c windows/config-appveyor.ini -b ../openlp-branch -d ../documentation --portable
       } else {
         cd packaging
-        &"$env:PYTHON\python.exe" builders/windows-builder.py --skip-update --skip-translations -c windows/config-appveyor.ini -b ../openlp-branch --portable
+        &"$env:PYTHON\python.exe" builders/windows-builder.py -v --skip-update --skip-translations -c windows/config-appveyor.ini -b ../openlp-branch --portable
       }
 
 artifacts:
