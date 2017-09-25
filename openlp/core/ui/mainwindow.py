@@ -39,7 +39,7 @@ from openlp.core.api.http import server
 from openlp.core.common import Registry, RegistryProperties, AppLocation, LanguageManager, Settings, UiStrings, \
     check_directory_exists, translate, is_win, is_macosx, add_actions
 from openlp.core.common.actions import ActionList, CategoryOrder
-from openlp.core.common.path import Path, path_to_str, str_to_path
+from openlp.core.common.path import Path, copyfile, path_to_str, str_to_path
 from openlp.core.common.versionchecker import get_application_version
 from openlp.core.lib import PluginManager, ImageManager, PluginStatus, ScreenList, build_icon
 from openlp.core.lib.ui import create_action
@@ -848,12 +848,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, RegistryProperties):
                                                 QtWidgets.QMessageBox.No)
         if answer == QtWidgets.QMessageBox.No:
             return
-        import_file_name, filter_used = QtWidgets.QFileDialog.getOpenFileName(
+        import_file_path, filter_used = FileDialog.getOpenFileName(
             self,
             translate('OpenLP.MainWindow', 'Import settings'),
-            '',
+            None,
             translate('OpenLP.MainWindow', 'OpenLP Settings (*.conf)'))
-        if not import_file_name:
+        if import_file_path is None:
             return
         setting_sections = []
         # Add main sections.
@@ -871,12 +871,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, RegistryProperties):
         # Add plugin sections.
         setting_sections.extend([plugin.name for plugin in self.plugin_manager.plugins])
         # Copy the settings file to the tmp dir, because we do not want to change the original one.
-        temp_directory = os.path.join(str(gettempdir()), 'openlp')
-        check_directory_exists(Path(temp_directory))
-        temp_config = os.path.join(temp_directory, os.path.basename(import_file_name))
-        shutil.copyfile(import_file_name, temp_config)
+        temp_dir_path = Path(gettempdir(), 'openlp')
+        check_directory_exists(temp_dir_path)
+        temp_config_path = temp_dir_path / import_file_path.name
+        copyfile(import_file_path, temp_config_path)
         settings = Settings()
-        import_settings = Settings(temp_config, Settings.IniFormat)
+        import_settings = Settings(str(temp_config_path), Settings.IniFormat)
 
         log.info('hook upgrade_plugin_settings')
         self.plugin_manager.hook_upgrade_plugin_settings(import_settings)
@@ -920,7 +920,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, RegistryProperties):
                 settings.setValue('{key}'.format(key=section_key), value)
         now = datetime.now()
         settings.beginGroup(self.header_section)
-        settings.setValue('file_imported', import_file_name)
+        settings.setValue('file_imported', import_file_path)
         settings.setValue('file_date_imported', now.strftime("%Y-%m-%d %H:%M"))
         settings.endGroup()
         settings.sync()
@@ -1332,12 +1332,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, RegistryProperties):
             if self.application:
                 self.application.process_events()
 
-    def set_new_data_path(self, new_data_path):
-        """
-        Set the new data path
-        """
-        self.new_data_path = new_data_path
-
     def set_copy_data(self, copy_data):
         """
         Set the flag to copy the data
@@ -1349,7 +1343,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, RegistryProperties):
         Change the data directory.
         """
         log.info('Changing data path to {newpath}'.format(newpath=self.new_data_path))
-        old_data_path = str(AppLocation.get_data_path())
+        old_data_path = AppLocation.get_data_path()
         # Copy OpenLP data to new location if requested.
         self.application.set_busy_cursor()
         if self.copy_data:
@@ -1358,7 +1352,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, RegistryProperties):
                 self.show_status_message(
                     translate('OpenLP.MainWindow', 'Copying OpenLP data to new data directory location - {path} '
                               '- Please wait for copy to finish').format(path=self.new_data_path))
-                dir_util.copy_tree(old_data_path, self.new_data_path)
+                dir_util.copy_tree(str(old_data_path), str(self.new_data_path))
                 log.info('Copy successful')
             except (IOError, os.error, DistutilsFileError) as why:
                 self.application.set_normal_cursor()
@@ -1373,9 +1367,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, RegistryProperties):
             log.info('No data copy requested')
         # Change the location of data directory in config file.
         settings = QtCore.QSettings()
-        settings.setValue('advanced/data path', Path(self.new_data_path))
+        settings.setValue('advanced/data path', self.new_data_path)
         # Check if the new data path is our default.
-        if self.new_data_path == str(AppLocation.get_directory(AppLocation.DataDir)):
+        if self.new_data_path == AppLocation.get_directory(AppLocation.DataDir):
             settings.remove('advanced/data path')
         self.application.set_normal_cursor()
 
