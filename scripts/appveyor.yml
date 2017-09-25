@@ -8,27 +8,23 @@ clone_script:
   - bzr checkout --lightweight BRANCHNAME openlp-branch
 
 environment:
-  PYTHON: C:\\Python34
+  PYTHON: C:\\Python36
 
 install:
   # Install dependencies from pypi
-  - "%PYTHON%\\python.exe -m pip install sqlalchemy alembic chardet beautifulsoup4 Mako nose mock pyodbc==4.0.8 psycopg2 pypiwin32 pyenchant websockets asyncio waitress six webob"
+  - "%PYTHON%\\python.exe -m pip install sqlalchemy alembic chardet beautifulsoup4 Mako nose mock pyodbc psycopg2 pypiwin32 pyenchant websockets asyncio waitress six webob requests pyqt5 lxml"
   # Install mysql dependency
-  - "%PYTHON%\\python.exe -m pip install http://cdn.mysql.com/Downloads/Connector-Python/mysql-connector-python-2.0.4.zip#md5=3df394d89300db95163f17c843ef49df"
+  - "%PYTHON%\\python.exe -m pip install http://cdn.mysql.com/Downloads/Connector-Python/mysql-connector-python-2.1.7.zip#md5=6e3f27535ab4390717f29583ed3249cd"
   # Download and install lxml and pyicu (originally from http://www.lfd.uci.edu/~gohlke/pythonlibs/)
-  - "%PYTHON%\\python.exe -m pip install https://get.openlp.org/win-sdk/lxml-3.6.4-cp34-cp34m-win32.whl"
-  - "%PYTHON%\\python.exe -m pip install https://get.openlp.org/win-sdk/PyICU-1.9.5-cp34-cp34m-win32.whl"
-  # Download and install PyQt5
-  - appveyor DownloadFile http://downloads.sourceforge.net/project/pyqt/PyQt5/PyQt-5.5.1/PyQt5-5.5.1-gpl-Py3.4-Qt5.5.1-x32.exe
-  - PyQt5-5.5.1-gpl-Py3.4-Qt5.5.1-x32.exe /S
+  - "%PYTHON%\\python.exe -m pip install https://get.openlp.org/win-sdk/PyICU-1.9.7-cp36-cp36m-win32.whl"
   # Download and unpack mupdf
   - appveyor DownloadFile http://mupdf.com/downloads/archive/mupdf-1.9a-windows.zip
   - 7z x mupdf-1.9a-windows.zip
   - cp mupdf-1.9a-windows/mupdf.exe openlp-branch/mupdf.exe
   # Download and unpack mediainfo
-  - appveyor DownloadFile https://mediaarea.net/download/binary/mediainfo/0.7.90/MediaInfo_CLI_0.7.90_Windows_i386.zip
+  - appveyor DownloadFile https://mediaarea.net/download/binary/mediainfo/0.7.99/MediaInfo_CLI_0.7.99_Windows_i386.zip
   - mkdir MediaInfo
-  - 7z x -oMediaInfo MediaInfo_CLI_0.7.90_Windows_i386.zip
+  - 7z x -oMediaInfo MediaInfo_CLI_0.7.99_Windows_i386.zip
   - cp MediaInfo\\MediaInfo.exe openlp-branch\\MediaInfo.exe
 
 build: off
@@ -36,15 +32,15 @@ build: off
 test_script:
   - cd openlp-branch
   # Run the tests
-  - "%PYTHON%\\python.exe -m nose -v tests"
+  #- "%PYTHON%\\python.exe -m nose -v tests"
   # Go back to the user root folder
   - cd..
 
 after_test:
   # This is where we create a package using PyInstaller
   # First get PyInstaller
-  - appveyor DownloadFile  https://github.com/pyinstaller/pyinstaller/releases/download/v3.2/PyInstaller-3.2.zip
-  - 7z x PyInstaller-3.2.zip
+  - appveyor DownloadFile  https://github.com/pyinstaller/pyinstaller/releases/download/v3.3/PyInstaller-3.3.zip
+  - 7z x PyInstaller-3.3.zip
   # Install PyInstaller dependencies
   - "%PYTHON%\\python.exe -m pip install future pefile"
   # Download and install Inno Setup - used for packaging
