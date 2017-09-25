@@ -18,7 +18,7 @@ install:
   - 7z x mysql-connector-python-2.1.7.zip
   - cd mysql-connector-python-2.1.7
   - "%PYTHON%\\python.exe setup.py install"
-  #- "%PYTHON%\\python.exe -m pip install http://cdn.mysql.com/Downloads/Connector-Python/mysql-connector-python-2.1.7.zip#md5=6e3f27535ab4390717f29583ed3249cd"
+  - cd ..
   # Download and install lxml and pyicu (originally from http://www.lfd.uci.edu/~gohlke/pythonlibs/)
   - "%PYTHON%\\python.exe -m pip install https://get.openlp.org/win-sdk/PyICU-1.9.7-cp36-cp36m-win32.whl"
   # Download and unpack mupdf
