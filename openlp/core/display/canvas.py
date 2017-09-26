@@ -427,7 +427,7 @@ class MainCanvas(OpenLPMixin, Canvas, RegistryProperties):
         if not hasattr(self, 'service_item'):
             return False
         self.override['image'] = path
-        self.override['theme'] = self.service_item.theme_data.background_filename
+        self.override['theme'] = path_to_str(self.service_item.theme_data.background_filename)
         self.image(path)
         # Update the preview frame.
         if self.is_live:
@@ -529,7 +529,7 @@ class MainCanvas(OpenLPMixin, Canvas, RegistryProperties):
                 Registry().execute('video_background_replaced')
                 self.override = {}
             # We have a different theme.
-            elif self.override['theme'] != service_item.theme_data.background_filename:
+            elif self.override['theme'] != path_to_str(service_item.theme_data.background_filename):
                 Registry().execute('live_theme_changed')
                 self.override = {}
             else:
@@ -541,7 +541,7 @@ class MainCanvas(OpenLPMixin, Canvas, RegistryProperties):
         if self.service_item.theme_data.background_type == 'image':
             if self.service_item.theme_data.background_filename:
                 self.service_item.bg_image_bytes = self.image_manager.get_image_bytes(
-                    self.service_item.theme_data.background_filename, ImageSource.Theme)
+                    path_to_str(self.service_item.theme_data.background_filename), ImageSource.Theme)
             if image_path:
                 image_bytes = self.image_manager.get_image_bytes(image_path, ImageSource.ImagePlugin)
         created_html = build_html(self.service_item, self.screen, self.is_live, background, image_bytes,
@@ -563,7 +563,7 @@ class MainCanvas(OpenLPMixin, Canvas, RegistryProperties):
                 path = os.path.join(str(AppLocation.get_section_data_path('themes')),
                                     self.service_item.theme_data.theme_name)
                 service_item.add_from_command(path,
-                                              self.service_item.theme_data.background_filename,
+                                              path_to_str(self.service_item.theme_data.background_filename),
                                               ':/media/slidecontroller_multimedia.png')
                 self.media_controller.video(DisplayControllerType.Live, service_item, video_behind_text=True)
         self._hide_mouse()
