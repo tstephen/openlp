@@ -17,7 +17,7 @@ install:
   - appveyor DownloadFile http://cdn.mysql.com/Downloads/Connector-Python/mysql-connector-python-2.1.7.zip
   - 7z x mysql-connector-python-2.1.7.zip
   - cd mysql-connector-python-2.1.7
-  - "%PYTHON%\\python.exe setup.py install"
+  - "%PYTHON%\\python.exe setup.py -q install"
   - cd ..
   # Download and install lxml and pyicu (originally from http://www.lfd.uci.edu/~gohlke/pythonlibs/)
   - "%PYTHON%\\python.exe -m pip install https://get.openlp.org/win-sdk/PyICU-1.9.7-cp36-cp36m-win32.whl"
@@ -79,7 +79,7 @@ after_test:
         &"$env:PYTHON\python.exe" builders/windows-builder.py --skip-update -c windows/config-appveyor.ini -b ../openlp-branch -d ../documentation --portable
       } else {
         cd packaging
-        &"$env:PYTHON\python.exe" builders/windows-builder.py -v --skip-update --skip-translations -c windows/config-appveyor.ini -b ../openlp-branch --portable
+        &"$env:PYTHON\python.exe" builders/windows-builder.py --skip-update --skip-translations -c windows/config-appveyor.ini -b ../openlp-branch --portable
       }
 
 artifacts:
