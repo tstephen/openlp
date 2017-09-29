@@ -24,7 +24,7 @@ The :mod:`~openlp.core.ui.media.webkit` module contains our WebKit video player
 """
 import logging
 
-from PyQt5 import QtGui, QtWebKitWidgets
+from PyQt5 import QtGui, QtWebEngineWidgets
 
 from openlp.core.common import Settings
 from openlp.core.lib import translate
@@ -157,7 +157,7 @@ class WebkitPlayer(MediaPlayer):
 
         :return: boolean. True if available
         """
-        web = QtWebKitWidgets.QWebPage()
+        web = QtWebEngineWidgets.QWebPage()
         # This script should return '[object HTMLVideoElement]' if the html5 video is available in webkit. Otherwise it
         # should return '[object HTMLUnknownElement]'
         return web.mainFrame().evaluateJavaScript(

@@ -34,7 +34,7 @@ import json
 import logging
 import os
 
-from PyQt5 import QtCore, QtWidgets, QtWebKit, QtWebKitWidgets, QtGui, QtMultimedia, QtWebChannel, QtWebEngineWidgets
+from PyQt5 import QtCore, QtWidgets, QtGui, QtMultimedia, QtWebChannel, QtWebEngineWidgets
 
 from openlp.core.common import AppLocation, Registry, RegistryProperties, OpenLPMixin, Settings, translate,\
     is_macosx, is_win
