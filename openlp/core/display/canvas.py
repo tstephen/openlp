@@ -26,9 +26,7 @@ Some of the code for this form is based on the examples at:
 
 * `http://www.steveheffernan.com/html5-video-player/demo-video-player.html`_
 * `http://html5demos.com/two-videos`_
-
 """
-
 import html
 import json
 import logging
@@ -109,7 +107,7 @@ class Canvas(QtWidgets.QGraphicsView):
         #self.frame = self.page.mainFrame()
         #if self.is_live and log.getEffectiveLevel() == logging.DEBUG:
         #    self.web_view.settings().setAttribute(QtWebKit.QWebSettings.DeveloperExtrasEnabled, True)
-        #self.web_view.loadFinished.connect(self.is_web_loaded)
+
 
         self.webview = WebEngineView(self)
         self.webview.setGeometry(0, 0, self.screen['size'].width(), self.screen['size'].height())
@@ -123,6 +121,7 @@ class Canvas(QtWidgets.QGraphicsView):
         self.channel = QtWebChannel.QWebChannel(self)
         self.channel.registerObject('mediaWatcher', self.media_watcher)
         self.webview.page().setWebChannel(self.channel)
+        self.webview.loadFinished.connect(self.is_web_loaded)
 
         self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
@@ -377,7 +376,7 @@ class MainCanvas(OpenLPMixin, Canvas, RegistryProperties):
         #if animate:
         #    # NOTE: Verify this works with ''.format()
         #    _text = slide.replace('\\', '\\\\').replace('\"', '\\\"')
-        #    self.frame.evaluateJavaScript('show_text("{text}")'.format(text=_text))
+        #    self.frame.runJavaScript('show_text("{text}")'.format(text=_text))
         #else:
         #    # This exists for https://bugs.launchpad.net/openlp/+bug/1016843
         #    # For unknown reasons if evaluateJavaScript is called

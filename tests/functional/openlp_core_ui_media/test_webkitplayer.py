@@ -39,7 +39,7 @@ class TestWebkitPlayer(TestCase):
         """
         # GIVEN: A WebkitPlayer instance and a mocked QWebPage
         mocked_qwebpage = MagicMock()
-        mocked_qwebpage.mainFrame().evaluateJavaScript.return_value = '[object HTMLUnknownElement]'
+        mocked_qwebpage.mainFrame().runJavaScript.return_value = '[object HTMLUnknownElement]'
         with patch('openlp.core.ui.media.webkitplayer.QtWebKitWidgets.QWebPage', **{'return_value': mocked_qwebpage}):
             webkit_player = WebkitPlayer(None)
 
@@ -56,7 +56,7 @@ class TestWebkitPlayer(TestCase):
         """
         # GIVEN: A WebkitPlayer instance and a mocked QWebPage
         mocked_qwebpage = MagicMock()
-        mocked_qwebpage.mainFrame().evaluateJavaScript.return_value = '[object HTMLVideoElement]'
+        mocked_qwebpage.runJavaScript.return_value = '[object HTMLVideoElement]'
         with patch('openlp.core.ui.media.webkitplayer.QtWebKitWidgets.QWebPage', **{'return_value': mocked_qwebpage}):
             webkit_player = WebkitPlayer(None)
 

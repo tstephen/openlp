@@ -29,7 +29,7 @@ import re
 
 import bs4
 import sqlalchemy
-from PyQt5 import Qt, QtCore, QtGui, QtWebKit, QtWidgets
+from PyQt5 import Qt, QtCore, QtGui, QtWidgets
 from lxml import etree
 
 try:
@@ -61,7 +61,9 @@ try:
 except ImportError:
     ICU_VERSION = '-'
 try:
-    WEBKIT_VERSION = QtWebKit.qWebKitVersion()
+    # TODO: Fix for web engine
+    WEBKIT_VERSION = '-'
+    #WEBKIT_VERSION = QtWebKit.qWebKitVersion()
 except AttributeError:
     WEBKIT_VERSION = '-'
 try:

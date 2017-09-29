@@ -23,7 +23,7 @@
 import re
 
 from string import Template
-from PyQt5 import QtGui, QtCore, QtWebKitWidgets
+from PyQt5 import QtGui, QtCore, QtWebEngineWidgets
 
 from openlp.core.common import Registry, RegistryProperties, OpenLPMixin, RegistryMixin, Settings
 from openlp.core.common.path import path_to_str
@@ -63,9 +63,10 @@ class Renderer(OpenLPMixin, RegistryMixin, RegistryProperties):
         self.force_page = False
         self._theme_dimensions = {}
         self._calculate_default()
-        self.web = QtWebKitWidgets.QWebView()
+        self.web = QtWebEngineWidgets.QWebEngineView()
         self.web.setVisible(False)
-        self.web_frame = self.web.page().mainFrame()
+        # TODO: Rename to page
+        self.web_frame = self.web.page()
         Registry().register_function('theme_update_global', self.set_global_theme)
 
     def bootstrap_initialise(self):
@@ -367,10 +368,11 @@ class Renderer(OpenLPMixin, RegistryMixin, RegistryProperties):
         # For the life of my I don't know why we have to completely kill the QWebView in order for the display to work
         # properly, but we do. See bug #1041366 for an example of what happens if we take this out.
         self.web = None
-        self.web = QtWebKitWidgets.QWebView()
+        self.web = QtWebEngineWidgets.QWebEngineView()
         self.web.setVisible(False)
         self.web.resize(self.page_width, self.page_height)
-        self.web_frame = self.web.page().mainFrame()
+        # TODO: Rename to page
+        self.web_frame = self.web.page()
         # Adjust width and height to account for shadow. outline done in css.
         html = Template("""<!DOCTYPE html><html><head><script>
             function show_text(newtext) {
@@ -525,7 +527,7 @@ class Renderer(OpenLPMixin, RegistryMixin, RegistryProperties):
 
         :param text:  The text to check. It may contain HTML tags.
         """
-        self.web_frame.evaluateJavaScript('show_text'
+        self.web_frame.runJavaScript('show_text'
                                           '("{text}")'.format(text=text.replace('\\', '\\\\').replace('\"', '\\\"')))
         return self.web_frame.contentsSize().height() <= self.empty_height
 

@@ -251,7 +251,7 @@ class AlertsPlugin(Plugin):
         :param frame: The Web frame holding the page.
         """
         align = VerticalType.Names[self.settings_tab.location]
-        frame.evaluateJavaScript('update_css("{align}", "{face}", "{size}", "{color}", '
+        frame.runJavaScript('update_css("{align}", "{face}", "{size}", "{color}", '
                                  '"{background}")'.format(align=align,
                                                           face=self.settings_tab.font_face,
                                                           size=self.settings_tab.font_size,

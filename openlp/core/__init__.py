@@ -347,7 +347,7 @@ def set_up_logging(log_path):
     file_path = log_path / 'openlp.log'
     # TODO: FileHandler accepts a Path object in Py3.6
     logfile = logging.FileHandler(str(file_path), 'w', encoding='UTF-8')
-    logfile.setFormatter(logging.Formatter('%(asctime)s %(name)-55s %(levelname)-8s %(message)s'))
+    logfile.setFormatter(logging.Formatter('%(asctime)s %(threadName)s %(name)-55s %(levelname)-8s %(message)s'))
     log.addHandler(logfile)
     if log.isEnabledFor(logging.DEBUG):
         print('Logging to: {name}'.format(name=file_path))

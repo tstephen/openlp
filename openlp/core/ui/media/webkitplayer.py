@@ -157,10 +157,10 @@ class WebkitPlayer(MediaPlayer):
 
         :return: boolean. True if available
         """
-        web = QtWebEngineWidgets.QWebPage()
+        web = QtWebEngineWidgets.QWebEnginePage()
         # This script should return '[object HTMLVideoElement]' if the html5 video is available in webkit. Otherwise it
         # should return '[object HTMLUnknownElement]'
-        return web.mainFrame().evaluateJavaScript(
+        return web.runJavaScript(
             "Object.prototype.toString.call(document.createElement('video'));") == '[object HTMLVideoElement]'
 
     def load(self, display):
@@ -179,7 +179,7 @@ class WebkitPlayer(MediaPlayer):
         path = controller.media_info.file_info.absoluteFilePath()
         display.web_view.setVisible(True)
         js = 'show_video("load", "{path}", {vol});'.format(path=path.replace('\\', '\\\\'), vol=str(vol))
-        display.frame.evaluateJavaScript(js)
+        display.frame.runJavaScript(js)
         return True
 
     def resize(self, display):
@@ -206,7 +206,7 @@ class WebkitPlayer(MediaPlayer):
             if self.get_preview_state() != MediaState.Paused and controller.media_info.start_time > 0:
                 start_time = controller.media_info.start_time
         self.set_visible(display, True)
-        display.frame.evaluateJavaScript('show_video("play");')
+        display.frame.runJavaScript('show_video("play");')
         if start_time > 0:
             self.seek(display, controller.media_info.start_time * 1000)
         self.set_state(MediaState.Playing, display)
@@ -219,7 +219,7 @@ class WebkitPlayer(MediaPlayer):
 
         :param display: The display to be updated.
         """
-        display.frame.evaluateJavaScript('show_video("pause");')
+        display.frame.runJavaScript('show_video("pause");')
         self.set_state(MediaState.Paused, display)
 
     def stop(self, display):
@@ -228,7 +228,7 @@ class WebkitPlayer(MediaPlayer):
 
         :param display: The display to be updated.
         """
-        display.frame.evaluateJavaScript('show_video("stop");')
+        display.frame.runJavaScript('show_video("stop");')
         self.set_state(MediaState.Stopped, display)
 
     def volume(self, display, volume):
@@ -241,7 +241,7 @@ class WebkitPlayer(MediaPlayer):
         # 1.0 is the highest value
         if display.has_audio:
             vol = float(volume) / float(100)
-            display.frame.evaluateJavaScript('show_video(null, null, %s);' % str(vol))
+            display.frame.runJavaScript('show_video(null, null, %s);' % str(vol))
 
     def seek(self, display, seek_value):
         """
@@ -251,7 +251,7 @@ class WebkitPlayer(MediaPlayer):
         :param seek_value: The value to be set.
         """
         seek = float(seek_value) / 1000
-        display.frame.evaluateJavaScript('show_video("seek", null, null, null, "%f");' % seek)
+        display.frame.runJavaScript('show_video("seek", null, null, null, "%f");' % seek)
 
     def reset(self, display):
         """
@@ -259,7 +259,7 @@ class WebkitPlayer(MediaPlayer):
 
         :param display: The display to be updated.
         """
-        display.frame.evaluateJavaScript('show_video("close");')
+        display.frame.runJavaScript('show_video("close");')
         self.set_state(MediaState.Off, display)
 
     def set_visible(self, display, visibility):
@@ -273,7 +273,7 @@ class WebkitPlayer(MediaPlayer):
             is_visible = "visible"
         else:
             is_visible = "hidden"
-        display.frame.evaluateJavaScript('show_video("setVisible", null, null, null, "%s");' % is_visible)
+        display.frame.runJavaScript('show_video("setVisible", null, null, null, "%s");' % is_visible)
 
     def update_ui(self, display):
         """
@@ -282,13 +282,13 @@ class WebkitPlayer(MediaPlayer):
         :param display: The display to be updated.
         """
         controller = display.controller
-        if display.frame.evaluateJavaScript('show_video("isEnded");'):
+        if display.frame.runJavaScript('show_video("isEnded");'):
             self.stop(display)
-        current_time = display.frame.evaluateJavaScript('show_video("current_time");')
+        current_time = display.frame.runJavaScript('show_video("current_time");')
         # check if conversion was ok and value is not 'NaN'
         if current_time and current_time != float('inf'):
             current_time = int(current_time * 1000)
-        length = display.frame.evaluateJavaScript('show_video("length");')
+        length = display.frame.runJavaScript('show_video("length");')
         # check if conversion was ok and value is not 'NaN'
         if length and length != float('inf'):
             length = int(length * 1000)

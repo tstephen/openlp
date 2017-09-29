@@ -435,7 +435,7 @@ class MediaController(RegistryMixin, OpenLPMixin, RegistryProperties):
         log.debug('video mediatype: ' + str(controller.media_info.media_type))
         # dont care about actual theme, set a black background
         if controller.is_live and not controller.media_info.is_background:
-            display.frame.evaluateJavaScript('show_video("setBackBoard", null, null,"visible");')
+            display.frame.runJavaScript('show_video("setBackBoard", null, null,"visible");')
         # now start playing - Preview is autoplay!
         autoplay = False
         # Preview requested
@@ -644,7 +644,7 @@ class MediaController(RegistryMixin, OpenLPMixin, RegistryProperties):
             self.media_volume(controller, controller.media_info.volume)
         if first_time:
             if not controller.media_info.is_background:
-                display.frame.evaluateJavaScript('show_blank("desktop");')
+                display.frame.runJavaScript('show_blank("desktop");')
             self.current_media_players[controller.controller_type].set_visible(display, True)
             controller.mediabar.actions['playbackPlay'].setVisible(False)
             controller.mediabar.actions['playbackPause'].setVisible(True)
@@ -764,7 +764,7 @@ class MediaController(RegistryMixin, OpenLPMixin, RegistryProperties):
         display = self._define_display(controller)
         if controller.controller_type in self.current_media_players:
             if not looping_background:
-                display.frame.evaluateJavaScript('show_blank("black");')
+                display.frame.runJavaScript('show_blank("black");')
             self.current_media_players[controller.controller_type].stop(display)
             self.current_media_players[controller.controller_type].set_visible(display, False)
             controller.seek_slider.setSliderPosition(0)
@@ -835,7 +835,7 @@ class MediaController(RegistryMixin, OpenLPMixin, RegistryProperties):
             display.override = {}
             self.current_media_players[controller.controller_type].reset(display)
             self.current_media_players[controller.controller_type].set_visible(display, False)
-            display.frame.evaluateJavaScript('show_video("setBackBoard", null, null, "hidden");')
+            display.frame.runJavaScript('show_video("setBackBoard", null, null, "hidden");')
             del self.current_media_players[controller.controller_type]
 
     def media_hide(self, msg):
