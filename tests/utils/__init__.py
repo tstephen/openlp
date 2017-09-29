@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -26,7 +26,7 @@ import json
 def assert_length(expected, iterable, msg=None):
     if len(iterable) != expected:
         if not msg:
-            msg = 'Expected length %s, got %s' % (expected, len(iterable))
+            msg = 'Expected length {expected}, got {got}'.format(expected=expected, got=len(iterable))
         raise AssertionError(msg)
 
 

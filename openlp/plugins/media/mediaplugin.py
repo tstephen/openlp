@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -24,11 +24,15 @@ The Media plugin
 """
 
 import logging
-
+import os
+import re
 from PyQt5 import QtCore
 
-from openlp.core.common import Settings, translate
+from openlp.core.api.http import register_endpoint
+from openlp.core.common import AppLocation, translate, check_binary_exists
+from openlp.core.common.path import Path
 from openlp.core.lib import Plugin, StringContent, build_icon
+from openlp.plugins.media.endpoint import api_media_endpoint, media_endpoint
 from openlp.plugins.media.lib import MediaMediaItem, MediaTab
 
 
@@ -38,7 +42,8 @@ log = logging.getLogger(__name__)
 # Some settings starting with "media" are in core, because they are needed for core functionality.
 __default_settings__ = {
     'media/media auto start': QtCore.Qt.Unchecked,
-    'media/media files': []
+    'media/media files': [],
+    'media/last directory': None
 }
 
 
@@ -46,7 +51,7 @@ class MediaPlugin(Plugin):
     """
     The media plugin adds the ability to playback audio and video content.
     """
-    log.info('%s MediaPlugin loaded', __name__)
+    log.info('{name} MediaPlugin loaded'.format(name=__name__))
 
     def __init__(self):
         super(MediaPlugin, self).__init__('media', __default_settings__, MediaMediaItem)
@@ -55,12 +60,27 @@ class MediaPlugin(Plugin):
         self.icon = build_icon(self.icon_path)
         # passed with drag and drop messages
         self.dnd_id = 'Media'
+        register_endpoint(media_endpoint)
+        register_endpoint(api_media_endpoint)
 
     def initialise(self):
         """
         Override the inherited initialise() method in order to upgrade the media before trying to load it
         """
         super().initialise()
+
+    def check_pre_conditions(self):
+        """
+        Check it we have a valid environment.
+        :return: true or false
+        """
+        log.debug('check_installed Mediainfo')
+        # Try to find mediainfo in the path
+        exists = process_check_binary('mediainfo')
+        # If mediainfo is not in the path, try to find it in the application folder
+        if not exists:
+            exists = process_check_binary(os.path.join(str(AppLocation.get_directory(AppLocation.AppDir)), 'mediainfo'))
+        return exists
 
     def app_startup(self):
         """
@@ -137,3 +157,19 @@ class MediaPlugin(Plugin):
         Add html code to htmlbuilder.
         """
         return self.media_controller.get_media_display_html()
+
+
+def process_check_binary(program_path):
+    """
+    Function that checks whether a binary MediaInfo is present
+
+    :param program_path:The full path to the binary to check.
+    :return: If exists or not
+    """
+    runlog = check_binary_exists(Path(program_path))
+    # Analyse the output to see it the program is mediainfo
+    for line in runlog.splitlines():
+        decoded_line = line.decode()
+        if re.search('MediaInfo Command line', decoded_line, re.IGNORECASE):
+            return True
+    return False

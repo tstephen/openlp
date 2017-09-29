@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -22,13 +22,13 @@
 """
 Package to test the openlp.core.ui.settingsform package.
 """
-from PyQt5 import QtWidgets
 from unittest import TestCase
+from unittest.mock import MagicMock, patch
+
+from PyQt5 import QtWidgets
 
 from openlp.core.common import Registry
 from openlp.core.ui.settingsform import SettingsForm
-
-from tests.functional import MagicMock, patch
 
 
 class TestSettingsForm(TestCase):
@@ -39,7 +39,7 @@ class TestSettingsForm(TestCase):
         """
         Registry.create()
 
-    def insert_tab_visible_test(self):
+    def test_insert_tab_visible(self):
         """
         Test that the insert_tab() method works correctly when a visible tab is inserted
         """
@@ -48,7 +48,7 @@ class TestSettingsForm(TestCase):
         general_tab = MagicMock()
         general_tab.tab_title = 'mock'
         general_tab.tab_title_visible = 'Mock'
-        general_tab.icon_path = ':/icon/openlp-logo-16x16.png'
+        general_tab.icon_path = ':/icon/openlp-logo.svg'
 
         # WHEN: We insert the general tab
         with patch.object(settings_form.stacked_layout, 'addWidget') as mocked_add_widget, \
@@ -59,7 +59,7 @@ class TestSettingsForm(TestCase):
             mocked_add_widget.assert_called_with(general_tab)
             self.assertEqual(1, mocked_add_item.call_count, 'addItem should have been called')
 
-    def insert_tab_not_visible_test(self):
+    def test_insert_tab_not_visible(self):
         """
         Test that the insert_tab() method works correctly when a tab that should not be visible is inserted
         """
@@ -77,7 +77,7 @@ class TestSettingsForm(TestCase):
             mocked_add_widget.assert_called_with(general_tab)
             self.assertEqual(0, mocked_add_item.call_count, 'addItem should not have been called')
 
-    def accept_with_inactive_plugins_test(self):
+    def test_accept_with_inactive_plugins(self):
         """
         Test that the accept() method works correctly when some of the plugins are inactive
         """
@@ -86,16 +86,20 @@ class TestSettingsForm(TestCase):
         general_tab = QtWidgets.QWidget(None)
         general_tab.tab_title = 'mock-general'
         general_tab.tab_title_visible = 'Mock General'
-        general_tab.icon_path = ':/icon/openlp-logo-16x16.png'
+        general_tab.icon_path = ':/icon/openlp-logo.svg'
         mocked_general_save = MagicMock()
         general_tab.save = mocked_general_save
+        mocked_general_load = MagicMock()
+        general_tab.load = mocked_general_load
         settings_form.insert_tab(general_tab, is_visible=True)
         themes_tab = QtWidgets.QWidget(None)
         themes_tab.tab_title = 'mock-themes'
         themes_tab.tab_title_visible = 'Mock Themes'
-        themes_tab.icon_path = ':/icon/openlp-logo-16x16.png'
+        themes_tab.icon_path = ':/icon/openlp-logo.svg'
         mocked_theme_save = MagicMock()
         themes_tab.save = mocked_theme_save
+        mocked_theme_load = MagicMock()
+        themes_tab.load = mocked_theme_load
         settings_form.insert_tab(themes_tab, is_visible=False)
 
         # WHEN: The accept() method is called
@@ -105,7 +109,7 @@ class TestSettingsForm(TestCase):
         mocked_general_save.assert_called_with()
         self.assertEqual(0, mocked_theme_save.call_count, 'The Themes tab\'s save() should not have been called')
 
-    def list_item_changed_invalid_item_test(self):
+    def test_list_item_changed_invalid_item(self):
         """
         Test that the list_item_changed() slot handles a non-existent item
         """
@@ -114,7 +118,9 @@ class TestSettingsForm(TestCase):
         general_tab = QtWidgets.QWidget(None)
         general_tab.tab_title = 'mock'
         general_tab.tab_title_visible = 'Mock'
-        general_tab.icon_path = ':/icon/openlp-logo-16x16.png'
+        general_tab.icon_path = ':/icon/openlp-logo.svg'
+        mocked_general_load = MagicMock()
+        general_tab.load = mocked_general_load
         settings_form.insert_tab(general_tab, is_visible=True)
 
         with patch.object(settings_form.stacked_layout, 'count') as mocked_count:
@@ -124,7 +130,7 @@ class TestSettingsForm(TestCase):
             # THEN: The rest of the method should not have been called
             self.assertEqual(0, mocked_count.call_count, 'The count method of the stacked layout should not be called')
 
-    def reject_with_inactive_items_test(self):
+    def test_reject_with_inactive_items(self):
         """
         Test that the reject() method works correctly when some of the plugins are inactive
         """
@@ -133,14 +139,16 @@ class TestSettingsForm(TestCase):
         general_tab = QtWidgets.QWidget(None)
         general_tab.tab_title = 'mock-general'
         general_tab.tab_title_visible = 'Mock General'
-        general_tab.icon_path = ':/icon/openlp-logo-16x16.png'
+        general_tab.icon_path = ':/icon/openlp-logo.svg'
         mocked_general_cancel = MagicMock()
         general_tab.cancel = mocked_general_cancel
+        mocked_general_load = MagicMock()
+        general_tab.load = mocked_general_load
         settings_form.insert_tab(general_tab, is_visible=True)
         themes_tab = QtWidgets.QWidget(None)
         themes_tab.tab_title = 'mock-themes'
         themes_tab.tab_title_visible = 'Mock Themes'
-        themes_tab.icon_path = ':/icon/openlp-logo-16x16.png'
+        themes_tab.icon_path = ':/icon/openlp-logo.svg'
         mocked_theme_cancel = MagicMock()
         themes_tab.cancel = mocked_theme_cancel
         settings_form.insert_tab(themes_tab, is_visible=False)
@@ -151,3 +159,17 @@ class TestSettingsForm(TestCase):
         # THEN: The general tab's cancel() method should have been called, but not the themes tab
         mocked_general_cancel.assert_called_with()
         self.assertEqual(0, mocked_theme_cancel.call_count, 'The Themes tab\'s cancel() should not have been called')
+
+    def test_register_post_process(self):
+        """
+        Test that the register_post_process() method works correctly
+        """
+        # GIVEN: A settings form instance
+        settings_form = SettingsForm(None)
+        fake_function = MagicMock()
+
+        # WHEN: register_post_process() is called
+        settings_form.register_post_process(fake_function)
+
+        # THEN: The fake function should be in the settings form's list
+        assert fake_function in settings_form.processes

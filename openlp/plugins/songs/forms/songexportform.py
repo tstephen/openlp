@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -30,7 +30,7 @@ from PyQt5 import QtCore, QtWidgets
 from openlp.core.common import Registry, UiStrings, translate
 from openlp.core.lib import create_separated_list, build_icon
 from openlp.core.lib.ui import critical_error_message_box
-from openlp.core.ui.wizard import OpenLPWizard, WizardStrings
+from openlp.core.ui.lib.wizard import OpenLPWizard, WizardStrings
 from openlp.plugins.songs.lib.db import Song
 from openlp.plugins.songs.lib.openlyricsexport import OpenLyricsExport
 
@@ -51,7 +51,7 @@ class SongExportForm(OpenLPWizard):
         :param parent: The QWidget-derived parent of the wizard.
         :param plugin: The songs plugin.
         """
-        super(SongExportForm, self).__init__(parent, plugin, 'song_export_wizard', ':/wizards/wizard_exportsong.bmp')
+        super(SongExportForm, self).__init__(parent, plugin, 'song_export_wizard', ':/wizards/wizard_song.bmp')
         self.stop_export_flag = False
         Registry().register_function('openlp_stop_wizard', self.stop_export)
 
@@ -121,7 +121,7 @@ class SongExportForm(OpenLPWizard):
         self.selected_list_widget = QtWidgets.QListWidget(self.export_song_page)
         self.selected_list_widget.setObjectName('selected_list_widget')
         self.grid_layout.addWidget(self.selected_list_widget, 1, 0, 1, 1)
-        # FIXME: self.horizontal_layout is already defined above?!?!?
+        # FIXME: self.horizontal_layout is already defined above?!?!? Replace with Path Eidt!
         self.horizontal_layout = QtWidgets.QHBoxLayout()
         self.horizontal_layout.setObjectName('horizontal_layout')
         self.directory_label = QtWidgets.QLabel(self.export_song_page)
@@ -143,15 +143,15 @@ class SongExportForm(OpenLPWizard):
         Song wizard localisation.
         """
         self.setWindowTitle(translate('SongsPlugin.ExportWizardForm', 'Song Export Wizard'))
-        self.title_label.setText(WizardStrings.HeaderStyle %
-                                 translate('OpenLP.Ui', 'Welcome to the Song Export Wizard'))
+        self.title_label.setText(
+            WizardStrings.HeaderStyle.format(text=translate('OpenLP.Ui', 'Welcome to the Song Export Wizard')))
         self.information_label.setText(
             translate('SongsPlugin.ExportWizardForm', 'This wizard will help to export your songs to the open and free '
                                                       '<strong>OpenLyrics </strong> worship song format.'))
         self.available_songs_page.setTitle(translate('SongsPlugin.ExportWizardForm', 'Select Songs'))
         self.available_songs_page.setSubTitle(translate('SongsPlugin.ExportWizardForm',
                                               'Check the songs you want to export.'))
-        self.search_label.setText('%s:' % UiStrings().Search)
+        self.search_label.setText('{text}:'.format(text=UiStrings().Search))
         self.uncheck_button.setText(translate('SongsPlugin.ExportWizardForm', 'Uncheck All'))
         self.check_button.setText(translate('SongsPlugin.ExportWizardForm', 'Check All'))
         self.export_song_page.setTitle(translate('SongsPlugin.ExportWizardForm', 'Select Directory'))
@@ -203,6 +203,10 @@ class SongExportForm(OpenLPWizard):
         """
         Set default form values for the song export wizard.
         """
+        def get_song_key(song):
+            """Get the key to sort by"""
+            return song.sort_key
+
         self.restart()
         self.finish_button.setVisible(False)
         self.cancel_button.setVisible(True)
@@ -213,13 +217,13 @@ class SongExportForm(OpenLPWizard):
         # Load the list of songs.
         self.application.set_busy_cursor()
         songs = self.plugin.manager.get_all_objects(Song)
-        songs.sort(key=lambda song: song.sort_key)
+        songs.sort(key=get_song_key)
         for song in songs:
             # No need to export temporary songs.
             if song.temporary:
                 continue
             authors = create_separated_list([author.display_name for author in song.authors])
-            title = '%s (%s)' % (str(song.title), authors)
+            title = '{title} ({author})'.format(title=song.title, author=authors)
             item = QtWidgets.QListWidgetItem(title)
             item.setData(QtCore.Qt.UserRole, song)
             item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
@@ -253,7 +257,7 @@ class SongExportForm(OpenLPWizard):
                 self.progress_label.setText(translate('SongsPlugin.SongExportForm', 'Your song export failed.'))
         except OSError as ose:
             self.progress_label.setText(translate('SongsPlugin.SongExportForm', 'Your song export failed because this '
-                                                  'error occurred: %s') % ose.strerror)
+                                                  'error occurred: {error}').format(error=ose.strerror))
 
     def on_search_line_edit_changed(self, text):
         """

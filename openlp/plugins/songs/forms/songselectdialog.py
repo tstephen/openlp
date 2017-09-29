@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -242,7 +242,8 @@ class Ui_SongSelectDialog(object):
         self.search_label.setText(translate('SongsPlugin.SongSelectForm', 'Search Text:'))
         self.search_button.setText(translate('SongsPlugin.SongSelectForm', 'Search'))
         self.stop_button.setText(translate('SongsPlugin.SongSelectForm', 'Stop'))
-        self.result_count_label.setText(translate('SongsPlugin.SongSelectForm', 'Found %s song(s)') % 0)
+        self.result_count_label.setText(translate('SongsPlugin.SongSelectForm',
+                                                  'Found {count:d} song(s)').format(count=0))
         self.logout_button.setText(translate('SongsPlugin.SongSelectForm', 'Logout'))
         self.view_button.setText(translate('SongsPlugin.SongSelectForm', 'View'))
         self.title_label.setText(translate('SongsPlugin.SongSelectForm', 'Title:'))

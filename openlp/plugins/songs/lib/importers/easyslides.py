@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -45,8 +45,8 @@ class EasySlidesImport(SongImport):
         super(EasySlidesImport, self).__init__(manager, **kwargs)
 
     def do_import(self):
-        log.info('Importing EasySlides XML file %s', self.import_source)
-        parser = etree.XMLParser(remove_blank_text=True)
+        log.info('Importing EasySlides XML file {source}'.format(source=self.import_source))
+        parser = etree.XMLParser(remove_blank_text=True, recover=True)
         parsed_file = etree.parse(self.import_source, parser)
         xml = etree.tostring(parsed_file).decode()
         song_xml = objectify.fromstring(xml)
@@ -96,10 +96,10 @@ class EasySlidesImport(SongImport):
         try:
             setattr(self, self_attribute, str(import_attribute).strip())
         except UnicodeDecodeError:
-            log.exception('UnicodeDecodeError decoding %s' % import_attribute)
+            log.exception('UnicodeDecodeError decoding {attribute}'.format(attribute=import_attribute))
             self._success = False
         except AttributeError:
-            log.exception('No attribute %s' % import_attribute)
+            log.exception('No attribute {attribute}'.format(attribute=import_attribute))
             if mandatory:
                 self._success = False
 
@@ -119,7 +119,7 @@ class EasySlidesImport(SongImport):
         try:
             self.add_copyright(str(element).strip())
         except UnicodeDecodeError:
-            log.exception('Unicode error on decoding copyright: %s' % element)
+            log.exception('Unicode error on decoding copyright: {element}'.format(element=element))
             self._success = False
         except AttributeError:
             pass
@@ -157,9 +157,10 @@ class EasySlidesImport(SongImport):
         separators = (separator_lines > 0)
         # the number of different regions in song - 1
         if len(region_lines) > 1:
-            log.info('EasySlidesImport: the file contained a song named "%s"'
-                     'with more than two regions, but only two regions are tested, encountered regions were: %s',
-                     self.title, ','.join(list(region_lines.keys())))
+            log.info('EasySlidesImport: the file contained a song named "{title}"'
+                     'with more than two regions, but only two regions are tested, '
+                     'encountered regions were: {keys}'.format(title=self.title,
+                                                               keys=','.join(list(region_lines.keys()))))
         # if the song has regions
         regions = (len(region_lines) > 0)
         # if the regions are inside verses
@@ -179,7 +180,7 @@ class EasySlidesImport(SongImport):
         reg = default_region
         verses[reg] = {}
         # instance differentiates occurrences of same verse tag
-        vt = 'V'
+        vt = 'v'
         vn = '1'
         inst = 1
         for line in lines:
@@ -192,14 +193,14 @@ class EasySlidesImport(SongImport):
                         inst += 1
                 else:
                     # separators are not used, so empty line starts a new verse
-                    vt = 'V'
+                    vt = 'v'
                     vn = len(verses[reg].get(vt, {})) + 1
                     inst = 1
             elif line[0:7] == '[region':
                 reg = self._extract_region(line)
                 verses.setdefault(reg, {})
                 if not regions_in_verses:
-                    vt = 'V'
+                    vt = 'v'
                     vn = '1'
                     inst = 1
             elif line[0] == '[':
@@ -212,7 +213,7 @@ class EasySlidesImport(SongImport):
                 if match:
                     marker = match.group(1).strip()
                     vn = match.group(2)
-                vt = MarkTypes.get(marker, 'O') if marker else 'V'
+                vt = MarkTypes.get(marker, 'o') if marker else 'v'
                 if regions_in_verses:
                     region = default_region
                 inst = 1
@@ -232,18 +233,18 @@ class EasySlidesImport(SongImport):
         for [reg, vt, vn, inst] in our_verse_order:
             if self._list_has(verses, [reg, vt, vn, inst]):
                 # this is false, but needs user input
-                versetag = '%s%s' % (vt, vn)
+                versetag = '{tag}{number}'.format(tag=vt, number=vn)
                 versetags.append(versetag)
                 lines = '\n'.join(verses[reg][vt][vn][inst])
                 self.add_verse(lines, versetag)
         SeqTypes = {
-            'p': 'P1',
-            'q': 'P2',
-            'c': 'C1',
-            't': 'C2',
-            'b': 'B1',
-            'w': 'B2',
-            'e': 'E1'}
+            'p': 'p1',
+            'q': 'p2',
+            'c': 'c1',
+            't': 'c2',
+            'b': 'b1',
+            'w': 'b2',
+            'e': 'e1'}
         # Make use of Sequence data, determining the order of verses
         try:
             order = str(song.Sequence).strip().split(',')
@@ -251,7 +252,7 @@ class EasySlidesImport(SongImport):
                 if not tag:
                     continue
                 elif tag[0].isdigit():
-                    tag = 'V' + tag
+                    tag = 'v' + tag
                 elif tag.lower() in SeqTypes:
                     tag = SeqTypes[tag.lower()]
                 else:
@@ -259,7 +260,8 @@ class EasySlidesImport(SongImport):
                 if tag in versetags:
                     self.verse_order_list.append(tag)
                 else:
-                    log.info('Got order item %s, which is not in versetags, dropping item from presentation order', tag)
+                    log.info('Got order item {tag}, which is not in versetags, dropping item from presentation '
+                             'order'.format(tag=tag))
         except UnicodeDecodeError:
             log.exception('Unicode decode error while decoding Sequence')
             self._success = False

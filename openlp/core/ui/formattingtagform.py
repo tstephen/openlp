@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -51,7 +51,8 @@ class FormattingTagForm(QtWidgets.QDialog, Ui_FormattingTagDialog, FormattingTag
         """
         Constructor
         """
-        super(FormattingTagForm, self).__init__(parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint)
+        super(FormattingTagForm, self).__init__(parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint |
+                                                QtCore.Qt.WindowCloseButtonHint)
         self.setupUi(self)
         self._setup()
 
@@ -90,9 +91,10 @@ class FormattingTagForm(QtWidgets.QDialog, Ui_FormattingTagDialog, FormattingTag
         """
         new_row = self.tag_table_widget.rowCount()
         self.tag_table_widget.insertRow(new_row)
-        self.tag_table_widget.setItem(new_row, 0, QtWidgets.QTableWidgetItem(translate('OpenLP.FormattingTagForm',
-                                                                                       'New Tag %d' % new_row)))
-        self.tag_table_widget.setItem(new_row, 1, QtWidgets.QTableWidgetItem('n%d' % new_row))
+        self.tag_table_widget.setItem(new_row, 0,
+                                      QtWidgets.QTableWidgetItem(translate('OpenLP.FormattingTagForm',
+                                                                           'New Tag {row:d}').format(row=new_row)))
+        self.tag_table_widget.setItem(new_row, 1, QtWidgets.QTableWidgetItem('n{row:d}'.format(row=new_row)))
         self.tag_table_widget.setItem(new_row, 2,
                                       QtWidgets.QTableWidgetItem(translate('OpenLP.FormattingTagForm', '<HTML here>')))
         self.tag_table_widget.setItem(new_row, 3, QtWidgets.QTableWidgetItem(''))
@@ -121,8 +123,7 @@ class FormattingTagForm(QtWidgets.QDialog, Ui_FormattingTagDialog, FormattingTag
                                                     self.tag_table_widget.item(count, 2).text(),
                                                     self.tag_table_widget.item(count, 3).text())
             if error:
-                QtWidgets.QMessageBox.warning(self, translate('OpenLP.FormattingTagForm', 'Validation Error'), error,
-                                              QtWidgets.QMessageBox.Ok)
+                QtWidgets.QMessageBox.warning(self, translate('OpenLP.FormattingTagForm', 'Validation Error'), error)
                 self.tag_table_widget.selectRow(count)
                 return
             count += 1
@@ -197,6 +198,5 @@ class FormattingTagForm(QtWidgets.QDialog, Ui_FormattingTagDialog, FormattingTag
                 if tag:
                     self.tag_table_widget.setItem(pre_row, 3, QtWidgets.QTableWidgetItem(tag))
             if errors:
-                QtWidgets.QMessageBox.warning(self, translate('OpenLP.FormattingTagForm', 'Validation Error'), errors,
-                                              QtWidgets.QMessageBox.Ok)
+                QtWidgets.QMessageBox.warning(self, translate('OpenLP.FormattingTagForm', 'Validation Error'), errors)
             self.tag_table_widget.resizeRowsToContents()

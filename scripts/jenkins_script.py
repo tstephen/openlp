@@ -5,7 +5,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -59,13 +59,13 @@ class OpenLPJobs(object):
     Branch_Pull = 'Branch-01-Pull'
     Branch_Functional = 'Branch-02-Functional-Tests'
     Branch_Interface = 'Branch-03-Interface-Tests'
-    Branch_Windows_Functional = 'Branch-04a-Windows_Functional_Tests'
-    Branch_Windows_Interface = 'Branch-04b-Windows_Interface_Tests'
-    Branch_PEP = 'Branch-05a-Code_Analysis'
-    Branch_Coverage = 'Branch-05b-Test_Coverage'
+    Branch_PEP = 'Branch-04a-Code_Analysis'
+    Branch_Coverage = 'Branch-04b-Test_Coverage'
+    Branch_Pylint = 'Branch-04c-Code_Analysis2'
+    Branch_AppVeyor = 'Branch-05-AppVeyor-Tests'
 
-    Jobs = [Branch_Pull, Branch_Functional, Branch_Interface, Branch_Windows_Functional, Branch_Windows_Interface,
-            Branch_PEP, Branch_Coverage]
+    Jobs = [Branch_Pull, Branch_Functional, Branch_Interface, Branch_PEP, Branch_Coverage, Branch_Pylint,
+            Branch_AppVeyor]
 
 
 class Colour(object):
@@ -171,7 +171,7 @@ def get_repo_name():
     # Determine the branch's name
     repo_name = ''
     for line in output_list:
-        # Check if it is remote branch.
+        # Check if it is api branch.
         if 'push branch' in line:
             match = re.match(REPO_REGEX, line)
             if match:
@@ -216,6 +216,7 @@ def main():
             jenkins_trigger.print_output()
     else:
         parser.print_help()
+
 
 if __name__ == '__main__':
     main()

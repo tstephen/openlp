@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -22,43 +22,94 @@
 """
 Package to test the openlp.core.lib.theme package.
 """
-from tests.functional import MagicMock, patch
+import os
+from pathlib import Path
 from unittest import TestCase
 
-from openlp.core.lib.theme import ThemeXML
+from openlp.core.lib.theme import Theme
 
 
 class TestTheme(TestCase):
     """
-    Test the functions in the Theme module
+    Test the Theme class
     """
-    def setUp(self):
+    def test_new_theme(self):
         """
-        Create the UI
+        Test the Theme constructor
         """
-        pass
+        # GIVEN: The Theme class
+        # WHEN: A theme object is created
+        default_theme = Theme()
 
-    def tearDown(self):
-        """
-        Delete all the C++ objects at the end so that we don't have a segfault
-        """
-        pass
+        # THEN: The default values should be correct
+        self.check_theme(default_theme)
 
-    def new_theme_test(self):
+    def test_expand_json(self):
         """
-        Test the theme creation - basic test
+        Test the expand_json method
         """
-        # GIVEN: A new theme
+        # GIVEN: A Theme object and some JSON to "expand"
+        theme = Theme()
+        theme_json = {
+            'background': {
+                'border_color': '#000000',
+                'type': 'solid'
+            },
+            'display': {
+                'vertical_align': 0
+            },
+            'font': {
+                'footer': {
+                    'bold': False
+                },
+                'main': {
+                    'name': 'Arial'
+                }
+            }
+        }
 
-        # WHEN: A theme is created
-        default_theme = ThemeXML()
+        # WHEN: Theme.expand_json() is run
+        theme.expand_json(theme_json)
 
-        # THEN: We should get some default behaviours
-        self.assertTrue(default_theme.background_border_color == '#000000', 'The theme should have a black border')
-        self.assertTrue(default_theme.background_type == 'solid', 'The theme should have a solid backgrounds')
-        self.assertTrue(default_theme.display_vertical_align == 0,
-                        'The theme should have a display_vertical_align of 0')
-        self.assertTrue(default_theme.font_footer_name == "Arial",
-                        'The theme should have a font_footer_name of Arial')
-        self.assertTrue(default_theme.font_main_bold is False, 'The theme should have a font_main_bold of false')
-        self.assertTrue(len(default_theme.__dict__) == 47, 'The theme should have 47 variables')
+        # THEN: The attributes should be set on the object
+        self.check_theme(theme)
+
+    def test_extend_image_filename(self):
+        """
+        Test the extend_image_filename method
+        """
+        # GIVEN: A theme object
+        theme = Theme()
+        theme.theme_name = 'MyBeautifulTheme'
+        theme.background_filename = Path('video.mp4')
+        theme.background_type = 'video'
+        path = Path.home()
+
+        # WHEN: Theme.extend_image_filename is run
+        theme.extend_image_filename(path)
+
+        # THEN: The filename of the background should be correct
+        expected_filename = path / 'MyBeautifulTheme' / 'video.mp4'
+        self.assertEqual(expected_filename, theme.background_filename)
+        self.assertEqual('MyBeautifulTheme', theme.theme_name)
+
+    def test_save_retrieve(self):
+        """
+        Load a dummy theme, save it and reload it
+        """
+        # GIVEN: The default Theme class
+        # WHEN: A theme object is created
+        default_theme = Theme()
+        # THEN: The default values should be correct
+        save_theme_json = default_theme.export_theme()
+        lt = Theme()
+        lt.load_theme(save_theme_json)
+        self.check_theme(lt)
+
+    def check_theme(self, theme):
+        self.assertEqual('#000000', theme.background_border_color, 'background_border_color should be "#000000"')
+        self.assertEqual('solid', theme.background_type, 'background_type should be "solid"')
+        self.assertEqual(0, theme.display_vertical_align, 'display_vertical_align should be 0')
+        self.assertFalse(theme.font_footer_bold, 'font_footer_bold should be False')
+        self.assertEqual('Arial', theme.font_main_name, 'font_main_name should be "Arial"')
+        self.assertEqual(47, len(theme.__dict__), 'The theme should have 47 attributes')

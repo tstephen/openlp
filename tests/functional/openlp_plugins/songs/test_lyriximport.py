@@ -3,7 +3,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -21,14 +21,10 @@
 """
 This module contains tests for the LyriX song importer.
 """
-
 import os
-from unittest import TestCase
+from unittest.mock import patch
 
 from tests.helpers.songfileimport import SongImportTestHelper
-from openlp.plugins.songs.lib.importers.opensong import OpenSongImport
-from openlp.core.common import Registry
-from tests.functional import patch, MagicMock
 
 TEST_PATH = os.path.abspath(
     os.path.join(os.path.dirname(__file__), '..', '..', '..', 'resources', 'lyrixsongs'))

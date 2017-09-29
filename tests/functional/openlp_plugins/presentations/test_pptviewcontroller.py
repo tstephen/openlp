@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -22,18 +22,17 @@
 """
 This module contains tests for the pptviewcontroller module of the Presentations plugin.
 """
-import os
 import shutil
-
 from tempfile import mkdtemp
 from unittest import TestCase
-
-from tests.functional import MagicMock, patch
-from tests.helpers.testmixin import TestMixin
-from tests.utils.constants import TEST_RESOURCES_PATH
+from unittest.mock import MagicMock, patch
 
 from openlp.plugins.presentations.lib.pptviewcontroller import PptviewDocument, PptviewController
 from openlp.core.common import is_win
+from openlp.core.common.path import Path
+
+from tests.helpers.testmixin import TestMixin
+from tests.utils.constants import TEST_RESOURCES_PATH
 
 if is_win():
     from ctypes import cdll
@@ -43,11 +42,6 @@ class TestPptviewController(TestCase, TestMixin):
     """
     Test the PptviewController Class
     """
-# TODO: Items left to test
-#   PptviewController
-#       start_process(self)
-#       kill
-
     def setUp(self):
         """
         Set up the patches and mocks need for all tests.
@@ -65,7 +59,7 @@ class TestPptviewController(TestCase, TestMixin):
         self.destroy_settings()
         shutil.rmtree(self.temp_folder)
 
-    def constructor_test(self):
+    def test_constructor(self):
         """
         Test the Constructor from the PptViewController
         """
@@ -79,7 +73,7 @@ class TestPptviewController(TestCase, TestMixin):
         self.assertEqual('Powerpoint Viewer', controller.name,
                          'The name of the presentation controller should be correct')
 
-    def check_available_test(self):
+    def test_check_available(self):
         """
         Test check_available / check_installed
         """
@@ -104,24 +98,6 @@ class TestPptviewDocument(TestCase):
     """
     Test the PptviewDocument Class
     """
-    # TODO: Items left to test
-    #   PptviewDocument
-    #       __init__
-    #       create_thumbnails
-    #       close_presentation
-    #       is_loaded
-    #       is_active
-    #       blank_screen
-    #       unblank_screen
-    #       is_blank
-    #       stop_presentation
-    #       start_presentation
-    #       get_slide_number
-    #       get_slide_count
-    #       goto_slide
-    #       next_step
-    #       previous_step
-
     def setUp(self):
         """
         Set up the patches and mocks need for all tests.
@@ -162,7 +138,7 @@ class TestPptviewDocument(TestCase):
         self.screen_list_patcher.stop()
         shutil.rmtree(self.temp_folder)
 
-    def load_presentation_succesfull_test(self):
+    def test_load_presentation_succesfull(self):
         """
         Test the PptviewDocument.load_presentation() method when the PPT is successfully opened
         """
@@ -181,7 +157,7 @@ class TestPptviewDocument(TestCase):
             # THEN: PptviewDocument.load_presentation should return True
             self.assertTrue(result)
 
-    def load_presentation_un_succesfull_test(self):
+    def test_load_presentation_un_succesfull(self):
         """
         Test the PptviewDocument.load_presentation() method when the temporary directory does not exist and the PPT is
         not successfully opened
@@ -202,13 +178,13 @@ class TestPptviewDocument(TestCase):
                 mock_makedirs.assert_called_once_with(self.temp_folder)
                 self.assertFalse(result)
 
-    def create_titles_and_notes_test(self):
+    def test_create_titles_and_notes(self):
         """
         Test PowerpointController.create_titles_and_notes
         """
         # GIVEN: mocked PresentationController.save_titles_and_notes and a pptx file
         doc = PptviewDocument(self.mock_controller, self.mock_presentation)
-        doc.file_path = os.path.join(TEST_RESOURCES_PATH, 'presentations', 'test.pptx')
+        doc.file_path = Path(TEST_RESOURCES_PATH, 'presentations', 'test.pptx')
         doc.save_titles_and_notes = MagicMock()
 
         # WHEN reading the titles and notes
@@ -219,19 +195,19 @@ class TestPptviewDocument(TestCase):
                                                           ['Notes for slide 1', 'Inserted', 'Notes for slide 2',
                                                            'Notes \nfor slide 4', 'Notes for slide 3'])
 
-    def create_titles_and_notes_nonexistent_file_test(self):
+    def test_create_titles_and_notes_nonexistent_file(self):
         """
         Test PowerpointController.create_titles_and_notes with nonexistent file
         """
         # GIVEN: mocked PresentationController.save_titles_and_notes and an nonexistent file
         with patch('builtins.open') as mocked_open, \
-                patch('openlp.plugins.presentations.lib.pptviewcontroller.os.path.exists') as mocked_exists, \
+                patch.object(Path, 'exists') as mocked_path_exists, \
                 patch('openlp.plugins.presentations.lib.presentationcontroller.check_directory_exists') as \
                 mocked_dir_exists:
-            mocked_exists.return_value = False
+            mocked_path_exists.return_value = False
             mocked_dir_exists.return_value = False
             doc = PptviewDocument(self.mock_controller, self.mock_presentation)
-            doc.file_path = 'Idontexist.pptx'
+            doc.file_path = Path('Idontexist.pptx')
             doc.save_titles_and_notes = MagicMock()
 
             # WHEN: Reading the titles and notes
@@ -239,10 +215,10 @@ class TestPptviewDocument(TestCase):
 
             # THEN: File existens should have been checked, and not have been opened.
             doc.save_titles_and_notes.assert_called_once_with(None, None)
-            mocked_exists.assert_any_call('Idontexist.pptx')
+            mocked_path_exists.assert_called_with()
             self.assertEqual(mocked_open.call_count, 0, 'There should be no calls to open a file.')
 
-    def create_titles_and_notes_invalid_file_test(self):
+    def test_create_titles_and_notes_invalid_file(self):
         """
         Test PowerpointController.create_titles_and_notes with invalid file
         """
@@ -252,7 +228,7 @@ class TestPptviewDocument(TestCase):
             mocked_is_zf.return_value = False
             mocked_open.filesize = 10
             doc = PptviewDocument(self.mock_controller, self.mock_presentation)
-            doc.file_path = os.path.join(TEST_RESOURCES_PATH, 'presentations', 'test.ppt')
+            doc.file_path = Path(TEST_RESOURCES_PATH, 'presentations', 'test.ppt')
             doc.save_titles_and_notes = MagicMock()
 
             # WHEN: reading the titles and notes

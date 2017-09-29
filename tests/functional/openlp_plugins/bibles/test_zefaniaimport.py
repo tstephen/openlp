@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -22,13 +22,12 @@
 """
 This module contains tests for the Zefania Bible importer.
 """
-
 import os
 import json
 from unittest import TestCase
+from unittest.mock import MagicMock, patch
 
-from tests.functional import MagicMock, patch
-from openlp.plugins.bibles.lib.zefania import ZefaniaBible
+from openlp.plugins.bibles.lib.importers.zefania import ZefaniaBible
 from openlp.plugins.bibles.lib.db import BibleDB
 
 TEST_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__),
@@ -41,16 +40,14 @@ class TestZefaniaImport(TestCase):
     """
 
     def setUp(self):
-        self.registry_patcher = patch('openlp.plugins.bibles.lib.db.Registry')
+        self.registry_patcher = patch('openlp.plugins.bibles.lib.bibleimport.Registry')
+        self.addCleanup(self.registry_patcher.stop)
         self.registry_patcher.start()
         self.manager_patcher = patch('openlp.plugins.bibles.lib.db.Manager')
+        self.addCleanup(self.manager_patcher.stop)
         self.manager_patcher.start()
 
-    def tearDown(self):
-        self.registry_patcher.stop()
-        self.manager_patcher.stop()
-
-    def create_importer_test(self):
+    def test_create_importer(self):
         """
         Test creating an instance of the Zefania file importer
         """
@@ -63,7 +60,7 @@ class TestZefaniaImport(TestCase):
         # THEN: The importer should be an instance of BibleDB
         self.assertIsInstance(importer, BibleDB)
 
-    def file_import_test(self):
+    def test_file_import(self):
         """
         Test the actual import of Zefania Bible file
         """
@@ -72,7 +69,7 @@ class TestZefaniaImport(TestCase):
         result_file = open(os.path.join(TEST_PATH, 'dk1933.json'), 'rb')
         test_data = json.loads(result_file.read().decode())
         bible_file = 'zefania-dk1933.xml'
-        with patch('openlp.plugins.bibles.lib.zefania.ZefaniaBible.application'):
+        with patch('openlp.plugins.bibles.lib.importers.zefania.ZefaniaBible.application'):
             mocked_manager = MagicMock()
             mocked_import_wizard = MagicMock()
             importer = ZefaniaBible(mocked_manager, path='.', name='.', filename='')
@@ -90,10 +87,10 @@ class TestZefaniaImport(TestCase):
             # THEN: The create_verse() method should have been called with each verse in the file.
             self.assertTrue(importer.create_verse.called)
             for verse_tag, verse_text in test_data['verses']:
-                importer.create_verse.assert_any_call(importer.create_book().id, '1', verse_tag, verse_text)
+                importer.create_verse.assert_any_call(importer.create_book().id, 1, verse_tag, verse_text)
             importer.create_book.assert_any_call('Genesis', 1, 1)
 
-    def file_import_no_book_name_test(self):
+    def test_file_import_no_book_name(self):
         """
         Test the import of Zefania Bible file without book names
         """
@@ -102,7 +99,7 @@ class TestZefaniaImport(TestCase):
         result_file = open(os.path.join(TEST_PATH, 'rst.json'), 'rb')
         test_data = json.loads(result_file.read().decode())
         bible_file = 'zefania-rst.xml'
-        with patch('openlp.plugins.bibles.lib.zefania.ZefaniaBible.application'):
+        with patch('openlp.plugins.bibles.lib.importers.zefania.ZefaniaBible.application'):
             mocked_manager = MagicMock()
             mocked_import_wizard = MagicMock()
             importer = ZefaniaBible(mocked_manager, path='.', name='.', filename='')
@@ -120,5 +117,5 @@ class TestZefaniaImport(TestCase):
             # THEN: The create_verse() method should have been called with each verse in the file.
             self.assertTrue(importer.create_verse.called)
             for verse_tag, verse_text in test_data['verses']:
-                importer.create_verse.assert_any_call(importer.create_book().id, '1', verse_tag, verse_text)
+                importer.create_verse.assert_any_call(importer.create_book().id, 1, verse_tag, verse_text)
             importer.create_book.assert_any_call('Exodus', 2, 1)

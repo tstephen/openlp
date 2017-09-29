@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -26,9 +26,13 @@ from unittest import TestCase
 
 from PyQt5 import QtCore, QtTest, QtWidgets
 
-from openlp.core.common import Registry
+from openlp.core.common import Registry, Settings
 from openlp.plugins.songs.forms.editverseform import EditVerseForm
 from tests.helpers.testmixin import TestMixin
+
+__default_settings__ = {
+    'songs/enable chords': True,
+}
 
 
 class TestEditVerseForm(TestCase, TestMixin):
@@ -44,16 +48,19 @@ class TestEditVerseForm(TestCase, TestMixin):
         self.setup_application()
         self.main_window = QtWidgets.QMainWindow()
         Registry().register('main_window', self.main_window)
+        self.build_settings()
+        Settings().extend_default_settings(__default_settings__)
         self.form = EditVerseForm()
 
     def tearDown(self):
         """
         Delete all the C++ objects at the end so that we don't have a segfault
         """
+        self.destroy_settings()
         del self.form
         del self.main_window
 
-    def ui_defaults_test(self):
+    def test_ui_defaults(self):
         """
         Test the EditVerseForm defaults are correct
         """
@@ -62,7 +69,7 @@ class TestEditVerseForm(TestCase, TestMixin):
         # THEN: The default value is correct
         self.assertEqual(self.form.verse_text_edit.toPlainText(), '', 'The verse edit box is empty.')
 
-    def type_verse_text_tests(self):
+    def test_type_verse_text(self):
         """
         Test that typing into the verse text edit box returns the correct text
         """
@@ -76,7 +83,7 @@ class TestEditVerseForm(TestCase, TestMixin):
         self.assertEqual(text, self.form.verse_text_edit.toPlainText(),
                          'The verse text edit should have the typed out verse')
 
-    def insert_verse_test(self):
+    def test_insert_verse(self):
         """
         Test that clicking the insert button inserts the correct verse marker
         """
@@ -88,7 +95,7 @@ class TestEditVerseForm(TestCase, TestMixin):
         self.assertIn('---[Verse:1]---', self.form.verse_text_edit.toPlainText(),
                       'The verse text edit should have a verse marker')
 
-    def insert_verse_2_test(self):
+    def test_insert_verse_2(self):
         """
         Test that clicking the up button on the spin box and then clicking the insert button inserts the correct marker
         """
@@ -101,7 +108,7 @@ class TestEditVerseForm(TestCase, TestMixin):
         self.assertIn('---[Verse:2]---', self.form.verse_text_edit.toPlainText(),
                       'The verse text edit should have a "Verse 2" marker')
 
-    def insert_chorus_test(self):
+    def test_insert_chorus(self):
         """
         Test that clicking the verse type combo box and then clicking the insert button inserts the correct marker
         """

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -45,7 +45,7 @@ class LanguageManager(object):
     auto_language = False
 
     @staticmethod
-    def get_translator(language):
+    def get_translators(language):
         """
         Set up a translator to use in this instance of OpenLP
 
@@ -53,26 +53,29 @@ class LanguageManager(object):
         """
         if LanguageManager.auto_language:
             language = QtCore.QLocale.system().name()
-        lang_path = AppLocation.get_directory(AppLocation.LanguageDir)
+        lang_path = str(AppLocation.get_directory(AppLocation.LanguageDir))
         app_translator = QtCore.QTranslator()
         app_translator.load(language, lang_path)
         # A translator for buttons and other default strings provided by Qt.
         if not is_win() and not is_macosx():
             lang_path = QtCore.QLibraryInfo.location(QtCore.QLibraryInfo.TranslationsPath)
+        # As of Qt5, the core translations come in 2 files per language
         default_translator = QtCore.QTranslator()
         default_translator.load('qt_%s' % language, lang_path)
-        return app_translator, default_translator
+        base_translator = QtCore.QTranslator()
+        base_translator.load('qtbase_%s' % language, lang_path)
+        return app_translator, default_translator, base_translator
 
     @staticmethod
     def find_qm_files():
         """
         Find all available language files in this OpenLP install
         """
-        log.debug('Translation files: %s', AppLocation.get_directory(AppLocation.LanguageDir))
-        trans_dir = QtCore.QDir(AppLocation.get_directory(AppLocation.LanguageDir))
+        log.debug('Translation files: {files}'.format(files=AppLocation.get_directory(AppLocation.LanguageDir)))
+        trans_dir = QtCore.QDir(str(AppLocation.get_directory(AppLocation.LanguageDir)))
         file_names = trans_dir.entryList(['*.qm'], QtCore.QDir.Files, QtCore.QDir.Name)
-        # Remove qm files from the list which start with "qt_".
-        file_names = [file_ for file_ in file_names if not file_.startswith('qt_')]
+        # Remove qm files from the list which start with "qt".
+        file_names = [file_ for file_ in file_names if not file_.startswith('qt')]
         return list(map(trans_dir.filePath, file_names))
 
     @staticmethod
@@ -93,7 +96,7 @@ class LanguageManager(object):
         """
         language = Settings().value('core/language')
         language = str(language)
-        log.info('Language file: \'%s\' Loaded from conf file' % language)
+        log.info("Language file: '{language}' Loaded from conf file".format(language=language))
         if re.match(r'[[].*[]]', language):
             LanguageManager.auto_language = True
             language = re.sub(r'[\[\]]', '', language)
@@ -117,9 +120,9 @@ class LanguageManager(object):
                 qm_list = LanguageManager.get_qm_list()
                 language = str(qm_list[action_name])
         if LanguageManager.auto_language:
-            language = '[%s]' % language
+            language = '[{language}]'.format(language=language)
         Settings().setValue('core/language', language)
-        log.info('Language file: \'%s\' written to conf file' % language)
+        log.info("Language file: '{language}' written to conf file".format(language=language))
         if message:
             QtWidgets.QMessageBox.information(None,
                                               translate('OpenLP.LanguageManager', 'Language'),
@@ -136,8 +139,9 @@ class LanguageManager(object):
         for counter, qmf in enumerate(qm_files):
             reg_ex = QtCore.QRegExp("^.*i18n/(.*).qm")
             if reg_ex.exactMatch(qmf):
-                name = '%s' % reg_ex.cap(1)
-                LanguageManager.__qm_list__['%#2i %s' % (counter + 1, LanguageManager.language_name(qmf))] = name
+                name = '{regex}'.format(regex=reg_ex.cap(1))
+                LanguageManager.__qm_list__[
+                    '{count:>2d} {name}'.format(count=counter + 1, name=LanguageManager.language_name(qmf))] = name
 
     @staticmethod
     def get_qm_list():
@@ -167,7 +171,7 @@ def format_time(text, local_time):
         """
         return local_time.strftime(match.group())
 
-    return re.sub('\%[a-zA-Z]', match_formatting, text)
+    return re.sub(r'\%[a-zA-Z]', match_formatting, text)
 
 
 def get_locale_key(string):

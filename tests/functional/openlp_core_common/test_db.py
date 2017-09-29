@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -67,7 +67,7 @@ class TestUtilsDBFunctions(TestCase):
                 time.sleep(1)
                 retries += 1
 
-    def delete_column_test(self):
+    def test_delete_column(self):
         """
         Test deleting a single column in a table
         """
@@ -85,7 +85,7 @@ class TestUtilsDBFunctions(TestCase):
             if column.name == 'song_book_id':
                 self.fail("The column 'song_book_id' should have been deleted.")
 
-    def delete_columns_test(self):
+    def test_delete_columns(self):
         """
         Test deleting multiple columns in a table
         """

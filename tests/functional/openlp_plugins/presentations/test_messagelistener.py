@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,11 +23,12 @@
 This module contains tests for the lib submodule of the Presentations plugin.
 """
 from unittest import TestCase
+from unittest.mock import patch, MagicMock
 
 from openlp.core.common import Registry
 from openlp.plugins.presentations.lib.mediaitem import MessageListener, PresentationMediaItem
 from openlp.plugins.presentations.lib.messagelistener import Controller
-from tests.functional import patch, MagicMock
+
 from tests.helpers.testmixin import TestMixin
 
 
@@ -47,7 +48,7 @@ class TestMessageListener(TestCase, TestMixin):
             self.media_item = PresentationMediaItem(None, MagicMock, MagicMock())
 
     @patch('openlp.plugins.presentations.lib.mediaitem.MessageListener._setup')
-    def start_presentation_test(self, media_mock):
+    def test_start_presentation(self, media_mock):
         """
         Find and chose a controller to play a presentations.
         """
@@ -75,7 +76,7 @@ class TestMessageListener(TestCase, TestMixin):
         self.assertTrue(len(controllers), 'We have loaded a controller')
 
     @patch('openlp.plugins.presentations.lib.mediaitem.MessageListener._setup')
-    def start_presentation_with_no_player_test(self, media_mock):
+    def test_start_presentation_with_no_player(self, media_mock):
         """
         Find and chose a controller to play a presentations when the player is not available.
         """
@@ -107,7 +108,7 @@ class TestMessageListener(TestCase, TestMixin):
         self.assertTrue(len(controllers), 'We have loaded a controller')
 
     @patch('openlp.plugins.presentations.lib.mediaitem.MessageListener._setup')
-    def start_pdf_presentation_test(self, media_mock):
+    def test_start_pdf_presentation(self, media_mock):
         """
         Test the startup of pdf presentation succeed.
         """
@@ -132,7 +133,7 @@ class TestController(TestCase, TestMixin):
     Test the Presentation Controller.
     """
 
-    def add_handler_failure_test(self):
+    def test_add_handler_failure(self):
         """
         Test that add_handler does set doc.slidenumber to 0 in case filed loading
         """

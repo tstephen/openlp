@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -53,13 +53,13 @@ class TestTopicsForm(TestCase, TestMixin):
         del self.form
         del self.main_window
 
-    def ui_defaults_test(self):
+    def test_ui_defaults(self):
         """
         Test the TopicsForm defaults are correct
         """
         self.assertEqual(self.form.name_edit.text(), '', 'The first name edit should be empty')
 
-    def get_name_property_test(self):
+    def test_get_name_property(self):
         """
         Test that getting the name property on the TopicsForm works correctly
         """
@@ -72,7 +72,7 @@ class TestTopicsForm(TestCase, TestMixin):
         # THEN: The name property should have the correct value
         self.assertEqual(self.form.name, topic_name, 'The name property should be correct')
 
-    def set_name_property_test(self):
+    def test_set_name_property(self):
         """
         Test that setting the name property on the TopicsForm works correctly
         """

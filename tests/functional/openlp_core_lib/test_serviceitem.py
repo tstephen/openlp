@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -24,12 +24,12 @@ Package to test the openlp.core.lib package.
 """
 import os
 from unittest import TestCase
-
-from tests.functional import MagicMock, patch
-from tests.utils import assert_length, convert_file_service_item
+from unittest.mock import MagicMock, patch
 
 from openlp.core.common import Registry, md5_hash
-from openlp.core.lib import ItemCapabilities, ServiceItem, ServiceItemType
+from openlp.core.lib import ItemCapabilities, ServiceItem, ServiceItemType, FormattingTags
+
+from tests.utils import assert_length, convert_file_service_item
 
 VERSE = 'The Lord said to {r}Noah{/r}: \n'\
         'There\'s gonna be a {su}floody{/su}, {sb}floody{/sb}\n'\
@@ -38,6 +38,23 @@ VERSE = 'The Lord said to {r}Noah{/r}: \n'\
         'Get those children out of the muddy, muddy \n'\
         '{r}C{/r}{b}h{/b}{bl}i{/bl}{y}l{/y}{g}d{/g}{pk}'\
         'r{/pk}{o}e{/o}{pp}n{/pp} of the Lord\n'
+CLEANED_VERSE = 'The Lord said to Noah: \n'\
+                'There\'s gonna be a floody, floody\n'\
+                'The Lord said to Noah:\n'\
+                'There\'s gonna be a floody, floody\n'\
+                'Get those children out of the muddy, muddy \n'\
+                'Children of the Lord\n'
+RENDERED_VERSE = 'The Lord said to <span style="-webkit-text-fill-color:red">Noah</span>: \n'\
+                 'There&#x27;s gonna be a <sup>floody</sup>, <sub>floody</sub>\n'\
+                 'The Lord said to <span style="-webkit-text-fill-color:green">Noah</span>:\n'\
+                 'There&#x27;s gonna be a <strong>floody</strong>, <em>floody</em>\n'\
+                 'Get those children out of the muddy, muddy \n'\
+                 '<span style="-webkit-text-fill-color:red">C</span><span style="-webkit-text-fill-color:black">h' \
+                 '</span><span style="-webkit-text-fill-color:blue">i</span>'\
+                 '<span style="-webkit-text-fill-color:yellow">l</span><span style="-webkit-text-fill-color:green">d'\
+                 '</span><span style="-webkit-text-fill-color:#FFC0CB">r</span>'\
+                 '<span style="-webkit-text-fill-color:#FFA500">e</span><span style="-webkit-text-fill-color:#800080">'\
+                 'n</span> of the Lord\n'
 FOOTER = ['Arky Arky (Unknown)', 'Public Domain', 'CCLI 123456']
 TEST_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'resources', 'service'))
 
@@ -54,7 +71,7 @@ class TestServiceItem(TestCase):
         Registry().register('renderer', mocked_renderer)
         Registry().register('image_manager', MagicMock())
 
-    def service_item_basic_test(self):
+    def test_service_item_basic(self):
         """
         Test the Service Item - basic test
         """
@@ -67,13 +84,14 @@ class TestServiceItem(TestCase):
         self.assertTrue(service_item.is_valid, 'The new service item should be valid')
         self.assertTrue(service_item.missing_frames(), 'There should not be any frames in the service item')
 
-    def service_item_load_custom_from_service_test(self):
+    def test_service_item_load_custom_from_service(self):
         """
         Test the Service Item - adding a custom slide from a saved service
         """
         # GIVEN: A new service item and a mocked add icon function
         service_item = ServiceItem(None)
         service_item.add_icon = MagicMock()
+        FormattingTags.load_tags()
 
         # WHEN: We add a custom from a saved service
         line = convert_file_service_item(TEST_PATH, 'serviceitem_custom_1.osj')
@@ -89,15 +107,15 @@ class TestServiceItem(TestCase):
 
         # THEN: The frames should also be valid
         self.assertEqual('Test Custom', service_item.get_display_title(), 'The title should be "Test Custom"')
-        self.assertEqual(VERSE[:-1], service_item.get_frames()[0]['text'],
+        self.assertEqual(CLEANED_VERSE[:-1], service_item.get_frames()[0]['text'],
                          'The returned text matches the input, except the last line feed')
-        self.assertEqual(VERSE.split('\n', 1)[0], service_item.get_rendered_frame(1),
+        self.assertEqual(RENDERED_VERSE.split('\n', 1)[0], service_item.get_rendered_frame(1),
                          'The first line has been returned')
         self.assertEqual('Slide 1', service_item.get_frame_title(0), '"Slide 1" has been returned as the title')
         self.assertEqual('Slide 2', service_item.get_frame_title(1), '"Slide 2" has been returned as the title')
         self.assertEqual('', service_item.get_frame_title(2), 'Blank has been returned as the title of slide 3')
 
-    def service_item_load_image_from_service_test(self):
+    def test_service_item_load_image_from_service(self):
         """
         Test the Service Item - adding an image from a saved service
         """
@@ -112,7 +130,6 @@ class TestServiceItem(TestCase):
         # WHEN: adding an image from a saved Service and mocked exists
         line = convert_file_service_item(TEST_PATH, 'serviceitem_image_1.osj')
         with patch('openlp.core.ui.servicemanager.os.path.exists') as mocked_exists,\
-                patch('openlp.core.lib.serviceitem.create_thumb') as mocked_create_thumb,\
                 patch('openlp.core.lib.serviceitem.AppLocation.get_section_data_path') as \
                 mocked_get_section_data_path:
             mocked_exists.return_value = True
@@ -141,7 +158,7 @@ class TestServiceItem(TestCase):
         self.assertTrue(service_item.is_capable(ItemCapabilities.CanAppend),
                         'This service item should be able to have new items added to it')
 
-    def service_item_load_image_from_local_service_test(self):
+    def test_service_item_load_image_from_local_service(self):
         """
         Test the Service Item - adding an image from a saved local service
         """
@@ -164,7 +181,6 @@ class TestServiceItem(TestCase):
         line2 = convert_file_service_item(TEST_PATH, 'serviceitem_image_2.osj', 1)
 
         with patch('openlp.core.ui.servicemanager.os.path.exists') as mocked_exists, \
-                patch('openlp.core.lib.serviceitem.create_thumb') as mocked_create_thumb, \
                 patch('openlp.core.lib.serviceitem.AppLocation.get_section_data_path') as \
                 mocked_get_section_data_path:
             mocked_exists.return_value = True
@@ -206,7 +222,7 @@ class TestServiceItem(TestCase):
         self.assertTrue(service_item.is_capable(ItemCapabilities.CanAppend),
                         'This service item should be able to have new items added to it')
 
-    def add_from_command_for_a_presentation_test(self):
+    def test_add_from_command_for_a_presentation(self):
         """
         Test the Service Item - adding a presentation
         """
@@ -226,7 +242,7 @@ class TestServiceItem(TestCase):
         self.assertEqual(service_item.service_item_type, ServiceItemType.Command, 'It should be a Command')
         self.assertEqual(service_item.get_frames()[0], frame, 'Frames should match')
 
-    def add_from_comamnd_without_display_title_and_notes_test(self):
+    def test_add_from_comamnd_without_display_title_and_notes(self):
         """
         Test the Service Item - add from command, but not presentation
         """
@@ -244,14 +260,16 @@ class TestServiceItem(TestCase):
         self.assertEqual(service_item.service_item_type, ServiceItemType.Command, 'It should be a Command')
         self.assertEqual(service_item.get_frames()[0], frame, 'Frames should match')
 
+    @patch(u'openlp.core.lib.serviceitem.ServiceItem.image_manager')
     @patch('openlp.core.lib.serviceitem.AppLocation.get_section_data_path')
-    def add_from_command_for_a_presentation_thumb_test(self, mocked_get_section_data_path):
+    def test_add_from_command_for_a_presentation_thumb(self, mocked_get_section_data_path, mocked_image_manager):
         """
-        Test the Service Item - adding a presentation, and updating the thumb path
+        Test the Service Item - adding a presentation, updating the thumb path & adding the thumb to image_manager
         """
         # GIVEN: A service item, a mocked AppLocation and presentation data
         mocked_get_section_data_path.return_value = os.path.join('mocked', 'section', 'path')
         service_item = ServiceItem(None)
+        service_item.add_capability(ItemCapabilities.HasThumbnails)
         service_item.has_original_files = False
         service_item.name = 'presentations'
         presentation_name = 'test.pptx'
@@ -270,8 +288,9 @@ class TestServiceItem(TestCase):
         # THEN: verify that it is setup as a Command and that the frame data matches
         self.assertEqual(service_item.service_item_type, ServiceItemType.Command, 'It should be a Command')
         self.assertEqual(service_item.get_frames()[0], frame, 'Frames should match')
+        self.assertEqual(1, mocked_image_manager.add_image.call_count, 'image_manager should be used')
 
-    def service_item_load_optical_media_from_service_test(self):
+    def test_service_item_load_optical_media_from_service(self):
         """
         Test the Service Item - load an optical media item
         """
@@ -292,13 +311,14 @@ class TestServiceItem(TestCase):
         self.assertEqual(service_item.end_time, 672.069, 'End time should be 672.069')
         self.assertEqual(service_item.media_length, 17.694, 'Media length should be 17.694')
 
-    def service_item_load_song_and_audio_from_service_test(self):
+    def test_service_item_load_song_and_audio_from_service(self):
         """
         Test the Service Item - adding a song slide from a saved service
         """
         # GIVEN: A new service item and a mocked add icon function
         service_item = ServiceItem(None)
         service_item.add_icon = MagicMock()
+        FormattingTags.load_tags()
 
         # WHEN: We add a custom from a saved service
         line = convert_file_service_item(TEST_PATH, 'serviceitem-song-linked-audio.osj')
@@ -314,9 +334,9 @@ class TestServiceItem(TestCase):
 
         # THEN: The frames should also be valid
         self.assertEqual('Amazing Grace', service_item.get_display_title(), 'The title should be "Amazing Grace"')
-        self.assertEqual(VERSE[:-1], service_item.get_frames()[0]['text'],
+        self.assertEqual(CLEANED_VERSE[:-1], service_item.get_frames()[0]['text'],
                          'The returned text matches the input, except the last line feed')
-        self.assertEqual(VERSE.split('\n', 1)[0], service_item.get_rendered_frame(1),
+        self.assertEqual(RENDERED_VERSE.split('\n', 1)[0], service_item.get_rendered_frame(1),
                          'The first line has been returned')
         self.assertEqual('Amazing Grace! how sweet the s', service_item.get_frame_title(0),
                          '"Amazing Grace! how sweet the s" has been returned as the title')

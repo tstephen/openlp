@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -19,16 +19,15 @@
 # with this program; if not, write to the Free Software Foundation, Inc., 59  #
 # Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
 ###############################################################################
-
-import logging
 import copy
-import os
+import logging
 
 from PyQt5 import QtCore
 
-from openlp.core.common import Registry
+from openlp.core.common import Registry, Settings
+from openlp.core.common.path import Path
+from openlp.core.lib import ServiceItemContext
 from openlp.core.ui import HideMode
-from openlp.core.lib import ServiceItemContext, ServiceItem
 from openlp.plugins.presentations.lib.pdfcontroller import PDF_CONTROLLER_FILETYPES
 
 log = logging.getLogger(__name__)
@@ -48,14 +47,14 @@ class Controller(object):
         self.is_live = live
         self.doc = None
         self.hide_mode = None
-        log.info('%s controller loaded' % live)
+        log.info('{name} controller loaded'.format(name=live))
 
     def add_handler(self, controller, file, hide_mode, slide_no):
         """
         Add a handler, which is an instance of a presentation and slidecontroller combination. If the slidecontroller
         has a display then load the presentation.
         """
-        log.debug('Live = %s, add_handler %s' % (self.is_live, file))
+        log.debug('Live = {live}, add_handler {handler}'.format(live=self.is_live, handler=file))
         self.controller = controller
         if self.doc is not None:
             self.shutdown()
@@ -67,7 +66,7 @@ class Controller(object):
             return
         self.doc.slidenumber = slide_no
         self.hide_mode = hide_mode
-        log.debug('add_handler, slide_number: %d' % slide_no)
+        log.debug('add_handler, slide_number: {slide:d}'.format(slide=slide_no))
         if self.is_live:
             if hide_mode == HideMode.Screen:
                 Registry().execute('live_display_hide', HideMode.Screen)
@@ -87,14 +86,14 @@ class Controller(object):
         """
         Active the presentation, and show it on the screen. Use the last slide number.
         """
-        log.debug('Live = %s, activate' % self.is_live)
+        log.debug('Live = {live}, activate'.format(live=self.is_live))
         if not self.doc:
             return False
         if self.doc.is_active():
             return True
         if not self.doc.is_loaded():
             if not self.doc.load_presentation():
-                log.warning('Failed to activate %s' % self.doc.file_path)
+                log.warning('Failed to activate {path}'.format(path=self.doc.file_path))
                 return False
         if self.is_live:
             self.doc.start_presentation()
@@ -105,14 +104,14 @@ class Controller(object):
         if self.doc.is_active():
             return True
         else:
-            log.warning('Failed to activate %s' % self.doc.file_path)
+            log.warning('Failed to activate {path}'.format(path=self.doc.file_path))
             return False
 
     def slide(self, slide):
         """
         Go to a specific slide
         """
-        log.debug('Live = %s, slide' % self.is_live)
+        log.debug('Live = {live}, slide'.format(live=self.is_live))
         if not self.doc:
             return
         if not self.is_live:
@@ -130,7 +129,7 @@ class Controller(object):
         """
         Based on the handler passed at startup triggers the first slide.
         """
-        log.debug('Live = %s, first' % self.is_live)
+        log.debug('Live = {live}, first'.format(live=self.is_live))
         if not self.doc:
             return
         if not self.is_live:
@@ -148,7 +147,7 @@ class Controller(object):
         """
         Based on the handler passed at startup triggers the last slide.
         """
-        log.debug('Live = %s, last' % self.is_live)
+        log.debug('Live = {live}, last'.format(live=self.is_live))
         if not self.doc:
             return
         if not self.is_live:
@@ -166,7 +165,7 @@ class Controller(object):
         """
         Based on the handler passed at startup triggers the next slide event.
         """
-        log.debug('Live = %s, next' % self.is_live)
+        log.debug('Live = {live}, next'.format(live=self.is_live))
         if not self.doc:
             return False
         if not self.is_live:
@@ -192,7 +191,7 @@ class Controller(object):
         """
         Based on the handler passed at startup triggers the previous slide event.
         """
-        log.debug('Live = %s, previous' % self.is_live)
+        log.debug('Live = {live}, previous'.formta(live=self.is_live))
         if not self.doc:
             return
         if not self.is_live:
@@ -213,7 +212,7 @@ class Controller(object):
         """
         Based on the handler passed at startup triggers slide show to shut down.
         """
-        log.debug('Live = %s, shutdown' % self.is_live)
+        log.debug('Live = {live}, shutdown'.format(live=self.is_live))
         if not self.doc:
             return
         self.doc.close_presentation()
@@ -223,7 +222,7 @@ class Controller(object):
         """
         Instruct the controller to blank the presentation.
         """
-        log.debug('Live = %s, blank' % self.is_live)
+        log.debug('Live = {live}, blank'.format(live=self.is_live))
         self.hide_mode = hide_mode
         if not self.doc:
             return
@@ -244,7 +243,7 @@ class Controller(object):
         """
         Instruct the controller to stop and hide the presentation.
         """
-        log.debug('Live = %s, stop' % self.is_live)
+        log.debug('Live = {live}, stop'.format(live=self.is_live))
         # The document has not been loaded yet, so don't do anything. This can happen when going live with a
         # presentation while blanked to desktop.
         if not self.doc:
@@ -267,7 +266,7 @@ class Controller(object):
         """
         Instruct the controller to unblank the presentation.
         """
-        log.debug('Live = %s, unblank' % self.is_live)
+        log.debug('Live = {live}, unblank'.format(live=self.is_live))
         self.hide_mode = None
         if not self.doc:
             return
@@ -322,25 +321,29 @@ class MessageListener(object):
         """
         Start of new presentation. Save the handler as any new presentations start here
         """
-        log.debug('Startup called with message %s' % message)
+        log.debug('Startup called with message {text}'.format(text=message))
         is_live = message[1]
         item = message[0]
         hide_mode = message[2]
-        file = item.get_frame_path()
+        file_path = Path(item.get_frame_path())
         self.handler = item.processor
         # When starting presentation from the servicemanager we convert
         # PDF/XPS/OXPS-serviceitems into image-serviceitems. When started from the mediamanager
         # the conversion has already been done at this point.
-        file_type = os.path.splitext(file.lower())[1][1:]
+        file_type = file_path.suffix.lower()[1:]
         if file_type in PDF_CONTROLLER_FILETYPES:
-            log.debug('Converting from pdf/xps/oxps to images for serviceitem with file %s', file)
+            log.debug('Converting from pdf/xps/oxps to images for serviceitem with file {name}'.format(name=file_path))
             # Create a copy of the original item, and then clear the original item so it can be filled with images
             item_cpy = copy.copy(item)
             item.__init__(None)
             if is_live:
-                self.media_item.generate_slide_data(item, item_cpy, False, False, ServiceItemContext.Live, file)
+                # TODO: To Path object
+                self.media_item.generate_slide_data(item, item_cpy, False, False, ServiceItemContext.Live,
+                                                    str(file_path))
             else:
-                self.media_item.generate_slide_data(item, item_cpy, False, False, ServiceItemContext.Preview, file)
+                # TODO: To Path object
+                self.media_item.generate_slide_data(item, item_cpy, False, False, ServiceItemContext.Preview,
+                                                    str(file_path))
             # Some of the original serviceitem attributes is needed in the new serviceitem
             item.footer = item_cpy.footer
             item.from_service = item_cpy.from_service
@@ -353,13 +356,13 @@ class MessageListener(object):
             self.handler = None
         else:
             if self.handler == self.media_item.automatic:
-                self.handler = self.media_item.find_controller_by_type(file)
+                self.handler = self.media_item.find_controller_by_type(file_path)
                 if not self.handler:
                     return
             else:
-                # the saved handler is not present so need to use one based on file suffix.
+                # the saved handler is not present so need to use one based on file_path suffix.
                 if not self.controllers[self.handler].available:
-                    self.handler = self.media_item.find_controller_by_type(file)
+                    self.handler = self.media_item.find_controller_by_type(file_path)
                     if not self.handler:
                         return
         if is_live:
@@ -371,7 +374,7 @@ class MessageListener(object):
         if self.handler is None:
             self.controller = controller
         else:
-            controller.add_handler(self.controllers[self.handler], file, hide_mode, message[3])
+            controller.add_handler(self.controllers[self.handler], file_path, hide_mode, message[3])
             self.timer.start()
 
     def slide(self, message):
@@ -419,7 +422,11 @@ class MessageListener(object):
         """
         is_live = message[1]
         if is_live:
-            return self.live_handler.next()
+            ret = self.live_handler.next()
+            self.live_handler.next()
+            if Settings().value('core/click live slide to unblank'):
+                Registry().execute('slidecontroller_live_unblank')
+            return ret
         else:
             return self.preview_handler.next()
 
@@ -432,6 +439,8 @@ class MessageListener(object):
         is_live = message[1]
         if is_live:
             self.live_handler.previous()
+            if Settings().value('core/click live slide to unblank'):
+                Registry().execute('slidecontroller_live_unblank')
         else:
             self.preview_handler.previous()
 

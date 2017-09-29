@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -22,10 +22,10 @@
 """
 Functional tests to test the AppLocation class and related methods.
 """
-import os
 from unittest import TestCase
 
 from openlp.core.common import is_not_image_file
+from openlp.core.common.path import Path
 from tests.utils.constants import TEST_RESOURCES_PATH
 from tests.helpers.testmixin import TestMixin
 
@@ -41,7 +41,7 @@ class TestUtils(TestCase, TestMixin):
         """
         self.setup_application()
 
-    def is_not_image_empty_test(self):
+    def test_is_not_image_empty(self):
         """
         Test the method handles an empty string
         """
@@ -54,12 +54,12 @@ class TestUtils(TestCase, TestMixin):
         # THEN the result is false
         assert result is True, 'The missing file test should return True'
 
-    def is_not_image_with_image_file_test(self):
+    def test_is_not_image_with_image_file(self):
         """
         Test the method handles an image file
         """
         # Given and empty string
-        file_name = os.path.join(TEST_RESOURCES_PATH, 'church.jpg')
+        file_name = Path(TEST_RESOURCES_PATH, 'church.jpg')
 
         # WHEN testing for it
         result = is_not_image_file(file_name)
@@ -67,12 +67,12 @@ class TestUtils(TestCase, TestMixin):
         # THEN the result is false
         assert result is False, 'The file is present so the test should return False'
 
-    def is_not_image_with_none_image_file_test(self):
+    def test_is_not_image_with_none_image_file(self):
         """
         Test the method handles a non image file
         """
         # Given and empty string
-        file_name = os.path.join(TEST_RESOURCES_PATH, 'serviceitem_custom_1.osj')
+        file_name = Path(TEST_RESOURCES_PATH, 'serviceitem_custom_1.osj')
 
         # WHEN testing for it
         result = is_not_image_file(file_name)

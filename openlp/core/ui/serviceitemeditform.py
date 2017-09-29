@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -37,8 +37,8 @@ class ServiceItemEditForm(QtWidgets.QDialog, Ui_ServiceItemEditDialog, RegistryP
         """
         Constructor
         """
-        super(ServiceItemEditForm, self).__init__(Registry().get('main_window'),
-                                                  QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint)
+        super(ServiceItemEditForm, self).__init__(Registry().get('main_window'), QtCore.Qt.WindowSystemMenuHint |
+                                                  QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowCloseButtonHint)
         self.setupUi(self)
         self.item_list = []
         self.list_widget.currentRowChanged.connect(self.on_current_row_changed)

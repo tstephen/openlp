@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -114,7 +114,7 @@ class CategoryActionList(object):
             if item[1] == action:
                 self.actions.remove(item)
                 return
-        raise ValueError('Action "%s" does not exist.' % action)
+        raise ValueError('Action "{action}" does not exist.'.format(action=action))
 
 
 class CategoryList(object):
@@ -138,7 +138,7 @@ class CategoryList(object):
         for category in self.categories:
             if category.name == key:
                 return category
-        raise KeyError('Category "%s" does not exist.' % key)
+        raise KeyError('Category "{key}" does not exist.'.format(key=key))
 
     def __len__(self):
         """
@@ -203,7 +203,7 @@ class CategoryList(object):
             if category.name == name:
                 self.categories.remove(category)
                 return
-        raise ValueError('Category "%s" does not exist.' % name)
+        raise ValueError('Category "{name}" does not exist.'.format(name=name))
 
 
 class ActionList(object):
@@ -272,8 +272,9 @@ class ActionList(object):
                 actions.append(action)
                 ActionList.shortcut_map[shortcuts[1]] = actions
             else:
-                log.warning('Shortcut "%s" is removed from "%s" because another action already uses this shortcut.' %
-                            (shortcuts[1], action.objectName()))
+                log.warning('Shortcut "{shortcut}" is removed from "{action}" because another '
+                            'action already uses this shortcut.'.format(shortcut=shortcuts[1],
+                                                                        action=action.objectName()))
                 shortcuts.remove(shortcuts[1])
         # Check the primary shortcut.
         existing_actions = ActionList.shortcut_map.get(shortcuts[0], [])
@@ -283,8 +284,9 @@ class ActionList(object):
             actions.append(action)
             ActionList.shortcut_map[shortcuts[0]] = actions
         else:
-            log.warning('Shortcut "%s" is removed from "%s" because another action already uses this shortcut.' %
-                        (shortcuts[0], action.objectName()))
+            log.warning('Shortcut "{shortcut}" is removed from "{action}" '
+                        'because another action already uses this shortcut.'.format(shortcut=shortcuts[0],
+                                                                                    action=action.objectName()))
             shortcuts.remove(shortcuts[0])
         action.setShortcuts([QtGui.QKeySequence(shortcut) for shortcut in shortcuts])
 

@@ -1,190 +1,226 @@
 """
 Package to test the openlp.core.lib.htmlbuilder module.
 """
-
 from unittest import TestCase
+from unittest.mock import MagicMock, patch
 
 from PyQt5 import QtCore, QtWebKit
 
 from openlp.core.common import Settings
 from openlp.core.lib.htmlbuilder import build_html, build_background_css, build_lyrics_css, build_lyrics_outline_css, \
-    build_lyrics_format_css, build_footer_css, webkit_version
+    build_lyrics_format_css, build_footer_css, webkit_version, build_chords_css
 from openlp.core.lib.theme import HorizontalType, VerticalType
-from tests.functional import MagicMock, patch
+
 from tests.helpers.testmixin import TestMixin
 
 HTML = """
-<!DOCTYPE html>
-<html>
-<head>
-<title>OpenLP Display</title>
-<style>
-*{
-    margin: 0;
-    padding: 0;
-    border: 0;
-    overflow: hidden;
-    -webkit-user-select: none;
-}
-body {
-    ;
-}
-.size {
-    position: absolute;
-    left: 0px;
-    top: 0px;
-    width: 100%;
-    height: 100%;
-}
-#black {
-    z-index: 8;
-    background-color: black;
-    display: none;
-}
-#bgimage {
-    z-index: 1;
-}
-#image {
-    z-index: 2;
-}
-plugin CSS
-#footer {
-    position: absolute;
-    z-index: 6;
-    dummy: dummy;
-}
-/* lyric css */
-
-sup {
-    font-size: 0.6em;
-    vertical-align: top;
-    position: relative;
-    top: -0.3em;
-}
-</style>
-<script>
-    var timer = null;
-    var transition = false;
-    plugin JS
-
-    function show_image(src){
-        var img = document.getElementById('image');
-        img.src = src;
-        if(src == '')
-            img.style.display = 'none';
-        else
-            img.style.display = 'block';
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <title>OpenLP Display</title>
+    <style>
+    *{
+        margin: 0;
+        padding: 0;
+        border: 0;
+        overflow: hidden;
+        -webkit-user-select: none;
     }
+    body {
+        ;
+    }
+    .size {
+        position: absolute;
+        left: 0px;
+        top: 0px;
+        width: 100%;
+        height: 100%;
+    }
+    #black {
+        z-index: 8;
+        background-color: black;
+        display: none;
+    }
+    #bgimage {
+        z-index: 1;
+    }
+    #image {
+        z-index: 2;
+    }
+    plugin CSS
+    #footer {
+        position: absolute;
+        z-index: 6;
+        dummy: dummy;
+    }
+    /* lyric css */
+    sup {
+        font-size: 0.6em;
+        vertical-align: top;
+        position: relative;
+        top: -0.3em;
+    }
+    /* Chords css */
+    .chordline {
+      line-height: 1.0em;
+    }
+    .chordline span.chord span {
+      position: relative;
+    }
+    .chordline span.chord span strong {
+      position: absolute;
+      top: -0.8em;
+      left: 0;
+      font-size: 75%;
+      font-weight: normal;
+      line-height: normal;
+      display: none;
+    }
+    .firstchordline {
+        line-height: 1.0em;
+    }
+    .ws {
+        display: none;
+        white-space: pre-wrap;
+    }
+    </style>
+    <script>
+        var timer = null;
+        var transition = false;
+        plugin JS
 
-    function show_blank(state){
-        var black = 'none';
-        var lyrics = '';
-        switch(state){
-            case 'theme':
-                lyrics = 'hidden';
-                break;
-            case 'black':
-                black = 'block';
-                break;
-            case 'desktop':
-                break;
+        function show_image(src){
+            var img = document.getElementById('image');
+            img.src = src;
+            if(src == '')
+                img.style.display = 'none';
+            else
+                img.style.display = 'block';
         }
-        document.getElementById('black').style.display = black;
-        document.getElementById('lyricsmain').style.visibility = lyrics;
-        document.getElementById('image').style.visibility = lyrics;
-        document.getElementById('footer').style.visibility = lyrics;
-    }
 
-    function show_footer(footertext){
-        document.getElementById('footer').innerHTML = footertext;
-    }
-
-    function show_text(new_text){
-        var match = /-webkit-text-fill-color:[^;"]+/gi;
-        if(timer != null)
-            clearTimeout(timer);
-        /*
-        QtWebkit bug with outlines and justify causing outline alignment
-        problems. (Bug 859950) Surround each word with a <span> to workaround,
-        but only in this scenario.
-        */
-        var txt = document.getElementById('lyricsmain');
-        if(window.getComputedStyle(txt).textAlign == 'justify'){
-            if(window.getComputedStyle(txt).webkitTextStrokeWidth != '0px'){
-                new_text = new_text.replace(/(\s|&nbsp;)+(?![^<]*>)/g,
-                    function(match) {
-                        return '</span>' + match + '<span>';
-                    });
-                new_text = '<span>' + new_text + '</span>';
+        function show_blank(state){
+            var black = 'none';
+            var lyrics = '';
+            switch(state){
+                case 'theme':
+                    lyrics = 'hidden';
+                    break;
+                case 'black':
+                    black = 'block';
+                    break;
+                case 'desktop':
+                    break;
             }
+            document.getElementById('black').style.display = black;
+            document.getElementById('lyricsmain').style.visibility = lyrics;
+            document.getElementById('image').style.visibility = lyrics;
+            document.getElementById('footer').style.visibility = lyrics;
         }
-        text_fade('lyricsmain', new_text);
-    }
 
-    function text_fade(id, new_text){
-        /*
-        Show the text.
-        */
-        var text = document.getElementById(id);
-        if(text == null) return;
-        if(!transition){
+        function show_footer(footertext){
+            document.getElementById('footer').innerHTML = footertext;
+        }
+
+        function show_text(new_text){
+            var match = /-webkit-text-fill-color:[^;"]+/gi;
+            if(timer != null)
+                clearTimeout(timer);
+            /*
+            QtWebkit bug with outlines and justify causing outline alignment
+            problems. (Bug 859950) Surround each word with a <span> to workaround,
+            but only in this scenario.
+            */
+            var txt = document.getElementById('lyricsmain');
+            if(window.getComputedStyle(txt).textAlign == 'justify'){
+                if(window.getComputedStyle(txt).webkitTextStrokeWidth != '0px'){
+                    new_text = new_text.replace(/(\s|&nbsp;)+(?![^<]*>)/g,
+                        function(match) {
+                            return '</span>' + match + '<span>';
+                        });
+                    new_text = '<span>' + new_text + '</span>';
+                }
+            }
+            text_fade('lyricsmain', new_text);
+        }
+
+        function text_fade(id, new_text){
+            /*
+            Show the text.
+            */
+            var text = document.getElementById(id);
+            if(text == null) return;
+            if(!transition){
+                text.innerHTML = new_text;
+                return;
+            }
+            // Fade text out. 0.1 to minimize the time "nothing" is shown on the screen.
+            text.style.opacity = '0.1';
+            // Fade new text in after the old text has finished fading out.
+            timer = window.setTimeout(function(){_show_text(text, new_text)}, 400);
+        }
+
+        function _show_text(text, new_text) {
+            /*
+            Helper function to show the new_text delayed.
+            */
             text.innerHTML = new_text;
-            return;
+            text.style.opacity = '1';
+            // Wait until the text is completely visible. We want to save the timer id, to be able to call
+            // clearTimeout(timer) when the text has changed before finishing fading.
+            timer = window.setTimeout(function(){timer = null;}, 400);
         }
-        // Fade text out. 0.1 to minimize the time "nothing" is shown on the screen.
-        text.style.opacity = '0.1';
-        // Fade new text in after the old text has finished fading out.
-        timer = window.setTimeout(function(){_show_text(text, new_text)}, 400);
-    }
 
-    function _show_text(text, new_text) {
-        /*
-        Helper function to show the new_text delayed.
-        */
-        text.innerHTML = new_text;
-        text.style.opacity = '1';
-        // Wait until the text is completely visible. We want to save the timer id, to be able to call
-        // clearTimeout(timer) when the text has changed before finishing fading.
-        timer = window.setTimeout(function(){timer = null;}, 400);
-    }
-
-    function show_text_completed(){
-        return (timer == null);
-    }
-</script>
-</head>
-<body>
-<img id="bgimage" class="size" style="display:none;" />
-<img id="image" class="size" style="display:none;" />
-plugin HTML
-<div class="lyricstable"><div id="lyricsmain" style="opacity:1" class="lyricscell lyricsmain"></div></div>
-<div id="footer" class="footer"></div>
-<div id="black" class="size"></div>
-</body>
-</html>
-"""
+        function show_text_completed(){
+            return (timer == null);
+        }
+    </script>
+    </head>
+    <body>
+    <img id="bgimage" class="size" style="display:none;" />
+    <img id="image" class="size" style="display:none;" />
+    plugin HTML
+    <div class="lyricstable"><div id="lyricsmain" style="opacity:1" class="lyricscell lyricsmain"></div></div>
+    <div id="footer" class="footer"></div>
+    <div id="black" class="size"></div>
+    </body>
+    </html>
+    """
 BACKGROUND_CSS_RADIAL = 'background: -webkit-gradient(radial, 5 50%, 100, 5 50%, 5, from(#000000), to(#FFFFFF)) fixed'
 LYRICS_CSS = """
-.lyricstable {
-    z-index: 5;
-    position: absolute;
-    display: table;
-    left: 10px; top: 20px;
-}
-.lyricscell {
-    display: table-cell;
-    word-wrap: break-word;
-    -webkit-transition: opacity 0.4s ease;
-    lyrics_format_css
-}
-.lyricsmain {
-     text-shadow: #000000 5px 5px;
-}
-"""
+    .lyricstable {
+        z-index: 5;
+        position: absolute;
+        display: table;
+        left: 10px; top: 20px;
+    }
+    .lyricscell {
+        display: table-cell;
+        word-wrap: break-word;
+        -webkit-transition: opacity 0.4s ease;
+        lyrics_format_css
+    }
+    .lyricsmain {
+        text-shadow: #000000 5px 5px;
+    }
+    """
 LYRICS_OUTLINE_CSS = ' -webkit-text-stroke: 0.125em #000000; -webkit-text-fill-color: #FFFFFF; '
-LYRICS_FORMAT_CSS = ' word-wrap: break-word; text-align: justify; vertical-align: bottom; ' + \
-    'font-family: Arial; font-size: 40pt; color: #FFFFFF; line-height: 108%; margin: 0;padding: 0; ' + \
-    'padding-bottom: 0.5em; padding-left: 2px; width: 1580px; height: 810px; font-style:italic; font-weight:bold; '
+LYRICS_FORMAT_CSS = """
+    word-wrap: break-word;
+    text-align: justify;
+    vertical-align: bottom;
+    font-family: Arial;
+    font-size: 40pt;
+    color: #FFFFFF;
+    line-height: 108%;
+    margin: 0;
+    padding: 0;
+    padding-bottom: 0.5em;
+    padding-left: 2px;
+    width: 1580px;
+    height: 810px;
+    font-style: italic;
+    font-weight: bold;
+    """
 FOOTER_CSS_BASE = """
     left: 10px;
     bottom: 0px;
@@ -197,6 +233,35 @@ FOOTER_CSS_BASE = """
     """
 FOOTER_CSS = FOOTER_CSS_BASE % ('nowrap')
 FOOTER_CSS_WRAP = FOOTER_CSS_BASE % ('normal')
+FOOTER_CSS_INVALID = ''
+CHORD_CSS_ENABLED = """
+    .chordline {
+      line-height: 2.0em;
+    }
+    .chordline span.chord span {
+      position: relative;
+    }
+    .chordline span.chord span strong {
+      position: absolute;
+      top: -0.8em;
+      left: 0;
+      font-size: 75%;
+      font-weight: normal;
+      line-height: normal;
+      display: inline;
+    }
+    .firstchordline {
+        line-height: 2.1em;
+    }
+    .ws {
+        display: inline;
+        white-space: pre-wrap;
+    }"""
+
+__default_settings__ = {
+    'songs/mainview chords': False,
+    'songs/enable chords': True
+}
 
 
 class Htmbuilder(TestCase, TestMixin):
@@ -208,6 +273,7 @@ class Htmbuilder(TestCase, TestMixin):
         Create the UI
         """
         self.build_settings()
+        Settings().extend_default_settings(__default_settings__)
 
     def tearDown(self):
         """
@@ -215,7 +281,7 @@ class Htmbuilder(TestCase, TestMixin):
         """
         self.destroy_settings()
 
-    def build_html_test(self):
+    def test_build_html(self):
         """
         Test the build_html() function
         """
@@ -245,7 +311,7 @@ class Htmbuilder(TestCase, TestMixin):
             # THEN: The returned html should match.
             self.assertEqual(html, HTML, 'The returned html should match')
 
-    def build_background_css_radial_test(self):
+    def test_build_background_css_radial(self):
         """
         Test the build_background_css() function with a radial background
         """
@@ -261,7 +327,7 @@ class Htmbuilder(TestCase, TestMixin):
         # THEN: The returned css should match.
         self.assertEqual(BACKGROUND_CSS_RADIAL, css, 'The background css should be equal.')
 
-    def build_lyrics_css_test(self):
+    def test_build_lyrics_css(self):
         """
         Test the build_lyrics_css() function
         """
@@ -282,7 +348,7 @@ class Htmbuilder(TestCase, TestMixin):
             # THEN: The css should be equal.
             self.assertEqual(LYRICS_CSS, css, 'The lyrics css should be equal.')
 
-    def build_lyrics_outline_css_test(self):
+    def test_build_lyrics_outline_css(self):
         """
         Test the build_lyrics_outline_css() function
         """
@@ -299,7 +365,7 @@ class Htmbuilder(TestCase, TestMixin):
         # THEN: The css should be equal.
         self.assertEqual(LYRICS_OUTLINE_CSS, css, 'The outline css should be equal.')
 
-    def build_lyrics_format_css_test(self):
+    def test_build_lyrics_format_css(self):
         """
         Test the build_lyrics_format_css() function
         """
@@ -322,7 +388,7 @@ class Htmbuilder(TestCase, TestMixin):
         # THEN: They should be equal.
         self.assertEqual(LYRICS_FORMAT_CSS, css, 'The lyrics format css should be equal.')
 
-    def build_footer_css_test(self):
+    def test_build_footer_css(self):
         """
         Test the build_footer_css() function
         """
@@ -340,7 +406,7 @@ class Htmbuilder(TestCase, TestMixin):
         # THEN: THE css should be the same.
         self.assertEqual(FOOTER_CSS, css, 'The footer strings should be equal.')
 
-    def build_footer_css_wrap_test(self):
+    def test_build_footer_css_wrap(self):
         """
         Test the build_footer_css() function
         """
@@ -359,7 +425,28 @@ class Htmbuilder(TestCase, TestMixin):
         # THEN: Footer should wrap
         self.assertEqual(FOOTER_CSS_WRAP, css, 'The footer strings should be equal.')
 
-    def webkit_version_test(self):
+    def test_build_footer_invalid(self):
+        """
+        Test the build_footer_css() function
+        """
+        # GIVEN: Create a theme.
+        css = []
+        item = MagicMock()
+        item.theme_data = None
+        item.footer = 'FAIL'
+        height = 1024
+
+        # WHEN: Settings say that footer should wrap
+        css.append(build_footer_css(item, height))
+        item.theme_data = 'TEST'
+        item.footer = None
+        css.append(build_footer_css(item, height))
+
+        # THEN: Footer should wrap
+        self.assertEqual(FOOTER_CSS_INVALID, css[0], 'The footer strings should be blank.')
+        self.assertEqual(FOOTER_CSS_INVALID, css[1], 'The footer strings should be blank.')
+
+    def test_webkit_version(self):
         """
         Test the webkit_version() function
         """
@@ -368,3 +455,17 @@ class Htmbuilder(TestCase, TestMixin):
         # WHEN: Retrieving the webkit version
         # THEN: Webkit versions should match
         self.assertEquals(webkit_version(), webkit_ver, "The returned webkit version doesn't match the installed one")
+
+    def test_build_chords_css(self):
+        """
+        Test the build_chords_css() function
+        """
+        # GIVEN: A setting that activates chords on the mainview
+        Settings().setValue('songs/enable chords', True)
+        Settings().setValue('songs/mainview chords', True)
+
+        # WHEN: Building the chord CSS
+        chord_css = build_chords_css()
+
+        # THEN: The build css should look as expected
+        self.assertEqual(CHORD_CSS_ENABLED, chord_css, 'The chord CSS should look as expected')

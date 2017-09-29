@@ -5,7 +5,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -20,13 +20,18 @@
 # with this program; if not, write to the Free Software Foundation, Inc., 59  #
 # Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
 ###############################################################################
-
-import sys
+"""
+The entrypoint for OpenLP
+"""
+import faulthandler
 import multiprocessing
+import sys
 
 from openlp.core.common import is_win, is_macosx
+from openlp.core.common.applocation import AppLocation
 from openlp.core import main
 
+faulthandler.enable(open(str(AppLocation.get_directory(AppLocation.CacheDir) / 'error.log'), 'wb'))
 
 if __name__ == '__main__':
     """

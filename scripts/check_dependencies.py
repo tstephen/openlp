@@ -5,7 +5,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -26,7 +26,7 @@ This script is used to check dependencies of OpenLP. It checks availability
 of required python modules and their version. To verify availability of Python
 modules, simply run this script::
 
-    @:~$ ./check_dependencies.py
+    $ ./check_dependencies.py
 
 """
 import os
@@ -45,7 +45,7 @@ IS_MAC = sys.platform.startswith('dar')
 
 
 VERS = {
-    'Python': '3.0',
+    'Python': '3.4',
     'PyQt5': '5.0',
     'Qt5': '5.0',
     'sqlalchemy': '0.5',
@@ -93,6 +93,12 @@ MODULES = [
     'bs4',
     'mako',
     'uno',
+    'websockets',
+    'asyncio',
+    'waitress',
+    'six',
+    'webob',
+    'requests'
 ]
 
 
@@ -102,6 +108,7 @@ OPTIONAL_MODULES = [
     ('nose', '(testing framework)', True),
     ('mock', '(testing module)', sys.version_info[1] < 3),
     ('jenkins', '(access jenkins api - package name: jenkins-webapi)', True),
+    ('pysword', '(import SWORD bibles)', True),
 ]
 
 w = sys.stdout.write
@@ -247,6 +254,7 @@ def main():
     verify_versions()
     print_qt_image_formats()
     print_enchant_backends_and_languages()
+
 
 if __name__ == '__main__':
     main()

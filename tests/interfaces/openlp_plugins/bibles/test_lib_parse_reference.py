@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,7 +23,7 @@
 This module contains tests for the lib submodule of the Bibles plugin.
 """
 from unittest import TestCase
-from tests.interfaces import MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 from openlp.core.common import Registry, Settings
 from openlp.plugins.bibles.lib import BibleManager, parse_reference, LanguageSelection
@@ -38,6 +38,7 @@ class TestBibleManager(TestCase, TestMixin):
         """
         Set up the environment for testing bible parse reference
         """
+        self.setup_application()
         self.build_settings()
         Registry.create()
         Registry().register('service_list', MagicMock())
@@ -69,7 +70,7 @@ class TestBibleManager(TestCase, TestMixin):
         del self.manager
         self.destroy_settings()
 
-    def parse_reference_one_test(self):
+    def test_parse_reference_one(self):
         """
         Test the parse_reference method with 1 Timothy 1
         """
@@ -79,7 +80,7 @@ class TestBibleManager(TestCase, TestMixin):
         # THEN a verse array should be returned
         self.assertEqual([(54, 1, 1, -1)], results, "The bible verses should matches the expected results")
 
-    def parse_reference_two_test(self):
+    def test_parse_reference_two(self):
         """
         Test the parse_reference method with 1 Timothy 1:1-2
         """
@@ -89,7 +90,7 @@ class TestBibleManager(TestCase, TestMixin):
         # THEN a verse array should be returned
         self.assertEqual([(54, 1, 1, 2)], results, "The bible verses should matches the expected results")
 
-    def parse_reference_three_test(self):
+    def test_parse_reference_three(self):
         """
         Test the parse_reference method with 1 Timothy 1:1-2
         """
@@ -100,7 +101,7 @@ class TestBibleManager(TestCase, TestMixin):
         self.assertEqual([(54, 1, 1, -1), (54, 2, 1, 1)], results,
                          "The bible verses should match the expected results")
 
-    def parse_reference_four_test(self):
+    def test_parse_reference_four(self):
         """
         Test the parse_reference method with non existence book
         """
@@ -108,9 +109,9 @@ class TestBibleManager(TestCase, TestMixin):
         # WHEN asking to parse the bible reference
         results = parse_reference('Raoul 1', self.manager.db_cache['tests'], MagicMock())
         # THEN a verse array should be returned
-        self.assertEqual(False, results, "The bible Search should return False")
+        self.assertEqual([], results, "The bible Search should return an empty list")
 
-    def parse_reference_five_test(self):
+    def test_parse_reference_five(self):
         """
         Test the parse_reference method with 1 Timothy 1:3-end
         """

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -26,9 +26,10 @@ import platform
 from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.common import Registry, Settings, UiStrings, translate
-from openlp.core.lib import ColorButton, SettingsTab
+from openlp.core.lib import SettingsTab
 from openlp.core.lib.ui import create_button
 from openlp.core.ui.media import get_media_players, set_media_players
+from openlp.core.ui.lib.colorbutton import ColorButton
 
 
 class MediaQCheckBox(QtWidgets.QCheckBox):
@@ -125,7 +126,7 @@ class PlayerTab(SettingsTab):
         self.media_player_group_box.setTitle(translate('OpenLP.PlayerTab', 'Available Media Players'))
         self.player_order_group_box.setTitle(translate('OpenLP.PlayerTab', 'Player Search Order'))
         self.background_color_group_box.setTitle(UiStrings().BackgroundColor)
-        self.background_color_label.setText(UiStrings().DefaultColor)
+        self.background_color_label.setText(UiStrings().BackgroundColorColon)
         self.information_label.setText(translate('OpenLP.PlayerTab',
                                        'Visible background for videos with aspect ratio different to screen.'))
         self.retranslate_players()
@@ -223,9 +224,11 @@ class PlayerTab(SettingsTab):
             self.settings_form.register_post_process('mediaitem_media_rebuild')
             self.settings_form.register_post_process('config_screen_changed')
 
-    def post_set_up(self):
+    def post_set_up(self, post_update=False):
         """
         Late setup for players as the MediaController has to be initialised first.
+
+        :param post_update: Indicates if called before or after updates.
         """
         for key, player in self.media_players.items():
             player = self.media_players[key]

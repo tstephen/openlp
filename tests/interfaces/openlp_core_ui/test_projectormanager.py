@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -24,14 +24,13 @@ Interface tests to test the themeManager class and related methods.
 """
 import os
 from unittest import TestCase
+from unittest.mock import patch, MagicMock
 
 from openlp.core.common import Registry, Settings
-from tests.functional import patch, MagicMock
-from tests.helpers.testmixin import TestMixin
-
 from openlp.core.ui import ProjectorManager, ProjectorEditForm
 from openlp.core.lib.projector.db import Projector, ProjectorDB
 
+from tests.helpers.testmixin import TestMixin
 from tests.resources.projector.data import TEST_DB, TEST1_DATA, TEST2_DATA, TEST3_DATA
 
 
@@ -63,7 +62,7 @@ class TestProjectorManager(TestCase, TestMixin):
         self.destroy_settings()
         del self.projector_manager
 
-    def bootstrap_initialise_test(self):
+    def test_bootstrap_initialise(self):
         """
         Test initialize calls correct startup functions
         """
@@ -73,7 +72,7 @@ class TestProjectorManager(TestCase, TestMixin):
         self.assertEqual(type(self.projector_manager.projectordb), ProjectorDB,
                          'Initialization should have created a ProjectorDB() instance')
 
-    def bootstrap_post_set_up_test(self):
+    def test_bootstrap_post_set_up(self):
         """
         Test post-initialize calls proper setups
         """

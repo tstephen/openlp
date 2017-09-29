@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -20,12 +20,14 @@
 # Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
 ###############################################################################
 
-from PyQt5 import QtGui, QtWidgets
+from PyQt5 import QtWidgets
 
 from openlp.core.common import Settings, UiStrings, translate
-from openlp.core.lib import SettingsTab, build_icon
+from openlp.core.common.path import path_to_str, str_to_path
+from openlp.core.lib import SettingsTab
 from openlp.core.lib.ui import critical_error_message_box
-from .pdfcontroller import PdfController
+from openlp.core.ui.lib import PathEdit
+from openlp.plugins.presentations.lib.pdfcontroller import PdfController
 
 
 class PresentationTab(SettingsTab):
@@ -36,7 +38,6 @@ class PresentationTab(SettingsTab):
         """
         Constructor
         """
-        self.parent = parent
         self.controllers = controllers
         super(PresentationTab, self).__init__(parent, title, visible_title, icon_path)
         self.activated = False
@@ -88,26 +89,15 @@ class PresentationTab(SettingsTab):
         self.pdf_program_check_box = QtWidgets.QCheckBox(self.pdf_group_box)
         self.pdf_program_check_box.setObjectName('pdf_program_check_box')
         self.pdf_layout.addRow(self.pdf_program_check_box)
-        self.pdf_program_path_layout = QtWidgets.QHBoxLayout()
-        self.pdf_program_path_layout.setObjectName('pdf_program_path_layout')
-        self.pdf_program_path = QtWidgets.QLineEdit(self.pdf_group_box)
-        self.pdf_program_path.setObjectName('pdf_program_path')
-        self.pdf_program_path.setReadOnly(True)
-        self.pdf_program_path.setPalette(self.get_grey_text_palette(True))
-        self.pdf_program_path_layout.addWidget(self.pdf_program_path)
-        self.pdf_program_browse_button = QtWidgets.QToolButton(self.pdf_group_box)
-        self.pdf_program_browse_button.setObjectName('pdf_program_browse_button')
-        self.pdf_program_browse_button.setIcon(build_icon(':/general/general_open.png'))
-        self.pdf_program_browse_button.setEnabled(False)
-        self.pdf_program_path_layout.addWidget(self.pdf_program_browse_button)
-        self.pdf_layout.addRow(self.pdf_program_path_layout)
+        self.program_path_edit = PathEdit(self.pdf_group_box)
+        self.pdf_layout.addRow(self.program_path_edit)
         self.left_layout.addWidget(self.pdf_group_box)
         self.left_layout.addStretch()
         self.right_column.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
         self.right_layout.addStretch()
         # Signals and slots
-        self.pdf_program_browse_button.clicked.connect(self.on_pdf_program_browse_button_clicked)
-        self.pdf_program_check_box.clicked.connect(self.on_pdf_program_check_box_clicked)
+        self.program_path_edit.pathChanged.connect(self.on_program_path_edit_path_changed)
+        self.pdf_program_check_box.clicked.connect(self.program_path_edit.setEnabled)
 
     def retranslateUi(self):
         """
@@ -125,19 +115,22 @@ class PresentationTab(SettingsTab):
             translate('PresentationPlugin.PresentationTab', 'Allow presentation application to be overridden'))
         self.ppt_slide_click_check_box.setText(
             translate('PresentationPlugin.PresentationTab',
-                      'Clicking on a selected slide in the slidecontroller advances to next effect.'))
+                      'Clicking on the current slide advances to the next effect'))
         self.ppt_window_check_box.setText(
             translate('PresentationPlugin.PresentationTab',
-                      'Let PowerPoint control the size and position of the presentation window '
-                      '(workaround for Windows 8 scaling issue).'))
+                      'Let PowerPoint control the size and monitor of the presentations\n'
+                      '(This may fix PowerPoint scaling issues in Windows 8 and 10)'))
         self.pdf_program_check_box.setText(
             translate('PresentationPlugin.PresentationTab', 'Use given full path for mudraw or ghostscript binary:'))
+        self.program_path_edit.dialog_caption = translate('PresentationPlugin.PresentationTab',
+                                                          'Select mudraw or ghostscript binary')
 
     def set_controller_text(self, checkbox, controller):
         if checkbox.isEnabled():
             checkbox.setText(controller.name)
         else:
-            checkbox.setText(translate('PresentationPlugin.PresentationTab', '%s (unavailable)') % controller.name)
+            checkbox.setText(translate('PresentationPlugin.PresentationTab',
+                                       '{name} (unavailable)').format(name=controller.name))
 
     def load(self):
         """
@@ -151,7 +144,7 @@ class PresentationTab(SettingsTab):
             if controller.name == 'Powerpoint' and controller.is_available():
                 powerpoint_available = True
         self.override_app_check_box.setChecked(Settings().value(self.settings_section + '/override app'))
-        # Load Powerpoint settings
+        # Load PowerPoint settings
         self.ppt_slide_click_check_box.setChecked(Settings().value(self.settings_section +
                                                                    '/powerpoint slide click advance'))
         self.ppt_slide_click_check_box.setEnabled(powerpoint_available)
@@ -160,11 +153,8 @@ class PresentationTab(SettingsTab):
         # load pdf-program settings
         enable_pdf_program = Settings().value(self.settings_section + '/enable_pdf_program')
         self.pdf_program_check_box.setChecked(enable_pdf_program)
-        self.pdf_program_path.setPalette(self.get_grey_text_palette(not enable_pdf_program))
-        self.pdf_program_browse_button.setEnabled(enable_pdf_program)
-        pdf_program = Settings().value(self.settings_section + '/pdf_program')
-        if pdf_program:
-            self.pdf_program_path.setText(pdf_program)
+        self.program_path_edit.setEnabled(enable_pdf_program)
+        self.program_path_edit.path = Settings().value(self.settings_section + '/pdf_program')
 
     def save(self):
         """
@@ -200,13 +190,13 @@ class PresentationTab(SettingsTab):
             Settings().setValue(setting_key, self.ppt_window_check_box.checkState())
             changed = True
         # Save pdf-settings
-        pdf_program = self.pdf_program_path.text()
+        pdf_program_path = self.program_path_edit.path
         enable_pdf_program = self.pdf_program_check_box.checkState()
         # If the given program is blank disable using the program
-        if pdf_program == '':
+        if pdf_program_path is None:
             enable_pdf_program = 0
-        if pdf_program != Settings().value(self.settings_section + '/pdf_program'):
-            Settings().setValue(self.settings_section + '/pdf_program', pdf_program)
+        if pdf_program_path != Settings().value(self.settings_section + '/pdf_program'):
+            Settings().setValue(self.settings_section + '/pdf_program', pdf_program_path)
             changed = True
         if enable_pdf_program != Settings().value(self.settings_section + '/enable_pdf_program'):
             Settings().setValue(self.settings_section + '/enable_pdf_program', enable_pdf_program)
@@ -227,42 +217,15 @@ class PresentationTab(SettingsTab):
             checkbox.setEnabled(controller.is_available())
             self.set_controller_text(checkbox, controller)
 
-    def on_pdf_program_browse_button_clicked(self):
+    def on_program_path_edit_path_changed(self, new_path):
         """
-        Select the mudraw or ghostscript binary that should be used.
+        Handle the `pathEditChanged` signal from program_path_edit
+
+        :param openlp.core.common.path.Path new_path: File path to the new program
+        :rtype: None
         """
-        filename, filter_used = QtWidgets.QFileDialog.getOpenFileName(
-            self, translate('PresentationPlugin.PresentationTab', 'Select mudraw or ghostscript binary.'),
-            self.pdf_program_path.text())
-        if filename:
-            program_type = PdfController.check_binary(filename)
-            if not program_type:
+        if new_path:
+            if not PdfController.process_check_binary(new_path):
                 critical_error_message_box(UiStrings().Error,
                                            translate('PresentationPlugin.PresentationTab',
                                                      'The program is not ghostscript or mudraw which is required.'))
-            else:
-                self.pdf_program_path.setText(filename)
-
-    def on_pdf_program_check_box_clicked(self, checked):
-        """
-        When checkbox for manual entering pdf-program is clicked,
-        enable or disable the textbox for the programpath and the browse-button.
-
-        :param checked: If the box is checked or not.
-        """
-        self.pdf_program_path.setPalette(self.get_grey_text_palette(not checked))
-        self.pdf_program_browse_button.setEnabled(checked)
-
-    def get_grey_text_palette(self, greyed):
-        """
-        Returns a QPalette with greyed out text as used for placeholderText.
-
-        :param greyed: Determines whether the palette should be grayed.
-        :return: The created palette.
-        """
-        palette = QtGui.QPalette()
-        color = self.palette().color(QtGui.QPalette.Active, QtGui.QPalette.Text)
-        if greyed:
-            color.setAlpha(128)
-        palette.setColor(QtGui.QPalette.Active, QtGui.QPalette.Text, color)
-        return palette

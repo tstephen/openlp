@@ -5,7 +5,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -60,7 +60,7 @@ import webbrowser
 from PyQt5 import QtCore
 from lxml import etree, objectify
 
-SERVER_URL = 'http://www.transifex.net/api/2/project/openlp/resource/openlp-24x/'
+SERVER_URL = 'http://www.transifex.com/api/2/project/openlp/resource/openlp-26x/'
 IGNORED_PATHS = ['scripts']
 IGNORED_FILES = ['setup.py']
 
@@ -270,7 +270,7 @@ def update_translations():
         return
     else:
         os.chdir(os.path.abspath('..'))
-        run('pylupdate4 -verbose -noobsolete openlp.pro')
+        run('pylupdate5 -verbose -noobsolete openlp.pro')
         os.chdir(os.path.abspath('scripts'))
 
 

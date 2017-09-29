@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,14 +23,15 @@
 This module contains tests for the lib submodule of the Songs plugin.
 """
 from unittest import TestCase
+from unittest.mock import MagicMock, patch, call
 
 from PyQt5 import QtCore
 
 from openlp.core.common import Registry, Settings
 from openlp.core.lib import ServiceItem
-from openlp.plugins.songs.lib.mediaitem import SongMediaItem
 from openlp.plugins.songs.lib.db import AuthorType, Song
-from tests.functional import patch, MagicMock
+from openlp.plugins.songs.lib.mediaitem import SongMediaItem
+
 from tests.helpers.testmixin import TestMixin
 
 
@@ -45,14 +46,16 @@ class TestMediaItem(TestCase, TestMixin):
         Registry.create()
         Registry().register('service_list', MagicMock())
         Registry().register('main_window', MagicMock())
+        self.mocked_plugin = MagicMock()
         with patch('openlp.core.lib.mediamanageritem.MediaManagerItem._setup'), \
                 patch('openlp.plugins.songs.forms.editsongform.EditSongForm.__init__'):
-            self.media_item = SongMediaItem(None, MagicMock())
+            self.media_item = SongMediaItem(None, self.mocked_plugin)
             self.media_item.save_auto_select_id = MagicMock()
             self.media_item.list_view = MagicMock()
             self.media_item.list_view.save_auto_select_id = MagicMock()
             self.media_item.list_view.clear = MagicMock()
             self.media_item.list_view.addItem = MagicMock()
+            self.media_item.list_view.setCurrentItem = MagicMock()
             self.media_item.auto_select_id = -1
             self.media_item.display_songbook = False
             self.media_item.display_copyright_symbol = False
@@ -66,7 +69,7 @@ class TestMediaItem(TestCase, TestMixin):
         """
         self.destroy_settings()
 
-    def display_results_song_test(self):
+    def test_display_results_song(self):
         """
         Test displaying song search results with basic song
         """
@@ -79,13 +82,22 @@ class TestMediaItem(TestCase, TestMixin):
             mock_song.title = 'My Song'
             mock_song.sort_key = 'My Song'
             mock_song.authors = []
+            mock_song_temp = MagicMock()
+            mock_song_temp.id = 2
+            mock_song_temp.title = 'My Temporary'
+            mock_song_temp.sort_key = 'My Temporary'
+            mock_song_temp.authors = []
             mock_author = MagicMock()
             mock_author.display_name = 'My Author'
             mock_song.authors.append(mock_author)
+            mock_song_temp.authors.append(mock_author)
             mock_song.temporary = False
+            mock_song_temp.temporary = True
             mock_search_results.append(mock_song)
+            mock_search_results.append(mock_song_temp)
             mock_qlist_widget = MagicMock()
             MockedQListWidgetItem.return_value = mock_qlist_widget
+            self.media_item.auto_select_id = 1
 
             # WHEN: I display song search results
             self.media_item.display_results_song(mock_search_results)
@@ -93,11 +105,12 @@ class TestMediaItem(TestCase, TestMixin):
             # THEN: The current list view is cleared, the widget is created, and the relevant attributes set
             self.media_item.list_view.clear.assert_called_with()
             self.media_item.save_auto_select_id.assert_called_with()
-            MockedQListWidgetItem.assert_called_with('My Song (My Author)')
-            mock_qlist_widget.setData.assert_called_with(MockedUserRole, mock_song.id)
-            self.media_item.list_view.addItem.assert_called_with(mock_qlist_widget)
+            MockedQListWidgetItem.assert_called_once_with('My Song (My Author)')
+            mock_qlist_widget.setData.assert_called_once_with(MockedUserRole, mock_song.id)
+            self.media_item.list_view.addItem.assert_called_once_with(mock_qlist_widget)
+            self.media_item.list_view.setCurrentItem.assert_called_with(mock_qlist_widget)
 
-    def display_results_author_test(self):
+    def test_display_results_author(self):
         """
         Test displaying song search results grouped by author with basic song
         """
@@ -107,13 +120,19 @@ class TestMediaItem(TestCase, TestMixin):
             mock_search_results = []
             mock_author = MagicMock()
             mock_song = MagicMock()
+            mock_song_temp = MagicMock()
             mock_author.display_name = 'My Author'
             mock_author.songs = []
             mock_song.id = 1
             mock_song.title = 'My Song'
             mock_song.sort_key = 'My Song'
             mock_song.temporary = False
+            mock_song_temp.id = 2
+            mock_song_temp.title = 'My Temporary'
+            mock_song_temp.sort_key = 'My Temporary'
+            mock_song_temp.temporary = True
             mock_author.songs.append(mock_song)
+            mock_author.songs.append(mock_song_temp)
             mock_search_results.append(mock_author)
             mock_qlist_widget = MagicMock()
             MockedQListWidgetItem.return_value = mock_qlist_widget
@@ -123,30 +142,18 @@ class TestMediaItem(TestCase, TestMixin):
 
             # THEN: The current list view is cleared, the widget is created, and the relevant attributes set
             self.media_item.list_view.clear.assert_called_with()
-            MockedQListWidgetItem.assert_called_with('My Author (My Song)')
-            mock_qlist_widget.setData.assert_called_with(MockedUserRole, mock_song.id)
-            self.media_item.list_view.addItem.assert_called_with(mock_qlist_widget)
+            MockedQListWidgetItem.assert_called_once_with('My Author (My Song)')
+            mock_qlist_widget.setData.assert_called_once_with(MockedUserRole, mock_song.id)
+            self.media_item.list_view.addItem.assert_called_once_with(mock_qlist_widget)
 
-    def display_results_book_test(self):
+    def test_display_results_book(self):
         """
         Test displaying song search results grouped by book and entry with basic song
         """
         # GIVEN: Search results grouped by book and entry, plus a mocked QtListWidgetItem
         with patch('openlp.core.lib.QtWidgets.QListWidgetItem') as MockedQListWidgetItem, \
                 patch('openlp.core.lib.QtCore.Qt.UserRole') as MockedUserRole:
-            mock_search_results = []
-            mock_songbook_entry = MagicMock()
-            mock_songbook = MagicMock()
-            mock_song = MagicMock()
-            mock_songbook_entry.entry = '1'
-            mock_songbook.name = 'My Book'
-            mock_song.id = 1
-            mock_song.title = 'My Song'
-            mock_song.sort_key = 'My Song'
-            mock_song.temporary = False
-            mock_songbook_entry.song = mock_song
-            mock_songbook_entry.songbook = mock_songbook
-            mock_search_results.append(mock_songbook_entry)
+            mock_search_results = [('1', 'My Book', 'My Song', 1)]
             mock_qlist_widget = MagicMock()
             MockedQListWidgetItem.return_value = mock_qlist_widget
 
@@ -155,11 +162,37 @@ class TestMediaItem(TestCase, TestMixin):
 
             # THEN: The current list view is cleared, the widget is created, and the relevant attributes set
             self.media_item.list_view.clear.assert_called_with()
-            MockedQListWidgetItem.assert_called_with('My Book #1: My Song')
-            mock_qlist_widget.setData.assert_called_with(MockedUserRole, mock_songbook_entry.song.id)
-            self.media_item.list_view.addItem.assert_called_with(mock_qlist_widget)
+            MockedQListWidgetItem.assert_called_once_with('My Book #1: My Song')
+            mock_qlist_widget.setData.assert_called_once_with(MockedUserRole, 1)
+            self.media_item.list_view.addItem.assert_called_once_with(mock_qlist_widget)
 
-    def display_results_topic_test(self):
+    def test_songbook_natural_sorting(self):
+        """
+        Test that songbooks are sorted naturally
+        """
+        # GIVEN: Search results grouped by book and entry, plus a mocked QtListWidgetItem
+        with patch('openlp.core.lib.QtWidgets.QListWidgetItem') as MockedQListWidgetItem:
+            mock_search_results = [('2', 'Thy Book', 'Thy Song', 50),
+                                   ('2', 'My Book', 'Your Song', 7),
+                                   ('10', 'My Book', 'Our Song', 12),
+                                   ('1', 'My Book', 'My Song', 1),
+                                   ('2', 'Thy Book', 'A Song', 8)]
+            mock_qlist_widget = MagicMock()
+            MockedQListWidgetItem.return_value = mock_qlist_widget
+
+            # WHEN: I display song search results grouped by book
+            self.media_item.display_results_book(mock_search_results)
+
+            # THEN: The songbooks are inserted in the right (natural) order,
+            #       grouped first by book, then by number, then by song title
+            calls = [call('My Book #1: My Song'), call().setData(QtCore.Qt.UserRole, 1),
+                     call('My Book #2: Your Song'), call().setData(QtCore.Qt.UserRole, 7),
+                     call('My Book #10: Our Song'), call().setData(QtCore.Qt.UserRole, 12),
+                     call('Thy Book #2: A Song'), call().setData(QtCore.Qt.UserRole, 8),
+                     call('Thy Book #2: Thy Song'), call().setData(QtCore.Qt.UserRole, 50)]
+            MockedQListWidgetItem.assert_has_calls(calls)
+
+    def test_display_results_topic(self):
         """
         Test displaying song search results grouped by topic with basic song
         """
@@ -169,13 +202,19 @@ class TestMediaItem(TestCase, TestMixin):
             mock_search_results = []
             mock_topic = MagicMock()
             mock_song = MagicMock()
+            mock_song_temp = MagicMock()
             mock_topic.name = 'My Topic'
             mock_topic.songs = []
             mock_song.id = 1
             mock_song.title = 'My Song'
             mock_song.sort_key = 'My Song'
             mock_song.temporary = False
+            mock_song_temp.id = 2
+            mock_song_temp.title = 'My Temporary'
+            mock_song_temp.sort_key = 'My Temporary'
+            mock_song_temp.temporary = True
             mock_topic.songs.append(mock_song)
+            mock_topic.songs.append(mock_song_temp)
             mock_search_results.append(mock_topic)
             mock_qlist_widget = MagicMock()
             MockedQListWidgetItem.return_value = mock_qlist_widget
@@ -185,11 +224,11 @@ class TestMediaItem(TestCase, TestMixin):
 
             # THEN: The current list view is cleared, the widget is created, and the relevant attributes set
             self.media_item.list_view.clear.assert_called_with()
-            MockedQListWidgetItem.assert_called_with('My Topic (My Song)')
-            mock_qlist_widget.setData.assert_called_with(MockedUserRole, mock_song.id)
-            self.media_item.list_view.addItem.assert_called_with(mock_qlist_widget)
+            MockedQListWidgetItem.assert_called_once_with('My Topic (My Song)')
+            mock_qlist_widget.setData.assert_called_once_with(MockedUserRole, mock_song.id)
+            self.media_item.list_view.addItem.assert_called_once_with(mock_qlist_widget)
 
-    def display_results_themes_test(self):
+    def test_display_results_themes(self):
         """
         Test displaying song search results sorted by theme with basic song
         """
@@ -198,12 +237,19 @@ class TestMediaItem(TestCase, TestMixin):
                 patch('openlp.core.lib.QtCore.Qt.UserRole') as MockedUserRole:
             mock_search_results = []
             mock_song = MagicMock()
+            mock_song_temp = MagicMock()
             mock_song.id = 1
             mock_song.title = 'My Song'
             mock_song.sort_key = 'My Song'
             mock_song.theme_name = 'My Theme'
             mock_song.temporary = False
+            mock_song_temp.id = 2
+            mock_song_temp.title = 'My Temporary'
+            mock_song_temp.sort_key = 'My Temporary'
+            mock_song_temp.theme_name = 'My Theme'
+            mock_song_temp.temporary = True
             mock_search_results.append(mock_song)
+            mock_search_results.append(mock_song_temp)
             mock_qlist_widget = MagicMock()
             MockedQListWidgetItem.return_value = mock_qlist_widget
 
@@ -212,11 +258,11 @@ class TestMediaItem(TestCase, TestMixin):
 
             # THEN: The current list view is cleared, the widget is created, and the relevant attributes set
             self.media_item.list_view.clear.assert_called_with()
-            MockedQListWidgetItem.assert_called_with('My Theme (My Song)')
-            mock_qlist_widget.setData.assert_called_with(MockedUserRole, mock_song.id)
-            self.media_item.list_view.addItem.assert_called_with(mock_qlist_widget)
+            MockedQListWidgetItem.assert_called_once_with('My Theme (My Song)')
+            mock_qlist_widget.setData.assert_called_once_with(MockedUserRole, mock_song.id)
+            self.media_item.list_view.addItem.assert_called_once_with(mock_qlist_widget)
 
-    def display_results_cclinumber_test(self):
+    def test_display_results_cclinumber(self):
         """
         Test displaying song search results sorted by CCLI number with basic song
         """
@@ -225,12 +271,19 @@ class TestMediaItem(TestCase, TestMixin):
                 patch('openlp.core.lib.QtCore.Qt.UserRole') as MockedUserRole:
             mock_search_results = []
             mock_song = MagicMock()
+            mock_song_temp = MagicMock()
             mock_song.id = 1
             mock_song.title = 'My Song'
             mock_song.sort_key = 'My Song'
             mock_song.ccli_number = '12345'
             mock_song.temporary = False
+            mock_song_temp.id = 2
+            mock_song_temp.title = 'My Temporary'
+            mock_song_temp.sort_key = 'My Temporary'
+            mock_song_temp.ccli_number = '12346'
+            mock_song_temp.temporary = True
             mock_search_results.append(mock_song)
+            mock_search_results.append(mock_song_temp)
             mock_qlist_widget = MagicMock()
             MockedQListWidgetItem.return_value = mock_qlist_widget
 
@@ -239,15 +292,22 @@ class TestMediaItem(TestCase, TestMixin):
 
             # THEN: The current list view is cleared, the widget is created, and the relevant attributes set
             self.media_item.list_view.clear.assert_called_with()
-            MockedQListWidgetItem.assert_called_with('12345 (My Song)')
-            mock_qlist_widget.setData.assert_called_with(MockedUserRole, mock_song.id)
-            self.media_item.list_view.addItem.assert_called_with(mock_qlist_widget)
+            MockedQListWidgetItem.assert_called_once_with('12345 (My Song)')
+            mock_qlist_widget.setData.assert_called_once_with(MockedUserRole, mock_song.id)
+            self.media_item.list_view.addItem.assert_called_once_with(mock_qlist_widget)
 
-    def build_song_footer_one_author_test(self):
+    @patch(u'openlp.plugins.songs.lib.mediaitem.Settings')
+    def test_build_song_footer_one_author_show_written_by(self, MockedSettings):
         """
         Test build songs footer with basic song and one author
         """
-        # GIVEN: A Song and a Service Item
+        # GIVEN: A Song and a Service Item, mocked settings: True for 'songs/display written by'
+        # and False for 'core/ccli number' (ccli will cause traceback if true)
+
+        mocked_settings = MagicMock()
+        mocked_settings.value.side_effect = [True, False]
+        MockedSettings.return_value = mocked_settings
+
         mock_song = MagicMock()
         mock_song.title = 'My Song'
         mock_song.authors_songs = []
@@ -268,7 +328,40 @@ class TestMediaItem(TestCase, TestMixin):
         self.assertEqual(author_list, ['my author'],
                          'The author list should be returned correctly with one author')
 
-    def build_song_footer_two_authors_test(self):
+    @patch(u'openlp.plugins.songs.lib.mediaitem.Settings')
+    def test_build_song_footer_one_author_hide_written_by(self, MockedSettings):
+        """
+        Test build songs footer with basic song and one author
+        """
+        # GIVEN: A Song and a Service Item, mocked settings: False for 'songs/display written by'
+        # and False for 'core/ccli number' (ccli will cause traceback if true)
+
+        mocked_settings = MagicMock()
+        mocked_settings.value.side_effect = [False, False]
+        MockedSettings.return_value = mocked_settings
+
+        mock_song = MagicMock()
+        mock_song.title = 'My Song'
+        mock_song.authors_songs = []
+        mock_author = MagicMock()
+        mock_author.display_name = 'my author'
+        mock_author_song = MagicMock()
+        mock_author_song.author = mock_author
+        mock_song.authors_songs.append(mock_author_song)
+        mock_song.copyright = 'My copyright'
+        service_item = ServiceItem(None)
+
+        # WHEN: I generate the Footer with default settings
+        author_list = self.media_item.generate_footer(service_item, mock_song)
+
+        # THEN: I get the following Array returned
+        self.assertEqual(service_item.raw_footer, ['My Song', 'my author', 'My copyright'],
+                         'The array should be returned correctly with a song, one author and copyright,'
+                         'text Written by should not be part of the text.')
+        self.assertEqual(author_list, ['my author'],
+                         'The author list should be returned correctly with one author')
+
+    def test_build_song_footer_two_authors(self):
         """
         Test build songs footer with basic song and two authors
         """
@@ -307,7 +400,7 @@ class TestMediaItem(TestCase, TestMixin):
         self.assertEqual(author_list, ['another author', 'my author', 'translator'],
                          'The author list should be returned correctly with two authors')
 
-    def build_song_footer_base_ccli_test(self):
+    def test_build_song_footer_base_ccli(self):
         """
         Test build songs footer with basic song and a CCLI number
         """
@@ -333,7 +426,7 @@ class TestMediaItem(TestCase, TestMixin):
         self.assertEqual(service_item.raw_footer, ['My Song', 'My copyright', 'CCLI License: 4321'],
                          'The array should be returned correctly with a song, an author, copyright and amended ccli')
 
-    def build_song_footer_base_songbook_test(self):
+    def test_build_song_footer_base_songbook(self):
         """
         Test build songs footer with basic song and multiple songbooks
         """
@@ -366,7 +459,7 @@ class TestMediaItem(TestCase, TestMixin):
         # THEN: The songbook should be in the footer
         self.assertEqual(service_item.raw_footer, ['My Song', 'My copyright', 'My songbook #12, Thy songbook #502A'])
 
-    def build_song_footer_copyright_enabled_test(self):
+    def test_build_song_footer_copyright_enabled(self):
         """
         Test building song footer with displaying the copyright symbol
         """
@@ -383,7 +476,7 @@ class TestMediaItem(TestCase, TestMixin):
         # THEN: The copyright symbol should be in the footer
         self.assertEqual(service_item.raw_footer, ['My Song', '© My copyright'])
 
-    def build_song_footer_copyright_disabled_test(self):
+    def test_build_song_footer_copyright_disabled(self):
         """
         Test building song footer without displaying the copyright symbol
         """
@@ -399,7 +492,7 @@ class TestMediaItem(TestCase, TestMixin):
         # THEN: The copyright symbol should not be in the footer
         self.assertEqual(service_item.raw_footer, ['My Song', 'My copyright'])
 
-    def authors_match_test(self):
+    def test_authors_match(self):
         """
         Test the author matching when importing a song from a service
         """
@@ -425,7 +518,7 @@ class TestMediaItem(TestCase, TestMixin):
         # THEN: They should match
         self.assertTrue(result, "Authors should match")
 
-    def authors_dont_match_test(self):
+    def test_authors_dont_match(self):
         # GIVEN: A song and a string with authors
         song = MagicMock()
         song.authors = []
@@ -448,7 +541,7 @@ class TestMediaItem(TestCase, TestMixin):
         # THEN: They should not match
         self.assertFalse(result, "Authors should not match")
 
-    def build_remote_search_test(self):
+    def test_build_remote_search(self):
         """
         Test results for the remote search api
         """
@@ -466,3 +559,35 @@ class TestMediaItem(TestCase, TestMixin):
 
         # THEN: The correct formatted results are returned
         self.assertEqual(search_results, [[123, 'My Song', 'My alternative']])
+
+    @patch('openlp.plugins.songs.lib.mediaitem.Book')
+    @patch('openlp.plugins.songs.lib.mediaitem.SongBookEntry')
+    @patch('openlp.plugins.songs.lib.mediaitem.Song')
+    @patch('openlp.plugins.songs.lib.mediaitem.or_')
+    def test_entire_song_search(self, mocked_or, MockedSong, MockedSongBookEntry, MockedBook):
+        """
+        Test that searching the entire song does the right queries
+        """
+        # GIVEN: A song media item, a keyword and some mocks
+        keyword = 'Jesus'
+        mocked_song = MagicMock()
+        mocked_or.side_effect = lambda a, b, c, d, e: ' '.join([a, b, c, d, e])
+        MockedSong.search_title.like.side_effect = lambda a: a
+        MockedSong.search_lyrics.like.side_effect = lambda a: a
+        MockedSong.comments.like.side_effect = lambda a: a
+        MockedSongBookEntry.entry.like.side_effect = lambda a: a
+        MockedBook.name.like.side_effect = lambda a: a
+
+        # WHEN: search_entire_song() is called with the keyword
+        self.media_item.search_entire(keyword)
+
+        # THEN: The correct calls were made
+        MockedSong.search_title.like.assert_called_once_with('%jesus%')
+        MockedSong.search_lyrics.like.assert_called_once_with('%jesus%')
+        MockedSong.comments.like.assert_called_once_with('%jesus%')
+        MockedSongBookEntry.entry.like.assert_called_once_with('%jesus%')
+        MockedBook.name.like.assert_called_once_with('%jesus%')
+        mocked_or.assert_called_once_with('%jesus%', '%jesus%', '%jesus%', '%jesus%', '%jesus%')
+        self.mocked_plugin.manager.session.query.assert_called_once_with(MockedSong)
+
+        self.assertEqual(self.mocked_plugin.manager.session.query.mock_calls[4][0], '().join().join().filter().all')

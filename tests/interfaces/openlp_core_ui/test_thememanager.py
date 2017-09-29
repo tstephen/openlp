@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,10 +23,12 @@
 Interface tests to test the themeManager class and related methods.
 """
 from unittest import TestCase
+from unittest.mock import patch, MagicMock
 
 from openlp.core.common import Registry, Settings
-from openlp.core.ui import ThemeManager, ThemeForm, FileRenameForm
-from tests.functional import patch, MagicMock
+from openlp.core.common.path import Path
+from openlp.core.ui import ThemeManager
+
 from tests.helpers.testmixin import TestMixin
 
 
@@ -50,7 +52,7 @@ class TestThemeManager(TestCase, TestMixin):
         self.destroy_settings()
         del self.theme_manager
 
-    def initialise_test(self):
+    def test_initialise(self):
         """
         Test the thememanager initialise - basic test
         """
@@ -70,7 +72,7 @@ class TestThemeManager(TestCase, TestMixin):
         self.assertEqual(self.theme_manager.global_theme, 'my_theme',
                          'The global theme should have been set to my_theme')
 
-    def build_theme_path_test(self):
+    def test_build_theme_path(self):
         """
         Test the thememanager build_theme_path - basic test
         """
@@ -90,7 +92,24 @@ class TestThemeManager(TestCase, TestMixin):
         assert self.theme_manager.thumb_path.startswith(self.theme_manager.path) is True, \
             'The thumb path and the main path should start with the same value'
 
-    def click_on_new_theme_test(self):
+    def test_build_theme_path(self):
+        """
+        Test the thememanager build_theme_path - basic test
+        """
+        # GIVEN: A new a call to initialise
+        with patch('openlp.core.common.AppLocation.get_section_data_path', return_value=Path('test/path')):
+            Settings().setValue('themes/global theme', 'my_theme')
+
+            self.theme_manager.theme_form = MagicMock()
+            self.theme_manager.load_first_time_themes = MagicMock()
+
+            # WHEN: the build_theme_path is run
+            self.theme_manager.build_theme_path()
+
+            #  THEN: The thumbnail path should be a sub path of the test path
+            self.assertEqual(self.theme_manager.thumb_path, Path('test/path/thumbnails'))
+
+    def test_click_on_new_theme(self):
         """
         Test the on_add_theme event handler is called by the UI
         """
@@ -108,17 +127,16 @@ class TestThemeManager(TestCase, TestMixin):
 
     @patch('openlp.core.ui.themeform.ThemeForm._setup')
     @patch('openlp.core.ui.filerenameform.FileRenameForm._setup')
-    def bootstrap_post_test(self, mocked_theme_form, mocked_rename_form):
+    def test_bootstrap_post(self, mocked_rename_form, mocked_theme_form):
         """
         Test the functions of bootstrap_post_setup are called.
         """
         # GIVEN:
         self.theme_manager.load_themes = MagicMock()
-        self.theme_manager.path = MagicMock()
+        self.theme_manager.theme_path = MagicMock()
 
         # WHEN:
         self.theme_manager.bootstrap_post_set_up()
 
         # THEN:
-        self.assertEqual(self.theme_manager.path, self.theme_manager.theme_form.path)
         self.assertEqual(1, self.theme_manager.load_themes.call_count, "load_themes should have been called once")

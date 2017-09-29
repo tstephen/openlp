@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,6 +23,7 @@
 This module contains tests for the OpenOffice/LibreOffice importer.
 """
 from unittest import TestCase, SkipTest
+from unittest.mock import MagicMock, patch
 
 from openlp.core.common import Registry
 try:
@@ -30,7 +31,6 @@ try:
 except ImportError:
     raise SkipTest('Could not import OpenOfficeImport probably due to unavailability of uno')
 
-from tests.functional import MagicMock, patch
 from tests.helpers.testmixin import TestMixin
 
 
@@ -46,7 +46,7 @@ class TestOpenOfficeImport(TestCase, TestMixin):
         Registry.create()
 
     @patch('openlp.plugins.songs.lib.importers.openoffice.SongImport')
-    def create_importer_test(self, mocked_songimport):
+    def test_create_importer(self, mocked_songimport):
         """
         Test creating an instance of the OpenOfficeImport file importer
         """
@@ -60,7 +60,7 @@ class TestOpenOfficeImport(TestCase, TestMixin):
         self.assertIsNotNone(importer, 'Import should not be none')
 
     @patch('openlp.plugins.songs.lib.importers.openoffice.SongImport')
-    def close_ooo_file_test(self, mocked_songimport):
+    def test_close_ooo_file(self, mocked_songimport):
         """
         Test that close_ooo_file catches raised exceptions
         """

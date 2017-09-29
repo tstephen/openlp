@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -38,11 +38,13 @@ class Ui_ExceptionDialog(object):
         Set up the UI.
         """
         exception_dialog.setObjectName('exception_dialog')
-        exception_dialog.setWindowIcon(build_icon(u':/icon/openlp-logo.svg'))
+        exception_dialog.setWindowIcon(build_icon(':/icon/openlp-logo.svg'))
         self.exception_layout = QtWidgets.QVBoxLayout(exception_dialog)
         self.exception_layout.setObjectName('exception_layout')
         self.message_layout = QtWidgets.QHBoxLayout()
         self.message_layout.setObjectName('messageLayout')
+        # Set margin to make the box a bit wider so the traceback is easier to read. (left, top, right, bottom)
+        self.message_layout.setContentsMargins(0, 0, 50, 0)
         self.message_layout.addSpacing(12)
         self.bug_label = QtWidgets.QLabel(exception_dialog)
         self.bug_label.setPixmap(QtGui.QPixmap(':/graphics/exception.png'))
@@ -88,17 +90,25 @@ class Ui_ExceptionDialog(object):
         """
         Translate the widgets on the fly.
         """
+        # Note that bugs mail is not clicable, but it adds the blue color and underlining and makes the test copyable.
         exception_dialog.setWindowTitle(translate('OpenLP.ExceptionDialog', 'Error Occurred'))
+        # Explanation text, &nbsp; adds a small space before: If possible, write in English.
         self.description_explanation.setText(
-            translate('OpenLP.ExceptionDialog', 'Please enter a description of what you were doing to cause this error.'
-                                                ' If possible, write in English.'
-                                                '\n(Minimum 20 characters)'))
+            translate('OpenLP.ExceptionDialog', '<strong>Please describe what you were trying to do.</strong> '
+                                                '&nbsp;If possible, write in English.'))
+        exception_part1 = (translate('OpenLP.ExceptionDialog',
+                                     '<strong>Oops, OpenLP hit a problem and couldn\'t recover!<br><br>'
+                                     'You can help </strong> the OpenLP developers to <strong>fix this</strong>'
+                                     ' by<br> sending them a <strong>bug report to {email}</strong>{newlines}'
+                                     ).format(email='<a href = "mailto:bugs@openlp.org" > bugs@openlp.org</a>',
+                                              newlines='<br><br>'))
         self.message_label.setText(
-            translate('OpenLP.ExceptionDialog', 'Oops! OpenLP hit a problem, and couldn\'t recover. The text in the '
-                                                'box below contains information that might be helpful to the OpenLP '
-                                                'developers, so please e-mail it to bugs@openlp.org, along with a '
-                                                'detailed description of what you were doing when the problem '
-                                                'occurred. Also attach any files that triggered the problem.'))
+            translate('OpenLP.ExceptionDialog', '{first_part}'
+                      '<strong>No email app? </strong> You can <strong>save</strong> this '
+                      'information to a <strong>file</strong> and<br>'
+                      'send it from your <strong>mail on browser</strong> via an <strong>attachment.</strong><br><br>'
+                      '<strong>Thank you</strong> for being part of making OpenLP better!<br>'
+                      ).format(first_part=exception_part1))
         self.send_report_button.setText(translate('OpenLP.ExceptionDialog', 'Send E-Mail'))
         self.save_report_button.setText(translate('OpenLP.ExceptionDialog', 'Save to File'))
         self.attach_tile_button.setText(translate('OpenLP.ExceptionDialog', 'Attach File'))

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -34,7 +34,7 @@ import ntpath
 from PyQt5 import QtGui
 
 from openlp.core.common import RegistryProperties, Settings, translate, AppLocation, md5_hash
-from openlp.core.lib import ImageSource, build_icon, clean_tags, expand_tags, create_thumb
+from openlp.core.lib import ImageSource, build_icon, clean_tags, expand_tags, expand_chords, create_thumb
 
 log = logging.getLogger(__name__)
 
@@ -117,7 +117,6 @@ class ItemCapabilities(object):
 
     ``HasThumbnails``
             The item has related thumbnails available
-
     """
     CanPreview = 1
     CanEdit = 2
@@ -247,7 +246,9 @@ class ServiceItem(RegistryProperties):
             self.renderer.set_item_theme(self.theme)
             self.theme_data, self.main, self.footer = self.renderer.pre_render()
         if self.service_item_type == ServiceItemType.Text:
-            log.debug('Formatting slides: %s' % self.title)
+            expand_chord_tags = hasattr(self, 'name') and self.name == 'songs' and Settings().value(
+                'songs/enable chords')
+            log.debug('Formatting slides: {title}'.format(title=self.title))
             # Save rendered pages to this dict. In the case that a slide is used twice we can use the pages saved to
             # the dict instead of rendering them again.
             previous_pages = {}
@@ -260,17 +261,20 @@ class ServiceItem(RegistryProperties):
                     previous_pages[verse_tag] = (slide['raw_slide'], pages)
                 for page in pages:
                     page = page.replace('<br>', '{br}')
-                    html_data = expand_tags(html.escape(page.rstrip()))
-                    self._display_frames.append({
+                    html_data = expand_tags(page.rstrip(), expand_chord_tags)
+                    new_frame = {
                         'title': clean_tags(page),
-                        'text': clean_tags(page.rstrip()),
+                        'text': clean_tags(page.rstrip(), expand_chord_tags),
+                        'chords_text': expand_chords(clean_tags(page.rstrip(), False)),
                         'html': html_data.replace('&amp;nbsp;', '&nbsp;'),
-                        'verseTag': verse_tag
-                    })
+                        'printing_html': expand_tags(html.escape(page.rstrip()), expand_chord_tags, True),
+                        'verseTag': verse_tag,
+                    }
+                    self._display_frames.append(new_frame)
         elif self.service_item_type == ServiceItemType.Image or self.service_item_type == ServiceItemType.Command:
             pass
         else:
-            log.error('Invalid value renderer: %s' % self.service_item_type)
+            log.error('Invalid value renderer: {item}'.format(item=self.service_item_type))
         self.title = clean_tags(self.title)
         # The footer should never be None, but to be compatible with a few
         # nightly builds between 1.9.4 and 1.9.5, we have to correct this to
@@ -325,15 +329,18 @@ class ServiceItem(RegistryProperties):
         self.service_item_type = ServiceItemType.Command
         # If the item should have a display title but this frame doesn't have one, we make one up
         if self.is_capable(ItemCapabilities.HasDisplayTitle) and not display_title:
-            display_title = translate('OpenLP.ServiceItem', '[slide %d]') % (len(self._raw_frames) + 1)
+            display_title = translate('OpenLP.ServiceItem',
+                                      '[slide {frame:d}]').format(frame=len(self._raw_frames) + 1)
         # Update image path to match servicemanager location if file was loaded from service
         if image and not self.has_original_files and self.name == 'presentations':
             file_location = os.path.join(path, file_name)
             file_location_hash = md5_hash(file_location.encode('utf-8'))
-            image = os.path.join(AppLocation.get_section_data_path(self.name), 'thumbnails',
+            image = os.path.join(str(AppLocation.get_section_data_path(self.name)), 'thumbnails',
                                  file_location_hash, ntpath.basename(image))
         self._raw_frames.append({'title': file_name, 'image': image, 'path': path,
                                  'display_title': display_title, 'notes': notes})
+        if self.is_capable(ItemCapabilities.HasThumbnails):
+            self.image_manager.add_image(image, ImageSource.CommandPlugins, '#000000')
         self._new_item()
 
     def get_service_repr(self, lite_save):
@@ -390,7 +397,7 @@ class ServiceItem(RegistryProperties):
         :param path: Defaults to *None*. This is the service manager path for things which have their files saved
             with them or None when the saved service is lite and the original file paths need to be preserved.
         """
-        log.debug('set_from_service called with path %s' % path)
+        log.debug('set_from_service called with path {path}'.format(path=path))
         header = service_item['serviceitem']['header']
         self.title = header['title']
         self.name = header['name']
@@ -606,11 +613,13 @@ class ServiceItem(RegistryProperties):
         start = None
         end = None
         if self.start_time != 0:
-            start = translate('OpenLP.ServiceItem', '<strong>Start</strong>: %s') % \
-                str(datetime.timedelta(seconds=self.start_time))
+            time = str(datetime.timedelta(seconds=self.start_time))
+            start = translate('OpenLP.ServiceItem',
+                              '<strong>Start</strong>: {start}').format(start=time)
         if self.media_length != 0:
-            end = translate('OpenLP.ServiceItem', '<strong>Length</strong>: %s') % \
-                str(datetime.timedelta(seconds=self.media_length // 1000))
+            length = str(datetime.timedelta(seconds=self.media_length // 1000))
+            end = translate('OpenLP.ServiceItem', '<strong>Length</strong>: {length}').format(length=length)
+
         if not start and not end:
             return ''
         elif start and not end:
@@ -618,7 +627,7 @@ class ServiceItem(RegistryProperties):
         elif not start and end:
             return end
         else:
-            return '%s <br>%s' % (start, end)
+            return '{start} <br>{end}'.format(start=start, end=end)
 
     def update_theme(self, theme):
         """

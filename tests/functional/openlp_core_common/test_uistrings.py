@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -29,7 +29,7 @@ from openlp.core.common import UiStrings
 
 class TestUiStrings(TestCase):
 
-    def check_same_instance_test(self):
+    def test_check_same_instance(self):
         """
         Test the UiStrings class - we always should have only one instance of the UiStrings class.
         """

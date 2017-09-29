@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -27,7 +27,9 @@ import logging
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from openlp.core.common import Registry, Settings, UiStrings, translate, get_images_filter
-from openlp.core.lib import SettingsTab, ScreenList, ColorButton, build_icon
+from openlp.core.common.path import Path, path_to_str, str_to_path
+from openlp.core.lib import SettingsTab, ScreenList
+from openlp.core.ui.lib import ColorButton, PathEdit
 
 log = logging.getLogger(__name__)
 
@@ -43,7 +45,7 @@ class GeneralTab(SettingsTab):
         self.logo_file = ':/graphics/openlp-splash-screen.png'
         self.logo_background_color = '#ffffff'
         self.screens = ScreenList()
-        self.icon_path = ':/icon/openlp-logo-16x16.png'
+        self.icon_path = ':/icon/openlp-logo.svg'
         general_translated = translate('OpenLP.GeneralTab', 'General')
         super(GeneralTab, self).__init__(parent, 'Core', general_translated)
 
@@ -161,7 +163,6 @@ class GeneralTab(SettingsTab):
         self.startup_layout.addWidget(self.show_splash_check_box)
         self.check_for_updates_check_box = QtWidgets.QCheckBox(self.startup_group_box)
         self.check_for_updates_check_box.setObjectName('check_for_updates_check_box')
-        self.check_for_updates_check_box.setVisible(False)
         self.startup_layout.addWidget(self.check_for_updates_check_box)
         self.right_layout.addWidget(self.startup_group_box)
         # Logo
@@ -171,20 +172,9 @@ class GeneralTab(SettingsTab):
         self.logo_layout.setObjectName('logo_layout')
         self.logo_file_label = QtWidgets.QLabel(self.logo_group_box)
         self.logo_file_label.setObjectName('logo_file_label')
-        self.logo_file_edit = QtWidgets.QLineEdit(self.logo_group_box)
-        self.logo_file_edit.setObjectName('logo_file_edit')
-        self.logo_browse_button = QtWidgets.QToolButton(self.logo_group_box)
-        self.logo_browse_button.setObjectName('logo_browse_button')
-        self.logo_browse_button.setIcon(build_icon(':/general/general_open.png'))
-        self.logo_revert_button = QtWidgets.QToolButton(self.logo_group_box)
-        self.logo_revert_button.setObjectName('logo_revert_button')
-        self.logo_revert_button.setIcon(build_icon(':/general/general_revert.png'))
-        self.logo_file_layout = QtWidgets.QHBoxLayout()
-        self.logo_file_layout.setObjectName('logo_file_layout')
-        self.logo_file_layout.addWidget(self.logo_file_edit)
-        self.logo_file_layout.addWidget(self.logo_browse_button)
-        self.logo_file_layout.addWidget(self.logo_revert_button)
-        self.logo_layout.addRow(self.logo_file_label, self.logo_file_layout)
+        self.logo_file_path_edit = PathEdit(self.logo_group_box,
+                                            default_path=Path(':/graphics/openlp-splash-screen.png'))
+        self.logo_layout.addRow(self.logo_file_label, self.logo_file_path_edit)
         self.logo_color_label = QtWidgets.QLabel(self.logo_group_box)
         self.logo_color_label.setObjectName('logo_color_label')
         self.logo_color_button = ColorButton(self.logo_group_box)
@@ -195,8 +185,6 @@ class GeneralTab(SettingsTab):
         self.logo_layout.addRow(self.logo_hide_on_startup_check_box)
         self.right_layout.addWidget(self.logo_group_box)
         self.logo_color_button.colorChanged.connect(self.on_logo_background_color_changed)
-        self.logo_browse_button.clicked.connect(self.on_logo_browse_button_clicked)
-        self.logo_revert_button.clicked.connect(self.on_logo_revert_button_clicked)
         # Application Settings
         self.settings_group_box = QtWidgets.QGroupBox(self.right_column)
         self.settings_group_box.setObjectName('settings_group_box')
@@ -208,6 +196,9 @@ class GeneralTab(SettingsTab):
         self.auto_unblank_check_box = QtWidgets.QCheckBox(self.settings_group_box)
         self.auto_unblank_check_box.setObjectName('auto_unblank_check_box')
         self.settings_layout.addRow(self.auto_unblank_check_box)
+        self.click_live_slide_to_unblank_check_box = QtWidgets.QCheckBox(self.settings_group_box)
+        self.click_live_slide_to_unblank_check_box.setObjectName('click_live_slide_to_unblank')
+        self.settings_layout.addRow(self.click_live_slide_to_unblank_check_box)
         self.auto_preview_check_box = QtWidgets.QCheckBox(self.settings_group_box)
         self.auto_preview_check_box.setObjectName('auto_preview_check_box')
         self.settings_layout.addRow(self.auto_preview_check_box)
@@ -245,21 +236,22 @@ class GeneralTab(SettingsTab):
         self.display_on_monitor_check.setText(translate('OpenLP.GeneralTab', 'Display if a single screen'))
         self.startup_group_box.setTitle(translate('OpenLP.GeneralTab', 'Application Startup'))
         self.warning_check_box.setText(translate('OpenLP.GeneralTab', 'Show blank screen warning'))
-        self.auto_open_check_box.setText(translate('OpenLP.GeneralTab', 'Automatically open the last service'))
+        self.auto_open_check_box.setText(translate('OpenLP.GeneralTab', 'Automatically open the previous service file'))
         self.show_splash_check_box.setText(translate('OpenLP.GeneralTab', 'Show the splash screen'))
         self.logo_group_box.setTitle(translate('OpenLP.GeneralTab', 'Logo'))
         self.logo_color_label.setText(UiStrings().BackgroundColorColon)
         self.logo_file_label.setText(translate('OpenLP.GeneralTab', 'Logo file:'))
-        self.logo_browse_button.setToolTip(translate('OpenLP.GeneralTab', 'Browse for an image file to display.'))
-        self.logo_revert_button.setToolTip(translate('OpenLP.GeneralTab', 'Revert to the default OpenLP logo.'))
         self.logo_hide_on_startup_check_box.setText(translate('OpenLP.GeneralTab', 'Don\'t show logo on startup'))
         self.check_for_updates_check_box.setText(translate('OpenLP.GeneralTab', 'Check for updates to OpenLP'))
         self.settings_group_box.setTitle(translate('OpenLP.GeneralTab', 'Application Settings'))
         self.save_check_service_check_box.setText(translate('OpenLP.GeneralTab',
                                                   'Prompt to save before starting a new service'))
-        self.auto_unblank_check_box.setText(translate('OpenLP.GeneralTab', 'Unblank display when adding new live item'))
+        self.click_live_slide_to_unblank_check_box.setText(translate('OpenLP.GeneralTab',
+                                                           'Unblank display when changing slide in Live'))
+        self.auto_unblank_check_box.setText(translate('OpenLP.GeneralTab', 'Unblank display when sending '
+                                                                           'items to Live'))
         self.auto_preview_check_box.setText(translate('OpenLP.GeneralTab',
-                                                      'Automatically preview next item in service'))
+                                                      'Automatically preview the next item in service'))
         self.timeout_label.setText(translate('OpenLP.GeneralTab', 'Timed slide interval:'))
         self.timeout_spin_box.setSuffix(translate('OpenLP.GeneralTab', ' sec'))
         self.ccli_group_box.setTitle(translate('OpenLP.GeneralTab', 'CCLI Details'))
@@ -275,6 +267,9 @@ class GeneralTab(SettingsTab):
         self.audio_group_box.setTitle(translate('OpenLP.GeneralTab', 'Background Audio'))
         self.start_paused_check_box.setText(translate('OpenLP.GeneralTab', 'Start background audio paused'))
         self.repeat_list_check_box.setText(translate('OpenLP.GeneralTab', 'Repeat track list'))
+        self.logo_file_path_edit.dialog_caption = translate('OpenLP.AdvancedTab', 'Select Logo File')
+        self.logo_file_path_edit.filters = '{text};;{names} (*)'.format(
+            text=get_images_filter(), names=UiStrings().AllFiles)
 
     def load(self):
         """
@@ -291,12 +286,13 @@ class GeneralTab(SettingsTab):
         self.password_edit.setText(settings.value('songselect password'))
         self.save_check_service_check_box.setChecked(settings.value('save prompt'))
         self.auto_unblank_check_box.setChecked(settings.value('auto unblank'))
+        self.click_live_slide_to_unblank_check_box.setChecked(settings.value('click live slide to unblank'))
         self.display_on_monitor_check.setChecked(self.screens.display)
         self.warning_check_box.setChecked(settings.value('blank warning'))
         self.auto_open_check_box.setChecked(settings.value('auto open'))
         self.show_splash_check_box.setChecked(settings.value('show splash'))
         self.logo_background_color = settings.value('logo background color')
-        self.logo_file_edit.setText(settings.value('logo file'))
+        self.logo_file_path_edit.path = settings.value('logo file')
         self.logo_hide_on_startup_check_box.setChecked(settings.value('logo hide on startup'))
         self.logo_color_button.color = self.logo_background_color
         self.check_for_updates_check_box.setChecked(settings.value('update check'))
@@ -330,11 +326,12 @@ class GeneralTab(SettingsTab):
         settings.setValue('auto open', self.auto_open_check_box.isChecked())
         settings.setValue('show splash', self.show_splash_check_box.isChecked())
         settings.setValue('logo background color', self.logo_background_color)
-        settings.setValue('logo file', self.logo_file_edit.text())
+        settings.setValue('logo file', self.logo_file_path_edit.path)
         settings.setValue('logo hide on startup', self.logo_hide_on_startup_check_box.isChecked())
         settings.setValue('update check', self.check_for_updates_check_box.isChecked())
         settings.setValue('save prompt', self.save_check_service_check_box.isChecked())
         settings.setValue('auto unblank', self.auto_unblank_check_box.isChecked())
+        settings.setValue('click live slide to unblank', self.click_live_slide_to_unblank_check_box.isChecked())
         settings.setValue('auto preview', self.auto_preview_check_box.isChecked())
         settings.setValue('loop delay', self.timeout_spin_box.value())
         settings.setValue('ccli number', self.number_edit.displayText())
@@ -394,25 +391,6 @@ class GeneralTab(SettingsTab):
         Called when the width, height, x position or y position has changed.
         """
         self.display_changed = True
-
-    def on_logo_browse_button_clicked(self):
-        """
-        Select the logo file
-        """
-        file_filters = '%s;;%s (*.*)' % (get_images_filter(), UiStrings().AllFiles)
-        filename, filter_used = QtWidgets.QFileDialog.getOpenFileName(self,
-                                                                      translate('OpenLP.AdvancedTab', 'Open File'), '',
-                                                                      file_filters)
-        if filename:
-            self.logo_file_edit.setText(filename)
-        self.logo_file_edit.setFocus()
-
-    def on_logo_revert_button_clicked(self):
-        """
-        Revert the logo file back to the default setting.
-        """
-        self.logo_file_edit.setText(':/graphics/openlp-splash-screen.png')
-        self.logo_file_edit.setFocus()
 
     def on_logo_background_color_changed(self, color):
         """

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -34,16 +34,16 @@ from openlp.core.common import is_win, Settings
 if is_win():
     from win32com.client import Dispatch
     import win32con
-    import winreg
-    import win32ui
     import win32gui
+    import win32ui
+    import winreg
     import pywintypes
 
 
+from openlp.core.common import Registry, UiStrings, trace_error_handler
 from openlp.core.lib import ScreenList
-from openlp.core.lib.ui import UiStrings, critical_error_message_box, translate
-from openlp.core.common import trace_error_handler, Registry
-from .presentationcontroller import PresentationController, PresentationDocument
+from openlp.core.lib.ui import critical_error_message_box, translate
+from openlp.plugins.presentations.lib.presentationcontroller import PresentationController, PresentationDocument
 
 log = logging.getLogger(__name__)
 
@@ -81,7 +81,7 @@ class PowerpointController(PresentationController):
                     if app_version >= 12:
                         self.also_supports = ['odp']
                 except (OSError, ValueError):
-                    log.warning('Detection of powerpoint version using registry failed.')
+                    log.exception('Detection of powerpoint version using registry failed.')
                 return True
             except OSError:
                 pass
@@ -109,9 +109,8 @@ class PowerpointController(PresentationController):
                 if self.process.Presentations.Count > 0:
                     return
                 self.process.Quit()
-            except (AttributeError, pywintypes.com_error) as e:
+            except (AttributeError, pywintypes.com_error):
                 log.exception('Exception caught while killing powerpoint process')
-                log.exception(e)
                 trace_error_handler(log)
             self.process = None
 
@@ -121,15 +120,16 @@ class PowerpointDocument(PresentationDocument):
     Class which holds information and controls a single presentation.
     """
 
-    def __init__(self, controller, presentation):
+    def __init__(self, controller, document_path):
         """
         Constructor, store information about the file and initialise.
 
         :param controller:
-        :param presentation:
+        :param openlp.core.common.path.Path document_path: Path to the document to load
+        :rtype: None
         """
         log.debug('Init Presentation Powerpoint')
-        super(PowerpointDocument, self).__init__(controller, presentation)
+        super().__init__(controller, document_path)
         self.presentation = None
         self.index_map = {}
         self.slide_count = 0
@@ -146,7 +146,7 @@ class PowerpointDocument(PresentationDocument):
         try:
             if not self.controller.process:
                 self.controller.start_process()
-            self.controller.process.Presentations.Open(os.path.normpath(self.file_path), False, False, False)
+            self.controller.process.Presentations.Open(str(self.file_path), False, False, False)
             self.presentation = self.controller.process.Presentations(self.controller.process.Presentations.Count)
             self.create_thumbnails()
             self.create_titles_and_notes()
@@ -154,9 +154,8 @@ class PowerpointDocument(PresentationDocument):
             if len(ScreenList().screen_list) > 1:
                 Registry().get('main_window').activateWindow()
             return True
-        except (AttributeError, pywintypes.com_error) as e:
+        except (AttributeError, pywintypes.com_error):
             log.exception('Exception caught while loading Powerpoint presentation')
-            log.exception(e)
             trace_error_handler(log)
             return False
 
@@ -179,7 +178,7 @@ class PowerpointDocument(PresentationDocument):
             if not self.presentation.Slides(num + 1).SlideShowTransition.Hidden:
                 self.index_map[key] = num + 1
                 self.presentation.Slides(num + 1).Export(
-                    os.path.join(self.get_thumbnail_folder(), 'slide%d.png' % (key)), 'png', 320, 240)
+                    str(self.get_thumbnail_folder() / 'slide{key:d}.png'.format(key=key)), 'png', 320, 240)
                 key += 1
         self.slide_count = key - 1
 
@@ -192,9 +191,8 @@ class PowerpointDocument(PresentationDocument):
         if self.presentation:
             try:
                 self.presentation.Close()
-            except (AttributeError, pywintypes.com_error) as e:
+            except (AttributeError, pywintypes.com_error):
                 log.exception('Caught exception while closing powerpoint presentation')
-                log.exception(e)
                 trace_error_handler(log)
         self.presentation = None
         self.controller.remove_doc(self)
@@ -210,9 +208,8 @@ class PowerpointDocument(PresentationDocument):
         try:
             if self.controller.process.Presentations.Count == 0:
                 return False
-        except (AttributeError, pywintypes.com_error) as e:
+        except (AttributeError, pywintypes.com_error):
             log.exception('Caught exception while in is_loaded')
-            log.exception(e)
             trace_error_handler(log)
             return False
         return True
@@ -229,9 +226,8 @@ class PowerpointDocument(PresentationDocument):
                 return False
             if self.presentation.SlideShowWindow.View is None:
                 return False
-        except (AttributeError, pywintypes.com_error) as e:
+        except (AttributeError, pywintypes.com_error):
             log.exception('Caught exception while in is_active')
-            log.exception(e)
             trace_error_handler(log)
             return False
         return True
@@ -249,9 +245,8 @@ class PowerpointDocument(PresentationDocument):
                 self.presentation.SlideShowWindow.View.GotoSlide(self.index_map[self.blank_slide], False)
                 if self.blank_click:
                     self.presentation.SlideShowWindow.View.GotoClick(self.blank_click)
-        except (AttributeError, pywintypes.com_error) as e:
+        except (AttributeError, pywintypes.com_error):
             log.exception('Caught exception while in unblank_screen')
-            log.exception(e)
             trace_error_handler(log)
             self.show_error_msg()
         # Stop powerpoint from flashing in the taskbar
@@ -273,9 +268,8 @@ class PowerpointDocument(PresentationDocument):
                 self.blank_click = self.presentation.SlideShowWindow.View.GetClickIndex()
             # ppSlideShowBlackScreen = 3
             self.presentation.SlideShowWindow.View.State = 3
-        except (AttributeError, pywintypes.com_error) as e:
+        except (AttributeError, pywintypes.com_error):
             log.exception('Caught exception while in blank_screen')
-            log.exception(e)
             trace_error_handler(log)
             self.show_error_msg()
 
@@ -288,9 +282,8 @@ class PowerpointDocument(PresentationDocument):
             try:
                 # ppSlideShowBlackScreen = 3
                 return self.presentation.SlideShowWindow.View.State == 3
-            except (AttributeError, pywintypes.com_error) as e:
+            except (AttributeError, pywintypes.com_error):
                 log.exception('Caught exception while in is_blank')
-                log.exception(e)
                 trace_error_handler(log)
                 self.show_error_msg()
         else:
@@ -303,9 +296,8 @@ class PowerpointDocument(PresentationDocument):
         log.debug('stop_presentation')
         try:
             self.presentation.SlideShowWindow.View.Exit()
-        except (AttributeError, pywintypes.com_error) as e:
+        except (AttributeError, pywintypes.com_error):
             log.exception('Caught exception while in stop_presentation')
-            log.exception(e)
             trace_error_handler(log)
             self.show_error_msg()
 
@@ -328,9 +320,8 @@ class PowerpointDocument(PresentationDocument):
             ppt_window = None
             try:
                 ppt_window = self.presentation.SlideShowSettings.Run()
-            except (AttributeError, pywintypes.com_error) as e:
+            except (AttributeError, pywintypes.com_error):
                 log.exception('Caught exception while in start_presentation')
-                log.exception(e)
                 trace_error_handler(log)
                 self.show_error_msg()
             if ppt_window and not Settings().value('presentations/powerpoint control window'):
@@ -339,14 +330,14 @@ class PowerpointDocument(PresentationDocument):
                     ppt_window.Height = size.height() * 72 / dpi
                     ppt_window.Left = size.x() * 72 / dpi
                     ppt_window.Width = size.width() * 72 / dpi
-                except AttributeError as e:
+                except AttributeError:
                     log.exception('AttributeError while in start_presentation')
-                    log.exception(e)
             # Find the presentation window and save the handle for later
             self.presentation_hwnd = None
             if ppt_window:
-                log.debug('main display size:  y=%d, height=%d, x=%d, width=%d'
-                          % (size.y(), size.height(), size.x(), size.width()))
+                log.debug('main display size:  y={y:d}, height={height:d}, '
+                          'x={x:d}, width={width:d}'.format(y=size.y(), height=size.height(),
+                                                            x=size.x(), width=size.width()))
                 win32gui.EnumWindows(self._window_enum_callback, size)
             # Make sure powerpoint doesn't steal focus, unless we're on a single screen setup
             if len(ScreenList().screen_list) > 1:
@@ -361,13 +352,20 @@ class PowerpointDocument(PresentationDocument):
         # it is the powerpoint presentation window.
         (left, top, right, bottom) = win32gui.GetWindowRect(hwnd)
         window_title = win32gui.GetWindowText(hwnd)
-        log.debug('window size:  left=%d, top=%d, right=%d, width=%d' % (left, top, right, bottom))
-        log.debug('compare size:  %d and %d, %d and %d, %d and %d, %d and %d'
-                  % (size.y(), top, size.height(), (bottom - top), size.x(), left, size.width(), (right - left)))
-        log.debug('window title: %s' % window_title)
-        filename_root, filename_ext = os.path.splitext(os.path.basename(self.file_path))
+        log.debug('window size:  left={left:d}, top={top:d}, '
+                  'right={right:d}, bottom={bottom:d}'.format(left=left, top=top, right=right, bottom=bottom))
+        log.debug('compare size:  {y:d} and {top:d}, {height:d} and {vertical:d}, '
+                  '{x:d} and {left}, {width:d} and {horizontal:d}'.format(y=size.y(),
+                                                                          top=top,
+                                                                          height=size.height(),
+                                                                          vertical=(bottom - top),
+                                                                          x=size.x(),
+                                                                          left=left,
+                                                                          width=size.width(),
+                                                                          horizontal=(right - left)))
+        log.debug('window title: {title}'.format(title=window_title))
         if size.y() == top and size.height() == (bottom - top) and size.x() == left and \
-                size.width() == (right - left) and filename_root in window_title:
+                size.width() == (right - left) and self.file_path.stem in window_title:
             log.debug('Found a match and will save the handle')
             self.presentation_hwnd = hwnd
             # Stop powerpoint from flashing in the taskbar
@@ -390,9 +388,8 @@ class PowerpointDocument(PresentationDocument):
                 ret = next((key for key, slidenum in self.index_map.items() if slidenum == ret), None)
             else:
                 ret = self.presentation.SlideShowWindow.View.CurrentShowPosition
-        except (AttributeError, pywintypes.com_error) as e:
+        except (AttributeError, pywintypes.com_error):
             log.exception('Caught exception while in get_slide_number')
-            log.exception(e)
             trace_error_handler(log)
             self.show_error_msg()
         return ret
@@ -416,15 +413,14 @@ class PowerpointDocument(PresentationDocument):
                     and self.get_slide_number() == slide_no:
                 click_index = self.presentation.SlideShowWindow.View.GetClickIndex()
                 click_count = self.presentation.SlideShowWindow.View.GetClickCount()
-                log.debug('We are already on this slide - go to next effect if any left, idx: %d, count: %d'
-                          % (click_index, click_count))
+                log.debug('We are already on this slide - go to next effect if any left, idx: '
+                          '{index:d}, count: {count:d}'.format(index=click_index, count=click_count))
                 if click_index < click_count:
                     self.next_step()
             else:
                 self.presentation.SlideShowWindow.View.GotoSlide(self.index_map[slide_no])
-        except (AttributeError, pywintypes.com_error) as e:
+        except (AttributeError, pywintypes.com_error):
             log.exception('Caught exception while in goto_slide')
-            log.exception(e)
             trace_error_handler(log)
             self.show_error_msg()
 
@@ -437,9 +433,8 @@ class PowerpointDocument(PresentationDocument):
         try:
             self.presentation.SlideShowWindow.Activate()
             self.presentation.SlideShowWindow.View.Next()
-        except (AttributeError, pywintypes.com_error) as e:
+        except (AttributeError, pywintypes.com_error):
             log.exception('Caught exception while in next_step')
-            log.exception(e)
             trace_error_handler(log)
             self.show_error_msg()
             return past_end
@@ -462,9 +457,8 @@ class PowerpointDocument(PresentationDocument):
         log.debug('previous_step')
         try:
             self.presentation.SlideShowWindow.View.Previous()
-        except (AttributeError, pywintypes.com_error) as e:
+        except (AttributeError, pywintypes.com_error):
             log.exception('Caught exception while in previous_step')
-            log.exception(e)
             trace_error_handler(log)
             self.show_error_msg()
 
@@ -497,8 +491,8 @@ class PowerpointDocument(PresentationDocument):
             slide = self.presentation.Slides(self.index_map[num + 1])
             try:
                 text = slide.Shapes.Title.TextFrame.TextRange.Text
-            except Exception as e:
-                log.exception(e)
+            except Exception:
+                log.exception('Exception raised when getting title text')
                 text = ''
             titles.append(text.replace('\n', ' ').replace('\x0b', ' ') + '\n')
             note = _get_text_from_shapes(slide.NotesPage.Shapes)
@@ -513,11 +507,10 @@ class PowerpointDocument(PresentationDocument):
         """
         try:
             self.presentation.SlideShowWindow.View.Exit()
-        except (AttributeError, pywintypes.com_error) as e:
+        except (AttributeError, pywintypes.com_error):
             log.exception('Failed to exit Powerpoint presentation after error')
-            log.exception(e)
         critical_error_message_box(UiStrings().Error, translate('PresentationPlugin.PowerpointDocument',
-                                                                'An error occurred in the Powerpoint integration '
+                                                                'An error occurred in the PowerPoint integration '
                                                                 'and the presentation will be stopped. '
                                                                 'Restart the presentation if you wish to present it.'))
 
@@ -534,7 +527,6 @@ def _get_text_from_shapes(shapes):
             if shape.PlaceholderFormat.Type == 2:  # 2 from is enum PpPlaceholderType.ppPlaceholderBody
                 if shape.HasTextFrame and shape.TextFrame.HasText:
                     text += shape.TextFrame.TextRange.Text + '\n'
-    except pywintypes.com_error as e:
-        log.warning('Failed to extract text from powerpoint slide')
-        log.warning(e)
+    except pywintypes.com_error:
+        log.exception('Failed to extract text from powerpoint slide')
     return text

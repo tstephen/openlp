@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -141,7 +141,7 @@ class SundayPlusImport(SongImport):
                         if len(value):
                             verse_type = VerseType.tags[VerseType.from_loose_input(value[0])]
                             if len(value) >= 2 and value[-1] in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
-                                verse_type = "%s%s" % (verse_type, value[-1])
+                                verse_type = "{verse}{value}".format(verse=verse_type, value=value[-1])
                     elif name == 'HOTKEY':
                         value = self.decode(value).strip()
                         # HOTKEY always appears after MARKER_NAME, so it

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -173,7 +173,7 @@ class BibleStrings(object):
 
 def update_reference_separators():
     """
-    Updates separators and matches for parsing and formating scripture references.
+    Updates separators and matches for parsing and formatting scripture references.
     """
     default_separators = [
         '|'.join([
@@ -211,26 +211,26 @@ def update_reference_separators():
         while '||' in source_string:
             source_string = source_string.replace('||', '|')
         if role != 'e':
-            REFERENCE_SEPARATORS['sep_%s_display' % role] = source_string.split('|')[0]
+            REFERENCE_SEPARATORS['sep_{role}_display'.format(role=role)] = source_string.split('|')[0]
         # escape reserved characters
         for character in '\\.^$*+?{}[]()':
             source_string = source_string.replace(character, '\\' + character)
-        # add various unicode alternatives
+        # add various Unicode alternatives
         source_string = source_string.replace('-', '(?:[-\u00AD\u2010\u2011\u2012\u2014\u2014\u2212\uFE63\uFF0D])')
         source_string = source_string.replace(',', '(?:[,\u201A])')
-        REFERENCE_SEPARATORS['sep_%s' % role] = '\s*(?:%s)\s*' % source_string
-        REFERENCE_SEPARATORS['sep_%s_default' % role] = default_separators[index]
+        REFERENCE_SEPARATORS['sep_{role}'.format(role=role)] = '\s*(?:{source})\s*'.format(source=source_string)
+        REFERENCE_SEPARATORS['sep_{role}_default'.format(role=role)] = default_separators[index]
     # verse range match: (<chapter>:)?<verse>(-((<chapter>:)?<verse>|end)?)?
-    range_regex = '(?:(?P<from_chapter>[0-9]+)%(sep_v)s)?' \
-        '(?P<from_verse>[0-9]+)(?P<range_to>%(sep_r)s(?:(?:(?P<to_chapter>' \
-        '[0-9]+)%(sep_v)s)?(?P<to_verse>[0-9]+)|%(sep_e)s)?)?' % REFERENCE_SEPARATORS
-    REFERENCE_MATCHES['range'] = re.compile('^\s*%s\s*$' % range_regex, re.UNICODE)
+    range_regex = '(?:(?P<from_chapter>[0-9]+){sep_v})?' \
+        '(?P<from_verse>[0-9]+)(?P<range_to>{sep_r}(?:(?:(?P<to_chapter>' \
+        '[0-9]+){sep_v})?(?P<to_verse>[0-9]+)|{sep_e})?)?'.format_map(REFERENCE_SEPARATORS)
+    REFERENCE_MATCHES['range'] = re.compile(r'^\s*{range}\s*$'.format(range=range_regex), re.UNICODE)
     REFERENCE_MATCHES['range_separator'] = re.compile(REFERENCE_SEPARATORS['sep_l'], re.UNICODE)
     # full reference match: <book>(<range>(,(?!$)|(?=$)))+
     REFERENCE_MATCHES['full'] = \
-        re.compile('^\s*(?!\s)(?P<book>[\d]*[^\d]+)(?<!\s)\s*'
-                   '(?P<ranges>(?:%(range_regex)s(?:%(sep_l)s(?!\s*$)|(?=\s*$)))+)\s*$'
-                   % dict(list(REFERENCE_SEPARATORS.items()) + [('range_regex', range_regex)]), re.UNICODE)
+        re.compile(r'^\s*(?!\s)(?P<book>[\d]*[.]?[^\d\.]+)\.*(?<!\s)\s*'
+                   r'(?P<ranges>(?:{range_regex}(?:{sep_l}(?!\s*$)|(?=\s*$)))+)\s*$'.format(
+                       range_regex=range_regex, sep_l=REFERENCE_SEPARATORS['sep_l']), re.UNICODE)
 
 
 def get_reference_separator(separator_type):
@@ -324,25 +324,25 @@ def parse_reference(reference, bible, language_selection, book_ref_id=False):
 
     ``^\s*(?!\s)(?P<book>[\d]*[^\d]+)(?<!\s)\s*``
         The ``book`` group starts with the first non-whitespace character. There are optional leading digits followed by
-        non-digits. The group ends before the whitspace in front of the next digit.
+        non-digits. The group ends before the whitespace, or a full stop in front of the next digit.
 
     ``(?P<ranges>(?:%(range_regex)s(?:%(sep_l)s(?!\s*$)|(?=\s*$)))+)\s*$``
         The second group contains all ``ranges``. This can be multiple declarations of range_regex separated by a list
         separator.
 
     """
-    log.debug('parse_reference("%s")', reference)
+    log.debug('parse_reference("{text}")'.format(text=reference))
     match = get_reference_match('full').match(reference)
     if match:
-        log.debug('Matched reference %s' % reference)
+        log.debug('Matched reference {text}'.format(text=reference))
         book = match.group('book')
         if not book_ref_id:
             book_ref_id = bible.get_book_ref_id_by_localised_name(book, language_selection)
         elif not bible.get_book_by_book_ref_id(book_ref_id):
-            return False
+            return []
         # We have not found the book so do not continue
         if not book_ref_id:
-            return False
+            return []
         ranges = match.group('ranges')
         range_list = get_reference_match('range_separator').split(ranges)
         ref_list = []
@@ -400,8 +400,8 @@ def parse_reference(reference, bible, language_selection, book_ref_id=False):
                 ref_list.append((book_ref_id, from_chapter, 1, -1))
         return ref_list
     else:
-        log.debug('Invalid reference: %s' % reference)
-        return None
+        log.debug('Invalid reference: {text}'.format(text=reference))
+        return []
 
 
 class SearchResults(object):

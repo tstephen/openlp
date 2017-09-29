@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -27,7 +27,7 @@ Powerpraise song files into the current database.
 import os
 from lxml import objectify
 
-from openlp.core.ui.wizard import WizardStrings
+from openlp.core.ui.lib.wizard import WizardStrings
 from .songimport import SongImport
 
 
@@ -41,7 +41,8 @@ class PowerPraiseImport(SongImport):
         for file_path in self.import_source:
             if self.stop_import_flag:
                 return
-            self.import_wizard.increment_progress_bar(WizardStrings.ImportingType % os.path.basename(file_path))
+            self.import_wizard.increment_progress_bar(
+                WizardStrings.ImportingType.format(source=os.path.basename(file_path)))
             root = objectify.parse(open(file_path, 'rb')).getroot()
             self.process_song(root)
 
@@ -66,7 +67,7 @@ class PowerPraiseImport(SongImport):
             else:
                 verse_def = 'o'
             verse_count[verse_def] = verse_count.get(verse_def, 0) + 1
-            verse_def = '%s%d' % (verse_def, verse_count[verse_def])
+            verse_def = '{verse}{count:d}'.format(verse=verse_def, count=verse_count[verse_def])
             verse_text = []
             for slide in part.slide:
                 if not hasattr(slide, 'line'):

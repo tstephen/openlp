@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -22,14 +22,14 @@
 """
 This module contains tests for the SongShow Plus song importer.
 """
-
 import os
 from unittest import TestCase
+from unittest.mock import patch, MagicMock
 
-from tests.helpers.songfileimport import SongImportTestHelper
 from openlp.plugins.songs.lib import VerseType
 from openlp.plugins.songs.lib.importers.songshowplus import SongShowPlusImport
-from tests.functional import patch, MagicMock
+
+from tests.helpers.songfileimport import SongImportTestHelper
 
 TEST_PATH = os.path.abspath(
     os.path.join(os.path.dirname(__file__), '..', '..', '..', 'resources', 'songshowplussongs'))
@@ -52,13 +52,15 @@ class TestSongShowPlusFileImport(SongImportTestHelper):
                          self.load_external_result_data(os.path.join(TEST_PATH, 'Beautiful Garden Of Prayer.json')))
         self.file_import([os.path.join(TEST_PATH, 'a mighty fortress is our god.sbsong')],
                          self.load_external_result_data(os.path.join(TEST_PATH, 'a mighty fortress is our god.json')))
+        self.file_import([os.path.join(TEST_PATH, 'cleanse-me.sbsong')],
+                         self.load_external_result_data(os.path.join(TEST_PATH, 'cleanse-me.json')))
 
 
 class TestSongShowPlusImport(TestCase):
     """
     Test the functions in the :mod:`songshowplusimport` module.
     """
-    def create_importer_test(self):
+    def test_create_importer(self):
         """
         Test creating an instance of the SongShow Plus file importer
         """
@@ -72,7 +74,7 @@ class TestSongShowPlusImport(TestCase):
             # THEN: The importer object should not be None
             self.assertIsNotNone(importer, 'Import should not be none')
 
-    def invalid_import_source_test(self):
+    def test_invalid_import_source(self):
         """
         Test SongShowPlusImport.do_import handles different invalid import_source values
         """
@@ -93,7 +95,7 @@ class TestSongShowPlusImport(TestCase):
                 self.assertEqual(mocked_import_wizard.progress_bar.setMaximum.called, False,
                                  'setMaximum on import_wizard.progress_bar should not have been called')
 
-    def valid_import_source_test(self):
+    def test_valid_import_source(self):
         """
         Test SongShowPlusImport.do_import handles different invalid import_source values
         """
@@ -114,7 +116,7 @@ class TestSongShowPlusImport(TestCase):
                               'and stop_import_flag is True')
             mocked_import_wizard.progress_bar.setMaximum.assert_called_with(len(importer.import_source))
 
-    def to_openlp_verse_tag_test(self):
+    def test_to_openlp_verse_tag(self):
         """
         Test to_openlp_verse_tag method by simulating adding a verse
         """
@@ -142,7 +144,7 @@ class TestSongShowPlusImport(TestCase):
                                  'SongShowPlusImport.to_openlp_verse_tag should return "%s" when called with "%s"' %
                                  (openlp_tag, original_tag))
 
-    def to_openlp_verse_tag_verse_order_test(self):
+    def test_to_openlp_verse_tag_verse_order(self):
         """
         Test to_openlp_verse_tag method by simulating adding a verse to the verse order
         """

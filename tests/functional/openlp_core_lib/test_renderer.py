@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,20 +23,39 @@
 Package to test the openlp.core.ui.renderer package.
 """
 from unittest import TestCase
+from unittest.mock import MagicMock, patch
 
 from PyQt5 import QtCore
 
 from openlp.core.common import Registry
 from openlp.core.lib import Renderer, ScreenList, ServiceItem, FormattingTags
 from openlp.core.lib.renderer import words_split, get_start_tags
+from openlp.core.lib.theme import Theme
 
-from tests.functional import MagicMock, patch
 
 SCREEN = {
     'primary': False,
     'number': 1,
     'size': QtCore.QRect(0, 0, 1024, 768)
 }
+
+
+# WARNING: Leave formatting alone - this is how it's returned in renderer.py
+CSS_TEST_ONE = """<!DOCTYPE html><html><head><script>
+            function show_text(newtext) {
+                var main = document.getElementById('main');
+                main.innerHTML = newtext;
+                // We need to be sure that the page is loaded, that is why we
+                // return the element's height (even though we do not use the
+                // returned value).
+                return main.offsetHeight;
+            }
+            </script>
+            <style>
+                *{margin: 0; padding: 0; border: 0;}
+                #main {position: absolute; top: 0px;  FORMAT CSS;   OUTLINE CSS; }
+            </style></head>
+            <body><div id="main"></div></body></html>'"""
 
 
 class TestRenderer(TestCase):
@@ -59,7 +78,7 @@ class TestRenderer(TestCase):
         """
         del self.screens
 
-    def default_screen_layout_test(self):
+    def test_default_screen_layout(self):
         """
         Test the default layout calculations
         """
@@ -73,7 +92,7 @@ class TestRenderer(TestCase):
         self.assertEqual(renderer.footer_start, 691, 'The base renderer should be a live controller')
 
     @patch('openlp.core.lib.renderer.FormattingTags.get_html_tags')
-    def get_start_tags_test(self, mocked_get_html_tags):
+    def test_get_start_tags(self, mocked_get_html_tags):
         """
         Test the get_start_tags() method
         """
@@ -95,7 +114,7 @@ class TestRenderer(TestCase):
         self.assertEqual(result, expected_tuple), 'A tuple should be returned containing the text with correct ' \
             'tags, the opening tags, and the opening html tags.'
 
-    def word_split_test(self):
+    def test_word_split(self):
         """
         Test the word_split() method
         """
@@ -109,7 +128,7 @@ class TestRenderer(TestCase):
         # THEN: The word lists should be the same.
         self.assertListEqual(result_words, expected_words)
 
-    def format_slide_logical_split_test(self):
+    def test_format_slide_logical_split(self):
         """
         Test that a line with text and a logic break does not break the renderer just returns the input
         """
@@ -126,7 +145,7 @@ class TestRenderer(TestCase):
         # THEN: The word lists should be the same.
         self.assertListEqual(result_words, expected_words)
 
-    def format_slide_blank_before_split_test(self):
+    def test_format_slide_blank_before_split(self):
         """
         Test that a line with blanks before the logical split at handled
         """
@@ -143,7 +162,7 @@ class TestRenderer(TestCase):
         # THEN: The blanks have been removed.
         self.assertListEqual(result_words, expected_words)
 
-    def format_slide_blank_after_split_test(self):
+    def test_format_slide_blank_after_split(self):
         """
         Test that a line with blanks before the logical split at handled
         """
@@ -159,3 +178,30 @@ class TestRenderer(TestCase):
 
         # THEN: The blanks have been removed.
         self.assertListEqual(result_words, expected_words)
+
+    @patch('openlp.core.lib.renderer.QtWebKitWidgets.QWebView')
+    @patch('openlp.core.lib.renderer.build_lyrics_format_css')
+    @patch('openlp.core.lib.renderer.build_lyrics_outline_css')
+    @patch('openlp.core.lib.renderer.build_chords_css')
+    def test_set_text_rectangle(self, mock_build_chords_css, mock_outline_css, mock_lyrics_css, mock_webview):
+        """
+        Test set_text_rectangle returns a proper html string
+        """
+        # GIVEN: test object and data
+        mock_lyrics_css.return_value = ' FORMAT CSS; '
+        mock_outline_css.return_value = ' OUTLINE CSS; '
+        mock_build_chords_css.return_value = ' CHORDS CSS; '
+        theme_data = Theme()
+        theme_data.font_main_name = 'Arial'
+        theme_data.font_main_size = 20
+        theme_data.font_main_color = '#FFFFFF'
+        theme_data.font_main_outline_color = '#FFFFFF'
+        main = QtCore.QRect(10, 10, 1280, 900)
+        foot = QtCore.QRect(10, 1000, 1260, 24)
+        renderer = Renderer()
+
+        # WHEN: Calling method
+        renderer._set_text_rectangle(theme_data=theme_data, rect_main=main, rect_footer=foot)
+
+        # THEN: QtWebKitWidgets should be called with the proper string
+        mock_webview.setHtml.called_with(CSS_TEST_ONE, 'Should be the same')

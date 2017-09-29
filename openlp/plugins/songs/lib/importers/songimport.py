@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -28,7 +28,8 @@ import os
 from PyQt5 import QtCore
 
 from openlp.core.common import Registry, AppLocation, check_directory_exists, translate
-from openlp.core.ui.wizard import WizardStrings
+from openlp.core.common.path import Path
+from openlp.core.ui.lib.wizard import WizardStrings
 from openlp.plugins.songs.lib import clean_song, VerseType
 from openlp.plugins.songs.lib.db import Song, Author, Topic, Book, MediaFile
 from openlp.plugins.songs.lib.ui import SongStrings
@@ -117,7 +118,7 @@ class SongImport(QtCore.QObject):
             self.import_wizard.error_report_text_edit.setVisible(True)
             self.import_wizard.error_copy_to_button.setVisible(True)
             self.import_wizard.error_save_to_button.setVisible(True)
-        self.import_wizard.error_report_text_edit.append('- %s (%s)' % (file_path, reason))
+        self.import_wizard.error_report_text_edit.append('- {path} ({error})'.format(path=file_path, error=reason))
 
     def stop_import(self):
         """
@@ -140,10 +141,13 @@ class SongImport(QtCore.QObject):
         text = text.replace('\u2026', '...')
         text = text.replace('\u2013', '-')
         text = text.replace('\u2014', '-')
+        # Replace vertical tab with 2 linebreaks
+        text = text.replace('\v', '\n\n')
+        # Replace form feed (page break) with 2 linebreaks
+        text = text.replace('\f', '\n\n')
         # Remove surplus blank lines, spaces, trailing/leading spaces
-        text = re.sub(r'[ \t\v]+', ' ', text)
+        text = re.sub(r'[ \t]+', ' ', text)
         text = re.sub(r' ?(\r\n?|\n) ?', '\n', text)
-        text = re.sub(r' ?(\n{5}|\f)+ ?', '\f', text)
         return text
 
     def process_song_text(self, text):
@@ -239,7 +243,7 @@ class SongImport(QtCore.QObject):
             self.copyright += ' '
         self.copyright += copyright
 
-    def parse_author(self, text):
+    def parse_author(self, text, type=None):
         """
         Add the author. OpenLP stores them individually so split by 'and', '&' and comma. However need to check
         for 'Mr and Mrs Smith' and turn it to 'Mr Smith' and 'Mrs Smith'.
@@ -253,7 +257,10 @@ class SongImport(QtCore.QObject):
                 if author2.endswith('.'):
                     author2 = author2[:-1]
                 if author2:
-                    self.add_author(author2)
+                    if type:
+                        self.add_author(author2, type)
+                    else:
+                        self.add_author(author2)
 
     def add_author(self, author, type=None):
         """
@@ -301,12 +308,23 @@ class SongImport(QtCore.QObject):
         if verse_def not in self.verse_order_list_generated:
             self.verse_order_list_generated.append(verse_def)
 
-    def repeat_verse(self):
+    def repeat_verse(self, verse_def=None):
         """
-        Repeat the previous verse in the verse order
+        Repeat the verse with the given verse_def or default to repeating the previous verse in the verse order
+
+        :param verse_def: verse_def of the verse to be repeated
         """
         if self.verse_order_list_generated:
-            self.verse_order_list_generated.append(self.verse_order_list_generated[-1])
+            if verse_def:
+                # If the given verse_def is only one char (like 'v' or 'c'), postfix it with '1'
+                if len(verse_def) == 1:
+                    verse_def += '1'
+                if verse_def in self.verse_order_list_generated:
+                    self.verse_order_list_generated.append(verse_def)
+                else:
+                    log.warning('Trying to add unknown verse_def "%s"' % verse_def)
+            else:
+                self.verse_order_list_generated.append(self.verse_order_list_generated[-1])
             self.verse_order_list_generated_useful = True
 
     def check_complete(self):
@@ -326,11 +344,11 @@ class SongImport(QtCore.QObject):
         if not self.check_complete():
             self.set_defaults()
             return False
-        log.info('committing song %s to database', self.title)
+        log.info('committing song {title} to database'.format(title=self.title))
         song = Song()
         song.title = self.title
         if self.import_wizard is not None:
-            self.import_wizard.increment_progress_bar(WizardStrings.ImportingType % song.title)
+            self.import_wizard.increment_progress_bar(WizardStrings.ImportingType.format(source=song.title))
         song.alternate_title = self.alternate_title
         # Values will be set when cleaning the song.
         song.search_title = ''
@@ -344,11 +362,11 @@ class SongImport(QtCore.QObject):
             if verse_def[0].lower() in VerseType.tags:
                 verse_tag = verse_def[0].lower()
             else:
-                new_verse_def = '%s%d' % (VerseType.tags[VerseType.Other], other_count)
+                new_verse_def = '{tag}{count:d}'.format(tag=VerseType.tags[VerseType.Other], count=other_count)
                 verses_changed_to_other[verse_def] = new_verse_def
                 other_count += 1
                 verse_tag = VerseType.tags[VerseType.Other]
-                log.info('Versetype %s changing to %s', verse_def, new_verse_def)
+                log.info('Versetype {old} changing to {new}'.format(old=verse_def, new=new_verse_def))
                 verse_def = new_verse_def
             sxml.add_verse_to_lyrics(verse_tag, verse_def[1:], verse_text, lang)
         song.lyrics = str(sxml.extract_xml(), 'utf-8')
@@ -404,9 +422,9 @@ class SongImport(QtCore.QObject):
         :param filename: The file to copy.
         """
         if not hasattr(self, 'save_path'):
-            self.save_path = os.path.join(AppLocation.get_section_data_path(self.import_wizard.plugin.name),
+            self.save_path = os.path.join(str(AppLocation.get_section_data_path(self.import_wizard.plugin.name)),
                                           'audio', str(song_id))
-        check_directory_exists(self.save_path)
+        check_directory_exists(Path(self.save_path))
         if not filename.startswith(self.save_path):
             old_file, filename = filename, os.path.join(self.save_path, os.path.split(filename)[1])
             shutil.copyfile(old_file, filename)

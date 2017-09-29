@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -50,7 +50,7 @@ __default_settings__ = {
     'songusage/active': False,
     'songusage/to date': QtCore.QDate(YEAR, 8, 31),
     'songusage/from date': QtCore.QDate(YEAR - 1, 9, 1),
-    'songusage/last directory export': ''
+    'songusage/last directory export': None
 }
 
 

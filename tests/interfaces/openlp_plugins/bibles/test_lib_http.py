@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -22,13 +22,15 @@
 """
     Package to test the openlp.plugin.bible.lib.https package.
 """
-from unittest import TestCase
+import os
+from unittest import TestCase, skipIf
+from unittest.mock import MagicMock
 
 from openlp.core.common import Registry
-from openlp.plugins.bibles.lib.http import BGExtract, CWExtract, BSExtract
-from tests.interfaces import MagicMock
+from openlp.plugins.bibles.lib.importers.http import BGExtract, CWExtract, BSExtract
 
 
+@skipIf(os.environ.get('JENKINS_URL'), 'Skip Bible HTTP tests to prevent Jenkins from being blacklisted')
 class TestBibleHTTP(TestCase):
 
     def setUp(self):
@@ -38,8 +40,9 @@ class TestBibleHTTP(TestCase):
         Registry.create()
         Registry().register('service_list', MagicMock())
         Registry().register('application', MagicMock())
+        Registry().register('main_window', MagicMock())
 
-    def bible_gateway_extract_books_test(self):
+    def test_bible_gateway_extract_books(self):
         """
         Test the Bible Gateway retrieval of book list for NIV bible
         """
@@ -50,9 +53,10 @@ class TestBibleHTTP(TestCase):
         books = handler.get_books_from_http('NIV')
 
         # THEN: We should get back a valid service item
-        assert len(books) == 66, 'The bible should not have had any books added or removed'
+        self.assertEqual(len(books), 66, 'The bible should not have had any books added or removed')
+        self.assertEqual(books[0], 'Genesis', 'The first bible book should be Genesis')
 
-    def bible_gateway_extract_books_support_redirect_test(self):
+    def test_bible_gateway_extract_books_support_redirect(self):
         """
         Test the Bible Gateway retrieval of book list for DN1933 bible with redirect (bug 1251437)
         """
@@ -63,9 +67,9 @@ class TestBibleHTTP(TestCase):
         books = handler.get_books_from_http('DN1933')
 
         # THEN: We should get back a valid service item
-        assert len(books) == 66, 'This bible should have 66 books'
+        self.assertEqual(len(books), 66, 'This bible should have 66 books')
 
-    def bible_gateway_extract_verse_test(self):
+    def test_bible_gateway_extract_verse(self):
         """
         Test the Bible Gateway retrieval of verse list for NIV bible John 3
         """
@@ -76,9 +80,10 @@ class TestBibleHTTP(TestCase):
         results = handler.get_bible_chapter('NIV', 'John', 3)
 
         # THEN: We should get back a valid service item
-        assert len(results.verse_list) == 36, 'The book of John should not have had any verses added or removed'
+        self.assertEqual(len(results.verse_list), 36,
+                         'The book of John should not have had any verses added or removed')
 
-    def bible_gateway_extract_verse_nkjv_test(self):
+    def test_bible_gateway_extract_verse_nkjv(self):
         """
         Test the Bible Gateway retrieval of verse list for NKJV bible John 3
         """
@@ -89,9 +94,10 @@ class TestBibleHTTP(TestCase):
         results = handler.get_bible_chapter('NKJV', 'John', 3)
 
         # THEN: We should get back a valid service item
-        assert len(results.verse_list) == 36, 'The book of John should not have had any verses added or removed'
+        self.assertEqual(len(results.verse_list), 36,
+                         'The book of John should not have had any verses added or removed')
 
-    def crosswalk_extract_books_test(self):
+    def test_crosswalk_extract_books(self):
         """
         Test Crosswalk retrieval of book list for NIV bible
         """
@@ -102,9 +108,9 @@ class TestBibleHTTP(TestCase):
         books = handler.get_books_from_http('niv')
 
         # THEN: We should get back a valid service item
-        assert len(books) == 66, 'The bible should not have had any books added or removed'
+        self.assertEqual(len(books), 66, 'The bible should not have had any books added or removed')
 
-    def crosswalk_extract_verse_test(self):
+    def test_crosswalk_extract_verse(self):
         """
         Test Crosswalk retrieval of verse list for NIV bible John 3
         """
@@ -115,9 +121,10 @@ class TestBibleHTTP(TestCase):
         results = handler.get_bible_chapter('niv', 'john', 3)
 
         # THEN: We should get back a valid service item
-        assert len(results.verse_list) == 36, 'The book of John should not have had any verses added or removed'
+        self.assertEqual(len(results.verse_list), 36,
+                         'The book of John should not have had any verses added or removed')
 
-    def bibleserver_get_bibles_test(self):
+    def test_bibleserver_get_bibles(self):
         """
         Test getting list of bibles from BibleServer.com
         """
@@ -132,7 +139,7 @@ class TestBibleHTTP(TestCase):
         self.assertIn(('New Int. Readers Version', 'NIRV', 'en'), bibles)
         self.assertIn(('Священное Писание, Восточный перевод', 'CARS', 'ru'), bibles)
 
-    def biblegateway_get_bibles_test(self):
+    def test_biblegateway_get_bibles(self):
         """
         Test getting list of bibles from BibleGateway.com
         """
@@ -144,9 +151,9 @@ class TestBibleHTTP(TestCase):
 
         # THEN: The list should not be None, and some known bibles should be there
         self.assertIsNotNone(bibles)
-        self.assertIn(('Holman Christian Standard Bible', 'HCSB', 'en'), bibles)
+        self.assertIn(('Holman Christian Standard Bible (HCSB)', 'HCSB', 'en'), bibles)
 
-    def crosswalk_get_bibles_test(self):
+    def test_crosswalk_get_bibles(self):
         """
         Test getting list of bibles from Crosswalk.com
         """
@@ -159,3 +166,19 @@ class TestBibleHTTP(TestCase):
         # THEN: The list should not be None, and some known bibles should be there
         self.assertIsNotNone(bibles)
         self.assertIn(('Giovanni Diodati 1649 (Italian)', 'gdb', 'it'), bibles)
+
+    def test_crosswalk_get_verse_text(self):
+        """
+        Test verse text from Crosswalk.com
+        """
+        # GIVEN: A new Crosswalk extraction class
+        handler = CWExtract()
+
+        # WHEN: downloading NIV Genesis from Crosswalk
+        niv_genesis_chapter_one = handler.get_bible_chapter('niv', 'Genesis', 1)
+
+        # THEN: The verse list should contain the verses
+        self.assertTrue(niv_genesis_chapter_one.has_verse_list())
+        self.assertEquals('In the beginning God created the heavens and the earth.',
+                          niv_genesis_chapter_one.verse_list[1],
+                          'The first chapter of genesis should have been fetched.')

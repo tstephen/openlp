@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,11 +23,11 @@
 Package to test the openlp.core.ui.mainwindow package.
 """
 from unittest import TestCase
-
+from unittest.mock import MagicMock, patch
 
 from openlp.core.common import Registry
 from openlp.core.ui.mainwindow import MainWindow
-from tests.interfaces import MagicMock, patch
+
 from tests.helpers.testmixin import TestMixin
 
 
@@ -45,6 +45,7 @@ class TestMainWindow(TestCase, TestMixin):
         self.app.set_normal_cursor = MagicMock()
         self.app.args = []
         Registry().register('application', self.app)
+        Registry().set_flag('no_web_server', False)
         # Mock classes and methods used by mainwindow.
         with patch('openlp.core.ui.mainwindow.SettingsForm') as mocked_settings_form, \
                 patch('openlp.core.ui.mainwindow.ImageManager') as mocked_image_manager, \
@@ -56,7 +57,9 @@ class TestMainWindow(TestCase, TestMixin):
                 patch('openlp.core.ui.mainwindow.ServiceManager') as mocked_service_manager, \
                 patch('openlp.core.ui.mainwindow.ThemeManager') as mocked_theme_manager, \
                 patch('openlp.core.ui.mainwindow.ProjectorManager') as mocked_projector_manager, \
-                patch('openlp.core.ui.mainwindow.Renderer') as mocked_renderer:
+                patch('openlp.core.ui.mainwindow.Renderer') as mocked_renderer, \
+                patch('openlp.core.ui.mainwindow.websockets.WebSocketServer') as mocked_websocketserver, \
+                patch('openlp.core.ui.mainwindow.server.HttpServer') as mocked_httpserver:
             self.main_window = MainWindow()
 
     def tearDown(self):
@@ -65,7 +68,7 @@ class TestMainWindow(TestCase, TestMixin):
         """
         del self.main_window
 
-    def restore_current_media_manager_item_test(self):
+    def test_restore_current_media_manager_item(self):
         """
         Regression test for bug #1152509.
         """
@@ -80,7 +83,7 @@ class TestMainWindow(TestCase, TestMixin):
             # THEN: The current widget should have been set.
             self.main_window.media_tool_box.setCurrentIndex.assert_called_with(2)
 
-    def projector_manager_dock_locked_test(self):
+    def test_projector_manager_dock_locked(self):
         """
         Projector Manager enable UI options -  bug #1390702
         """
@@ -93,7 +96,7 @@ class TestMainWindow(TestCase, TestMixin):
         # THEN: Projector manager dock should have been called with disable UI features
         projector_dock.setFeatures.assert_called_with(0)
 
-    def projector_manager_dock_unlocked_test(self):
+    def test_projector_manager_dock_unlocked(self):
         """
         Projector Manager disable UI options -  bug #1390702
         """

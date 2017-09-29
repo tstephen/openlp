@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -37,7 +37,7 @@ class SongUsageDeleteForm(QtWidgets.QDialog, Ui_SongUsageDeleteDialog, RegistryP
         """
         self.manager = manager
         super(SongUsageDeleteForm, self).__init__(parent, QtCore.Qt.WindowSystemMenuHint |
-                                                  QtCore.Qt.WindowTitleHint)
+                                                  QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowCloseButtonHint)
         self.setupUi(self)
         self.button_box.clicked.connect(self.on_button_box_clicked)
 
@@ -53,9 +53,7 @@ class SongUsageDeleteForm(QtWidgets.QDialog, Ui_SongUsageDeleteDialog, RegistryP
                                                            'Delete Selected Song Usage Events?'),
                                                  translate('SongUsagePlugin.SongUsageDeleteForm',
                                                            'Are you sure you want to delete selected Song Usage data?'),
-                                                 QtWidgets.QMessageBox.StandardButtons(QtWidgets.QMessageBox.Yes |
-                                                                                       QtWidgets.QMessageBox.No),
-                                                 QtWidgets.QMessageBox.No)
+                                                 defaultButton=QtWidgets.QMessageBox.No)
             if ret == QtWidgets.QMessageBox.Yes:
                 delete_date = self.delete_calendar.selectedDate().toPyDate()
                 self.manager.delete_all_objects(SongUsageItem, SongUsageItem.usagedate <= delete_date)

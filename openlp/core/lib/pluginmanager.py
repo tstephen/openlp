@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,11 +23,9 @@
 Provide plugin management
 """
 import os
-import sys
-import imp
 
 from openlp.core.lib import Plugin, PluginStatus
-from openlp.core.common import AppLocation, RegistryProperties, OpenLPMixin, RegistryMixin
+from openlp.core.common import AppLocation, RegistryProperties, OpenLPMixin, RegistryMixin, extension_loader
 
 
 class PluginManager(RegistryMixin, OpenLPMixin, RegistryProperties):
@@ -42,8 +40,8 @@ class PluginManager(RegistryMixin, OpenLPMixin, RegistryProperties):
         """
         super(PluginManager, self).__init__(parent)
         self.log_info('Plugin manager Initialising')
-        self.base_path = os.path.abspath(AppLocation.get_directory(AppLocation.PluginsDir))
-        self.log_debug('Base path %s ' % self.base_path)
+        self.base_path = os.path.abspath(str(AppLocation.get_directory(AppLocation.PluginsDir)))
+        self.log_debug('Base path {path}'.format(path=self.base_path))
         self.plugins = []
         self.log_info('Plugin manager Initialised')
 
@@ -71,43 +69,21 @@ class PluginManager(RegistryMixin, OpenLPMixin, RegistryProperties):
         """
         Scan a directory for objects inheriting from the ``Plugin`` class.
         """
-        start_depth = len(os.path.abspath(self.base_path).split(os.sep))
-        present_plugin_dir = os.path.join(self.base_path, 'presentations')
-        self.log_debug('finding plugins in %s at depth %d' % (self.base_path, start_depth))
-        for root, dirs, files in os.walk(self.base_path):
-            for name in files:
-                if name.endswith('.py') and not name.startswith('__'):
-                    path = os.path.abspath(os.path.join(root, name))
-                    this_depth = len(path.split(os.sep))
-                    if this_depth - start_depth > 2:
-                        # skip anything lower down
-                        break
-                    module_name = name[:-3]
-                    # import the modules
-                    self.log_debug('Importing %s from %s. Depth %d' % (module_name, root, this_depth))
-                    try:
-                        # Use the "imp" library to try to get around a problem with the PyUNO library which
-                        # monkey-patches the __import__ function to do some magic. This causes issues with our tests.
-                        # First, try to find the module we want to import, searching the directory in root
-                        fp, path_name, description = imp.find_module(module_name, [root])
-                        # Then load the module (do the actual import) using the details from find_module()
-                        imp.load_module(module_name, fp, path_name, description)
-                    except ImportError as e:
-                        self.log_exception('Failed to import module %s on path %s: %s'
-                                           % (module_name, path, e.args[0]))
+        glob_pattern = os.path.join('plugins', '*', '*plugin.py')
+        extension_loader(glob_pattern)
         plugin_classes = Plugin.__subclasses__()
         plugin_objects = []
         for p in plugin_classes:
             try:
                 plugin = p()
-                self.log_debug('Loaded plugin %s' % str(p))
+                self.log_debug('Loaded plugin {plugin}'.format(plugin=str(p)))
                 plugin_objects.append(plugin)
             except TypeError:
-                self.log_exception('Failed to load plugin %s' % str(p))
+                self.log_exception('Failed to load plugin {plugin}'.format(plugin=str(p)))
         plugins_list = sorted(plugin_objects, key=lambda plugin: plugin.weight)
         for plugin in plugins_list:
             if plugin.check_pre_conditions():
-                self.log_debug('Plugin %s active' % str(plugin.name))
+                self.log_debug('Plugin {plugin} active'.format(plugin=str(plugin.name)))
                 plugin.set_status()
             else:
                 plugin.status = PluginStatus.Disabled
@@ -175,10 +151,11 @@ class PluginManager(RegistryMixin, OpenLPMixin, RegistryProperties):
         Loop through all the plugins and give them an opportunity to initialise themselves.
         """
         for plugin in self.plugins:
-            self.log_info('initialising plugins %s in a %s state' % (plugin.name, plugin.is_active()))
+            self.log_info('initialising plugins {plugin} in a {state} state'.format(plugin=plugin.name,
+                                                                                    state=plugin.is_active()))
             if plugin.is_active():
                 plugin.initialise()
-                self.log_info('Initialisation Complete for %s ' % plugin.name)
+                self.log_info('Initialisation Complete for {plugin}'.format(plugin=plugin.name))
 
     def finalise_plugins(self):
         """
@@ -187,7 +164,7 @@ class PluginManager(RegistryMixin, OpenLPMixin, RegistryProperties):
         for plugin in self.plugins:
             if plugin.is_active():
                 plugin.finalise()
-                self.log_info('Finalisation Complete for %s ' % plugin.name)
+                self.log_info('Finalisation Complete for {plugin}'.format(plugin=plugin.name))
 
     def get_plugin_by_name(self, name):
         """

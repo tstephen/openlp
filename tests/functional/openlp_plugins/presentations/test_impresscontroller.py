@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,18 +23,17 @@
 Functional tests to test the Impress class and related methods.
 """
 from unittest import TestCase
-import os
+from unittest.mock import MagicMock
 import shutil
 from tempfile import mkdtemp
 
-from tests.functional import patch, MagicMock
+from openlp.core.common import Settings
+from openlp.core.common.path import Path
+from openlp.plugins.presentations.lib.impresscontroller import ImpressController, ImpressDocument, TextType
+from openlp.plugins.presentations.presentationplugin import __default_settings__
+
 from tests.utils.constants import TEST_RESOURCES_PATH
 from tests.helpers.testmixin import TestMixin
-
-from openlp.core.common import Settings
-from openlp.plugins.presentations.lib.impresscontroller import \
-    ImpressController, ImpressDocument, TextType
-from openlp.plugins.presentations.presentationplugin import __default_settings__
 
 
 class TestImpressController(TestCase, TestMixin):
@@ -59,7 +58,7 @@ class TestImpressController(TestCase, TestMixin):
         self.destroy_settings()
         shutil.rmtree(self.temp_folder)
 
-    def constructor_test(self):
+    def test_constructor(self):
         """
         Test the Constructor from the ImpressController
         """
@@ -82,11 +81,11 @@ class TestImpressDocument(TestCase):
         mocked_plugin = MagicMock()
         mocked_plugin.settings_section = 'presentations'
         Settings().extend_default_settings(__default_settings__)
-        self.file_name = os.path.join(TEST_RESOURCES_PATH, 'presentations', 'test.pptx')
+        self.file_name = Path(TEST_RESOURCES_PATH, 'presentations', 'test.pptx')
         self.ppc = ImpressController(mocked_plugin)
         self.doc = ImpressDocument(self.ppc, self.file_name)
 
-    def create_titles_and_notes_test(self):
+    def test_create_titles_and_notes(self):
         """
         Test ImpressDocument.create_titles_and_notes
         """
@@ -114,7 +113,7 @@ class TestImpressDocument(TestCase):
         # two arrays of two elements
         self.doc.save_titles_and_notes.assert_called_once_with(['\n', '\n'], [' ', ' '])
 
-    def get_text_from_page_out_of_bound_test(self):
+    def test_get_text_from_page_out_of_bound(self):
         """
         Test ImpressDocument.__get_text_from_page with out-of-bounds index
         """
@@ -143,7 +142,7 @@ class TestImpressDocument(TestCase):
         self.assertEqual(self.doc.document.getDrawPages().getByIndex.call_count, 0,
                          'There should be no call to getByIndex')
 
-    def get_text_from_page_wrong_type_test(self):
+    def test_get_text_from_page_wrong_type(self):
         """
         Test ImpressDocument.__get_text_from_page with wrong TextType
         """
@@ -159,7 +158,7 @@ class TestImpressDocument(TestCase):
         self.assertEqual(self.doc.document.getDrawPages().getByIndex.call_count, 0,
                          'There should be no call to getByIndex')
 
-    def get_text_from_page_valid_params_test(self):
+    def test_get_text_from_page_valid_params(self):
         """
         Test ImpressDocument.__get_text_from_page with valid parameters
         """

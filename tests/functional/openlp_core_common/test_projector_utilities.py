@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,13 +23,12 @@
 Package to test the openlp.core.ui.projector.networkutils package.
 """
 
-import os
-
 from unittest import TestCase
 
 from openlp.core.common import verify_ip_address, md5_hash, qmd5_hash
 
 from tests.resources.projector.data import TEST_PIN, TEST_SALT, TEST_HASH
+
 salt = TEST_SALT
 pin = TEST_PIN
 test_hash = TEST_HASH
@@ -125,7 +124,7 @@ class testProjectorUtilities(TestCase):
         Test MD5 hash from salt+data pass (python)
         """
         # WHEN: Given a known salt+data
-        hash_ = md5_hash(salt=salt.encode('ascii'), data=pin.encode('ascii'))
+        hash_ = md5_hash(salt=salt.encode('utf-8'), data=pin.encode('utf-8'))
 
         # THEN: Validate return has is same
         self.assertEquals(hash_, test_hash, 'MD5 should have returned a good hash')
@@ -135,7 +134,7 @@ class testProjectorUtilities(TestCase):
         Test MD5 hash from salt+data fail (python)
         """
         # WHEN: Given a different salt+hash
-        hash_ = md5_hash(salt=pin.encode('ascii'), data=salt.encode('ascii'))
+        hash_ = md5_hash(salt=pin.encode('utf-8'), data=salt.encode('utf-8'))
 
         # THEN: return data is different
         self.assertNotEquals(hash_, test_hash, 'MD5 should have returned a bad hash')
@@ -145,20 +144,20 @@ class testProjectorUtilities(TestCase):
         Test MD5 hash from salt+data pass (Qt)
         """
         # WHEN: Given a known salt+data
-        hash_ = qmd5_hash(salt=salt.encode('ascii'), data=pin.encode('ascii'))
+        hash_ = qmd5_hash(salt=salt.encode('utf-8'), data=pin.encode('utf-8'))
 
         # THEN: Validate return has is same
-        self.assertEquals(hash_.decode('ascii'), test_hash, 'Qt-MD5 should have returned a good hash')
+        self.assertEquals(hash_, test_hash, 'Qt-MD5 should have returned a good hash')
 
     def test_qmd5_hash_bad(self):
         """
         Test MD5 hash from salt+hash fail (Qt)
         """
         # WHEN: Given a different salt+hash
-        hash_ = qmd5_hash(salt=pin.encode('ascii'), data=salt.encode('ascii'))
+        hash_ = qmd5_hash(salt=pin.encode('utf-8'), data=salt.encode('utf-8'))
 
         # THEN: return data is different
-        self.assertNotEquals(hash_.decode('ascii'), test_hash, 'Qt-MD5 should have returned a bad hash')
+        self.assertNotEquals(hash_, test_hash, 'Qt-MD5 should have returned a bad hash')
 
     def test_md5_non_ascii_string(self):
         """
@@ -175,7 +174,7 @@ class testProjectorUtilities(TestCase):
         Test MD5 hash with non-ascii string - bug 1417809
         """
         # WHEN: Non-ascii string is hashed
-        hash_ = md5_hash(salt=test_non_ascii_string.encode('utf-8'), data=None)
+        hash_ = md5_hash(data=test_non_ascii_string.encode('utf-8'))
 
         # THEN: Valid MD5 hash should be returned
         self.assertEqual(hash_, test_non_ascii_hash, 'Qt-MD5 should have returned a valid hash')

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,21 +23,86 @@
 """
 The :mod:`db` module provides the core database functionality for OpenLP
 """
+import json
 import logging
 import os
+from copy import copy
 from urllib.parse import quote_plus as urlquote
 
-from sqlalchemy import Table, MetaData, Column, types, create_engine
-from sqlalchemy.exc import SQLAlchemyError, InvalidRequestError, DBAPIError, OperationalError
+from sqlalchemy import Table, MetaData, Column, types, create_engine, UnicodeText
+from sqlalchemy.engine.url import make_url
+from sqlalchemy.exc import SQLAlchemyError, InvalidRequestError, DBAPIError, OperationalError, ProgrammingError
 from sqlalchemy.orm import scoped_session, sessionmaker, mapper
 from sqlalchemy.pool import NullPool
+
 from alembic.migration import MigrationContext
 from alembic.operations import Operations
 
-from openlp.core.common import AppLocation, Settings, translate, delete_file
+from openlp.core.common import AppLocation, Settings, delete_file, translate
+from openlp.core.common.json import OpenLPJsonDecoder, OpenLPJsonEncoder
 from openlp.core.lib.ui import critical_error_message_box
 
 log = logging.getLogger(__name__)
+
+
+def database_exists(url):
+    """Check if a database exists.
+
+    :param url: A SQLAlchemy engine URL.
+
+    Performs backend-specific testing to quickly determine if a database
+    exists on the server. ::
+
+        database_exists('postgres://postgres@localhost/name')  #=> False
+        create_database('postgres://postgres@localhost/name')
+        database_exists('postgres://postgres@localhost/name')  #=> True
+
+    Supports checking against a constructed URL as well. ::
+
+        engine = create_engine('postgres://postgres@localhost/name')
+        database_exists(engine.url)  #=> False
+        create_database(engine.url)
+        database_exists(engine.url)  #=> True
+
+    Borrowed from SQLAlchemy_Utils (v0.32.14 )since we only need this one function.
+    """
+
+    url = copy(make_url(url))
+    database = url.database
+    if url.drivername.startswith('postgresql'):
+        url.database = 'template1'
+    else:
+        url.database = None
+
+    engine = create_engine(url)
+
+    if engine.dialect.name == 'postgresql':
+        text = "SELECT 1 FROM pg_database WHERE datname='{db}'".format(db=database)
+        return bool(engine.execute(text).scalar())
+
+    elif engine.dialect.name == 'mysql':
+        text = ("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA "
+                "WHERE SCHEMA_NAME = '{db}'".format(db=database))
+        return bool(engine.execute(text).scalar())
+
+    elif engine.dialect.name == 'sqlite':
+        if database:
+            return database == ':memory:' or os.path.exists(database)
+        else:
+            # The default SQLAlchemy database is in memory,
+            # and :memory is not required, thus we should support that use-case
+            return True
+
+    else:
+        text = 'SELECT 1'
+        try:
+            url.database = database
+            engine = create_engine(url)
+            engine.execute(text)
+            return True
+
+        except (ProgrammingError, OperationalError):
+            return False
 
 
 def init_db(url, auto_flush=True, auto_commit=False, base=None):
@@ -68,9 +133,12 @@ def get_db_path(plugin_name, db_file_name=None):
     :return: The path to the database as type str
     """
     if db_file_name is None:
-        return 'sqlite:///%s/%s.sqlite' % (AppLocation.get_section_data_path(plugin_name), plugin_name)
+        return 'sqlite:///{path}/{plugin}.sqlite'.format(path=AppLocation.get_section_data_path(plugin_name),
+                                                         plugin=plugin_name)
+    elif os.path.isabs(db_file_name):
+        return 'sqlite:///{db_file_name}'.format(db_file_name=db_file_name)
     else:
-        return 'sqlite:///%s/%s' % (AppLocation.get_section_data_path(plugin_name), db_file_name)
+        return 'sqlite:///{path}/{name}'.format(path=AppLocation.get_section_data_path(plugin_name), name=db_file_name)
 
 
 def handle_db_error(plugin_name, db_file_name):
@@ -82,10 +150,10 @@ def handle_db_error(plugin_name, db_file_name):
     :return: None
     """
     db_path = get_db_path(plugin_name, db_file_name)
-    log.exception('Error loading database: %s', db_path)
+    log.exception('Error loading database: {db}'.format(db=db_path))
     critical_error_message_box(translate('OpenLP.Manager', 'Database Error'),
-                               translate('OpenLP.Manager', 'OpenLP cannot load your database.\n\nDatabase: %s')
-                               % db_path)
+                               translate('OpenLP.Manager',
+                                         'OpenLP cannot load your database.\n\nDatabase: {db}').format(db=db_path))
 
 
 def init_url(plugin_name, db_file_name=None):
@@ -101,10 +169,11 @@ def init_url(plugin_name, db_file_name=None):
     if db_type == 'sqlite':
         db_url = get_db_path(plugin_name, db_file_name)
     else:
-        db_url = '%s://%s:%s@%s/%s' % (db_type, urlquote(settings.value('db username')),
-                                       urlquote(settings.value('db password')),
-                                       urlquote(settings.value('db hostname')),
-                                       urlquote(settings.value('db database')))
+        db_url = '{type}://{user}:{password}@{host}/{db}'.format(type=db_type,
+                                                                 user=urlquote(settings.value('db username')),
+                                                                 password=urlquote(settings.value('db password')),
+                                                                 host=urlquote(settings.value('db hostname')),
+                                                                 db=urlquote(settings.value('db database')))
     settings.endGroup()
     return db_url
 
@@ -117,81 +186,6 @@ def get_upgrade_op(session):
     """
     context = MigrationContext.configure(session.bind.connect())
     return Operations(context)
-
-
-def upgrade_db(url, upgrade):
-    """
-    Upgrade a database.
-
-    :param url: The url of the database to upgrade.
-    :param upgrade: The python module that contains the upgrade instructions.
-    """
-    session, metadata = init_db(url)
-
-    class Metadata(BaseModel):
-        """
-        Provides a class for the metadata table.
-        """
-        pass
-
-    metadata_table = Table(
-        'metadata', metadata,
-        Column('key', types.Unicode(64), primary_key=True),
-        Column('value', types.UnicodeText(), default=None)
-    )
-    metadata_table.create(checkfirst=True)
-    mapper(Metadata, metadata_table)
-    version_meta = session.query(Metadata).get('version')
-    if version_meta is None:
-        # Tables have just been created - fill the version field with the most recent version
-        if session.query(Metadata).get('dbversion'):
-            version = 0
-        else:
-            version = upgrade.__version__
-        version_meta = Metadata.populate(key='version', value=version)
-        session.add(version_meta)
-        session.commit()
-    else:
-        version = int(version_meta.value)
-    if version > upgrade.__version__:
-        return version, upgrade.__version__
-    version += 1
-    try:
-        while hasattr(upgrade, 'upgrade_%d' % version):
-            log.debug('Running upgrade_%d', version)
-            try:
-                upgrade_func = getattr(upgrade, 'upgrade_%d' % version)
-                upgrade_func(session, metadata)
-                session.commit()
-                # Update the version number AFTER a commit so that we are sure the previous transaction happened
-                version_meta.value = str(version)
-                session.commit()
-                version += 1
-            except (SQLAlchemyError, DBAPIError):
-                log.exception('Could not run database upgrade script "upgrade_%s", upgrade process has been halted.',
-                              version)
-                break
-    except (SQLAlchemyError, DBAPIError):
-        version_meta = Metadata.populate(key='version', value=int(upgrade.__version__))
-        session.commit()
-    upgrade_version = upgrade.__version__
-    version_meta = int(version_meta.value)
-    session.close()
-    return version_meta, upgrade_version
-
-
-def delete_database(plugin_name, db_file_name=None):
-    """
-    Remove a database file from the system.
-
-    :param plugin_name: The name of the plugin to remove the database for
-    :param db_file_name: The database file name. Defaults to None resulting in the plugin_name being used.
-    """
-    if db_file_name:
-        db_file_path = os.path.join(AppLocation.get_section_data_path(plugin_name), db_file_name)
-    else:
-        db_file_path = os.path.join(AppLocation.get_section_data_path(plugin_name), plugin_name)
-    return delete_file(db_file_path)
 
 
 class BaseModel(object):
@@ -209,48 +203,179 @@ class BaseModel(object):
         return instance
 
 
+class PathType(types.TypeDecorator):
+    """
+    Create a PathType for storing Path objects with SQLAlchemy. Behind the scenes we convert the Path object to a JSON
+    representation and store it as a Unicode type
+    """
+    impl = types.UnicodeText
+
+    def coerce_compared_value(self, op, value):
+        """
+        Some times it make sense to compare a PathType with a string. In the case a string is used coerce the the
+        PathType to a UnicodeText type.
+
+        :param op: The operation being carried out. Not used, as we only care about the type that is being used with the
+            operation.
+        :param openlp.core.common.path.Path | str value: The value being used for the comparison. Most likely a Path
+            Object or str.
+        :return: The coerced value stored in the db
+        :rtype: PathType or UnicodeText
+        """
+        if isinstance(value, str):
+            return UnicodeText()
+        else:
+            return self
+
+    def process_bind_param(self, value, dialect):
+        """
+        Convert the Path object to a JSON representation
+
+        :param openlp.core.common.path.Path value: The value to convert
+        :param dialect: Not used
+        :return: The Path object as a JSON string
+        :rtype: str
+        """
+        data_path = AppLocation.get_data_path()
+        return json.dumps(value, cls=OpenLPJsonEncoder, base_path=data_path)
+
+    def process_result_value(self, value, dialect):
+        """
+        Convert the JSON representation back
+
+        :param types.UnicodeText value: The value to convert
+        :param dialect: Not used
+        :return: The JSON object converted Python object (in this case it should be a Path object)
+        :rtype: openlp.core.common.path.Path
+        """
+        data_path = AppLocation.get_data_path()
+        return json.loads(value, cls=OpenLPJsonDecoder, base_path=data_path)
+
+
+def upgrade_db(url, upgrade):
+    """
+    Upgrade a database.
+
+    :param url: The url of the database to upgrade.
+    :param upgrade: The python module that contains the upgrade instructions.
+    """
+    if not database_exists(url):
+        log.warning("Database {db} doesn't exist - skipping upgrade checks".format(db=url))
+        return (0, 0)
+
+    log.debug('Checking upgrades for DB {db}'.format(db=url))
+
+    session, metadata = init_db(url)
+
+    class Metadata(BaseModel):
+        """
+        Provides a class for the metadata table.
+        """
+        pass
+
+    metadata_table = Table(
+        'metadata', metadata,
+        Column('key', types.Unicode(64), primary_key=True),
+        Column('value', types.UnicodeText(), default=None)
+    )
+    metadata_table.create(checkfirst=True)
+    mapper(Metadata, metadata_table)
+    version_meta = session.query(Metadata).get('version')
+    if version_meta:
+        version = int(version_meta.value)
+    else:
+        # Due to issues with other checks, if the version is not set in the DB then default to 0
+        # and let the upgrade function handle the checks
+        version = 0
+        version_meta = Metadata.populate(key='version', value=version)
+        session.add(version_meta)
+        session.commit()
+    if version > upgrade.__version__:
+        session.remove()
+        return version, upgrade.__version__
+    version += 1
+    try:
+        while hasattr(upgrade, 'upgrade_{version:d}'.format(version=version)):
+            log.debug('Running upgrade_{version:d}'.format(version=version))
+            try:
+                upgrade_func = getattr(upgrade, 'upgrade_{version:d}'.format(version=version))
+                upgrade_func(session, metadata)
+                session.commit()
+                # Update the version number AFTER a commit so that we are sure the previous transaction happened
+                version_meta.value = str(version)
+                session.commit()
+                version += 1
+            except (SQLAlchemyError, DBAPIError):
+                log.exception('Could not run database upgrade script '
+                              '"upgrade_{version:d}", upgrade process has been halted.'.format(version=version))
+                break
+    except (SQLAlchemyError, DBAPIError):
+        version_meta = Metadata.populate(key='version', value=int(upgrade.__version__))
+        session.commit()
+    upgrade_version = upgrade.__version__
+    version = int(version_meta.value)
+    session.remove()
+    return version, upgrade_version
+
+
+def delete_database(plugin_name, db_file_name=None):
+    """
+    Remove a database file from the system.
+
+    :param plugin_name: The name of the plugin to remove the database for
+    :param db_file_name: The database file name. Defaults to None resulting in the plugin_name being used.
+    """
+    db_file_path = AppLocation.get_section_data_path(plugin_name)
+    if db_file_name:
+        db_file_path = db_file_path / db_file_name
+    else:
+        db_file_path = db_file_path / plugin_name
+    return delete_file(db_file_path)
+
+
 class Manager(object):
     """
     Provide generic object persistence management
     """
-    def __init__(self, plugin_name, init_schema, db_file_name=None, upgrade_mod=None, session=None):
+    def __init__(self, plugin_name, init_schema, db_file_path=None, upgrade_mod=None, session=None):
         """
         Runs the initialisation process that includes creating the connection to the database and the tables if they do
         not exist.
 
         :param plugin_name:  The name to setup paths and settings section names
         :param init_schema: The init_schema function for this database
-        :param db_file_name: The upgrade_schema function for this database
-        :param upgrade_mod: The file name to use for this database. Defaults to None resulting in the plugin_name
-        being used.
+        :param openlp.core.common.path.Path db_file_path: The file name to use for this database. Defaults to None
+            resulting in the plugin_name being used.
+        :param upgrade_mod: The upgrade_schema function for this database
         """
         self.is_dirty = False
         self.session = None
         self.db_url = None
-        if db_file_name:
+        if db_file_path:
             log.debug('Manager: Creating new DB url')
-            self.db_url = init_url(plugin_name, db_file_name)
+            self.db_url = init_url(plugin_name, str(db_file_path))
         else:
             self.db_url = init_url(plugin_name)
         if upgrade_mod:
             try:
                 db_ver, up_ver = upgrade_db(self.db_url, upgrade_mod)
             except (SQLAlchemyError, DBAPIError):
-                handle_db_error(plugin_name, db_file_name)
+                handle_db_error(plugin_name, str(db_file_path))
                 return
             if db_ver > up_ver:
                 critical_error_message_box(
                     translate('OpenLP.Manager', 'Database Error'),
                     translate('OpenLP.Manager', 'The database being loaded was created in a more recent version of '
-                              'OpenLP. The database is version %d, while OpenLP expects version %d. The database will '
-                              'not be loaded.\n\nDatabase: %s') % (db_ver, up_ver, self.db_url)
-                )
+                              'OpenLP. The database is version {db_ver}, while OpenLP expects version {db_up}. '
+                              'The database will not be loaded.\n\nDatabase: {db_name}').format(db_ver=db_ver,
+                                                                                                db_up=up_ver,
+                                                                                                db_name=self.db_url))
                 return
         if not session:
             try:
                 self.session = init_schema(self.db_url)
             except (SQLAlchemyError, DBAPIError):
-                handle_db_error(plugin_name, db_file_name)
+                handle_db_error(plugin_name, str(db_file_path))
         else:
             self.session = session
 
@@ -460,7 +585,7 @@ class Manager(object):
                     raise
             except InvalidRequestError:
                 self.session.rollback()
-                log.exception('Failed to delete %s records', object_class.__name__)
+                log.exception('Failed to delete {name} records'.format(name=object_class.__name__))
                 return False
             except:
                 self.session.rollback()

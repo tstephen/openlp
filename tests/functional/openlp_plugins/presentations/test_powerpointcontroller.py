@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -25,15 +25,15 @@ Functional tests to test the PowerPointController class and related methods.
 import os
 import shutil
 from unittest import TestCase
+from unittest.mock import patch, MagicMock
 from tempfile import mkdtemp
-
-from tests.functional import patch, MagicMock
-from tests.helpers.testmixin import TestMixin
-from tests.utils.constants import TEST_RESOURCES_PATH
 
 from openlp.plugins.presentations.lib.powerpointcontroller import PowerpointController, PowerpointDocument,\
     _get_text_from_shapes
 from openlp.core.common import is_win, Settings
+
+from tests.helpers.testmixin import TestMixin
+from tests.utils.constants import TEST_RESOURCES_PATH
 
 if is_win():
     import pywintypes
@@ -65,7 +65,7 @@ class TestPowerpointController(TestCase, TestMixin):
         self.destroy_settings()
         shutil.rmtree(self.temp_folder)
 
-    def constructor_test(self):
+    def test_constructor(self):
         """
         Test the Constructor from the PowerpointController
         """
@@ -120,7 +120,7 @@ class TestPowerpointDocument(TestCase, TestMixin):
         self.destroy_settings()
         shutil.rmtree(self.temp_folder)
 
-    def show_error_msg_test(self):
+    def test_show_error_msg(self):
         """
         Test the PowerpointDocument.show_error_msg() method gets called on com exception
         """
@@ -137,7 +137,7 @@ class TestPowerpointDocument(TestCase, TestMixin):
                 instance.goto_slide(42)
 
                 # THEN: mocked_critical_error_message_box should have been called
-                mocked_critical_error_message_box.assert_called_with('Error', 'An error occurred in the Powerpoint '
+                mocked_critical_error_message_box.assert_called_with('Error', 'An error occurred in the PowerPoint '
                                                                      'integration and the presentation will be stopped.'
                                                                      ' Restart the presentation if you wish to '
                                                                      'present it.')
@@ -160,7 +160,7 @@ class TestPowerpointDocument(TestCase, TestMixin):
         else:
             self.skipTest('Powerpoint not available, skipping test.')
 
-    def create_titles_and_notes_test(self):
+    def test_create_titles_and_notes(self):
         """
         Test creating the titles from PowerPoint
         """
@@ -183,7 +183,7 @@ class TestPowerpointDocument(TestCase, TestMixin):
         # THEN the save should have been called exactly once with 2 titles and 2 notes
         self.doc.save_titles_and_notes.assert_called_once_with(['SlideText\n', 'SlideText\n'], [' ', ' '])
 
-    def create_titles_and_notes_with_no_slides_test(self):
+    def test_create_titles_and_notes_with_no_slides(self):
         """
         Test creating the titles from PowerPoint when it returns no slides
         """
@@ -201,7 +201,7 @@ class TestPowerpointDocument(TestCase, TestMixin):
         # THEN the save should have been called exactly once with empty titles and notes
         doc.save_titles_and_notes.assert_called_once_with([], [])
 
-    def get_text_from_shapes_test(self):
+    def test_get_text_from_shapes(self):
         """
         Test getting text from powerpoint shapes
         """
@@ -218,7 +218,7 @@ class TestPowerpointDocument(TestCase, TestMixin):
         # THEN: it should return the text
         self.assertEqual(result, 'slideText\nslideText\n', 'result should match \'slideText\nslideText\n\'')
 
-    def get_text_from_shapes_with_no_shapes_test(self):
+    def test_get_text_from_shapes_with_no_shapes(self):
         """
         Test getting text from powerpoint shapes with no shapes
         """
@@ -231,7 +231,7 @@ class TestPowerpointDocument(TestCase, TestMixin):
         # THEN: it should not fail but return empty string
         self.assertEqual(result, '', 'result should be empty')
 
-    def goto_slide_test(self):
+    def test_goto_slide(self):
         """
         Test that goto_slide goes to next effect if the slide is already displayed
         """
@@ -251,7 +251,7 @@ class TestPowerpointDocument(TestCase, TestMixin):
         # THEN: next_step() should be call to try to advance to the next effect.
         self.assertTrue(doc.next_step.called, 'next_step() should have been called!')
 
-    def blank_screen_test(self):
+    def test_blank_screen(self):
         """
         Test that blank_screen works as expected
         """
@@ -271,7 +271,7 @@ class TestPowerpointDocument(TestCase, TestMixin):
         self.assertEquals(doc.blank_slide, 2, 'doc.blank_slide should be 2 because of the PowerPoint version')
         self.assertEquals(doc.blank_click, 3, 'doc.blank_click should be 3 because of the PowerPoint version')
 
-    def unblank_screen_test(self):
+    def test_unblank_screen(self):
         """
         Test that unblank_screen works as expected
         """

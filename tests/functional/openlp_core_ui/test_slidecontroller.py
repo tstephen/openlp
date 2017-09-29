@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -22,20 +22,20 @@
 """
 Package to test the openlp.core.ui.slidecontroller package.
 """
+from unittest import TestCase
+from unittest.mock import MagicMock, patch
+
 from PyQt5 import QtCore, QtGui
 
-from unittest import TestCase
 from openlp.core import Registry
-from openlp.core.lib import ServiceItemAction
+from openlp.core.lib import ImageSource, ServiceItemAction
 from openlp.core.ui import SlideController, LiveController, PreviewController
 from openlp.core.ui.slidecontroller import InfoLabel, WIDE_MENU, NON_TEXT_MENU
-
-from tests.functional import MagicMock, patch
 
 
 class TestSlideController(TestCase):
 
-    def initial_slide_controller_test(self):
+    def test_initial_slide_controller(self):
         """
         Test the initial slide controller state .
         """
@@ -46,7 +46,7 @@ class TestSlideController(TestCase):
         # THEN: The controller should not be a live controller.
         self.assertEqual(slide_controller.is_live, False, 'The base slide controller should not be a live controller')
 
-    def text_service_item_blank_test(self):
+    def test_text_service_item_blank(self):
         """
         Test that loading a text-based service item into the slide controller sets the correct blank menu
         """
@@ -65,7 +65,7 @@ class TestSlideController(TestCase):
         # THEN: the call to set the visible items on the toolbar should be correct
         toolbar.set_widget_visible.assert_called_with(WIDE_MENU, True)
 
-    def non_text_service_item_blank_test(self):
+    def test_non_text_service_item_blank(self):
         """
         Test that loading a non-text service item into the slide controller sets the correct blank menu
         """
@@ -85,7 +85,7 @@ class TestSlideController(TestCase):
         toolbar.set_widget_visible.assert_called_with(NON_TEXT_MENU, True)
 
     @patch('openlp.core.ui.slidecontroller.Settings')
-    def receive_spin_delay_test(self, MockedSettings):
+    def test_receive_spin_delay(self, MockedSettings):
         """
         Test that the spin box is updated accordingly after a call to receive_spin_delay()
         """
@@ -103,7 +103,7 @@ class TestSlideController(TestCase):
         mocked_value.assert_called_with('core/loop delay')
         mocked_delay_spin_box.setValue.assert_called_with(1)
 
-    def toggle_display_blank_test(self):
+    def test_toggle_display_blank(self):
         """
         Check that the toggle_display('blank') method calls the on_blank_display() method
         """
@@ -124,7 +124,7 @@ class TestSlideController(TestCase):
         self.assertEqual(0, mocked_on_theme_display.call_count, 'on_theme_display should not have been called')
         self.assertEqual(0, mocked_on_hide_display.call_count, 'on_hide_display should not have been called')
 
-    def toggle_display_hide_test(self):
+    def test_toggle_display_hide(self):
         """
         Check that the toggle_display('hide') method calls the on_blank_display() method
         """
@@ -145,7 +145,7 @@ class TestSlideController(TestCase):
         self.assertEqual(0, mocked_on_theme_display.call_count, 'on_theme_display should not have been called')
         self.assertEqual(0, mocked_on_hide_display.call_count, 'on_hide_display should not have been called')
 
-    def toggle_display_theme_test(self):
+    def test_toggle_display_theme(self):
         """
         Check that the toggle_display('theme') method calls the on_theme_display() method
         """
@@ -166,7 +166,7 @@ class TestSlideController(TestCase):
         self.assertEqual(0, mocked_on_blank_display.call_count, 'on_blank_display should not have been called')
         self.assertEqual(0, mocked_on_hide_display.call_count, 'on_hide_display should not have been called')
 
-    def toggle_display_desktop_test(self):
+    def test_toggle_display_desktop(self):
         """
         Check that the toggle_display('desktop') method calls the on_hide_display() method
         """
@@ -187,7 +187,7 @@ class TestSlideController(TestCase):
         self.assertEqual(0, mocked_on_blank_display.call_count, 'on_blank_display should not have been called')
         self.assertEqual(0, mocked_on_theme_display.call_count, 'on_theme_display should not have been called')
 
-    def toggle_display_show_test(self):
+    def test_toggle_display_show(self):
         """
         Check that the toggle_display('show') method calls all the on_X_display() methods
         """
@@ -208,30 +208,7 @@ class TestSlideController(TestCase):
         mocked_on_theme_display.assert_called_once_with(False)
         mocked_on_hide_display.assert_called_once_with(False)
 
-    def live_escape_test(self):
-        """
-        Test that when the live_escape() method is called, the display is set to invisible and any media is stopped
-        """
-        # GIVEN: A new SlideController instance and mocked out display and media_controller
-        mocked_display = MagicMock()
-        mocked_media_controller = MagicMock()
-        Registry.create()
-        Registry().register('media_controller', mocked_media_controller)
-        slide_controller = SlideController(None)
-        slide_controller.display = mocked_display
-        play_slides = MagicMock()
-        play_slides.isChecked.return_value = False
-        slide_controller.play_slides_loop = play_slides
-        slide_controller.play_slides_once = play_slides
-
-        # WHEN: live_escape() is called
-        slide_controller.live_escape()
-
-        # THEN: the display should be set to invisible and the media controller stopped
-        mocked_display.setVisible.assert_called_once_with(False)
-        mocked_media_controller.media_stop.assert_called_once_with(slide_controller)
-
-    def on_go_live_live_controller_test(self):
+    def test_on_go_live_live_controller(self):
         """
         Test that when the on_go_live() method is called the message is sent to the live controller and focus is
         set correctly.
@@ -243,7 +220,7 @@ class TestSlideController(TestCase):
         mocked_service_item = MagicMock()
         mocked_service_item.from_service = False
         mocked_preview_widget.current_slide_number.return_value = 1
-        mocked_preview_widget.slide_count.return_value = 2
+        mocked_preview_widget.slide_count = MagicMock(return_value=2)
         mocked_live_controller.preview_widget = MagicMock()
         Registry.create()
         Registry().register('live_controller', mocked_live_controller)
@@ -259,7 +236,7 @@ class TestSlideController(TestCase):
         mocked_live_controller.add_service_manager_item.assert_called_once_with(mocked_service_item, 1)
         mocked_live_controller.preview_widget.setFocus.assert_called_once_with()
 
-    def on_go_live_service_manager_test(self):
+    def test_on_go_live_service_manager(self):
         """
         Test that when the on_go_live() method is called the message is sent to the live controller and focus is
         set correctly.
@@ -273,7 +250,7 @@ class TestSlideController(TestCase):
         mocked_service_item.from_service = True
         mocked_service_item.unique_identifier = 42
         mocked_preview_widget.current_slide_number.return_value = 1
-        mocked_preview_widget.slide_count.return_value = 2
+        mocked_preview_widget.slide_count = MagicMock(return_value=2)
         mocked_live_controller.preview_widget = MagicMock()
         Registry.create()
         Registry().register('live_controller', mocked_live_controller)
@@ -290,7 +267,7 @@ class TestSlideController(TestCase):
         mocked_service_manager.preview_live.assert_called_once_with(42, 1)
         mocked_live_controller.preview_widget.setFocus.assert_called_once_with()
 
-    def service_previous_test(self):
+    def test_service_previous(self):
         """
         Check that calling the service_previous() method adds the previous key to the queue and processes the queue
         """
@@ -308,7 +285,7 @@ class TestSlideController(TestCase):
         mocked_keypress_queue.append.assert_called_once_with(ServiceItemAction.Previous)
         mocked_process_queue.assert_called_once_with()
 
-    def service_next_test(self):
+    def test_service_next(self):
         """
         Check that calling the service_next() method adds the next key to the queue and processes the queue
         """
@@ -327,7 +304,7 @@ class TestSlideController(TestCase):
         mocked_process_queue.assert_called_once_with()
 
     @patch('openlp.core.ui.slidecontroller.Settings')
-    def update_slide_limits_test(self, MockedSettings):
+    def test_update_slide_limits(self, MockedSettings):
         """
         Test that calling the update_slide_limits() method updates the slide limits
         """
@@ -346,7 +323,7 @@ class TestSlideController(TestCase):
         mocked_value.assert_called_once_with('advanced/slide limits')
         self.assertEqual(10, slide_controller.slide_limits, 'Slide limits should have been updated to 10')
 
-    def enable_tool_bar_live_test(self):
+    def test_enable_tool_bar_live(self):
         """
         Check that when enable_tool_bar on a live slide controller is called, enable_live_tool_bar is called
         """
@@ -366,7 +343,7 @@ class TestSlideController(TestCase):
         mocked_enable_live_tool_bar.assert_called_once_with(mocked_service_item)
         self.assertEqual(0, mocked_enable_preview_tool_bar.call_count, 'The preview method should not have been called')
 
-    def enable_tool_bar_preview_test(self):
+    def test_enable_tool_bar_preview(self):
         """
         Check that when enable_tool_bar on a preview slide controller is called, enable_preview_tool_bar is called
         """
@@ -386,7 +363,7 @@ class TestSlideController(TestCase):
         mocked_enable_preview_tool_bar.assert_called_once_with(mocked_service_item)
         self.assertEqual(0, mocked_enable_live_tool_bar.call_count, 'The live method should not have been called')
 
-    def refresh_service_item_text_test(self):
+    def test_refresh_service_item_text(self):
         """
         Test that the refresh_service_item() method refreshes a text service item
         """
@@ -409,7 +386,7 @@ class TestSlideController(TestCase):
         mocked_service_item.render.assert_called_once_with()
         mocked_process_item.assert_called_once_with(mocked_service_item, 5)
 
-    def refresh_service_item_image_test(self):
+    def test_refresh_service_item_image(self):
         """
         Test that the refresh_service_item() method refreshes a image service item
         """
@@ -432,7 +409,7 @@ class TestSlideController(TestCase):
         mocked_service_item.render.assert_called_once_with()
         mocked_process_item.assert_called_once_with(mocked_service_item, 5)
 
-    def refresh_service_item_not_image_or_text_test(self):
+    def test_refresh_service_item_not_image_or_text(self):
         """
         Test that the refresh_service_item() method does not refresh a service item if it's neither text or an image
         """
@@ -456,7 +433,7 @@ class TestSlideController(TestCase):
         self.assertEqual(0, mocked_process_item.call_count,
                          'The mocked_process_item() method should not have been called')
 
-    def add_service_item_with_song_edit_test(self):
+    def test_add_service_item_with_song_edit(self):
         """
         Test the add_service_item() method when song_edit is True
         """
@@ -476,7 +453,7 @@ class TestSlideController(TestCase):
         self.assertFalse(slide_controller.song_edit, 'song_edit should be False')
         mocked_process_item.assert_called_once_with(mocked_item, 2)
 
-    def add_service_item_without_song_edit_test(self):
+    def test_add_service_item_without_song_edit(self):
         """
         Test the add_service_item() method when song_edit is False
         """
@@ -496,7 +473,7 @@ class TestSlideController(TestCase):
         self.assertFalse(slide_controller.song_edit, 'song_edit should be False')
         mocked_process_item.assert_called_once_with(mocked_item, 0)
 
-    def replace_service_manager_item_different_items_test(self):
+    def test_replace_service_manager_item_different_items(self):
         """
         Test that when the service items are not the same, nothing happens
         """
@@ -517,7 +494,7 @@ class TestSlideController(TestCase):
         self.assertEqual(0, mocked_preview_widget.current_slide_number.call_count,
                          'The preview_widgetcurrent_slide_number.() method should not have been called')
 
-    def replace_service_manager_item_same_item_test(self):
+    def test_replace_service_manager_item_same_item(self):
         """
         Test that when the service item is the same, the service item is reprocessed
         """
@@ -538,7 +515,7 @@ class TestSlideController(TestCase):
         mocked_preview_widget.current_slide_number.assert_called_with()
         mocked_process_item.assert_called_once_with(mocked_item, 7)
 
-    def on_slide_blank_test(self):
+    def test_on_slide_blank(self):
         """
         Test on_slide_blank
         """
@@ -552,7 +529,7 @@ class TestSlideController(TestCase):
         # THEN: on_blank_display should have been called with True
         slide_controller.on_blank_display.assert_called_once_with(True)
 
-    def on_slide_unblank_test(self):
+    def test_on_slide_unblank(self):
         """
         Test on_slide_unblank
         """
@@ -566,7 +543,7 @@ class TestSlideController(TestCase):
         # THEN: on_blank_display should have been called with False
         slide_controller.on_blank_display.assert_called_once_with(False)
 
-    def on_slide_selected_index_no_service_item_test(self):
+    def test_on_slide_selected_index_no_service_item(self):
         """
         Test that when there is no service item, the on_slide_selected_index() method returns immediately
         """
@@ -582,7 +559,7 @@ class TestSlideController(TestCase):
         self.assertEqual(0, mocked_item.is_command.call_count, 'The service item should have not been called')
 
     @patch.object(Registry, 'execute')
-    def on_slide_selected_index_service_item_command_test(self, mocked_execute):
+    def test_on_slide_selected_index_service_item_command(self, mocked_execute):
         """
         Test that when there is a command service item, the command is executed
         """
@@ -612,7 +589,7 @@ class TestSlideController(TestCase):
         self.assertEqual(0, mocked_slide_selected.call_count, 'slide_selected should not have been called')
 
     @patch.object(Registry, 'execute')
-    def on_slide_selected_index_service_item_not_command_test(self, mocked_execute):
+    def test_on_slide_selected_index_service_item_not_command(self, mocked_execute):
         """
         Test that when there is a service item but it's not a command, the preview widget is updated
         """
@@ -641,7 +618,7 @@ class TestSlideController(TestCase):
         mocked_slide_selected.assert_called_once_with()
 
     @patch.object(Registry, 'execute')
-    def process_item_test(self, mocked_execute):
+    def test_process_item(self, mocked_execute):
         """
         Test that presentation service-items is closed when followed by a media service-item
         """
@@ -681,11 +658,11 @@ class TestSlideController(TestCase):
         slide_controller._process_item(mocked_media_item, 0)
 
         # THEN: Registry.execute should have been called to stop the presentation
-        self.assertEqual(3, mocked_execute.call_count, 'Execute should have been called 3 times')
+        self.assertEqual(2, mocked_execute.call_count, 'Execute should have been called 2 times')
         self.assertEqual('mocked_presentation_item_stop', mocked_execute.call_args_list[1][0][0],
                          'The presentation should have been stopped.')
 
-    def live_stolen_focus_shortcuts_test(self):
+    def test_live_stolen_focus_shortcuts(self):
         """
         Test that all the needed shortcuts are available in scenarios where Live has stolen focus.
         These are found under def __add_actions_to_widget(self, widget): in slidecontroller.py
@@ -697,7 +674,7 @@ class TestSlideController(TestCase):
         slide_controller.next_item = MagicMock()
         slide_controller.previous_service = MagicMock()
         slide_controller.next_service = MagicMock()
-        slide_controller.escape_item = MagicMock()
+        slide_controller.desktop_screen_enable = MagicMock()
         slide_controller.desktop_screen = MagicMock()
         slide_controller.blank_screen = MagicMock()
         slide_controller.theme_screen = MagicMock()
@@ -709,14 +686,229 @@ class TestSlideController(TestCase):
         mocked_widget.addActions.assert_called_with([
             slide_controller.previous_item, slide_controller.next_item,
             slide_controller.previous_service, slide_controller.next_service,
-            slide_controller.escape_item, slide_controller.desktop_screen,
+            slide_controller.desktop_screen_enable, slide_controller.desktop_screen,
             slide_controller.theme_screen, slide_controller.blank_screen
         ])
+
+    @patch('openlp.core.ui.slidecontroller.Settings')
+    def on_preview_double_click_unblank_display_test(self, MockedSettings):
+        # GIVEN: A slide controller, actions needed, settins set to True.
+        slide_controller = SlideController(None)
+        mocked_settings = MagicMock()
+        mocked_settings.return_value = True
+        MockedSettings.return_value = mocked_settings
+        slide_controller.service_item = MagicMock()
+        slide_controller.service_item.is_media = MagicMock()
+        slide_controller.on_media_close = MagicMock()
+        slide_controller.on_go_live = MagicMock()
+        slide_controller.on_preview_add_to_service = MagicMock()
+        slide_controller.media_reset = MagicMock()
+        Registry.create()
+        Registry().set_flag('has doubleclick added item to service', True)
+
+        # WHEN: on_preview_double_click is called
+        slide_controller.on_preview_double_click()
+
+        # THEN: The call to addActions should be correct
+        self.assertEqual(1, slide_controller.on_go_live.call_count, 'on_go_live should have been called once.')
+        self.assertEqual(0, slide_controller.on_preview_add_to_service.call_count, 'Should have not been called.')
+
+    @patch('openlp.core.ui.slidecontroller.Settings')
+    def on_preview_double_click_add_to_service_test(self, MockedSettings):
+        # GIVEN: A slide controller, actions needed, settins set to False.
+        slide_controller = SlideController(None)
+        mocked_settings = MagicMock()
+        mocked_settings.value.return_value = False
+        MockedSettings.return_value = mocked_settings
+        slide_controller.service_item = MagicMock()
+        slide_controller.service_item.is_media = MagicMock()
+        slide_controller.on_media_close = MagicMock()
+        slide_controller.on_go_live = MagicMock()
+        slide_controller.on_preview_add_to_service = MagicMock()
+        slide_controller.media_reset = MagicMock()
+        Registry.create()
+        Registry().set_flag('has doubleclick added item to service', False)
+
+        # WHEN: on_preview_double_click is called
+        slide_controller.on_preview_double_click()
+
+        # THEN: The call to addActions should be correct
+        self.assertEqual(0, slide_controller.on_go_live.call_count, 'on_go_live Should have not been called.')
+        self.assertEqual(1, slide_controller.on_preview_add_to_service.call_count, 'Should have been called once.')
+
+    @patch(u'openlp.core.ui.slidecontroller.SlideController.image_manager')
+    @patch(u'PyQt5.QtCore.QTimer.singleShot')
+    def test_update_preview_live(self, mocked_singleShot, mocked_image_manager):
+        """
+        Test that the preview screen is updated with a screen grab for live service items
+        """
+        # GIVEN: A mocked live service item, a mocked image_manager, a mocked Registry,
+        #        and a slide controller with many mocks.
+        # Mocked Live Item
+        mocked_live_item = MagicMock()
+        mocked_live_item.get_rendered_frame.return_value = ''
+        mocked_live_item.is_capable = MagicMock()
+        mocked_live_item.is_capable.side_effect = [True, True]
+        # Mock image_manager
+        mocked_image_manager.get_image.return_value = QtGui.QImage()
+        # Mock Registry
+        Registry.create()
+        mocked_main_window = MagicMock()
+        Registry().register('main_window', mocked_main_window)
+        # Mock SlideController
+        slide_controller = SlideController(None)
+        slide_controller.service_item = mocked_live_item
+        slide_controller.is_live = True
+        slide_controller.log_debug = MagicMock()
+        slide_controller.selected_row = MagicMock()
+        slide_controller.screens = MagicMock()
+        slide_controller.screens.current = {'primary': ''}
+        slide_controller.display = MagicMock()
+        slide_controller.display.preview.return_value = QtGui.QImage()
+        slide_controller.grab_maindisplay = MagicMock()
+        slide_controller.slide_preview = MagicMock()
+        slide_controller.slide_count = 0
+
+        # WHEN: update_preview is called
+        slide_controller.update_preview()
+
+        # THEN: A screen_grab should have been called
+        self.assertEqual(0, slide_controller.slide_preview.setPixmap.call_count, 'setPixmap should not be called')
+        self.assertEqual(0, slide_controller.display.preview.call_count, 'display.preview() should not be called')
+        self.assertEqual(2, mocked_singleShot.call_count,
+                         'Timer to grab_maindisplay should have been called 2 times')
+        self.assertEqual(0, mocked_image_manager.get_image.call_count, 'image_manager not be called')
+
+    @patch(u'openlp.core.ui.slidecontroller.SlideController.image_manager')
+    @patch(u'PyQt5.QtCore.QTimer.singleShot')
+    def test_update_preview_pres(self, mocked_singleShot, mocked_image_manager):
+        """
+        Test that the preview screen is updated with the correct preview for presentation service items
+        """
+        # GIVEN: A mocked presentation service item, a mocked image_manager, a mocked Registry,
+        #        and a slide controller with many mocks.
+        # Mocked Presentation Item
+        mocked_pres_item = MagicMock()
+        mocked_pres_item.get_rendered_frame.return_value = ''
+        mocked_pres_item.is_capable = MagicMock()
+        mocked_pres_item.is_capable.side_effect = [True, True]
+        # Mock image_manager
+        mocked_image_manager.get_image.return_value = QtGui.QImage()
+        # Mock Registry
+        Registry.create()
+        mocked_main_window = MagicMock()
+        Registry().register('main_window', mocked_main_window)
+        # Mock SlideController
+        slide_controller = SlideController(None)
+        slide_controller.service_item = mocked_pres_item
+        slide_controller.is_live = False
+        slide_controller.log_debug = MagicMock()
+        slide_controller.selected_row = MagicMock()
+        slide_controller.screens = MagicMock()
+        slide_controller.screens.current = {'primary': ''}
+        slide_controller.display = MagicMock()
+        slide_controller.display.preview.return_value = QtGui.QImage()
+        slide_controller.grab_maindisplay = MagicMock()
+        slide_controller.slide_preview = MagicMock()
+        slide_controller.slide_count = 0
+
+        # WHEN: update_preview is called
+        slide_controller.update_preview()
+
+        # THEN: setPixmap and the image_manager should have been called
+        self.assertEqual(1, slide_controller.slide_preview.setPixmap.call_count, 'setPixmap should be called')
+        self.assertEqual(0, slide_controller.display.preview.call_count, 'display.preview() should not be called')
+        self.assertEqual(0, mocked_singleShot.call_count, 'Timer to grab_maindisplay should not be called')
+        self.assertEqual(1, mocked_image_manager.get_image.call_count, 'image_manager should be called')
+
+    @patch(u'openlp.core.ui.slidecontroller.SlideController.image_manager')
+    @patch(u'PyQt5.QtCore.QTimer.singleShot')
+    def test_update_preview_media(self, mocked_singleShot, mocked_image_manager):
+        """
+        Test that the preview screen is updated with the correct preview for media service items
+        """
+        # GIVEN: A mocked media service item, a mocked image_manager, a mocked Registry,
+        #        and a slide controller with many mocks.
+        # Mocked Media Item
+        mocked_media_item = MagicMock()
+        mocked_media_item.get_rendered_frame.return_value = ''
+        mocked_media_item.is_capable = MagicMock()
+        mocked_media_item.is_capable.side_effect = [True, False]
+        # Mock image_manager
+        mocked_image_manager.get_image.return_value = QtGui.QImage()
+        # Mock Registry
+        Registry.create()
+        mocked_main_window = MagicMock()
+        Registry().register('main_window', mocked_main_window)
+        # Mock SlideController
+        slide_controller = SlideController(None)
+        slide_controller.service_item = mocked_media_item
+        slide_controller.is_live = False
+        slide_controller.log_debug = MagicMock()
+        slide_controller.selected_row = MagicMock()
+        slide_controller.screens = MagicMock()
+        slide_controller.screens.current = {'primary': ''}
+        slide_controller.display = MagicMock()
+        slide_controller.display.preview.return_value = QtGui.QImage()
+        slide_controller.grab_maindisplay = MagicMock()
+        slide_controller.slide_preview = MagicMock()
+        slide_controller.slide_count = 0
+
+        # WHEN: update_preview is called
+        slide_controller.update_preview()
+
+        # THEN: setPixmap should have been called
+        self.assertEqual(1, slide_controller.slide_preview.setPixmap.call_count, 'setPixmap should be called')
+        self.assertEqual(0, slide_controller.display.preview.call_count, 'display.preview() should not be called')
+        self.assertEqual(0, mocked_singleShot.call_count, 'Timer to grab_maindisplay should not be called')
+        self.assertEqual(0, mocked_image_manager.get_image.call_count, 'image_manager should not be called')
+
+    @patch(u'openlp.core.ui.slidecontroller.SlideController.image_manager')
+    @patch(u'PyQt5.QtCore.QTimer.singleShot')
+    def test_update_preview_image(self, mocked_singleShot, mocked_image_manager):
+        """
+        Test that the preview screen is updated with the correct preview for image service items
+        """
+        # GIVEN: A mocked image service item, a mocked image_manager, a mocked Registry,
+        #        and a slide controller with many mocks.
+        # Mocked Image Item
+        mocked_img_item = MagicMock()
+        mocked_img_item.get_rendered_frame.return_value = ''
+        mocked_img_item.is_capable = MagicMock()
+        mocked_img_item.is_capable.side_effect = [False, True]
+        # Mock image_manager
+        mocked_image_manager.get_image.return_value = QtGui.QImage()
+        # Mock Registry
+        Registry.create()
+        mocked_main_window = MagicMock()
+        Registry().register('main_window', mocked_main_window)
+        # Mock SlideController
+        slide_controller = SlideController(None)
+        slide_controller.service_item = mocked_img_item
+        slide_controller.is_live = False
+        slide_controller.log_debug = MagicMock()
+        slide_controller.selected_row = MagicMock()
+        slide_controller.screens = MagicMock()
+        slide_controller.screens.current = {'primary': ''}
+        slide_controller.display = MagicMock()
+        slide_controller.display.preview.return_value = QtGui.QImage()
+        slide_controller.grab_maindisplay = MagicMock()
+        slide_controller.slide_preview = MagicMock()
+        slide_controller.slide_count = 0
+
+        # WHEN: update_preview is called
+        slide_controller.update_preview()
+
+        # THEN: setPixmap and display.preview should have been called
+        self.assertEqual(1, slide_controller.slide_preview.setPixmap.call_count, 'setPixmap should be called')
+        self.assertEqual(1, slide_controller.display.preview.call_count, 'display.preview() should be called')
+        self.assertEqual(0, mocked_singleShot.call_count, 'Timer to grab_maindisplay should not be called')
+        self.assertEqual(0, mocked_image_manager.get_image.call_count, 'image_manager should not be called')
 
 
 class TestInfoLabel(TestCase):
 
-    def paint_event_text_fits_test(self):
+    def test_paint_event_text_fits(self):
         """
         Test the paintEvent method when text fits the label
         """
@@ -744,7 +936,7 @@ class TestInfoLabel(TestCase):
             # THEN: The text should be drawn centered with the complete test_string
             mocked_qpainter().drawText.assert_called_once_with(mocked_rect(), QtCore.Qt.AlignCenter, test_string)
 
-    def paint_event_text_doesnt_fit_test(self):
+    def test_paint_event_text_doesnt_fit(self):
         """
         Test the paintEvent method when text fits the label
         """
@@ -775,7 +967,7 @@ class TestInfoLabel(TestCase):
             mocked_qpainter().drawText.assert_called_once_with(mocked_rect(), QtCore.Qt.AlignLeft, elided_test_string)
 
     @patch('builtins.super')
-    def set_text_test(self, mocked_super):
+    def test_set_text(self, mocked_super):
         """
         Test the reimplemented setText method
         """
@@ -794,7 +986,7 @@ class TestInfoLabel(TestCase):
 
 class TestLiveController(TestCase):
 
-    def initial_live_controller_test(self):
+    def test_initial_live_controller(self):
         """
         Test the initial live slide controller state .
         """
@@ -809,7 +1001,7 @@ class TestLiveController(TestCase):
 
 class TestPreviewLiveController(TestCase):
 
-    def initial_preview_controller_test(self):
+    def test_initial_preview_controller(self):
         """
         Test the initial preview slide controller state.
         """

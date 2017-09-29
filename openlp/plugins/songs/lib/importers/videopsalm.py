@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -26,8 +26,9 @@ exproted from Lyrix."""
 import logging
 import json
 import os
+import re
 
-from openlp.core.common import translate
+from openlp.core.common import translate, Settings
 from openlp.plugins.songs.lib.importers.songimport import SongImport
 from openlp.plugins.songs.lib.db import AuthorType
 
@@ -65,14 +66,22 @@ class VideoPsalmImport(SongImport):
                 if c == '\n':
                     if inside_quotes:
                         processed_content += '\\n'
-                # Put keys in quotes
-                elif c.isalnum() and not inside_quotes:
+                # Put keys in quotes. The '-' is for handling nagative numbers
+                elif (c.isalnum() or c == '-') and not inside_quotes:
                     processed_content += '"' + c
                     c = next(file_content_it)
                     while c.isalnum():
                         processed_content += c
                         c = next(file_content_it)
                     processed_content += '"' + c
+                # Remove control characters
+                elif (c < chr(32)):
+                    processed_content += ' '
+                # Handle escaped characters
+                elif c == '\\':
+                    processed_content += c
+                    c = next(file_content_it)
+                    processed_content += c
                 else:
                     processed_content += c
             songbook = json.loads(processed_content.strip())
@@ -113,10 +122,14 @@ class VideoPsalmImport(SongImport):
                 if 'Memo3' in song:
                     self.add_comment(song['Memo3'])
                 for verse in song['Verses']:
-                    self.add_verse(verse['Text'], 'v')
+                    if 'Text' not in verse:
+                        continue
+                    verse_text = verse['Text']
+                    # Strip out chords if set up to
+                    if not Settings().value('songs/enable chords') or Settings().value('songs/disable chords import'):
+                        verse_text = re.sub(r'\[.*?\]', '', verse_text)
+                    self.add_verse(verse_text, 'v')
                 if not self.finish():
-                    self.log_error('Could not import %s' % self.title)
+                    self.log_error('Could not import {title}'.format(title=self.title))
         except Exception as e:
-            self.log_error(translate('SongsPlugin.VideoPsalmImport', 'File %s' % file.name),
-                           translate('SongsPlugin.VideoPsalmImport', 'Error: %s') % e)
-        song_file.close()
+            self.log_error(song_file.name, translate('SongsPlugin.VideoPsalmImport', 'Error: {error}').format(error=e))

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -30,8 +30,6 @@ log = logging.getLogger(__name__)
 log.debug('editform loaded')
 
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtCore import pyqtSlot, pyqtSignal
-from PyQt5.QtWidgets import QDialog, QPlainTextEdit, QLineEdit, QDialogButtonBox, QLabel, QGridLayout
 
 from openlp.core.common import translate, verify_ip_address
 from openlp.core.lib import build_icon
@@ -49,60 +47,60 @@ class Ui_ProjectorEditForm(object):
         Create the interface layout.
         """
         edit_projector_dialog.setObjectName('edit_projector_dialog')
-        edit_projector_dialog.setWindowIcon(build_icon(u':/icon/openlp-logo-32x32.png'))
+        edit_projector_dialog.setWindowIcon(build_icon(':/icon/openlp-logo.svg'))
         edit_projector_dialog.setMinimumWidth(400)
         edit_projector_dialog.setModal(True)
         # Define the basic layout
-        self.dialog_layout = QGridLayout(edit_projector_dialog)
+        self.dialog_layout = QtWidgets.QGridLayout(edit_projector_dialog)
         self.dialog_layout.setObjectName('dialog_layout')
         self.dialog_layout.setSpacing(8)
         self.dialog_layout.setContentsMargins(8, 8, 8, 8)
         # IP Address
-        self.ip_label = QLabel(edit_projector_dialog)
+        self.ip_label = QtWidgets.QLabel(edit_projector_dialog)
         self.ip_label.setObjectName('projector_edit_ip_label')
-        self.ip_text = QLineEdit(edit_projector_dialog)
+        self.ip_text = QtWidgets.QLineEdit(edit_projector_dialog)
         self.ip_text.setObjectName('projector_edit_ip_text')
         self.dialog_layout.addWidget(self.ip_label, 0, 0)
         self.dialog_layout.addWidget(self.ip_text, 0, 1)
         # Port number
-        self.port_label = QLabel(edit_projector_dialog)
+        self.port_label = QtWidgets.QLabel(edit_projector_dialog)
         self.port_label.setObjectName('projector_edit_ip_label')
-        self.port_text = QLineEdit(edit_projector_dialog)
+        self.port_text = QtWidgets.QLineEdit(edit_projector_dialog)
         self.port_text.setObjectName('projector_edit_port_text')
         self.dialog_layout.addWidget(self.port_label, 1, 0)
         self.dialog_layout.addWidget(self.port_text, 1, 1)
         # PIN
-        self.pin_label = QLabel(edit_projector_dialog)
+        self.pin_label = QtWidgets.QLabel(edit_projector_dialog)
         self.pin_label.setObjectName('projector_edit_pin_label')
-        self.pin_text = QLineEdit(edit_projector_dialog)
+        self.pin_text = QtWidgets.QLineEdit(edit_projector_dialog)
         self.pin_label.setObjectName('projector_edit_pin_text')
         self.dialog_layout.addWidget(self.pin_label, 2, 0)
         self.dialog_layout.addWidget(self.pin_text, 2, 1)
         # Name
-        self.name_label = QLabel(edit_projector_dialog)
+        self.name_label = QtWidgets.QLabel(edit_projector_dialog)
         self.name_label.setObjectName('projector_edit_name_label')
-        self.name_text = QLineEdit(edit_projector_dialog)
+        self.name_text = QtWidgets.QLineEdit(edit_projector_dialog)
         self.name_text.setObjectName('projector_edit_name_text')
         self.dialog_layout.addWidget(self.name_label, 3, 0)
         self.dialog_layout.addWidget(self.name_text, 3, 1)
         # Location
-        self.location_label = QLabel(edit_projector_dialog)
+        self.location_label = QtWidgets.QLabel(edit_projector_dialog)
         self.location_label.setObjectName('projector_edit_location_label')
-        self.location_text = QLineEdit(edit_projector_dialog)
+        self.location_text = QtWidgets.QLineEdit(edit_projector_dialog)
         self.location_text.setObjectName('projector_edit_location_text')
         self.dialog_layout.addWidget(self.location_label, 4, 0)
         self.dialog_layout.addWidget(self.location_text, 4, 1)
         # Notes
-        self.notes_label = QLabel(edit_projector_dialog)
+        self.notes_label = QtWidgets.QLabel(edit_projector_dialog)
         self.notes_label.setObjectName('projector_edit_notes_label')
-        self.notes_text = QPlainTextEdit(edit_projector_dialog)
+        self.notes_text = QtWidgets.QPlainTextEdit(edit_projector_dialog)
         self.notes_text.setObjectName('projector_edit_notes_text')
         self.dialog_layout.addWidget(self.notes_label, 5, 0, alignment=QtCore.Qt.AlignTop)
         self.dialog_layout.addWidget(self.notes_text, 5, 1)
         # Time for the buttons
-        self.button_box = QDialogButtonBox(QDialogButtonBox.Help |
-                                           QDialogButtonBox.Save |
-                                           QDialogButtonBox.Cancel)
+        self.button_box = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Help |
+                                                     QtWidgets.QDialogButtonBox.Save |
+                                                     QtWidgets.QDialogButtonBox.Cancel)
         self.dialog_layout.addWidget(self.button_box, 8, 0, 1, 2)
 
     def retranslateUi(self, edit_projector_dialog):
@@ -128,7 +126,7 @@ class Ui_ProjectorEditForm(object):
         self.notes_text.insertPlainText(self.projector.notes)
 
 
-class ProjectorEditForm(QDialog, Ui_ProjectorEditForm):
+class ProjectorEditForm(QtWidgets.QDialog, Ui_ProjectorEditForm):
     """
     Class to add or edit a projector entry in the database.
 
@@ -140,11 +138,12 @@ class ProjectorEditForm(QDialog, Ui_ProjectorEditForm):
         location = Column(String(30))
         notes = Column(String(200))
     """
-    newProjector = pyqtSignal(str)
-    editProjector = pyqtSignal(object)
+    newProjector = QtCore.pyqtSignal(str)
+    editProjector = QtCore.pyqtSignal(object)
 
     def __init__(self, parent=None, projectordb=None):
-        super(ProjectorEditForm, self).__init__(parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint)
+        super(ProjectorEditForm, self).__init__(parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint |
+                                                QtCore.Qt.WindowCloseButtonHint)
         self.projectordb = projectordb
         self.setupUi(self)
         self.button_box.accepted.connect(self.accept_me)
@@ -159,10 +158,10 @@ class ProjectorEditForm(QDialog, Ui_ProjectorEditForm):
             self.projector = projector
             self.new_projector = False
         self.retranslateUi(self)
-        reply = QDialog.exec(self)
+        reply = QtWidgets.QDialog.exec(self)
         return reply
 
-    @pyqtSlot()
+    @QtCore.pyqtSlot()
     def accept_me(self):
         """
         Validate input before accepting input.
@@ -182,9 +181,10 @@ class ProjectorEditForm(QDialog, Ui_ProjectorEditForm):
             QtWidgets.QMessageBox.warning(self,
                                           translate('OpenLP.ProjectorEdit', 'Duplicate Name'),
                                           translate('OpenLP.ProjectorEdit',
-                                                    'There is already an entry with name "%s" in '
-                                                    'the database as ID "%s". <br />'
-                                                    'Please enter a different name.' % (name, record.id)))
+                                                    'There is already an entry with name "{name}" in '
+                                                    'the database as ID "{record}". <br />'
+                                                    'Please enter a different name.'.format(name=name,
+                                                                                            record=record.id)))
             valid = False
             return
         adx = self.ip_text.text()
@@ -198,17 +198,17 @@ class ProjectorEditForm(QDialog, Ui_ProjectorEditForm):
                 QtWidgets.QMessageBox.warning(self,
                                               translate('OpenLP.ProjectorWizard', 'Duplicate IP Address'),
                                               translate('OpenLP.ProjectorWizard',
-                                                        'IP address "%s"<br />is already in the database as ID %s.'
-                                                        '<br /><br />Please Enter a different IP address.' %
-                                                        (adx, ip.id)))
+                                                        'IP address "{ip}"<br />is already in the database '
+                                                        'as ID {data}.<br /><br />Please Enter a different '
+                                                        'IP address.'.format(ip=adx, data=ip.id)))
                 valid = False
                 return
         else:
             QtWidgets.QMessageBox.warning(self,
                                           translate('OpenLP.ProjectorWizard', 'Invalid IP Address'),
                                           translate('OpenLP.ProjectorWizard',
-                                                    'IP address "%s"<br>is not a valid IP address.'
-                                                    '<br /><br />Please enter a valid IP address.' % adx))
+                                                    'IP address "{ip}"<br>is not a valid IP address.'
+                                                    '<br /><br />Please enter a valid IP address.'.format(ip=adx)))
             valid = False
             return
         port = int(self.port_text.text())
@@ -219,8 +219,8 @@ class ProjectorEditForm(QDialog, Ui_ProjectorEditForm):
                                                     'Port numbers below 1000 are reserved for admin use only, '
                                                     '<br />and port numbers above 32767 are not currently usable.'
                                                     '<br /><br />Please enter a valid port number between '
-                                                    ' 1000 and 32767.'
-                                                    '<br /><br />Default PJLink port is %s' % PJLINK_PORT))
+                                                    '1000 and 32767.<br /><br />'
+                                                    'Default PJLink port is {port}'.format(port=PJLINK_PORT)))
             valid = False
         if valid:
             self.projector.ip = self.ip_text.text()
@@ -246,14 +246,14 @@ class ProjectorEditForm(QDialog, Ui_ProjectorEditForm):
                 self.editProjector.emit(self.projector)
             self.close()
 
-    @pyqtSlot()
+    @QtCore.pyqtSlot()
     def help_me(self):
         """
         Show a help message about the input fields.
         """
         log.debug('help_me() signal received')
 
-    @pyqtSlot()
+    @QtCore.pyqtSlot()
     def cancel_me(self):
         """
         Cancel button clicked - just close.

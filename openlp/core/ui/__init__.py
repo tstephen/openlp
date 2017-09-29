@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -99,7 +99,7 @@ from .themelayoutform import ThemeLayoutForm
 from .themeform import ThemeForm
 from .filerenameform import FileRenameForm
 from .starttimeform import StartTimeForm
-from .maindisplay import MainDisplay, Display
+from .maindisplay import MainDisplay, Display, AudioPlayer
 from .servicenoteform import ServiceNoteForm
 from .serviceitemeditform import ServiceItemEditForm
 from .slidecontroller import SlideController, DisplayController, PreviewController, LiveController
@@ -113,7 +113,6 @@ from .settingsform import SettingsForm
 from .formattingtagform import FormattingTagForm
 from .formattingtagcontroller import FormattingTagController
 from .shortcutlistform import ShortcutListForm
-from .mediadockmanager import MediaDockManager
 from .servicemanager import ServiceManager
 from .thememanager import ThemeManager
 from .projector.manager import ProjectorManager
@@ -121,8 +120,8 @@ from .projector.tab import ProjectorTab
 from .projector.editform import ProjectorEditForm
 
 __all__ = ['SplashScreen', 'AboutForm', 'SettingsForm', 'MainDisplay', 'SlideController', 'ServiceManager', 'ThemeForm',
-           'ThemeManager', 'MediaDockManager', 'ServiceItemEditForm', 'FirstTimeForm', 'FirstTimeLanguageForm',
-           'Display', 'ServiceNoteForm', 'ThemeLayoutForm', 'FileRenameForm', 'StartTimeForm', 'MainDisplay',
+           'ThemeManager', 'ServiceItemEditForm', 'FirstTimeForm', 'FirstTimeLanguageForm', 'Display', 'AudioPlayer',
+           'ServiceNoteForm', 'ThemeLayoutForm', 'FileRenameForm', 'StartTimeForm', 'MainDisplay',
            'SlideController', 'DisplayController', 'GeneralTab', 'ThemesTab', 'AdvancedTab', 'PluginForm',
            'FormattingTagForm', 'ShortcutListForm', 'FormattingTagController', 'SingleColumnTableWidget',
            'ProjectorManager', 'ProjectorTab', 'ProjectorEditForm']

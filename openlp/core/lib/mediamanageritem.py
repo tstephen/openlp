@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -26,13 +26,16 @@ import logging
 import os
 import re
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.common import Registry, RegistryProperties, Settings, UiStrings, translate
-from openlp.core.lib import FileDialog, OpenLPToolbar, ServiceItem, StringContent, ListWidgetWithDnD, \
-    ServiceItemContext
+from openlp.core.common.path import Path, path_to_str, str_to_path
+from openlp.core.lib import ServiceItem, StringContent, ServiceItemContext
 from openlp.core.lib.searchedit import SearchEdit
 from openlp.core.lib.ui import create_widget_action, critical_error_message_box
+from openlp.core.ui.lib.filedialog import FileDialog
+from openlp.core.ui.lib.listwidgetwithdnd import ListWidgetWithDnD
+from openlp.core.ui.lib.toolbar import OpenLPToolbar
 
 log = logging.getLogger(__name__)
 
@@ -185,7 +188,7 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
         for action in toolbar_actions:
             if action[0] == StringContent.Preview:
                 self.toolbar.addSeparator()
-            self.toolbar.add_toolbar_action('%s%sAction' % (self.plugin.name, action[0]),
+            self.toolbar.add_toolbar_action('{name}{action}Action'.format(name=self.plugin.name, action=action[0]),
                                             text=self.plugin.get_string(action[1])['title'], icon=action[2],
                                             tooltip=self.plugin.get_string(action[1])['tooltip'],
                                             triggers=action[3])
@@ -196,14 +199,9 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
         """
         # Add the List widget
         self.list_view = ListWidgetWithDnD(self, self.plugin.name)
-        self.list_view.setSpacing(1)
-        self.list_view.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
-        self.list_view.setAlternatingRowColors(True)
-        self.list_view.setObjectName('%sListView' % self.plugin.name)
+        self.list_view.setObjectName('{name}ListView'.format(name=self.plugin.name))
         # Add to page_layout
         self.page_layout.addWidget(self.list_view)
-        # define and add the context menu
-        self.list_view.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         if self.has_edit_icon:
             create_widget_action(self.list_view,
                                  text=self.plugin.get_string(StringContent.Edit)['title'],
@@ -211,19 +209,22 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
                                  triggers=self.on_edit_click)
             create_widget_action(self.list_view, separator=True)
         create_widget_action(self.list_view,
-                             'listView%s%sItem' % (self.plugin.name.title(), StringContent.Preview.title()),
+                             'listView{plugin}{preview}Item'.format(plugin=self.plugin.name.title(),
+                                                                    preview=StringContent.Preview.title()),
                              text=self.plugin.get_string(StringContent.Preview)['title'],
                              icon=':/general/general_preview.png',
                              can_shortcuts=True,
                              triggers=self.on_preview_click)
         create_widget_action(self.list_view,
-                             'listView%s%sItem' % (self.plugin.name.title(), StringContent.Live.title()),
+                             'listView{plugin}{live}Item'.format(plugin=self.plugin.name.title(),
+                                                                 live=StringContent.Live.title()),
                              text=self.plugin.get_string(StringContent.Live)['title'],
                              icon=':/general/general_live.png',
                              can_shortcuts=True,
                              triggers=self.on_live_click)
         create_widget_action(self.list_view,
-                             'listView%s%sItem' % (self.plugin.name.title(), StringContent.Service.title()),
+                             'listView{plugin}{service}Item'.format(plugin=self.plugin.name.title(),
+                                                                    service=StringContent.Service.title()),
                              can_shortcuts=True,
                              text=self.plugin.get_string(StringContent.Service)['title'],
                              icon=':/general/general_add.png',
@@ -231,7 +232,8 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
         if self.has_delete_icon:
             create_widget_action(self.list_view, separator=True)
             create_widget_action(self.list_view,
-                                 'listView%s%sItem' % (self.plugin.name.title(), StringContent.Delete.title()),
+                                 'listView{plugin}{delete}Item'.format(plugin=self.plugin.name.title(),
+                                                                       delete=StringContent.Delete.title()),
                                  text=self.plugin.get_string(StringContent.Delete)['title'],
                                  icon=':/general/general_delete.png',
                                  can_shortcuts=True, triggers=self.on_delete_click)
@@ -261,7 +263,7 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
         self.search_text_layout.setObjectName('search_text_layout')
         self.search_text_label = QtWidgets.QLabel(self.search_widget)
         self.search_text_label.setObjectName('search_text_label')
-        self.search_text_edit = SearchEdit(self.search_widget)
+        self.search_text_edit = SearchEdit(self.search_widget, self.settings_section)
         self.search_text_edit.setObjectName('search_text_edit')
         self.search_text_label.setBuddy(self.search_text_edit)
         self.search_text_layout.addRow(self.search_text_label, self.search_text_edit)
@@ -309,13 +311,14 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
         """
         Add a file to the list widget to make it available for showing
         """
-        files = FileDialog.getOpenFileNames(self, self.on_new_prompt,
-                                            Settings().value(self.settings_section + '/last directory'),
-                                            self.on_new_file_masks)
-        log.info('New files(s) %s' % files)
-        if files:
+        file_paths, selected_filter = FileDialog.getOpenFileNames(
+            self, self.on_new_prompt,
+            Settings().value(self.settings_section + '/last directory'),
+            self.on_new_file_masks)
+        log.info('New files(s) {file_paths}'.format(file_paths=file_paths))
+        if file_paths:
             self.application.set_busy_cursor()
-            self.validate_and_load(files)
+            self.validate_and_load([path_to_str(path) for path in file_paths])
         self.application.set_normal_cursor()
 
     def load_file(self, data):
@@ -332,7 +335,8 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
                 if not error_shown:
                     critical_error_message_box(translate('OpenLP.MediaManagerItem', 'Invalid File Type'),
                                                translate('OpenLP.MediaManagerItem',
-                                                         'Invalid File %s.\nSuffix not supported') % file_name)
+                                                         'Invalid File {name}.\n'
+                                                         'Suffix not supported').format(name=file_name))
                     error_shown = True
             else:
                 new_files.append(file_name)
@@ -355,10 +359,8 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
         :param files: The files to be loaded.
         :param target_group: The QTreeWidgetItem of the group that will be the parent of the added files
         """
-        names = []
         full_list = []
         for count in range(self.list_view.count()):
-            names.append(self.list_view.item(count).text())
             full_list.append(self.list_view.item(count).data(QtCore.Qt.UserRole))
         duplicates_found = False
         files_added = False
@@ -373,8 +375,8 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
                 self.list_view.clear()
             self.load_list(full_list, target_group)
             last_dir = os.path.split(files[0])[0]
-            Settings().setValue(self.settings_section + '/last directory', last_dir)
-            Settings().setValue('%s/%s files' % (self.settings_section, self.settings_section), self.get_file_list())
+            Settings().setValue(self.settings_section + '/last directory', Path(last_dir))
+            Settings().setValue('{section}/{section} files'.format(section=self.settings_section), self.get_file_list())
         if duplicates_found:
             critical_error_message_box(UiStrings().Duplicate,
                                        translate('OpenLP.MediaManagerItem',
@@ -390,20 +392,20 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
         # Decide if we have to show the context menu or not.
         if item is None:
             return
-        if not item.flags() & QtCore.Qt.ItemIsSelectable:
-            return
         self.menu.exec(self.list_view.mapToGlobal(point))
 
     def get_file_list(self):
         """
         Return the current list of files
+
+        :rtype: list[openlp.core.common.path.Path]
         """
-        file_list = []
+        file_paths = []
         for index in range(self.list_view.count()):
             list_item = self.list_view.item(index)
             filename = list_item.data(QtCore.Qt.UserRole)
-            file_list.append(filename)
-        return file_list
+            file_paths.append(str_to_path(filename))
+        return file_paths
 
     def load_list(self, load_list, target_group):
         """
@@ -481,6 +483,7 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
                                                         'You must select one or more items to preview.'))
         else:
             log.debug('%s Preview requested' % self.plugin.name)
+            Registry().set_flag('has doubleclick added item to service', False)
             service_item = self.build_service_item()
             if service_item:
                 service_item.from_plugin = True
@@ -549,7 +552,7 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
             # Is it possible to process multiple list items to generate
             # multiple service items?
             if self.single_service_item:
-                log.debug('%s Add requested', self.plugin.name)
+                log.debug('{plugin} Add requested'.format(plugin=self.plugin.name))
                 self.add_to_service(replace=self.remote_triggered)
             else:
                 items = self.list_view.selectedIndexes()
@@ -590,7 +593,7 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
                                               translate('OpenLP.MediaManagerItem',
                                                         'You must select one or more items.'))
         else:
-            log.debug('%s Add requested', self.plugin.name)
+            log.debug('{plugin} Add requested'.format(plugin=self.plugin.name))
             service_item = self.service_manager.get_service_item()
             if not service_item:
                 QtWidgets.QMessageBox.information(self, UiStrings().NISs,
@@ -603,7 +606,8 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
                 # Turn off the remote edit update message indicator
                 QtWidgets.QMessageBox.information(self, translate('OpenLP.MediaManagerItem', 'Invalid Service Item'),
                                                   translate('OpenLP.MediaManagerItem',
-                                                            'You must select a %s service item.') % self.title)
+                                                            'You must select a {title} '
+                                                            'service item.').format(title=self.title))
 
     def build_service_item(self, item=None, xml_version=False, remote=False, context=ServiceItemContext.Live):
         """
@@ -628,20 +632,6 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
         :param item: The item to be processed and returned.
         """
         return item
-
-    def check_search_result(self):
-        """
-        Checks if the list_view is empty and adds a "No Search Results" item.
-        """
-        if self.list_view.count():
-            return
-        message = translate('OpenLP.MediaManagerItem', 'No Search Results')
-        item = QtWidgets.QListWidgetItem(message)
-        item.setFlags(QtCore.Qt.NoItemFlags)
-        font = QtGui.QFont()
-        font.setItalic(True)
-        item.setFont(font)
-        self.list_view.addItem(item)
 
     def _get_id_of_item_to_generate(self, item, remote_item):
         """

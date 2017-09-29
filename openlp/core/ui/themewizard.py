@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -25,9 +25,11 @@ The Create/Edit theme wizard
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from openlp.core.common import UiStrings, translate, is_macosx
-from openlp.core.lib import build_icon, ColorButton
+from openlp.core.common.path import Path
+from openlp.core.lib import build_icon
 from openlp.core.lib.theme import HorizontalType, BackgroundType, BackgroundGradientType
 from openlp.core.lib.ui import add_welcome_page, create_valign_selection_widgets
+from openlp.core.ui.lib import ColorButton, PathEdit
 
 
 class Ui_ThemeWizard(object):
@@ -39,13 +41,13 @@ class Ui_ThemeWizard(object):
         Set up the UI
         """
         theme_wizard.setObjectName('OpenLP.ThemeWizard')
-        theme_wizard.setWindowIcon(build_icon(u':/icon/openlp-logo.svg'))
+        theme_wizard.setWindowIcon(build_icon(':/icon/openlp-logo.svg'))
         theme_wizard.setModal(True)
         theme_wizard.setOptions(QtWidgets.QWizard.IndependentPages |
                                 QtWidgets.QWizard.NoBackButtonOnStartPage | QtWidgets.QWizard.HaveCustomButton1)
+        theme_wizard.setFixedWidth(640)
         if is_macosx():
             theme_wizard.setPixmap(QtWidgets.QWizard.BackgroundPixmap, QtGui.QPixmap(':/wizards/openlp-osx-wizard.png'))
-            theme_wizard.resize(646, 400)
         else:
             theme_wizard.setWizardStyle(QtWidgets.QWizard.ModernStyle)
         self.spacer = QtWidgets.QSpacerItem(10, 0, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
@@ -61,7 +63,7 @@ class Ui_ThemeWizard(object):
         self.background_label = QtWidgets.QLabel(self.background_page)
         self.background_label.setObjectName('background_label')
         self.background_combo_box = QtWidgets.QComboBox(self.background_page)
-        self.background_combo_box.addItems(['', '', '', ''])
+        self.background_combo_box.addItems(['', '', '', '', ''])
         self.background_combo_box.setObjectName('background_combo_box')
         self.background_type_layout.addRow(self.background_label, self.background_combo_box)
         self.background_type_layout.setItem(1, QtWidgets.QFormLayout.LabelRole, self.spacer)
@@ -115,16 +117,10 @@ class Ui_ThemeWizard(object):
         self.image_layout.addRow(self.image_color_label, self.image_color_button)
         self.image_label = QtWidgets.QLabel(self.image_widget)
         self.image_label.setObjectName('image_label')
-        self.image_file_layout = QtWidgets.QHBoxLayout()
-        self.image_file_layout.setObjectName('image_file_layout')
-        self.image_file_edit = QtWidgets.QLineEdit(self.image_widget)
-        self.image_file_edit.setObjectName('image_file_edit')
-        self.image_file_layout.addWidget(self.image_file_edit)
-        self.image_browse_button = QtWidgets.QToolButton(self.image_widget)
-        self.image_browse_button.setObjectName('image_browse_button')
-        self.image_browse_button.setIcon(build_icon(':/general/general_open.png'))
-        self.image_file_layout.addWidget(self.image_browse_button)
-        self.image_layout.addRow(self.image_label, self.image_file_layout)
+        self.image_path_edit = PathEdit(self.image_widget,
+                                        dialog_caption=translate('OpenLP.ThemeWizard', 'Select Image'),
+                                        show_revert=False)
+        self.image_layout.addRow(self.image_label, self.image_path_edit)
         self.image_layout.setItem(2, QtWidgets.QFormLayout.LabelRole, self.spacer)
         self.background_stack.addWidget(self.image_widget)
         self.transparent_widget = QtWidgets.QWidget(self.background_page)
@@ -134,6 +130,24 @@ class Ui_ThemeWizard(object):
         self.transparent_layout.setObjectName('Transparent_layout')
         self.background_stack.addWidget(self.transparent_widget)
         self.background_layout.addLayout(self.background_stack)
+        self.video_widget = QtWidgets.QWidget(self.background_page)
+        self.video_widget.setObjectName('video_widget')
+        self.video_layout = QtWidgets.QFormLayout(self.video_widget)
+        self.video_layout.setContentsMargins(0, 0, 0, 0)
+        self.video_layout.setObjectName('video_layout')
+        self.video_color_label = QtWidgets.QLabel(self.color_widget)
+        self.video_color_label.setObjectName('video_color_label')
+        self.video_color_button = ColorButton(self.color_widget)
+        self.video_color_button.setObjectName('video_color_button')
+        self.video_layout.addRow(self.video_color_label, self.video_color_button)
+        self.video_label = QtWidgets.QLabel(self.video_widget)
+        self.video_label.setObjectName('video_label')
+        self.video_path_edit = PathEdit(self.video_widget,
+                                        dialog_caption=translate('OpenLP.ThemeWizard', 'Select Video'),
+                                        show_revert=False)
+        self.video_layout.addRow(self.video_label, self.video_path_edit)
+        self.video_layout.setItem(2, QtWidgets.QFormLayout.LabelRole, self.spacer)
+        self.background_stack.addWidget(self.video_widget)
         theme_wizard.addPage(self.background_page)
         # Main Area Page
         self.main_area_page = QtWidgets.QWizardPage()
@@ -380,8 +394,8 @@ class Ui_ThemeWizard(object):
         Translate the UI on the fly
         """
         theme_wizard.setWindowTitle(translate('OpenLP.ThemeWizard', 'Theme Wizard'))
-        self.title_label.setText('<span style="font-size:14pt; font-weight:600;">%s</span>' %
-                                 translate('OpenLP.ThemeWizard', 'Welcome to the Theme Wizard'))
+        text = translate('OpenLP.ThemeWizard', 'Welcome to the Theme Wizard')
+        self.title_label.setText('<span style="font-size:14pt; font-weight:600;">{text}</span>'.format(text=text))
         self.information_label.setText(
             translate('OpenLP.ThemeWizard', 'This wizard will help you to create and edit your themes. Click the next '
                       'button below to start the process by setting up your background.'))
@@ -389,11 +403,10 @@ class Ui_ThemeWizard(object):
         self.background_page.setSubTitle(translate('OpenLP.ThemeWizard', 'Set up your theme\'s background '
                                          'according to the parameters below.'))
         self.background_label.setText(translate('OpenLP.ThemeWizard', 'Background type:'))
-        self.background_combo_box.setItemText(BackgroundType.Solid,
-                                              translate('OpenLP.ThemeWizard', 'Solid color'))
-        self.background_combo_box.setItemText(BackgroundType.Gradient,
-                                              translate('OpenLP.ThemeWizard', 'Gradient'))
+        self.background_combo_box.setItemText(BackgroundType.Solid, translate('OpenLP.ThemeWizard', 'Solid color'))
+        self.background_combo_box.setItemText(BackgroundType.Gradient, translate('OpenLP.ThemeWizard', 'Gradient'))
         self.background_combo_box.setItemText(BackgroundType.Image, UiStrings().Image)
+        self.background_combo_box.setItemText(BackgroundType.Video, UiStrings().Video)
         self.background_combo_box.setItemText(BackgroundType.Transparent,
                                               translate('OpenLP.ThemeWizard', 'Transparent'))
         self.color_label.setText(translate('OpenLP.ThemeWizard', 'color:'))
@@ -411,22 +424,24 @@ class Ui_ThemeWizard(object):
         self.gradient_combo_box.setItemText(BackgroundGradientType.LeftBottom,
                                             translate('OpenLP.ThemeWizard', 'Bottom Left - Top Right'))
         self.image_color_label.setText(translate('OpenLP.ThemeWizard', 'Background color:'))
-        self.image_label.setText('%s:' % UiStrings().Image)
+        self.image_label.setText('{text}:'.format(text=UiStrings().Image))
+        self.video_color_label.setText(translate('OpenLP.ThemeWizard', 'Background color:'))
+        self.video_label.setText('{text}:'.format(text=UiStrings().Video))
         self.main_area_page.setTitle(translate('OpenLP.ThemeWizard', 'Main Area Font Details'))
         self.main_area_page.setSubTitle(translate('OpenLP.ThemeWizard', 'Define the font and display '
                                                   'characteristics for the Display text'))
         self.main_font_label.setText(translate('OpenLP.ThemeWizard', 'Font:'))
         self.main_color_label.setText(translate('OpenLP.ThemeWizard', 'color:'))
         self.main_size_label.setText(translate('OpenLP.ThemeWizard', 'Size:'))
-        self.main_size_spin_box.setSuffix(UiStrings().FontSizePtUnit)
+        self.main_size_spin_box.setSuffix(' {unit}'.format(unit=UiStrings().FontSizePtUnit))
         self.line_spacing_label.setText(translate('OpenLP.ThemeWizard', 'Line Spacing:'))
-        self.line_spacing_spin_box.setSuffix(UiStrings().FontSizePtUnit)
+        self.line_spacing_spin_box.setSuffix(' {unit}'.format(unit=UiStrings().FontSizePtUnit))
         self.outline_check_box.setText(translate('OpenLP.ThemeWizard', '&Outline:'))
         self.outline_size_label.setText(translate('OpenLP.ThemeWizard', 'Size:'))
-        self.outline_size_spin_box.setSuffix(UiStrings().FontSizePtUnit)
+        self.outline_size_spin_box.setSuffix(' {unit}'.format(unit=UiStrings().FontSizePtUnit))
         self.shadow_check_box.setText(translate('OpenLP.ThemeWizard', '&Shadow:'))
         self.shadow_size_label.setText(translate('OpenLP.ThemeWizard', 'Size:'))
-        self.shadow_size_spin_box.setSuffix(UiStrings().FontSizePtUnit)
+        self.shadow_size_spin_box.setSuffix(' {unit}'.format(unit=UiStrings().FontSizePtUnit))
         self.main_bold_check_box.setText(translate('OpenLP.ThemeWizard', 'Bold'))
         self.main_italics_check_box.setText(translate('OpenLP.ThemeWizard', 'Italic'))
         self.footer_area_page.setTitle(translate('OpenLP.ThemeWizard', 'Footer Area Font Details'))
@@ -435,7 +450,7 @@ class Ui_ThemeWizard(object):
         self.footer_font_label.setText(translate('OpenLP.ThemeWizard', 'Font:'))
         self.footer_color_label.setText(translate('OpenLP.ThemeWizard', 'color:'))
         self.footer_size_label.setText(translate('OpenLP.ThemeWizard', 'Size:'))
-        self.footer_size_spin_box.setSuffix(UiStrings().FontSizePtUnit)
+        self.footer_size_spin_box.setSuffix(' {unit}'.format(unit=UiStrings().FontSizePtUnit))
         self.alignment_page.setTitle(translate('OpenLP.ThemeWizard', 'Text Formatting Details'))
         self.alignment_page.setSubTitle(translate('OpenLP.ThemeWizard', 'Allows additional display '
                                                   'formatting information to be defined'))

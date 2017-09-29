@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -49,12 +49,13 @@ class OpenLPMixin(object):
         Code to added debug wrapper to work on called functions within a decorated class.
         """
         def wrapped(*args, **kwargs):
-            parent.logger.debug("Entering %s" % func.__name__)
+            parent.logger.debug("Entering {function}".format(function=func.__name__))
             try:
                 return func(*args, **kwargs)
             except Exception as e:
                 if parent.logger.getEffectiveLevel() <= logging.ERROR:
-                    parent.logger.error('Exception in %s : %s' % (func.__name__, e))
+                    parent.logger.error('Exception in {function} : {error}'.format(function=func.__name__,
+                                                                                   error=e))
                 raise e
         return wrapped
 
@@ -69,6 +70,12 @@ class OpenLPMixin(object):
         Common log info handler
         """
         self.logger.info(message)
+
+    def log_warning(self, message):
+        """
+        Common log warning handler
+        """
+        self.logger.warning(message)
 
     def log_error(self, message):
         """

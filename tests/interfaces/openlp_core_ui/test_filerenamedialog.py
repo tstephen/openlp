@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,12 +23,13 @@
     Package to test the openlp.core.ui package.
 """
 from unittest import TestCase
+from unittest.mock import MagicMock, patch
 
 from PyQt5 import QtTest, QtWidgets
 
 from openlp.core.common import Registry
 from openlp.core.ui import filerenameform
-from tests.interfaces import MagicMock, patch
+
 from tests.helpers.testmixin import TestMixin
 
 
@@ -51,7 +52,7 @@ class TestStartFileRenameForm(TestCase, TestMixin):
         del self.form
         del self.main_window
 
-    def window_title_test(self):
+    def test_window_title(self):
         """
         Test the windowTitle of the FileRenameDialog
         """
@@ -76,7 +77,7 @@ class TestStartFileRenameForm(TestCase, TestMixin):
             # THEN: the window title is set correctly
             self.assertEqual(self.form.windowTitle(), 'File Copy', 'The window title should be "File Copy"')
 
-    def line_edit_focus_test(self):
+    def test_line_edit_focus(self):
         """
         Regression test for bug1067251
         Test that the file_name_edit setFocus has called with True when executed
@@ -92,7 +93,7 @@ class TestStartFileRenameForm(TestCase, TestMixin):
             # THEN: the setFocus method of the file_name_edit has been called with True
             mocked_set_focus.assert_called_with()
 
-    def file_name_validation_test(self):
+    def test_file_name_validation(self):
         """
         Test the file_name_edit validation
         """

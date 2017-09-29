@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -61,8 +61,8 @@ import re
 
 from lxml import etree, objectify
 
-from openlp.core.common import translate
-from openlp.core.common.versionchecker import get_application_version
+from openlp.core.common import translate, Settings
+from openlp.core.version import get_version
 from openlp.core.lib import FormattingTags
 from openlp.plugins.songs.lib import VerseType, clean_song
 from openlp.plugins.songs.lib.db import Author, AuthorType, Book, Song, Topic
@@ -70,7 +70,7 @@ from openlp.plugins.songs.lib.db import Author, AuthorType, Book, Song, Topic
 log = logging.getLogger(__name__)
 
 NAMESPACE = 'http://openlyrics.info/namespace/2009/song'
-NSMAP = '{' + NAMESPACE + '}' + '%s'
+NSMAP = '{{' + NAMESPACE + '}}{tag}'
 
 
 class SongXML(object):
@@ -126,7 +126,7 @@ class SongXML(object):
         try:
             self.song_xml = objectify.fromstring(xml)
         except etree.XMLSyntaxError:
-            log.exception('Invalid xml %s', xml)
+            log.exception('Invalid xml {text}'.format(text=xml))
         xml_iter = self.song_xml.getiterator()
         for element in xml_iter:
             if element.tag == 'verse':
@@ -153,7 +153,7 @@ class OpenLyrics(object):
         OpenLP does not support the attribute *lang*.
 
     ``<chord>``
-        This property is not supported.
+        This property is fully supported.
 
     ``<comments>``
         The ``<comments>`` property is fully supported. But comments in lyrics are not supported.
@@ -234,7 +234,7 @@ class OpenLyrics(object):
         # Append the necessary meta data to the song.
         song_xml.set('xmlns', NAMESPACE)
         song_xml.set('version', OpenLyrics.IMPLEMENTED_VERSION)
-        application_name = 'OpenLP ' + get_application_version()['version']
+        application_name = 'OpenLP ' + get_version()['version']
         song_xml.set('createdIn', application_name)
         song_xml.set('modifiedIn', application_name)
         # "Convert" 2012-08-27 11:49:15 to 2012-08-27T11:49:15.
@@ -322,7 +322,19 @@ class OpenLyrics(object):
                 # Do not add the break attribute to the last lines element.
                 if index < len(optional_verses) - 1:
                     lines_element.set('break', 'optional')
-        return self._extract_xml(song_xml).decode()
+        xml_text = self._extract_xml(song_xml).decode()
+        return self._chordpro_to_openlyrics(xml_text)
+
+    def _chordpro_to_openlyrics(self, text):
+        """
+        Convert chords from Chord Pro format to Open Lyrics format
+
+        :param text: the lyric with chords
+        :return: the lyrics with the converted chords
+        """
+        # Process chords.
+        new_text = re.sub(r'\[(\w.*?)\]', r'<chord name="\1"/>', text)
+        return new_text
 
     def _get_missing_tags(self, text):
         """
@@ -422,7 +434,7 @@ class OpenLyrics(object):
         :param tags_element: Some tag elements
         """
         available_tags = FormattingTags.get_html_tags()
-        start_tag = '{%s}' % tag_name
+        start_tag = '{{{name}}}'.format(name=tag_name)
         for tag in available_tags:
             if tag['start tag'] == start_tag:
                 # Create new formatting tag in openlyrics xml.
@@ -449,18 +461,18 @@ class OpenLyrics(object):
             xml_tags = tags_element.xpath('tag/attribute::name')
             # Some formatting tag has only starting part e.g. <br>. Handle this case.
             if tag in end_tags:
-                text = text.replace('{%s}' % tag, '<tag name="%s">' % tag)
+                text = text.replace('{{{tag}}}'.format(tag=tag), '<tag name="{tag}">'.format(tag=tag))
             else:
-                text = text.replace('{%s}' % tag, '<tag name="%s"/>' % tag)
+                text = text.replace('{{{tag}}}'.format(tag=tag), '<tag name="{tag}"/>'.format(tag=tag))
             # Add tag to <format> element if tag not present.
             if tag not in xml_tags:
                 self._add_tag_to_formatting(tag, tags_element)
         # Replace end tags.
         for tag in end_tags:
-            text = text.replace('{/%s}' % tag, '</tag>')
+            text = text.replace('{{/{tag}}}'.format(tag=tag), '</tag>')
         # Replace \n with <br/>.
         text = text.replace('\n', '<br/>')
-        element = etree.XML('<lines>%s</lines>' % text)
+        element = etree.XML('<lines>{text}</lines>'.format(text=text))
         verse_element.append(element)
         return element
 
@@ -566,9 +578,9 @@ class OpenLyrics(object):
             name = tag.get('name')
             if name is None:
                 continue
-            start_tag = '{%s}' % name[:5]
+            start_tag = '{{{name}}}'.format(name=name[:5])
             # Some tags have only start tag e.g. {br}
-            end_tag = '{/' + name[:5] + '}' if hasattr(tag, 'close') else ''
+            end_tag = '{{/{name}}}'.format(name=name[:5]) if hasattr(tag, 'close') else ''
             openlp_tag = {
                 'desc': name,
                 'start tag': start_tag,
@@ -594,8 +606,7 @@ class OpenLyrics(object):
 
     def _process_lines_mixed_content(self, element, newlines=True):
         """
-        Converts the xml text with mixed content to OpenLP representation. Chords are skipped and formatting tags are
-        converted.
+        Converts the xml text with mixed content to OpenLP representation. Chords and formatting tags are converted.
 
         :param element: The property object (lxml.etree.Element).
         :param newlines: The switch to enable/disable processing of line breaks <br/>. The <br/> is used since
@@ -604,26 +615,28 @@ class OpenLyrics(object):
         text = ''
         use_endtag = True
         # Skip <comment> elements - not yet supported.
-        if element.tag == NSMAP % 'comment':
+        if element.tag == NSMAP.format(tag='comment'):
             if element.tail:
-                # Append tail text at chord element.
+                # Append tail text at comment element.
                 text += element.tail
             return text
-        # Skip <chord> element - not yet supported.
-        elif element.tag == NSMAP % 'chord':
+        # Convert chords to ChordPro format which OpenLP uses internally
+        elif element.tag == NSMAP.format(tag='chord'):
+            if Settings().value('songs/enable chords') and not Settings().value('songs/disable chords import'):
+                text += '[{chord}]'.format(chord=element.get('name'))
             if element.tail:
                 # Append tail text at chord element.
                 text += element.tail
             return text
         # Convert line breaks <br/> to \n.
-        elif newlines and element.tag == NSMAP % 'br':
+        elif newlines and element.tag == NSMAP.format(tag='br'):
             text += '\n'
             if element.tail:
                 text += element.tail
             return text
         # Start formatting tag.
-        if element.tag == NSMAP % 'tag':
-            text += '{%s}' % element.get('name')
+        if element.tag == NSMAP.format(tag='tag'):
+            text += '{{{name}}}'.format(name=element.get('name'))
             # Some formattings may have only start tag.
             # Handle this case if element has no children and contains no text.
             if not element and not element.text:
@@ -636,8 +649,8 @@ class OpenLyrics(object):
             # Use recursion since nested formatting tags are allowed.
             text += self._process_lines_mixed_content(child, newlines)
         # Append text from tail and add formatting end tag.
-        if element.tag == NSMAP % 'tag' and use_endtag:
-            text += '{/%s}' % element.get('name')
+        if element.tag == NSMAP.format(tag='tag') and use_endtag:
+            text += '{{/{name}}}'.format(name=element.get('name'))
         # Append text from tail.
         if element.tail:
             text += element.tail
@@ -660,10 +673,10 @@ class OpenLyrics(object):
             text = self._process_lines_mixed_content(element)
         # OpenLyrics version <= 0.7 contains <line> elements to represent lines. First child element is tested.
         else:
-            # Loop over the "line" elements removing comments and chords.
+            # Loop over the "line" elements removing comments
             for line in element:
                 # Skip comment lines.
-                if line.tag == NSMAP % 'comment':
+                if line.tag == NSMAP.format(tag='comment'):
                     continue
                 if text:
                     text += '\n'

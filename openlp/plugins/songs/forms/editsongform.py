@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -32,8 +32,11 @@ import shutil
 from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.common import Registry, RegistryProperties, AppLocation, UiStrings, check_directory_exists, translate
-from openlp.core.lib import FileDialog, PluginStatus, MediaType, create_separated_list
+from openlp.core.common.path import Path, path_to_str
+from openlp.core.lib import PluginStatus, MediaType, create_separated_list
 from openlp.core.lib.ui import set_case_insensitive_completer, critical_error_message_box, find_and_set_in_combo_box
+from openlp.core.ui.lib.filedialog import FileDialog
+from openlp.core.common.languagemanager import get_natural_key
 from openlp.plugins.songs.lib import VerseType, clean_song
 from openlp.plugins.songs.lib.db import Book, Song, Author, AuthorType, Topic, MediaFile, SongBookEntry
 from openlp.plugins.songs.lib.ui import SongStrings
@@ -49,13 +52,14 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
     """
     Class to manage the editing of a song
     """
-    log.info('%s EditSongForm loaded', __name__)
+    log.info('{name} EditSongForm loaded'.format(name=__name__))
 
     def __init__(self, media_item, parent, manager):
         """
         Constructor
         """
-        super(EditSongForm, self).__init__(parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint)
+        super(EditSongForm, self).__init__(parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint |
+                                           QtCore.Qt.WindowCloseButtonHint)
         self.media_item = media_item
         self.song = None
         # can this be automated?
@@ -110,15 +114,21 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
         """
         Generically load a set of objects into a cache and a combobox.
         """
-        objects = self.manager.get_all_objects(cls, order_by_ref=cls.name)
+        def get_key(obj):
+            """Get the key to sort by"""
+            return get_natural_key(obj.name)
+
+        objects = self.manager.get_all_objects(cls)
+        objects.sort(key=get_key)
         combo.clear()
-        combo.addItem('')
         for obj in objects:
             row = combo.count()
             combo.addItem(obj.name)
             cache.append(obj.name)
             combo.setItemData(row, obj.id)
         set_case_insensitive_completer(cache, combo)
+        combo.setCurrentIndex(-1)
+        combo.setCurrentText('')
 
     def _add_author_to_list(self, author, author_type):
         """
@@ -179,22 +189,24 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
             verse = verse.data(QtCore.Qt.UserRole)
             if verse not in verse_names:
                 verses.append(verse)
-                verse_names.append('%s%s' % (VerseType.translated_tag(verse[0]), verse[1:]))
+                verse_names.append('{verse1}{verse2}'.format(verse1=VerseType.translated_tag(verse[0]),
+                                                             verse2=verse[1:]))
         for count, item in enumerate(order):
             if item not in verses:
                 invalid_verses.append(order_names[count])
         if invalid_verses:
             valid = create_separated_list(verse_names)
             if len(invalid_verses) > 1:
-                msg = translate('SongsPlugin.EditSongForm', 'There are no verses corresponding to "%(invalid)s". '
-                                'Valid entries are %(valid)s.\nPlease enter the verses separated by spaces.') % \
-                    {'invalid': ', '.join(invalid_verses), 'valid': valid}
+                msg = translate('SongsPlugin.EditSongForm',
+                                'There are no verses corresponding to "{invalid}". Valid entries are {valid}.\n'
+                                'Please enter the verses separated by spaces.'
+                                ).format(invalid=', '.join(invalid_verses), valid=valid)
             else:
-                msg = translate('SongsPlugin.EditSongForm', 'There is no verse corresponding to "%(invalid)s".'
-                                'Valid entries are %(valid)s.\nPlease enter the verses separated by spaces.') % \
-                    {'invalid': invalid_verses[0], 'valid': valid}
-            critical_error_message_box(title=translate('SongsPlugin.EditSongForm', 'Invalid Verse Order'),
-                                       message=msg)
+                msg = translate('SongsPlugin.EditSongForm',
+                                'There is no verse corresponding to "{invalid}". Valid entries are {valid}.\n'
+                                'Please enter the verses separated by spaces.').format(invalid=invalid_verses[0],
+                                                                                       valid=valid)
+            critical_error_message_box(title=translate('SongsPlugin.EditSongForm', 'Invalid Verse Order'), message=msg)
         return len(invalid_verses) == 0
 
     def _validate_song(self):
@@ -236,23 +248,24 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
             field = item.data(QtCore.Qt.UserRole)
             verse_tags.append(field)
             if not self._validate_tags(tags):
-                misplaced_tags.append('%s %s' % (VerseType.translated_name(field[0]), field[1:]))
+                misplaced_tags.append('{field1} {field2}'.format(field1=VerseType.translated_name(field[0]),
+                                                                 field2=field[1:]))
         if misplaced_tags:
             critical_error_message_box(
                 message=translate('SongsPlugin.EditSongForm',
-                                  'There are misplaced formatting tags in the following verses:\n\n%s\n\n'
-                                  'Please correct these tags before continuing.' % ', '.join(misplaced_tags)))
+                                  'There are misplaced formatting tags in the following verses:\n\n{tag}\n\n'
+                                  'Please correct these tags before continuing.').format(tag=', '.join(misplaced_tags)))
             return False
         for tag in verse_tags:
             if verse_tags.count(tag) > 26:
                 # lp#1310523: OpenLyrics allows only a-z variants of one verse:
                 # http://openlyrics.info/dataformat.html#verse-name
                 critical_error_message_box(message=translate(
-                    'SongsPlugin.EditSongForm', 'You have %(count)s verses named %(name)s %(number)s. '
-                                                'You can have at most 26 verses with the same name' %
-                                                {'count': verse_tags.count(tag),
-                                                 'name': VerseType.translated_name(tag[0]),
-                                                 'number': tag[1:]}))
+                    'SongsPlugin.EditSongForm',
+                    'You have {count} verses named {name} {number}. You can have at most '
+                    '26 verses with the same name').format(count=verse_tags.count(tag),
+                                                           name=VerseType.translated_name(tag[0]),
+                                                           number=tag[1:]))
                 return False
         return True
 
@@ -307,7 +320,7 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
                 self.song.verse_order = re.sub('([' + verse.upper() + verse.lower() + '])(\W|$)',
                                                r'\g<1>1\2', self.song.verse_order)
         except:
-            log.exception('Problem processing song Lyrics \n%s', sxml.dump_xml())
+            log.exception('Problem processing song Lyrics \n{xml}'.format(xml=sxml.dump_xml()))
             raise
 
     def keyPressEvent(self, event):
@@ -343,9 +356,13 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
         """
         Load the authors from the database into the combobox.
         """
-        authors = self.manager.get_all_objects(Author, order_by_ref=Author.display_name)
+        def get_author_key(author):
+            """Get the key to sort by"""
+            return get_natural_key(author.display_name)
+
+        authors = self.manager.get_all_objects(Author)
+        authors.sort(key=get_author_key)
         self.authors_combo_box.clear()
-        self.authors_combo_box.addItem('')
         self.authors = []
         for author in authors:
             row = self.authors_combo_box.count()
@@ -353,6 +370,8 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
             self.authors_combo_box.setItemData(row, author.id)
             self.authors.append(author.display_name)
         set_case_insensitive_completer(self.authors, self.authors_combo_box)
+        self.authors_combo_box.setCurrentIndex(-1)
+        self.authors_combo_box.setCurrentText('')
 
         # Types
         self.author_types_combo_box.clear()
@@ -378,11 +397,17 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
         """
         Load the themes into a combobox.
         """
+        def get_theme_key(theme):
+            """Get the key to sort by"""
+            return get_natural_key(theme)
+
         self.theme_combo_box.clear()
-        self.theme_combo_box.addItem('')
         self.themes = theme_list
+        self.themes.sort(key=get_theme_key)
         self.theme_combo_box.addItems(theme_list)
         set_case_insensitive_completer(self.themes, self.theme_combo_box)
+        self.theme_combo_box.setCurrentIndex(-1)
+        self.theme_combo_box.setCurrentText('')
 
     def load_media_files(self):
         """
@@ -421,8 +446,8 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
         self.load_topics()
         self.load_songbooks()
         self.load_media_files()
-        self.theme_combo_box.setEditText('')
-        self.theme_combo_box.setCurrentIndex(0)
+        self.theme_combo_box.setCurrentIndex(-1)
+        self.theme_combo_box.setCurrentText('')
         # it's a new song to preview is not possible
         self.preview_button.setVisible(False)
 
@@ -447,8 +472,8 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
             find_and_set_in_combo_box(self.theme_combo_box, str(self.song.theme_name))
         else:
             # Clear the theme combo box in case it was previously set (bug #1212801)
-            self.theme_combo_box.setEditText('')
-            self.theme_combo_box.setCurrentIndex(0)
+            self.theme_combo_box.setCurrentIndex(-1)
+            self.theme_combo_box.setCurrentText('')
         self.copyright_edit.setText(self.song.copyright if self.song.copyright else '')
         self.comments_edit.setPlainText(self.song.comments if self.song.comments else '')
         self.ccli_number_edit.setText(self.song.ccli_number if self.song.ccli_number else '')
@@ -476,7 +501,7 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
                 verse[0]['type'] = VerseType.tags[index]
                 if verse[0]['label'] == '':
                     verse[0]['label'] = '1'
-                verse_def = '%s%s' % (verse[0]['type'], verse[0]['label'])
+                verse_def = '{verse}{label}'.format(verse=verse[0]['type'], label=verse[0]['label'])
                 item = QtWidgets.QTableWidgetItem(verse[1])
                 item.setData(QtCore.Qt.UserRole, verse_def)
                 self.verse_list_widget.setItem(count, 0, item)
@@ -485,7 +510,7 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
             for count, verse in enumerate(verses):
                 self.verse_list_widget.setRowCount(self.verse_list_widget.rowCount() + 1)
                 item = QtWidgets.QTableWidgetItem(verse)
-                verse_def = '%s%s' % (VerseType.tags[VerseType.Verse], str(count + 1))
+                verse_def = '{verse}{count:d}'.format(verse=VerseType.tags[VerseType.Verse], count=(count + 1))
                 item.setData(QtCore.Qt.UserRole, verse_def)
                 self.verse_list_widget.setItem(count, 0, item)
         if self.song.verse_order:
@@ -498,7 +523,7 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
                 if verse_index is None:
                     verse_index = VerseType.from_tag(verse_def[0])
                 verse_tag = VerseType.translated_tags[verse_index].upper()
-                translated.append('%s%s' % (verse_tag, verse_def[1:]))
+                translated.append('{tag}{verse}'.format(tag=verse_tag, verse=verse_def[1:]))
             self.verse_order_edit.setText(' '.join(translated))
         else:
             self.verse_order_edit.setText('')
@@ -538,7 +563,7 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
             item = self.verse_list_widget.item(row, 0)
             verse_def = item.data(QtCore.Qt.UserRole)
             verse_tag = VerseType.translated_tag(verse_def[0])
-            row_def = '%s%s' % (verse_tag, verse_def[1:])
+            row_def = '{tag}{verse}'.format(tag=verse_tag, verse=verse_def[1:])
             row_label.append(row_def)
         self.verse_list_widget.setVerticalHeaderLabels(row_label)
         self.verse_list_widget.resizeRowsToContents()
@@ -551,18 +576,12 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
         item = int(self.authors_combo_box.currentIndex())
         text = self.authors_combo_box.currentText().strip(' \r\n\t')
         author_type = self.author_types_combo_box.itemData(self.author_types_combo_box.currentIndex())
-        # This if statement is for OS X, which doesn't seem to work well with
-        # the QCompleter auto-completion class. See bug #812628.
-        if text in self.authors:
-            # Index 0 is a blank string, so add 1
-            item = self.authors.index(text) + 1
-        if item == 0 and text:
+        if item == -1 and text:
             if QtWidgets.QMessageBox.question(
                     self,
                     translate('SongsPlugin.EditSongForm', 'Add Author'),
                     translate('SongsPlugin.EditSongForm', 'This author does not exist, do you want to add them?'),
-                    QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
-                    QtWidgets.QMessageBox.Yes) == QtWidgets.QMessageBox.Yes:
+                    defaultButton=QtWidgets.QMessageBox.Yes) == QtWidgets.QMessageBox.Yes:
                 if text.find(' ') == -1:
                     author = Author.populate(first_name='', last_name='', display_name=text)
                 else:
@@ -571,10 +590,11 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
                 self.manager.save_object(author)
                 self._add_author_to_list(author, author_type)
                 self.load_authors()
-                self.authors_combo_box.setCurrentIndex(0)
+                self.authors_combo_box.setCurrentIndex(-1)
+                self.authors_combo_box.setCurrentText('')
             else:
                 return
-        elif item > 0:
+        elif item >= 0:
             item_id = (self.authors_combo_box.itemData(item))
             author = self.manager.get_object(Author, item_id)
             if self.authors_list_view.findItems(author.get_display_name(author_type), QtCore.Qt.MatchExactly):
@@ -582,7 +602,8 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
                     message=translate('SongsPlugin.EditSongForm', 'This author is already in the list.'))
             else:
                 self._add_author_to_list(author, author_type)
-            self.authors_combo_box.setCurrentIndex(0)
+            self.authors_combo_box.setCurrentIndex(-1)
+            self.authors_combo_box.setCurrentText('')
         else:
             QtWidgets.QMessageBox.warning(
                 self, UiStrings().NISs,
@@ -634,22 +655,22 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
     def on_topic_add_button_clicked(self):
         item = int(self.topics_combo_box.currentIndex())
         text = self.topics_combo_box.currentText()
-        if item == 0 and text:
+        if item == -1 and text:
             if QtWidgets.QMessageBox.question(
                     self, translate('SongsPlugin.EditSongForm', 'Add Topic'),
                     translate('SongsPlugin.EditSongForm', 'This topic does not exist, do you want to add it?'),
-                    QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
-                    QtWidgets.QMessageBox.Yes) == QtWidgets.QMessageBox.Yes:
+                    defaultButton=QtWidgets.QMessageBox.Yes) == QtWidgets.QMessageBox.Yes:
                 topic = Topic.populate(name=text)
                 self.manager.save_object(topic)
                 topic_item = QtWidgets.QListWidgetItem(str(topic.name))
                 topic_item.setData(QtCore.Qt.UserRole, topic.id)
                 self.topics_list_view.addItem(topic_item)
                 self.load_topics()
-                self.topics_combo_box.setCurrentIndex(0)
+                self.topics_combo_box.setCurrentIndex(-1)
+                self.topics_combo_box.setCurrentText('')
             else:
                 return
-        elif item > 0:
+        elif item >= 0:
             item_id = (self.topics_combo_box.itemData(item))
             topic = self.manager.get_object(Topic, item_id)
             if self.topics_list_view.findItems(str(topic.name), QtCore.Qt.MatchExactly):
@@ -659,7 +680,8 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
                 topic_item = QtWidgets.QListWidgetItem(str(topic.name))
                 topic_item.setData(QtCore.Qt.UserRole, topic.id)
                 self.topics_list_view.addItem(topic_item)
-            self.topics_combo_box.setCurrentIndex(0)
+            self.topics_combo_box.setCurrentIndex(-1)
+            self.topics_combo_box.setCurrentText('')
         else:
             QtWidgets.QMessageBox.warning(
                 self, UiStrings().NISs,
@@ -679,21 +701,21 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
     def on_songbook_add_button_clicked(self):
         item = int(self.songbooks_combo_box.currentIndex())
         text = self.songbooks_combo_box.currentText()
-        if item == 0 and text:
+        if item == -1 and text:
             if QtWidgets.QMessageBox.question(
                     self, translate('SongsPlugin.EditSongForm', 'Add Songbook'),
                     translate('SongsPlugin.EditSongForm', 'This Songbook does not exist, do you want to add it?'),
-                    QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
-                    QtWidgets.QMessageBox.Yes) == QtWidgets.QMessageBox.Yes:
+                    defaultButton=QtWidgets.QMessageBox.Yes) == QtWidgets.QMessageBox.Yes:
                 songbook = Book.populate(name=text)
                 self.manager.save_object(songbook)
                 self.add_songbook_entry_to_list(songbook.id, songbook.name, self.songbook_entry_edit.text())
                 self.load_songbooks()
-                self.songbooks_combo_box.setCurrentIndex(0)
+                self.songbooks_combo_box.setCurrentIndex(-1)
+                self.songbooks_combo_box.setCurrentText('')
                 self.songbook_entry_edit.clear()
             else:
                 return
-        elif item > 0:
+        elif item >= 0:
             item_id = (self.songbooks_combo_box.itemData(item))
             songbook = self.manager.get_object(Book, item_id)
             if self.songbooks_list_view.findItems(str(songbook.name), QtCore.Qt.MatchExactly):
@@ -701,7 +723,8 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
                     message=translate('SongsPlugin.EditSongForm', 'This Songbook is already in the list.'))
             else:
                 self.add_songbook_entry_to_list(songbook.id, songbook.name, self.songbook_entry_edit.text())
-            self.songbooks_combo_box.setCurrentIndex(0)
+            self.songbooks_combo_box.setCurrentIndex(-1)
+            self.songbooks_combo_box.setCurrentText('')
             self.songbook_entry_edit.clear()
         else:
             QtWidgets.QMessageBox.warning(
@@ -726,7 +749,7 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
         self.verse_form.set_verse('', True)
         if self.verse_form.exec():
             after_text, verse_tag, verse_num = self.verse_form.get_verse()
-            verse_def = '%s%s' % (verse_tag, verse_num)
+            verse_def = '{tag}{number}'.format(tag=verse_tag, number=verse_num)
             item = QtWidgets.QTableWidgetItem(after_text)
             item.setData(QtCore.Qt.UserRole, verse_def)
             item.setText(after_text)
@@ -744,7 +767,7 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
             self.verse_form.set_verse(temp_text, True, verse_id)
             if self.verse_form.exec():
                 after_text, verse_tag, verse_num = self.verse_form.get_verse()
-                verse_def = '%s%s' % (verse_tag, verse_num)
+                verse_def = '{tag}{number}'.format(tag=verse_tag, number=verse_num)
                 item.setData(QtCore.Qt.UserRole, verse_def)
                 item.setText(after_text)
                 # number of lines has changed, repaint the list moving the data
@@ -777,7 +800,7 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
                 field = item.data(QtCore.Qt.UserRole)
                 verse_tag = VerseType.translated_name(field[0])
                 verse_num = field[1:]
-                verse_list += '---[%s:%s]---\n' % (verse_tag, verse_num)
+                verse_list += '---[{tag}:{number}]---\n'.format(tag=verse_tag, number=verse_num)
                 verse_list += item.text()
                 verse_list += '\n'
             self.verse_form.set_verse(verse_list)
@@ -812,7 +835,7 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
                             verse_num = match.group(1)
                         else:
                             verse_num = '1'
-                        verse_def = '%s%s' % (verse_tag, verse_num)
+                        verse_def = '{tag}{number}'.format(tag=verse_tag, number=verse_num)
                     else:
                         if parts.endswith('\n'):
                             parts = parts.rstrip('\n')
@@ -903,10 +926,11 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
         """
         Loads file(s) from the filesystem.
         """
-        filters = '%s (*)' % UiStrings().AllFiles
-        file_names = FileDialog.getOpenFileNames(self, translate('SongsPlugin.EditSongForm', 'Open File(s)'), '',
-                                                 filters)
-        for filename in file_names:
+        filters = '{text} (*)'.format(text=UiStrings().AllFiles)
+        file_paths, selected_filter = FileDialog.getOpenFileNames(
+            self, translate('SongsPlugin.EditSongForm', 'Open File(s)'), Path(), filters)
+        for file_path in file_paths:
+            filename = path_to_str(file_path)
             item = QtWidgets.QListWidgetItem(os.path.split(str(filename))[1])
             item.setData(QtCore.Qt.UserRole, filename)
             self.audio_list_widget.addItem(item)
@@ -1011,7 +1035,7 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
         for item in order_text.split():
             verse_tag = VerseType.tags[VerseType.from_translated_tag(item[0])]
             verse_num = item[1:].lower()
-            order.append('%s%s' % (verse_tag, verse_num))
+            order.append('{tag}{number}'.format(tag=verse_tag, number=verse_num))
         self.song.verse_order = ' '.join(order)
         self.song.ccli_number = self.ccli_number_edit.text()
         theme_name = self.theme_combo_box.currentText()
@@ -1044,9 +1068,9 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
         self.manager.save_object(self.song)
         audio_files = [a.file_name for a in self.song.media_files]
         log.debug(audio_files)
-        save_path = os.path.join(AppLocation.get_section_data_path(self.media_item.plugin.name), 'audio',
+        save_path = os.path.join(str(AppLocation.get_section_data_path(self.media_item.plugin.name)), 'audio',
                                  str(self.song.id))
-        check_directory_exists(save_path)
+        check_directory_exists(Path(save_path))
         self.song.media_files = []
         files = []
         for row in range(self.audio_list_widget.count()):
@@ -1066,12 +1090,12 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
                 try:
                     os.remove(audio)
                 except:
-                    log.exception('Could not remove file: %s', audio)
+                    log.exception('Could not remove file: {audio}'.format(audio=audio))
         if not files:
             try:
                 os.rmdir(save_path)
             except OSError:
-                log.exception('Could not remove directory: %s', save_path)
+                log.exception('Could not remove directory: {path}'.format(path=save_path))
         clean_song(self.manager, self.song)
         self.manager.save_object(self.song)
         self.media_item.auto_select_id = self.song.id

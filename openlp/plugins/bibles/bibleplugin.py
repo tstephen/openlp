@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -22,12 +22,12 @@
 
 import logging
 
-from PyQt5 import QtWidgets
-
+from openlp.core.api.http import register_endpoint
+from openlp.core.common import UiStrings
 from openlp.core.common.actions import ActionList
 from openlp.core.lib import Plugin, StringContent, build_icon, translate
-from openlp.core.lib.ui import UiStrings, create_action
-from openlp.plugins.bibles.forms import BibleUpgradeForm
+from openlp.plugins.bibles.endpoint import api_bibles_endpoint, bibles_endpoint
+from openlp.core.lib.ui import create_action
 from openlp.plugins.bibles.lib import BibleManager, BiblesTab, BibleMediaItem, LayoutStyle, DisplayStyle, \
     LanguageSelection
 from openlp.plugins.bibles.lib.mediaitem import BibleSearch
@@ -41,15 +41,15 @@ __default_settings__ = {
     'bibles/db password': '',
     'bibles/db hostname': '',
     'bibles/db database': '',
-    'bibles/last search type': BibleSearch.Reference,
+    'bibles/last used search type': BibleSearch.Combined,
+    'bibles/reset to combined quick search': True,
     'bibles/verse layout style': LayoutStyle.VersePerSlide,
     'bibles/book name language': LanguageSelection.Bible,
     'bibles/display brackets': DisplayStyle.NoBrackets,
     'bibles/is verse number visible': True,
     'bibles/display new chapter': False,
     'bibles/second bibles': True,
-    'bibles/advanced bible': '',
-    'bibles/quick bible': '',
+    'bibles/primary bible': '',
     'bibles/proxy name': '',
     'bibles/proxy address': '',
     'bibles/proxy username': '',
@@ -59,7 +59,9 @@ __default_settings__ = {
     'bibles/range separator': '',
     'bibles/list separator': '',
     'bibles/end separator': '',
-    'bibles/last directory import': ''
+    'bibles/last directory import': None,
+    'bibles/hide combined quick error': False,
+    'bibles/is search while typing enabled': True
 }
 
 
@@ -75,6 +77,8 @@ class BiblePlugin(Plugin):
         self.icon_path = ':/plugins/plugin_bibles.png'
         self.icon = build_icon(self.icon_path)
         self.manager = BibleManager(self)
+        register_endpoint(bibles_endpoint)
+        register_endpoint(api_bibles_endpoint)
 
     def initialise(self):
         """
@@ -87,7 +91,6 @@ class BiblePlugin(Plugin):
         action_list.add_action(self.import_bible_item, UiStrings().Import)
         # Set to invisible until we can export bibles
         self.export_bible_item.setVisible(False)
-        self.tools_upgrade_item.setVisible(bool(self.manager.old_bible_databases))
 
     def finalise(self):
         """
@@ -100,20 +103,6 @@ class BiblePlugin(Plugin):
         action_list.remove_action(self.import_bible_item, UiStrings().Import)
         self.import_bible_item.setVisible(False)
         self.export_bible_item.setVisible(False)
-
-    def app_startup(self):
-        """
-        Perform tasks on application startup
-        """
-        super(BiblePlugin, self).app_startup()
-        if self.manager.old_bible_databases:
-            if QtWidgets.QMessageBox.information(
-                    self.main_window, translate('OpenLP', 'Information'),
-                    translate('OpenLP', 'Bible format has changed.\nYou have to upgrade your '
-                                        'existing Bibles.\nShould OpenLP upgrade now?'),
-                    QtWidgets.QMessageBox.StandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)) == \
-                    QtWidgets.QMessageBox.Yes:
-                self.on_tools_upgrade_item_triggered()
 
     def add_import_menu_item(self, import_menu):
         """
@@ -136,30 +125,6 @@ class BiblePlugin(Plugin):
                                                text=translate('BiblesPlugin', '&Bible'), visible=False)
         export_menu.addAction(self.export_bible_item)
 
-    def add_tools_menu_item(self, tools_menu):
-        """
-        Give the bible plugin the opportunity to add items to the **Tools** menu.
-
-        :param tools_menu:  The actual **Tools** menu item, so that your actions can use it as their parent.
-        """
-        log.debug('add tools menu')
-        self.tools_upgrade_item = create_action(
-            tools_menu, 'toolsUpgradeItem',
-            text=translate('BiblesPlugin', '&Upgrade older Bibles'),
-            statustip=translate('BiblesPlugin', 'Upgrade the Bible databases to the latest format.'),
-            visible=False, triggers=self.on_tools_upgrade_item_triggered)
-        tools_menu.addAction(self.tools_upgrade_item)
-
-    def on_tools_upgrade_item_triggered(self):
-        """
-        Upgrade older bible databases.
-        """
-        if not hasattr(self, 'upgrade_wizard'):
-            self.upgrade_wizard = BibleUpgradeForm(self.main_window, self.manager, self)
-        # If the import was not cancelled then reload.
-        if self.upgrade_wizard.exec():
-            self.media_item.reload_bibles()
-
     def on_bible_import_click(self):
         """
         Show the Bible Import wizard
@@ -179,10 +144,10 @@ class BiblePlugin(Plugin):
 
     def uses_theme(self, theme):
         """
-        Called to find out if the bible plugin is currently using a theme. Returns ``1`` if the theme is being used,
-        otherwise returns ``0``.
+        Called to find out if the bible plugin is currently using a theme.
 
         :param theme: The theme
+        :return: 1 if the theme is being used, otherwise returns 0
         """
         if str(self.settings_tab.bible_theme) == theme:
             return 1
@@ -190,11 +155,11 @@ class BiblePlugin(Plugin):
 
     def rename_theme(self, old_theme, new_theme):
         """
-        Rename the theme the bible plugin is using making the plugin use the
-        new name.
+        Rename the theme the bible plugin is using, making the plugin use the new name.
 
         :param old_theme: The name of the theme the plugin should stop using. Unused for this particular plugin.
         :param new_theme:  The new name the plugin should now use.
+        :return: None
         """
         self.settings_tab.bible_theme = new_theme
         self.settings_tab.save()

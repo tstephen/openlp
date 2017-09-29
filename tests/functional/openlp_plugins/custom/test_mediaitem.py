@@ -1,15 +1,36 @@
+# -*- coding: utf-8 -*-
+# vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
+
+###############################################################################
+# OpenLP - Open Source Lyrics Projection                                      #
+# --------------------------------------------------------------------------- #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# --------------------------------------------------------------------------- #
+# This program is free software; you can redistribute it and/or modify it     #
+# under the terms of the GNU General Public License as published by the Free  #
+# Software Foundation; version 2 of the License.                              #
+#                                                                             #
+# This program is distributed in the hope that it will be useful, but WITHOUT #
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
+# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
+# more details.                                                               #
+#                                                                             #
+# You should have received a copy of the GNU General Public License along     #
+# with this program; if not, write to the Free Software Foundation, Inc., 59  #
+# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
+###############################################################################
 """
 This module contains tests for the lib submodule of the Songs plugin.
 """
 from unittest import TestCase
+from unittest.mock import patch, MagicMock
 
 from PyQt5 import QtCore
 
-from openlp.core.common import Registry, Settings
+from openlp.core.common import Registry
 from openlp.core.lib import ServiceItem, PluginStatus
 from openlp.plugins.custom.lib import CustomMediaItem
-from openlp.plugins.custom.lib.db import CustomSlide
-from tests.functional import patch, MagicMock
+
 from tests.helpers.testmixin import TestMixin
 
 FOOTER = ['Arky Arky (Unknown)', 'Public Domain', 'CCLI 123456']
@@ -41,7 +62,7 @@ class TestMediaItem(TestCase, TestMixin):
         """
         self.destroy_settings()
 
-    def service_load_inactive_test(self):
+    def test_service_load_inactive(self):
         """
         Test the service load in custom with a default service item
         """
@@ -54,7 +75,7 @@ class TestMediaItem(TestCase, TestMixin):
         # THEN: the processing should be ignored
         self.assertEqual(item, None, 'The Service item is inactive so processing should be bypassed')
 
-    def service_load_basic_custom_false_test(self):
+    def test_service_load_basic_custom_false(self):
         """
         Test the service load in custom with a default service item and no requirement to add to the database
         """
@@ -77,7 +98,7 @@ class TestMediaItem(TestCase, TestMixin):
             self.assertEqual(self.media_item.create_from_service_item.call_count, 0,
                              'The item should not have been added to the database')
 
-    def service_load_basic_custom_true_test(self):
+    def test_service_load_basic_custom_true(self):
         """
         Test the service load in custom with a default service item and a requirement to add to the database
         """

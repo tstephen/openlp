@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -29,4 +29,9 @@ class ValidationError(Exception):
     The :class:`~openlp.core.lib.exceptions.ValidationError` exception provides a custom exception for validating
     import files.
     """
-    pass
+
+    def __init__(self, msg="Validation Error"):
+        self.msg = msg
+
+    def __str__(self):
+        return '{error_message}'.format(error_message=self.msg)

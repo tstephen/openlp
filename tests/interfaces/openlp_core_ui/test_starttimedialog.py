@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,12 +23,13 @@
 Package to test the openlp.core.ui package.
 """
 from unittest import TestCase
+from unittest.mock import MagicMock, patch
 
 from PyQt5 import QtCore, QtTest, QtWidgets
 
 from openlp.core.common import Registry
 from openlp.core.ui import starttimeform
-from tests.interfaces import MagicMock, patch
+
 from tests.helpers.testmixin import TestMixin
 
 
@@ -51,7 +52,7 @@ class TestStartTimeDialog(TestCase, TestMixin):
         del self.form
         del self.main_window
 
-    def ui_defaults_test(self):
+    def test_ui_defaults(self):
         """
         Test StartTimeDialog are defaults correct
         """
@@ -78,7 +79,7 @@ class TestStartTimeDialog(TestCase, TestMixin):
         self.assertEqual(self.form.second_finish_spin_box.maximum(), 59,
                          'The maximum finish second should stay the same as the dialog')
 
-    def time_display_test(self):
+    def test_time_display(self):
         """
         Test StartTimeDialog display functionality
         """

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,10 +23,10 @@
 Package to test the openlp.core.lib.mediamanageritem package.
 """
 from unittest import TestCase
+from unittest.mock import MagicMock, patch
 
 from openlp.core.lib import MediaManagerItem
 
-from tests.functional import MagicMock, patch
 from tests.helpers.testmixin import TestMixin
 
 
@@ -44,7 +44,7 @@ class TestMediaManagerItem(TestCase, TestMixin):
 
     @patch(u'openlp.core.lib.mediamanageritem.Settings')
     @patch(u'openlp.core.lib.mediamanageritem.MediaManagerItem.on_preview_click')
-    def on_double_clicked_test(self, mocked_on_preview_click, MockedSettings):
+    def test_on_double_clicked(self, mocked_on_preview_click, MockedSettings):
         """
         Test that when an item is double-clicked then the item is previewed
         """
@@ -60,7 +60,7 @@ class TestMediaManagerItem(TestCase, TestMixin):
         # THEN: on_preview_click() should have been called
         mocked_on_preview_click.assert_called_with()
 
-    def required_icons_test(self):
+    def test_required_icons(self):
         """
         Test the default icons for plugins
         """
@@ -77,7 +77,7 @@ class TestMediaManagerItem(TestCase, TestMixin):
 
     @patch(u'openlp.core.lib.mediamanageritem.Settings')
     @patch(u'openlp.core.lib.mediamanageritem.MediaManagerItem.on_live_click')
-    def on_double_clicked_go_live_test(self, mocked_on_live_click, MockedSettings):
+    def test_on_double_clicked_go_live(self, mocked_on_live_click, MockedSettings):
         """
         Test that when "Double-click to go live" is enabled that the item goes live
         """
@@ -96,7 +96,7 @@ class TestMediaManagerItem(TestCase, TestMixin):
     @patch(u'openlp.core.lib.mediamanageritem.Settings')
     @patch(u'openlp.core.lib.mediamanageritem.MediaManagerItem.on_live_click')
     @patch(u'openlp.core.lib.mediamanageritem.MediaManagerItem.on_preview_click')
-    def on_double_clicked_single_click_preview_test(self, mocked_on_preview_click, mocked_on_live_click,
+    def test_on_double_clicked_single_click_preview(self, mocked_on_preview_click, mocked_on_live_click,
                                                     MockedSettings):
         """
         Test that when "Single-click preview" is enabled then nothing happens on double-click

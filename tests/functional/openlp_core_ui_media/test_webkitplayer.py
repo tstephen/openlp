@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,7 +23,7 @@
 Package to test the openlp.core.ui.media.webkitplayer package.
 """
 from unittest import TestCase
-from tests.functional import MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 from openlp.core.ui.media.webkitplayer import WebkitPlayer
 
@@ -33,7 +33,7 @@ class TestWebkitPlayer(TestCase):
     Test the functions in the :mod:`webkitplayer` module.
     """
 
-    def check_available_video_disabled_test(self):
+    def test_check_available_video_disabled(self):
         """
         Test of webkit video unavailability
         """
@@ -50,7 +50,7 @@ class TestWebkitPlayer(TestCase):
             self.assertEqual(False, available,
                              'The WebkitPlayer should not be available when video feature detection fails')
 
-    def check_available_video_enabled_test(self):
+    def test_check_available_video_enabled(self):
         """
         Test of webkit video availability
         """

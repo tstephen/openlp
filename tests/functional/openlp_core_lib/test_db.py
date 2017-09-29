@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -22,22 +22,39 @@
 """
 Package to test the openlp.core.lib package.
 """
-import os
+import shutil
+
+from tempfile import mkdtemp
 from unittest import TestCase
+from unittest.mock import patch, MagicMock
 
 from sqlalchemy.pool import NullPool
 from sqlalchemy.orm.scoping import ScopedSession
 from sqlalchemy import MetaData
 
-from openlp.core.lib.db import init_db, get_upgrade_op, delete_database
-from tests.functional import patch, MagicMock
+from openlp.core.common.path import Path
+from openlp.core.lib.db import init_db, get_upgrade_op, delete_database, upgrade_db
+from openlp.core.lib.projector import upgrade as pjlink_upgrade
 
 
 class TestDB(TestCase):
     """
     A test case for all the tests for the :mod:`~openlp.core.lib.db` module.
     """
-    def init_db_calls_correct_functions_test(self):
+    def setUp(self):
+        """
+        Set up anything necessary for all tests
+        """
+        self.tmp_folder = mkdtemp(prefix='openlp_')
+
+    def tearDown(self):
+        """
+        Clean up
+        """
+        # Ignore errors since windows can have problems with locked files
+        shutil.rmtree(self.tmp_folder, ignore_errors=True)
+
+    def test_init_db_calls_correct_functions(self):
         """
         Test that the init_db function makes the correct function calls
         """
@@ -67,7 +84,7 @@ class TestDB(TestCase):
             self.assertIs(session, mocked_scoped_session_object, 'The ``session`` object should be the mock')
             self.assertIs(metadata, mocked_metadata, 'The ``metadata`` object should be the mock')
 
-    def init_db_defaults_test(self):
+    def test_init_db_defaults(self):
         """
         Test that initialising an in-memory SQLite database via ``init_db`` uses the defaults
         """
@@ -81,7 +98,7 @@ class TestDB(TestCase):
         self.assertIsInstance(session, ScopedSession, 'The ``session`` object should be a ``ScopedSession`` instance')
         self.assertIsInstance(metadata, MetaData, 'The ``metadata`` object should be a ``MetaData`` instance')
 
-    def get_upgrade_op_test(self):
+    def test_get_upgrade_op(self):
         """
         Test that the ``get_upgrade_op`` function creates a MigrationContext and an Operations object
         """
@@ -105,17 +122,17 @@ class TestDB(TestCase):
             MockedMigrationContext.configure.assert_called_with(mocked_connection)
             MockedOperations.assert_called_with(mocked_context)
 
-    def delete_database_without_db_file_name_test(self):
+    def test_delete_database_without_db_file_name(self):
         """
         Test that the ``delete_database`` function removes a database file, without the file name parameter
         """
         # GIVEN: Mocked out AppLocation class and delete_file method, a test plugin name and a db location
         with patch('openlp.core.lib.db.AppLocation') as MockedAppLocation, \
                 patch('openlp.core.lib.db.delete_file') as mocked_delete_file:
-            MockedAppLocation.get_section_data_path.return_value = 'test-dir'
+            MockedAppLocation.get_section_data_path.return_value = Path('test-dir')
             mocked_delete_file.return_value = True
             test_plugin = 'test'
-            test_location = os.path.join('test-dir', test_plugin)
+            test_location = Path('test-dir', test_plugin)
 
             # WHEN: delete_database is run without a database file
             result = delete_database(test_plugin)
@@ -125,18 +142,18 @@ class TestDB(TestCase):
             mocked_delete_file.assert_called_with(test_location)
             self.assertTrue(result, 'The result of delete_file should be True (was rigged that way)')
 
-    def delete_database_with_db_file_name_test(self):
+    def test_delete_database_with_db_file_name(self):
         """
         Test that the ``delete_database`` function removes a database file, with the file name supplied
         """
         # GIVEN: Mocked out AppLocation class and delete_file method, a test plugin name and a db location
         with patch('openlp.core.lib.db.AppLocation') as MockedAppLocation, \
                 patch('openlp.core.lib.db.delete_file') as mocked_delete_file:
-            MockedAppLocation.get_section_data_path.return_value = 'test-dir'
+            MockedAppLocation.get_section_data_path.return_value = Path('test-dir')
             mocked_delete_file.return_value = False
             test_plugin = 'test'
             test_db_file = 'mydb.sqlite'
-            test_location = os.path.join('test-dir', test_db_file)
+            test_location = Path('test-dir', test_db_file)
 
             # WHEN: delete_database is run without a database file
             result = delete_database(test_plugin, test_db_file)
@@ -145,3 +162,17 @@ class TestDB(TestCase):
             MockedAppLocation.get_section_data_path.assert_called_with(test_plugin)
             mocked_delete_file.assert_called_with(test_location)
             self.assertFalse(result, 'The result of delete_file should be False (was rigged that way)')
+
+    @patch('tests.functional.openlp_core_lib.test_db.pjlink_upgrade')
+    def test_skip_db_upgrade_with_no_database(self, mocked_upgrade):
+        """
+        Test the upgrade_db function does not try to update a missing database
+        """
+        # GIVEN: Database URL that does not (yet) exist
+        url = 'sqlite:///{tmp}/test_db.sqlite'.format(tmp=self.tmp_folder)
+
+        # WHEN: We attempt to upgrade a non-existant database
+        upgrade_db(url, pjlink_upgrade)
+
+        # THEN: upgrade should NOT have been called
+        self.assertFalse(mocked_upgrade.called, 'Database upgrade function should NOT have been called')

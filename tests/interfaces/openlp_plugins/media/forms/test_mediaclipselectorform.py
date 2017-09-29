@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -22,9 +22,10 @@
 """
 Module to test the MediaClipSelectorForm.
 """
-
 import os
 from unittest import TestCase, SkipTest
+from unittest.mock import MagicMock, patch
+
 from openlp.core.ui.media.vlcplayer import get_vlc
 
 if os.name == 'nt' and not get_vlc():
@@ -34,7 +35,7 @@ from PyQt5 import QtTest, QtCore, QtWidgets
 
 from openlp.core.common import Registry
 from openlp.plugins.media.forms.mediaclipselectorform import MediaClipSelectorForm
-from tests.interfaces import MagicMock, patch
+
 from tests.helpers.testmixin import TestMixin
 
 
@@ -73,7 +74,7 @@ class TestMediaClipSelectorForm(TestCase, TestMixin):
         self.vlc_patcher.stop()
         del self.main_window
 
-    def basic_test(self):
+    def test_basic(self):
         """
         Test if the dialog is correctly set up.
         """
@@ -85,7 +86,7 @@ class TestMediaClipSelectorForm(TestCase, TestMixin):
             # THEN: The media path should be empty.
             assert self.form.media_path_combobox.currentText() == '', 'There should not be any text in the media path.'
 
-    def click_load_button_test(self):
+    def test_click_load_button(self):
         """
         Test that the correct function is called when load is clicked, and that it behaves as expected.
         """
@@ -126,7 +127,7 @@ class TestMediaClipSelectorForm(TestCase, TestMixin):
                 'The media path should be the given one.'
             mocked_critical_error_message_box.assert_called_with(message='VLC player failed playing the media')
 
-    def title_combobox_test(self):
+    def test_title_combobox(self):
         """
         Test the behavior when the title combobox is updated
         """
@@ -153,7 +154,7 @@ class TestMediaClipSelectorForm(TestCase, TestMixin):
             self.form.audio_tracks_combobox.itemData.assert_any_call(1)
             self.form.subtitle_tracks_combobox.itemData.assert_any_call(0)
 
-    def click_save_button_test(self):
+    def test_click_save_button(self):
         """
         Test that the correct function is called when save is clicked, and that it behaves as expected.
         """

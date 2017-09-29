@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -83,17 +83,27 @@ class SystemPlayer(MediaPlayer):
             elif mime_type.startswith('video/'):
                 self._add_to_list(self.video_extensions_list, mime_type)
 
-    def _add_to_list(self, mime_type_list, mimetype):
+    def _add_to_list(self, mime_type_list, mime_type):
         """
         Add mimetypes to the provided list
         """
         # Add all extensions which mimetypes provides us for supported types.
-        extensions = mimetypes.guess_all_extensions(str(mimetype))
+        extensions = mimetypes.guess_all_extensions(mime_type)
         for extension in extensions:
             ext = '*%s' % extension
             if ext not in mime_type_list:
                 mime_type_list.append(ext)
-        log.info('MediaPlugin: %s extensions: %s' % (mimetype, ' '.join(extensions)))
+        log.info('MediaPlugin: %s extensions: %s', mime_type, ' '.join(extensions))
+
+    def disconnect_slots(self, signal):
+        """
+        Safely disconnect the slots from `signal`
+        """
+        try:
+            signal.disconnect()
+        except TypeError:
+            # If disconnect() is called on a signal without slots, it throws a TypeError
+            pass
 
     def setup(self, display):
         """
@@ -160,6 +170,7 @@ class SystemPlayer(MediaPlayer):
         if start_time > 0:
             self.seek(display, controller.media_info.start_time * 1000)
         self.volume(display, controller.media_info.volume)
+        self.disconnect_slots(display.media_player.durationChanged)
         display.media_player.durationChanged.connect(functools.partial(self.set_duration, controller))
         self.set_state(MediaState.Playing, display)
         display.video_widget.raise_()
@@ -247,7 +258,7 @@ class SystemPlayer(MediaPlayer):
         :param display: The display where the media is
         """
         if display.media_player.state() == QtMultimedia.QMediaPlayer.PausedState and self.state != MediaState.Paused:
-            self.stop(display)
+            self.pause(display)
         controller = display.controller
         if controller.media_info.end_time > 0:
             if display.media_player.position() > controller.media_info.end_time:
@@ -284,25 +295,25 @@ class SystemPlayer(MediaPlayer):
         :return: True if file can be played otherwise False
         """
         thread = QtCore.QThread()
-        check_media_player = CheckMedia(path)
-        check_media_player.setVolume(0)
-        check_media_player.moveToThread(thread)
-        check_media_player.finished.connect(thread.quit)
-        thread.started.connect(check_media_player.play)
+        check_media_worker = CheckMediaWorker(path)
+        check_media_worker.setVolume(0)
+        check_media_worker.moveToThread(thread)
+        check_media_worker.finished.connect(thread.quit)
+        thread.started.connect(check_media_worker.play)
         thread.start()
         while thread.isRunning():
             self.application.processEvents()
-        return check_media_player.result
+        return check_media_worker.result
 
 
-class CheckMedia(QtMultimedia.QMediaPlayer):
+class CheckMediaWorker(QtMultimedia.QMediaPlayer):
     """
     Class used to check if a media file is playable
     """
     finished = QtCore.pyqtSignal()
 
     def __init__(self, path):
-        super(CheckMedia, self).__init__(None, QtMultimedia.QMediaPlayer.VideoSurface)
+        super(CheckMediaWorker, self).__init__(None, QtMultimedia.QMediaPlayer.VideoSurface)
         self.result = None
 
         self.error.connect(functools.partial(self.signals, 'error'))

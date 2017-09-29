@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -72,7 +72,7 @@ class SongProImport(SongImport):
         Receive a single file or a list of files to import.
         """
         self.encoding = None
-        with open(self.import_source, 'rt') as songs_file:
+        with open(self.import_source, 'rt', errors='ignore') as songs_file:
             self.import_wizard.progress_bar.setMaximum(0)
             tag = ''
             text = ''

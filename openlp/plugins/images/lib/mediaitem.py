@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -21,15 +21,16 @@
 ###############################################################################
 
 import logging
-import os
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from openlp.core.common import Registry, AppLocation, Settings, UiStrings, check_directory_exists, translate, \
     delete_file, get_images_filter
-from openlp.core.lib import ItemCapabilities, MediaManagerItem, ServiceItemContext, StringContent, TreeWidgetWithDnD,\
-    build_icon, check_item_selected, create_thumb, validate_thumb
+from openlp.core.common.path import Path
+from openlp.core.lib import ItemCapabilities, MediaManagerItem, ServiceItemContext, StringContent, build_icon, \
+    check_item_selected, create_thumb, validate_thumb
 from openlp.core.lib.ui import create_widget_action, critical_error_message_box
+from openlp.core.ui.lib.treewidgetwithdnd import TreeWidgetWithDnD
 from openlp.core.common.languagemanager import get_locale_key
 from openlp.plugins.images.forms import AddGroupForm, ChooseGroupForm
 from openlp.plugins.images.lib.db import ImageFilenames, ImageGroups
@@ -73,9 +74,9 @@ class ImageMediaItem(MediaManagerItem):
     def retranslateUi(self):
         self.on_new_prompt = translate('ImagePlugin.MediaItem', 'Select Image(s)')
         file_formats = get_images_filter()
-        self.on_new_file_masks = '%s;;%s (*)' % (file_formats, UiStrings().AllFiles)
-        self.add_group_action.setText(UiStrings().AddGroup)
-        self.add_group_action.setToolTip(UiStrings().AddGroup)
+        self.on_new_file_masks = '{formats};;{files} (*)'.format(formats=file_formats, files=UiStrings().AllFiles)
+        self.add_group_action.setText(UiStrings().AddGroupDot)
+        self.add_group_action.setToolTip(UiStrings().AddGroupDot)
         self.replace_action.setText(UiStrings().ReplaceBG)
         self.replace_action.setToolTip(UiStrings().ReplaceLiveBG)
         self.reset_action.setText(UiStrings().ResetBG)
@@ -97,11 +98,11 @@ class ImageMediaItem(MediaManagerItem):
         self.list_view.setIconSize(QtCore.QSize(88, 50))
         self.list_view.setIndentation(self.list_view.default_indentation)
         self.list_view.allow_internal_dnd = True
-        self.service_path = os.path.join(AppLocation.get_section_data_path(self.settings_section), 'thumbnails')
+        self.service_path = AppLocation.get_section_data_path(self.settings_section) / 'thumbnails'
         check_directory_exists(self.service_path)
         # Load images from the database
         self.load_full_list(
-            self.manager.get_all_objects(ImageFilenames, order_by_ref=ImageFilenames.filename), initial_load=True)
+            self.manager.get_all_objects(ImageFilenames, order_by_ref=ImageFilenames.file_path), initial_load=True)
 
     def add_list_view_to_toolbar(self):
         """
@@ -112,7 +113,7 @@ class ImageMediaItem(MediaManagerItem):
         self.list_view = TreeWidgetWithDnD(self, self.plugin.name)
         self.list_view.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
         self.list_view.setAlternatingRowColors(True)
-        self.list_view.setObjectName('%sTreeView' % self.plugin.name)
+        self.list_view.setObjectName('{name}TreeView'.format(name=self.plugin.name))
         # Add to pageLayout
         self.page_layout.addWidget(self.list_view)
         # define and add the context menu
@@ -126,21 +127,21 @@ class ImageMediaItem(MediaManagerItem):
             create_widget_action(self.list_view, separator=True)
         create_widget_action(
             self.list_view,
-            'listView%s%sItem' % (self.plugin.name.title(), StringContent.Preview.title()),
+            'listView{name}{preview}Item'.format(name=self.plugin.name.title(), preview=StringContent.Preview.title()),
             text=self.plugin.get_string(StringContent.Preview)['title'],
             icon=':/general/general_preview.png',
             can_shortcuts=True,
             triggers=self.on_preview_click)
         create_widget_action(
             self.list_view,
-            'listView%s%sItem' % (self.plugin.name.title(), StringContent.Live.title()),
+            'listView{name}{live}Item'.format(name=self.plugin.name.title(), live=StringContent.Live.title()),
             text=self.plugin.get_string(StringContent.Live)['title'],
             icon=':/general/general_live.png',
             can_shortcuts=True,
             triggers=self.on_live_click)
         create_widget_action(
             self.list_view,
-            'listView%s%sItem' % (self.plugin.name.title(), StringContent.Service.title()),
+            'listView{name}{service}Item'.format(name=self.plugin.name.title(), service=StringContent.Service.title()),
             can_shortcuts=True,
             text=self.plugin.get_string(StringContent.Service)['title'],
             icon=':/general/general_add.png',
@@ -156,7 +157,7 @@ class ImageMediaItem(MediaManagerItem):
         if self.has_delete_icon:
             create_widget_action(
                 self.list_view,
-                'listView%s%sItem' % (self.plugin.name.title(), StringContent.Delete.title()),
+                'listView{name}{delete}Item'.format(name=self.plugin.name.title(), delete=StringContent.Delete.title()),
                 text=self.plugin.get_string(StringContent.Delete)['title'],
                 icon=':/general/general_delete.png',
                 can_shortcuts=True, triggers=self.on_delete_click)
@@ -179,7 +180,7 @@ class ImageMediaItem(MediaManagerItem):
             text=UiStrings().AddGroup, icon=':/images/image_new_group.png', triggers=self.on_add_group_click)
         create_widget_action(
             self.list_view,
-            text=self.plugin.get_string(StringContent.Load)['tooltip'],
+            text=translate('ImagePlugin', 'Add new image(s)'),
             icon=':/general/general_open.png', triggers=self.on_file_click)
 
     def add_start_header_bar(self):
@@ -209,7 +210,7 @@ class ImageMediaItem(MediaManagerItem):
         """
         images = self.manager.get_all_objects(ImageFilenames, ImageFilenames.group_id == image_group.id)
         for image in images:
-            delete_file(os.path.join(self.service_path, os.path.split(image.filename)[1]))
+            delete_file(self.service_path / image.file_path.name)
             delete_file(self.generate_thumbnail_path(image))
             self.manager.delete_object(ImageFilenames, image.id)
         image_groups = self.manager.get_all_objects(ImageGroups, ImageGroups.parent_id == image_group.id)
@@ -232,7 +233,7 @@ class ImageMediaItem(MediaManagerItem):
                 if row_item:
                     item_data = row_item.data(0, QtCore.Qt.UserRole)
                     if isinstance(item_data, ImageFilenames):
-                        delete_file(os.path.join(self.service_path, row_item.text(0)))
+                        delete_file(self.service_path / row_item.text(0))
                         delete_file(self.generate_thumbnail_path(item_data))
                         if item_data.group_id == 0:
                             self.list_view.takeTopLevelItem(self.list_view.indexOfTopLevelItem(row_item))
@@ -244,10 +245,8 @@ class ImageMediaItem(MediaManagerItem):
                                 self.list_view.parent(),
                                 translate('ImagePlugin.MediaItem', 'Remove group'),
                                 translate('ImagePlugin.MediaItem',
-                                          'Are you sure you want to remove "%s" and everything in it?') %
-                                item_data.group_name,
-                                QtWidgets.QMessageBox.StandardButtons(QtWidgets.QMessageBox.Yes |
-                                                                      QtWidgets.QMessageBox.No)
+                                          'Are you sure you want to remove "{name}" and everything in it?'
+                                          ).format(name=item_data.group_name)
                         ) == QtWidgets.QMessageBox.Yes:
                             self.recursively_delete_group(item_data)
                             self.manager.delete_object(ImageGroups, row_item.data(0, QtCore.Qt.UserRole).id)
@@ -326,17 +325,19 @@ class ImageMediaItem(MediaManagerItem):
         """
         Generate a path to the thumbnail
 
-        :param image: An instance of ImageFileNames
-        :return: A path to the thumbnail of type str
+        :param openlp.plugins.images.lib.db.ImageFilenames image: The image to generate the thumbnail path for.
+        :return: A path to the thumbnail
+        :rtype: openlp.core.common.path.Path
         """
-        ext = os.path.splitext(image.filename)[1].lower()
-        return os.path.join(self.service_path, '{}{}'.format(str(image.id), ext))
+        ext = image.file_path.suffix.lower()
+        return self.service_path / '{name:d}{ext}'.format(name=image.id, ext=ext)
 
     def load_full_list(self, images, initial_load=False, open_group=None):
         """
         Replace the list of images and groups in the interface.
 
-        :param images: A List of Image Filenames objects that will be used to reload the mediamanager list.
+        :param list[openlp.plugins.images.lib.db.ImageFilenames] images: A List of Image Filenames objects that will be
+            used to reload the mediamanager list.
         :param initial_load: When set to False, the busy cursor and progressbar will be shown while loading images.
         :param open_group: ImageGroups object of the group that must be expanded after reloading the list in the
             interface.
@@ -352,34 +353,34 @@ class ImageMediaItem(MediaManagerItem):
             self.expand_group(open_group.id)
         # Sort the images by its filename considering language specific.
         # characters.
-        images.sort(key=lambda image_object: get_locale_key(os.path.split(str(image_object.filename))[1]))
-        for image_file in images:
-            log.debug('Loading image: %s', image_file.filename)
-            filename = os.path.split(image_file.filename)[1]
-            thumb = self.generate_thumbnail_path(image_file)
-            if not os.path.exists(image_file.filename):
+        images.sort(key=lambda image_object: get_locale_key(image_object.file_path.name))
+        for image in images:
+            log.debug('Loading image: {name}'.format(name=image.file_path))
+            file_name = image.file_path.name
+            thumbnail_path = self.generate_thumbnail_path(image)
+            if not image.file_path.exists():
                 icon = build_icon(':/general/general_delete.png')
             else:
-                if validate_thumb(image_file.filename, thumb):
-                    icon = build_icon(thumb)
+                if validate_thumb(image.file_path, thumbnail_path):
+                    icon = build_icon(thumbnail_path)
                 else:
-                    icon = create_thumb(image_file.filename, thumb)
-            item_name = QtWidgets.QTreeWidgetItem([filename])
-            item_name.setText(0, filename)
+                    icon = create_thumb(image.file_path, thumbnail_path)
+            item_name = QtWidgets.QTreeWidgetItem([file_name])
+            item_name.setText(0, file_name)
             item_name.setIcon(0, icon)
-            item_name.setToolTip(0, image_file.filename)
-            item_name.setData(0, QtCore.Qt.UserRole, image_file)
-            if image_file.group_id == 0:
+            item_name.setToolTip(0, str(image.file_path))
+            item_name.setData(0, QtCore.Qt.UserRole, image)
+            if image.group_id == 0:
                 self.list_view.addTopLevelItem(item_name)
             else:
-                group_items[image_file.group_id].addChild(item_name)
+                group_items[image.group_id].addChild(item_name)
             if not initial_load:
                 self.main_window.increment_progress_bar()
         if not initial_load:
             self.main_window.finished_progress_bar()
         self.application.set_normal_cursor()
 
-    def validate_and_load(self, files, target_group=None):
+    def validate_and_load(self, file_paths, target_group=None):
         """
         Process a list for files either from the File Dialog or from Drag and Drop.
         This method is overloaded from MediaManagerItem.
@@ -388,15 +389,15 @@ class ImageMediaItem(MediaManagerItem):
         :param target_group: The QTreeWidgetItem of the group that will be the parent of the added files
         """
         self.application.set_normal_cursor()
-        self.load_list(files, target_group)
-        last_dir = os.path.split(files[0])[0]
+        self.load_list(file_paths, target_group)
+        last_dir = file_paths[0].parent
         Settings().setValue(self.settings_section + '/last directory', last_dir)
 
-    def load_list(self, images, target_group=None, initial_load=False):
+    def load_list(self, image_paths, target_group=None, initial_load=False):
         """
         Add new images to the database. This method is called when adding images using the Add button or DnD.
 
-        :param images: A List of strings containing the filenames of the files to be loaded
+        :param list[openlp.core.common.Path] image_paths: A list of file paths to the images to be loaded
         :param target_group: The QTreeWidgetItem of the group that will be the parent of the added files
         :param initial_load: When set to False, the busy cursor and progressbar will be shown while loading images
         """
@@ -429,7 +430,7 @@ class ImageMediaItem(MediaManagerItem):
             else:
                 self.choose_group_form.existing_radio_button.setDisabled(False)
                 self.choose_group_form.group_combobox.setDisabled(False)
-            # Ask which group the images should be saved in
+            # Ask which group the image_paths should be saved in
             if self.choose_group_form.exec(selected_group=preselect_group):
                 if self.choose_group_form.nogroup_radio_button.isChecked():
                     # User chose 'No group'
@@ -461,33 +462,33 @@ class ImageMediaItem(MediaManagerItem):
             return
         # Initialize busy cursor and progress bar
         self.application.set_busy_cursor()
-        self.main_window.display_progress_bar(len(images))
-        # Save the new images in the database
-        self.save_new_images_list(images, group_id=parent_group.id, reload_list=False)
-        self.load_full_list(self.manager.get_all_objects(ImageFilenames, order_by_ref=ImageFilenames.filename),
+        self.main_window.display_progress_bar(len(image_paths))
+        # Save the new image_paths in the database
+        self.save_new_images_list(image_paths, group_id=parent_group.id, reload_list=False)
+        self.load_full_list(self.manager.get_all_objects(ImageFilenames, order_by_ref=ImageFilenames.file_path),
                             initial_load=initial_load, open_group=parent_group)
         self.application.set_normal_cursor()
 
-    def save_new_images_list(self, images_list, group_id=0, reload_list=True):
+    def save_new_images_list(self, image_paths, group_id=0, reload_list=True):
         """
         Convert a list of image filenames to ImageFilenames objects and save them in the database.
 
-        :param images_list: A List of strings containing image filenames
+        :param list[Path] image_paths: A List of file paths to image
         :param group_id: The ID of the group to save the images in
         :param reload_list: This boolean is set to True when the list in the interface should be reloaded after saving
             the new images
         """
-        for filename in images_list:
-            if not isinstance(filename, str):
+        for image_path in image_paths:
+            if not isinstance(image_path, Path):
                 continue
-            log.debug('Adding new image: %s', filename)
+            log.debug('Adding new image: {name}'.format(name=image_path))
             image_file = ImageFilenames()
             image_file.group_id = group_id
-            image_file.filename = str(filename)
+            image_file.file_path = image_path
             self.manager.save_object(image_file)
             self.main_window.increment_progress_bar()
-        if reload_list and images_list:
-            self.load_full_list(self.manager.get_all_objects(ImageFilenames, order_by_ref=ImageFilenames.filename))
+        if reload_list and image_paths:
+            self.load_full_list(self.manager.get_all_objects(ImageFilenames, order_by_ref=ImageFilenames.file_path))
 
     def dnd_move_internal(self, target):
         """
@@ -581,29 +582,29 @@ class ImageMediaItem(MediaManagerItem):
             return False
         # Find missing files
         for image in images:
-            if not os.path.exists(image.filename):
-                missing_items_file_names.append(image.filename)
+            if not image.file_path.exists():
+                missing_items_file_names.append(str(image.file_path))
         # We cannot continue, as all images do not exist.
         if not images:
             if not remote:
                 critical_error_message_box(
                     translate('ImagePlugin.MediaItem', 'Missing Image(s)'),
-                    translate('ImagePlugin.MediaItem', 'The following image(s) no longer exist: %s')
-                    % '\n'.join(missing_items_file_names))
+                    translate('ImagePlugin.MediaItem', 'The following image(s) no longer exist: {names}'
+                              ).format(names='\n'.join(missing_items_file_names)))
             return False
         # We have missing as well as existing images. We ask what to do.
         elif missing_items_file_names and QtWidgets.QMessageBox.question(
                 self, translate('ImagePlugin.MediaItem', 'Missing Image(s)'),
-                translate('ImagePlugin.MediaItem', 'The following image(s) no longer exist: %s\n'
-                          'Do you want to add the other images anyway?') % '\n'.join(missing_items_file_names),
-                QtWidgets.QMessageBox.StandardButtons(QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Yes)) == \
+                translate('ImagePlugin.MediaItem', 'The following image(s) no longer exist: {names}\n'
+                          'Do you want to add the other images anyway?'
+                          ).format(names='\n'.join(missing_items_file_names))) == \
                 QtWidgets.QMessageBox.No:
             return False
         # Continue with the existing images.
         for image in images:
-            name = os.path.split(image.filename)[1]
-            thumbnail = self.generate_thumbnail_path(image)
-            service_item.add_from_image(image.filename, name, background, thumbnail)
+            name = image.file_path.name
+            thumbnail_path = self.generate_thumbnail_path(image)
+            service_item.add_from_image(str(image.file_path), name, background, str(thumbnail_path))
         return True
 
     def check_group_exists(self, new_group):
@@ -640,7 +641,7 @@ class ImageMediaItem(MediaManagerItem):
             if not self.check_group_exists(new_group):
                 if self.manager.save_object(new_group):
                     self.load_full_list(self.manager.get_all_objects(
-                        ImageFilenames, order_by_ref=ImageFilenames.filename))
+                        ImageFilenames, order_by_ref=ImageFilenames.file_path))
                     self.expand_group(new_group.id)
                     self.fill_groups_combobox(self.choose_group_form.group_combobox)
                     self.fill_groups_combobox(self.add_group_form.parent_group_combobox)
@@ -675,9 +676,9 @@ class ImageMediaItem(MediaManagerItem):
             if not isinstance(bitem.data(0, QtCore.Qt.UserRole), ImageFilenames):
                 # Only continue when an image is selected.
                 return
-            filename = bitem.data(0, QtCore.Qt.UserRole).filename
-            if os.path.exists(filename):
-                if self.live_controller.display.direct_image(filename, background):
+            file_path = bitem.data(0, QtCore.Qt.UserRole).file_path
+            if file_path.exists():
+                if self.live_controller.display.direct_image(str(file_path), background):
                     self.reset_action.setVisible(True)
                 else:
                     critical_error_message_box(
@@ -687,22 +688,22 @@ class ImageMediaItem(MediaManagerItem):
                 critical_error_message_box(
                     UiStrings().LiveBGError,
                     translate('ImagePlugin.MediaItem', 'There was a problem replacing your background, '
-                              'the image file "%s" no longer exists.') % filename)
+                              'the image file "{name}" no longer exists.').format(name=file_path))
 
     def search(self, string, show_error=True):
         """
         Perform a search on the image file names.
 
-        :param string: The glob to search for
-        :param show_error: Unused.
+        :param str string: The glob to search for
+        :param bool show_error: Unused.
         """
         files = self.manager.get_all_objects(
-            ImageFilenames, filter_clause=ImageFilenames.filename.contains(string),
-            order_by_ref=ImageFilenames.filename)
+            ImageFilenames, filter_clause=ImageFilenames.file_path.contains(string),
+            order_by_ref=ImageFilenames.file_path)
         results = []
         for file_object in files:
-            filename = os.path.split(str(file_object.filename))[1]
-            results.append([file_object.filename, filename])
+            file_name = file_object.file_path.name
+            results.append([str(file_object.file_path), file_name])
         return results
 
     def create_item_from_id(self, item_id):
@@ -711,8 +712,9 @@ class ImageMediaItem(MediaManagerItem):
 
         :param item_id: Id to make live
         """
+        item_id = Path(item_id)
         item = QtWidgets.QTreeWidgetItem()
-        item_data = self.manager.get_object_filtered(ImageFilenames, ImageFilenames.filename == item_id)
-        item.setText(0, os.path.basename(item_data.filename))
+        item_data = self.manager.get_object_filtered(ImageFilenames, ImageFilenames.file_path == item_id)
+        item.setText(0, item_data.file_path.name)
         item.setData(0, QtCore.Qt.UserRole, item_data)
         return item

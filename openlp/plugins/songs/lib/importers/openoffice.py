@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -161,7 +161,7 @@ class OpenOfficeImport(SongImport):
             else:
                 self.import_wizard.increment_progress_bar('Processing file ' + file_path, 0)
         except AttributeError:
-            log.exception("open_ooo_file failed: %s", url)
+            log.exception("open_ooo_file failed: {url}".format(url=url))
         return
 
     def create_property(self, name, value):

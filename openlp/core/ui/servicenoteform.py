@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -25,7 +25,7 @@ The :mod:`~openlp.core.ui.servicenoteform` module contains the `ServiceNoteForm`
 from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.common import Registry, RegistryProperties, translate
-from openlp.core.lib import SpellTextEdit
+from openlp.core.ui.lib import SpellTextEdit
 from openlp.core.lib.ui import create_button_box
 
 
@@ -37,8 +37,8 @@ class ServiceNoteForm(QtWidgets.QDialog, RegistryProperties):
         """
         Constructor
         """
-        super(ServiceNoteForm, self).__init__(Registry().get('main_window'),
-                                              QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint)
+        super(ServiceNoteForm, self).__init__(Registry().get('main_window'), QtCore.Qt.WindowSystemMenuHint |
+                                              QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowCloseButtonHint)
         self.setupUi()
         self.retranslateUi()
 

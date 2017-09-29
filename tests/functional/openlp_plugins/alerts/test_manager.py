@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -22,12 +22,11 @@
 """
 This module contains tests for the CSV Bible importer.
 """
-
 import os
 import json
 from unittest import TestCase
+from unittest.mock import MagicMock, patch
 
-from tests.functional import MagicMock, patch
 from openlp.core.common.registry import Registry
 from openlp.plugins.alerts.lib.alertsmanager import AlertsManager
 
@@ -40,7 +39,7 @@ class TestAlertManager(TestCase):
         """
         Registry.create()
 
-    def remove_message_text_test(self):
+    def test_remove_message_text(self):
         """
         Test that Alerts are not triggered with empty strings
         """
@@ -54,7 +53,7 @@ class TestAlertManager(TestCase):
         # THEN: the display should not have been triggered
         self.assertFalse(alert_manager.display_alert.called, 'The Alert should not have been called')
 
-    def trigger_message_text_test(self):
+    def test_trigger_message_text(self):
         """
         Test that Alerts are triggered with a text string
         """
@@ -68,7 +67,7 @@ class TestAlertManager(TestCase):
         # THEN: the display should have been triggered
         self.assertTrue(alert_manager.display_alert.called, 'The Alert should have been called')
 
-    def line_break_message_text_test(self):
+    def test_line_break_message_text(self):
         """
         Test that Alerts are triggered with a text string but line breaks are removed
         """

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -22,58 +22,153 @@
 """
 Functional tests to test the AppLocation class and related methods.
 """
-
 from unittest import TestCase
+from unittest.mock import MagicMock, call, patch
 
-from openlp.core.common import check_directory_exists, de_hump, trace_error_handler, translate, is_win, is_macosx, \
-    is_linux, clean_button_text
-from tests.functional import MagicMock, patch
+from openlp.core.common import check_directory_exists, clean_button_text, de_hump, extension_loader, is_macosx, \
+    is_linux, is_win, path_to_module, trace_error_handler, translate
+from openlp.core.common.path import Path
 
 
 class TestCommonFunctions(TestCase):
     """
     A test suite to test out various functions in the openlp.core.common module.
     """
-    def check_directory_exists_test(self):
+    def test_check_directory_exists_dir_exists(self):
         """
-        Test the check_directory_exists() function
+        Test the check_directory_exists() function when the path already exists
         """
-        with patch('openlp.core.lib.os.path.exists') as mocked_exists, \
-                patch('openlp.core.lib.os.makedirs') as mocked_makedirs:
-            # GIVEN: A directory to check and a mocked out os.makedirs and os.path.exists
-            directory_to_check = 'existing/directory'
+        # GIVEN: A `Path` to check with patched out mkdir and exists methods
+        with patch.object(Path, 'exists') as mocked_exists, \
+                patch.object(Path, 'mkdir') as mocked_mkdir, \
+                patch('openlp.core.common.log'):
 
-            # WHEN: os.path.exists returns True and we check to see if the directory exists
+            # WHEN: `check_directory_exists` is called and the path exists
             mocked_exists.return_value = True
-            check_directory_exists(directory_to_check)
+            check_directory_exists(Path('existing', 'directory'))
 
-            # THEN: Only os.path.exists should have been called
-            mocked_exists.assert_called_with(directory_to_check)
-            self.assertIsNot(mocked_makedirs.called, 'os.makedirs should not have been called')
+            # THEN: The function should not attempt to create the directory
+            mocked_exists.assert_called_with()
+            self.assertFalse(mocked_mkdir.called)
 
-            # WHEN: os.path.exists returns False and we check the directory exists
+    def test_check_directory_exists_dir_doesnt_exists(self):
+        """
+        Test the check_directory_exists() function when the path does not already exist
+        """
+        # GIVEN: A `Path` to check with patched out mkdir and exists methods
+        with patch.object(Path, 'exists') as mocked_exists, \
+                patch.object(Path, 'mkdir') as mocked_mkdir, \
+                patch('openlp.core.common.log'):
+
+            # WHEN: `check_directory_exists` is called and the path does not exist
             mocked_exists.return_value = False
-            check_directory_exists(directory_to_check)
+            check_directory_exists(Path('existing', 'directory'))
 
-            # THEN: Both the mocked functions should have been called
-            mocked_exists.assert_called_with(directory_to_check)
-            mocked_makedirs.assert_called_with(directory_to_check)
+            # THEN: The directory should have been created
+            mocked_exists.assert_called_with()
+            mocked_mkdir.assert_called_with(parents=True)
 
-            # WHEN: os.path.exists raises an IOError
+    def test_check_directory_exists_dir_io_error(self):
+        """
+        Test the check_directory_exists() when an IOError is raised
+        """
+        # GIVEN: A `Path` to check with patched out mkdir and exists methods
+        with patch.object(Path, 'exists') as mocked_exists, \
+                patch.object(Path, 'mkdir'), \
+                patch('openlp.core.common.log') as mocked_logger:
+
+            # WHEN: An IOError is raised when checking the if the path exists.
             mocked_exists.side_effect = IOError()
-            check_directory_exists(directory_to_check)
+            check_directory_exists(Path('existing', 'directory'))
 
-            # THEN: We shouldn't get an exception though the mocked exists has been called
-            mocked_exists.assert_called_with(directory_to_check)
+            # THEN: The Error should have been logged
+            mocked_logger.exception.assert_called_once_with('failed to check if directory exists or create directory')
+
+    def test_check_directory_exists_dir_value_error(self):
+        """
+        Test the check_directory_exists() when an error other than IOError is raised
+        """
+        # GIVEN: A `Path` to check with patched out mkdir and exists methods
+        with patch.object(Path, 'exists') as mocked_exists, \
+                patch.object(Path, 'mkdir'), \
+                patch('openlp.core.common.log'):
 
             # WHEN: Some other exception is raised
             mocked_exists.side_effect = ValueError()
 
-            # THEN: check_directory_exists raises an exception
-            mocked_exists.assert_called_with(directory_to_check)
-            self.assertRaises(ValueError, check_directory_exists, directory_to_check)
+            # THEN: `check_directory_exists` raises an exception
+            self.assertRaises(ValueError, check_directory_exists, Path('existing', 'directory'))
 
-    def de_hump_conversion_test(self):
+    def test_extension_loader_no_files_found(self):
+        """
+        Test the `extension_loader` function when no files are found
+        """
+        # GIVEN: A mocked `Path.glob` method which does not match any files
+        with patch('openlp.core.common.AppLocation.get_directory', return_value=Path('/', 'app', 'dir', 'openlp')), \
+                patch.object(Path, 'glob', return_value=[]), \
+                patch('openlp.core.common.importlib.import_module') as mocked_import_module:
+
+            # WHEN: Calling `extension_loader`
+            extension_loader('glob', ['file2.py', 'file3.py'])
+
+            # THEN: `extension_loader` should not try to import any files
+            self.assertFalse(mocked_import_module.called)
+
+    def test_extension_loader_files_found(self):
+        """
+        Test the `extension_loader` function when it successfully finds and loads some files
+        """
+        # GIVEN: A mocked `Path.glob` method which returns a list of files
+        with patch('openlp.core.common.AppLocation.get_directory', return_value=Path('/', 'app', 'dir', 'openlp')), \
+                patch.object(Path, 'glob', return_value=[
+                    Path('/', 'app', 'dir', 'openlp', 'import_dir', 'file1.py'),
+                    Path('/', 'app', 'dir', 'openlp', 'import_dir', 'file2.py'),
+                    Path('/', 'app', 'dir', 'openlp', 'import_dir', 'file3.py'),
+                    Path('/', 'app', 'dir', 'openlp', 'import_dir', 'file4.py')]), \
+                patch('openlp.core.common.importlib.import_module') as mocked_import_module:
+
+            # WHEN: Calling `extension_loader` with a list of files to exclude
+            extension_loader('glob', ['file2.py', 'file3.py'])
+
+            # THEN: `extension_loader` should only try to import the files that are matched by the blob, excluding the
+            #       files listed in the `excluded_files` argument
+            mocked_import_module.assert_has_calls([call('openlp.import_dir.file1'), call('openlp.import_dir.file4')])
+
+    def test_extension_loader_import_error(self):
+        """
+        Test the `extension_loader` function when `SourceFileLoader` raises a `ImportError`
+        """
+        # GIVEN: A mocked `import_module` which raises an `ImportError`
+        with patch('openlp.core.common.AppLocation.get_directory', return_value=Path('/', 'app', 'dir', 'openlp')), \
+                patch.object(Path, 'glob', return_value=[
+                    Path('/', 'app', 'dir', 'openlp', 'import_dir', 'file1.py')]), \
+                patch('openlp.core.common.importlib.import_module', side_effect=ImportError()), \
+                patch('openlp.core.common.log') as mocked_logger:
+
+            # WHEN: Calling `extension_loader`
+            extension_loader('glob')
+
+            # THEN: The `ImportError` should be caught and logged
+            self.assertTrue(mocked_logger.warning.called)
+
+    def test_extension_loader_os_error(self):
+        """
+        Test the `extension_loader` function when `import_module` raises a `ImportError`
+        """
+        # GIVEN: A mocked `SourceFileLoader` which raises an `OSError`
+        with patch('openlp.core.common.AppLocation.get_directory', return_value=Path('/', 'app', 'dir', 'openlp')), \
+                patch.object(Path, 'glob', return_value=[
+                    Path('/', 'app', 'dir', 'openlp', 'import_dir', 'file1.py')]), \
+                patch('openlp.core.common.importlib.import_module', side_effect=OSError()), \
+                patch('openlp.core.common.log') as mocked_logger:
+
+            # WHEN: Calling `extension_loader`
+            extension_loader('glob')
+
+            # THEN: The `OSError` should be caught and logged
+            self.assertTrue(mocked_logger.warning.called)
+
+    def test_de_hump_conversion(self):
         """
         Test the de_hump function with a class name
         """
@@ -84,9 +179,9 @@ class TestCommonFunctions(TestCase):
         new_string = de_hump(string)
 
         # THEN: the new string should be converted to python format
-        self.assertTrue(new_string == "my_class", 'The class name should have been converted')
+        self.assertEqual(new_string, "my_class", 'The class name should have been converted')
 
-    def de_hump_static_test(self):
+    def test_de_hump_static(self):
         """
         Test the de_hump function with a python string
         """
@@ -97,9 +192,22 @@ class TestCommonFunctions(TestCase):
         new_string = de_hump(string)
 
         # THEN: the new string should be converted to python format
-        self.assertTrue(new_string == "my_class", 'The class name should have been preserved')
+        self.assertEqual(new_string, "my_class", 'The class name should have been preserved')
 
-    def trace_error_handler_test(self):
+    def test_path_to_module(self):
+        """
+        Test `path_to_module` when supplied with a `Path` object
+        """
+        # GIVEN: A `Path` object
+        path = Path('core', 'ui', 'media', 'webkitplayer.py')
+
+        # WHEN: Calling path_to_module with the `Path` object
+        result = path_to_module(path)
+
+        # THEN: path_to_module should return the module name
+        self.assertEqual(result, 'openlp.core.ui.media.webkitplayer')
+
+    def test_trace_error_handler(self):
         """
         Test the trace_error_handler() method
         """
@@ -115,7 +223,7 @@ class TestCommonFunctions(TestCase):
             mocked_logger.error.assert_called_with(
                 'OpenLP Error trace\n   File openlp.fake at line 56 \n\t called trace_error_handler_test')
 
-    def translate_test(self):
+    def test_translate(self):
         """
         Test the translate() function
         """
@@ -132,7 +240,7 @@ class TestCommonFunctions(TestCase):
         mocked_translate.assert_called_with(context, text, comment)
         self.assertEqual('Translated string', result, 'The translated string should have been returned')
 
-    def is_win_test(self):
+    def test_is_win(self):
         """
         Test the is_win() function
         """
@@ -148,7 +256,7 @@ class TestCommonFunctions(TestCase):
             self.assertFalse(is_macosx(), 'is_macosx() should return False')
             self.assertFalse(is_linux(), 'is_linux() should return False')
 
-    def is_macosx_test(self):
+    def test_is_macosx(self):
         """
         Test the is_macosx() function
         """
@@ -164,7 +272,7 @@ class TestCommonFunctions(TestCase):
             self.assertFalse(is_win(), 'is_win() should return False')
             self.assertFalse(is_linux(), 'is_linux() should return False')
 
-    def is_linux_test(self):
+    def test_is_linux(self):
         """
         Test the is_linux() function
         """
@@ -180,7 +288,7 @@ class TestCommonFunctions(TestCase):
             self.assertFalse(is_win(), 'is_win() should return False')
             self.assertFalse(is_macosx(), 'is_macosx() should return False')
 
-    def clean_button_text_test(self):
+    def test_clean_button_text(self):
         """
         Test the clean_button_text() function.
         """

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -24,14 +24,14 @@ Package to test the openlp.core.__init__ package.
 """
 import os
 from unittest import TestCase
+from unittest.mock import MagicMock, patch
 
 from PyQt5 import QtCore, QtWidgets
 
-from openlp.core import OpenLP, parse_options
+from openlp.core import OpenLP
 from openlp.core.common import Settings
 
 from tests.helpers.testmixin import TestMixin
-from tests.functional import MagicMock, patch, call
 
 TEST_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'resources'))
 
@@ -47,7 +47,7 @@ class TestInit(TestCase, TestMixin):
         self.destroy_settings()
         del self.openlp
 
-    def event_test(self):
+    def test_event(self):
         """
         Test the reimplemented event method
         """
@@ -66,7 +66,7 @@ class TestInit(TestCase, TestMixin):
         self.assertEqual(self.openlp.args[0], file_path, "The path should be in args.")
 
     @patch('openlp.core.is_macosx')
-    def application_activate_event_test(self, mocked_is_macosx):
+    def test_application_activate_event(self, mocked_is_macosx):
         """
         Test that clicking on the dock icon on Mac OS X restores the main window if it is minimized
         """
@@ -84,7 +84,7 @@ class TestInit(TestCase, TestMixin):
         self.assertTrue(result, "The method should have returned True.")
         # self.assertFalse(self.openlp.main_window.isMinimized())
 
-    def backup_on_upgrade_first_install_test(self):
+    def test_backup_on_upgrade_first_install(self):
         """
         Test that we don't try to backup on a new install
         """
@@ -96,19 +96,19 @@ class TestInit(TestCase, TestMixin):
             'build': 'bzr000'
         }
         Settings().setValue('core/application version', '2.2.0')
-        with patch('openlp.core.get_application_version') as mocked_get_application_version,\
+        with patch('openlp.core.get_version') as mocked_get_version,\
                 patch('openlp.core.QtWidgets.QMessageBox.question') as mocked_question:
-            mocked_get_application_version.return_value = MOCKED_VERSION
+            mocked_get_version.return_value = MOCKED_VERSION
             mocked_question.return_value = QtWidgets.QMessageBox.No
 
             # WHEN: We check if a backup should be created
-            self.openlp.backup_on_upgrade(old_install)
+            self.openlp.backup_on_upgrade(old_install, False)
 
             # THEN: It should not ask if we want to create a backup
             self.assertEqual(Settings().value('core/application version'), '2.2.0', 'Version should be the same!')
             self.assertEqual(mocked_question.call_count, 0, 'No question should have been asked!')
 
-    def backup_on_upgrade_test(self):
+    def test_backup_on_upgrade(self):
         """
         Test that we try to backup on a new install
         """
@@ -120,14 +120,18 @@ class TestInit(TestCase, TestMixin):
             'build': 'bzr000'
         }
         Settings().setValue('core/application version', '2.0.5')
-        with patch('openlp.core.get_application_version') as mocked_get_application_version,\
+        self.openlp.splash = MagicMock()
+        self.openlp.splash.isVisible.return_value = True
+        with patch('openlp.core.get_version') as mocked_get_version, \
                 patch('openlp.core.QtWidgets.QMessageBox.question') as mocked_question:
-            mocked_get_application_version.return_value = MOCKED_VERSION
+            mocked_get_version.return_value = MOCKED_VERSION
             mocked_question.return_value = QtWidgets.QMessageBox.No
 
             # WHEN: We check if a backup should be created
-            self.openlp.backup_on_upgrade(old_install)
+            self.openlp.backup_on_upgrade(old_install, True)
 
             # THEN: It should ask if we want to create a backup
             self.assertEqual(Settings().value('core/application version'), '2.2.0', 'Version should be upgraded!')
             self.assertEqual(mocked_question.call_count, 1, 'A question should have been asked!')
+            self.openlp.splash.hide.assert_called_once_with()
+            self.openlp.splash.show.assert_called_once_with()

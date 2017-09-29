@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -31,8 +31,6 @@ import bs4
 import sqlalchemy
 from PyQt5 import Qt, QtCore, QtGui, QtWebKit, QtWidgets
 from lxml import etree
-
-from openlp.core.common import RegistryProperties, is_linux
 
 try:
     import migrate
@@ -72,8 +70,9 @@ try:
 except ImportError:
     VLC_VERSION = '-'
 
-from openlp.core.common import Settings, UiStrings, translate
-from openlp.core.common.versionchecker import get_application_version
+from openlp.core.common import RegistryProperties, Settings, UiStrings, is_linux, translate
+from openlp.core.version import get_version
+from openlp.core.ui.lib.filedialog import FileDialog
 
 from .exceptiondialog import Ui_ExceptionDialog
 
@@ -92,11 +91,11 @@ class ExceptionForm(QtWidgets.QDialog, Ui_ExceptionDialog, RegistryProperties):
         self.setupUi(self)
         self.settings_section = 'crashreport'
         self.report_text = '**OpenLP Bug Report**\n' \
-            'Version: %s\n\n' \
-            '--- Details of the Exception. ---\n\n%s\n\n ' \
-            '--- Exception Traceback ---\n%s\n' \
-            '--- System information ---\n%s\n' \
-            '--- Library Versions ---\n%s\n'
+            'Version: {version}\n\n' \
+            '--- Details of the Exception. ---\n\n{description}\n\n ' \
+            '--- Exception Traceback ---\n{traceback}\n' \
+            '--- System information ---\n{system}\n' \
+            '--- Library Versions ---\n{libs}\n'
 
     def exec(self):
         """
@@ -111,24 +110,20 @@ class ExceptionForm(QtWidgets.QDialog, Ui_ExceptionDialog, RegistryProperties):
         """
         Create an exception report.
         """
-        openlp_version = get_application_version()
+        openlp_version = get_version()
         description = self.description_text_edit.toPlainText()
         traceback = self.exception_text_edit.toPlainText()
-        system = translate('OpenLP.ExceptionForm', 'Platform: %s\n') % platform.platform()
-        libraries = 'Python: %s\n' % platform.python_version() + \
-            'Qt5: %s\n' % Qt.qVersion() + \
-            'PyQt5: %s\n' % Qt.PYQT_VERSION_STR + \
-            'QtWebkit: %s\n' % WEBKIT_VERSION + \
-            'SQLAlchemy: %s\n' % sqlalchemy.__version__ + \
-            'SQLAlchemy Migrate: %s\n' % MIGRATE_VERSION + \
-            'BeautifulSoup: %s\n' % bs4.__version__ + \
-            'lxml: %s\n' % etree.__version__ + \
-            'Chardet: %s\n' % CHARDET_VERSION + \
-            'PyEnchant: %s\n' % ENCHANT_VERSION + \
-            'Mako: %s\n' % MAKO_VERSION + \
-            'pyICU: %s\n' % ICU_VERSION + \
-            'pyUNO bridge: %s\n' % self._pyuno_import() + \
-            'VLC: %s\n' % VLC_VERSION
+        system = translate('OpenLP.ExceptionForm', 'Platform: {platform}\n').format(platform=platform.platform())
+        libraries = ('Python: {python}\nQt5: {qt5}\nPyQt5: {pyqt5}\nQtWebkit: {qtwebkit}\nSQLAlchemy: {sqalchemy}\n'
+                     'SQLAlchemy Migrate: {migrate}\nBeautifulSoup: {soup}\nlxml: {etree}\nChardet: {chardet}\n'
+                     'PyEnchant: {enchant}\nMako: {mako}\npyICU: {icu}\npyUNO bridge: {uno}\n'
+                     'VLC: {vlc}\n').format(python=platform.python_version(), qt5=Qt.qVersion(),
+                                            pyqt5=Qt.PYQT_VERSION_STR, qtwebkit=WEBKIT_VERSION,
+                                            sqalchemy=sqlalchemy.__version__, migrate=MIGRATE_VERSION,
+                                            soup=bs4.__version__, etree=etree.__version__, chardet=CHARDET_VERSION,
+                                            enchant=ENCHANT_VERSION, mako=MAKO_VERSION, icu=ICU_VERSION,
+                                            uno=self._pyuno_import(), vlc=VLC_VERSION)
+
         if is_linux():
             if os.environ.get('KDE_FULL_SESSION') == 'true':
                 system += 'Desktop: KDE SC\n'
@@ -136,35 +131,29 @@ class ExceptionForm(QtWidgets.QDialog, Ui_ExceptionDialog, RegistryProperties):
                 system += 'Desktop: GNOME\n'
             elif os.environ.get('DESKTOP_SESSION') == 'xfce':
                 system += 'Desktop: Xfce\n'
-        return openlp_version, description, traceback, system, libraries
+        # NOTE: Keys match the expected input for self.report_text.format()
+        return {'version': openlp_version, 'description': description, 'traceback': traceback,
+                'system': system, 'libs': libraries}
 
     def on_save_report_button_clicked(self):
         """
         Saving exception log and system information to a file.
         """
-        filename = QtWidgets.QFileDialog.getSaveFileName(
+        file_path, filter_used = FileDialog.getSaveFileName(
             self,
             translate('OpenLP.ExceptionForm', 'Save Crash Report'),
             Settings().value(self.settings_section + '/last directory'),
-            translate('OpenLP.ExceptionForm', 'Text files (*.txt *.log *.text)'))[0]
-        if filename:
-            filename = str(filename).replace('/', os.path.sep)
-            Settings().setValue(self.settings_section + '/last directory', os.path.dirname(filename))
-            report_text = self.report_text % self._create_report()
+            translate('OpenLP.ExceptionForm', 'Text files (*.txt *.log *.text)'))
+        if file_path:
+            Settings().setValue(self.settings_section + '/last directory', file_path.parent)
+            opts = self._create_report()
+            report_text = self.report_text.format(version=opts['version'], description=opts['description'],
+                                                  traceback=opts['traceback'], libs=opts['libs'], system=opts['system'])
             try:
-                report_file = open(filename, 'w')
-                try:
+                with file_path.open('w') as report_file:
                     report_file.write(report_text)
-                except UnicodeError:
-                    report_file.close()
-                    report_file = open(filename, 'wb')
-                    report_file.write(report_text.encode('utf-8'))
-                finally:
-                    report_file.close()
             except IOError:
                 log.exception('Failed to write crash report')
-            finally:
-                report_file.close()
 
     def on_send_report_button_clicked(self):
         """
@@ -173,15 +162,19 @@ class ExceptionForm(QtWidgets.QDialog, Ui_ExceptionDialog, RegistryProperties):
         content = self._create_report()
         source = ''
         exception = ''
-        for line in content[2].split('\n'):
+        for line in content['traceback'].split('\n'):
             if re.search(r'[/\\]openlp[/\\]', line):
                 source = re.sub(r'.*[/\\]openlp[/\\](.*)".*', r'\1', line)
             if ':' in line:
                 exception = line.split('\n')[-1].split(':')[0]
-        subject = 'Bug report: %s in %s' % (exception, source)
+        subject = 'Bug report: {error} in {source}'.format(error=exception, source=source)
         mail_urlquery = QtCore.QUrlQuery()
         mail_urlquery.addQueryItem('subject', subject)
-        mail_urlquery.addQueryItem('body', self.report_text % content)
+        mail_urlquery.addQueryItem('body', self.report_text.format(version=content['version'],
+                                                                   description=content['description'],
+                                                                   traceback=content['traceback'],
+                                                                   system=content['system'],
+                                                                   libs=content['libs']))
         if self.file_attachment:
             mail_urlquery.addQueryItem('attach', self.file_attachment)
         mail_to_url = QtCore.QUrl('mailto:bugs@openlp.org')
@@ -194,26 +187,31 @@ class ExceptionForm(QtWidgets.QDialog, Ui_ExceptionDialog, RegistryProperties):
         """
         count = int(20 - len(self.description_text_edit.toPlainText()))
         if count < 0:
-            count = 0
             self.__button_state(True)
+            self.description_word_count.setText(
+                translate('OpenLP.ExceptionDialog', '<strong>Thank you for your description!</strong>'))
+        elif count == 20:
+            self.__button_state(False)
+            self.description_word_count.setText(
+                translate('OpenLP.ExceptionDialog', '<strong>Tell us what you were doing when this happened.</strong>'))
         else:
             self.__button_state(False)
-        self.description_word_count.setText(
-            translate('OpenLP.ExceptionDialog', 'Description characters to enter : %s') % count)
+            self.description_word_count.setText(
+                translate('OpenLP.ExceptionDialog', '<strong>Please enter a more detailed description of the situation'
+                                                    '</strong>'))
 
     def on_attach_file_button_clicked(self):
         """
-        Attache files to the bug report e-mail.
+        Attach files to the bug report e-mail.
         """
-        files, filter_used = QtWidgets.QFileDialog.getOpenFileName(self,
-                                                                   translate('ImagePlugin.ExceptionDialog',
-                                                                             'Select Attachment'),
-                                                                   Settings().value(self.settings_section +
-                                                                                    '/last directory'),
-                                                                   '%s (*)' % UiStrings().AllFiles)
-        log.info('New files(s) %s', str(files))
-        if files:
-            self.file_attachment = str(files)
+        file_path, filter_used = \
+            FileDialog.getOpenFileName(self,
+                                       translate('ImagePlugin.ExceptionDialog', 'Select Attachment'),
+                                       Settings().value(self.settings_section + '/last directory'),
+                                       '{text} (*)'.format(text=UiStrings().AllFiles))
+        log.info('New files {file_path}'.format(file_path=file_path))
+        if file_path:
+            self.file_attachment = str(file_path)
 
     def __button_state(self, state):
         """

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -48,7 +48,8 @@ class TestDB(TestCase):
         """
         Clean up after tests
         """
-        shutil.rmtree(self.tmp_folder)
+        # Ignore errors since windows can have problems with locked files
+        shutil.rmtree(self.tmp_folder, ignore_errors=True)
 
     def test_add_author(self):
         """

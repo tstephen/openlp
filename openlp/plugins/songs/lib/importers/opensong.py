@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -26,7 +26,7 @@ import re
 from lxml import objectify
 from lxml.etree import Error, LxmlError
 
-from openlp.core.common import translate
+from openlp.core.common import translate, Settings
 from openlp.plugins.songs.lib import VerseType
 from openlp.plugins.songs.lib.importers.songimport import SongImport
 from openlp.plugins.songs.lib.ui import SongStrings
@@ -87,7 +87,7 @@ class OpenSongImport(SongImport):
     All verses are imported and tagged appropriately.
 
     Guitar chords can be provided "above" the lyrics (the line is preceded by a period "."), and one or more "_" can
-    be used to signify long-drawn-out words. Chords and "_" are removed by this importer. For example::
+    be used to signify long-drawn-out words. For example::
 
         . A7        Bm
         1 Some____ Words
@@ -156,8 +156,8 @@ class OpenSongImport(SongImport):
                 ustring = str(root.__getattr__(attr))
                 if isinstance(fn_or_string, str):
                     if attr in ['ccli']:
+                        ustring = ''.join(re.findall('\d+', ustring))
                         if ustring:
-                            ustring = ''.join(re.findall('\d+', ustring))
                             setattr(self, fn_or_string, int(ustring))
                         else:
                             setattr(self, fn_or_string, None)
@@ -195,14 +195,34 @@ class OpenSongImport(SongImport):
             lyrics = str(root.lyrics)
         else:
             lyrics = ''
+        chords = []
         for this_line in lyrics.split('\n'):
             if not this_line.strip():
                 continue
             # skip this line if it is a comment
             if this_line.startswith(';'):
                 continue
-            # skip guitar chords and page and column breaks
-            if this_line.startswith('.') or this_line.startswith('---') or this_line.startswith('-!!'):
+            # skip page and column breaks
+            if this_line.startswith('---') or this_line.startswith('-!!'):
+                continue
+            # guitar chords marker
+            if this_line.startswith('.'):
+                # Find the position of the chords so they can be inserted in the lyrics
+                chords = []
+                this_line = this_line[1:]
+                chord = ''
+                i = 0
+                while i < len(this_line):
+                    if this_line[i] != ' ':
+                        chord_pos = i
+                        chord += this_line[i]
+                        i += 1
+                        while i < len(this_line) and this_line[i] != ' ':
+                            chord += this_line[i]
+                            i += 1
+                        chords.append((chord_pos, chord))
+                        chord = ''
+                    i += 1
                 continue
             # verse/chorus/etc. marker
             if this_line.startswith('['):
@@ -228,12 +248,20 @@ class OpenSongImport(SongImport):
             # number at start of line.. it's verse number
             if this_line[0].isdigit():
                 verse_num = this_line[0]
-                this_line = this_line[1:].strip()
+                this_line = this_line[1:]
             verses.setdefault(verse_tag, {})
             verses[verse_tag].setdefault(verse_num, {})
             if inst not in verses[verse_tag][verse_num]:
                 verses[verse_tag][verse_num][inst] = []
                 our_verse_order.append([verse_tag, verse_num, inst])
+            # If chords exists insert them
+            if chords and Settings().value('songs/enable chords') and not Settings().value(
+                    'songs/disable chords import'):
+                offset = 0
+                for (column, chord) in chords:
+                    this_line = '{pre}[{chord}]{post}'.format(pre=this_line[:offset + column], chord=chord,
+                                                              post=this_line[offset + column:])
+                    offset += len(chord) + 2
             # Tidy text and remove the ____s from extended words
             this_line = self.tidy_text(this_line)
             this_line = this_line.replace('_', '')
@@ -254,8 +282,8 @@ class OpenSongImport(SongImport):
             length = 0
             while length < len(verse_num) and verse_num[length].isnumeric():
                 length += 1
-            verse_def = '%s%s' % (verse_tag, verse_num[:length])
-            verse_joints[verse_def] = '%s\n[---]\n%s' % (verse_joints[verse_def], lines) \
+            verse_def = '{tag}{number}'.format(tag=verse_tag, number=verse_num[:length])
+            verse_joints[verse_def] = '{verse}\n[---]\n{lines}'.format(verse=verse_joints[verse_def], lines=lines) \
                 if verse_def in verse_joints else lines
         # Parsing the dictionary produces the elements in a non-intuitive order.  While it "works", it's not a
         # natural layout should the user come back to edit the song.  Instead we sort by the verse type, so that we
@@ -287,11 +315,11 @@ class OpenSongImport(SongImport):
                     verse_num = '1'
                 verse_index = VerseType.from_loose_input(verse_tag)
                 verse_tag = VerseType.tags[verse_index]
-                verse_def = '%s%s' % (verse_tag, verse_num)
+                verse_def = '{tag}{number}'.format(tag=verse_tag, number=verse_num)
                 if verse_num in verses.get(verse_tag, {}):
                     self.verse_order_list.append(verse_def)
                 else:
-                    log.info('Got order %s but not in verse tags, dropping this item from presentation order',
-                             verse_def)
+                    log.info('Got order {order} but not in verse tags, dropping this item from presentation '
+                             'order'.format(order=verse_def))
         if not self.finish():
             self.log_error(file.name)

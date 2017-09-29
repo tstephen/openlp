@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,6 +23,7 @@
 Module to test the EditCustomForm.
 """
 from unittest import TestCase
+from unittest.mock import MagicMock, call, patch
 
 from PyQt5 import QtCore, QtGui, QtTest, QtWidgets
 
@@ -58,7 +59,12 @@ class TestSearchEdit(TestCase, TestMixin):
         self.main_window = QtWidgets.QMainWindow()
         Registry().register('main_window', self.main_window)
 
-        self.search_edit = SearchEdit(self.main_window)
+        settings_patcher = patch(
+            'openlp.core.lib.searchedit.Settings', return_value=MagicMock(**{'value.return_value': SearchTypes.First}))
+        self.addCleanup(settings_patcher.stop)
+        self.mocked_settings = settings_patcher.start()
+
+        self.search_edit = SearchEdit(self.main_window, 'settings_section')
         # To complete set up we have to set the search types.
         self.search_edit.set_search_types(SEARCH_TYPES)
 
@@ -69,7 +75,7 @@ class TestSearchEdit(TestCase, TestMixin):
         del self.search_edit
         del self.main_window
 
-    def set_search_types_test(self):
+    def test_set_search_types(self):
         """
         Test setting the search types of the search edit.
         """
@@ -78,10 +84,13 @@ class TestSearchEdit(TestCase, TestMixin):
 
         # WHEN:
 
-        # THEN: The first search type should be the first one in the list.
-        assert self.search_edit.current_search_type() == SearchTypes.First, "The first search type should be selected."
+        # THEN: The first search type should be the first one in the list. The selected type should be saved in the
+        #       settings
+        self.assertEqual(self.search_edit.current_search_type(), SearchTypes.First,
+                         "The first search type should be selected.")
+        self.mocked_settings().setValue.assert_called_once_with('settings_section/last used search type', 0)
 
-    def set_current_search_type_test(self):
+    def test_set_current_search_type(self):
         """
         Test if changing the search type works.
         """
@@ -90,13 +99,15 @@ class TestSearchEdit(TestCase, TestMixin):
         result = self.search_edit.set_current_search_type(SearchTypes.Second)
 
         # THEN:
-        assert result, "The call should return success (True)."
-        assert self.search_edit.current_search_type() == SearchTypes.Second,\
-            "The search type should be SearchTypes.Second"
-        assert self.search_edit.placeholderText() == SECOND_PLACEHOLDER_TEXT,\
-            "The correct placeholder text should be 'Second Placeholder Text'."
+        self.assertTrue(result, "The call should return success (True).")
+        self.assertEqual(self.search_edit.current_search_type(), SearchTypes.Second,
+                         "The search type should be SearchTypes.Second")
+        self.assertEqual(self.search_edit.placeholderText(), SECOND_PLACEHOLDER_TEXT,
+                         "The correct placeholder text should be 'Second Placeholder Text'.")
+        self.mocked_settings().setValue.assert_has_calls(
+            [call('settings_section/last used search type', 0), call('settings_section/last used search type', 1)])
 
-    def clear_button_visibility_test(self):
+    def test_clear_button_visibility(self):
         """
         Test if the clear button is hidden/shown correctly.
         """
@@ -110,7 +121,7 @@ class TestSearchEdit(TestCase, TestMixin):
         # THEN: The clear button should not be hidden any more.
         assert not self.search_edit.clear_button.isHidden(), "The clear button should be visible."
 
-    def press_clear_button_test(self):
+    def test_press_clear_button(self):
         """
         Check if the search edit behaves correctly when pressing the clear button.
         """

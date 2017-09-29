@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -26,17 +26,17 @@ song files from third party applications.
 import json
 import logging
 from unittest import TestCase
+from unittest.mock import MagicMock, patch, call
 
-from openlp.plugins.songs.lib.importers.opensong import OpenSongImport
 from openlp.core.common import Registry
-from tests.functional import patch, MagicMock, call
+from openlp.plugins.songs.lib.importers.opensong import OpenSongImport
 
 log = logging.getLogger(__name__)
 
 
 class SongImportTestHelper(TestCase):
     """
-    This class is designed to be a helper class to reduce repition when testing the import of song files.
+    This class is designed to be a helper class to reduce repetition when testing the import of song files.
     """
     def __init__(self, *args, **kwargs):
         super(SongImportTestHelper, self).__init__(*args, **kwargs)

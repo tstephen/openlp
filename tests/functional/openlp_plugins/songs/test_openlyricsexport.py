@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -22,16 +22,16 @@
 """
 This module contains tests for the OpenLyrics song importer.
 """
-
 import os
 import shutil
-from unittest import TestCase
 from tempfile import mkdtemp
+from unittest import TestCase
+from unittest.mock import MagicMock, patch
 
-from tests.functional import MagicMock, patch
-from tests.helpers.testmixin import TestMixin
 from openlp.plugins.songs.lib.openlyricsexport import OpenLyricsExport
 from openlp.core.common import Registry
+
+from tests.helpers.testmixin import TestMixin
 
 
 class TestOpenLyricsExport(TestCase, TestMixin):
@@ -51,7 +51,7 @@ class TestOpenLyricsExport(TestCase, TestMixin):
         """
         shutil.rmtree(self.temp_folder)
 
-    def export_same_filename_test(self):
+    def test_export_same_filename(self):
         """
         Test that files is not overwritten if songs has same title and author
         """

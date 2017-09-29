@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,10 +23,12 @@
 This module contains tests for the lib submodule of the Presentations plugin.
 """
 from unittest import TestCase
+from unittest.mock import patch, MagicMock, call
 
 from openlp.core.common import Registry
+from openlp.core.common.path import Path
 from openlp.plugins.presentations.lib.mediaitem import PresentationMediaItem
-from tests.functional import patch, MagicMock, call
+
 from tests.helpers.testmixin import TestMixin
 
 
@@ -46,7 +48,7 @@ class TestMediaItem(TestCase, TestMixin):
             self.media_item = PresentationMediaItem(None, MagicMock, MagicMock())
         self.setup_application()
 
-    def build_file_mask_string_test(self):
+    def test_build_file_mask_string(self):
         """
         Test the build_file_mask_string() method
         """
@@ -85,23 +87,24 @@ class TestMediaItem(TestCase, TestMixin):
         self.assertIn('*.xps', self.media_item.on_new_file_masks, 'The file mask should contain the xps extension')
         self.assertIn('*.oxps', self.media_item.on_new_file_masks, 'The file mask should contain the oxps extension')
 
-    def clean_up_thumbnails_test(self):
+    def test_clean_up_thumbnails(self):
         """
         Test that the clean_up_thumbnails method works as expected when files exists.
         """
         # GIVEN: A mocked controller, and mocked os.path.getmtime
         mocked_controller = MagicMock()
-        mocked_doc = MagicMock()
+        mocked_doc = MagicMock(**{'get_thumbnail_path.return_value': Path()})
         mocked_controller.add_document.return_value = mocked_doc
         mocked_controller.supports = ['tmp']
         self.media_item.controllers = {
             'Mocked': mocked_controller
         }
-        presentation_file = 'file.tmp'
-        with patch('openlp.plugins.presentations.lib.mediaitem.os.path.getmtime') as mocked_getmtime, \
-                patch('openlp.plugins.presentations.lib.mediaitem.os.path.exists') as mocked_exists:
-            mocked_getmtime.side_effect = [100, 200]
-            mocked_exists.return_value = True
+
+        thmub_path = MagicMock(st_mtime=100)
+        file_path = MagicMock(st_mtime=400)
+        with patch.object(Path, 'stat', side_effect=[thmub_path, file_path]), \
+                patch.object(Path, 'exists', return_value=True):
+            presentation_file = Path('file.tmp')
 
             # WHEN: calling clean_up_thumbnails
             self.media_item.clean_up_thumbnails(presentation_file, True)
@@ -110,7 +113,7 @@ class TestMediaItem(TestCase, TestMixin):
         #       the presentation_file's mtime.
         mocked_doc.assert_has_calls([call.get_thumbnail_path(1, True), call.presentation_deleted()], True)
 
-    def clean_up_thumbnails_missing_file_test(self):
+    def test_clean_up_thumbnails_missing_file(self):
         """
         Test that the clean_up_thumbnails method works as expected when file is missing.
         """
@@ -122,9 +125,8 @@ class TestMediaItem(TestCase, TestMixin):
         self.media_item.controllers = {
             'Mocked': mocked_controller
         }
-        presentation_file = 'file.tmp'
-        with patch('openlp.plugins.presentations.lib.mediaitem.os.path.exists') as mocked_exists:
-            mocked_exists.return_value = False
+        presentation_file = Path('file.tmp')
+        with patch.object(Path, 'exists', return_value=False):
 
             # WHEN: calling clean_up_thumbnails
             self.media_item.clean_up_thumbnails(presentation_file, True)

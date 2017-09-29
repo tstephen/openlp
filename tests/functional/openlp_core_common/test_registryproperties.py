@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,9 +23,9 @@
 Test the registry properties
 """
 from unittest import TestCase
+from unittest.mock import MagicMock, patch
 
 from openlp.core.common import Registry, RegistryProperties
-from tests.functional import MagicMock
 
 
 class TestRegistryProperties(TestCase, RegistryProperties):
@@ -38,7 +38,7 @@ class TestRegistryProperties(TestCase, RegistryProperties):
         """
         Registry.create()
 
-    def no_application_test(self):
+    def test_no_application(self):
         """
         Test property if no registry value assigned
         """
@@ -47,13 +47,51 @@ class TestRegistryProperties(TestCase, RegistryProperties):
         # THEN the application should be none
         self.assertEqual(self.application, None, 'The application value should be None')
 
-    def application_test(self):
+    def test_application(self):
         """
         Test property if registry value assigned
         """
         # GIVEN an Empty Registry
         application = MagicMock()
+
         # WHEN the application is registered
         Registry().register('application', application)
+
         # THEN the application should be none
         self.assertEqual(self.application, application, 'The application value should match')
+
+    @patch('openlp.core.common.registryproperties.is_win')
+    def test_application_on_windows(self, mocked_is_win):
+        """
+        Test property if registry value assigned on Windows
+        """
+        # GIVEN an Empty Registry and we're on Windows
+        application = MagicMock()
+        mocked_is_win.return_value = True
+
+        # WHEN the application is registered
+        Registry().register('application', application)
+
+        # THEN the application should be none
+        self.assertEqual(self.application, application, 'The application value should match')
+
+    @patch('openlp.core.common.registryproperties.is_win')
+    def test_get_application_on_windows(self, mocked_is_win):
+        """
+        Set that getting the application object on Windows happens dynamically
+        """
+        # GIVEN an Empty Registry and we're on Windows
+        mocked_is_win.return_value = True
+        mock_application = MagicMock()
+        reg_props = RegistryProperties()
+        registry = Registry()
+
+        # WHEN the application is accessed
+        with patch.object(registry, 'get') as mocked_get:
+            mocked_get.return_value = mock_application
+            actual_application = reg_props.application
+
+        # THEN the application should be the mock object, and the correct function should have been called
+        self.assertEqual(mock_application, actual_application, 'The application value should match')
+        mocked_is_win.assert_called_with()
+        mocked_get.assert_called_with('application')

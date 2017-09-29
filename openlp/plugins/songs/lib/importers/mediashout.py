@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,12 +23,18 @@
 The :mod:`mediashout` module provides the functionality for importing
 a MediaShout database into the OpenLP database.
 """
+
+# WARNING: See https://docs.python.org/3/library/sqlite3.html for value substitution
+#          in SQL statements
+
 import pyodbc
+import logging
 
 from openlp.core.lib import translate
 from openlp.plugins.songs.lib.importers.songimport import SongImport
 
 VERSE_TAGS = ['V', 'C', 'B', 'O', 'P', 'I', 'E']
+log = logging.getLogger(__name__)
 
 
 class MediaShoutImport(SongImport):
@@ -40,17 +46,18 @@ class MediaShoutImport(SongImport):
         """
         Initialise the MediaShout importer.
         """
-        SongImport.__init__(self, manager, **kwargs)
+        super(MediaShoutImport, self).__init__(manager, **kwargs)
 
     def do_import(self):
         """
         Receive a single file to import.
         """
         try:
-            conn = pyodbc.connect('DRIVER={Microsoft Access Driver (*.mdb)};DBQ=%s;PWD=6NOZ4eHK7k' %
-                                  self.import_source)
-        except:
+            conn = pyodbc.connect('DRIVER={{Microsoft Access Driver (*.mdb)}};DBQ={source};'
+                                  'PWD=6NOZ4eHK7k'.format(source=self.import_source))
+        except Exception as e:
             # Unfortunately no specific exception type
+            log.exception(e)
             self.log_error(self.import_source, translate('SongsPlugin.MediaShoutImport',
                                                          'Unable to open the MediaShout database.'))
             return
@@ -59,18 +66,21 @@ class MediaShoutImport(SongImport):
         songs = cursor.fetchall()
         self.import_wizard.progress_bar.setMaximum(len(songs))
         for song in songs:
+            topics = []
             if self.stop_import_flag:
                 break
-            cursor.execute('SELECT Type, Number, Text FROM Verses WHERE Record = %s ORDER BY Type, Number'
-                           % song.Record)
+            cursor.execute('SELECT Type, Number, Text FROM Verses WHERE Record = ? ORDER BY Type, Number',
+                           float(song.Record))
             verses = cursor.fetchall()
-            cursor.execute('SELECT Type, Number, POrder FROM PlayOrder WHERE Record = %s ORDER BY POrder' % song.Record)
+            cursor.execute('SELECT Type, Number, POrder FROM PlayOrder WHERE Record = ? ORDER BY POrder',
+                           float(song.Record))
             verse_order = cursor.fetchall()
-            cursor.execute('SELECT Name FROM Themes INNER JOIN SongThemes ON SongThemes.ThemeId = Themes.ThemeId '
-                           'WHERE SongThemes.Record = %s' % song.Record)
-            topics = cursor.fetchall()
+            if cursor.tables(table='TableName', tableType='TABLE').fetchone():
+                cursor.execute('SELECT Name FROM Themes INNER JOIN SongThemes ON SongThemes.ThemeId = Themes.ThemeId '
+                               'WHERE SongThemes.Record = ?', float(song.Record))
+                topics = cursor.fetchall()
             cursor.execute('SELECT Name FROM Groups INNER JOIN SongGroups ON SongGroups.GroupId = Groups.GroupId '
-                           'WHERE SongGroups.Record = %s' % song.Record)
+                           'WHERE SongGroups.Record = ?', float(song.Record))
             topics += cursor.fetchall()
             self.process_song(song, verses, verse_order, topics)
 
@@ -91,7 +101,7 @@ class MediaShoutImport(SongImport):
             self.song_book_name = song.SongID
         for verse in verses:
             tag = VERSE_TAGS[verse.Type] + str(verse.Number) if verse.Type < len(VERSE_TAGS) else 'O'
-            self.add_verse(verse.Text, tag)
+            self.add_verse(self.tidy_text(verse.Text), tag)
         for order in verse_order:
             if order.Type < len(VERSE_TAGS):
                 self.verse_order_list.append(VERSE_TAGS[order.Type] + str(order.Number))

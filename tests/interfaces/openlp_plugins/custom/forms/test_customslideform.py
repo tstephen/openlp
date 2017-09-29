@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,12 +23,13 @@
 Module to test the EditCustomSlideForm.
 """
 from unittest import TestCase
+from unittest.mock import MagicMock, patch
 
 from PyQt5 import QtWidgets
 
 from openlp.core.common import Registry
 from openlp.plugins.custom.forms.editcustomslideform import EditCustomSlideForm
-from tests.interfaces import MagicMock, patch
+
 from tests.helpers.testmixin import TestMixin
 
 
@@ -53,7 +54,7 @@ class TestEditCustomSlideForm(TestCase, TestMixin):
         del self.form
         del self.main_window
 
-    def basic_test(self):
+    def test_basic(self):
         """
         Test if the dialog is correctly set up.
         """
@@ -65,7 +66,7 @@ class TestEditCustomSlideForm(TestCase, TestMixin):
             # THEN: The dialog should be empty.
             assert self.form.slide_text_edit.toPlainText() == '', 'There should not be any text in the text editor.'
 
-    def set_text_test(self):
+    def test_set_text(self):
         """
         Test the set_text() method.
         """

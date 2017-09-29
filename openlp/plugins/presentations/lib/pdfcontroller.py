@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -22,15 +22,14 @@
 
 import os
 import logging
-from tempfile import NamedTemporaryFile
 import re
-from shutil import which
-from subprocess import check_output, CalledProcessError, STDOUT
+from subprocess import check_output, CalledProcessError
 
-from openlp.core.common import AppLocation
-from openlp.core.common import Settings, is_win, trace_error_handler
+from openlp.core.common import AppLocation, check_binary_exists
+from openlp.core.common import Settings, is_win
+from openlp.core.common.path import which
 from openlp.core.lib import ScreenList
-from .presentationcontroller import PresentationController, PresentationDocument
+from openlp.plugins.presentations.lib.presentationcontroller import PresentationController, PresentationDocument
 
 if is_win():
     from subprocess import STARTUPINFO, STARTF_USESHOWWINDOW
@@ -61,31 +60,17 @@ class PdfController(PresentationController):
         self.check_installed()
 
     @staticmethod
-    def check_binary(program_path):
+    def process_check_binary(program_path):
         """
         Function that checks whether a binary is either ghostscript or mudraw or neither.
         Is also used from presentationtab.py
 
-        :param program_path:The full path to the binary to check.
+        :param openlp.core.common.path.Path program_path: The full path to the binary to check.
         :return: Type of the binary, 'gs' if ghostscript, 'mudraw' if mudraw, None if invalid.
+        :rtype: str | None
         """
         program_type = None
-        runlog = ''
-        log.debug('testing program_path: %s', program_path)
-        try:
-            # Setup startupinfo options for check_output to avoid console popping up on windows
-            if is_win():
-                startupinfo = STARTUPINFO()
-                startupinfo.dwFlags |= STARTF_USESHOWWINDOW
-            else:
-                startupinfo = None
-            runlog = check_output([program_path, '--help'], stderr=STDOUT, startupinfo=startupinfo)
-        except CalledProcessError as e:
-            runlog = e.output
-        except Exception:
-            trace_error_handler(log)
-            runlog = ''
-        log.debug('check_output returned: %s' % runlog)
+        runlog = check_binary_exists(program_path)
         # Analyse the output to see it the program is mudraw, ghostscript or neither
         for line in runlog.splitlines():
             decoded_line = line.decode()
@@ -93,11 +78,17 @@ class PdfController(PresentationController):
             if found_mudraw:
                 program_type = 'mudraw'
                 break
+            found_mutool = re.search('usage: mutool.*', decoded_line, re.IGNORECASE)
+            if found_mutool:
+                # Test that mutool contains mudraw
+                if re.search(r'draw\s+--\s+convert document.*', runlog.decode(), re.IGNORECASE | re.MULTILINE):
+                    program_type = 'mutool'
+                    break
             found_gs = re.search('GPL Ghostscript.*', decoded_line, re.IGNORECASE)
             if found_gs:
                 program_type = 'gs'
                 break
-        log.debug('in check_binary, found: %s', program_type)
+        log.debug('in check_binary, found: {text}'.format(text=program_type))
         return program_type
 
     def check_available(self):
@@ -116,38 +107,47 @@ class PdfController(PresentationController):
         :return: True if program to open PDF-files was found, otherwise False.
         """
         log.debug('check_installed Pdf')
-        self.mudrawbin = ''
-        self.gsbin = ''
+        self.mudrawbin = None
+        self.mutoolbin = None
+        self.gsbin = None
         self.also_supports = []
         # Use the user defined program if given
         if Settings().value('presentations/enable_pdf_program'):
-            pdf_program = Settings().value('presentations/pdf_program')
-            program_type = self.check_binary(pdf_program)
+            program_path = Settings().value('presentations/pdf_program')
+            program_type = self.process_check_binary(program_path)
             if program_type == 'gs':
-                self.gsbin = pdf_program
+                self.gsbin = program_path
             elif program_type == 'mudraw':
-                self.mudrawbin = pdf_program
+                self.mudrawbin = program_path
+            elif program_type == 'mutool':
+                self.mutoolbin = program_path
         else:
             # Fallback to autodetection
             application_path = AppLocation.get_directory(AppLocation.AppDir)
             if is_win():
-                # for windows we only accept mudraw.exe in the base folder
-                application_path = AppLocation.get_directory(AppLocation.AppDir)
-                if os.path.isfile(os.path.join(application_path, 'mudraw.exe')):
-                    self.mudrawbin = os.path.join(application_path, 'mudraw.exe')
+                # for windows we only accept mudraw.exe or mutool.exe in the base folder
+                if (application_path / 'mudraw.exe').is_file():
+                    self.mudrawbin = application_path / 'mudraw.exe'
+                elif (application_path / 'mutool.exe').is_file():
+                    self.mutoolbin = application_path / 'mutool.exe'
             else:
                 DEVNULL = open(os.devnull, 'wb')
-                # First try to find mupdf
+                # First try to find mudraw
                 self.mudrawbin = which('mudraw')
-                # if mupdf isn't installed, fallback to ghostscript
+                # if mudraw isn't installed, try mutool
                 if not self.mudrawbin:
-                    self.gsbin = which('gs')
-                # Last option: check if mudraw is placed in OpenLP base folder
-                if not self.mudrawbin and not self.gsbin:
+                    self.mutoolbin = which('mutool')
+                    # Check we got a working mutool
+                    if not self.mutoolbin or self.process_check_binary(self.mutoolbin) != 'mutool':
+                        self.gsbin = which('gs')
+                # Last option: check if mudraw or mutool is placed in OpenLP base folder
+                if not self.mudrawbin and not self.mutoolbin and not self.gsbin:
                     application_path = AppLocation.get_directory(AppLocation.AppDir)
-                    if os.path.isfile(os.path.join(application_path, 'mudraw')):
-                        self.mudrawbin = os.path.join(application_path, 'mudraw')
-        if self.mudrawbin:
+                    if (application_path / 'mudraw').is_file():
+                        self.mudrawbin = application_path / 'mudraw'
+                    elif (application_path / 'mutool').is_file():
+                        self.mutoolbin = application_path / 'mutool'
+        if self.mudrawbin or self.mutoolbin:
             self.also_supports = ['xps', 'oxps']
             return True
         elif self.gsbin:
@@ -171,12 +171,15 @@ class PdfDocument(PresentationDocument):
     image-serviceitem on the fly and present as such. Therefore some of the 'playback'
     functions is not implemented.
     """
-    def __init__(self, controller, presentation):
+    def __init__(self, controller, document_path):
         """
         Constructor, store information about the file and initialise.
+
+        :param openlp.core.common.path.Path document_path: Path to the document to load
+        :rtype: None
         """
         log.debug('Init Presentation Pdf')
-        PresentationDocument.__init__(self, controller, presentation)
+        super().__init__(controller, document_path)
         self.presentation = None
         self.blanked = False
         self.hidden = False
@@ -200,12 +203,12 @@ class PdfDocument(PresentationDocument):
         """
         # Use a postscript script to get size of the pdf. It is assumed that all pages have same size
         gs_resolution_script = AppLocation.get_directory(
-            AppLocation.PluginsDir) + '/presentations/lib/ghostscript_get_resolution.ps'
+            AppLocation.PluginsDir) / 'presentations' / 'lib' / 'ghostscript_get_resolution.ps'
         # Run the script on the pdf to get the size
         runlog = []
         try:
-            runlog = check_output([self.controller.gsbin, '-dNOPAUSE', '-dNODISPLAY', '-dBATCH',
-                                   '-sFile=' + self.file_path, gs_resolution_script],
+            runlog = check_output([str(self.controller.gsbin), '-dNOPAUSE', '-dNODISPLAY', '-dBATCH',
+                                   '-sFile={file_path}'.format(file_path=self.file_path), str(gs_resolution_script)],
                                   startupinfo=self.startupinfo)
         except CalledProcessError as e:
             log.debug(' '.join(e.cmd))
@@ -215,8 +218,8 @@ class PdfDocument(PresentationDocument):
         height = 0.0
         for line in runlog.splitlines():
             try:
-                width = float(re.search('.*Size: x: (\d+\.?\d*), y: \d+.*', line.decode()).group(1))
-                height = float(re.search('.*Size: x: \d+\.?\d*, y: (\d+\.?\d*).*', line.decode()).group(1))
+                width = float(re.search(r'.*Size: x: (\d+\.?\d*), y: \d+.*', line.decode()).group(1))
+                height = float(re.search(r'.*Size: x: \d+\.?\d*, y: (\d+\.?\d*).*', line.decode()).group(1))
                 break
             except AttributeError:
                 continue
@@ -239,37 +242,47 @@ class PdfDocument(PresentationDocument):
         :return: True is loading succeeded, otherwise False.
         """
         log.debug('load_presentation pdf')
+        temp_dir_path = self.get_temp_folder()
         # Check if the images has already been created, and if yes load them
-        if os.path.isfile(os.path.join(self.get_temp_folder(), 'mainslide001.png')):
-            created_files = sorted(os.listdir(self.get_temp_folder()))
-            for fn in created_files:
-                if os.path.isfile(os.path.join(self.get_temp_folder(), fn)):
-                    self.image_files.append(os.path.join(self.get_temp_folder(), fn))
+        if (temp_dir_path / 'mainslide001.png').is_file():
+            created_files = sorted(temp_dir_path.glob('*'))
+            for image_path in created_files:
+                if image_path.is_file():
+                    self.image_files.append(image_path)
             self.num_pages = len(self.image_files)
             return True
         size = ScreenList().current['size']
         # Generate images from PDF that will fit the frame.
         runlog = ''
         try:
-            if not os.path.isdir(self.get_temp_folder()):
-                os.makedirs(self.get_temp_folder())
+            if not temp_dir_path.is_dir():
+                temp_dir_path.mkdir(parents=True)
+            # The %03d in the file name is handled by each binary
             if self.controller.mudrawbin:
-                runlog = check_output([self.controller.mudrawbin, '-w', str(size.width()), '-h', str(size.height()),
-                                       '-o', os.path.join(self.get_temp_folder(), 'mainslide%03d.png'), self.file_path],
+                log.debug('loading presentation using mudraw')
+                runlog = check_output([str(self.controller.mudrawbin), '-w', str(size.width()),
+                                       '-h', str(size.height()),
+                                       '-o', str(temp_dir_path / 'mainslide%03d.png'), str(self.file_path)],
+                                      startupinfo=self.startupinfo)
+            elif self.controller.mutoolbin:
+                log.debug('loading presentation using mutool')
+                runlog = check_output([str(self.controller.mutoolbin), 'draw', '-w', str(size.width()),
+                                       '-h', str(size.height()), '-o', str(temp_dir_path / 'mainslide%03d.png'),
+                                       str(self.file_path)],
                                       startupinfo=self.startupinfo)
             elif self.controller.gsbin:
+                log.debug('loading presentation using gs')
                 resolution = self.gs_get_resolution(size)
-                runlog = check_output([self.controller.gsbin, '-dSAFER', '-dNOPAUSE', '-dBATCH', '-sDEVICE=png16m',
-                                       '-r' + str(resolution), '-dTextAlphaBits=4', '-dGraphicsAlphaBits=4',
-                                       '-sOutputFile=' + os.path.join(self.get_temp_folder(), 'mainslide%03d.png'),
-                                       self.file_path], startupinfo=self.startupinfo)
-            created_files = sorted(os.listdir(self.get_temp_folder()))
-            for fn in created_files:
-                if os.path.isfile(os.path.join(self.get_temp_folder(), fn)):
-                    self.image_files.append(os.path.join(self.get_temp_folder(), fn))
+                runlog = check_output([str(self.controller.gsbin), '-dSAFER', '-dNOPAUSE', '-dBATCH', '-sDEVICE=png16m',
+                                       '-r{res}'.format(res=resolution), '-dTextAlphaBits=4', '-dGraphicsAlphaBits=4',
+                                       '-sOutputFile={output}'.format(output=temp_dir_path / 'mainslide%03d.png'),
+                                       str(self.file_path)], startupinfo=self.startupinfo)
+            created_files = sorted(temp_dir_path.glob('*'))
+            for image_path in created_files:
+                if image_path.is_file():
+                    self.image_files.append(image_path)
         except Exception as e:
-            log.debug(e)
-            log.debug(runlog)
+            log.exception(runlog)
             return False
         self.num_pages = len(self.image_files)
         # Create thumbnails

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -44,7 +44,8 @@ class ShortcutListForm(QtWidgets.QDialog, Ui_ShortcutListDialog, RegistryPropert
         """
         Constructor
         """
-        super(ShortcutListForm, self).__init__(parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint)
+        super(ShortcutListForm, self).__init__(parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint |
+                                               QtCore.Qt.WindowCloseButtonHint)
         self.setupUi(self)
         self.changed_actions = {}
         self.action_list = ActionList.get_instance()
@@ -279,9 +280,7 @@ class ShortcutListForm(QtWidgets.QDialog, Ui_ShortcutListDialog, RegistryPropert
             return
         if QtWidgets.QMessageBox.question(self, translate('OpenLP.ShortcutListDialog', 'Restore Default Shortcuts'),
                                           translate('OpenLP.ShortcutListDialog', 'Do you want to restore all '
-                                                    'shortcuts to their defaults?'),
-                                          QtWidgets.QMessageBox.StandardButtons(QtWidgets.QMessageBox.Yes |
-                                                                                QtWidgets.QMessageBox.No)
+                                                    'shortcuts to their defaults?')
                                           ) == QtWidgets.QMessageBox.No:
             return
         self._adjust_button(self.primary_push_button, False, text='')
@@ -425,11 +424,12 @@ class ShortcutListForm(QtWidgets.QDialog, Ui_ShortcutListDialog, RegistryPropert
                 if changing_action.shortcutContext() in [QtCore.Qt.WindowShortcut, QtCore.Qt.ApplicationShortcut]:
                     is_valid = False
         if not is_valid:
+            text = translate('OpenLP.ShortcutListDialog',
+                             'The shortcut "{key}" is already assigned to another action,\n'
+                             'please use a different shortcut.'
+                             ).format(key=self.get_shortcut_string(key_sequence))
             self.main_window.warning_message(translate('OpenLP.ShortcutListDialog', 'Duplicate Shortcut'),
-                                             translate('OpenLP.ShortcutListDialog',
-                                                       'The shortcut "%s" is already assigned to another action, please'
-                                                       ' use a different shortcut.') %
-                                             self.get_shortcut_string(key_sequence, for_display=True))
+                                             text)
             self.dialog_was_shown = True
         return is_valid
 

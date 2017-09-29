@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -22,9 +22,9 @@
 """
 The :mod:`~openlp.core.ui.media.webkit` module contains our WebKit video player
 """
-from PyQt5 import QtGui, QtWebKitWidgets
-
 import logging
+
+from PyQt5 import QtGui, QtWebKitWidgets
 
 from openlp.core.common import Settings
 from openlp.core.lib import translate
@@ -45,7 +45,7 @@ VIDEO_CSS = """
 """
 
 VIDEO_JS = """
-    function show_video(state, path, volume, loop, variable_value){
+    function show_video(state, path, volume, variable_value){
         // Sometimes  video.currentTime stops slightly short of video.duration and video.ended is intermittent!
 
         var video = document.getElementById('video');
@@ -55,9 +55,6 @@ VIDEO_JS = """
         switch(state){
             case 'load':
                 video.src = 'file:///' + path;
-                if(loop == true) {
-                    video.loop = true;
-                }
                 video.load();
                 break;
             case 'play':
@@ -180,12 +177,8 @@ class WebkitPlayer(MediaPlayer):
         else:
             vol = 0
         path = controller.media_info.file_info.absoluteFilePath()
-        if controller.media_info.is_background:
-            loop = 'true'
-        else:
-            loop = 'false'
         display.web_view.setVisible(True)
-        js = 'show_video("load", "%s", %s, %s);' % (path.replace('\\', '\\\\'), str(vol), loop)
+        js = 'show_video("load", "{path}", {vol});'.format(path=path.replace('\\', '\\\\'), vol=str(vol))
         display.frame.evaluateJavaScript(js)
         return True
 

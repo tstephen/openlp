@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,11 +23,14 @@
 Functional tests to test the AppLocation class and related methods.
 """
 import os
+from io import BytesIO
 from unittest import TestCase
+from unittest.mock import MagicMock, PropertyMock, call, patch
 
-from openlp.core.common import add_actions, get_uno_instance, get_uno_command, delete_file, get_filesystem_encoding, \
-    split_filename, clean_filename
-from tests.functional import MagicMock, patch
+from openlp.core.common import add_actions, clean_filename, delete_file, get_file_encoding, get_filesystem_encoding,  \
+    get_uno_command, get_uno_instance, split_filename
+from openlp.core.common.path import Path
+
 from tests.helpers.testmixin import TestMixin
 
 
@@ -48,7 +51,7 @@ class TestInit(TestCase, TestMixin):
         """
         self.destroy_settings()
 
-    def add_actions_empty_list_test(self):
+    def test_add_actions_empty_list(self):
         """
         Test that no actions are added when the list is empty
         """
@@ -63,7 +66,7 @@ class TestInit(TestCase, TestMixin):
         self.assertEqual(0, mocked_target.addSeparator.call_count, 'addSeparator method should not have been called')
         self.assertEqual(0, mocked_target.addAction.call_count, 'addAction method should not have been called')
 
-    def add_actions_none_action_test(self):
+    def test_add_actions_none_action(self):
         """
         Test that a separator is added when a None action is in the list
         """
@@ -78,7 +81,7 @@ class TestInit(TestCase, TestMixin):
         mocked_target.addSeparator.assert_called_with()
         self.assertEqual(0, mocked_target.addAction.call_count, 'addAction method should not have been called')
 
-    def add_actions_add_action_test(self):
+    def test_add_actions_add_action(self):
         """
         Test that an action is added when a valid action is in the list
         """
@@ -93,7 +96,7 @@ class TestInit(TestCase, TestMixin):
         self.assertEqual(0, mocked_target.addSeparator.call_count, 'addSeparator method should not have been called')
         mocked_target.addAction.assert_called_with('action')
 
-    def add_actions_action_and_none_test(self):
+    def test_add_actions_action_and_none(self):
         """
         Test that an action and a separator are added when a valid action and None are in the list
         """
@@ -108,7 +111,7 @@ class TestInit(TestCase, TestMixin):
         mocked_target.addSeparator.assert_called_with()
         mocked_target.addAction.assert_called_with('action')
 
-    def get_uno_instance_pipe_test(self):
+    def test_get_uno_instance_pipe(self):
         """
         Test that when the UNO connection type is "pipe" the resolver is given the "pipe" URI
         """
@@ -121,7 +124,7 @@ class TestInit(TestCase, TestMixin):
         # THEN: the resolve method is called with the correct argument
         mock_resolver.resolve.assert_called_with('uno:pipe,name=openlp_pipe;urp;StarOffice.ComponentContext')
 
-    def get_uno_instance_socket_test(self):
+    def test_get_uno_instance_socket(self):
         """
         Test that when the UNO connection type is other than "pipe" the resolver is given the "socket" URI
         """
@@ -134,7 +137,7 @@ class TestInit(TestCase, TestMixin):
         # THEN: the resolve method is called with the correct argument
         mock_resolver.resolve.assert_called_with('uno:socket,host=localhost,port=2002;urp;StarOffice.ComponentContext')
 
-    def get_uno_command_libreoffice_command_exists_test(self):
+    def test_get_uno_command_libreoffice_command_exists(self):
         """
         Test the ``get_uno_command`` function uses the libreoffice command when available.
         :return:
@@ -151,7 +154,7 @@ class TestInit(TestCase, TestMixin):
                               'libreoffice --nologo --norestore --minimized --nodefault --nofirststartwizard'
                               ' "--accept=pipe,name=openlp_pipe;urp;"')
 
-    def get_uno_command_only_soffice_command_exists_test(self):
+    def test_get_uno_command_only_soffice_command_exists(self):
         """
         Test the ``get_uno_command`` function uses the soffice command when the libreoffice command is not available.
         :return:
@@ -169,7 +172,7 @@ class TestInit(TestCase, TestMixin):
             self.assertEquals(result, 'soffice --nologo --norestore --minimized --nodefault --nofirststartwizard'
                                       ' "--accept=pipe,name=openlp_pipe;urp;"')
 
-    def get_uno_command_when_no_command_exists_test(self):
+    def test_get_uno_command_when_no_command_exists(self):
         """
         Test the ``get_uno_command`` function raises an FileNotFoundError when neither the libreoffice or soffice
         commands are available.
@@ -183,7 +186,7 @@ class TestInit(TestCase, TestMixin):
             # THEN: a FileNotFoundError exception should be raised
             self.assertRaises(FileNotFoundError, get_uno_command)
 
-    def get_uno_command_connection_type_test(self):
+    def test_get_uno_command_connection_type(self):
         """
         Test the ``get_uno_command`` function when the connection type is anything other than pipe.
         :return:
@@ -198,7 +201,7 @@ class TestInit(TestCase, TestMixin):
             self.assertEqual(result, 'libreoffice --nologo --norestore --minimized --nodefault --nofirststartwizard'
                                      ' "--accept=socket,host=localhost,port=2002;urp;"')
 
-    def get_filesystem_encoding_sys_function_not_called_test(self):
+    def test_get_filesystem_encoding_sys_function_not_called(self):
         """
         Test the get_filesystem_encoding() function does not call the sys.getdefaultencoding() function
         """
@@ -215,7 +218,7 @@ class TestInit(TestCase, TestMixin):
             self.assertEqual(0, mocked_getdefaultencoding.called, 'getdefaultencoding should not have been called')
             self.assertEqual('cp1252', result, 'The result should be "cp1252"')
 
-    def get_filesystem_encoding_sys_function_is_called_test(self):
+    def test_get_filesystem_encoding_sys_function_is_called(self):
         """
         Test the get_filesystem_encoding() function calls the sys.getdefaultencoding() function
         """
@@ -233,7 +236,7 @@ class TestInit(TestCase, TestMixin):
             mocked_getdefaultencoding.assert_called_with()
             self.assertEqual('utf-8', result, 'The result should be "utf-8"')
 
-    def split_filename_with_file_path_test(self):
+    def test_split_filename_with_file_path(self):
         """
         Test the split_filename() function with a path to a file
         """
@@ -253,7 +256,7 @@ class TestInit(TestCase, TestMixin):
             # THEN: A tuple should be returned.
             self.assertEqual(wanted_result, result, 'A tuple with the dir and file name should have been returned')
 
-    def split_filename_with_dir_path_test(self):
+    def test_split_filename_with_dir_path(self):
         """
         Test the split_filename() function with a path to a directory
         """
@@ -274,7 +277,7 @@ class TestInit(TestCase, TestMixin):
             self.assertEqual(wanted_result, result,
                              'A two-entry tuple with the directory and file name (empty) should have been returned.')
 
-    def clean_filename_test(self):
+    def test_clean_filename(self):
         """
         Test the clean_filename() function
         """
@@ -288,18 +291,18 @@ class TestInit(TestCase, TestMixin):
         # THEN: The file name should be cleaned.
         self.assertEqual(wanted_name, result, 'The file name should not contain any special characters.')
 
-    def delete_file_no_path_test(self):
+    def test_delete_file_no_path(self):
         """
         Test the delete_file function when called with out a valid path
         """
         # GIVEN: A blank path
         # WEHN: Calling delete_file
-        result = delete_file('')
+        result = delete_file(None)
 
         # THEN: delete_file should return False
-        self.assertFalse(result, "delete_file should return False when called with ''")
+        self.assertFalse(result, "delete_file should return False when called with None")
 
-    def delete_file_path_success_test(self):
+    def test_delete_file_path_success(self):
         """
         Test the delete_file function when it successfully deletes a file
         """
@@ -307,36 +310,99 @@ class TestInit(TestCase, TestMixin):
         with patch('openlp.core.common.os', **{'path.exists.return_value': False}):
 
             # WHEN: Calling delete_file with a file path
-            result = delete_file('path/file.ext')
+            result = delete_file(Path('path', 'file.ext'))
 
             # THEN: delete_file should return True
             self.assertTrue(result, 'delete_file should return True when it successfully deletes a file')
 
-    def delete_file_path_no_file_exists_test(self):
+    def test_delete_file_path_no_file_exists(self):
         """
-        Test the delete_file function when the file to remove does not exist
+        Test the `delete_file` function when the file to remove does not exist
         """
-        # GIVEN: A mocked os which returns False when os.path.exists is called
-        with patch('openlp.core.common.os', **{'path.exists.return_value': False}):
+        # GIVEN: A patched `exists` methods on the Path object, which returns False
+        with patch.object(Path, 'exists', return_value=False), \
+                patch.object(Path, 'unlink') as mocked_unlink:
 
-            # WHEN: Calling delete_file with a file path
-            result = delete_file('path/file.ext')
+            # WHEN: Calling `delete_file with` a file path
+            result = delete_file(Path('path', 'file.ext'))
 
-            # THEN: delete_file should return True
+            # THEN: The function should not attempt to delete the file and it should return True
+            self.assertFalse(mocked_unlink.called)
             self.assertTrue(result, 'delete_file should return True when the file doesnt exist')
 
-    def delete_file_path_exception_test(self):
+    def test_delete_file_path_exception(self):
         """
-        Test the delete_file function when os.remove raises an exception
+        Test the delete_file function when an exception is raised
         """
-        # GIVEN: A mocked os which returns True when os.path.exists is called and raises an OSError when os.remove is
+        # GIVEN: A test `Path` object with a patched exists method which raises an OSError
         #       called.
-        with patch('openlp.core.common.os', **{'path.exists.return_value': True, 'path.exists.side_effect': OSError}), \
+        with patch.object(Path, 'exists') as mocked_exists, \
+                patch('openlp.core.common.log') as mocked_log:
+            mocked_exists.side_effect = OSError
+
+            # WHEN: Calling delete_file with a the test Path object
+            result = delete_file(Path('path', 'file.ext'))
+
+            # THEN: The exception should be logged and `delete_file` should return False
+            self.assertTrue(mocked_log.exception.called)
+            self.assertFalse(result, 'delete_file should return False when an OSError is raised')
+
+    def test_get_file_encoding_done_test(self):
+        """
+        Test get_file_encoding when the detector sets done to True
+        """
+        # GIVEN: A mocked UniversalDetector instance with done attribute set to True after first iteration
+        with patch('openlp.core.common.UniversalDetector') as mocked_universal_detector, \
+                patch.object(Path, 'open', return_value=BytesIO(b"data" * 260)) as mocked_open:
+            encoding_result = {'encoding': 'UTF-8', 'confidence': 0.99}
+            mocked_universal_detector_inst = MagicMock(result=encoding_result)
+            type(mocked_universal_detector_inst).done = PropertyMock(side_effect=[False, True])
+            mocked_universal_detector.return_value = mocked_universal_detector_inst
+
+            # WHEN: Calling get_file_encoding
+            result = get_file_encoding(Path('file name'))
+
+            # THEN: The feed method of UniversalDetector should only br called once before returning a result
+            mocked_open.assert_called_once_with('rb')
+            self.assertEqual(mocked_universal_detector_inst.feed.mock_calls, [call(b"data" * 256)])
+            mocked_universal_detector_inst.close.assert_called_once_with()
+            self.assertEqual(result, encoding_result)
+
+    def test_get_file_encoding_eof_test(self):
+        """
+        Test get_file_encoding when the end of the file is reached
+        """
+        # GIVEN: A mocked UniversalDetector instance which isn't set to done and a mocked open, with 1040 bytes of test
+        #       data (enough to run the iterator twice)
+        with patch('openlp.core.common.UniversalDetector') as mocked_universal_detector, \
+                patch.object(Path, 'open', return_value=BytesIO(b"data" * 260)) as mocked_open:
+            encoding_result = {'encoding': 'UTF-8', 'confidence': 0.99}
+            mocked_universal_detector_inst = MagicMock(mock=mocked_universal_detector,
+                                                       **{'done': False, 'result': encoding_result})
+            mocked_universal_detector.return_value = mocked_universal_detector_inst
+
+            # WHEN: Calling get_file_encoding
+            result = get_file_encoding(Path('file name'))
+
+            # THEN: The feed method of UniversalDetector should have been called twice before returning a result
+            mocked_open.assert_called_once_with('rb')
+            self.assertEqual(mocked_universal_detector_inst.feed.mock_calls, [call(b"data" * 256), call(b"data" * 4)])
+            mocked_universal_detector_inst.close.assert_called_once_with()
+            self.assertEqual(result, encoding_result)
+
+    def test_get_file_encoding_oserror_test(self):
+        """
+        Test get_file_encoding when the end of the file is reached
+        """
+        # GIVEN: A mocked UniversalDetector instance which isn't set to done and a mocked open, with 1040 bytes of test
+        #       data (enough to run the iterator twice)
+        with patch('openlp.core.common.UniversalDetector'), \
+                patch('builtins.open', side_effect=OSError), \
                 patch('openlp.core.common.log') as mocked_log:
 
-            # WHEN: Calling delete_file with a file path
-            result = delete_file('path/file.ext')
+            # WHEN: Calling get_file_encoding
+            result = get_file_encoding(Path('file name'))
 
-            # THEN: delete_file should log and exception and return False
-            self.assertEqual(mocked_log.exception.call_count, 1)
-            self.assertFalse(result, 'delete_file should return False when os.remove raises an OSError')
+            # THEN: log.exception should be called and get_file_encoding should return None
+            mocked_log.exception.assert_called_once_with('Error detecting file encoding')
+            self.assertIsNone(result)

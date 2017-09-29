@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,10 +23,10 @@
 Functional tests to test the Bible Manager class and related methods.
 """
 from unittest import TestCase
+from unittest.mock import MagicMock, patch
 
 from openlp.core.common import Registry, Settings
 from openlp.plugins.bibles.lib import BibleManager, LanguageSelection
-from tests.interfaces import MagicMock, patch
 
 from tests.utils.constants import TEST_RESOURCES_PATH
 from tests.helpers.testmixin import TestMixin
@@ -38,6 +38,7 @@ class TestBibleManager(TestCase, TestMixin):
         """
         Set up the environment for testing bible queries with 1 Timothy 3
         """
+        self.setup_application()
         self.build_settings()
         Registry.create()
         Registry().register('service_list', MagicMock())
@@ -69,7 +70,7 @@ class TestBibleManager(TestCase, TestMixin):
         del self.manager
         self.destroy_settings()
 
-    def get_books_test(self):
+    def test_get_books(self):
         """
         Test the get_books method
         """
@@ -79,7 +80,7 @@ class TestBibleManager(TestCase, TestMixin):
         # THEN a list of books should be returned
         self.assertEqual(66, len(books), 'There should be 66 books in the bible')
 
-    def get_book_by_id_test(self):
+    def test_get_book_by_id(self):
         """
         Test the get_book_by_id method
         """
@@ -89,7 +90,7 @@ class TestBibleManager(TestCase, TestMixin):
         # THEN a book should be returned
         self.assertEqual('1 Timothy', book.name, '1 Timothy should have been returned from the bible')
 
-    def get_chapter_count_test(self):
+    def test_get_chapter_count(self):
         """
         Test the get_chapter_count method
         """
@@ -100,7 +101,7 @@ class TestBibleManager(TestCase, TestMixin):
         # THEN the chapter count should be returned
         self.assertEqual(6, chapter, '1 Timothy should have 6 chapters returned from the bible')
 
-    def get_verse_count_by_book_ref_id_test(self):
+    def test_get_verse_count_by_book_ref_id(self):
         """
         Test the get_verse_count_by_book_ref_id method
         """

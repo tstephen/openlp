@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,16 +23,9 @@
 Package to test the openlp.core.ui.formattingtagsform package.
 """
 from unittest import TestCase
-
-from tests.functional import MagicMock, patch, call
+from unittest.mock import MagicMock, patch, call
 
 from openlp.core.ui.formattingtagform import FormattingTagForm
-
-# TODO: Tests Still TODO
-# __init__
-# exec
-# on_saved_clicked
-# _reloadTable
 
 
 class TestFormattingTagForm(TestCase):
@@ -50,7 +43,7 @@ class TestFormattingTagForm(TestCase):
         """
         self.setup_patcher.stop()
 
-    def on_row_selected_test(self):
+    def test_on_row_selected(self):
         """
         Test that the appropriate actions are preformed when on_row_selected is called
         """
@@ -64,7 +57,7 @@ class TestFormattingTagForm(TestCase):
         # THEN: setEnabled and should have been called on delete_button
         form.delete_button.setEnabled.assert_called_with(True)
 
-    def on_new_clicked_test(self):
+    def test_on_new_clicked(self):
         """
         Test that clicking the Add a new tag button does the right thing
         """

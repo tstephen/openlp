@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -32,7 +32,7 @@ TEST_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../', '..',
 
 class TestRegistryMixin(TestCase):
 
-    def registry_mixin_missing_test(self):
+    def test_registry_mixin_missing(self):
         """
         Test the registry creation and its usage
         """
@@ -45,7 +45,7 @@ class TestRegistryMixin(TestCase):
         # THEN: The following methods are missing
         self.assertEqual(len(Registry().functions_list), 0), 'The function should not be in the dict anymore.'
 
-    def registry_mixin_present_test(self):
+    def test_registry_mixin_present(self):
         """
         Test the registry creation and its usage
         """

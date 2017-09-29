@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,15 +23,15 @@
 This module contains tests for the lib submodule of the Images plugin.
 """
 from unittest import TestCase
+from unittest.mock import MagicMock, patch
+
 from PyQt5 import QtWidgets
 
-from openlp.core.common import Settings
-
-from openlp.core.common import Registry
+from openlp.core.common import Registry, Settings
 from openlp.plugins.images.lib.db import ImageFilenames, ImageGroups
 from openlp.plugins.images.lib.mediaitem import ImageMediaItem
 from openlp.plugins.images.lib import ImageTab
-from tests.functional import MagicMock, patch
+
 from tests.helpers.testmixin import TestMixin
 
 __default_settings__ = {
@@ -66,7 +66,7 @@ class TestImageMediaItem(TestCase, TestMixin):
         del self.form
         self.destroy_settings()
 
-    def save_tab_nochange_test_test(self):
+    def test_save_tab_nochange(self):
         """
         Test no changes does not trigger post processing
         """
@@ -78,7 +78,7 @@ class TestImageMediaItem(TestCase, TestMixin):
         self.assertEqual(0, self.form.settings_form.register_post_process.call_count,
                          'Image Post processing should not have been requested')
 
-    def save_tab_change_test_test(self):
+    def test_save_tab_change(self):
         """
         Test a color change is applied and triggers post processing.
         """

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -22,11 +22,13 @@
 
 import re
 
+from string import Template
 from PyQt5 import QtGui, QtCore, QtWebKitWidgets
 
 from openlp.core.common import Registry, RegistryProperties, OpenLPMixin, RegistryMixin, Settings
+from openlp.core.common.path import path_to_str
 from openlp.core.lib import FormattingTags, ImageSource, ItemCapabilities, ScreenList, ServiceItem, expand_tags, \
-    build_lyrics_format_css, build_lyrics_outline_css
+    build_lyrics_format_css, build_lyrics_outline_css, build_chords_css
 from openlp.core.common import ThemeLevel
 from openlp.core.ui import MainDisplay
 
@@ -107,7 +109,7 @@ class Renderer(OpenLPMixin, RegistryMixin, RegistryProperties):
 
         :param theme_name: The theme name
         """
-        self.log_debug("_set_theme with theme %s" % theme_name)
+        self.log_debug("_set_theme with theme {theme}".format(theme=theme_name))
         if theme_name not in self._theme_dimensions:
             theme_data = self.theme_manager.get_theme_data(theme_name)
             main_rect = self.get_main_rectangle(theme_data)
@@ -117,7 +119,7 @@ class Renderer(OpenLPMixin, RegistryMixin, RegistryProperties):
             theme_data, main_rect, footer_rect = self._theme_dimensions[theme_name]
         # if No file do not update cache
         if theme_data.background_filename:
-            self.image_manager.add_image(theme_data.background_filename,
+            self.image_manager.add_image(path_to_str(theme_data.background_filename),
                                          ImageSource.Theme, QtGui.QColor(theme_data.background_border_color))
 
     def pre_render(self, override_theme_data=None):
@@ -183,7 +185,7 @@ class Renderer(OpenLPMixin, RegistryMixin, RegistryProperties):
 
         :param item_theme_name: The item theme's name.
         """
-        self.log_debug("set_item_theme with theme %s" % item_theme_name)
+        self.log_debug("set_item_theme with theme {theme}".format(theme=item_theme_name))
         self._set_theme(item_theme_name)
         self.item_theme_name = item_theme_name
 
@@ -206,8 +208,8 @@ class Renderer(OpenLPMixin, RegistryMixin, RegistryProperties):
         service_item.raw_footer = FOOTER
         # if No file do not update cache
         if theme_data.background_filename:
-            self.image_manager.add_image(
-                theme_data.background_filename, ImageSource.Theme, QtGui.QColor(theme_data.background_border_color))
+            self.image_manager.add_image(path_to_str(theme_data.background_filename),
+                                         ImageSource.Theme, QtGui.QColor(theme_data.background_border_color))
         theme_data, main, footer = self.pre_render(theme_data)
         service_item.theme_data = theme_data
         service_item.main = main
@@ -317,7 +319,7 @@ class Renderer(OpenLPMixin, RegistryMixin, RegistryProperties):
         self.width = screen_size.width()
         self.height = screen_size.height()
         self.screen_ratio = self.height / self.width
-        self.log_debug('_calculate default %s, %f' % (screen_size, self.screen_ratio))
+        self.log_debug('_calculate default {size}, {ratio:f}'.format(size=screen_size, ratio=self.screen_ratio))
         # 90% is start of footer
         self.footer_start = int(self.height * 0.90)
 
@@ -354,7 +356,7 @@ class Renderer(OpenLPMixin, RegistryMixin, RegistryProperties):
         :param rect_main: The main text block.
         :param rect_footer: The footer text block.
         """
-        self.log_debug('_set_text_rectangle %s , %s' % (rect_main, rect_footer))
+        self.log_debug('_set_text_rectangle {main} , {footer}'.format(main=rect_main, footer=rect_footer))
         self._rect = rect_main
         self._rect_footer = rect_footer
         self.page_width = self._rect.width()
@@ -370,7 +372,7 @@ class Renderer(OpenLPMixin, RegistryMixin, RegistryProperties):
         self.web.resize(self.page_width, self.page_height)
         self.web_frame = self.web.page().mainFrame()
         # Adjust width and height to account for shadow. outline done in css.
-        html = """<!DOCTYPE html><html><head><script>
+        html = Template("""<!DOCTYPE html><html><head><script>
             function show_text(newtext) {
                 var main = document.getElementById('main');
                 main.innerHTML = newtext;
@@ -379,12 +381,17 @@ class Renderer(OpenLPMixin, RegistryMixin, RegistryProperties):
                 // returned value).
                 return main.offsetHeight;
             }
-            </script><style>*{margin: 0; padding: 0; border: 0;}
-            #main {position: absolute; top: 0px; %s %s}</style></head><body>
-            <div id="main"></div></body></html>""" % \
-            (build_lyrics_format_css(theme_data, self.page_width, self.page_height),
-             build_lyrics_outline_css(theme_data))
-        self.web.setHtml(html)
+            </script>
+            <style>
+                *{margin: 0; padding: 0; border: 0;}
+                #main {position: absolute; top: 0px; ${format_css} ${outline_css}} ${chords_css}
+            </style></head>
+            <body><div id="main"></div></body></html>""")
+        self.web.setHtml(html.substitute(format_css=build_lyrics_format_css(theme_data,
+                                                                            self.page_width,
+                                                                            self.page_height),
+                                         outline_css=build_lyrics_outline_css(theme_data),
+                                         chords_css=build_chords_css()))
         self.empty_height = self.web_frame.contentsSize().height()
 
     def _paginate_slide(self, lines, line_end):
@@ -518,7 +525,8 @@ class Renderer(OpenLPMixin, RegistryMixin, RegistryProperties):
 
         :param text:  The text to check. It may contain HTML tags.
         """
-        self.web_frame.evaluateJavaScript('show_text("%s")' % text.replace('\\', '\\\\').replace('\"', '\\\"'))
+        self.web_frame.evaluateJavaScript('show_text'
+                                          '("{text}")'.format(text=text.replace('\\', '\\\\').replace('\"', '\\\"')))
         return self.web_frame.contentsSize().height() <= self.empty_height
 
 
@@ -529,7 +537,7 @@ def words_split(line):
     :param line: Line to be split
     """
     # this parse we are to be wordy
-    return re.split('\s+', line)
+    return re.split(r'\s+', line)
 
 
 def get_start_tags(raw_text):

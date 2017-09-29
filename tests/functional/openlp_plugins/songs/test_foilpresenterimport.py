@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -22,10 +22,9 @@
 """
 This module contains tests for the SongShow Plus song importer.
 """
-
 import os
 from unittest import TestCase
-from tests.functional import patch, MagicMock
+from unittest.mock import patch, MagicMock
 
 from openlp.plugins.songs.lib.importers.foilpresenter import FoilPresenter
 
@@ -37,18 +36,6 @@ class TestFoilPresenter(TestCase):
     """
     Test the functions in the :mod:`foilpresenterimport` module.
     """
-    # TODO: The following modules still need tests written for
-    #   xml_to_song
-    #   to_str
-    #   _process_authors
-    #   _process_cclinumber
-    #   _process_comments
-    #   _process_copyright
-    #   _process_lyrics
-    #   _process_songbooks
-    #   _process_titles
-    #   _process_topics
-
     def setUp(self):
         self.to_str_patcher = patch('openlp.plugins.songs.lib.importers.foilpresenter.to_str')
         self.clean_song_patcher = patch('openlp.plugins.songs.lib.importers.foilpresenter.clean_song')
@@ -107,7 +94,7 @@ class TestFoilPresenter(TestCase):
         self.song_xml_patcher.stop()
         self.translate_patcher.stop()
 
-    def create_foil_presenter_test(self):
+    def test_create_foil_presenter(self):
         """
         Test creating an instance of the foil_presenter class
         """
@@ -121,7 +108,7 @@ class TestFoilPresenter(TestCase):
         # THEN: The instance should not be None
         self.assertIsNotNone(foil_presenter_instance, 'foil_presenter instance should not be none')
 
-    def no_xml_test(self):
+    def test_no_xml(self):
         """
         Test calling xml_to_song with out the xml argument
         """
@@ -137,7 +124,7 @@ class TestFoilPresenter(TestCase):
             # Then: xml_to_song should return False
             self.assertEqual(result, None, 'xml_to_song should return None when called with %s' % arg)
 
-    def encoding_declaration_removal_test(self):
+    def test_encoding_declaration_removal(self):
         """
         Test that the encoding declaration is removed
         """
@@ -151,7 +138,7 @@ class TestFoilPresenter(TestCase):
         # THEN: the xml encoding declaration should have been stripped
         self.mocked_re.compile.sub.called_with('\n<foilpresenterfolie>')
 
-    def no_encoding_declaration_test(self):
+    def test_no_encoding_declaration(self):
         """
         Check that the xml sting is left intact when no encoding declaration is made
         """
@@ -165,7 +152,7 @@ class TestFoilPresenter(TestCase):
         # THEN: the string should have been left intact
         self.mocked_re.compile.sub.called_with('<foilpresenterfolie>')
 
-    def process_lyrics_no_verses_test(self):
+    def test_process_lyrics_no_verses(self):
         """
         Test that _process_lyrics handles song files that have no verses.
         """

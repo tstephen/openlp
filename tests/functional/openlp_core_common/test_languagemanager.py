@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,8 +23,8 @@
 Functional tests to test the AppLocation class and related methods.
 """
 from unittest import TestCase
+from unittest.mock import patch
 
-from tests.functional import patch
 from openlp.core.common.languagemanager import get_locale_key, get_natural_key
 
 
@@ -33,7 +33,7 @@ class TestLanguageManager(TestCase):
     A test suite to test out various methods around the common __init__ class.
     """
 
-    def get_locale_key_test(self):
+    def test_get_locale_key(self):
         """
         Test the get_locale_key(string) function
         """
@@ -50,7 +50,7 @@ class TestLanguageManager(TestCase):
             self.assertEqual(['Aushang', '\u00C4u\u00DFerung', 'Auszug'], sorted_list,
                              'Strings should be sorted properly')
 
-    def get_natural_key_test(self):
+    def test_get_natural_key(self):
         """
         Test the get_natural_key(string) function
         """

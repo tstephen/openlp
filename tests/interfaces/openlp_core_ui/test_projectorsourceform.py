@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -24,23 +24,20 @@
 
 Tests for the Projector Source Select form.
 """
-import logging
-log = logging.getLogger(__name__)
-log.debug('test_projectorsourceform loaded')
 import os
 import time
 from unittest import TestCase
+from unittest.mock import patch
 
 from PyQt5.QtWidgets import QDialog
-
-from tests.functional import patch
-from tests.helpers.testmixin import TestMixin
-from tests.resources.projector.data import TEST_DB, TEST1_DATA
 
 from openlp.core.common import Registry, Settings
 from openlp.core.lib.projector.db import ProjectorDB, Projector
 from openlp.core.lib.projector.constants import PJLINK_DEFAULT_CODES, PJLINK_DEFAULT_SOURCES
 from openlp.core.ui.projector.sourceselectform import source_group, SourceSelectSingle
+
+from tests.helpers.testmixin import TestMixin
+from tests.resources.projector.data import TEST_DB, TEST1_DATA
 
 
 def build_source_dict():
@@ -100,7 +97,7 @@ class ProjectorSourceFormTest(TestCase, TestMixin):
                 retries += 1
         self.destroy_settings()
 
-    def source_dict_test(self):
+    def test_source_dict(self):
         """
         Test that source list dict returned from sourceselectform module is a valid dict with proper entries
         """
@@ -118,7 +115,7 @@ class ProjectorSourceFormTest(TestCase, TestMixin):
                           "Source group dictionary should match test dictionary")
 
     @patch.object(QDialog, 'exec')
-    def source_select_edit_button_test(self, mocked_qdialog):
+    def test_source_select_edit_button(self, mocked_qdialog):
         """
         Test source select form edit has Ok, Cancel, Reset, and Revert buttons
         """
@@ -138,7 +135,7 @@ class ProjectorSourceFormTest(TestCase, TestMixin):
                           '"Rest", and "Revert" buttons available')
 
     @patch.object(QDialog, 'exec')
-    def source_select_noedit_button_test(self, mocked_qdialog):
+    def test_source_select_noedit_button(self, mocked_qdialog):
         """
         Test source select form view has OK and Cancel buttons only
         """

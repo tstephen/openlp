@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,17 +23,15 @@
 from PyQt5 import QtGui, QtWidgets
 
 from openlp.core.common import Settings, UiStrings, translate
-from openlp.core.lib import ColorButton, SettingsTab
+from openlp.core.lib import SettingsTab
 from openlp.core.lib.ui import create_valign_selection_widgets
+from openlp.core.ui.lib.colorbutton import ColorButton
 
 
 class AlertsTab(SettingsTab):
     """
     AlertsTab is the alerts settings tab in the settings dialog.
     """
-    def __init__(self, parent, name, visible_title, icon_path):
-        super(AlertsTab, self).__init__(parent, name, visible_title, icon_path)
-
     def setupUi(self):
         self.setObjectName('AlertsTab')
         super(AlertsTab, self).setupUi()
@@ -98,13 +96,13 @@ class AlertsTab(SettingsTab):
         self.font_group_box.setTitle(translate('AlertsPlugin.AlertsTab', 'Font'))
         self.font_label.setText(translate('AlertsPlugin.AlertsTab', 'Font name:'))
         self.font_color_label.setText(translate('AlertsPlugin.AlertsTab', 'Font color:'))
-        self.background_color_label.setText(translate('AlertsPlugin.AlertsTab', 'Background color:'))
+        self.background_color_label.setText(UiStrings().BackgroundColorColon)
         self.font_size_label.setText(translate('AlertsPlugin.AlertsTab', 'Font size:'))
-        self.font_size_spin_box.setSuffix(UiStrings().FontSizePtUnit)
+        self.font_size_spin_box.setSuffix(' {unit}'.format(unit=UiStrings().FontSizePtUnit))
         self.timeout_label.setText(translate('AlertsPlugin.AlertsTab', 'Alert timeout:'))
-        self.timeout_spin_box.setSuffix(UiStrings().Seconds)
+        self.timeout_spin_box.setSuffix(' {unit}'.format(unit=UiStrings().Seconds))
         self.preview_group_box.setTitle(UiStrings().Preview)
-        self.font_preview.setText(UiStrings().OLPV2x)
+        self.font_preview.setText(UiStrings().OpenLP)
 
     def on_background_color_changed(self, color):
         """
@@ -196,5 +194,6 @@ class AlertsTab(SettingsTab):
         font.setBold(True)
         font.setPointSize(self.font_size)
         self.font_preview.setFont(font)
-        self.font_preview.setStyleSheet('background-color: %s; color: %s' % (self.background_color, self.font_color))
+        self.font_preview.setStyleSheet('background-color: {back}; color: {front}'.format(back=self.background_color,
+                                                                                          front=self.font_color))
         self.changed = True

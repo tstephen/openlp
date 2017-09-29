@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -25,14 +25,15 @@ Package to test the openlp.core.ui package.
 import os
 import time
 from threading import Lock
-
 from unittest import TestCase
+from unittest.mock import patch
+
 from PyQt5 import QtGui
 
 from openlp.core.common import Registry
 from openlp.core.lib import ImageManager, ScreenList
 from openlp.core.lib.imagemanager import Priority
-from tests.functional import patch
+
 from tests.helpers.testmixin import TestMixin
 
 TEST_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'resources'))
@@ -55,9 +56,11 @@ class TestImageManager(TestCase, TestMixin):
         """
         Delete all the C++ objects at the end so that we don't have a segfault
         """
+        self.image_manager.stop_manager = True
+        self.image_manager.image_thread.wait()
         del self.app
 
-    def basic_image_manager_test(self):
+    def test_basic_image_manager(self):
         """
         Test the Image Manager setup basic functionality
         """
@@ -83,7 +86,7 @@ class TestImageManager(TestCase, TestMixin):
             self.image_manager.get_image(TEST_PATH, 'church1.jpg')
         self.assertNotEquals(context.exception, '', 'KeyError exception should have been thrown for missing image')
 
-    def different_dimension_image_test(self):
+    def test_different_dimension_image(self):
         """
         Test the Image Manager with dimensions
         """
@@ -115,7 +118,7 @@ class TestImageManager(TestCase, TestMixin):
             self.image_manager.get_image(full_path, 'church.jpg', 120, 120)
         self.assertNotEquals(context.exception, '', 'KeyError exception should have been thrown for missing dimension')
 
-    def process_cache_test(self):
+    def test_process_cache(self):
         """
         Test the process_cache method
         """

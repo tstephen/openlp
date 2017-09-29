@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -24,10 +24,12 @@ from PyQt5 import QtGui
 
 import logging
 
+from openlp.core.api.http import register_endpoint
 from openlp.core.common import Settings, translate
 from openlp.core.lib import Plugin, StringContent, ImageSource, build_icon
 from openlp.core.lib.db import Manager
-from openlp.plugins.images.lib import ImageMediaItem, ImageTab
+from openlp.plugins.images.endpoint import api_images_endpoint, images_endpoint
+from openlp.plugins.images.lib import ImageMediaItem, ImageTab, upgrade
 from openlp.plugins.images.lib.db import init_schema
 
 log = logging.getLogger(__name__)
@@ -39,6 +41,7 @@ __default_settings__ = {
     'images/db hostname': '',
     'images/db database': '',
     'images/background color': '#000000',
+    'images/last directory': None
 }
 
 
@@ -47,10 +50,12 @@ class ImagePlugin(Plugin):
 
     def __init__(self):
         super(ImagePlugin, self).__init__('images', __default_settings__, ImageMediaItem, ImageTab)
-        self.manager = Manager('images', init_schema)
+        self.manager = Manager('images', init_schema, upgrade_mod=upgrade)
         self.weight = -7
         self.icon_path = ':/plugins/plugin_images.png'
         self.icon = build_icon(self.icon_path)
+        register_endpoint(images_endpoint)
+        register_endpoint(api_images_endpoint)
 
     @staticmethod
     def about():
@@ -67,14 +72,6 @@ class ImagePlugin(Plugin):
                                'provided by the theme.')
         return about_text
 
-    def upgrade_settings(self, settings):
-        """
-        Upgrade the settings of this plugin.
-
-        :param settings: The Settings object containing the old settings.
-        """
-        pass
-
     def set_plugin_text_strings(self):
         """
         Called to define all translatable texts of the plugin.
@@ -88,7 +85,7 @@ class ImagePlugin(Plugin):
         self.text_strings[StringContent.VisibleName] = {'title': translate('ImagePlugin', 'Images', 'container title')}
         # Middle Header Bar
         tooltips = {
-            'load': translate('ImagePlugin', 'Load a new image.'),
+            'load': translate('ImagePlugin', 'Add new image(s).'),
             'import': '',
             'new': translate('ImagePlugin', 'Add a new image.'),
             'edit': translate('ImagePlugin', 'Edit the selected image.'),

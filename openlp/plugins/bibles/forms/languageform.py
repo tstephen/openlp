@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -29,9 +29,9 @@ from PyQt5.QtWidgets import QDialog
 from PyQt5 import QtCore
 
 from openlp.core.common import translate
+from openlp.core.common.languages import languages
 from openlp.core.lib.ui import critical_error_message_box
 from openlp.plugins.bibles.forms.languagedialog import Ui_LanguageDialog
-from openlp.plugins.bibles.lib.db import BiblesResourcesDB
 
 
 log = logging.getLogger(__name__)
@@ -47,15 +47,16 @@ class LanguageForm(QDialog, Ui_LanguageDialog):
         """
         Constructor
         """
-        super(LanguageForm, self).__init__(parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint)
+        super(LanguageForm, self).__init__(parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint |
+                                           QtCore.Qt.WindowCloseButtonHint)
         self.setupUi(self)
 
     def exec(self, bible_name):
-        self.language_combo_box.addItem('')
         if bible_name:
-            self.bible_label.setText(str(bible_name))
-        items = BiblesResourcesDB.get_languages()
-        self.language_combo_box.addItems([item['name'] for item in items])
+            self.bible_label.setText(bible_name)
+        self.language_combo_box.addItem('')
+        for language in languages:
+            self.language_combo_box.addItem(language.name, language.id)
         return QDialog.exec(self)
 
     def accept(self):

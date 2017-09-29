@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -20,25 +20,26 @@
 # Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
 ###############################################################################
 """
-The :mod:`presentationplugin` module provides the ability for OpenLP to display presentations from a variety of document
-formats.
+The :mod:`openlp.plugins.presentations.presentationplugin` module provides the ability for OpenLP to display
+presentations from a variety of document formats.
 """
 import os
 import logging
 
 from PyQt5 import QtCore
 
-from openlp.core.common import AppLocation, translate
+from openlp.core.api.http import register_endpoint
+from openlp.core.common import extension_loader, translate
 from openlp.core.lib import Plugin, StringContent, build_icon
+from openlp.plugins.presentations.endpoint import api_presentations_endpoint, presentations_endpoint
 from openlp.plugins.presentations.lib import PresentationController, PresentationMediaItem, PresentationTab
-
 
 log = logging.getLogger(__name__)
 
 
 __default_settings__ = {'presentations/override app': QtCore.Qt.Unchecked,
                         'presentations/enable_pdf_program': QtCore.Qt.Unchecked,
-                        'presentations/pdf_program': '',
+                        'presentations/pdf_program': None,
                         'presentations/Impress': QtCore.Qt.Checked,
                         'presentations/Powerpoint': QtCore.Qt.Checked,
                         'presentations/Powerpoint Viewer': QtCore.Qt.Checked,
@@ -46,7 +47,8 @@ __default_settings__ = {'presentations/override app': QtCore.Qt.Unchecked,
                         'presentations/presentations files': [],
                         'presentations/thumbnail_scheme': '',
                         'presentations/powerpoint slide click advance': QtCore.Qt.Unchecked,
-                        'presentations/powerpoint control window': QtCore.Qt.Unchecked
+                        'presentations/powerpoint control window': QtCore.Qt.Unchecked,
+                        'presentations/last directory': None
                         }
 
 
@@ -67,6 +69,8 @@ class PresentationPlugin(Plugin):
         self.weight = -8
         self.icon_path = ':/plugins/plugin_presentations.png'
         self.icon = build_icon(self.icon_path)
+        register_endpoint(presentations_endpoint)
+        register_endpoint(api_presentations_endpoint)
 
     def create_settings_tab(self, parent):
         """
@@ -122,17 +126,9 @@ class PresentationPlugin(Plugin):
         Check to see if we have any presentation software available. If not do not install the plugin.
         """
         log.debug('check_pre_conditions')
-        controller_dir = os.path.join(AppLocation.get_directory(AppLocation.PluginsDir), 'presentations', 'lib')
-        for filename in os.listdir(controller_dir):
-            if filename.endswith('controller.py') and not filename == 'presentationcontroller.py':
-                path = os.path.join(controller_dir, filename)
-                if os.path.isfile(path):
-                    module_name = 'openlp.plugins.presentations.lib.' + os.path.splitext(filename)[0]
-                    log.debug('Importing controller %s', module_name)
-                    try:
-                        __import__(module_name, globals(), locals(), [])
-                    except ImportError:
-                        log.warning('Failed to import %s on path %s', module_name, path)
+        controller_dir = os.path.join('plugins', 'presentations', 'lib')
+        glob_pattern = os.path.join(controller_dir, '*controller.py')
+        extension_loader(glob_pattern, ['presentationcontroller.py'])
         controller_classes = PresentationController.__subclasses__()
         for controller_class in controller_classes:
             controller = controller_class(self)

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,12 +23,12 @@
 Package to test the openlp.core.lib.screenlist package.
 """
 from unittest import TestCase
+from unittest.mock import MagicMock
 
 from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.common import Registry
 from openlp.core.lib import ScreenList
-from tests.functional import MagicMock
 
 SCREEN = {
     'primary': False,
@@ -62,7 +62,7 @@ class TestScreenList(TestCase):
         del self.screens
         del self.application
 
-    def add_desktop_test(self):
+    def test_add_desktop(self):
         """
         Test the ScreenList.screen_count_changed method to check if new monitors are detected by OpenLP.
         """

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -31,13 +31,16 @@ Some of the code for this form is based on the examples at:
 
 import html
 import logging
+import os
 
-from PyQt5 import QtCore, QtWidgets, QtWebKit, QtWebKitWidgets, QtOpenGL, QtGui, QtMultimedia
+from PyQt5 import QtCore, QtWidgets, QtWebKit, QtWebKitWidgets, QtGui, QtMultimedia
 
-from openlp.core.common import Registry, RegistryProperties, OpenLPMixin, Settings, translate, is_macosx, is_win
+from openlp.core.common import AppLocation, Registry, RegistryProperties, OpenLPMixin, Settings, translate,\
+    is_macosx, is_win
+from openlp.core.common.path import path_to_str
 from openlp.core.lib import ServiceItem, ImageSource, ScreenList, build_html, expand_tags, image_to_byte
 from openlp.core.lib.theme import BackgroundType
-from openlp.core.ui import HideMode, AlertLocation
+from openlp.core.ui import HideMode, AlertLocation, DisplayControllerType
 
 if is_macosx():
     from ctypes import pythonapi, c_void_p, c_char_p, py_object
@@ -155,7 +158,7 @@ class MainDisplay(OpenLPMixin, Display, RegistryProperties):
         # platforms. For OpenLP 2.0 keep it only for OS X to not cause any
         # regressions on other platforms.
         if is_macosx():
-            window_flags = QtCore.Qt.FramelessWindowHint | QtCore.Qt.Window
+            window_flags = QtCore.Qt.FramelessWindowHint | QtCore.Qt.Window | QtCore.Qt.NoDropShadowWindowHint
         self.setWindowFlags(window_flags)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.set_transparency(False)
@@ -247,7 +250,7 @@ class MainDisplay(OpenLPMixin, Display, RegistryProperties):
         """
         Set up and build the output screen
         """
-        self.log_debug('Start MainDisplay setup (live = %s)' % self.is_live)
+        self.log_debug('Start MainDisplay setup (live = {islive})'.format(islive=self.is_live))
         self.screen = self.screens.current
         self.setVisible(False)
         Display.setup(self)
@@ -257,7 +260,7 @@ class MainDisplay(OpenLPMixin, Display, RegistryProperties):
             background_color.setNamedColor(Settings().value('core/logo background color'))
             if not background_color.isValid():
                 background_color = QtCore.Qt.white
-            image_file = Settings().value('core/logo file')
+            image_file = path_to_str(Settings().value('core/logo file'))
             splash_image = QtGui.QImage(image_file)
             self.initial_fame = QtGui.QImage(
                 self.screen['size'].width(),
@@ -288,7 +291,9 @@ class MainDisplay(OpenLPMixin, Display, RegistryProperties):
             self.application.process_events()
         self.setGeometry(self.screen['size'])
         if animate:
-            self.frame.evaluateJavaScript('show_text("%s")' % slide.replace('\\', '\\\\').replace('\"', '\\\"'))
+            # NOTE: Verify this works with ''.format()
+            _text = slide.replace('\\', '\\\\').replace('\"', '\\\"')
+            self.frame.evaluateJavaScript('show_text("{text}")'.format(text=_text))
         else:
             # This exists for https://bugs.launchpad.net/openlp/+bug/1016843
             # For unknown reasons if evaluateJavaScript is called
@@ -309,10 +314,10 @@ class MainDisplay(OpenLPMixin, Display, RegistryProperties):
         text_prepared = expand_tags(html.escape(text)).replace('\\', '\\\\').replace('\"', '\\\"')
         if self.height() != self.screen['size'].height() or not self.isVisible():
             shrink = True
-            js = 'show_alert("%s", "%s")' % (text_prepared, 'top')
+            js = 'show_alert("{text}", "{top}")'.format(text=text_prepared, top='top')
         else:
             shrink = False
-            js = 'show_alert("%s", "")' % text_prepared
+            js = 'show_alert("{text}", "")'.format(text=text_prepared)
         height = self.frame.evaluateJavaScript(js)
         if shrink:
             if text:
@@ -341,7 +346,7 @@ class MainDisplay(OpenLPMixin, Display, RegistryProperties):
         if not hasattr(self, 'service_item'):
             return False
         self.override['image'] = path
-        self.override['theme'] = self.service_item.theme_data.background_filename
+        self.override['theme'] = path_to_str(self.service_item.theme_data.background_filename)
         self.image(path)
         # Update the preview frame.
         if self.is_live:
@@ -368,7 +373,7 @@ class MainDisplay(OpenLPMixin, Display, RegistryProperties):
         """
         self.setGeometry(self.screen['size'])
         if image:
-            js = 'show_image("data:image/png;base64,%s");' % image
+            js = 'show_image("data:image/png;base64,{image}");'.format(image=image)
         else:
             js = 'show_image("");'
         self.frame.evaluateJavaScript(js)
@@ -449,7 +454,7 @@ class MainDisplay(OpenLPMixin, Display, RegistryProperties):
                 Registry().execute('video_background_replaced')
                 self.override = {}
             # We have a different theme.
-            elif self.override['theme'] != service_item.theme_data.background_filename:
+            elif self.override['theme'] != path_to_str(service_item.theme_data.background_filename):
                 Registry().execute('live_theme_changed')
                 self.override = {}
             else:
@@ -457,16 +462,16 @@ class MainDisplay(OpenLPMixin, Display, RegistryProperties):
                 background = self.image_manager.get_image_bytes(self.override['image'], ImageSource.ImagePlugin)
         self.set_transparency(self.service_item.theme_data.background_type ==
                               BackgroundType.to_string(BackgroundType.Transparent))
-        if self.service_item.theme_data.background_filename:
-            self.service_item.bg_image_bytes = self.image_manager.get_image_bytes(
-                self.service_item.theme_data.background_filename, ImageSource.Theme)
-        if image_path:
-            image_bytes = self.image_manager.get_image_bytes(image_path, ImageSource.ImagePlugin)
-        else:
-            image_bytes = None
-        html = build_html(self.service_item, self.screen, self.is_live, background, image_bytes,
-                          plugins=self.plugin_manager.plugins)
-        self.web_view.setHtml(html)
+        image_bytes = None
+        if self.service_item.theme_data.background_type == 'image':
+            if self.service_item.theme_data.background_filename:
+                self.service_item.bg_image_bytes = self.image_manager.get_image_bytes(
+                    path_to_str(self.service_item.theme_data.background_filename), ImageSource.Theme)
+            if image_path:
+                image_bytes = self.image_manager.get_image_bytes(image_path, ImageSource.ImagePlugin)
+        created_html = build_html(self.service_item, self.screen, self.is_live, background, image_bytes,
+                                  plugins=self.plugin_manager.plugins)
+        self.web_view.setHtml(created_html)
         if service_item.foot_text:
             self.footer(service_item.foot_text)
         # if was hidden keep it hidden
@@ -475,6 +480,17 @@ class MainDisplay(OpenLPMixin, Display, RegistryProperties):
                 Registry().execute('slidecontroller_live_unblank')
             else:
                 self.hide_display(self.hide_mode)
+        if self.service_item.theme_data.background_type == 'video' and self.is_live:
+            if self.service_item.theme_data.background_filename:
+                service_item = ServiceItem()
+                service_item.title = 'webkit'
+                service_item.processor = 'webkit'
+                path = os.path.join(str(AppLocation.get_section_data_path('themes')),
+                                    self.service_item.theme_data.theme_name)
+                service_item.add_from_command(path,
+                                              path_to_str(self.service_item.theme_data.background_filename),
+                                              ':/media/slidecontroller_multimedia.png')
+                self.media_controller.video(DisplayControllerType.Live, service_item, video_behind_text=True)
         self._hide_mouse()
 
     def footer(self, text):
@@ -492,7 +508,7 @@ class MainDisplay(OpenLPMixin, Display, RegistryProperties):
 
         :param mode: How the screen is to be hidden
         """
-        self.log_debug('hide_display mode = %d' % mode)
+        self.log_debug('hide_display mode = {mode:d}'.format(mode=mode))
         if self.screens.display_count == 1:
             # Only make visible if setting enabled.
             if not Settings().value('core/display on monitor'):
@@ -674,7 +690,7 @@ class AudioPlayer(OpenLPMixin, QtCore.QObject):
         """
         Skip forward to the next track in the list
         """
-        self.player.next()
+        self.playlist.next()
 
     def go_to(self, index):
         """

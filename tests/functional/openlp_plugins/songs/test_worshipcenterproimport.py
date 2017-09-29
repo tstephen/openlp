@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -22,17 +22,16 @@
 """
 This module contains tests for the WorshipCenter Pro song importer.
 """
-import os
-from unittest import TestCase, SkipTest
+from unittest import TestCase, skipUnless
+from unittest.mock import patch, MagicMock
 
-if os.name != 'nt':
-    raise SkipTest('Not Windows, skipping test')
-
-import pyodbc
-from tests.functional import patch, MagicMock
-
-from openlp.core.common import Registry
-from openlp.plugins.songs.lib.importers.worshipcenterpro import WorshipCenterProImport
+try:
+    import pyodbc
+    from openlp.core.common import Registry
+    from openlp.plugins.songs.lib.importers.worshipcenterpro import WorshipCenterProImport
+    CAN_RUN_TESTS = True
+except ImportError:
+    CAN_RUN_TESTS = False
 
 
 class TestRecord(object):
@@ -40,30 +39,31 @@ class TestRecord(object):
     Microsoft Access Driver is not available on non Microsoft Systems for this reason the :class:`TestRecord` is used
     to simulate a recordset that would be returned by pyobdc.
     """
-    def __init__(self, id, field, value):
+    def __init__(self, id_, field, value):
         # The case of the following instance variables is important as it needs to be the same as the ones in use in the
         # WorshipCenter Pro database.
-        self.ID = id
+        self.ID = id_
         self.Field = field
         self.Value = value
 
 
-class WorshipCenterProImportLogger(WorshipCenterProImport):
-    """
-    This class logs changes in the title instance variable
-    """
-    _title_assignment_list = []
+if CAN_RUN_TESTS:
+    class WorshipCenterProImportLogger(WorshipCenterProImport):
+        """
+        This class logs changes in the title instance variable
+        """
+        _title_assignment_list = []
 
-    def __init__(self, manager):
-        WorshipCenterProImport.__init__(self, manager, filenames=[])
+        def __init__(self, manager):
+            WorshipCenterProImport.__init__(self, manager, filenames=[])
 
-    @property
-    def title(self):
-        return self._title_assignment_list[-1]
+        @property
+        def title(self):
+            return self._title_assignment_list[-1]
 
-    @title.setter
-    def title(self, title):
-        self._title_assignment_list.append(title)
+        @title.setter
+        def title(self, title):
+            self._title_assignment_list.append(title)
 
 
 RECORDSET_TEST_DATA = [TestRecord(1, 'TITLE', 'Amazing Grace'),
@@ -133,6 +133,7 @@ SONG_TEST_DATA = [{'title': 'Amazing Grace',
                         'Just to bow and\nreceive a new blessing\nIn the beautiful\ngarden of prayer.')]}]
 
 
+@skipUnless(CAN_RUN_TESTS, 'Not Windows, skipping test')
 class TestWorshipCenterProSongImport(TestCase):
     """
     Test the functions in the :mod:`worshipcenterproimport` module.
@@ -143,7 +144,7 @@ class TestWorshipCenterProSongImport(TestCase):
         """
         Registry.create()
 
-    def create_importer_test(self):
+    def test_create_importer(self):
         """
         Test creating an instance of the WorshipCenter Pro file importer
         """
@@ -157,7 +158,7 @@ class TestWorshipCenterProSongImport(TestCase):
             # THEN: The importer object should not be None
             self.assertIsNotNone(importer, 'Import should not be none')
 
-    def pyodbc_exception_test(self):
+    def test_pyodbc_exception(self):
         """
         Test that exceptions raised by pyodbc are handled
         """
@@ -186,7 +187,7 @@ class TestWorshipCenterProSongImport(TestCase):
                                                     'Unable to connect the WorshipCenter Pro database.')
                 mocked_log_error.assert_called_with('import_source', 'Translated Text')
 
-    def song_import_test(self):
+    def test_song_import(self):
         """
         Test that a simulated WorshipCenter Pro recordset is imported correctly
         """

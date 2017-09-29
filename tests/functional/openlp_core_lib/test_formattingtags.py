@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -24,10 +24,9 @@ Package to test the openlp.core.lib.formattingtags package.
 """
 import copy
 from unittest import TestCase
+from unittest.mock import patch
 
 from openlp.core.lib import FormattingTags
-from tests.functional import patch
-
 
 TAG = {
     'end tag': '{/aa}',
@@ -47,7 +46,7 @@ class TestFormattingTags(TestCase):
         """
         FormattingTags.html_expands = []
 
-    def get_html_tags_no_user_tags_test(self):
+    def test_get_html_tags_no_user_tags(self):
         """
         Test the FormattingTags class' get_html_tags static method.
         """
@@ -68,7 +67,7 @@ class TestFormattingTags(TestCase):
             # THEN: Lists should be identical.
             assert old_tags_list == new_tags_list, 'The formatting tag lists should be identical.'
 
-    def get_html_tags_with_user_tags_test(self):
+    def test_get_html_tags_with_user_tags(self):
         """
         FormattingTags class - test the get_html_tags(), add_html_tags() and remove_html_tag() methods.
         """

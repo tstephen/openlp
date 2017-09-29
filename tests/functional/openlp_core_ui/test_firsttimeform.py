@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,18 +23,18 @@
 Package to test the openlp.core.ui.firsttimeform package.
 """
 import os
-import socket
 import tempfile
 import urllib
 from unittest import TestCase
+from unittest.mock import MagicMock, patch
 
 from openlp.core.common import Registry
+from openlp.core.common.path import Path
 from openlp.core.ui.firsttimeform import FirstTimeForm
 
-from tests.functional import MagicMock, patch
 from tests.helpers.testmixin import TestMixin
 
-FAKE_CONFIG = b"""
+FAKE_CONFIG = """
 [general]
 base url = http://example.com/frw/
 [songs]
@@ -45,7 +45,7 @@ directory = bibles
 directory = themes
 """
 
-FAKE_BROKEN_CONFIG = b"""
+FAKE_BROKEN_CONFIG = """
 [general]
 base url = http://example.com/frw/
 [songs]
@@ -54,7 +54,7 @@ directory = songs
 directory = bibles
 """
 
-FAKE_INVALID_CONFIG = b"""
+FAKE_INVALID_CONFIG = """
 <html>
 <head><title>This is not a config file</title></head>
 <body>Some text</body>
@@ -78,7 +78,7 @@ class TestFirstTimeForm(TestCase, TestMixin):
         if os.path.isfile(self.tempfile):
             os.remove(self.tempfile)
 
-    def initialise_test(self):
+    def test_initialise(self):
         """
         Test if we can intialise the FirstTimeForm
         """
@@ -97,7 +97,7 @@ class TestFirstTimeForm(TestCase, TestMixin):
         self.assertListEqual([], frw.theme_screenshot_workers, 'The list of workers should be empty')
         self.assertFalse(frw.has_run_wizard, 'has_run_wizard should be False')
 
-    def set_defaults_test(self):
+    def test_set_defaults(self):
         """
         Test that the default values are set when set_defaults() is run
         """
@@ -112,12 +112,12 @@ class TestFirstTimeForm(TestCase, TestMixin):
                 patch('openlp.core.ui.firsttimeform.Settings') as MockedSettings, \
                 patch('openlp.core.ui.firsttimeform.gettempdir') as mocked_gettempdir, \
                 patch('openlp.core.ui.firsttimeform.check_directory_exists') as mocked_check_directory_exists, \
-                patch.object(frw.application, 'set_normal_cursor') as mocked_set_normal_cursor:
+                patch.object(frw.application, 'set_normal_cursor'):
             mocked_settings = MagicMock()
             mocked_settings.value.return_value = True
             MockedSettings.return_value = mocked_settings
             mocked_gettempdir.return_value = 'temp'
-            expected_temp_path = os.path.join('temp', 'openlp')
+            expected_temp_path = Path('temp', 'openlp')
 
             # WHEN: The set_defaults() method is run
             frw.set_defaults()
@@ -134,7 +134,7 @@ class TestFirstTimeForm(TestCase, TestMixin):
             mocked_gettempdir.assert_called_with()
             mocked_check_directory_exists.assert_called_with(expected_temp_path)
 
-    def update_screen_list_combo_test(self):
+    def test_update_screen_list_combo(self):
         """
         Test that the update_screen_list_combo() method works correctly
         """
@@ -157,7 +157,7 @@ class TestFirstTimeForm(TestCase, TestMixin):
             mocked_display_combo_box.count.assert_called_with()
             mocked_display_combo_box.setCurrentIndex.assert_called_with(1)
 
-    def on_cancel_button_clicked_test(self):
+    def test_on_cancel_button_clicked(self):
         """
         Test that the cancel button click slot shuts down the threads correctly
         """
@@ -184,7 +184,7 @@ class TestFirstTimeForm(TestCase, TestMixin):
             self.assertEqual(1, mocked_time.sleep.call_count, 'sleep() should have only been called once')
             mocked_set_normal_cursor.assert_called_with()
 
-    def broken_config_test(self):
+    def test_broken_config(self):
         """
         Test if we can handle an config file with missing data
         """
@@ -192,7 +192,7 @@ class TestFirstTimeForm(TestCase, TestMixin):
         with patch('openlp.core.ui.firsttimeform.get_web_page') as mocked_get_web_page:
             first_time_form = FirstTimeForm(None)
             first_time_form.initialize(MagicMock())
-            mocked_get_web_page.return_value.read.return_value = FAKE_BROKEN_CONFIG
+            mocked_get_web_page.return_value = FAKE_BROKEN_CONFIG
 
             # WHEN: The First Time Wizard is downloads the config file
             first_time_form._download_index()
@@ -200,7 +200,7 @@ class TestFirstTimeForm(TestCase, TestMixin):
             # THEN: The First Time Form should not have web access
             self.assertFalse(first_time_form.web_access, 'There should not be web access with a broken config file')
 
-    def invalid_config_test(self):
+    def test_invalid_config(self):
         """
         Test if we can handle an config file in invalid format
         """
@@ -208,7 +208,7 @@ class TestFirstTimeForm(TestCase, TestMixin):
         with patch('openlp.core.ui.firsttimeform.get_web_page') as mocked_get_web_page:
             first_time_form = FirstTimeForm(None)
             first_time_form.initialize(MagicMock())
-            mocked_get_web_page.return_value.read.return_value = FAKE_INVALID_CONFIG
+            mocked_get_web_page.return_value = FAKE_INVALID_CONFIG
 
             # WHEN: The First Time Wizard is downloads the config file
             first_time_form._download_index()
@@ -218,38 +218,20 @@ class TestFirstTimeForm(TestCase, TestMixin):
 
     @patch('openlp.core.ui.firsttimeform.get_web_page')
     @patch('openlp.core.ui.firsttimeform.QtWidgets.QMessageBox')
-    def network_error_test(self, mocked_message_box, mocked_get_web_page):
+    def test_network_error(self, mocked_message_box, mocked_get_web_page):
         """
         Test we catch a network error in First Time Wizard - bug 1409627
         """
         # GIVEN: Initial setup and mocks
         first_time_form = FirstTimeForm(None)
         first_time_form.initialize(MagicMock())
-        mocked_get_web_page.side_effect = urllib.error.HTTPError(url='http//localhost',
-                                                                 code=407,
-                                                                 msg='Network proxy error',
-                                                                 hdrs=None,
-                                                                 fp=None)
+        mocked_get_web_page.side_effect = ConnectionError('')
+        mocked_message_box.Ok = 'OK'
+
         # WHEN: the First Time Wizard calls to get the initial configuration
         first_time_form._download_index()
 
         # THEN: the critical_error_message_box should have been called
-        self.assertEquals(mocked_message_box.mock_calls[1][1][0], 'Network Error 407',
-                          'first_time_form should have caught Network Error')
-
-    @patch('openlp.core.ui.firsttimeform.urllib.request.urlopen')
-    def socket_timeout_test(self, mocked_urlopen):
-        """
-        Test socket timeout gets caught
-        """
-        # GIVEN: Mocked urlopen to fake a network disconnect in the middle of a download
-        first_time_form = FirstTimeForm(None)
-        first_time_form.initialize(MagicMock())
-        mocked_urlopen.side_effect = socket.timeout()
-
-        # WHEN: Attempt to retrieve a file
-        first_time_form.url_get_file(url='http://localhost/test', f_path=self.tempfile)
-
-        # THEN: socket.timeout should have been caught
-        # NOTE: Test is if $tmpdir/tempfile is still there, then test fails since ftw deletes bad downloaded files
-        self.assertFalse(os.path.exists(self.tempfile), 'FTW url_get_file should have caught socket.timeout')
+        mocked_message_box.critical.assert_called_once_with(
+            first_time_form, 'Network Error', 'There was a network error attempting to connect to retrieve '
+            'initial configuration information', 'OK')

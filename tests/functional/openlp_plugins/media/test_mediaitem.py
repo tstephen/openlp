@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,15 +23,14 @@
 Test the media plugin
 """
 from unittest import TestCase
-
-from openlp.core import Registry, Settings
-from openlp.plugins.media.mediaplugin import MediaPlugin
-from openlp.plugins.media.lib.mediaitem import MediaMediaItem
-from openlp.core.ui.media.mediacontroller import MediaController
+from unittest.mock import MagicMock, patch
 
 from PyQt5 import QtCore
 
-from tests.functional import MagicMock, patch
+from openlp.core import Settings
+from openlp.core.common.path import Path
+from openlp.plugins.media.lib.mediaitem import MediaMediaItem
+
 from tests.helpers.testmixin import TestMixin
 
 __default_settings__ = {
@@ -68,7 +67,7 @@ class MediaItemTest(TestCase, TestMixin):
         Media Remote Search Successful find
         """
         # GIVEN: The Mediaitem set up a list of media
-        Settings().setValue(self.media_item.settings_section + '/media files', ['test.mp3', 'test.mp4'])
+        Settings().setValue(self.media_item.settings_section + '/media files', [Path('test.mp3'), Path('test.mp4')])
         # WHEN: Retrieving the test file
         result = self.media_item.search('test.mp4', False)
         # THEN: a file should be found
@@ -79,7 +78,7 @@ class MediaItemTest(TestCase, TestMixin):
         Media Remote Search not find
         """
         # GIVEN: The Mediaitem set up a list of media
-        Settings().setValue(self.media_item.settings_section + '/media files', ['test.mp3', 'test.mp4'])
+        Settings().setValue(self.media_item.settings_section + '/media files', [Path('test.mp3'), Path('test.mp4')])
         # WHEN: Retrieving the test file
         result = self.media_item.search('test.mpx', False)
         # THEN: a file should be found

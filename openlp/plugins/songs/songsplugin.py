@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -31,11 +31,15 @@ from tempfile import gettempdir
 
 from PyQt5 import QtCore, QtWidgets
 
+from openlp.core.api.http import register_endpoint
 from openlp.core.common import UiStrings, Registry, translate
 from openlp.core.common.actions import ActionList
 from openlp.core.lib import Plugin, StringContent, build_icon
 from openlp.core.lib.db import Manager
 from openlp.core.lib.ui import create_action
+
+from openlp.plugins.songs import reporting
+from openlp.plugins.songs.endpoint import api_songs_endpoint, songs_endpoint
 from openlp.plugins.songs.forms.duplicatesongremovalform import DuplicateSongRemovalForm
 from openlp.plugins.songs.forms.songselectform import SongSelectForm
 from openlp.plugins.songs.lib import clean_song, upgrade
@@ -46,6 +50,7 @@ from openlp.plugins.songs.lib.mediaitem import SongMediaItem
 from openlp.plugins.songs.lib.mediaitem import SongSearch
 from openlp.plugins.songs.lib.songstab import SongsTab
 
+
 log = logging.getLogger(__name__)
 __default_settings__ = {
     'songs/db type': 'sqlite',
@@ -53,18 +58,23 @@ __default_settings__ = {
     'songs/db password': '',
     'songs/db hostname': '',
     'songs/db database': '',
-    'songs/last search type': SongSearch.Entire,
+    'songs/last used search type': SongSearch.Entire,
     'songs/last import type': SongFormat.OpenLyrics,
     'songs/update service on edit': False,
     'songs/add song from service': True,
     'songs/display songbar': True,
     'songs/display songbook': False,
+    'songs/display written by': True,
     'songs/display copyright symbol': False,
-    'songs/last directory import': '',
-    'songs/last directory export': '',
+    'songs/last directory import': None,
+    'songs/last directory export': None,
     'songs/songselect username': '',
     'songs/songselect password': '',
-    'songs/songselect searches': ''
+    'songs/songselect searches': '',
+    'songs/enable chords': True,
+    'songs/chord notation': 'english',  # Can be english, german or neo-latin
+    'songs/mainview chords': False,
+    'songs/disable chords import': False,
 }
 
 
@@ -85,6 +95,8 @@ class SongsPlugin(Plugin):
         self.icon_path = ':/plugins/plugin_songs.png'
         self.icon = build_icon(self.icon_path)
         self.songselect_form = None
+        register_endpoint(songs_endpoint)
+        register_endpoint(api_songs_endpoint)
 
     def check_pre_conditions(self):
         """
@@ -102,13 +114,13 @@ class SongsPlugin(Plugin):
         self.songselect_form.initialise()
         self.song_import_item.setVisible(True)
         self.song_export_item.setVisible(True)
-        self.tools_reindex_item.setVisible(True)
-        self.tools_find_duplicates.setVisible(True)
+        self.song_tools_menu.menuAction().setVisible(True)
         action_list = ActionList.get_instance()
         action_list.add_action(self.song_import_item, UiStrings().Import)
         action_list.add_action(self.song_export_item, UiStrings().Export)
         action_list.add_action(self.tools_reindex_item, UiStrings().Tools)
         action_list.add_action(self.tools_find_duplicates, UiStrings().Tools)
+        action_list.add_action(self.tools_report_song_list, UiStrings().Tools)
 
     def add_import_menu_item(self, import_menu):
         """
@@ -151,19 +163,37 @@ class SongsPlugin(Plugin):
         :param tools_menu: The actual **Tools** menu item, so that your actions can use it as their parent.
         """
         log.info('add tools menu')
+        self.tools_menu = tools_menu
+        self.song_tools_menu = QtWidgets.QMenu(tools_menu)
+        self.song_tools_menu.setObjectName('song_tools_menu')
+        self.song_tools_menu.setTitle(translate('SongsPlugin', 'Songs'))
         self.tools_reindex_item = create_action(
             tools_menu, 'toolsReindexItem',
             text=translate('SongsPlugin', '&Re-index Songs'),
             icon=':/plugins/plugin_songs.png',
             statustip=translate('SongsPlugin', 'Re-index the songs database to improve searching and ordering.'),
-            visible=False, triggers=self.on_tools_reindex_item_triggered)
-        tools_menu.addAction(self.tools_reindex_item)
+            triggers=self.on_tools_reindex_item_triggered)
         self.tools_find_duplicates = create_action(
             tools_menu, 'toolsFindDuplicates',
             text=translate('SongsPlugin', 'Find &Duplicate Songs'),
             statustip=translate('SongsPlugin', 'Find and remove duplicate songs in the song database.'),
-            visible=False, triggers=self.on_tools_find_duplicates_triggered, can_shortcuts=True)
-        tools_menu.addAction(self.tools_find_duplicates)
+            triggers=self.on_tools_find_duplicates_triggered, can_shortcuts=True)
+        self.tools_report_song_list = create_action(
+            tools_menu, 'toolsSongListReport',
+            text=translate('SongsPlugin', 'Song List Report'),
+            statustip=translate('SongsPlugin', 'Produce a CSV file of all the songs in the database.'),
+            triggers=self.on_tools_report_song_list_triggered)
+
+        self.tools_menu.addAction(self.song_tools_menu.menuAction())
+        self.song_tools_menu.addAction(self.tools_reindex_item)
+        self.song_tools_menu.addAction(self.tools_find_duplicates)
+        self.song_tools_menu.addAction(self.tools_report_song_list)
+
+        self.song_tools_menu.menuAction().setVisible(False)
+
+    @staticmethod
+    def on_tools_report_song_list_triggered():
+        reporting.report_song_list()
 
     def on_tools_reindex_item_triggered(self):
         """
@@ -302,8 +332,8 @@ class SongsPlugin(Plugin):
         self.application.process_events()
         progress = QtWidgets.QProgressDialog(self.main_window)
         progress.setWindowModality(QtCore.Qt.WindowModal)
-        progress.setWindowTitle(translate('OpenLP.Ui', 'Importing Songs'))
-        progress.setLabelText(translate('OpenLP.Ui', 'Starting import...'))
+        progress.setWindowTitle(translate('SongsPlugin', 'Importing Songs'))
+        progress.setLabelText(UiStrings().StartingImport)
         progress.setCancelButton(None)
         progress.setRange(0, song_count)
         progress.setMinimumDuration(0)
@@ -326,13 +356,13 @@ class SongsPlugin(Plugin):
         self.manager.finalise()
         self.song_import_item.setVisible(False)
         self.song_export_item.setVisible(False)
-        self.tools_reindex_item.setVisible(False)
-        self.tools_find_duplicates.setVisible(False)
         action_list = ActionList.get_instance()
         action_list.remove_action(self.song_import_item, UiStrings().Import)
         action_list.remove_action(self.song_export_item, UiStrings().Export)
         action_list.remove_action(self.tools_reindex_item, UiStrings().Tools)
         action_list.remove_action(self.tools_find_duplicates, UiStrings().Tools)
+        action_list.add_action(self.tools_report_song_list, UiStrings().Tools)
+        self.song_tools_menu.menuAction().setVisible(False)
         super(SongsPlugin, self).finalise()
 
     def new_service_created(self):

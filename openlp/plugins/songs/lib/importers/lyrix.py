@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -102,8 +102,8 @@ class LyrixImport(SongImport):
                     else:
                         current_verse += '\n' + line
         except Exception as e:
-            self.log_error(translate('SongsPlugin.LyrixImport', 'File %s' % file.name),
-                           translate('SongsPlugin.LyrixImport', 'Error: %s') % e)
+            self.log_error(translate('SongsPlugin.LyrixImport', 'File {name}').format(name=file.name),
+                           translate('SongsPlugin.LyrixImport', 'Error: {error}').format(error=e))
             return
         self.title = song_title
         self.parse_author(author)

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -38,8 +38,8 @@ class FileRenameForm(QtWidgets.QDialog, Ui_FileRenameDialog, RegistryProperties)
         """
         Constructor
         """
-        super(FileRenameForm, self).__init__(Registry().get('main_window'),
-                                             QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint)
+        super(FileRenameForm, self).__init__(Registry().get('main_window'), QtCore.Qt.WindowSystemMenuHint |
+                                             QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowCloseButtonHint)
         self._setup()
 
     def _setup(self):

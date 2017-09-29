@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -25,7 +25,8 @@ The UI widgets of the print service dialog.
 from PyQt5 import QtCore, QtWidgets, QtPrintSupport
 
 from openlp.core.common import UiStrings, translate
-from openlp.core.lib import SpellTextEdit, build_icon
+from openlp.core.lib import build_icon
+from openlp.core.ui.lib import SpellTextEdit
 
 
 class ZoomSize(object):
@@ -49,7 +50,7 @@ class Ui_PrintServiceDialog(object):
         Set up the UI
         """
         print_service_dialog.setObjectName('print_service_dialog')
-        print_service_dialog.setWindowIcon(build_icon(u':/icon/openlp-logo.svg'))
+        print_service_dialog.setWindowIcon(build_icon(':/icon/openlp-logo.svg'))
         print_service_dialog.resize(664, 594)
         self.main_layout = QtWidgets.QVBoxLayout(print_service_dialog)
         self.main_layout.setSpacing(0)
@@ -94,7 +95,7 @@ class Ui_PrintServiceDialog(object):
         self.main_layout.addWidget(self.preview_widget)
         self.options_widget = QtWidgets.QWidget(print_service_dialog)
         self.options_widget.hide()
-        self.options_widget.resize(400, 300)
+        self.options_widget.resize(400, 350)
         self.options_widget.setAutoFillBackground(True)
         self.options_layout = QtWidgets.QVBoxLayout(self.options_widget)
         self.options_layout.setContentsMargins(8, 8, 8, 8)
@@ -120,6 +121,8 @@ class Ui_PrintServiceDialog(object):
         self.group_layout.addWidget(self.notes_check_box)
         self.meta_data_check_box = QtWidgets.QCheckBox()
         self.group_layout.addWidget(self.meta_data_check_box)
+        self.show_chords_check_box = QtWidgets.QCheckBox()
+        self.group_layout.addWidget(self.show_chords_check_box)
         self.group_layout.addStretch(1)
         self.options_group_box.setLayout(self.group_layout)
         self.options_layout.addWidget(self.options_group_box)
@@ -143,6 +146,7 @@ class Ui_PrintServiceDialog(object):
         self.page_break_after_text.setText(translate('OpenLP.PrintServiceForm', 'Add page break before each text item'))
         self.notes_check_box.setText(translate('OpenLP.PrintServiceForm', 'Include service item notes'))
         self.meta_data_check_box.setText(translate('OpenLP.PrintServiceForm', 'Include play length of media items'))
+        self.show_chords_check_box.setText(translate('OpenLP.PrintServiceForm', 'Show chords'))
         self.title_line_edit.setText(translate('OpenLP.PrintServiceForm', 'Service Sheet'))
         # Do not change the order.
         self.zoom_combo_box.addItems([

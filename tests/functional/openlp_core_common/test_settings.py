@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,10 +23,10 @@
 Package to test the openlp.core.lib.settings package.
 """
 from unittest import TestCase
+from unittest.mock import patch
 
 from openlp.core.common import Settings
-from openlp.core.common.settings import recent_files_conv
-from tests.functional import patch
+
 from tests.helpers.testmixin import TestMixin
 
 
@@ -47,26 +47,7 @@ class TestSettings(TestCase, TestMixin):
         """
         self.destroy_settings()
 
-    def recent_files_conv_test(self):
-        """
-        Test that recent_files_conv, converts various possible types of values correctly.
-        """
-        # GIVEN: A list of possible value types and the expected results
-        possible_values = [(['multiple', 'values'], ['multiple', 'values']),
-                           (['single value'], ['single value']),
-                           ('string value', ['string value']),
-                           (b'bytes value', ['bytes value']),
-                           ([], []),
-                           (None, [])]
-
-        # WHEN: Calling recent_files_conv with the possible values
-        for value, expected_result in possible_values:
-            actual_result = recent_files_conv(value)
-
-            # THEN: The actual result should be the same as the expected result
-            self.assertEqual(actual_result, expected_result)
-
-    def settings_basic_test(self):
+    def test_settings_basic(self):
         """
         Test the Settings creation and its default usage
         """
@@ -84,7 +65,7 @@ class TestSettings(TestCase, TestMixin):
         # THEN the new value is returned when re-read
         self.assertTrue(Settings().value('core/has run wizard'), 'The saved value should have been returned')
 
-    def settings_override_test(self):
+    def test_settings_override(self):
         """
         Test the Settings creation and its override usage
         """
@@ -106,7 +87,7 @@ class TestSettings(TestCase, TestMixin):
         # THEN the new value is returned when re-read
         self.assertEqual('very short', Settings().value('test/extend'), 'The saved value should be returned')
 
-    def settings_override_with_group_test(self):
+    def test_settings_override_with_group(self):
         """
         Test the Settings creation and its override usage - with groups
         """
@@ -130,7 +111,7 @@ class TestSettings(TestCase, TestMixin):
         # THEN the new value is returned when re-read
         self.assertEqual('very short', Settings().value('test/extend'), 'The saved value should be returned')
 
-    def settings_nonexisting_test(self):
+    def test_settings_nonexisting(self):
         """
         Test the Settings on query for non-existing value
         """
@@ -142,7 +123,7 @@ class TestSettings(TestCase, TestMixin):
         # THEN: An exception with the non-existing key should be thrown
         self.assertEqual(str(cm.exception), "'core/does not exists'", 'We should get an exception')
 
-    def extend_default_settings_test(self):
+    def test_extend_default_settings(self):
         """
         Test that the extend_default_settings method extends the default settings
         """

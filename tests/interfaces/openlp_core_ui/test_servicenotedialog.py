@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,12 +23,13 @@
 Package to test the openlp.core.ui package.
 """
 from unittest import TestCase
+from unittest.mock import patch
 
 from PyQt5 import QtCore, QtTest, QtWidgets
 
 from openlp.core.common import Registry
 from openlp.core.ui import servicenoteform
-from tests.interfaces import patch
+
 from tests.helpers.testmixin import TestMixin
 
 
@@ -51,7 +52,7 @@ class TestStartNoteDialog(TestCase, TestMixin):
         del self.form
         del self.main_window
 
-    def basic_display_test(self):
+    def test_basic_display(self):
         """
         Test Service Note form functionality
         """

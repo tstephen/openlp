@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -94,7 +94,7 @@ class CustomMediaItem(MediaManagerItem):
         """
 
         """
-        self.search_text_label.setText('%s:' % UiStrings().Search)
+        self.search_text_label.setText('{text}:'.format(text=UiStrings().Search))
         self.search_text_button.setText(UiStrings().Search)
 
     def initialise(self):
@@ -105,7 +105,6 @@ class CustomMediaItem(MediaManagerItem):
             [(CustomSearch.Titles, ':/songs/song_search_title.png', translate('SongsPlugin.MediaItem', 'Titles'),
               translate('SongsPlugin.MediaItem', 'Search Titles...')),
              (CustomSearch.Themes, ':/slides/slide_theme.png', UiStrings().Themes, UiStrings().SearchThemes)])
-        self.search_text_edit.set_current_search_type(Settings().value('%s/last search type' % self.settings_section))
         self.load_list(self.plugin.db_manager.get_all_objects(CustomSlide, order_by_ref=CustomSlide.title))
         self.config_update()
 
@@ -130,7 +129,6 @@ class CustomMediaItem(MediaManagerItem):
         # Called to redisplay the custom list screen edith from a search
         # or from the exit of the Custom edit dialog. If remote editing is
         # active trigger it and clean up so it will not update again.
-        self.check_search_result()
 
     def on_new_click(self):
         """
@@ -190,10 +188,9 @@ class CustomMediaItem(MediaManagerItem):
             if QtWidgets.QMessageBox.question(
                     self, UiStrings().ConfirmDelete,
                     translate('CustomPlugin.MediaItem',
-                              'Are you sure you want to delete the "%d" selected custom slide(s)?') % len(items),
-                    QtWidgets.QMessageBox.StandardButtons(
-                        QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No),
-                    QtWidgets.QMessageBox.Yes) == QtWidgets.QMessageBox.No:
+                              'Are you sure you want to delete the "{items:d}" '
+                              'selected custom slide(s)?').format(items=len(items)),
+                    defaultButton=QtWidgets.QMessageBox.Yes) == QtWidgets.QMessageBox.No:
                 return
             row_list = [item.row() for item in self.list_view.selectedIndexes()]
             row_list.sort(reverse=True)
@@ -248,11 +245,9 @@ class CustomMediaItem(MediaManagerItem):
         """
         Search the plugin database
         """
-        # Save the current search type to the configuration.
-        Settings().setValue('%s/last search type' % self.settings_section, self.search_text_edit.current_search_type())
         # Reload the list considering the new search type.
         search_type = self.search_text_edit.current_search_type()
-        search_keywords = '%' + self.whitespace.sub(' ', self.search_text_edit.displayText()) + '%'
+        search_keywords = '%{search}%'.format(search=self.whitespace.sub(' ', self.search_text_edit.displayText()))
         if search_type == CustomSearch.Titles:
             log.debug('Titles Search')
             search_results = self.plugin.db_manager.get_all_objects(CustomSlide,
@@ -265,7 +260,6 @@ class CustomMediaItem(MediaManagerItem):
                                                                     CustomSlide.theme_name.like(search_keywords),
                                                                     order_by_ref=CustomSlide.title)
             self.load_list(search_results)
-        self.check_search_result()
 
     def on_search_text_edit_changed(self, text):
         """
@@ -347,7 +341,7 @@ class CustomMediaItem(MediaManagerItem):
         :param string: The search string
         :param show_error: The error string to be show.
         """
-        search = '%' + string.lower() + '%'
+        search = '%{search}%'.format(search=string.lower())
         search_results = self.plugin.db_manager.get_all_objects(CustomSlide,
                                                                 or_(func.lower(CustomSlide.title).like(search),
                                                                     func.lower(CustomSlide.text).like(search)),

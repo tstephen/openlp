@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -123,6 +123,25 @@ is the function which has to be called from outside. The generated and returned 
             vertical-align: top;
             position: relative;
             top: -0.3em;
+        }
+        /* Chords css */
+        .chordline {
+          line-height: 1.0em;
+        }
+        .chordline span.chord span {
+          position: relative;
+        }
+        .chordline span.chord span strong {
+          position: absolute;
+          top: -0.8em;
+          left: 0;
+          font-size: 75%;
+          font-weight: normal;
+          line-height: normal;
+          display: none;
+        }
+        .firstchordline {
+            line-height: 1.0em;
         }
         </style>
         <script>
@@ -389,6 +408,7 @@ is the function which has to be called from outside. The generated and returned 
 """
 import logging
 
+from string import Template
 from PyQt5 import QtWebKit
 
 from openlp.core.common import Settings
@@ -396,156 +416,225 @@ from openlp.core.lib.theme import BackgroundType, BackgroundGradientType, Vertic
 
 log = logging.getLogger(__name__)
 
-HTMLSRC = """
-<!DOCTYPE html>
-<html>
-<head>
-<title>OpenLP Display</title>
-<style>
-*{
+HTML_SRC = Template("""
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <title>OpenLP Display</title>
+    <style>
+    *{
+        margin: 0;
+        padding: 0;
+        border: 0;
+        overflow: hidden;
+        -webkit-user-select: none;
+    }
+    body {
+        ${bg_css};
+    }
+    .size {
+        position: absolute;
+        left: 0px;
+        top: 0px;
+        width: 100%;
+        height: 100%;
+    }
+    #black {
+        z-index: 8;
+        background-color: black;
+        display: none;
+    }
+    #bgimage {
+        z-index: 1;
+    }
+    #image {
+        z-index: 2;
+    }
+    ${css_additions}
+    #footer {
+        position: absolute;
+        z-index: 6;
+        ${footer_css}
+    }
+    /* lyric css */${lyrics_css}
+    sup {
+        font-size: 0.6em;
+        vertical-align: top;
+        position: relative;
+        top: -0.3em;
+    }
+    /* Chords css */${chords_css}
+    </style>
+    <script>
+        var timer = null;
+        var transition = ${transitions};
+        ${js_additions}
+
+        function show_image(src){
+            var img = document.getElementById('image');
+            img.src = src;
+            if(src == '')
+                img.style.display = 'none';
+            else
+                img.style.display = 'block';
+        }
+
+        function show_blank(state){
+            var black = 'none';
+            var lyrics = '';
+            switch(state){
+                case 'theme':
+                    lyrics = 'hidden';
+                    break;
+                case 'black':
+                    black = 'block';
+                    break;
+                case 'desktop':
+                    break;
+            }
+            document.getElementById('black').style.display = black;
+            document.getElementById('lyricsmain').style.visibility = lyrics;
+            document.getElementById('image').style.visibility = lyrics;
+            document.getElementById('footer').style.visibility = lyrics;
+        }
+
+        function show_footer(footertext){
+            document.getElementById('footer').innerHTML = footertext;
+        }
+
+        function show_text(new_text){
+            var match = /-webkit-text-fill-color:[^;\"]+/gi;
+            if(timer != null)
+                clearTimeout(timer);
+            /*
+            QtWebkit bug with outlines and justify causing outline alignment
+            problems. (Bug 859950) Surround each word with a <span> to workaround,
+            but only in this scenario.
+            */
+            var txt = document.getElementById('lyricsmain');
+            if(window.getComputedStyle(txt).textAlign == 'justify'){
+                if(window.getComputedStyle(txt).webkitTextStrokeWidth != '0px'){
+                    new_text = new_text.replace(/(\s|&nbsp;)+(?![^<]*>)/g,
+                        function(match) {
+                            return '</span>' + match + '<span>';
+                        });
+                    new_text = '<span>' + new_text + '</span>';
+                }
+            }
+            text_fade('lyricsmain', new_text);
+        }
+
+        function text_fade(id, new_text){
+            /*
+            Show the text.
+            */
+            var text = document.getElementById(id);
+            if(text == null) return;
+            if(!transition){
+                text.innerHTML = new_text;
+                return;
+            }
+            // Fade text out. 0.1 to minimize the time "nothing" is shown on the screen.
+            text.style.opacity = '0.1';
+            // Fade new text in after the old text has finished fading out.
+            timer = window.setTimeout(function(){_show_text(text, new_text)}, 400);
+        }
+
+        function _show_text(text, new_text) {
+            /*
+            Helper function to show the new_text delayed.
+            */
+            text.innerHTML = new_text;
+            text.style.opacity = '1';
+            // Wait until the text is completely visible. We want to save the timer id, to be able to call
+            // clearTimeout(timer) when the text has changed before finishing fading.
+            timer = window.setTimeout(function(){timer = null;}, 400);
+        }
+
+        function show_text_completed(){
+            return (timer == null);
+        }
+    </script>
+    </head>
+    <body>
+    <img id="bgimage" class="size" ${bg_image} />
+    <img id="image" class="size" ${image} />
+    ${html_additions}
+    <div class="lyricstable"><div id="lyricsmain" style="opacity:1" class="lyricscell lyricsmain"></div></div>
+    <div id="footer" class="footer"></div>
+    <div id="black" class="size"></div>
+    </body>
+    </html>
+    """)
+
+LYRICS_SRC = Template("""
+    .lyricstable {
+        z-index: 5;
+        position: absolute;
+        display: table;
+        ${stable}
+    }
+    .lyricscell {
+        display: table-cell;
+        word-wrap: break-word;
+        -webkit-transition: opacity 0.4s ease;
+        ${lyrics}
+    }
+    .lyricsmain {
+       ${main}
+    }
+    """)
+
+FOOTER_SRC = Template("""
+    left: ${left}px;
+    bottom: ${bottom}px;
+    width: ${width}px;
+    font-family: ${family};
+    font-size: ${size}pt;
+    color: ${color};
+    text-align: left;
+    white-space: ${space};
+    """)
+
+LYRICS_FORMAT_SRC = Template("""
+    ${justify}word-wrap: break-word;
+    text-align: ${align};
+    vertical-align: ${valign};
+    font-family: ${font};
+    font-size: ${size}pt;
+    color: ${color};
+    line-height: ${line}%;
     margin: 0;
     padding: 0;
-    border: 0;
-    overflow: hidden;
-    -webkit-user-select: none;
-}
-body {
-    %s;
-}
-.size {
-    position: absolute;
-    left: 0px;
-    top: 0px;
-    width: 100%%;
-    height: 100%%;
-}
-#black {
-    z-index: 8;
-    background-color: black;
-    display: none;
-}
-#bgimage {
-    z-index: 1;
-}
-#image {
-    z-index: 2;
-}
-%s
-#footer {
-    position: absolute;
-    z-index: 6;
-    %s
-}
-/* lyric css */
-%s
-sup {
-    font-size: 0.6em;
-    vertical-align: top;
-    position: relative;
-    top: -0.3em;
-}
-</style>
-<script>
-    var timer = null;
-    var transition = %s;
-    %s
+    padding-bottom: ${bottom};
+    padding-left: ${left}px;
+    width: ${width}px;
+    height: ${height}px;${font_style}${font_weight}
+    """)
 
-    function show_image(src){
-        var img = document.getElementById('image');
-        img.src = src;
-        if(src == '')
-            img.style.display = 'none';
-        else
-            img.style.display = 'block';
+CHORDS_FORMAT = Template("""
+    .chordline {
+      line-height: ${chord_line_height};
     }
-
-    function show_blank(state){
-        var black = 'none';
-        var lyrics = '';
-        switch(state){
-            case 'theme':
-                lyrics = 'hidden';
-                break;
-            case 'black':
-                black = 'block';
-                break;
-            case 'desktop':
-                break;
-        }
-        document.getElementById('black').style.display = black;
-        document.getElementById('lyricsmain').style.visibility = lyrics;
-        document.getElementById('image').style.visibility = lyrics;
-        document.getElementById('footer').style.visibility = lyrics;
+    .chordline span.chord span {
+      position: relative;
     }
-
-    function show_footer(footertext){
-        document.getElementById('footer').innerHTML = footertext;
+    .chordline span.chord span strong {
+      position: absolute;
+      top: -0.8em;
+      left: 0;
+      font-size: 75%;
+      font-weight: normal;
+      line-height: normal;
+      display: ${chords_display};
     }
-
-    function show_text(new_text){
-        var match = /-webkit-text-fill-color:[^;\"]+/gi;
-        if(timer != null)
-            clearTimeout(timer);
-        /*
-        QtWebkit bug with outlines and justify causing outline alignment
-        problems. (Bug 859950) Surround each word with a <span> to workaround,
-        but only in this scenario.
-        */
-        var txt = document.getElementById('lyricsmain');
-        if(window.getComputedStyle(txt).textAlign == 'justify'){
-            if(window.getComputedStyle(txt).webkitTextStrokeWidth != '0px'){
-                new_text = new_text.replace(/(\s|&nbsp;)+(?![^<]*>)/g,
-                    function(match) {
-                        return '</span>' + match + '<span>';
-                    });
-                new_text = '<span>' + new_text + '</span>';
-            }
-        }
-        text_fade('lyricsmain', new_text);
+    .firstchordline {
+        line-height: ${first_chord_line_height};
     }
-
-    function text_fade(id, new_text){
-        /*
-        Show the text.
-        */
-        var text = document.getElementById(id);
-        if(text == null) return;
-        if(!transition){
-            text.innerHTML = new_text;
-            return;
-        }
-        // Fade text out. 0.1 to minimize the time "nothing" is shown on the screen.
-        text.style.opacity = '0.1';
-        // Fade new text in after the old text has finished fading out.
-        timer = window.setTimeout(function(){_show_text(text, new_text)}, 400);
-    }
-
-    function _show_text(text, new_text) {
-        /*
-        Helper function to show the new_text delayed.
-        */
-        text.innerHTML = new_text;
-        text.style.opacity = '1';
-        // Wait until the text is completely visible. We want to save the timer id, to be able to call
-        // clearTimeout(timer) when the text has changed before finishing fading.
-        timer = window.setTimeout(function(){timer = null;}, 400);
-    }
-
-    function show_text_completed(){
-        return (timer == null);
-    }
-</script>
-</head>
-<body>
-<img id="bgimage" class="size" %s />
-<img id="image" class="size" %s />
-%s
-<div class="lyricstable"><div id="lyricsmain" style="opacity:1" class="lyricscell lyricsmain"></div></div>
-<div id="footer" class="footer"></div>
-<div id="black" class="size"></div>
-</body>
-</html>
-"""
+    .ws {
+        display: ${chords_display};
+        white-space: pre-wrap;
+    }""")
 
 
 def build_html(item, screen, is_live, background, image=None, plugins=None):
@@ -564,13 +653,13 @@ def build_html(item, screen, is_live, background, image=None, plugins=None):
     theme_data = item.theme_data
     # Image generated and poked in
     if background:
-        bgimage_src = 'src="data:image/png;base64,%s"' % background
+        bgimage_src = 'src="data:image/png;base64,{image}"'.format(image=background)
     elif item.bg_image_bytes:
-        bgimage_src = 'src="data:image/png;base64,%s"' % item.bg_image_bytes
+        bgimage_src = 'src="data:image/png;base64,{image}"'.format(image=item.bg_image_bytes)
     else:
         bgimage_src = 'style="display:none;"'
     if image:
-        image_src = 'src="data:image/png;base64,%s"' % image
+        image_src = 'src="data:image/png;base64,{image}"'.format(image=image)
     else:
         image_src = 'style="display:none;"'
     css_additions = ''
@@ -581,18 +670,18 @@ def build_html(item, screen, is_live, background, image=None, plugins=None):
             css_additions += plugin.get_display_css()
             js_additions += plugin.get_display_javascript()
             html_additions += plugin.get_display_html()
-    html = HTMLSRC % (
-        build_background_css(item, width),
-        css_additions,
-        build_footer_css(item, height),
-        build_lyrics_css(item),
-        'true' if theme_data and theme_data.display_slide_transition and is_live else 'false',
-        js_additions,
-        bgimage_src,
-        image_src,
-        html_additions
-    )
-    return html
+    return HTML_SRC.substitute(bg_css=build_background_css(item, width),
+                               css_additions=css_additions,
+                               footer_css=build_footer_css(item, height),
+                               lyrics_css=build_lyrics_css(item),
+                               transitions='true' if (theme_data and
+                                                      theme_data.display_slide_transition and
+                                                      is_live) else 'false',
+                               js_additions=js_additions,
+                               bg_image=bgimage_src,
+                               image=image_src,
+                               html_additions=html_additions,
+                               chords_css=build_chords_css())
 
 
 def webkit_version():
@@ -601,9 +690,9 @@ def webkit_version():
     """
     try:
         webkit_ver = float(QtWebKit.qWebKitVersion())
-        log.debug('Webkit version = %s' % webkit_ver)
+        log.debug('Webkit version = {version}'.format(version=webkit_ver))
     except AttributeError:
-        webkit_ver = 0
+        webkit_ver = 0.0
     return webkit_ver
 
 
@@ -621,23 +710,25 @@ def build_background_css(item, width):
         if theme.background_type == BackgroundType.to_string(BackgroundType.Transparent):
             background = ''
         elif theme.background_type == BackgroundType.to_string(BackgroundType.Solid):
-            background = 'background-color: %s' % theme.background_color
+            background = 'background-color: {theme}'.format(theme=theme.background_color)
         else:
             if theme.background_direction == BackgroundGradientType.to_string(BackgroundGradientType.Horizontal):
-                background = 'background: -webkit-gradient(linear, left top, left bottom, from(%s), to(%s)) fixed' \
-                    % (theme.background_start_color, theme.background_end_color)
+                background = 'background: -webkit-gradient(linear, left top, left bottom, from({start}), to({end})) ' \
+                    'fixed'.format(start=theme.background_start_color, end=theme.background_end_color)
             elif theme.background_direction == BackgroundGradientType.to_string(BackgroundGradientType.LeftTop):
-                background = 'background: -webkit-gradient(linear, left top, right bottom, from(%s), to(%s)) fixed' \
-                    % (theme.background_start_color, theme.background_end_color)
+                background = 'background: -webkit-gradient(linear, left top, right bottom, from({start}), to({end})) ' \
+                    'fixed'.format(start=theme.background_start_color, end=theme.background_end_color)
             elif theme.background_direction == BackgroundGradientType.to_string(BackgroundGradientType.LeftBottom):
-                background = 'background: -webkit-gradient(linear, left bottom, right top, from(%s), to(%s)) fixed' \
-                    % (theme.background_start_color, theme.background_end_color)
+                background = 'background: -webkit-gradient(linear, left bottom, right top, from({start}), to({end})) ' \
+                    'fixed'.format(start=theme.background_start_color, end=theme.background_end_color)
             elif theme.background_direction == BackgroundGradientType.to_string(BackgroundGradientType.Vertical):
-                background = 'background: -webkit-gradient(linear, left top, right top, from(%s), to(%s)) fixed' % \
-                    (theme.background_start_color, theme.background_end_color)
+                background = 'background: -webkit-gradient(linear, left top, right top, from({start}), to({end})) ' \
+                    'fixed'.format(start=theme.background_start_color, end=theme.background_end_color)
             else:
-                background = 'background: -webkit-gradient(radial, %s 50%%, 100, %s 50%%, %s, from(%s), to(%s)) fixed'\
-                    % (width, width, width, theme.background_start_color, theme.background_end_color)
+                background = 'background: -webkit-gradient(radial, {width} 50%, 100, {width} 50%, {width}, ' \
+                    'from({start}), to({end})) fixed'.format(width=width,
+                                                             start=theme.background_start_color,
+                                                             end=theme.background_end_color)
     return background
 
 
@@ -647,36 +738,19 @@ def build_lyrics_css(item):
 
     :param item: Service Item containing theme and location information
     """
-    style = """
-.lyricstable {
-    z-index: 5;
-    position: absolute;
-    display: table;
-    %s
-}
-.lyricscell {
-    display: table-cell;
-    word-wrap: break-word;
-    -webkit-transition: opacity 0.4s ease;
-    %s
-}
-.lyricsmain {
-    %s
-}
-"""
     theme_data = item.theme_data
     lyricstable = ''
     lyrics = ''
     lyricsmain = ''
     if theme_data and item.main:
-        lyricstable = 'left: %spx; top: %spx;' % (item.main.x(), item.main.y())
+        lyricstable = 'left: {left}px; top: {top}px;'.format(left=item.main.x(), top=item.main.y())
         lyrics = build_lyrics_format_css(theme_data, item.main.width(), item.main.height())
         lyricsmain += build_lyrics_outline_css(theme_data)
         if theme_data.font_main_shadow:
-            lyricsmain += ' text-shadow: %s %spx %spx;' % \
-                (theme_data.font_main_shadow_color, theme_data.font_main_shadow_size, theme_data.font_main_shadow_size)
-    lyrics_css = style % (lyricstable, lyrics, lyricsmain)
-    return lyrics_css
+            lyricsmain += ' text-shadow: {theme} {shadow}px ' \
+                '{shadow}px;'.format(theme=theme_data.font_main_shadow_color,
+                                     shadow=theme_data.font_main_shadow_size)
+    return LYRICS_SRC.substitute(stable=lyricstable, lyrics=lyrics, main=lyricsmain)
 
 
 def build_lyrics_outline_css(theme_data):
@@ -689,7 +763,9 @@ def build_lyrics_outline_css(theme_data):
         size = float(theme_data.font_main_outline_size) / 16
         fill_color = theme_data.font_main_color
         outline_color = theme_data.font_main_outline_color
-        return ' -webkit-text-stroke: %sem %s; -webkit-text-fill-color: %s; ' % (size, outline_color, fill_color)
+        return ' -webkit-text-stroke: {size}em {color}; -webkit-text-fill-color: {fill}; '.format(size=size,
+                                                                                                  color=outline_color,
+                                                                                                  fill=fill_color)
     return ''
 
 
@@ -703,30 +779,23 @@ def build_lyrics_format_css(theme_data, width, height):
     """
     align = HorizontalType.Names[theme_data.display_horizontal_align]
     valign = VerticalType.Names[theme_data.display_vertical_align]
-    if theme_data.font_main_outline:
-        left_margin = int(theme_data.font_main_outline_size) * 2
-    else:
-        left_margin = 0
-    justify = 'white-space:pre-wrap;'
+    left_margin = (int(theme_data.font_main_outline_size) * 2) if theme_data.font_main_outline else 0
     # fix tag incompatibilities
-    if theme_data.display_horizontal_align == HorizontalType.Justify:
-        justify = ''
-    if theme_data.display_vertical_align == VerticalType.Bottom:
-        padding_bottom = '0.5em'
-    else:
-        padding_bottom = '0'
-    lyrics = '%s word-wrap: break-word; ' \
-             'text-align: %s; vertical-align: %s; font-family: %s; ' \
-             'font-size: %spt; color: %s; line-height: %d%%; margin: 0;' \
-             'padding: 0; padding-bottom: %s; padding-left: %spx; width: %spx; height: %spx; ' % \
-        (justify, align, valign, theme_data.font_main_name, theme_data.font_main_size,
-         theme_data.font_main_color, 100 + int(theme_data.font_main_line_adjustment), padding_bottom,
-         left_margin, width, height)
-    if theme_data.font_main_italics:
-        lyrics += 'font-style:italic; '
-    if theme_data.font_main_bold:
-        lyrics += 'font-weight:bold; '
-    return lyrics
+    justify = '' if (theme_data.display_horizontal_align == HorizontalType.Justify) else '    white-space: pre-wrap;\n'
+    padding_bottom = '0.5em' if (theme_data.display_vertical_align == VerticalType.Bottom) else '0'
+    return LYRICS_FORMAT_SRC.substitute(justify=justify,
+                                        align=align,
+                                        valign=valign,
+                                        font=theme_data.font_main_name,
+                                        size=theme_data.font_main_size,
+                                        color=theme_data.font_main_color,
+                                        line='{line:d}'.format(line=100 + int(theme_data.font_main_line_adjustment)),
+                                        bottom=padding_bottom,
+                                        left=left_margin,
+                                        width=width,
+                                        height=height,
+                                        font_style='\n    font-style: italic;' if theme_data.font_main_italics else '',
+                                        font_weight='\n    font-weight: bold;' if theme_data.font_main_bold else '')
 
 
 def build_footer_css(item, height):
@@ -736,21 +805,24 @@ def build_footer_css(item, height):
     :param item: Service Item to be processed.
     :param height:
     """
-    style = """
-    left: %spx;
-    bottom: %spx;
-    width: %spx;
-    font-family: %s;
-    font-size: %spt;
-    color: %s;
-    text-align: left;
-    white-space: %s;
-    """
     theme = item.theme_data
     if not theme or not item.footer:
         return ''
     bottom = height - int(item.footer.y()) - int(item.footer.height())
     whitespace = 'normal' if Settings().value('themes/wrap footer') else 'nowrap'
-    lyrics_html = style % (item.footer.x(), bottom, item.footer.width(),
-                           theme.font_footer_name, theme.font_footer_size, theme.font_footer_color, whitespace)
-    return lyrics_html
+    return FOOTER_SRC.substitute(left=item.footer.x(), bottom=bottom, width=item.footer.width(),
+                                 family=theme.font_footer_name, size=theme.font_footer_size,
+                                 color=theme.font_footer_color, space=whitespace)
+
+
+def build_chords_css():
+    if Settings().value('songs/enable chords') and Settings().value('songs/mainview chords'):
+        chord_line_height = '2.0em'
+        chords_display = 'inline'
+        first_chord_line_height = '2.1em'
+    else:
+        chord_line_height = '1.0em'
+        chords_display = 'none'
+        first_chord_line_height = '1.0em'
+    return CHORDS_FORMAT.substitute(chord_line_height=chord_line_height, chords_display=chords_display,
+                                    first_chord_line_height=first_chord_line_height)

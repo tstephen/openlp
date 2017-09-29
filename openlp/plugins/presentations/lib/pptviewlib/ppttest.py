@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -196,6 +196,7 @@ class PPTViewer(QtWidgets.QWidget):
 
     def openDialog(self):
         self.pptEdit.setText(QtWidgets.QFileDialog.getOpenFileName(self, 'Open file')[0])
+
 
 if __name__ == '__main__':
     pptdll = cdll.LoadLibrary(r'pptviewlib.dll')

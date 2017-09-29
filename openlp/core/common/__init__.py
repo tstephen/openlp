@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -24,13 +24,16 @@ The :mod:`common` module contains most of the components and libraries that make
 OpenLP work.
 """
 import hashlib
+import importlib
 import logging
 import os
 import re
 import sys
 import traceback
+from chardet.universaldetector import UniversalDetector
 from ipaddress import IPv4Address, IPv6Address, AddressValueError
 from shutil import which
+from subprocess import check_output, CalledProcessError, STDOUT
 
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtCore import QCryptographicHash as QHash
@@ -53,25 +56,64 @@ def trace_error_handler(logger):
     """
     log_string = "OpenLP Error trace"
     for tb in traceback.extract_stack():
-        log_string = '%s\n   File %s at line %d \n\t called %s' % (log_string, tb[0], tb[1], tb[3])
+        log_string += '\n   File {file} at line {line} \n\t called {data}'.format(file=tb[0],
+                                                                                  line=tb[1],
+                                                                                  data=tb[3])
     logger.error(log_string)
 
 
 def check_directory_exists(directory, do_not_log=False):
     """
-    Check a theme directory exists and if not create it
+    Check a directory exists and if not create it
 
-    :param directory: The directory to make sure exists
-    :param do_not_log: To not log anything. This is need for the start up, when the log isn't ready.
+    :param openlp.core.common.path.Path directory: The directory to make sure exists
+    :param bool do_not_log: To not log anything. This is need for the start up, when the log isn't ready.
+    :rtype: None
     """
     if not do_not_log:
-        log.debug('check_directory_exists %s' % directory)
+        log.debug('check_directory_exists {text}'.format(text=directory))
     try:
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-    except IOError as e:
+        if not directory.exists():
+            directory.mkdir(parents=True)
+    except IOError:
         if not do_not_log:
             log.exception('failed to check if directory exists or create directory')
+
+
+def extension_loader(glob_pattern, excluded_files=[]):
+    """
+    A utility function to find and load OpenLP extensions, such as plugins, presentation and media controllers and
+    importers.
+
+    :param str glob_pattern: A glob pattern used to find the extension(s) to be imported. Should be relative to the
+        application directory. i.e. plugins/*/*plugin.py
+    :param list[str] excluded_files: A list of file names to exclude that the glob pattern may find.
+    :rtype: None
+    """
+    app_dir = AppLocation.get_directory(AppLocation.AppDir)
+    for extension_path in app_dir.glob(glob_pattern):
+        extension_path = extension_path.relative_to(app_dir)
+        if extension_path.name in excluded_files:
+            continue
+        module_name = path_to_module(extension_path)
+        try:
+            importlib.import_module(module_name)
+        except (ImportError, OSError):
+            # On some platforms importing vlc.py might cause OSError exceptions. (e.g. Mac OS X)
+            log.warning('Failed to import {module_name} on path {extension_path}'
+                        .format(module_name=module_name, extension_path=extension_path))
+
+
+def path_to_module(path):
+    """
+    Convert a path to a module name (i.e openlp.core.common)
+
+    :param openlp.core.common.path.Path path: The path to convert to a module name.
+    :return: The module name.
+    :rtype: str
+    """
+    module_path = path.with_suffix('')
+    return 'openlp.' + '.'.join(module_path.parts)
 
 
 def get_frozen_path(frozen_option, non_frozen_option):
@@ -191,7 +233,7 @@ def verify_ip_address(addr):
     return True if verify_ipv4(addr) else verify_ipv6(addr)
 
 
-def md5_hash(salt, data=None):
+def md5_hash(salt=None, data=None):
     """
     Returns the hashed output of md5sum on salt,data
     using Python3 hashlib
@@ -200,32 +242,43 @@ def md5_hash(salt, data=None):
     :param data: OPTIONAL Data to hash
     :returns: str
     """
-    log.debug('md5_hash(salt="%s")' % salt)
+    log.debug('md5_hash(salt="{text}")'.format(text=salt))
+    if not salt and not data:
+        return None
     hash_obj = hashlib.new('md5')
-    hash_obj.update(salt)
+    if salt:
+        hash_obj.update(salt)
     if data:
         hash_obj.update(data)
     hash_value = hash_obj.hexdigest()
-    log.debug('md5_hash() returning "%s"' % hash_value)
+    log.debug('md5_hash() returning "{text}"'.format(text=hash_value))
     return hash_value
 
 
-def qmd5_hash(salt, data=None):
+def qmd5_hash(salt=None, data=None):
     """
     Returns the hashed output of MD5Sum on salt, data
-    using PyQt5.QCryptographicHash.
+    using PyQt5.QCryptographicHash. Function returns a
+    QByteArray instead of a text string.
+    If you need a string instead, call with
+
+        result = str(qmd5_hash(salt=..., data=...), encoding='ascii')
 
     :param salt: Initial salt
     :param data: OPTIONAL Data to hash
-    :returns: str
+    :returns: QByteArray
     """
-    log.debug('qmd5_hash(salt="%s"' % salt)
+    log.debug('qmd5_hash(salt="{text}"'.format(text=salt))
+    if salt is None and data is None:
+        return None
     hash_obj = QHash(QHash.Md5)
-    hash_obj.addData(salt)
-    hash_obj.addData(data)
+    if salt:
+        hash_obj.addData(salt)
+    if data:
+        hash_obj.addData(data)
     hash_value = hash_obj.result().toHex()
-    log.debug('qmd5_hash() returning "%s"' % hash_value)
-    return hash_value.data()
+    log.debug('qmd5_hash() returning "{hash}"'.format(hash=hash_value))
+    return hash_value
 
 
 def clean_button_text(button_text):
@@ -246,6 +299,9 @@ from .settings import Settings
 from .applocation import AppLocation
 from .actions import ActionList
 from .languagemanager import LanguageManager
+
+if is_win():
+    from subprocess import STARTUPINFO, STARTF_USESHOWWINDOW
 
 
 def add_actions(target, actions):
@@ -278,7 +334,7 @@ def get_uno_command(connection_type='pipe'):
         CONNECTION = '"--accept=pipe,name=openlp_pipe;urp;"'
     else:
         CONNECTION = '"--accept=socket,host=localhost,port=2002;urp;"'
-    return '%s %s %s' % (command, OPTIONS, CONNECTION)
+    return '{cmd} {opt} {conn}'.format(cmd=command, opt=OPTIONS, conn=CONNECTION)
 
 
 def get_uno_instance(resolver, connection_type='pipe'):
@@ -315,20 +371,22 @@ def split_filename(path):
         return os.path.split(path)
 
 
-def delete_file(file_path_name):
+def delete_file(file_path):
     """
     Deletes a file from the system.
 
-    :param file_path_name: The file, including path, to delete.
+    :param openlp.core.common.path.Path file_path: The file, including path, to delete.
+    :return: True if the deletion was successful, or the file never existed. False otherwise.
+    :rtype: bool
     """
-    if not file_path_name:
+    if not file_path:
         return False
     try:
-        if os.path.exists(file_path_name):
-            os.remove(file_path_name)
+        if file_path.exists():
+            file_path.unlink()
         return True
     except (IOError, OSError):
-        log.exception("Unable to delete file %s" % file_path_name)
+        log.exception('Unable to delete file {file_path}'.format(file_path=file_path))
         return False
 
 
@@ -340,24 +398,27 @@ def get_images_filter():
     if not IMAGES_FILTER:
         log.debug('Generating images filter.')
         formats = list(map(bytes.decode, list(map(bytes, QtGui.QImageReader.supportedImageFormats()))))
-        visible_formats = '(*.%s)' % '; *.'.join(formats)
-        actual_formats = '(*.%s)' % ' *.'.join(formats)
-        IMAGES_FILTER = '%s %s %s' % (translate('OpenLP', 'Image Files'), visible_formats, actual_formats)
+        visible_formats = '(*.{text})'.format(text='; *.'.join(formats))
+        actual_formats = '(*.{text})'.format(text=' *.'.join(formats))
+        IMAGES_FILTER = '{text} {visible} {actual}'.format(text=translate('OpenLP', 'Image Files'),
+                                                           visible=visible_formats,
+                                                           actual=actual_formats)
     return IMAGES_FILTER
 
 
-def is_not_image_file(file_name):
+def is_not_image_file(file_path):
     """
     Validate that the file is not an image file.
 
-    :param file_name: File name to be checked.
+    :param openlp.core.common.path.Path file_path: The file to be checked.
+    :return: If the file is not an image
+    :rtype: bool
     """
-    if not file_name:
+    if not (file_path and file_path.exists()):
         return True
     else:
         formats = [bytes(fmt).decode().lower() for fmt in QtGui.QImageReader.supportedImageFormats()]
-        file_part, file_extension = os.path.splitext(str(file_name))
-        if file_extension[1:].lower() in formats and os.path.exists(file_name):
+        if file_path.suffix[1:].lower() in formats:
             return False
         return True
 
@@ -366,8 +427,56 @@ def clean_filename(filename):
     """
     Removes invalid characters from the given ``filename``.
 
-    :param filename:  The "dirty" file name to clean.
+    :param str filename:  The "dirty" file name to clean.
+    :return: The cleaned string
+    :rtype: str
     """
-    if not isinstance(filename, str):
-        filename = str(filename, 'utf-8')
     return INVALID_FILE_CHARS.sub('_', CONTROL_CHARS.sub('', filename))
+
+
+def check_binary_exists(program_path):
+    """
+    Function that checks whether a binary exists.
+
+    :param openlp.core.common.path.Path program_path: The full path to the binary to check.
+    :return: program output to be parsed
+    :rtype: bytes
+    """
+    log.debug('testing program_path: {text}'.format(text=program_path))
+    try:
+        # Setup startupinfo options for check_output to avoid console popping up on windows
+        if is_win():
+            startupinfo = STARTUPINFO()
+            startupinfo.dwFlags |= STARTF_USESHOWWINDOW
+        else:
+            startupinfo = None
+        run_log = check_output([str(program_path), '--help'], stderr=STDOUT, startupinfo=startupinfo)
+    except CalledProcessError as e:
+        run_log = e.output
+    except Exception:
+        trace_error_handler(log)
+        run_log = ''
+    log.debug('check_output returned: {text}'.format(text=run_log))
+    return run_log
+
+
+def get_file_encoding(file_path):
+    """
+    Utility function to incrementally detect the file encoding.
+
+    :param openlp.core.common.path.Path file_path: Filename for the file to determine the encoding for.
+    :return: A dict with the keys 'encoding' and 'confidence'
+    :rtype: dict[str, float]
+    """
+    detector = UniversalDetector()
+    try:
+        with file_path.open('rb') as detect_file:
+            while not detector.done:
+                chunk = detect_file.read(1024)
+                if not chunk:
+                    break
+                detector.feed(chunk)
+            detector.close()
+        return detector.result
+    except OSError:
+        log.exception('Error detecting file encoding')

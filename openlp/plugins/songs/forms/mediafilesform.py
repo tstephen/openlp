@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -34,10 +34,11 @@ class MediaFilesForm(QtWidgets.QDialog, Ui_MediaFilesDialog):
     """
     Class to show a list of files from the
     """
-    log.info('%s MediaFilesForm loaded', __name__)
+    log.info('{name} MediaFilesForm loaded'.format(name=__name__))
 
     def __init__(self, parent):
-        super(MediaFilesForm, self).__init__(parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint)
+        super(MediaFilesForm, self).__init__(parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint |
+                                             QtCore.Qt.WindowCloseButtonHint)
         self.setupUi(self)
 
     def populate_files(self, files):

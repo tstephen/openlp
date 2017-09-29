@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -35,10 +35,13 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from openlp.core.common import Registry, RegistryProperties, AppLocation, Settings, ThemeLevel, OpenLPMixin, \
     RegistryMixin, check_directory_exists, UiStrings, translate, split_filename, delete_file
 from openlp.core.common.actions import ActionList, CategoryOrder
-from openlp.core.lib import OpenLPToolbar, ServiceItem, ItemCapabilities, PluginStatus, build_icon
+from openlp.core.common.languagemanager import format_time
+from openlp.core.common.path import Path, path_to_str, str_to_path
+from openlp.core.lib import ServiceItem, ItemCapabilities, PluginStatus, build_icon
 from openlp.core.lib.ui import critical_error_message_box, create_widget_action, find_and_set_in_combo_box
 from openlp.core.ui import ServiceNoteForm, ServiceItemEditForm, StartTimeForm
-from openlp.core.common.languagemanager import format_time
+from openlp.core.ui.lib import OpenLPToolbar
+from openlp.core.ui.lib.filedialog import FileDialog
 
 
 class ServiceManagerList(QtWidgets.QTreeWidget):
@@ -64,6 +67,12 @@ class ServiceManagerList(QtWidgets.QTreeWidget):
                 event.accept()
             elif event.key() == QtCore.Qt.Key_Down:
                 self.service_manager.on_move_selection_down()
+                event.accept()
+            elif event.key() == QtCore.Qt.Key_Right:
+                self.service_manager.on_expand_selection()
+                event.accept()
+            elif event.key() == QtCore.Qt.Key_Left:
+                self.service_manager.on_collapse_selection()
                 event.accept()
             elif event.key() == QtCore.Qt.Key_Delete:
                 self.service_manager.on_delete_from_service()
@@ -117,7 +126,7 @@ class Ui_ServiceManager(object):
                                         tooltip=translate('OpenLP.ServiceManager', 'Save this service.'),
                                         triggers=self.decide_save_method)
         self.toolbar.addSeparator()
-        self.theme_label = QtWidgets.QLabel('%s:' % UiStrings().Theme, widget)
+        self.theme_label = QtWidgets.QLabel('{theme}:'.format(theme=UiStrings().Theme), widget)
         self.theme_label.setContentsMargins(3, 3, 3, 3)
         self.theme_label.setObjectName('theme_label')
         self.toolbar.add_toolbar_widget(self.theme_label)
@@ -216,7 +225,7 @@ class Ui_ServiceManager(object):
         self.service_manager_list.itemExpanded.connect(self.expanded)
         # Last little bits of setting up
         self.service_theme = Settings().value(self.main_window.service_manager_settings_section + '/service theme')
-        self.service_path = AppLocation.get_section_data_path('servicemanager')
+        self.service_path = str(AppLocation.get_section_data_path('servicemanager'))
         # build the drag and drop context menu
         self.dnd_menu = QtWidgets.QMenu()
         self.new_action = self.dnd_menu.addAction(translate('OpenLP.ServiceManager', '&Add New Item'))
@@ -357,16 +366,20 @@ class ServiceManager(OpenLPMixin, RegistryMixin, QtWidgets.QWidget, Ui_ServiceMa
         """
         return self._modified
 
-    def set_file_name(self, file_name):
+    def set_file_name(self, file_path):
         """
         Setter for service file.
 
-        :param file_name: The service file name
+        :param openlp.core.common.path.Path file_path: The service file name
+        :rtype: None
         """
-        self._file_name = str(file_name)
+        self._file_name = path_to_str(file_path)
         self.main_window.set_service_modified(self.is_modified(), self.short_file_name())
-        Settings().setValue('servicemanager/last file', file_name)
-        self._save_lite = self._file_name.endswith('.oszl')
+        Settings().setValue('servicemanager/last file', file_path)
+        if file_path and file_path.suffix == '.oszl':
+            self._save_lite = True
+        else:
+            self._save_lite = False
 
     def file_name(self):
         """
@@ -427,18 +440,17 @@ class ServiceManager(OpenLPMixin, RegistryMixin, QtWidgets.QWidget, Ui_ServiceMa
             elif result == QtWidgets.QMessageBox.Save:
                 self.decide_save_method()
         if not load_file:
-            file_name, filter_used = QtWidgets.QFileDialog.getOpenFileName(
+            file_path, filter_used = FileDialog.getOpenFileName(
                 self.main_window,
                 translate('OpenLP.ServiceManager', 'Open File'),
                 Settings().value(self.main_window.service_manager_settings_section + '/last directory'),
                 translate('OpenLP.ServiceManager', 'OpenLP Service Files (*.osz *.oszl)'))
-            if not file_name:
+            if not file_path:
                 return False
         else:
-            file_name = load_file
-        Settings().setValue(self.main_window.service_manager_settings_section + '/last directory',
-                            split_filename(file_name)[0])
-        self.load_file(file_name)
+            file_path = str_to_path(load_file)
+        Settings().setValue(self.main_window.service_manager_settings_section + '/last directory', file_path.parent)
+        self.load_file(str(file_path))
 
     def save_modified_service(self):
         """
@@ -466,10 +478,10 @@ class ServiceManager(OpenLPMixin, RegistryMixin, QtWidgets.QWidget, Ui_ServiceMa
         """
         self.service_manager_list.clear()
         self.service_items = []
-        self.set_file_name('')
+        self.set_file_name(None)
         self.service_id += 1
         self.set_modified(False)
-        Settings().setValue('servicemanager/last file', '')
+        Settings().setValue('servicemanager/last file', None)
         self.plugin_manager.new_service_created()
 
     def create_basic_service(self):
@@ -479,9 +491,10 @@ class ServiceManager(OpenLPMixin, RegistryMixin, QtWidgets.QWidget, Ui_ServiceMa
         :return: service array
         """
         service = []
-        core = {'lite-service': self._save_lite,
-                'service-theme': self.service_theme
-                }
+        core = {
+            'lite-service': self._save_lite,
+            'service-theme': self.service_theme
+        }
         service.append({'openlp_core': core})
         return service
 
@@ -502,9 +515,9 @@ class ServiceManager(OpenLPMixin, RegistryMixin, QtWidgets.QWidget, Ui_ServiceMa
         path_file_name = str(self.file_name())
         path, file_name = os.path.split(path_file_name)
         base_name = os.path.splitext(file_name)[0]
-        service_file_name = '%s.osj' % base_name
-        self.log_debug('ServiceManager.save_file - %s' % path_file_name)
-        Settings().setValue(self.main_window.service_manager_settings_section + '/last directory', path)
+        service_file_name = '{name}.osj'.format(name=base_name)
+        self.log_debug('ServiceManager.save_file - {name}'.format(name=path_file_name))
+        Settings().setValue(self.main_window.service_manager_settings_section + '/last directory', Path(path))
         service = self.create_basic_service()
         write_list = []
         missing_list = []
@@ -529,8 +542,9 @@ class ServiceManager(OpenLPMixin, RegistryMixin, QtWidgets.QWidget, Ui_ServiceMa
             self.application.set_normal_cursor()
             title = translate('OpenLP.ServiceManager', 'Service File(s) Missing')
             message = translate('OpenLP.ServiceManager',
-                                'The following file(s) in the service are missing: %s\n\n'
-                                'These files will be removed if you continue to save.') % "\n\t".join(missing_list)
+                                'The following file(s) in the service are missing: {name}\n\n'
+                                'These files will be removed if you continue to save.'
+                                ).format(name="\n\t".join(missing_list))
             answer = QtWidgets.QMessageBox.critical(self, title, message,
                                                     QtWidgets.QMessageBox.StandardButtons(QtWidgets.QMessageBox.Ok |
                                                                                           QtWidgets.QMessageBox.Cancel))
@@ -560,7 +574,7 @@ class ServiceManager(OpenLPMixin, RegistryMixin, QtWidgets.QWidget, Ui_ServiceMa
         service_content = json.dumps(service)
         # Usual Zip file cannot exceed 2GiB, file with Zip64 cannot be extracted using unzip in UNIX.
         allow_zip_64 = (total_size > 2147483648 + len(service_content))
-        self.log_debug('ServiceManager.save_file - allowZip64 is %s' % allow_zip_64)
+        self.log_debug('ServiceManager.save_file - allowZip64 is {text}'.format(text=allow_zip_64))
         zip_file = None
         success = True
         self.main_window.increment_progress_bar()
@@ -578,12 +592,12 @@ class ServiceManager(OpenLPMixin, RegistryMixin, QtWidgets.QWidget, Ui_ServiceMa
                     audio_from = os.path.join(self.service_path, audio_from)
                 save_file = os.path.join(self.service_path, audio_to)
                 save_path = os.path.split(save_file)[0]
-                check_directory_exists(save_path)
+                check_directory_exists(Path(save_path))
                 if not os.path.exists(save_file):
                     shutil.copy(audio_from, save_file)
                 zip_file.write(audio_from, audio_to)
         except IOError:
-            self.log_exception('Failed to save service to disk: %s' % temp_file_name)
+            self.log_exception('Failed to save service to disk: {name}'.format(name=temp_file_name))
             self.main_window.error_message(translate('OpenLP.ServiceManager', 'Error Saving File'),
                                            translate('OpenLP.ServiceManager', 'There was an error saving your file.'))
             success = False
@@ -595,17 +609,17 @@ class ServiceManager(OpenLPMixin, RegistryMixin, QtWidgets.QWidget, Ui_ServiceMa
         if success:
             try:
                 shutil.copy(temp_file_name, path_file_name)
-            except shutil.Error:
+            except (shutil.Error, PermissionError):
                 return self.save_file_as()
             except OSError as ose:
                 QtWidgets.QMessageBox.critical(self, translate('OpenLP.ServiceManager', 'Error Saving File'),
                                                translate('OpenLP.ServiceManager', 'An error occurred while writing the '
-                                                         'service file: %s') % ose.strerror,
+                                                         'service file: {error}').format(error=ose.strerror),
                                                QtWidgets.QMessageBox.StandardButtons(QtWidgets.QMessageBox.Ok))
                 success = False
             self.main_window.add_recent_file(path_file_name)
             self.set_modified(False)
-        delete_file(temp_file_name)
+        delete_file(Path(temp_file_name))
         return success
 
     def save_local_file(self):
@@ -622,9 +636,9 @@ class ServiceManager(OpenLPMixin, RegistryMixin, QtWidgets.QWidget, Ui_ServiceMa
         path_file_name = str(self.file_name())
         path, file_name = os.path.split(path_file_name)
         base_name = os.path.splitext(file_name)[0]
-        service_file_name = '%s.osj' % base_name
-        self.log_debug('ServiceManager.save_file - %s' % path_file_name)
-        Settings().setValue(self.main_window.service_manager_settings_section + '/last directory', path)
+        service_file_name = '{name}.osj'.format(name=base_name)
+        self.log_debug('ServiceManager.save_file - {name}'.format(name=path_file_name))
+        Settings().setValue(self.main_window.service_manager_settings_section + '/last directory', Path(path))
         service = self.create_basic_service()
         self.application.set_busy_cursor()
         # Number of items + 1 to zip it
@@ -644,7 +658,7 @@ class ServiceManager(OpenLPMixin, RegistryMixin, QtWidgets.QWidget, Ui_ServiceMa
             # First we add service contents.
             zip_file.writestr(service_file_name, service_content)
         except IOError:
-            self.log_exception('Failed to save service to disk: %s', temp_file_name)
+            self.log_exception('Failed to save service to disk: {name}'.format(name=temp_file_name))
             self.main_window.error_message(translate('OpenLP.ServiceManager', 'Error Saving File'),
                                            translate('OpenLP.ServiceManager', 'There was an error saving your file.'))
             success = False
@@ -656,11 +670,11 @@ class ServiceManager(OpenLPMixin, RegistryMixin, QtWidgets.QWidget, Ui_ServiceMa
         if success:
             try:
                 shutil.copy(temp_file_name, path_file_name)
-            except shutil.Error:
+            except (shutil.Error, PermissionError):
                 return self.save_file_as()
             self.main_window.add_recent_file(path_file_name)
             self.set_modified(False)
-        delete_file(temp_file_name)
+        delete_file(Path(temp_file_name))
         return success
 
     def save_file_as(self, field=None):
@@ -685,27 +699,25 @@ class ServiceManager(OpenLPMixin, RegistryMixin, QtWidgets.QWidget, Ui_ServiceMa
             default_file_name = format_time(default_pattern, local_time)
         else:
             default_file_name = ''
-        directory = Settings().value(self.main_window.service_manager_settings_section + '/last directory')
-        path = os.path.join(directory, default_file_name)
+        default_file_path = Path(default_file_name)
+        directory_path = Settings().value(self.main_window.service_manager_settings_section + '/last directory')
+        if directory_path:
+            default_file_path = directory_path / default_file_path
         # SaveAs from osz to oszl is not valid as the files will be deleted on exit which is not sensible or usable in
         # the long term.
         if self._file_name.endswith('oszl') or self.service_has_all_original_files:
-            file_name, filter_used = QtWidgets.QFileDialog.getSaveFileName(
-                self.main_window, UiStrings().SaveService, path,
+            file_path, filter_used = FileDialog.getSaveFileName(
+                self.main_window, UiStrings().SaveService, default_file_path,
                 translate('OpenLP.ServiceManager',
                           'OpenLP Service Files (*.osz);; OpenLP Service Files - lite (*.oszl)'))
         else:
-            file_name, filter_uesd = QtWidgets.QFileDialog.getSaveFileName(
-                self.main_window, UiStrings().SaveService, path,
+            file_path, filter_used = FileDialog.getSaveFileName(
+                self.main_window, UiStrings().SaveService, file_path,
                 translate('OpenLP.ServiceManager', 'OpenLP Service Files (*.osz);;'))
-        if not file_name:
+        if not file_path:
             return False
-        if os.path.splitext(file_name)[1] == '':
-            file_name += '.osz'
-        else:
-            ext = os.path.splitext(file_name)[1]
-            file_name.replace(ext, '.osz')
-        self.set_file_name(file_name)
+        file_path.with_suffix('.osz')
+        self.set_file_name(file_path)
         self.decide_save_method()
 
     def decide_save_method(self, field=None):
@@ -739,13 +751,13 @@ class ServiceManager(OpenLPMixin, RegistryMixin, QtWidgets.QWidget, Ui_ServiceMa
                 try:
                     ucs_file = zip_info.filename
                 except UnicodeDecodeError:
-                    self.log_exception('file_name "%s" is not valid UTF-8' % zip_info.file_name)
+                    self.log_exception('file_name "{name}" is not valid UTF-8'.format(name=zip_info.file_name))
                     critical_error_message_box(message=translate('OpenLP.ServiceManager',
                                                'File is not a valid service.\n The content encoding is not UTF-8.'))
                     continue
                 os_file = ucs_file.replace('/', os.path.sep)
                 os_file = os.path.basename(os_file)
-                self.log_debug('Extract file: %s' % os_file)
+                self.log_debug('Extract file: {name}'.format(name=os_file))
                 zip_info.filename = os_file
                 zip_file.extract(zip_info, self.service_path)
                 if os_file.endswith('osj') or os_file.endswith('osd'):
@@ -762,29 +774,29 @@ class ServiceManager(OpenLPMixin, RegistryMixin, QtWidgets.QWidget, Ui_ServiceMa
                     return
                 file_to.close()
                 self.new_file()
-                self.set_file_name(file_name)
+                self.set_file_name(str_to_path(file_name))
                 self.main_window.display_progress_bar(len(items))
                 self.process_service_items(items)
-                delete_file(p_file)
+                delete_file(Path(p_file))
                 self.main_window.add_recent_file(file_name)
                 self.set_modified(False)
-                Settings().setValue('servicemanager/last file', file_name)
+                Settings().setValue('servicemanager/last file', Path(file_name))
             else:
                 critical_error_message_box(message=translate('OpenLP.ServiceManager', 'File is not a valid service.'))
                 self.log_error('File contains no service data')
-        except (IOError, NameError, zipfile.BadZipfile):
-            self.log_exception('Problem loading service file %s' % file_name)
+        except (IOError, NameError):
+            self.log_exception('Problem loading service file {name}'.format(name=file_name))
             critical_error_message_box(message=translate('OpenLP.ServiceManager',
                                        'File could not be opened because it is corrupt.'))
         except zipfile.BadZipfile:
             if os.path.getsize(file_name) == 0:
-                self.log_exception('Service file is zero sized: %s' % file_name)
+                self.log_exception('Service file is zero sized: {name}'.format(name=file_name))
                 QtWidgets.QMessageBox.information(self, translate('OpenLP.ServiceManager', 'Empty File'),
                                                   translate('OpenLP.ServiceManager',
                                                             'This service file does not contain '
                                                             'any data.'))
             else:
-                self.log_exception('Service file is cannot be extracted as zip: %s' % file_name)
+                self.log_exception('Service file is cannot be extracted as zip: {name}'.format(name=file_name))
                 QtWidgets.QMessageBox.information(self, translate('OpenLP.ServiceManager', 'Corrupt File'),
                                                   translate('OpenLP.ServiceManager',
                                                             'This file is either corrupt or it is not an OpenLP 2 '
@@ -833,7 +845,7 @@ class ServiceManager(OpenLPMixin, RegistryMixin, QtWidgets.QWidget, Ui_ServiceMa
         Load the last service item from the service manager when the service was last closed. Can be blank if there was
         no service present.
         """
-        file_name = Settings().value('servicemanager/last file')
+        file_name = str_to_path(Settings().value('servicemanager/last file'))
         if file_name:
             self.load_file(file_name)
 
@@ -873,7 +885,7 @@ class ServiceManager(OpenLPMixin, RegistryMixin, QtWidgets.QWidget, Ui_ServiceMa
             self.auto_play_slides_loop.setChecked(service_item['service_item'].auto_play_slides_loop)
             self.timed_slide_interval.setChecked(service_item['service_item'].timed_slide_interval > 0)
             if service_item['service_item'].timed_slide_interval > 0:
-                delay_suffix = ' %s s' % str(service_item['service_item'].timed_slide_interval)
+                delay_suffix = ' {text} s'.format(text=str(service_item['service_item'].timed_slide_interval))
             else:
                 delay_suffix = ' ...'
             self.timed_slide_interval.setText(
@@ -1116,6 +1128,35 @@ class ServiceManager(OpenLPMixin, RegistryMixin, QtWidgets.QWidget, Ui_ServiceMa
             return
         self.service_manager_list.setCurrentItem(item_after)
 
+    def on_expand_selection(self):
+        """
+        Expands cursor selection on the window. Called by the right arrow
+        """
+        item = self.service_manager_list.currentItem()
+        # Since we only have 2 levels we find them by checking for children
+        if item.childCount():
+            if not self.service_manager_list.isExpanded(self.service_manager_list.currentIndex()):
+                self.service_manager_list.expandItem(item)
+                self.service_manager.expanded(item)
+                # If not expanded, Expand it
+            self.service_manager_list.setCurrentItem(self.service_manager_list.itemBelow(item))
+            # Then move selection down to child whether it needed to be expanded or not
+
+    def on_collapse_selection(self):
+        """
+        Collapses cursor selection on the window Called by the left arrow
+        """
+        item = self.service_manager_list.currentItem()
+        # Since we only have 2 levels we find them by checking for children
+        if item.childCount():
+            if self.service_manager_list.isExpanded(self.service_manager_list.currentIndex()):
+                self.service_manager_list.collapseItem(item)
+                self.service_manager.collapsed(item)
+        else:  # If selection is lower level
+            self.service_manager_list.collapseItem(item.parent())
+            self.service_manager.collapsed(item.parent())
+            self.service_manager_list.setCurrentItem(item.parent())
+
     def on_collapse_all(self, field=None):
         """
         Collapse all the service items.
@@ -1267,14 +1308,17 @@ class ServiceManager(OpenLPMixin, RegistryMixin, QtWidgets.QWidget, Ui_ServiceMa
             tree_widget_item.setText(0, service_item_from_item.get_display_title())
             tips = []
             if service_item_from_item.temporary_edit:
-                tips.append('<strong>%s:</strong> <em>%s</em>' % (translate('OpenLP.ServiceManager', 'Edit'),
-                            (translate('OpenLP.ServiceManager', 'Service copy only'))))
+                text1 = translate('OpenLP.ServiceManager', 'Edit')
+                text2 = translate('OpenLP.ServiceManager', 'Service copy only')
+                tips.append('<strong>{text1}:</strong> <em>{text2}</em>'.format(text1=text1, text2=text2))
             if service_item_from_item.theme and service_item_from_item.theme != -1:
-                tips.append('<strong>%s:</strong> <em>%s</em>' %
-                            (translate('OpenLP.ServiceManager', 'Slide theme'), service_item_from_item.theme))
+                text = translate('OpenLP.ServiceManager', 'Slide theme')
+                tips.append('<strong>{text1}:</strong> <em>{text2}</em>'.format(text1=text,
+                                                                                text2=service_item_from_item.theme))
             if service_item_from_item.notes:
-                tips.append('<strong>%s: </strong> %s' %
-                            (translate('OpenLP.ServiceManager', 'Notes'), html.escape(service_item_from_item.notes)))
+                text1 = translate('OpenLP.ServiceManager', 'Notes')
+                text2 = html.escape(service_item_from_item.notes)
+                tips.append('<strong>{text1}: </strong> {text2}'.format(text1=text1, text2=text2))
             if item['service_item'].is_capable(ItemCapabilities.HasVariableStartTime):
                 tips.append(item['service_item'].get_media_time())
             tree_widget_item.setToolTip(0, '<br>'.join(tips))
@@ -1302,7 +1346,7 @@ class ServiceManager(OpenLPMixin, RegistryMixin, QtWidgets.QWidget, Ui_ServiceMa
         Empties the service_path of temporary files on system exit.
         """
         for file_name in os.listdir(self.service_path):
-            file_path = os.path.join(self.service_path, file_name)
+            file_path = Path(self.service_path, file_name)
             delete_file(file_path)
         if os.path.exists(os.path.join(self.service_path, 'audio')):
             shutil.rmtree(os.path.join(self.service_path, 'audio'), True)
@@ -1322,9 +1366,10 @@ class ServiceManager(OpenLPMixin, RegistryMixin, QtWidgets.QWidget, Ui_ServiceMa
         """
         The theme may have changed in the settings dialog so make sure the theme combo box is in the correct state.
         """
-        visible = self.renderer.theme_level == ThemeLevel.Global
-        self.theme_label.setVisible(visible)
-        self.theme_combo_box.setVisible(visible)
+        visible = self.renderer.theme_level != ThemeLevel.Global
+        self.toolbar.actions['theme_combo_box'].setVisible(visible)
+        self.toolbar.actions['theme_label'].setVisible(visible)
+        self.regenerate_service_items()
 
     def regenerate_service_items(self, changed=False):
         """
@@ -1635,7 +1680,7 @@ class ServiceManager(OpenLPMixin, RegistryMixin, QtWidgets.QWidget, Ui_ServiceMa
                             replace = True
                     else:
                         self.drop_position = get_parent_item_data(item) - 1
-                Registry().execute('%s_add_service_item' % plugin, replace)
+                Registry().execute('{plugin}_add_service_item'.format(plugin=plugin), replace)
 
     def update_theme_list(self, theme_list):
         """

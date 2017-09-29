@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -38,8 +38,8 @@ class StartTimeForm(QtWidgets.QDialog, Ui_StartTimeDialog, RegistryProperties):
         """
         Constructor
         """
-        super(StartTimeForm, self).__init__(Registry().get('main_window'),
-                                            QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint)
+        super(StartTimeForm, self).__init__(Registry().get('main_window'), QtCore.Qt.WindowSystemMenuHint |
+                                            QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowCloseButtonHint)
         self.setupUi(self)
 
     def exec(self):
@@ -56,9 +56,9 @@ class StartTimeForm(QtWidgets.QDialog, Ui_StartTimeDialog, RegistryProperties):
         self.hour_finish_spin_box.setValue(hours)
         self.minute_finish_spin_box.setValue(minutes)
         self.second_finish_spin_box.setValue(seconds)
-        self.hour_finish_label.setText('%s%s' % (str(hour), UiStrings().Hours))
-        self.minute_finish_label.setText('%s%s' % (str(minutes), UiStrings().Minutes))
-        self.second_finish_label.setText('%s%s' % (str(seconds), UiStrings().Seconds))
+        self.hour_finish_label.setText('{val:d}{text}'.format(val=hour, text=UiStrings().Hours))
+        self.minute_finish_label.setText('{val:d}{text}'.format(val=minutes, text=UiStrings().Minutes))
+        self.second_finish_label.setText('{val:d}{text}'.format(val=seconds, text=UiStrings().Seconds))
         return QtWidgets.QDialog.exec(self)
 
     def accept(self):

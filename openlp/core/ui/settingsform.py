@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -26,6 +26,7 @@ import logging
 
 from PyQt5 import QtCore, QtWidgets
 
+from openlp.core.api import ApiTab
 from openlp.core.common import Registry, RegistryProperties
 from openlp.core.lib import build_icon
 from openlp.core.ui import AdvancedTab, GeneralTab, ThemesTab
@@ -46,7 +47,8 @@ class SettingsForm(QtWidgets.QDialog, Ui_SettingsDialog, RegistryProperties):
         """
         Registry().register('settings_form', self)
         Registry().register_function('bootstrap_post_set_up', self.bootstrap_post_set_up)
-        super(SettingsForm, self).__init__(parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint)
+        super(SettingsForm, self).__init__(parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint |
+                                           QtCore.Qt.WindowCloseButtonHint)
         self.processes = []
         self.setupUi(self)
         self.setting_list_widget.currentRowChanged.connect(self.list_item_changed)
@@ -55,12 +57,14 @@ class SettingsForm(QtWidgets.QDialog, Ui_SettingsDialog, RegistryProperties):
         self.projector_tab = None
         self.advanced_tab = None
         self.player_tab = None
+        self.api_tab = None
 
     def exec(self):
         """
         Execute the form
         """
-        # load all the settings
+        # load all the widgets
+        self.setting_list_widget.blockSignals(True)
         self.setting_list_widget.clear()
         while self.stacked_layout.count():
             # take at 0 and the rest shuffle up.
@@ -70,10 +74,12 @@ class SettingsForm(QtWidgets.QDialog, Ui_SettingsDialog, RegistryProperties):
         self.insert_tab(self.advanced_tab)
         self.insert_tab(self.player_tab)
         self.insert_tab(self.projector_tab)
+        self.insert_tab(self.api_tab)
         for plugin in self.plugin_manager.plugins:
             if plugin.settings_tab:
                 self.insert_tab(plugin.settings_tab, plugin.is_active())
         self.setting_list_widget.setCurrentRow(0)
+        self.setting_list_widget.blockSignals(False)
         return QtWidgets.QDialog.exec(self)
 
     def insert_tab(self, tab_widget, is_visible=True):
@@ -83,13 +89,14 @@ class SettingsForm(QtWidgets.QDialog, Ui_SettingsDialog, RegistryProperties):
         :param tab_widget: The widget to add
         :param is_visible: If this tab should be visible
         """
-        log.debug('Inserting %s tab' % tab_widget.tab_title)
+        log.debug('Inserting {text} tab'.format(text=tab_widget.tab_title))
         # add the tab to get it to display in the correct part of the screen
         self.stacked_layout.addWidget(tab_widget)
         if is_visible:
             list_item = QtWidgets.QListWidgetItem(build_icon(tab_widget.icon_path), tab_widget.tab_title_visible)
             list_item.setData(QtCore.Qt.UserRole, tab_widget.tab_title)
             self.setting_list_widget.addItem(list_item)
+            tab_widget.load()
 
     def accept(self):
         """
@@ -151,10 +158,13 @@ class SettingsForm(QtWidgets.QDialog, Ui_SettingsDialog, RegistryProperties):
         self.advanced_tab = AdvancedTab(self)
         # Advanced tab
         self.player_tab = PlayerTab(self)
+        # Api tab
+        self.api_tab = ApiTab(self)
         self.general_tab.post_set_up()
         self.themes_tab.post_set_up()
         self.advanced_tab.post_set_up()
         self.player_tab.post_set_up()
+        self.api_tab.post_set_up()
         for plugin in self.plugin_manager.plugins:
             if plugin.settings_tab:
                 plugin.settings_tab.post_set_up()
@@ -177,6 +187,7 @@ class SettingsForm(QtWidgets.QDialog, Ui_SettingsDialog, RegistryProperties):
             # Check that the title of the tab (i.e. plugin name) is the same as the data in the list item
             if tab_widget.tab_title == list_item.data(QtCore.Qt.UserRole):
                 # Make the matching tab visible
+                tab_widget.tab_visited = True
                 self.stacked_layout.setCurrentIndex(tab_index)
                 self.stacked_layout.currentWidget().tab_visible()
 

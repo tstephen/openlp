@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -36,8 +36,8 @@ class AlertForm(QtWidgets.QDialog, Ui_AlertDialog):
         """
         Initialise the alert form
         """
-        super(AlertForm, self).__init__(Registry().get('main_window'),
-                                        QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint)
+        super(AlertForm, self).__init__(Registry().get('main_window'), QtCore.Qt.WindowSystemMenuHint |
+                                        QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowCloseButtonHint)
         self.manager = plugin.manager
         self.plugin = plugin
         self.item_id = None
@@ -70,7 +70,7 @@ class AlertForm(QtWidgets.QDialog, Ui_AlertDialog):
             item_name = QtWidgets.QListWidgetItem(alert.text)
             item_name.setData(QtCore.Qt.UserRole, alert.id)
             self.alert_list_widget.addItem(item_name)
-            if alert.text == str(self.alert_text_edit.text()):
+            if alert.text == self.alert_text_edit.text():
                 self.item_id = alert.id
                 self.alert_list_widget.setCurrentRow(self.alert_list_widget.row(item_name))
 
@@ -180,9 +180,7 @@ class AlertForm(QtWidgets.QDialog, Ui_AlertDialog):
                                            translate('AlertsPlugin.AlertForm', 'No Parameter Found'),
                                            translate('AlertsPlugin.AlertForm',
                                                      'You have not entered a parameter to be replaced.\n'
-                                                     'Do you want to continue anyway?'),
-                                           QtWidgets.QMessageBox.StandardButtons(
-                                               QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Yes)
+                                                     'Do you want to continue anyway?')
                                            ) == QtWidgets.QMessageBox.No:
             self.parameter_edit.setFocus()
             return False
@@ -193,9 +191,7 @@ class AlertForm(QtWidgets.QDialog, Ui_AlertDialog):
                                            translate('AlertsPlugin.AlertForm', 'No Placeholder Found'),
                                            translate('AlertsPlugin.AlertForm',
                                                      'The alert text does not contain \'<>\'.\n'
-                                                     'Do you want to continue anyway?'),
-                                           QtWidgets.QMessageBox.StandardButtons(
-                                               QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Yes)
+                                                     'Do you want to continue anyway?')
                                            ) == QtWidgets.QMessageBox.No:
             self.parameter_edit.setFocus()
             return False

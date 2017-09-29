@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -27,7 +27,7 @@ import logging
 from PyQt5 import QtCore
 
 from openlp.core.common import Registry, RegistryProperties, Settings, UiStrings
-from openlp.core.common.versionchecker import get_application_version
+from openlp.core.version import get_version
 
 log = logging.getLogger(__name__)
 
@@ -130,7 +130,7 @@ class Plugin(QtCore.QObject, RegistryProperties):
         :param settings_tab_class: The class name of the plugin's settings tab.
         :param version: Defaults to *None*, which means that the same version number is used as OpenLP's version number.
         """
-        log.debug('Plugin %s initialised' % name)
+        log.debug('Plugin {plugin} initialised'.format(plugin=name))
         super(Plugin, self).__init__()
         self.name = name
         self.text_strings = {}
@@ -139,7 +139,7 @@ class Plugin(QtCore.QObject, RegistryProperties):
         if version:
             self.version = version
         else:
-            self.version = get_application_version()['version']
+            self.version = get_version()['version']
         self.settings_section = self.name
         self.icon = None
         self.media_item_class = media_item_class
@@ -150,15 +150,15 @@ class Plugin(QtCore.QObject, RegistryProperties):
         self.status = PluginStatus.Inactive
         # Add the default status to the default settings.
         default_settings[name + '/status'] = PluginStatus.Inactive
-        default_settings[name + '/last directory'] = ''
+        default_settings[name + '/last directory'] = None
         # Append a setting for files in the mediamanager (note not all plugins
         # which have a mediamanager need this).
         if media_item_class is not None:
-            default_settings['%s/%s files' % (name, name)] = []
+            default_settings['{name}/{name} files'.format(name=name)] = []
         # Add settings to the dict of all settings.
         Settings.extend_default_settings(default_settings)
-        Registry().register_function('%s_add_service_item' % self.name, self.process_add_service_event)
-        Registry().register_function('%s_config_updated' % self.name, self.config_update)
+        Registry().register_function('{name}_add_service_item'.format(name=self.name), self.process_add_service_event)
+        Registry().register_function('{name}_config_updated'.format(name=self.name), self.config_update)
 
     def check_pre_conditions(self):
         """
@@ -256,7 +256,7 @@ class Plugin(QtCore.QObject, RegistryProperties):
         """
         Generic Drag and drop handler triggered from service_manager.
         """
-        log.debug('process_add_service_event event called for plugin %s' % self.name)
+        log.debug('process_add_service_event event called for plugin {name}'.format(name=self.name))
         if replace:
             self.media_item.on_add_edit_click()
         else:

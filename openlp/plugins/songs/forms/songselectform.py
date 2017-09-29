@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2016 OpenLP Developers                                   #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -81,7 +81,8 @@ class SongSelectForm(QtWidgets.QDialog, Ui_SongSelectDialog):
     """
 
     def __init__(self, parent=None, plugin=None, db_manager=None):
-        QtWidgets.QDialog.__init__(self, parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint)
+        QtWidgets.QDialog.__init__(self, parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint |
+                                   QtCore.Qt.WindowCloseButtonHint)
         self.plugin = plugin
         self.db_manager = db_manager
         self.setup_ui(self)
@@ -248,8 +249,7 @@ class SongSelectForm(QtWidgets.QDialog, Ui_SongSelectDialog):
                 translate('SongsPlugin.SongSelectForm', 'WARNING: Saving your username and password is INSECURE, your '
                                                         'password is stored in PLAIN TEXT. Click Yes to save your '
                                                         'password or No to cancel this.'),
-                QtWidgets.QMessageBox.StandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No),
-                QtWidgets.QMessageBox.No)
+                defaultButton=QtWidgets.QMessageBox.No)
             if answer == QtWidgets.QMessageBox.No:
                 self.save_password_checkbox.setChecked(False)
 
@@ -305,7 +305,8 @@ class SongSelectForm(QtWidgets.QDialog, Ui_SongSelectDialog):
         self.search_progress_bar.setValue(0)
         self.set_progress_visible(True)
         self.search_results_widget.clear()
-        self.result_count_label.setText(translate('SongsPlugin.SongSelectForm', 'Found %s song(s)') % self.song_count)
+        self.result_count_label.setText(translate('SongsPlugin.SongSelectForm',
+                                                  'Found {count:d} song(s)').format(count=self.song_count))
         self.application.process_events()
         self.song_count = 0
         search_history = self.search_combobox.getItems()
@@ -343,7 +344,8 @@ class SongSelectForm(QtWidgets.QDialog, Ui_SongSelectDialog):
         :param song:
         """
         self.song_count += 1
-        self.result_count_label.setText(translate('SongsPlugin.SongSelectForm', 'Found %s song(s)') % self.song_count)
+        self.result_count_label.setText(translate('SongsPlugin.SongSelectForm',
+                                                  'Found {count:d} song(s)').format(count=self.song_count))
         item_title = song['title'] + ' (' + ', '.join(song['authors']) + ')'
         song_item = QtWidgets.QListWidgetItem(item_title, self.search_results_widget)
         song_item.setData(QtCore.Qt.UserRole, song)
@@ -395,8 +397,7 @@ class SongSelectForm(QtWidgets.QDialog, Ui_SongSelectDialog):
                                           translate('SongsPlugin.SongSelectForm',
                                                     'Your song has been imported, would you '
                                                     'like to import more songs?'),
-                                          QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
-                                          QtWidgets.QMessageBox.Yes) == QtWidgets.QMessageBox.Yes:
+                                          defaultButton=QtWidgets.QMessageBox.Yes) == QtWidgets.QMessageBox.Yes:
             self.on_back_button_clicked()
         else:
             self.application.process_events()
