@@ -12,14 +12,14 @@ environment:
 
 install:
   # Install dependencies from pypi
-  - "%PYTHON%\\python.exe -m pip install sqlalchemy alembic chardet beautifulsoup4 Mako nose mock pyodbc psycopg2 pypiwin32 pyenchant websockets asyncio waitress six webob requests pyqt5 lxml PyInstaller"
+  - "%PYTHON%\\python.exe -m pip install sqlalchemy alembic chardet beautifulsoup4 Mako nose mock pyodbc psycopg2 pypiwin32 pyenchant websockets asyncio waitress six webob requests pyqt5 lxml"
   # Install mysql dependency
   - appveyor DownloadFile http://cdn.mysql.com/Downloads/Connector-Python/mysql-connector-python-2.1.7.zip
   - 7z x mysql-connector-python-2.1.7.zip
   - cd mysql-connector-python-2.1.7
   - "%PYTHON%\\python.exe setup.py -q install"
   - cd ..
-  # Download and install lxml and pyicu (originally from http://www.lfd.uci.edu/~gohlke/pythonlibs/)
+  # Download and install pyicu (originally from http://www.lfd.uci.edu/~gohlke/pythonlibs/)
   - "%PYTHON%\\python.exe -m pip install https://get.openlp.org/win-sdk/PyICU-1.9.7-cp36-cp36m-win32.whl"
   # Download and unpack mupdf
   - appveyor DownloadFile http://mupdf.com/downloads/archive/mupdf-1.9a-windows.zip
@@ -42,11 +42,8 @@ test_script:
 
 after_test:
   # This is where we create a package using PyInstaller
-  # First get PyInstaller
-  #- appveyor DownloadFile  https://github.com/pyinstaller/pyinstaller/releases/download/v3.3/PyInstaller-3.3.zip
-  #- 7z x PyInstaller-3.3.zip
-  # Install PyInstaller dependencies
-  #- "%PYTHON%\\python.exe -m pip install future pefile"
+  # First install PyInstaller
+  - "%PYTHON%\\python.exe -m pip install PyInstaller"
   # Download and install Inno Setup - used for packaging
   - appveyor DownloadFile http://www.jrsoftware.org/download.php/is-unicode.exe
   - is-unicode.exe /VERYSILENT /SUPPRESSMSGBOXES /SP-
