@@ -28,9 +28,9 @@ from unittest.mock import MagicMock, patch
 from PyQt5 import QtCore, QtGui
 
 from openlp.core import Registry
-from openlp.core.lib import ImageSource, ServiceItemAction
-from openlp.core.ui import SlideController, LiveController, PreviewController
-from openlp.core.ui.slidecontroller import InfoLabel, WIDE_MENU, NON_TEXT_MENU
+from openlp.core.lib import ServiceItemAction
+from openlp.core.ui.slidecontroller import WIDE_MENU, NON_TEXT_MENU, InfoLabel, SlideController, LiveController, \
+    PreviewController
 
 
 class TestSlideController(TestCase):

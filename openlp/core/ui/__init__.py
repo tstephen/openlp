@@ -101,7 +101,6 @@ from .filerenameform import FileRenameForm
 from .starttimeform import StartTimeForm
 from .servicenoteform import ServiceNoteForm
 from .serviceitemeditform import ServiceItemEditForm
-from .slidecontroller import SlideController, DisplayController, PreviewController, LiveController
 from .splashscreen import SplashScreen
 from .generaltab import GeneralTab
 from .themestab import ThemesTab

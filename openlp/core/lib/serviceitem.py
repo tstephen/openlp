@@ -34,7 +34,8 @@ import ntpath
 from PyQt5 import QtGui
 
 from openlp.core.common import RegistryProperties, Settings, translate, AppLocation, md5_hash
-from openlp.core.lib import ImageSource, build_icon, clean_tags, expand_tags, expand_chords, create_thumb
+from openlp.core.display.render import remove_tags, render_tags, render_chords
+from openlp.core.lib import ImageSource, build_icon
 
 log = logging.getLogger(__name__)
 
@@ -246,7 +247,7 @@ class ServiceItem(RegistryProperties):
             self.renderer.set_item_theme(self.theme)
             self.theme_data, self.main, self.footer = self.renderer.pre_render()
         if self.service_item_type == ServiceItemType.Text:
-            expand_chord_tags = hasattr(self, 'name') and self.name == 'songs' and Settings().value(
+            can_render_chords = hasattr(self, 'name') and self.name == 'songs' and Settings().value(
                 'songs/enable chords')
             log.debug('Formatting slides: {title}'.format(title=self.title))
             # Save rendered pages to this dict. In the case that a slide is used twice we can use the pages saved to
@@ -261,13 +262,13 @@ class ServiceItem(RegistryProperties):
                     previous_pages[verse_tag] = (slide['raw_slide'], pages)
                 for page in pages:
                     page = page.replace('<br>', '{br}')
-                    html_data = expand_tags(page.rstrip(), expand_chord_tags)
+                    html_data = render_tags(page.rstrip(), can_render_chords)
                     new_frame = {
-                        'title': clean_tags(page),
-                        'text': clean_tags(page.rstrip(), expand_chord_tags),
-                        'chords_text': expand_chords(clean_tags(page.rstrip(), False)),
+                        'title': remove_tags(page),
+                        'text': remove_tags(page.rstrip(), can_render_chords),
+                        'chords_text': render_chords(remove_tags(page.rstrip(), False)),
                         'html': html_data.replace('&amp;nbsp;', '&nbsp;'),
-                        'printing_html': expand_tags(html.escape(page.rstrip()), expand_chord_tags, True),
+                        'printing_html': render_tags(html.escape(page.rstrip()), can_render_chords, is_printing=True),
                         'verseTag': verse_tag,
                     }
                     self._display_frames.append(new_frame)
@@ -275,7 +276,7 @@ class ServiceItem(RegistryProperties):
             pass
         else:
             log.error('Invalid value renderer: {item}'.format(item=self.service_item_type))
-        self.title = clean_tags(self.title)
+        self.title = remove_tags(self.title)
         # The footer should never be None, but to be compatible with a few
         # nightly builds between 1.9.4 and 1.9.5, we have to correct this to
         # avoid tracebacks.

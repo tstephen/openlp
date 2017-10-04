@@ -1,0 +1,25 @@
+{
+  "name": "openlp",
+  "version": "2.5.1",
+  "description": "OpenLP is free church worship presentation software",
+  "repository": "lp:openlp",
+  "directories": {
+    "test": "tests"
+  },
+  "dependencies": {
+    "jasmine-core": "^2.6.4",
+    "karma": "^1.7.0",
+    "karma-coverage": "^1.1.1",
+    "karma-jasmine": "^1.1.0",
+    "karma-phantomjs-launcher": "^1.0.4",
+    "phantomjs-prebuilt": "^2.1.14"
+  },
+  "scripts": {
+    "test": "karma start"
+  },
+  "author": "OpenLP Developers",
+  "license": "GPL-2.0",
+  "devDependencies": {
+    "karma-log-reporter": "0.0.4"
+  }
+}

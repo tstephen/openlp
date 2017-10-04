@@ -2,9 +2,7 @@ import logging
 import os
 import json
 
-from PyQt5 import QtCore, QtWidgets, QtWebEngineWidgets, QtWebChannel
-
-from openlp.core.display.webengine import WebEngineView
+from PyQt5 import QtCore, QtWidgets, QtWebChannel
 
 log = logging.getLogger(__name__)
 
@@ -79,6 +77,8 @@ class DisplayWindow(QtWidgets.QWidget):
         Create the display window
         """
         super(DisplayWindow, self).__init__(parent)
+        # Need to import this inline to get around a QtWebEngine issue
+        from openlp.core.display.webengine import WebEngineView
         self._is_initialised = False
         self._fbo = None
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.Tool | QtCore.Qt.WindowStaysOnTopHint)
@@ -113,26 +113,6 @@ class DisplayWindow(QtWidgets.QWidget):
         Add stuff after page initialisation
         """
         self.run_javascript('Display.init();')
-
-    def add_script_source(self, fname, source):
-        """
-        Add a script of source code
-        """
-        js = QtWebEngineWidgets.QWebEngineScript()
-        js.setSourceCode(source)
-        js.setName(fname)
-        js.setWorldId(QtWebEngineWidgets.QWebEngineScript.MainWorld)
-        self.webview.page().scripts().insert(js)
-
-    def add_script(self, fname):
-        """
-        Add a script to the page
-        """
-        js_file = QtCore.QFile(fname)
-        if not js_file.open(QtCore.QIODevice.ReadOnly):
-            log.warning('Could not open %s: %s', fname, js_file.errorString())
-            return
-        self.add_script_source(os.path.basename(fname), str(bytes(js_file.readAll()), 'utf-8'))
 
     def run_javascript(self, script, is_sync=False):
         """
@@ -208,7 +188,7 @@ class DisplayWindow(QtWidgets.QWidget):
         """
         Set the playback rate of the current video.
 
-        The rate can be any valid float, with 0.0 being stopped, 1.0 being normal speed, 
+        The rate can be any valid float, with 0.0 being stopped, 1.0 being normal speed,
         over 1.0 is faster, under 1.0 is slower, and negative is backwards.
 
         :param rate: A float indicating the playback rate.

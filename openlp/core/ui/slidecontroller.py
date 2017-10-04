@@ -39,7 +39,7 @@ from openlp.core.lib.ui import create_action
 from openlp.core.ui.lib.toolbar import OpenLPToolbar
 from openlp.core.ui.lib.listpreviewwidget import ListPreviewWidget
 from openlp.core.ui import HideMode, DisplayControllerType
-from openlp.core.display import MainCanvas, Canvas
+from openlp.core.display.window import DisplayWindow
 
 
 # Threshold which has to be trespassed to toggle.
@@ -371,7 +371,7 @@ class SlideController(DisplayController, RegistryProperties):
         self.slide_layout.setSpacing(0)
         self.slide_layout.setContentsMargins(0, 0, 0, 0)
         self.slide_layout.setObjectName('SlideLayout')
-        self.preview_display = Canvas(self)
+        self.preview_display = DisplayWindow(self)
         self.slide_layout.insertWidget(0, self.preview_display)
         self.preview_display.hide()
         # Actual preview screen
@@ -581,7 +581,7 @@ class SlideController(DisplayController, RegistryProperties):
         # rebuild display as screen size changed
         if self.display:
             self.display.close()
-        self.display = MainCanvas(self)
+        self.display = DisplayWindow(self)
         self.display.setup()
         if self.is_live:
             self.__add_actions_to_widget(self.display)

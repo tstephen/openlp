@@ -42,8 +42,9 @@ from openlp.core.common.actions import ActionList, CategoryOrder
 from openlp.core.common.path import Path, copyfile, path_to_str, str_to_path
 from openlp.core.lib import PluginManager, ImageManager, PluginStatus, ScreenList, build_icon
 from openlp.core.lib.ui import create_action
-from openlp.core.ui import AboutForm, SettingsForm, ServiceManager, ThemeManager, LiveController, PluginForm, \
-    ShortcutListForm, FormattingTagForm, PreviewController
+from openlp.core.ui import AboutForm, SettingsForm, ServiceManager, ThemeManager, PluginForm, ShortcutListForm, \
+    FormattingTagForm
+from openlp.core.ui.slidecontroller import LiveController, PreviewController
 from openlp.core.ui.firsttimeform import FirstTimeForm
 from openlp.core.ui.media import MediaController
 from openlp.core.ui.printserviceform import PrintServiceForm
@@ -51,7 +52,6 @@ from openlp.core.ui.projector.manager import ProjectorManager
 from openlp.core.ui.lib.dockwidget import OpenLPDockWidget
 from openlp.core.ui.lib.filedialog import FileDialog
 from openlp.core.ui.lib.mediadockmanager import MediaDockManager
-from openlp.core.display import Renderer
 from openlp.core.ui.style import PROGRESSBAR_STYLE, get_library_stylesheet
 from openlp.core.version import get_version
 
@@ -510,7 +510,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, RegistryProperties):
         # Set up the path with plugins
         PluginManager(self)
         ImageManager()
-        Renderer()
         # Set up the interface
         self.setupUi(self)
         # Define the media Dock Manager

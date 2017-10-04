@@ -44,3 +44,4 @@ coverage
 tags
 output
 htmlcov
+node_modules

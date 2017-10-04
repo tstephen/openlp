@@ -31,8 +31,7 @@ from openlp.core.common import Registry, RegistryProperties, UiStrings, translat
 from openlp.core.lib.theme import BackgroundType, BackgroundGradientType
 from openlp.core.lib.ui import critical_error_message_box
 from openlp.core.ui import ThemeLayoutForm
-from openlp.core.ui.media.webkitplayer import VIDEO_EXT
-from .themewizard import Ui_ThemeWizard
+from openlp.core.ui.themewizard import Ui_ThemeWizard
 
 log = logging.getLogger(__name__)
 
