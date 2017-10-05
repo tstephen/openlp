@@ -29,8 +29,8 @@ from unittest.mock import MagicMock, patch
 from PyQt5 import QtCore, QtGui
 
 from openlp.core.common.path import Path
-from openlp.core.lib import FormattingTags, build_icon, check_item_selected, create_separated_list, create_thumb, \
-    find_formatting_tags, get_text_file_string, image_to_byte, resize_image, str_to_bool, validate_thumb
+from openlp.core.lib import build_icon, check_item_selected, create_separated_list, create_thumb, \
+    get_text_file_string, image_to_byte, resize_image, str_to_bool, validate_thumb
 
 TEST_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'resources'))
 
@@ -489,12 +489,12 @@ class TestLib(TestCase):
         except:
             pass
 
+    @patch('openlp.core.lib.QtWidgets', MagicMock())
     def test_check_item_selected_true(self):
         """
         Test that the check_item_selected() function returns True when there are selected indexes
         """
         # GIVEN: A mocked out QtWidgets module and a list widget with selected indexes
-        mocked_QtWidgets = patch('openlp.core.lib.QtWidgets')
         mocked_list_widget = MagicMock()
         mocked_list_widget.selectedIndexes.return_value = True
         message = 'message'
@@ -532,7 +532,7 @@ class TestLib(TestCase):
         Test the validate_thumb() function when the thumbnail does not exist
         """
         # GIVEN: A mocked out os module, with path.exists returning False, and fake paths to a file and a thumb
-        with patch.object(Path, 'exists', return_value=False) as mocked_path_exists:
+        with patch.object(Path, 'exists', return_value=False):
             file_path = Path('path', 'to', 'file')
             thumb_path = Path('path', 'to', 'thumb')
 
@@ -619,11 +619,8 @@ class TestLib(TestCase):
         """
         Test the create_separated_list function using the Qt provided method
         """
-        with patch('openlp.core.lib.Qt') as mocked_qt, \
-                patch('openlp.core.lib.QtCore.QLocale.createSeparatedList') as mocked_createSeparatedList:
+        with patch('openlp.core.lib.QtCore.QLocale.createSeparatedList') as mocked_createSeparatedList:
             # GIVEN: A list of strings and the mocked Qt module.
-            mocked_qt.PYQT_VERSION_STR = '4.9'
-            mocked_qt.qVersion.return_value = '4.8'
             mocked_createSeparatedList.return_value = 'Author 1, Author 2, and Author 3'
             string_list = ['Author 1', 'Author 2', 'Author 3']
 
@@ -638,17 +635,14 @@ class TestLib(TestCase):
         """
         Test the create_separated_list function with an empty list
         """
-        with patch('openlp.core.lib.Qt') as mocked_qt:
-            # GIVEN: An empty list and the mocked Qt module.
-            mocked_qt.PYQT_VERSION_STR = '4.8'
-            mocked_qt.qVersion.return_value = '4.7'
-            string_list = []
+        # GIVEN: An empty list
+        string_list = []
 
-            # WHEN: We get a string build from the entries it the list and a separator.
-            string_result = create_separated_list(string_list)
+        # WHEN: We get a string build from the entries it the list and a separator.
+        string_result = create_separated_list(string_list)
 
-            # THEN: We shoud have an emptry string.
-            self.assertEqual(string_result, '', 'The string sould be empty.')
+        # THEN: We shoud have an emptry string.
+        self.assertEqual(string_result, '', 'The string sould be empty.')
 
     def test_create_separated_list_with_one_item(self):
         """
@@ -689,18 +683,3 @@ class TestLib(TestCase):
         # THEN: We should have "Author 1, Author 2 and Author 3"
         self.assertEqual(string_result, 'Author 1, Author 2 and Author 3', 'The string should be "Author 1, '
                          'Author 2, and Author 3".')
-
-    def test_find_formatting_tags(self):
-        """
-        Test that find_formatting_tags works as expected
-        """
-        # GIVEN: Lyrics with formatting tags and a empty list of formatting tags
-        lyrics = '{st}Amazing {r}grace{/r} how sweet the sound'
-        tags = []
-        FormattingTags.load_tags()
-
-        # WHEN: Detecting active formatting tags
-        active_tags = find_formatting_tags(lyrics, tags)
-
-        # THEN: The list of active tags should contain only 'st'
-        self.assertListEqual(['st'], active_tags, 'The list of active tags should contain only "st"')

@@ -25,7 +25,7 @@ Test the :mod:`~openlp.core.display.render` package.
 from unittest.mock import patch
 
 from openlp.core.display.render import remove_tags, render_tags, render_chords, compare_chord_lyric_width, \
-    render_chords_for_printing
+    render_chords_for_printing, find_formatting_tags
 from openlp.core.lib.formattingtags import FormattingTags
 
 
@@ -109,7 +109,7 @@ def test_render_chords():
     assert text_with_rendered_chords == expected_html, 'The rendered chords should look as expected'
 
 
-def test_render_chords_with_special_chars(self):
+def test_render_chords_with_special_chars():
     """
     Test that the rendering of chords works as expected when special chars are involved.
     """
@@ -126,7 +126,7 @@ def test_render_chords_with_special_chars(self):
     assert text_with_rendered_chords == expected_html, 'The rendered chords should look as expected'
 
 
-def test_compare_chord_lyric_short_chord(self):
+def test_compare_chord_lyric_short_chord():
     """
     Test that the chord/lyric comparing works.
     """
@@ -141,7 +141,7 @@ def test_compare_chord_lyric_short_chord(self):
     assert ret == 0, 'The returned value should 0 because the lyric is longer than the chord'
 
 
-def test_compare_chord_lyric_long_chord(self):
+def test_compare_chord_lyric_long_chord():
     """
     Test that the chord/lyric comparing works.
     """
@@ -156,7 +156,7 @@ def test_compare_chord_lyric_long_chord(self):
     assert ret == 4, 'The returned value should 4 because the chord is longer than the lyric'
 
 
-def test_render_chords_for_printing(self):
+def test_render_chords_for_printing():
     """
     Test that the rendering of chords for printing works as expected.
     """
@@ -192,3 +192,19 @@ def test_render_chords_for_printing(self):
                     'class="chordrow"><td class="chord">F</td></tr><tr><td class="lyrics">{st}{/st}&nbsp;</td>' \
                     '</tr></table></td></tr></table>'
     assert text_with_rendered_chords == expected_html, 'The rendered chords should look as expected!'
+
+
+def test_find_formatting_tags():
+    """
+    Test that find_formatting_tags works as expected
+    """
+    # GIVEN: Lyrics with formatting tags and a empty list of formatting tags
+    lyrics = '{st}Amazing {r}grace{/r} how sweet the sound'
+    tags = []
+    FormattingTags.load_tags()
+
+    # WHEN: Detecting active formatting tags
+    active_tags = find_formatting_tags(lyrics, tags)
+
+    # THEN: The list of active tags should contain only 'st'
+    assert active_tags == ['st'], 'The list of active tags should contain only "st"'
