@@ -180,10 +180,6 @@ class Controller(object):
             return False
         if not self.activate():
             return False
-        # The "End of slideshow" screen is after the last slide. Note, we can't just stop on the last slide, since it
-        # may contain animations that need to be stepped through.
-        if self.doc.slidenumber > self.doc.get_slide_count():
-            return True
         ret = self.doc.next_step()
         self.poll()
         return ret
@@ -424,7 +420,6 @@ class MessageListener(object):
         is_live = message[1]
         if is_live:
             ret = self.live_handler.next()
-            self.live_handler.next()
             if Settings().value('core/click live slide to unblank'):
                 Registry().execute('slidecontroller_live_unblank')
             return ret

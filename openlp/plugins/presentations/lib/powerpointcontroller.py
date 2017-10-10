@@ -427,6 +427,10 @@ class PowerpointDocument(PresentationDocument):
         Triggers the next effect of slide on the running presentation.
         """
         log.debug('next_step')
+        # if we are at the presentations end don't go further, just return True
+        if self.presentation.SlideShowWindow.View.GetClickCount() == self.presentation.SlideShowWindow.View.GetClickIndex()\
+                and self.get_slide_number() == self.get_slide_count():
+            return True
         past_end = False
         try:
             self.presentation.SlideShowWindow.Activate()
@@ -436,6 +440,7 @@ class PowerpointDocument(PresentationDocument):
             trace_error_handler(log)
             self.show_error_msg()
             return past_end
+        # If for some reason the presentation end was not detected above, this will catch it.
         if self.get_slide_number() > self.get_slide_count():
             log.debug('past end, stepping back to previous')
             self.previous_step()

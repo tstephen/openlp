@@ -421,13 +421,11 @@ class ImpressDocument(PresentationDocument):
         """
         # if we are at the presentations end don't go further, just return True
         if self.slide_ended and self.get_slide_count() == self.get_slide_number():
-            print('detected presentation end!')
             return True
         self.slide_ended = False
         self.slide_ended_reverse = False
         past_end = False
         is_paused = self.control.isPaused()
-        print('going to next effect')
         self.control.gotoNextEffect()
         time.sleep(0.1)
         # If for some reason the presentation end was not detected above, this will catch it.
@@ -552,7 +550,7 @@ class SlideShowListener(unohelper.Base, XSlideShowListener):
         Notify that the current slide has ended, e.g. the user has clicked on the slide. Calling displaySlide()
         twice will not issue this event.
         """
-        print('LibreOffice SlideShowListener event: slideEnded %d' % reverse)
+        log.debug('LibreOffice SlideShowListener event: slideEnded %d' % reverse)
         if reverse:
             self.document.slide_ended = False
             self.document.slide_ended_reverse = True
