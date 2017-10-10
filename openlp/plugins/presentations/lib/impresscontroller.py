@@ -51,8 +51,10 @@ if is_win():
 else:
     try:
         import uno
+        import unohelper
         from com.sun.star.beans import PropertyValue
         from com.sun.star.task import ErrorCodeIOException
+        from com.sun.star.presentation import XSlideShowListener
 
         uno_available = True
     except ImportError:
@@ -210,6 +212,8 @@ class ImpressDocument(PresentationDocument):
         self.document = None
         self.presentation = None
         self.control = None
+        self.slide_ended = False
+        self.slide_ended_reverse = False
 
     def load_presentation(self):
         """
@@ -381,6 +385,8 @@ class ImpressDocument(PresentationDocument):
                 sleep_count += 1
                 self.control = self.presentation.getController()
             window.setVisible(False)
+            listener = SlideShowListener(self)
+            self.control.getSlideShow().addSlideShowListener(listener)
         else:
             self.control.activate()
             self.goto_slide(1)
@@ -412,10 +418,19 @@ class ImpressDocument(PresentationDocument):
         """
         Triggers the next effect of slide on the running presentation.
         """
+        # if we are at the presentations end don't go further, just return True
+        if self.slide_ended and self.get_slide_count() == self.get_slide_number():
+            print('detected presentation end!')
+            return True
+        self.slide_ended = False
+        self.slide_ended_reverse = False
         past_end = False
         is_paused = self.control.isPaused()
+        print('going to next effect')
         self.control.gotoNextEffect()
         time.sleep(0.1)
+        # If for some reason the presentation end was not detected above, this will catch it.
+        # The presentation is set to paused when going past the end.
         if not is_paused and self.control.isPaused():
             self.control.gotoPreviousEffect()
             past_end = True
@@ -425,6 +440,8 @@ class ImpressDocument(PresentationDocument):
         """
         Triggers the previous slide on the running presentation.
         """
+        self.slide_ended = False
+        self.slide_ended_reverse = False
         self.control.gotoPreviousEffect()
 
     def get_slide_text(self, slide_no):
@@ -482,3 +499,96 @@ class ImpressDocument(PresentationDocument):
                 note = ' '
             notes.append(note)
         self.save_titles_and_notes(titles, notes)
+
+
+class SlideShowListener(unohelper.Base, XSlideShowListener):
+    """
+    Listener interface to receive global slide show events.
+    """
+
+    def __init__(self, document):
+        """
+
+        :param control: SlideShowController
+        """
+        self.document = document
+
+    def paused(self):
+        """
+        Notify that the slide show is paused
+        """
+        log.debug('LibreOffice SlideShowListener event: paused')
+
+    def resumed(self):
+        """
+        Notify that the slide show is resumed from a paused state
+        """
+        log.debug('LibreOffice SlideShowListener event: resumed')
+
+    def slideTransitionStarted(self):
+        """
+        Notify that a new slide starts to become visible.
+        """
+        log.debug('LibreOffice SlideShowListener event: slideTransitionStarted')
+
+    def slideTransitionEnded(self):
+        """
+        Notify that the slide transtion of the current slide ended.
+        """
+        log.debug('LibreOffice SlideShowListener event: slideTransitionEnded')
+
+    def slideAnimationsEnded(self):
+        """
+        Notify that the last animation from the main sequence of the current slide has ended.
+        """
+        log.debug('LibreOffice SlideShowListener event: slideAnimationsEnded')
+        #if not Registry().get('main_window').isActiveWindow():
+        #    log.debug('main window is not in focus - should update slidecontroller')
+        #    Registry().execute('slidecontroller_live_change', self.document.control.getCurrentSlideIndex() + 1)
+
+    def slideEnded(self, reverse):
+        """
+        Notify that the current slide has ended, e.g. the user has clicked on the slide. Calling displaySlide()
+        twice will not issue this event.
+        """
+        print('LibreOffice SlideShowListener event: slideEnded %d' % reverse)
+        if reverse:
+            self.document.slide_ended = False
+            self.document.slide_ended_reverse = True
+        else:
+            self.document.slide_ended = True
+            self.document.slide_ended_reverse = False
+
+    def hyperLinkClicked(self, hyperLink):
+        """
+        Notifies that a hyperlink has been clicked.
+        """
+        log.debug('LibreOffice SlideShowListener event: hyperLinkClicked %s' % hyperLink)
+
+    def disposing(self, source):
+        """
+        gets called when the broadcaster is about to be disposed.
+        :param source:
+        """
+        log.debug('LibreOffice SlideShowListener event: disposing')
+
+    def beginEvent(self, node):
+        """
+        This event is raised when the element local timeline begins to play.
+        :param node:
+        """
+        log.debug('LibreOffice SlideShowListener event: beginEvent')
+
+    def endEvent(self, node):
+        """
+        This event is raised at the active end of the element.
+        :param node:
+        """
+        log.debug('LibreOffice SlideShowListener event: endEvent')
+
+    def repeat(self, node):
+        """
+        This event is raised when the element local timeline repeats.
+        :param node:
+        """
+        log.debug('LibreOffice SlideShowListener event: repeat')
