@@ -25,11 +25,9 @@ This module is for controlling powerpoint. PPT API documentation:
 2010: https://msdn.microsoft.com/en-us/library/office/ff743835%28v=office.14%29.aspx
 2013: https://msdn.microsoft.com/en-us/library/office/ff743835.aspx
 """
-import os
 import logging
-import time
 
-from openlp.core.common import is_win, Settings
+from openlp.core.common import is_win
 
 if is_win():
     from win32com.client import Dispatch
@@ -40,8 +38,8 @@ if is_win():
     import pywintypes
 
 
-from openlp.core.common import Registry, UiStrings, trace_error_handler
-from openlp.core.lib import ScreenList
+from openlp.core.common import Registry, Settings, UiStrings, trace_error_handler
+from openlp.core.display.screens import ScreenList
 from openlp.core.lib.ui import critical_error_message_box, translate
 from openlp.plugins.presentations.lib.presentationcontroller import PresentationController, PresentationDocument
 

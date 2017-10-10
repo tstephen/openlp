@@ -40,7 +40,8 @@ from openlp.core.common import Registry, RegistryProperties, AppLocation, Langua
     check_directory_exists, translate, is_win, is_macosx, add_actions
 from openlp.core.common.actions import ActionList, CategoryOrder
 from openlp.core.common.path import Path, copyfile, path_to_str, str_to_path
-from openlp.core.lib import PluginManager, ImageManager, PluginStatus, ScreenList, build_icon
+from openlp.core.display.screens import ScreenList
+from openlp.core.lib import PluginManager, ImageManager, PluginStatus, build_icon
 from openlp.core.lib.ui import create_action
 from openlp.core.ui import AboutForm, SettingsForm, ServiceManager, ThemeManager, PluginForm, ShortcutListForm, \
     FormattingTagForm

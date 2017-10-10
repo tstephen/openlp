@@ -31,7 +31,8 @@ from unittest.mock import patch
 from PyQt5 import QtGui
 
 from openlp.core.common import Registry
-from openlp.core.lib import ImageManager, ScreenList
+from openlp.core.display.screens import ScreenList
+from openlp.core.lib import ImageManager
 from openlp.core.lib.imagemanager import Priority
 
 from tests.helpers.testmixin import TestMixin
@@ -152,8 +153,8 @@ class TestImageManager(TestCase, TestMixin):
             # Allow the queue to process.
             self.lock.release()
             # Request some "data".
-            image_bytes = self.image_manager.get_image_bytes(TEST_PATH, image4)
-            image_object = self.image_manager.get_image(TEST_PATH, image3)
+            self.image_manager.get_image_bytes(TEST_PATH, image4)
+            self.image_manager.get_image(TEST_PATH, image3)
             # Now the mocked methods/functions do not have to sleep anymore.
             self.sleep_time = 0
             # Wait for the queue to finish.

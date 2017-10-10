@@ -304,7 +304,6 @@ def create_separated_list(string_list):
 
 
 from .exceptions import ValidationError
-from .screen import ScreenList
 from .formattingtags import FormattingTags
 from .plugin import PluginStatus, StringContent, Plugin
 from .pluginmanager import PluginManager

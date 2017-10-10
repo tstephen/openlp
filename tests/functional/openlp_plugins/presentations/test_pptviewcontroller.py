@@ -24,7 +24,7 @@ This module contains tests for the pptviewcontroller module of the Presentations
 """
 import shutil
 from tempfile import mkdtemp
-from unittest import TestCase
+from unittest import TestCase, skipIf
 from unittest.mock import MagicMock, patch
 
 from openlp.plugins.presentations.lib.pptviewcontroller import PptviewDocument, PptviewController
@@ -33,9 +33,6 @@ from openlp.core.common.path import Path
 
 from tests.helpers.testmixin import TestMixin
 from tests.utils.constants import TEST_RESOURCES_PATH
-
-if is_win():
-    from ctypes import cdll
 
 
 class TestPptviewController(TestCase, TestMixin):
@@ -73,25 +70,23 @@ class TestPptviewController(TestCase, TestMixin):
         self.assertEqual('Powerpoint Viewer', controller.name,
                          'The name of the presentation controller should be correct')
 
-    def test_check_available(self):
+    @skipIf(not is_win(), 'Not Windows')
+    @patch('openlp.plugins.presentations.lib.pptviewcontroller.cdll.LoadLibrary')
+    def test_check_available(self, mocked_load_library):
         """
         Test check_available / check_installed
         """
         # GIVEN: A mocked dll loader and a controller
-        with patch('ctypes.cdll.LoadLibrary') as mocked_load_library:
-            mocked_process = MagicMock()
-            mocked_process.CheckInstalled.return_value = True
-            mocked_load_library.return_value = mocked_process
-            controller = PptviewController(plugin=self.mock_plugin)
+        mocked_process = MagicMock()
+        mocked_process.CheckInstalled.return_value = True
+        mocked_load_library.return_value = mocked_process
+        controller = PptviewController(plugin=self.mock_plugin)
 
-            # WHEN: check_available is called
-            available = controller.check_available()
+        # WHEN: check_available is called
+        available = controller.check_available()
 
-            # THEN: On windows it should return True, on other platforms False
-            if is_win():
-                self.assertTrue(available, 'check_available should return True on windows.')
-            else:
-                self.assertFalse(available, 'check_available should return False when not on windows.')
+        # THEN: On windows it should return True, on other platforms False
+        assert available is True, 'check_available should return True on windows.'
 
 
 class TestPptviewDocument(TestCase):
@@ -102,7 +97,6 @@ class TestPptviewDocument(TestCase):
         """
         Set up the patches and mocks need for all tests.
         """
-        self.os_isdir_patcher = patch('openlp.plugins.presentations.lib.pptviewcontroller.os.path.isdir')
         self.pptview_document_create_thumbnails_patcher = patch(
             'openlp.plugins.presentations.lib.pptviewcontroller.PptviewDocument.create_thumbnails')
         self.pptview_document_stop_presentation_patcher = patch(
@@ -113,7 +107,6 @@ class TestPptviewDocument(TestCase):
             'openlp.plugins.presentations.lib.pptviewcontroller.PresentationDocument._setup')
         self.screen_list_patcher = patch('openlp.plugins.presentations.lib.pptviewcontroller.ScreenList')
         self.rect_patcher = MagicMock()
-        self.mock_os_isdir = self.os_isdir_patcher.start()
         self.mock_pptview_document_create_thumbnails = self.pptview_document_create_thumbnails_patcher.start()
         self.mock_pptview_document_stop_presentation = self.pptview_document_stop_presentation_patcher.start()
         self.mock_presentation_document_get_temp_folder = self.presentation_document_get_temp_folder_patcher.start()
@@ -129,7 +122,6 @@ class TestPptviewDocument(TestCase):
         """
         Stop the patches
         """
-        self.os_isdir_patcher.stop()
         self.pptview_document_create_thumbnails_patcher.stop()
         self.pptview_document_stop_presentation_patcher.stop()
         self.presentation_document_get_temp_folder_patcher.stop()
@@ -138,45 +130,40 @@ class TestPptviewDocument(TestCase):
         self.screen_list_patcher.stop()
         shutil.rmtree(self.temp_folder)
 
+    @skipIf(not is_win(), 'Not Windows')
     def test_load_presentation_succesfull(self):
         """
         Test the PptviewDocument.load_presentation() method when the PPT is successfully opened
         """
         # GIVEN: A reset mocked_os
-        self.mock_os_isdir.reset()
-
-        # WHEN: The temporary directory exists and OpenPPT returns successfully (not -1)
-        self.mock_os_isdir.return_value = True
         self.mock_controller.process.OpenPPT.return_value = 0
         instance = PptviewDocument(self.mock_controller, self.mock_presentation)
         instance.file_path = 'test\path.ppt'
 
-        if is_win():
-            result = instance.load_presentation()
+        # WHEN: The temporary directory exists and OpenPPT returns successfully (not -1)
+        result = instance.load_presentation()
 
-            # THEN: PptviewDocument.load_presentation should return True
-            self.assertTrue(result)
+        # THEN: PptviewDocument.load_presentation should return True
+        self.assertTrue(result)
 
-    def test_load_presentation_un_succesfull(self):
+    @skipIf(not is_win(), 'Not Windows')
+    @patch('openlp.plugins.presentations.lib.pptviewcontroller.os.makedirs')
+    def test_load_presentation_un_succesfull(self, mock_makedirs):
         """
         Test the PptviewDocument.load_presentation() method when the temporary directory does not exist and the PPT is
         not successfully opened
         """
         # GIVEN: A reset mock_os_isdir
-        self.mock_os_isdir.reset()
+        self.mock_controller.process.OpenPPT.return_value = -1
+        instance = PptviewDocument(self.mock_controller, self.mock_presentation)
+        instance.file_path = 'test\path.ppt'
 
         # WHEN: The temporary directory does not exist and OpenPPT returns unsuccessfully (-1)
-        with patch('openlp.plugins.presentations.lib.pptviewcontroller.os.makedirs') as mock_makedirs:
-            self.mock_os_isdir.return_value = False
-            self.mock_controller.process.OpenPPT.return_value = -1
-            instance = PptviewDocument(self.mock_controller, self.mock_presentation)
-            instance.file_path = 'test\path.ppt'
-            if is_win():
-                result = instance.load_presentation()
+        result = instance.load_presentation()
 
-                # THEN: The temp folder should be created and PptviewDocument.load_presentation should return False
-                mock_makedirs.assert_called_once_with(self.temp_folder)
-                self.assertFalse(result)
+        # THEN: The temp folder should be created and PptviewDocument.load_presentation should return False
+        mock_makedirs.assert_called_once_with(self.temp_folder)
+        assert result is False
 
     def test_create_titles_and_notes(self):
         """

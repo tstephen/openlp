@@ -37,7 +37,7 @@ import time
 from PyQt5 import QtCore
 
 from openlp.core.common import Registry, delete_file, get_uno_command, get_uno_instance, is_win
-from openlp.core.lib import ScreenList
+from openlp.core.display.screens import ScreenList
 from openlp.plugins.presentations.lib.presentationcontroller import PresentationController, PresentationDocument, \
     TextType
 

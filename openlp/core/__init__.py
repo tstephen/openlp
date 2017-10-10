@@ -33,13 +33,12 @@ import time
 from datetime import datetime
 from traceback import format_exception
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.common import Registry, OpenLPMixin, AppLocation, LanguageManager, Settings, UiStrings, \
     check_directory_exists, is_macosx, is_win, translate
-from openlp.core.common.path import Path, copytree
-from openlp.core.version import check_for_update, get_version
-from openlp.core.lib import ScreenList
+from openlp.core.common.path import copytree
+from openlp.core.display.screens import ScreenList
 from openlp.core.resources import qInitResources
 from openlp.core.ui import SplashScreen
 from openlp.core.ui.exceptionform import ExceptionForm
@@ -47,6 +46,7 @@ from openlp.core.ui.firsttimeform import FirstTimeForm
 from openlp.core.ui.firsttimelanguageform import FirstTimeLanguageForm
 from openlp.core.ui.mainwindow import MainWindow
 from openlp.core.ui.style import get_application_stylesheet
+from openlp.core.version import check_for_update, get_version
 
 
 __all__ = ['OpenLP', 'main']

@@ -33,8 +33,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from openlp.core.common import Registry, RegistryProperties, Settings, SlideLimits, UiStrings, translate, \
     RegistryMixin, OpenLPMixin
 from openlp.core.common.actions import ActionList, CategoryOrder
-from openlp.core.lib import ItemCapabilities, ServiceItem, ImageSource, ServiceItemAction, ScreenList, build_icon, \
-    build_html
+from openlp.core.display.screens import ScreenList
+from openlp.core.lib import ItemCapabilities, ServiceItem, ImageSource, ServiceItemAction, build_icon, build_html
 from openlp.core.lib.ui import create_action
 from openlp.core.ui.lib.toolbar import OpenLPToolbar
 from openlp.core.ui.lib.listpreviewwidget import ListPreviewWidget
@@ -76,33 +76,6 @@ NON_TEXT_MENU = [
 ]
 
 
-class DisplayController(QtWidgets.QWidget):
-    """
-    Controller is a general display controller widget.
-    """
-    def __init__(self, parent):
-        """
-        Set up the general Controller.
-        """
-        super(DisplayController, self).__init__(parent)
-        self.is_live = False
-        self.display = None
-        self.controller_type = None
-        Registry().set_flag('has doubleclick added item to service', True)
-        Registry().set_flag('replace service manager item', False)
-
-    def send_to_plugins(self, *args):
-        """
-        This is the generic function to send signal for control widgets, created from within other plugins
-        This function is needed to catch the current controller
-
-        :param args: Arguments to send to the plugins
-        """
-        sender = self.sender().objectName() if self.sender().objectName() else self.sender().text()
-        controller = self
-        Registry().execute('{text}'.format(text=sender), [controller, args])
-
-
 class InfoLabel(QtWidgets.QLabel):
     """
     InfoLabel is a subclassed QLabel. Created to provide the ablilty to add a ellipsis if the text is cut off. Original
@@ -131,7 +104,7 @@ class InfoLabel(QtWidgets.QLabel):
         super().setText(text)
 
 
-class SlideController(DisplayController, RegistryProperties):
+class SlideController(QtWidgets.QWidget, RegistryProperties):
     """
     SlideController is the slide controller widget. This widget is what the
     user uses to control the displaying of verses/slides/etc on the screen.
@@ -141,13 +114,31 @@ class SlideController(DisplayController, RegistryProperties):
         Set up the Slide Controller.
         """
         super(SlideController, self).__init__(parent)
+        self.is_live = False
+        self.controller_type = None
+        self.displays = []
+        Registry().set_flag('has doubleclick added item to service', True)
+        Registry().set_flag('replace service manager item', False)
 
     def post_set_up(self):
         """
         Call by bootstrap functions
         """
         self.initialise()
+        self.setup_displays()
         self.screen_size_changed()
+
+    def setup_displays(self):
+        """
+        Set up the display
+        """
+        if self.displays:
+            # Delete any existing displays
+            del self.displays[:]
+        for screen in self.screens:
+            display = DisplayWindow(self)
+            display.resize(screen.current['size'])
+            # display.media_watcher.progress.connect(self.on_audio_time_remaining)
 
     def initialise(self):
         """
@@ -371,6 +362,7 @@ class SlideController(DisplayController, RegistryProperties):
         self.slide_layout.setSpacing(0)
         self.slide_layout.setContentsMargins(0, 0, 0, 0)
         self.slide_layout.setObjectName('SlideLayout')
+        # Set up the preview display
         self.preview_display = DisplayWindow(self)
         self.slide_layout.insertWidget(0, self.preview_display)
         self.preview_display.hide()
@@ -441,9 +433,9 @@ class SlideController(DisplayController, RegistryProperties):
         getattr(self,
                 'slidecontroller_{t}_previous'.format(t=self.type_prefix)).connect(self.on_slide_selected_previous)
         if self.is_live:
-            getattr(self, 'mediacontroller_live_play').connect(self.media_controller.on_media_play)
-            getattr(self, 'mediacontroller_live_pause').connect(self.media_controller.on_media_pause)
-            getattr(self, 'mediacontroller_live_stop').connect(self.media_controller.on_media_stop)
+            self.mediacontroller_live_play.connect(self.media_controller.on_media_play)
+            self.mediacontroller_live_pause.connect(self.media_controller.on_media_pause)
+            self.mediacontroller_live_stop.connect(self.media_controller.on_media_stop)
 
     def _slide_shortcut_activated(self):
         """
@@ -507,6 +499,17 @@ class SlideController(DisplayController, RegistryProperties):
                 self.slide_selected()
             # Reset the shortcut.
             self.current_shortcut = ''
+
+    def send_to_plugins(self, *args):
+        """
+        This is the generic function to send signal for control widgets, created from within other plugins
+        This function is needed to catch the current controller
+
+        :param args: Arguments to send to the plugins
+        """
+        sender = self.sender().objectName() if self.sender().objectName() else self.sender().text()
+        controller = self
+        Registry().execute('{text}'.format(text=sender), [controller, args])
 
     def set_live_hot_keys(self, parent=None):
         """
@@ -579,14 +582,11 @@ class SlideController(DisplayController, RegistryProperties):
         Settings dialog has changed the screen size of adjust output and screen previews.
         """
         # rebuild display as screen size changed
-        if self.display:
-            self.display.close()
-        self.display = DisplayWindow(self)
-        self.display.setup()
+        if self.displays:
+            for display in self.displays:
+                display.resize(self.screens.current['size'])
         if self.is_live:
             self.__add_actions_to_widget(self.display)
-        if self.display.audio_player:
-            self.display.audio_player.position_changed.connect(self.on_audio_time_remaining)
         # The SlidePreview's ratio.
         try:
             self.ratio = self.screens.current['size'].width() / self.screens.current['size'].height()
@@ -598,7 +598,7 @@ class SlideController(DisplayController, RegistryProperties):
         self.preview_display.setup()
         service_item = ServiceItem()
         self.preview_display.webview.setHtml(build_html(service_item, self.preview_display.screen, None, self.is_live,
-                                              plugins=self.plugin_manager.plugins))
+                                                        plugins=self.plugin_manager.plugins))
         self.media_controller.setup_display(self.preview_display, True)
         if self.service_item:
             self.refresh_service_item()

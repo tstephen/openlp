@@ -19,8 +19,6 @@
 # with this program; if not, write to the Free Software Foundation, Inc., 59  #
 # Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
 ###############################################################################
-
-import os
 import logging
 import zipfile
 import re
@@ -34,7 +32,7 @@ if is_win():
     from ctypes.wintypes import RECT
 
 from openlp.core.common import AppLocation
-from openlp.core.lib import ScreenList
+from openlp.core.display.screens import ScreenList
 from openlp.plugins.presentations.lib.presentationcontroller import PresentationController, PresentationDocument
 
 
