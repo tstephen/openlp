@@ -1,10 +1,36 @@
+# -*- coding: utf-8 -*-
+# vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
+
+###############################################################################
+# OpenLP - Open Source Lyrics Projection                                      #
+# --------------------------------------------------------------------------- #
+# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# --------------------------------------------------------------------------- #
+# This program is free software; you can redistribute it and/or modify it     #
+# under the terms of the GNU General Public License as published by the Free  #
+# Software Foundation; version 2 of the License.                              #
+#                                                                             #
+# This program is distributed in the hope that it will be useful, but WITHOUT #
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
+# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
+# more details.                                                               #
+#                                                                             #
+# You should have received a copy of the GNU General Public License along     #
+# with this program; if not, write to the Free Software Foundation, Inc., 59  #
+# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
+###############################################################################
+"""
+The :mod:`~openlp.core.display.window` module contains the display window
+"""
 import logging
 import os
 import json
+from pathlib import Path
 
 from PyQt5 import QtCore, QtWidgets, QtWebChannel
 
 log = logging.getLogger(__name__)
+DISPLAY_PATH = Path(__file__) / 'html' / 'display.html'
 
 
 class MediaWatcher(QtCore.QObject):
@@ -140,14 +166,14 @@ class DisplayWindow(QtWidgets.QWidget):
                 QtWidgets.QApplication.instance().processEvents()
             return self.__script_result
 
-    def set_verses(self, verses):
+    def load_verses(self, verses):
         """
         Set verses in the display
         """
         json_verses = json.dumps(verses)
         self.run_javascript('Display.setTextSlides({verses});'.format(verses=json_verses))
 
-    def set_images(self, images):
+    def load_images(self, images):
         """
         Set images in the display
         """
@@ -157,9 +183,9 @@ class DisplayWindow(QtWidgets.QWidget):
         json_images = json.dumps(images)
         self.run_javascript('Display.setImageSlides({images});'.format(images=json_images))
 
-    def set_video(self, video):
+    def load_video(self, video):
         """
-        Set video in the display
+        Load video in the display
         """
         if not video['file'].startswith('file://'):
             video['file'] = 'file://' + video['file']
@@ -231,3 +257,9 @@ class DisplayWindow(QtWidgets.QWidget):
         """
         print(theme.export_theme())
         self.run_javascript('Display.setTheme({theme});'.format(theme=theme.export_theme()))
+
+    def get_video_types(self):
+        """
+        Get the types of videos playable by the embedded media player
+        """
+        return self.run_javascript('Display.getVideoTypes();', is_sync=True)

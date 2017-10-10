@@ -133,6 +133,9 @@ AudioPlayer.prototype.createAudioElement = function () {
   this._audioElement.addEventListener("volumechange", this._callListener);
   this._audioElement.addEventListener("durationchange", this._callListener);
   this._audioElement.addEventListener("loadeddata", this._callListener);
+  document.addEventListener("complete", function(event) { 
+    document.body.appendChild(this._audioElement);
+  });
 };
 AudioPlayer.prototype.addEventListener = function (eventType, listener) {
   this._eventListeners[eventType] = this._eventListeners[eventType] || [];
@@ -599,6 +602,26 @@ var Display = {
         footer.style.setProperty(key, footerStyle[key]);
       }
     }
+  },
+  /**
+   * Return the video types supported by the video tag
+   */
+  getVideoTypes: function () {
+    var videoElement = document.createElement('video');
+    var videoTypes = [];
+    if (videoElement.canPlayType('video/mp4; codecs="mp4v.20.8"') == "probably" ||
+        videoElement.canPlayType('video/mp4; codecs="avc1.42E01E"') == "pobably" ||
+        videoElement.canPlayType('video/mp4; codecs="avc1.42E01E, mp4a.40.2"') == "probably") {
+      videoTypes.push(['video/mp4', '*.mp4']);
+    }
+    if (videoElement.canPlayType('video/ogg; codecs="theora"') == "probably") {
+      videoTypes.push(['video/ogg', '*.ogv']);
+    }
+    if (videoElement.canPlayType('video/webm; codecs="vp8, vorbis"') == "probably") {
+      videoTypes.push(['video/webm', '*.webm']);
+    }
+    return videoTypes;
+  }
   }
 };
 new QWebChannel(qt.webChannelTransport, function (channel) {
