@@ -131,7 +131,7 @@ class TestPptviewDocument(TestCase):
         shutil.rmtree(self.temp_folder)
 
     @skipIf(not is_win(), 'Not Windows')
-    def test_load_presentation_succesfull(self):
+    def test_load_presentation_succesful(self):
         """
         Test the PptviewDocument.load_presentation() method when the PPT is successfully opened
         """
@@ -144,11 +144,10 @@ class TestPptviewDocument(TestCase):
         result = instance.load_presentation()
 
         # THEN: PptviewDocument.load_presentation should return True
-        self.assertTrue(result)
+        assert result is True
 
     @skipIf(not is_win(), 'Not Windows')
-    @patch('openlp.plugins.presentations.lib.pptviewcontroller.os.makedirs')
-    def test_load_presentation_un_succesfull(self, mock_makedirs):
+    def test_load_presentation_un_succesful(self):
         """
         Test the PptviewDocument.load_presentation() method when the temporary directory does not exist and the PPT is
         not successfully opened
@@ -159,10 +158,11 @@ class TestPptviewDocument(TestCase):
         instance.file_path = 'test\path.ppt'
 
         # WHEN: The temporary directory does not exist and OpenPPT returns unsuccessfully (-1)
-        result = instance.load_presentation()
+        with patch.object(instance, 'get_temp_folder') as mocked_get_folder:
+            mocked_get_folder.return_value = MagicMock(spec=Path)
+            result = instance.load_presentation()
 
         # THEN: The temp folder should be created and PptviewDocument.load_presentation should return False
-        mock_makedirs.assert_called_once_with(self.temp_folder)
         assert result is False
 
     def test_create_titles_and_notes(self):
@@ -189,7 +189,7 @@ class TestPptviewDocument(TestCase):
         # GIVEN: mocked PresentationController.save_titles_and_notes and an nonexistent file
         with patch('builtins.open') as mocked_open, \
                 patch.object(Path, 'exists') as mocked_path_exists, \
-                patch('openlp.plugins.presentations.lib.presentationcontroller.check_directory_exists') as \
+                patch('openlp.plugins.presentations.lib.presentationcontroller.create_paths') as \
                 mocked_dir_exists:
             mocked_path_exists.return_value = False
             mocked_dir_exists.return_value = False

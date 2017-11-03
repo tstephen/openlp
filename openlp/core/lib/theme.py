@@ -26,7 +26,9 @@ import json
 import logging
 
 from lxml import etree, objectify
-from openlp.core.common import AppLocation, de_hump
+
+from openlp.core.common import de_hump
+from openlp.core.common.applocation import AppLocation
 from openlp.core.common.json import OpenLPJsonDecoder, OpenLPJsonEncoder
 from openlp.core.common.path import Path, str_to_path
 from openlp.core.display.screens import ScreenList

@@ -25,9 +25,10 @@ import logging
 import re
 from subprocess import check_output, CalledProcessError
 
-from openlp.core.common import AppLocation, check_binary_exists
-from openlp.core.common import Settings, is_win
+from openlp.core.common import check_binary_exists, is_win
+from openlp.core.common.applocation import AppLocation
 from openlp.core.common.path import which
+from openlp.core.common.settings import Settings
 from openlp.core.display.screens import ScreenList
 from openlp.plugins.presentations.lib.presentationcontroller import PresentationController, PresentationDocument
 

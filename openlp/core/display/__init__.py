@@ -20,5 +20,5 @@
 # Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
 ###############################################################################
 """
-The Display module.
+The :mod:`~openlp.core.display` module contains all the code related to rendering and output
 """

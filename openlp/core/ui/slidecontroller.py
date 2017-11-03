@@ -22,7 +22,6 @@
 """
 The :mod:`slidecontroller` module contains the most important part of OpenLP - the slide controller
 """
-
 import copy
 import os
 from collections import deque
@@ -30,16 +29,19 @@ from threading import Lock
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from openlp.core.common import Registry, RegistryProperties, Settings, SlideLimits, UiStrings, translate, \
-    RegistryMixin, OpenLPMixin
+from openlp.core.common import SlideLimits
 from openlp.core.common.actions import ActionList, CategoryOrder
+from openlp.core.common.i18n import UiStrings, translate
+from openlp.core.common.mixins import LogMixin, RegistryProperties
+from openlp.core.common.registry import Registry, RegistryBase
+from openlp.core.common.settings import Settings
 from openlp.core.display.screens import ScreenList
 from openlp.core.lib import ItemCapabilities, ServiceItem, ImageSource, ServiceItemAction, build_icon, build_html
 from openlp.core.lib.ui import create_action
-from openlp.core.ui.lib.toolbar import OpenLPToolbar
-from openlp.core.ui.lib.listpreviewwidget import ListPreviewWidget
 from openlp.core.ui import HideMode, DisplayControllerType
 from openlp.core.display.window import DisplayWindow
+from openlp.core.widgets.toolbar import OpenLPToolbar
+from openlp.core.widgets.views import ListPreviewWidget
 
 
 # Threshold which has to be trespassed to toggle.
@@ -109,11 +111,11 @@ class SlideController(QtWidgets.QWidget, RegistryProperties):
     SlideController is the slide controller widget. This widget is what the
     user uses to control the displaying of verses/slides/etc on the screen.
     """
-    def __init__(self, parent):
+    def __init__(self, *args, **kwargs):
         """
         Set up the Slide Controller.
         """
-        super(SlideController, self).__init__(parent)
+        super().__init__(*args, **kwargs)
         self.is_live = False
         self.controller_type = None
         self.displays = []
@@ -1503,7 +1505,7 @@ class SlideController(QtWidgets.QWidget, RegistryProperties):
         self.display.audio_player.go_to(action.data())
 
 
-class PreviewController(RegistryMixin, OpenLPMixin, SlideController):
+class PreviewController(RegistryBase, SlideController):
     """
     Set up the Preview Controller.
     """
@@ -1511,11 +1513,12 @@ class PreviewController(RegistryMixin, OpenLPMixin, SlideController):
     slidecontroller_preview_next = QtCore.pyqtSignal()
     slidecontroller_preview_previous = QtCore.pyqtSignal()
 
-    def __init__(self, parent):
+    def __init__(self, *args, **kwargs):
         """
         Set up the base Controller as a preview.
         """
-        super(PreviewController, self).__init__(parent)
+        self.__registry_name = 'preview_slidecontroller'
+        super().__init__(*args, **kwargs)
         self.split = 0
         self.type_prefix = 'preview'
         self.category = 'Preview Toolbar'
@@ -1527,7 +1530,7 @@ class PreviewController(RegistryMixin, OpenLPMixin, SlideController):
         self.post_set_up()
 
 
-class LiveController(RegistryMixin, OpenLPMixin, SlideController):
+class LiveController(RegistryBase, SlideController):
     """
     Set up the Live Controller.
     """
@@ -1539,11 +1542,11 @@ class LiveController(RegistryMixin, OpenLPMixin, SlideController):
     mediacontroller_live_pause = QtCore.pyqtSignal()
     mediacontroller_live_stop = QtCore.pyqtSignal()
 
-    def __init__(self, parent):
+    def __init__(self, *args, **kwargs):
         """
         Set up the base Controller as a live.
         """
-        super(LiveController, self).__init__(parent)
+        super().__init__(*args, **kwargs)
         self.is_live = True
         self.split = 1
         self.type_prefix = 'live'

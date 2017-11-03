@@ -23,7 +23,6 @@
 The :mod:`serviceitem` provides the service item functionality including the
 type and capability of an item.
 """
-
 import datetime
 import html
 import logging
@@ -33,7 +32,11 @@ import ntpath
 
 from PyQt5 import QtGui
 
-from openlp.core.common import RegistryProperties, Settings, translate, AppLocation, md5_hash
+from openlp.core.common import md5_hash
+from openlp.core.common.applocation import AppLocation
+from openlp.core.common.i18n import translate
+from openlp.core.common.mixins import RegistryProperties
+from openlp.core.common.settings import Settings
 from openlp.core.display.render import remove_tags, render_tags, render_chords
 from openlp.core.lib import ImageSource, build_icon
 

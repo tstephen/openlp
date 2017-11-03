@@ -27,7 +27,13 @@ This module is for controlling powerpoint. PPT API documentation:
 """
 import logging
 
-from openlp.core.common import is_win
+from openlp.core.common import is_win, trace_error_handler
+from openlp.core.common.i18n import UiStrings
+from openlp.core.common.registry import Registry
+from openlp.core.common.settings import Settings
+from openlp.core.display.screens import ScreenList
+from openlp.core.lib.ui import critical_error_message_box, translate
+from openlp.plugins.presentations.lib.presentationcontroller import PresentationController, PresentationDocument
 
 if is_win():
     from win32com.client import Dispatch
@@ -36,12 +42,6 @@ if is_win():
     import win32ui
     import winreg
     import pywintypes
-
-
-from openlp.core.common import Registry, Settings, UiStrings, trace_error_handler
-from openlp.core.display.screens import ScreenList
-from openlp.core.lib.ui import critical_error_message_box, translate
-from openlp.plugins.presentations.lib.presentationcontroller import PresentationController, PresentationDocument
 
 log = logging.getLogger(__name__)
 

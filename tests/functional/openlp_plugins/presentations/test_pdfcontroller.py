@@ -30,7 +30,7 @@ from unittest.mock import MagicMock, patch
 
 from PyQt5 import QtCore, QtGui
 
-from openlp.core.common import Settings
+from openlp.core.common.settings import Settings
 from openlp.core.common.path import Path
 from openlp.core.display.screens import ScreenList
 from openlp.plugins.presentations.lib.pdfcontroller import PdfController, PdfDocument
