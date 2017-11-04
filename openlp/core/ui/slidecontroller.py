@@ -36,7 +36,7 @@ from openlp.core.common.mixins import LogMixin, RegistryProperties
 from openlp.core.common.registry import Registry, RegistryBase
 from openlp.core.common.settings import Settings
 from openlp.core.display.screens import ScreenList
-from openlp.core.lib import ItemCapabilities, ServiceItem, ImageSource, ServiceItemAction, build_icon, build_html
+from openlp.core.lib import ItemCapabilities, ImageSource, ServiceItemAction, build_icon
 from openlp.core.lib.ui import create_action
 from openlp.core.ui import HideMode, DisplayControllerType
 from openlp.core.display.window import DisplayWindow
@@ -106,7 +106,7 @@ class InfoLabel(QtWidgets.QLabel):
         super().setText(text)
 
 
-class SlideController(QtWidgets.QWidget, RegistryProperties):
+class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
     """
     SlideController is the slide controller widget. This widget is what the
     user uses to control the displaying of verses/slides/etc on the screen.
@@ -431,9 +431,9 @@ class SlideController(QtWidgets.QWidget, RegistryProperties):
         Registry().register_function('slidecontroller_update_slide_limits', self.update_slide_limits)
         getattr(self, 'slidecontroller_{text}_set'.format(text=self.type_prefix)).connect(self.on_slide_selected_index)
         getattr(self, 'slidecontroller_{text}_next'.format(text=self.type_prefix)).connect(self.on_slide_selected_next)
-        # NOTE: {t} used to keep line length < maxline
+        # NOTE: {} used to keep line length < maxline
         getattr(self,
-                'slidecontroller_{t}_previous'.format(t=self.type_prefix)).connect(self.on_slide_selected_previous)
+                'slidecontroller_{}_previous'.format(self.type_prefix)).connect(self.on_slide_selected_previous)
         if self.is_live:
             self.mediacontroller_live_play.connect(self.media_controller.on_media_play)
             self.mediacontroller_live_pause.connect(self.media_controller.on_media_pause)
@@ -590,20 +590,7 @@ class SlideController(QtWidgets.QWidget, RegistryProperties):
         if self.is_live:
             self.__add_actions_to_widget(self.display)
         # The SlidePreview's ratio.
-        try:
-            self.ratio = self.screens.current['size'].width() / self.screens.current['size'].height()
-        except ZeroDivisionError:
-            self.ratio = 1
-        self.media_controller.setup_display(self.display, False)
-        self.preview_size_changed()
-        self.preview_widget.screen_size_changed(self.ratio)
-        self.preview_display.setup()
-        service_item = ServiceItem()
-        self.preview_display.webview.setHtml(build_html(service_item, self.preview_display.screen, None, self.is_live,
-                                                        plugins=self.plugin_manager.plugins))
-        self.media_controller.setup_display(self.preview_display, True)
-        if self.service_item:
-            self.refresh_service_item()
+        # TODO: Need to basically update everything
 
     def __add_actions_to_widget(self, widget):
         """

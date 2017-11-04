@@ -45,7 +45,6 @@ from openlp.core.common.mixins import RegistryProperties
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.display.screens import ScreenList
-from openlp.core.display.renderer import Renderer
 from openlp.core.lib import PluginManager, ImageManager, PluginStatus, build_icon
 from openlp.core.lib.ui import create_action
 from openlp.core.ui import AboutForm, SettingsForm, ServiceManager, ThemeManager, PluginForm, ShortcutListForm, \
