@@ -98,7 +98,7 @@ class DisplayWindow(QtWidgets.QWidget):
     """
     This is a window to show the output
     """
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, screen=None):
         """
         Create the display window
         """
@@ -119,10 +119,23 @@ class DisplayWindow(QtWidgets.QWidget):
         self.channel = QtWebChannel.QWebChannel(self)
         self.channel.registerObject('mediaWatcher', self.media_watcher)
         self.webview.page().setWebChannel(self.channel)
+        if screen and screen.is_display:
+            self.update_from_screen(screen)
+
+    def update_from_screen(self, screen):
+        """
+        Update the number and the geometry from the screen.
+
+        :param Screen screen: A `~openlp.core.display.screens.Screen` instance
+        """
+        self.setGeometry(screen.display_geometry)
+        self.screen_number = screen.number
 
     def set_url(self, url):
         """
         Set the URL of the webview
+
+        :param str url: The URL to set
         """
         if not isinstance(url, QtCore.QUrl):
             url = QtCore.QUrl(url)

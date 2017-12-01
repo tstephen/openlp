@@ -137,10 +137,10 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         if self.displays:
             # Delete any existing displays
             del self.displays[:]
-        for screen in self.screens:
-            display = DisplayWindow(self)
-            display.resize(screen.current['size'])
-            # display.media_watcher.progress.connect(self.on_audio_time_remaining)
+        # for screen in self.screens:
+        display = DisplayWindow(self, self.screens.current)
+        self.displays.append(display)
+        #    display.media_watcher.progress.connect(self.on_audio_time_remaining)
 
     def initialise(self):
         """
@@ -365,9 +365,9 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         self.slide_layout.setContentsMargins(0, 0, 0, 0)
         self.slide_layout.setObjectName('SlideLayout')
         # Set up the preview display
-        self.preview_display = DisplayWindow(self)
-        self.slide_layout.insertWidget(0, self.preview_display)
-        self.preview_display.hide()
+        # self.preview_display = DisplayWindow(self)
+        # self.slide_layout.insertWidget(0, self.preview_display)
+        # self.preview_display.hide()
         # Actual preview screen
         self.slide_preview = QtWidgets.QLabel(self)
         size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)

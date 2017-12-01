@@ -49,7 +49,7 @@ class GeneralTab(SettingsTab):
         """
         self.logo_file = ':/graphics/openlp-splash-screen.png'
         self.logo_background_color = '#ffffff'
-        self.screens = ScreenList()
+        self.screen_list = ScreenList()
         self.icon_path = ':/icon/openlp-logo.svg'
         general_translated = translate('OpenLP.GeneralTab', 'General')
         super(GeneralTab, self).__init__(parent, 'Core', general_translated)
@@ -283,7 +283,7 @@ class GeneralTab(SettingsTab):
         settings = Settings()
         settings.beginGroup(self.settings_section)
         self.monitor_combo_box.clear()
-        self.monitor_combo_box.addItems(self.screens.get_screen_list())
+        self.monitor_combo_box.addItems([str(screen) for screen in self.screen_list])
         monitor_number = settings.value('monitor')
         self.monitor_combo_box.setCurrentIndex(monitor_number)
         self.number_edit.setText(settings.value('ccli number'))
