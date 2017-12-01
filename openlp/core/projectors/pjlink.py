@@ -54,7 +54,7 @@ from PyQt5 import QtCore, QtNetwork
 
 from openlp.core.common import qmd5_hash
 from openlp.core.common.i18n import translate
-from openlp.core.lib.projector.constants import CONNECTION_ERRORS, CR, ERROR_MSG, ERROR_STRING, \
+from openlp.core.projectors.constants import CONNECTION_ERRORS, CR, ERROR_MSG, ERROR_STRING, \
     E_AUTHENTICATION, E_CONNECTION_REFUSED, E_GENERAL, E_INVALID_DATA, E_NETWORK, E_NOT_CONNECTED, E_OK, \
     E_PARAMETER, E_PROJECTOR, E_SOCKET_TIMEOUT, E_UNAVAILABLE, E_UNDEFINED, PJLINK_ERRORS, PJLINK_ERST_DATA, \
     PJLINK_ERST_STATUS, PJLINK_MAX_PACKET, PJLINK_PORT, PJLINK_POWR_STATUS, PJLINK_VALID_CMD, \
@@ -402,17 +402,20 @@ class PJLinkCommands(object):
         :param data: Lamp(s) status.
         """
         lamps = []
-        data_dict = data.split()
-        while data_dict:
-            try:
-                fill = {'Hours': int(data_dict[0]), 'On': False if data_dict[1] == '0' else True}
-            except ValueError:
-                # In case of invalid entry
-                log.warning('({ip}) process_lamp(): Invalid data "{data}"'.format(ip=self.ip, data=data))
-                return
-            lamps.append(fill)
-            data_dict.pop(0)  # Remove lamp hours
-            data_dict.pop(0)  # Remove lamp on/off
+        lamp_list = data.split()
+        if len(lamp_list) < 2:
+            lamps.append({'Hours': int(lamp_list[0]), 'On': None})
+        else:
+            while lamp_list:
+                try:
+                    fill = {'Hours': int(lamp_list[0]), 'On': False if lamp_list[1] == '0' else True}
+                except ValueError:
+                    # In case of invalid entry
+                    log.warning('({ip}) process_lamp(): Invalid data "{data}"'.format(ip=self.ip, data=data))
+                    return
+                lamps.append(fill)
+                lamp_list.pop(0)  # Remove lamp hours
+                lamp_list.pop(0)  # Remove lamp on/off
         self.lamp = lamps
         return
 
@@ -520,7 +523,6 @@ class PJLink(QtNetwork.QTcpSocket, PJLinkCommands):
     """
     # Signals sent by this module
     changeStatus = QtCore.pyqtSignal(str, int, str)
-    projectorNetwork = QtCore.pyqtSignal(int)  # Projector network activity
     projectorStatus = QtCore.pyqtSignal(int)  # Status update
     projectorAuthentication = QtCore.pyqtSignal(str)  # Authentication error
     projectorNoAuthentication = QtCore.pyqtSignal(str)  # PIN set and no authentication needed
@@ -846,7 +848,6 @@ class PJLink(QtNetwork.QTcpSocket, PJLinkCommands):
             log.debug('({ip}) get_socket(): No data available (-1)'.format(ip=self.ip))
             return self.receive_data_signal()
         self.socket_timer.stop()
-        self.projectorNetwork.emit(S_NETWORK_RECEIVED)
         return self.get_data(buff=read, ip=self.ip)
 
     def get_data(self, buff, ip):
@@ -925,7 +926,6 @@ class PJLink(QtNetwork.QTcpSocket, PJLinkCommands):
         if cmd not in PJLINK_VALID_CMD:
             log.error('({ip}) send_command(): Invalid command requested - ignoring.'.format(ip=self.ip))
             return
-        self.projectorNetwork.emit(S_NETWORK_SENDING)
         log.debug('({ip}) send_command(): Building cmd="{command}" opts="{data}"{salt}'.format(ip=self.ip,
                                                                                                command=cmd,
                                                                                                data=opts,
@@ -996,7 +996,6 @@ class PJLink(QtNetwork.QTcpSocket, PJLinkCommands):
         log.debug('({ip}) _send_string(): Sending "{data}"'.format(ip=self.ip, data=out.strip()))
         log.debug('({ip}) _send_string(): Queue = {data}'.format(ip=self.ip, data=self.send_queue))
         self.socket_timer.start()
-        self.projectorNetwork.emit(S_NETWORK_SENDING)
         sent = self.write(out.encode('{string_encoding}'.format(string_encoding='utf-8' if utf8 else 'ascii')))
         self.waitForBytesWritten(2000)  # 2 seconds should be enough
         if sent == -1:
