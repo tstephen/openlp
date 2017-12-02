@@ -23,7 +23,6 @@
 This module contains tests for the PdfController
 """
 import os
-import shutil
 from tempfile import mkdtemp
 from unittest import TestCase, SkipTest
 from unittest.mock import MagicMock, patch

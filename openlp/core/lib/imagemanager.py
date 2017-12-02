@@ -176,8 +176,8 @@ class ImageManager(QtCore.QObject):
         super(ImageManager, self).__init__()
         Registry().register('image_manager', self)
         current_screen = ScreenList().current
-        self.width = current_screen['size'].width()
-        self.height = current_screen['size'].height()
+        self.width = current_screen.display_geometry.width()
+        self.height = current_screen.display_geometry.height()
         self._cache = {}
         self.image_thread = ImageThread(self)
         self._conversion_queue = PriorityQueue()
@@ -190,8 +190,8 @@ class ImageManager(QtCore.QObject):
         """
         log.debug('update_display')
         current_screen = ScreenList().current
-        self.width = current_screen['size'].width()
-        self.height = current_screen['size'].height()
+        self.width = current_screen.display_geometry.width()
+        self.height = current_screen.display_geometry.height()
         # Mark the images as dirty for a rebuild by setting the image and byte stream to None.
         for image in list(self._cache.values()):
             self._reset_image(image)

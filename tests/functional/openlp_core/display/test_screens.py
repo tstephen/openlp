@@ -62,19 +62,26 @@ class TestScreenList(TestCase):
         del self.screens
         del self.application
 
-    def test_add_desktop(self):
+    def test_create_screen_list(self):
         """
-        Test the ScreenList.screen_count_changed method to check if new monitors are detected by OpenLP.
+        Create the screen list
         """
-        # GIVEN: The screen list at its current size
-        old_screen_count = len(self.screens.screen_list)
+        # GIVEN: Mocked desktop
+        mocked_desktop = MagicMock()
+        mocked_desktop.screenCount.return_value = 2
+        mocked_desktop.screenGeometry.side_effect = [
+            QtCore.QRect(0, 0, 1024, 768),
+            QtCore.QRect(1024, 0, 1024, 768)
+        ]
+        mocked_desktop.primaryScreen.return_value = 0
 
-        # WHEN: We add a new screen
-        self.desktop.screenCount.return_value = SCREEN['number'] + 1
-        self.screens.screen_count_changed(old_screen_count)
+        # WHEN: create() is called
+        screen_list = ScreenList.create(mocked_desktop)
 
-        # THEN: The screen should have been added and the screens should be identical
-        new_screen_count = len(self.screens.screen_list)
-        self.assertEqual(old_screen_count + 1, new_screen_count, 'The new_screens list should be bigger')
-        self.assertEqual(SCREEN, self.screens.screen_list.pop(),
-                         'The 2nd screen should be identical to the first screen')
+        # THEN: The correct screens have been set up
+        assert screen_list.screens[0].number == 0
+        assert screen_list.screens[0].geometry == QtCore.QRect(0, 0, 1024, 768)
+        assert screen_list.screens[0].is_primary is True
+        assert screen_list.screens[1].number == 1
+        assert screen_list.screens[1].geometry == QtCore.QRect(1024, 0, 1024, 768)
+        assert screen_list.screens[1].is_primary is False

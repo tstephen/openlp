@@ -34,9 +34,9 @@ except ImportError:
     CAN_RUN_TESTS = False
 
 
-class TestRecord(object):
+class FakeRecord(object):
     """
-    Microsoft Access Driver is not available on non Microsoft Systems for this reason the :class:`TestRecord` is used
+    Microsoft Access Driver is not available on non Microsoft Systems for this reason the :class:`FakeRecord` is used
     to simulate a recordset that would be returned by pyobdc.
     """
     def __init__(self, id_, field, value):
@@ -66,12 +66,12 @@ if CAN_RUN_TESTS:
             self._title_assignment_list.append(title)
 
 
-RECORDSET_TEST_DATA = [TestRecord(1, 'TITLE', 'Amazing Grace'),
-                       TestRecord(1, 'AUTHOR', 'John Newton'),
-                       TestRecord(1, 'CCLISONGID', '12345'),
-                       TestRecord(1, 'COMMENTS', 'The original version'),
-                       TestRecord(1, 'COPY', 'Public Domain'),
-                       TestRecord(
+RECORDSET_TEST_DATA = [FakeRecord(1, 'TITLE', 'Amazing Grace'),
+                       FakeRecord(1, 'AUTHOR', 'John Newton'),
+                       FakeRecord(1, 'CCLISONGID', '12345'),
+                       FakeRecord(1, 'COMMENTS', 'The original version'),
+                       FakeRecord(1, 'COPY', 'Public Domain'),
+                       FakeRecord(
                            1, 'LYRICS',
                            'Amazing grace! How&crlf;sweet the sound&crlf;That saved a wretch like me!&crlf;'
                            'I once was lost,&crlf;but now am found;&crlf;Was blind, but now I see.&crlf;&crlf;'
@@ -88,8 +88,8 @@ RECORDSET_TEST_DATA = [TestRecord(1, 'TITLE', 'Amazing Grace'),
                            'Shall be forever mine.&crlf;&crlf;When we\'ve been there&crlf;ten thousand years,&crlf;'
                            'Bright shining as the sun,&crlf;We\'ve no less days to&crlf;sing God\'s praise&crlf;'
                            'Than when we\'d first begun.&crlf;&crlf;'),
-                       TestRecord(2, 'TITLE', 'Beautiful Garden Of Prayer, The'),
-                       TestRecord(
+                       FakeRecord(2, 'TITLE', 'Beautiful Garden Of Prayer, The'),
+                       FakeRecord(
                            2, 'LYRICS',
                            'There\'s a garden where&crlf;Jesus is waiting,&crlf;'
                            'There\'s a place that&crlf;is wondrously fair,&crlf;For it glows with the&crlf;'

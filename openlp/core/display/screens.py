@@ -23,7 +23,6 @@
 The :mod:`screen` module provides management functionality for a machines'
 displays.
 """
-import json
 import logging
 
 from PyQt5 import QtCore
@@ -90,6 +89,30 @@ class ScreenList(object):
         for screen in self.screens:
             yield screen
 
+    def __len__(self):
+        """
+        Make sure we can call "len" on this object
+        """
+        return len(self.screens)
+
+    @property
+    def current(self):
+        """
+        Return the first "current" desktop
+
+        NOTE: This is a HACK to ease the upgrade process
+        """
+        # Get the first display screen
+        for screen in self.screens:
+            if screen.is_display:
+                return screen
+        # If there's no display screen, get the first primary screen
+        for screen in self.screens:
+            if screen.is_primary:
+                return screen
+        # Otherwise just return the first screen
+        return self.screens[0]
+
     @classmethod
     def create(cls, desktop):
         """
@@ -100,7 +123,7 @@ class ScreenList(object):
         screen_list = cls()
         screen_list.desktop = desktop
         screen_list.screens = []
-        screen_list.screen_count_changed()
+        screen_list.on_screen_count_changed()
         screen_list.load_screen_settings()
         screen_list.desktop.resized.connect(screen_list.on_screen_resolution_changed)
         screen_list.desktop.screenCountChanged.connect(screen_list.on_screen_count_changed)
@@ -138,7 +161,7 @@ class ScreenList(object):
         # Add new screens.
         for number in range(self.desktop.screenCount()):
             if not self.has_screen(number):
-                self.screens.append(Screen(number, self.desktop.getGeometry(number),
+                self.screens.append(Screen(number, self.desktop.screenGeometry(number),
                                            self.desktop.primaryScreen() == number))
         # We do not want to send this message at start up.
         if changed_screen is not None:
@@ -201,7 +224,7 @@ class ScreenList(object):
             'core/monitors': '{}'
         }
         Settings.extend_default_settings(screen_settings)
-        monitors = json.loads(Settings().value('core/monitors'))
+        monitors = Settings().value('core/monitors')
         for screen in self.screens:
             monitor = monitors.get(screen.number)
             if monitor:

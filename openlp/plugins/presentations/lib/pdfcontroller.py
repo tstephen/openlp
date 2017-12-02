@@ -249,7 +249,7 @@ class PdfDocument(PresentationDocument):
                     self.image_files.append(image_path)
             self.num_pages = len(self.image_files)
             return True
-        size = ScreenList().current['size']
+        size = ScreenList().current.display_geometry
         # Generate images from PDF that will fit the frame.
         runlog = ''
         try:
