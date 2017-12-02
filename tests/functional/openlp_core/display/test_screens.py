@@ -28,7 +28,7 @@ from unittest.mock import MagicMock
 from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.common.registry import Registry
-from openlp.core.display.screens import ScreenList
+from openlp.core.display.screens import ScreenList, Screen
 
 SCREEN = {
     'primary': False,
@@ -61,6 +61,45 @@ class TestScreenList(TestCase):
         """
         del self.screens
         del self.application
+
+    def test_current_display_screen(self):
+        """
+        Test that the "current" property returns the first display screen
+        """
+        # GIVEN: A new ScreenList object with some screens
+        screen_list = ScreenList()
+        screen_list.screens = [
+            Screen(number=0, geometry=QtCore.QRect(0, 0, 1024, 768), is_primary=True),
+            Screen(number=1, geometry=QtCore.QRect(1024, 0, 1024, 768), is_primary=False, is_display=True)
+        ]
+
+        # WHEN: The current property is accessed
+        screen = screen_list.current
+
+        # THEN: It should be the display screen
+        assert screen.number == 1
+        assert screen.geometry == QtCore.QRect(1024, 0, 1024, 768)
+        assert screen.is_primary is False
+        assert screen.is_display is True
+
+    def test_current_primary_screen(self):
+        """
+        Test that the "current" property returns the first primary screen
+        """
+        # GIVEN: A new ScreenList object with some screens
+        screen_list = ScreenList()
+        screen_list.screens = [
+            Screen(number=0, geometry=QtCore.QRect(0, 0, 1024, 768), is_primary=True)
+        ]
+
+        # WHEN: The current property is accessed
+        screen = screen_list.current
+
+        # THEN: It should be the display screen
+        assert screen.number == 0
+        assert screen.geometry == QtCore.QRect(0, 0, 1024, 768)
+        assert screen.is_primary is True
+        assert screen.is_display is False
 
     def test_create_screen_list(self):
         """
