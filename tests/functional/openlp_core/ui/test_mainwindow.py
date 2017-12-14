@@ -158,14 +158,18 @@ class TestMainWindow(TestCase, TestMixin):
         # WHEN: you check the started functions
 
         # THEN: the following registry functions should have been registered
-        expected_service_list = ['application', 'main_window', 'media_controller', 'settings_form', 'plugin_manager',
-                                 'image_manager', 'preview_controller', 'live_controller', 'service_manager',
-                                 'theme_manager', 'projector_manager']
+        expected_service_list = ['application', 'main_window', 'media_controller', 'http_server', 'settings_form',
+                                 'plugin_manager', 'image_manager', 'preview_controller', 'live_controller',
+                                 'service_manager', 'theme_manager', 'projector_manager']
+        expected_functions_list = ['bootstrap_initialise', 'bootstrap_post_set_up', 'playbackPlay', 'playbackPause',
+                                   'playbackStop', 'playbackLoop', 'seek_slider', 'volume_slider', 'media_hide',
+                                   'media_blank', 'media_unblank', 'songs_hide', 'songs_blank', 'songs_unblank',
+                                   'mediaitem_media_rebuild', 'mediaitem_suffixes', 'images_regenerate',
+                                   'theme_update_global', 'config_screen_changed']
         assert list(self.registry.service_list.keys()) == expected_service_list, \
-            'The registry should have the following services: {}, got {}'.format(expected_service_list,
-                                                                                 self.registry.service_list.keys())
-        assert len(self.registry.functions_list) == 19, \
-            'The registry should have 19 functions, got {}'.format(self.registry.functions_list.keys())
+            'The service list should have been {}'.format(self.registry.service_list.keys())
+        assert list(self.registry.functions_list.keys()) == expected_functions_list, \
+            'The function list should have been {}'.format(self.registry.functions_list.keys())
         assert 'application' in self.registry.service_list, 'The application should have been registered.'
         assert 'main_window' in self.registry.service_list, 'The main_window should have been registered.'
         assert 'media_controller' in self.registry.service_list, 'The media_controller should have been registered.'
