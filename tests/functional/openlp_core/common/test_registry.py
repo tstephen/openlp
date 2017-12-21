@@ -24,9 +24,9 @@ Package to test the openlp.core.lib package.
 """
 import os
 from unittest import TestCase
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
-from openlp.core.common.registry import Registry, RegistryProperties
+from openlp.core.common.registry import Registry, RegistryBase
 
 TEST_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../', '..', 'resources'))
 
@@ -51,19 +51,19 @@ class TestRegistry(TestCase):
         # THEN  and I will get an exception
         with self.assertRaises(KeyError) as context:
             Registry().register('test1', mock_1)
-        self.assertEqual(context.exception.args[0], 'Duplicate service exception test1',
-                         'KeyError exception should have been thrown for duplicate service')
+        assert context.exception.args[0] == 'Duplicate service exception test1', \
+            'KeyError exception should have been thrown for duplicate service'
 
         # WHEN I try to get back a non existent component
         # THEN I will get an exception
         temp = Registry().get('test2')
-        self.assertEqual(temp, None, 'None should have been returned for missing service')
+        assert temp is None, 'None should have been returned for missing service'
 
         # WHEN I try to replace a component I should be allowed
         Registry().remove('test1')
         # THEN I will get an exception
         temp = Registry().get('test1')
-        self.assertEqual(temp, None, 'None should have been returned for deleted service')
+        assert temp is None, 'None should have been returned for deleted service'
 
     def test_registry_function(self):
         """
@@ -77,21 +77,21 @@ class TestRegistry(TestCase):
         return_value = Registry().execute('test1')
 
         # THEN: I expect then function to have been called and a return given
-        self.assertEqual(return_value[0], 'function_1', 'A return value is provided and matches')
+        assert return_value[0] == 'function_1', 'A return value is provided and matches'
 
         # WHEN: I execute the a function with the same reference and execute the function
         Registry().register_function('test1', self.dummy_function_1)
         return_value = Registry().execute('test1')
 
         # THEN: I expect then function to have been called and a return given
-        self.assertEqual(return_value, ['function_1', 'function_1'], 'A return value list is provided and matches')
+        assert return_value == ['function_1', 'function_1'], 'A return value list is provided and matches'
 
         # WHEN: I execute the a 2nd function with the different reference and execute the function
         Registry().register_function('test2', self.dummy_function_2)
         return_value = Registry().execute('test2')
 
         # THEN: I expect then function to have been called and a return given
-        self.assertEqual(return_value[0], 'function_2', 'A return value is provided and matches')
+        assert return_value[0] == 'function_2', 'A return value is provided and matches'
 
     def test_registry_working_flags(self):
         """
@@ -107,28 +107,28 @@ class TestRegistry(TestCase):
 
         # THEN: we should be able retrieve the saved component
         temp = Registry().get_flag('test1')
-        self.assertEquals(temp, my_data, 'The value should have been saved')
+        assert temp == my_data, 'The value should have been saved'
 
         # WHEN: I add a component for the second time I am not mad.
         # THEN  and I will not get an exception
         Registry().set_flag('test1', my_data2)
         temp = Registry().get_flag('test1')
-        self.assertEquals(temp, my_data2, 'The value should have been updated')
+        assert temp == my_data2, 'The value should have been updated'
 
         # WHEN I try to get back a non existent Working Flag
         # THEN I will get an exception
         with self.assertRaises(KeyError) as context1:
             temp = Registry().get_flag('test2')
-        self.assertEqual(context1.exception.args[0], 'Working Flag test2 not found in list',
-                         'KeyError exception should have been thrown for missing working flag')
+        assert context1.exception.args[0] == 'Working Flag test2 not found in list', \
+            'KeyError exception should have been thrown for missing working flag'
 
         # WHEN I try to replace a working flag I should be allowed
         Registry().remove_flag('test1')
         # THEN I will get an exception
         with self.assertRaises(KeyError) as context:
             temp = Registry().get_flag('test1')
-        self.assertEqual(context.exception.args[0], 'Working Flag test1 not found in list',
-                         'KeyError exception should have been thrown for duplicate working flag')
+        assert context.exception.args[0] == 'Working Flag test1 not found in list', \
+            'KeyError exception should have been thrown for duplicate working flag'
 
     def test_remove_function(self):
         """
@@ -142,7 +142,7 @@ class TestRegistry(TestCase):
         Registry().remove_function('test1', self.dummy_function_1)
 
         # THEN: The method should not be available.
-        assert not Registry().functions_list['test1'], 'The function should not be in the dict anymore.'
+        assert Registry().functions_list['test1'] == [], 'The function should not be in the dict anymore.'
 
     def dummy_function_1(self):
         return "function_1"
@@ -151,70 +151,40 @@ class TestRegistry(TestCase):
         return "function_2"
 
 
-class TestRegistryProperties(TestCase, RegistryProperties):
-    """
-    Test the functions in the ThemeManager module
-    """
-    def setUp(self):
+class PlainStub(object):
+    def __init__(self):
+        pass
+
+
+class RegistryStub(RegistryBase):
+    def __init__(self):
+        super().__init__()
+
+
+class TestRegistryBase(TestCase):
+
+    def test_registry_mixin_missing(self):
         """
-        Create the Register
+        Test the registry creation and its usage
         """
+        # GIVEN: A new registry
         Registry.create()
 
-    def test_no_application(self):
+        # WHEN: I create an instance of a class that doesn't inherit from RegistryMixin
+        PlainStub()
+
+        # THEN: Nothing is registered with the registry
+        assert len(Registry().functions_list) == 0, 'The function should not be in the dict anymore.'
+
+    def test_registry_mixin_present(self):
         """
-        Test property if no registry value assigned
+        Test the registry creation and its usage
         """
-        # GIVEN an Empty Registry
-        # WHEN there is no Application
-        # THEN the application should be none
-        self.assertEqual(self.application, None, 'The application value should be None')
+        # GIVEN: A new registry
+        Registry.create()
 
-    def test_application(self):
-        """
-        Test property if registry value assigned
-        """
-        # GIVEN an Empty Registry
-        application = MagicMock()
+        # WHEN: I create an instance of a class that inherits from RegistryMixin
+        RegistryStub()
 
-        # WHEN the application is registered
-        Registry().register('application', application)
-
-        # THEN the application should be none
-        self.assertEqual(self.application, application, 'The application value should match')
-
-    @patch('openlp.core.common.registry.is_win')
-    def test_application_on_windows(self, mocked_is_win):
-        """
-        Test property if registry value assigned on Windows
-        """
-        # GIVEN an Empty Registry and we're on Windows
-        application = MagicMock()
-        mocked_is_win.return_value = True
-
-        # WHEN the application is registered
-        Registry().register('application', application)
-
-        # THEN the application should be none
-        self.assertEqual(self.application, application, 'The application value should match')
-
-    @patch('openlp.core.common.registry.is_win')
-    def test_get_application_on_windows(self, mocked_is_win):
-        """
-        Set that getting the application object on Windows happens dynamically
-        """
-        # GIVEN an Empty Registry and we're on Windows
-        mocked_is_win.return_value = True
-        mock_application = MagicMock()
-        reg_props = RegistryProperties()
-        registry = Registry()
-
-        # WHEN the application is accessed
-        with patch.object(registry, 'get') as mocked_get:
-            mocked_get.return_value = mock_application
-            actual_application = reg_props.application
-
-        # THEN the application should be the mock object, and the correct function should have been called
-        self.assertEqual(mock_application, actual_application, 'The application value should match')
-        mocked_is_win.assert_called_with()
-        mocked_get.assert_called_with('application')
+        # THEN: The bootstrap methods should be registered
+        assert len(Registry().functions_list) == 2, 'The bootstrap functions should be in the dict.'

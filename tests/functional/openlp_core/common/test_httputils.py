@@ -59,7 +59,7 @@ class TestHttpUtils(TestCase, TestMixin):
 
             # THEN: The user agent is a Linux (or ChromeOS) user agent
             result = 'Linux' in user_agent or 'CrOS' in user_agent
-            self.assertTrue(result, 'The user agent should be a valid Linux user agent')
+            assert result is True, 'The user agent should be a valid Linux user agent'
 
     def test_get_user_agent_windows(self):
         """
@@ -74,7 +74,7 @@ class TestHttpUtils(TestCase, TestMixin):
             user_agent = get_user_agent()
 
             # THEN: The user agent is a Linux (or ChromeOS) user agent
-            self.assertIn('Windows', user_agent, 'The user agent should be a valid Windows user agent')
+            assert 'Windows' in user_agent, 'The user agent should be a valid Windows user agent'
 
     def test_get_user_agent_macos(self):
         """
@@ -89,7 +89,7 @@ class TestHttpUtils(TestCase, TestMixin):
             user_agent = get_user_agent()
 
             # THEN: The user agent is a Linux (or ChromeOS) user agent
-            self.assertIn('Mac OS X', user_agent, 'The user agent should be a valid OS X user agent')
+            assert 'Mac OS X' in user_agent, 'The user agent should be a valid OS X user agent'
 
     def test_get_user_agent_default(self):
         """
@@ -104,7 +104,7 @@ class TestHttpUtils(TestCase, TestMixin):
             user_agent = get_user_agent()
 
             # THEN: The user agent is a Linux (or ChromeOS) user agent
-            self.assertIn('NetBSD', user_agent, 'The user agent should be the default user agent')
+            assert 'NetBSD'in user_agent, 'The user agent should be the default user agent'
 
     def test_get_web_page_no_url(self):
         """
@@ -117,7 +117,7 @@ class TestHttpUtils(TestCase, TestMixin):
         result = get_web_page(test_url)
 
         # THEN: None should be returned
-        self.assertIsNone(result, 'The return value of get_web_page should be None')
+        assert result is None, 'The return value of get_web_page should be None'
 
     @patch('openlp.core.common.httputils.requests')
     @patch('openlp.core.common.httputils.get_user_agent')
@@ -233,11 +233,11 @@ class TestHttpUtils(TestCase, TestMixin):
         Test socket timeout gets caught
         """
         # GIVEN: Mocked urlopen to fake a network disconnect in the middle of a download
-        mocked_requests.get.side_effect = IOError
+        mocked_requests.get.side_effect = OSError
 
         # WHEN: Attempt to retrieve a file
         url_get_file(MagicMock(), url='http://localhost/test', file_path=Path(self.tempfile))
 
         # THEN: socket.timeout should have been caught
         # NOTE: Test is if $tmpdir/tempfile is still there, then test fails since ftw deletes bad downloaded files
-        assert not os.path.exists(self.tempfile), 'tempfile should have been deleted'
+        assert os.path.exists(self.tempfile) is False, 'tempfile should have been deleted'
