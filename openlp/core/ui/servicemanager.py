@@ -843,7 +843,9 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
                 if theme:
                     find_and_set_in_combo_box(self.theme_combo_box, theme, set_missing=False)
                     if theme == self.theme_combo_box.currentText():
-                        self.renderer.set_service_theme(theme)
+                        # TODO: Use a local display widget
+                        # self.preview_display.set_theme(get_theme_from_name(theme))
+                        pass
             else:
                 if self._save_lite:
                     service_item.set_from_service(item)
@@ -1374,7 +1376,8 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
         :param current_index: The combo box index for the selected item
         """
         self.service_theme = self.theme_combo_box.currentText()
-        self.renderer.set_service_theme(self.service_theme)
+        # TODO: Use a local display widget
+        # self.preview_display.set_theme(get_theme_from_name(theme))
         Settings().setValue(self.main_window.service_manager_settings_section + '/service theme', self.service_theme)
         self.regenerate_service_items(True)
 
@@ -1723,7 +1726,8 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
             theme_group.addAction(create_widget_action(self.theme_menu, theme, text=theme, checked=False,
                                   triggers=self.on_theme_change_action))
         find_and_set_in_combo_box(self.theme_combo_box, self.service_theme)
-        self.renderer.set_service_theme(self.service_theme)
+        # TODO: Sort this out
+        # self.renderer.set_service_theme(self.service_theme)
         self.regenerate_service_items()
 
     def on_theme_change_action(self, field=None):
