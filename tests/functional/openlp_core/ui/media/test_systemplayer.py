@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -64,17 +64,17 @@ class TestSystemPlayer(TestCase):
         player = SystemPlayer(self)
 
         # THEN: The correct initial values should be set up
-        self.assertEqual('system', player.name)
-        self.assertEqual('System', player.original_name)
-        self.assertEqual('&System', player.display_name)
-        self.assertEqual(self, player.parent)
-        self.assertEqual(ADDITIONAL_EXT, player.additional_extensions)
+        assert 'system' == player.name
+        assert 'System' == player.original_name
+        assert '&System' == player.display_name
+        assert self == player.parent
+        assert ADDITIONAL_EXT == player.additional_extensions
         MockQMediaPlayer.assert_called_once_with(None, QtMultimedia.QMediaPlayer.VideoSurface)
         mocked_mimetypes.init.assert_called_once_with()
         mocked_media_player.service.assert_called_once_with()
         mocked_media_player.supportedMimeTypes.assert_called_once_with()
-        self.assertEqual(['*.aiff'], player.audio_extensions_list)
-        self.assertEqual(['*.afl', '*.asf'], player.video_extensions_list)
+        assert ['*.aiff'] == player.audio_extensions_list
+        assert ['*.afl', '*.asf'] == player.video_extensions_list
 
     @patch('openlp.core.ui.media.systemplayer.QtMultimediaWidgets.QVideoWidget')
     @patch('openlp.core.ui.media.systemplayer.QtMultimedia.QMediaPlayer')
@@ -96,15 +96,15 @@ class TestSystemPlayer(TestCase):
 
         # THEN: The player should have a display widget
         MockQVideoWidget.assert_called_once_with(mocked_display)
-        self.assertEqual(mocked_video_widget, mocked_display.video_widget)
+        assert mocked_video_widget == mocked_display.video_widget
         mocked_display.size.assert_called_once_with()
         mocked_video_widget.resize.assert_called_once_with([1, 2, 3, 4])
         MockQMediaPlayer.assert_called_with(mocked_display)
-        self.assertEqual(mocked_media_player, mocked_display.media_player)
+        assert mocked_media_player == mocked_display.media_player
         mocked_media_player.setVideoOutput.assert_called_once_with(mocked_video_widget)
         mocked_video_widget.raise_.assert_called_once_with()
         mocked_video_widget.hide.assert_called_once_with()
-        self.assertTrue(player.has_own_widget)
+        assert player.has_own_widget is True
 
     def test_disconnect_slots(self):
         """
@@ -133,7 +133,7 @@ class TestSystemPlayer(TestCase):
         result = player.check_available()
 
         # THEN: it should be available
-        self.assertTrue(result)
+        assert result is True
 
     def test_load_valid_media(self):
         """
@@ -157,7 +157,7 @@ class TestSystemPlayer(TestCase):
         mocked_display.media_player.setMedia.assert_called_once_with(
             QtMultimedia.QMediaContent(QtCore.QUrl.fromLocalFile('/path/to/file')))
         mocked_volume.assert_called_once_with(mocked_display, 1)
-        self.assertTrue(result)
+        assert result is True
 
     def test_load_invalid_media(self):
         """
@@ -171,14 +171,14 @@ class TestSystemPlayer(TestCase):
 
         # WHEN: The load() method is run
         with patch.object(player, 'check_media') as mocked_check_media, \
-                patch.object(player, 'volume') as mocked_volume:
+                patch.object(player, 'volume'):
             mocked_check_media.return_value = False
             result = player.load(mocked_display)
 
         # THEN: stuff
         mocked_display.controller.media_info.file_info.absoluteFilePath.assert_called_once_with()
         mocked_check_media.assert_called_once_with('/path/to/file')
-        self.assertFalse(result)
+        assert result is False
 
     def test_resize(self):
         """
@@ -227,7 +227,7 @@ class TestSystemPlayer(TestCase):
         mocked_display.media_player.durationChanged.connect.assert_called_once_with('function')
         mocked_set_state.assert_called_once_with(MediaState.Playing, mocked_display)
         mocked_display.video_widget.raise_.assert_called_once_with()
-        self.assertTrue(result)
+        assert result is True
 
     @patch('openlp.core.ui.media.systemplayer.functools')
     def test_play_is_preview(self, mocked_functools):
@@ -258,7 +258,7 @@ class TestSystemPlayer(TestCase):
         mocked_display.media_player.durationChanged.connect.assert_called_once_with('function')
         mocked_set_state.assert_called_once_with(MediaState.Playing, mocked_display)
         mocked_display.video_widget.raise_.assert_called_once_with()
-        self.assertTrue(result)
+        assert result is True
 
     def test_pause_is_live(self):
         """
@@ -419,14 +419,13 @@ class TestSystemPlayer(TestCase):
         expected_position_calls = [call(), call()]
         expected_block_signals_calls = [call(True), call(False)]
         mocked_display.media_player.state.assert_called_once_with()
-        self.assertEqual(1, mocked_stop.call_count)
-        self.assertEqual(expected_stop_calls, mocked_stop.call_args_list)
-        self.assertEqual(2, mocked_display.media_player.position.call_count)
-        self.assertEqual(expected_position_calls, mocked_display.media_player.position.call_args_list)
+        assert 1 == mocked_stop.call_count
+        assert expected_stop_calls == mocked_stop.call_args_list
+        assert 2 == mocked_display.media_player.position.call_count
+        assert expected_position_calls == mocked_display.media_player.position.call_args_list
         mocked_set_visible.assert_called_once_with(mocked_display, False)
         mocked_display.controller.seek_slider.isSliderDown.assert_called_once_with()
-        self.assertEqual(expected_block_signals_calls,
-                         mocked_display.controller.seek_slider.blockSignals.call_args_list)
+        assert expected_block_signals_calls == mocked_display.controller.seek_slider.blockSignals.call_args_list
         mocked_display.controller.seek_slider.setSliderPosition.assert_called_once_with(2)
 
     def test_get_media_display_css(self):
@@ -440,7 +439,7 @@ class TestSystemPlayer(TestCase):
         result = player.get_media_display_css()
 
         # THEN: The css should be empty
-        self.assertEqual('', result)
+        assert '' == result
 
     @patch('openlp.core.ui.media.systemplayer.QtMultimedia.QMediaPlayer')
     def test_get_info(self, MockQMediaPlayer):
@@ -459,11 +458,12 @@ class TestSystemPlayer(TestCase):
         # THEN: The info should be correct
         expected_info = 'This media player uses your operating system to provide media capabilities.<br/> ' \
             '<strong>Audio</strong><br/>[]<br/><strong>Video</strong><br/>[]<br/>'
-        self.assertEqual(expected_info, result)
+        assert expected_info == result
 
     @patch('openlp.core.ui.media.systemplayer.CheckMediaWorker')
-    @patch('openlp.core.ui.media.systemplayer.QtCore.QThread')
-    def test_check_media(self, MockQThread, MockCheckMediaWorker):
+    @patch('openlp.core.ui.media.systemplayer.run_thread')
+    @patch('openlp.core.ui.media.systemplayer.is_thread_finished')
+    def test_check_media(self, mocked_is_thread_finished, mocked_run_thread, MockCheckMediaWorker):
         """
         Test the check_media() method of the SystemPlayer
         """
@@ -473,12 +473,8 @@ class TestSystemPlayer(TestCase):
         Registry().create()
         Registry().register('application', mocked_application)
         player = SystemPlayer(self)
-        mocked_thread = MagicMock()
-        mocked_thread.isRunning.side_effect = [True, False]
-        mocked_thread.quit = 'quit'  # actually supposed to be a slot, but it's all mocked out anyway
-        MockQThread.return_value = mocked_thread
+        mocked_is_thread_finished.side_effect = [False, True]
         mocked_check_media_worker = MagicMock()
-        mocked_check_media_worker.play = 'play'
         mocked_check_media_worker.result = True
         MockCheckMediaWorker.return_value = mocked_check_media_worker
 
@@ -486,16 +482,13 @@ class TestSystemPlayer(TestCase):
         result = player.check_media(valid_file)
 
         # THEN: It should return True
-        MockQThread.assert_called_once_with()
         MockCheckMediaWorker.assert_called_once_with(valid_file)
         mocked_check_media_worker.setVolume.assert_called_once_with(0)
-        mocked_check_media_worker.moveToThread.assert_called_once_with(mocked_thread)
-        mocked_check_media_worker.finished.connect.assert_called_once_with('quit')
-        mocked_thread.started.connect.assert_called_once_with('play')
-        mocked_thread.start.assert_called_once_with()
-        self.assertEqual(2, mocked_thread.isRunning.call_count)
+        mocked_run_thread.assert_called_once_with(mocked_check_media_worker, 'check_media')
+        mocked_is_thread_finished.assert_called_with('check_media')
+        assert mocked_is_thread_finished.call_count == 2, 'is_thread_finished() should have been called twice'
         mocked_application.processEvents.assert_called_once_with()
-        self.assertTrue(result)
+        assert result is True
 
 
 class TestCheckMediaWorker(TestCase):
@@ -513,7 +506,7 @@ class TestCheckMediaWorker(TestCase):
         worker = CheckMediaWorker(path)
 
         # THEN: The correct values should be set up
-        self.assertIsNotNone(worker)
+        assert worker is not None
 
     def test_signals_media(self):
         """
@@ -524,13 +517,13 @@ class TestCheckMediaWorker(TestCase):
 
         # WHEN: signals() is called with media and BufferedMedia
         with patch.object(worker, 'stop') as mocked_stop, \
-                patch.object(worker, 'finished') as mocked_finished:
+                patch.object(worker, 'quit') as mocked_quit:
             worker.signals('media', worker.BufferedMedia)
 
         # THEN: The worker should exit and the result should be True
         mocked_stop.assert_called_once_with()
-        mocked_finished.emit.assert_called_once_with()
-        self.assertTrue(worker.result)
+        mocked_quit.emit.assert_called_once_with()
+        assert worker.result is True
 
     def test_signals_error(self):
         """
@@ -541,10 +534,10 @@ class TestCheckMediaWorker(TestCase):
 
         # WHEN: signals() is called with error and BufferedMedia
         with patch.object(worker, 'stop') as mocked_stop, \
-                patch.object(worker, 'finished') as mocked_finished:
+                patch.object(worker, 'quit') as mocked_quit:
             worker.signals('error', None)
 
         # THEN: The worker should exit and the result should be True
         mocked_stop.assert_called_once_with()
-        mocked_finished.emit.assert_called_once_with()
-        self.assertFalse(worker.result)
+        mocked_quit.emit.assert_called_once_with()
+        assert worker.result is False

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,8 +23,8 @@
 The :mod:`openlp.plugins.presentations.presentationplugin` module provides the ability for OpenLP to display
 presentations from a variety of document formats.
 """
-import os
 import logging
+import os
 
 from PyQt5 import QtCore
 
@@ -129,7 +129,8 @@ class PresentationPlugin(Plugin):
         """
         log.debug('check_pre_conditions')
         controller_dir = os.path.join('plugins', 'presentations', 'lib')
-        glob_pattern = os.path.join(controller_dir, '*controller.py')
+        # Find all files that do not begin with '.' (lp:#1738047) and end with controller.py
+        glob_pattern = os.path.join(controller_dir, '[!.]*controller.py')
         extension_loader(glob_pattern, ['presentationcontroller.py'])
         controller_classes = PresentationController.__subclasses__()
         for controller_class in controller_classes:

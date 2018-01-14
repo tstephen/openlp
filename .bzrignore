@@ -47,4 +47,5 @@ htmlcov
 node_modules
 openlp-test-projectordb.sqlite
 package-lock.json
+.cache
 test

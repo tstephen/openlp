@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,12 +23,10 @@
 This module contains the first time wizard.
 """
 import logging
-import os
-import socket
 import time
-import urllib.request
-import urllib.parse
 import urllib.error
+import urllib.parse
+import urllib.request
 from configparser import ConfigParser, MissingSectionHeaderError, NoOptionError, NoSectionError
 from tempfile import gettempdir
 
@@ -36,54 +34,55 @@ from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.common import clean_button_text, trace_error_handler
 from openlp.core.common.applocation import AppLocation
+from openlp.core.common.httputils import get_web_page, get_url_file_size, download_file
 from openlp.core.common.i18n import translate
-from openlp.core.common.path import Path, create_paths
 from openlp.core.common.mixins import RegistryProperties
+from openlp.core.common.path import Path, create_paths
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.lib import PluginStatus, build_icon
 from openlp.core.lib.ui import critical_error_message_box
-from openlp.core.common.httputils import get_web_page, get_url_file_size, url_get_file, CONNECTION_TIMEOUT
-from .firsttimewizard import UiFirstTimeWizard, FirstTimePage
+from openlp.core.threading import ThreadWorker, run_thread, get_thread_worker, is_thread_finished
+from openlp.core.ui.firsttimewizard import UiFirstTimeWizard, FirstTimePage
 
 log = logging.getLogger(__name__)
 
 
-class ThemeScreenshotWorker(QtCore.QObject):
+class ThemeScreenshotWorker(ThreadWorker):
     """
     This thread downloads a theme's screenshot
     """
     screenshot_downloaded = QtCore.pyqtSignal(str, str, str)
-    finished = QtCore.pyqtSignal()
 
     def __init__(self, themes_url, title, filename, sha256, screenshot):
         """
         Set up the worker object
         """
-        self.was_download_cancelled = False
+        self.was_cancelled = False
         self.themes_url = themes_url
         self.title = title
         self.filename = filename
         self.sha256 = sha256
         self.screenshot = screenshot
-        socket.setdefaulttimeout(CONNECTION_TIMEOUT)
-        super(ThemeScreenshotWorker, self).__init__()
+        super().__init__()
 
-    def run(self):
+    def start(self):
         """
-        Overridden method to run the thread.
+        Run the worker
         """
-        if self.was_download_cancelled:
+        if self.was_cancelled:
             return
         try:
-            urllib.request.urlretrieve('{host}{name}'.format(host=self.themes_url, name=self.screenshot),
-                                       os.path.join(gettempdir(), 'openlp', self.screenshot))
-            # Signal that the screenshot has been downloaded
-            self.screenshot_downloaded.emit(self.title, self.filename, self.sha256)
-        except:
+            download_path = Path(gettempdir()) / 'openlp' / self.screenshot
+            is_success = download_file(self, '{host}{name}'.format(host=self.themes_url, name=self.screenshot),
+                                       download_path)
+            if is_success and not self.was_cancelled:
+                # Signal that the screenshot has been downloaded
+                self.screenshot_downloaded.emit(self.title, self.filename, self.sha256)
+        except:                                                                 # noqa
             log.exception('Unable to download screenshot')
         finally:
-            self.finished.emit()
+            self.quit.emit()
 
     @QtCore.pyqtSlot(bool)
     def set_download_canceled(self, toggle):
@@ -145,12 +144,13 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
             return FirstTimePage.Progress
         elif self.currentId() == FirstTimePage.Themes:
             self.application.set_busy_cursor()
-            while not all([thread.isFinished() for thread in self.theme_screenshot_threads]):
+            while not all([is_thread_finished(thread_name) for thread_name in self.theme_screenshot_threads]):
                 time.sleep(0.1)
                 self.application.process_events()
             # Build the screenshot icons, as this can not be done in the thread.
             self._build_theme_screenshots()
             self.application.set_normal_cursor()
+            self.theme_screenshot_threads = []
             return FirstTimePage.Defaults
         else:
             return self.get_next_page_id()
@@ -171,7 +171,6 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
         self.screens = screens
         self.was_cancelled = False
         self.theme_screenshot_threads = []
-        self.theme_screenshot_workers = []
         self.has_run_wizard = False
 
     def _download_index(self):
@@ -256,14 +255,10 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
                 sha256 = self.config.get('theme_{theme}'.format(theme=theme), 'sha256', fallback='')
                 screenshot = self.config.get('theme_{theme}'.format(theme=theme), 'screenshot')
                 worker = ThemeScreenshotWorker(self.themes_url, title, filename, sha256, screenshot)
-                self.theme_screenshot_workers.append(worker)
                 worker.screenshot_downloaded.connect(self.on_screenshot_downloaded)
-                thread = QtCore.QThread(self)
-                self.theme_screenshot_threads.append(thread)
-                thread.started.connect(worker.run)
-                worker.finished.connect(thread.quit)
-                worker.moveToThread(thread)
-                thread.start()
+                thread_name = 'theme_screenshot_{title}'.format(title=title)
+                run_thread(worker, thread_name)
+                self.theme_screenshot_threads.append(thread_name)
             self.application.process_events()
 
     def set_defaults(self):
@@ -353,12 +348,14 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
         Process the triggering of the cancel button.
         """
         self.was_cancelled = True
-        if self.theme_screenshot_workers:
-            for worker in self.theme_screenshot_workers:
-                worker.set_download_canceled(True)
+        if self.theme_screenshot_threads:
+            for thread_name in self.theme_screenshot_threads:
+                worker = get_thread_worker(thread_name)
+                if worker:
+                    worker.set_download_canceled(True)
         # Was the thread created.
         if self.theme_screenshot_threads:
-            while any([thread.isRunning() for thread in self.theme_screenshot_threads]):
+            while any([not is_thread_finished(thread_name) for thread_name in self.theme_screenshot_threads]):
                 time.sleep(0.1)
         self.application.set_normal_cursor()
 
@@ -401,7 +398,7 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
             screenshot = self.config.get('theme_{theme}'.format(theme=theme), 'screenshot')
             item = self.themes_list_widget.item(index)
             if item:
-                item.setIcon(build_icon(os.path.join(gettempdir(), 'openlp', screenshot)))
+                item.setIcon(build_icon(Path(gettempdir(), 'openlp', screenshot)))
 
     def _download_progress(self, count, block_size):
         """
@@ -550,9 +547,9 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
         Download selected songs, bibles and themes. Returns False on download error
         """
         # Build directories for downloads
-        songs_destination = os.path.join(gettempdir(), 'openlp')
-        bibles_destination = str(AppLocation.get_section_data_path('bibles'))
-        themes_destination = str(AppLocation.get_section_data_path('themes'))
+        songs_destination_path = Path(gettempdir(), 'openlp')
+        bibles_destination_path = AppLocation.get_section_data_path('bibles')
+        themes_destination_path = AppLocation.get_section_data_path('themes')
         missed_files = []
         # Download songs
         for i in range(self.songs_list_widget.count()):
@@ -561,9 +558,9 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
                 filename, sha256 = item.data(QtCore.Qt.UserRole)
                 self._increment_progress_bar(self.downloading.format(name=filename), 0)
                 self.previous_size = 0
-                destination = Path(songs_destination, str(filename))
-                if not url_get_file(self, '{path}{name}'.format(path=self.songs_url, name=filename),
-                                    destination, sha256):
+                destination = songs_destination_path / str(filename)
+                if not download_file(self, '{path}{name}'.format(path=self.songs_url, name=filename),
+                                     destination, sha256):
                     missed_files.append('Song: {name}'.format(name=filename))
         # Download Bibles
         bibles_iterator = QtWidgets.QTreeWidgetItemIterator(self.bibles_tree_widget)
@@ -573,9 +570,8 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
                 bible, sha256 = item.data(0, QtCore.Qt.UserRole)
                 self._increment_progress_bar(self.downloading.format(name=bible), 0)
                 self.previous_size = 0
-                if not url_get_file(self, '{path}{name}'.format(path=self.bibles_url, name=bible),
-                                    Path(bibles_destination, bible),
-                                    sha256):
+                if not download_file(self, '{path}{name}'.format(path=self.bibles_url, name=bible),
+                                     bibles_destination_path / bible, sha256):
                     missed_files.append('Bible: {name}'.format(name=bible))
             bibles_iterator += 1
         # Download themes
@@ -585,9 +581,8 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
                 theme, sha256 = item.data(QtCore.Qt.UserRole)
                 self._increment_progress_bar(self.downloading.format(name=theme), 0)
                 self.previous_size = 0
-                if not url_get_file(self, '{path}{name}'.format(path=self.themes_url, name=theme),
-                                    Path(themes_destination, theme),
-                                    sha256):
+                if not download_file(self, '{path}{name}'.format(path=self.themes_url, name=theme),
+                                     themes_destination_path / theme, sha256):
                     missed_files.append('Theme: {name}'.format(name=theme))
         if missed_files:
             file_list = ''

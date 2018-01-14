@@ -10,7 +10,6 @@ from openlp.core.common.settings import Settings
 from openlp.core.lib.htmlbuilder import build_html, build_background_css, build_lyrics_css, build_lyrics_outline_css, \
     build_lyrics_format_css, build_footer_css, build_chords_css
 from openlp.core.lib.theme import HorizontalType, VerticalType
-
 from tests.helpers.testmixin import TestMixin
 
 HTML = """
@@ -309,7 +308,7 @@ class Htmbuilder(TestCase, TestMixin):
             html = build_html(item, screen, is_live, background, plugins=plugins)
 
             # THEN: The returned html should match.
-            self.assertEqual(html, HTML, 'The returned html should match')
+            assert html == HTML, 'The returned html should match'
 
     def test_build_background_css_radial(self):
         """
@@ -325,7 +324,7 @@ class Htmbuilder(TestCase, TestMixin):
         css = build_background_css(item, width)
 
         # THEN: The returned css should match.
-        self.assertEqual(BACKGROUND_CSS_RADIAL, css, 'The background css should be equal.')
+        assert BACKGROUND_CSS_RADIAL == css, 'The background css should be equal.'
 
     def test_build_lyrics_css(self):
         """
@@ -346,7 +345,7 @@ class Htmbuilder(TestCase, TestMixin):
             css = build_lyrics_css(item)
 
             # THEN: The css should be equal.
-            self.assertEqual(LYRICS_CSS, css, 'The lyrics css should be equal.')
+            assert LYRICS_CSS == css, 'The lyrics css should be equal.'
 
     def test_build_lyrics_outline_css(self):
         """
@@ -363,7 +362,7 @@ class Htmbuilder(TestCase, TestMixin):
         css = build_lyrics_outline_css(theme_data)
 
         # THEN: The css should be equal.
-        self.assertEqual(LYRICS_OUTLINE_CSS, css, 'The outline css should be equal.')
+        assert LYRICS_OUTLINE_CSS == css, 'The outline css should be equal.'
 
     def test_build_lyrics_format_css(self):
         """
@@ -386,7 +385,7 @@ class Htmbuilder(TestCase, TestMixin):
         css = build_lyrics_format_css(theme_data, width, height)
 
         # THEN: They should be equal.
-        self.assertEqual(LYRICS_FORMAT_CSS, css, 'The lyrics format css should be equal.')
+        assert LYRICS_FORMAT_CSS == css, 'The lyrics format css should be equal.'
 
     def test_build_footer_css(self):
         """
@@ -404,7 +403,7 @@ class Htmbuilder(TestCase, TestMixin):
         css = build_footer_css(item, height)
 
         # THEN: THE css should be the same.
-        self.assertEqual(FOOTER_CSS, css, 'The footer strings should be equal.')
+        assert FOOTER_CSS == css, 'The footer strings should be equal.'
 
     def test_build_footer_css_wrap(self):
         """
@@ -423,7 +422,7 @@ class Htmbuilder(TestCase, TestMixin):
         css = build_footer_css(item, height)
 
         # THEN: Footer should wrap
-        self.assertEqual(FOOTER_CSS_WRAP, css, 'The footer strings should be equal.')
+        assert FOOTER_CSS_WRAP == css, 'The footer strings should be equal.'
 
     def test_build_footer_invalid(self):
         """
@@ -443,8 +442,8 @@ class Htmbuilder(TestCase, TestMixin):
         css.append(build_footer_css(item, height))
 
         # THEN: Footer should wrap
-        self.assertEqual(FOOTER_CSS_INVALID, css[0], 'The footer strings should be blank.')
-        self.assertEqual(FOOTER_CSS_INVALID, css[1], 'The footer strings should be blank.')
+        assert FOOTER_CSS_INVALID == css[0], 'The footer strings should be blank.'
+        assert FOOTER_CSS_INVALID == css[1], 'The footer strings should be blank.'
 
     def test_build_chords_css(self):
         """
@@ -458,4 +457,4 @@ class Htmbuilder(TestCase, TestMixin):
         chord_css = build_chords_css()
 
         # THEN: The build css should look as expected
-        self.assertEqual(CHORD_CSS_ENABLED, chord_css, 'The chord CSS should look as expected')
+        assert CHORD_CSS_ENABLED == chord_css, 'The chord CSS should look as expected'

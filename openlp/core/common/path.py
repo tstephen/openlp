@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -26,9 +26,9 @@ from contextlib import suppress
 from openlp.core.common import is_win
 
 if is_win():
-    from pathlib import WindowsPath as PathVariant
+    from pathlib import WindowsPath as PathVariant          # pragma: nocover
 else:
-    from pathlib import PosixPath as PathVariant
+    from pathlib import PosixPath as PathVariant            # pragma: nocover
 
 log = logging.getLogger(__name__)
 

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -25,10 +25,10 @@ Functional tests to test the Http Server Class.
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
+from openlp.core.api.poll import Poller
+from openlp.core.api.websockets import WebSocketServer
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
-from openlp.core.api.websockets import WebSocketServer
-from openlp.core.api.poll import Poller
 from tests.helpers.testmixin import TestMixin
 
 __default_settings__ = {
@@ -63,34 +63,34 @@ class TestWSServer(TestCase, TestMixin):
         self.destroy_settings()
 
     @patch('openlp.core.api.websockets.WebSocketWorker')
-    @patch('openlp.core.api.websockets.QtCore.QThread')
-    def test_serverstart(self, mock_qthread, mock_worker):
+    @patch('openlp.core.api.websockets.run_thread')
+    def test_serverstart(self, mocked_run_thread, MockWebSocketWorker):
         """
         Test the starting of the WebSockets Server with the disabled flag set on
         """
         # GIVEN: A new httpserver
         # WHEN: I start the server
-        Registry().set_flag('no_web_server', True)
+        Registry().set_flag('no_web_server', False)
         WebSocketServer()
 
         # THEN: the api environment should have been created
-        self.assertEquals(1, mock_qthread.call_count, 'The qthread should have been called once')
-        self.assertEquals(1, mock_worker.call_count, 'The http thread should have been called once')
+        assert mocked_run_thread.call_count == 1, 'The qthread should have been called once'
+        assert MockWebSocketWorker.call_count == 1, 'The http thread should have been called once'
 
     @patch('openlp.core.api.websockets.WebSocketWorker')
-    @patch('openlp.core.api.websockets.QtCore.QThread')
-    def test_serverstart_not_required(self, mock_qthread, mock_worker):
+    @patch('openlp.core.api.websockets.run_thread')
+    def test_serverstart_not_required(self, mocked_run_thread, MockWebSocketWorker):
         """
         Test the starting of the WebSockets Server with the disabled flag set off
         """
         # GIVEN: A new httpserver and the server is not required
         # WHEN: I start the server
-        Registry().set_flag('no_web_server', False)
+        Registry().set_flag('no_web_server', True)
         WebSocketServer()
 
         # THEN: the api environment should have been created
-        self.assertEquals(0, mock_qthread.call_count, 'The qthread should not have been called')
-        self.assertEquals(0, mock_worker.call_count, 'The http thread should not have been called')
+        assert mocked_run_thread.call_count == 0, 'The qthread should not have been called'
+        assert MockWebSocketWorker.call_count == 0, 'The http thread should not have been called'
 
     def test_main_poll(self):
         """
@@ -102,8 +102,7 @@ class TestWSServer(TestCase, TestMixin):
         Registry().register('live_controller', mocked_live_controller)
         # THEN: the live json should be generated
         main_json = self.poll.main_poll()
-        self.assertEquals(b'{"results": {"slide_count": 5}}', main_json,
-                          'The return value should match the defined json')
+        assert b'{"results": {"slide_count": 5}}' == main_json, 'The return value should match the defined json'
 
     def test_poll(self):
         """
@@ -130,13 +129,13 @@ class TestWSServer(TestCase, TestMixin):
             mocked_is_chords_active.return_value = True
             poll_json = self.poll.poll()
         # THEN: the live json should be generated and match expected results
-        self.assertTrue(poll_json['results']['blank'], 'The blank return value should be True')
-        self.assertFalse(poll_json['results']['theme'], 'The theme return value should be False')
-        self.assertFalse(poll_json['results']['display'], 'The display return value should be False')
-        self.assertFalse(poll_json['results']['isSecure'], 'The isSecure return value should be False')
-        self.assertFalse(poll_json['results']['isAuthorised'], 'The isAuthorised return value should be False')
-        self.assertTrue(poll_json['results']['twelve'], 'The twelve return value should be False')
-        self.assertEquals(poll_json['results']['version'], 3, 'The version return value should be 3')
-        self.assertEquals(poll_json['results']['slide'], 5, 'The slide return value should be 5')
-        self.assertEquals(poll_json['results']['service'], 21, 'The version return value should be 21')
-        self.assertEquals(poll_json['results']['item'], '23-34-45', 'The item return value should match 23-34-45')
+        assert poll_json['results']['blank'] is True, 'The blank return value should be True'
+        assert poll_json['results']['theme'] is False, 'The theme return value should be False'
+        assert poll_json['results']['display'] is False, 'The display return value should be False'
+        assert poll_json['results']['isSecure'] is False, 'The isSecure return value should be False'
+        assert poll_json['results']['isAuthorised'] is False, 'The isAuthorised return value should be False'
+        assert poll_json['results']['twelve'] is True, 'The twelve return value should be True'
+        assert poll_json['results']['version'] == 3, 'The version return value should be 3'
+        assert poll_json['results']['slide'] == 5, 'The slide return value should be 5'
+        assert poll_json['results']['service'] == 21, 'The version return value should be 21'
+        assert poll_json['results']['item'] == '23-34-45', 'The item return value should match 23-34-45'

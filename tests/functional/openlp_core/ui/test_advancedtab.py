@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -27,7 +27,6 @@ from unittest import TestCase
 from openlp.core.common.registry import Registry
 from openlp.core.ui.advancedtab import AdvancedTab
 from openlp.core.ui.settingsform import SettingsForm
-
 from tests.helpers.testmixin import TestMixin
 
 
@@ -50,7 +49,7 @@ class TestAdvancedTab(TestCase, TestMixin):
         advanced_tab = AdvancedTab(settings_form)
 
         # THEN:
-        self.assertEqual("Advanced", advanced_tab.tab_title, 'The tab title should be Advanced')
+        assert "Advanced" == advanced_tab.tab_title, 'The tab title should be Advanced'
 
     def test_change_search_as_type(self):
         """
@@ -64,6 +63,6 @@ class TestAdvancedTab(TestCase, TestMixin):
         advanced_tab.on_search_as_type_check_box_changed(True)
 
         # THEN: we should have two post save processed to run
-        self.assertEqual(2, len(settings_form.processes), 'Two post save processes should be created')
-        self.assertTrue("songs_config_updated" in settings_form.processes, 'The songs plugin should be called')
-        self.assertTrue("custom_config_updated" in settings_form.processes, 'The custom plugin should be called')
+        assert 2 == len(settings_form.processes), 'Two post save processes should be created'
+        assert "songs_config_updated" in settings_form.processes, 'The songs plugin should be called'
+        assert "custom_config_updated" in settings_form.processes, 'The custom plugin should be called'

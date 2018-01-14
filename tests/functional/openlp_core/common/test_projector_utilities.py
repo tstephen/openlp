@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -26,7 +26,6 @@ Package to test the openlp.core.ui.projector.networkutils package.
 from unittest import TestCase
 
 from openlp.core.common import verify_ip_address, md5_hash, qmd5_hash
-
 from tests.resources.projector.data import TEST_PIN, TEST_SALT, TEST_HASH
 
 salt = TEST_SALT
@@ -45,7 +44,7 @@ ip6_link_local = 'fe80::223:14ff:fe99:d315'
 ip6_bad = 'ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff'
 
 
-class testProjectorUtilities(TestCase):
+class TestProjectorUtilities(TestCase):
     """
     Validate functions in the projector utilities module
     """
@@ -57,7 +56,7 @@ class testProjectorUtilities(TestCase):
         valid = verify_ip_address(addr=ip4_loopback)
 
         # THEN: Verify we received True
-        self.assertTrue(valid, 'IPv4 loopback address should have been valid')
+        assert valid, 'IPv4 loopback address should have been valid'
 
     def test_ip4_local_valid(self):
         """
@@ -67,7 +66,7 @@ class testProjectorUtilities(TestCase):
         valid = verify_ip_address(addr=ip4_local)
 
         # THEN: Verify we received True
-        self.assertTrue(valid, 'IPv4 local address should have been valid')
+        assert valid is True, 'IPv4 local address should have been valid'
 
     def test_ip4_broadcast_valid(self):
         """
@@ -77,7 +76,7 @@ class testProjectorUtilities(TestCase):
         valid = verify_ip_address(addr=ip4_broadcast)
 
         # THEN: Verify we received True
-        self.assertTrue(valid, 'IPv4 broadcast address should have been valid')
+        assert valid is True, 'IPv4 broadcast address should have been valid'
 
     def test_ip4_address_invalid(self):
         """
@@ -87,7 +86,7 @@ class testProjectorUtilities(TestCase):
         valid = verify_ip_address(addr=ip4_bad)
 
         # THEN: Verify we received True
-        self.assertFalse(valid, 'Bad IPv4 address should not have been valid')
+        assert valid is False, 'Bad IPv4 address should not have been valid'
 
     def test_ip6_loopback_valid(self):
         """
@@ -97,7 +96,7 @@ class testProjectorUtilities(TestCase):
         valid = verify_ip_address(addr=ip6_loopback)
 
         # THEN: Validate return
-        self.assertTrue(valid, 'IPv6 loopback address should have been valid')
+        assert valid is True, 'IPv6 loopback address should have been valid'
 
     def test_ip6_local_valid(self):
         """
@@ -107,7 +106,7 @@ class testProjectorUtilities(TestCase):
         valid = verify_ip_address(addr=ip6_link_local)
 
         # THEN: Validate return
-        self.assertTrue(valid, 'IPv6 link-local address should have been valid')
+        assert valid is True, 'IPv6 link-local address should have been valid'
 
     def test_ip6_address_invalid(self):
         """
@@ -117,7 +116,7 @@ class testProjectorUtilities(TestCase):
         valid = verify_ip_address(addr=ip6_bad)
 
         # THEN: Validate bad return
-        self.assertFalse(valid, 'IPv6 bad address should have been invalid')
+        assert valid is False, 'IPv6 bad address should have been invalid'
 
     def test_md5_hash(self):
         """
@@ -127,7 +126,7 @@ class testProjectorUtilities(TestCase):
         hash_ = md5_hash(salt=salt.encode('utf-8'), data=pin.encode('utf-8'))
 
         # THEN: Validate return has is same
-        self.assertEquals(hash_, test_hash, 'MD5 should have returned a good hash')
+        assert hash_ == test_hash, 'MD5 should have returned a good hash'
 
     def test_md5_hash_bad(self):
         """
@@ -137,7 +136,7 @@ class testProjectorUtilities(TestCase):
         hash_ = md5_hash(salt=pin.encode('utf-8'), data=salt.encode('utf-8'))
 
         # THEN: return data is different
-        self.assertNotEquals(hash_, test_hash, 'MD5 should have returned a bad hash')
+        assert hash_ is not test_hash, 'MD5 should have returned a bad hash'
 
     def test_qmd5_hash(self):
         """
@@ -147,7 +146,7 @@ class testProjectorUtilities(TestCase):
         hash_ = qmd5_hash(salt=salt.encode('utf-8'), data=pin.encode('utf-8'))
 
         # THEN: Validate return has is same
-        self.assertEquals(hash_, test_hash, 'Qt-MD5 should have returned a good hash')
+        assert hash_ == test_hash, 'Qt-MD5 should have returned a good hash'
 
     def test_qmd5_hash_bad(self):
         """
@@ -157,7 +156,7 @@ class testProjectorUtilities(TestCase):
         hash_ = qmd5_hash(salt=pin.encode('utf-8'), data=salt.encode('utf-8'))
 
         # THEN: return data is different
-        self.assertNotEquals(hash_, test_hash, 'Qt-MD5 should have returned a bad hash')
+        assert hash_ is not test_hash, 'Qt-MD5 should have returned a bad hash'
 
     def test_md5_non_ascii_string(self):
         """
@@ -167,7 +166,7 @@ class testProjectorUtilities(TestCase):
         hash_ = md5_hash(salt=test_non_ascii_string.encode('utf-8'), data=None)
 
         # THEN: Valid MD5 hash should be returned
-        self.assertEqual(hash_, test_non_ascii_hash, 'MD5 should have returned a valid hash')
+        assert hash_ == test_non_ascii_hash, 'MD5 should have returned a valid hash'
 
     def test_qmd5_non_ascii_string(self):
         """
@@ -177,4 +176,4 @@ class testProjectorUtilities(TestCase):
         hash_ = md5_hash(data=test_non_ascii_string.encode('utf-8'))
 
         # THEN: Valid MD5 hash should be returned
-        self.assertEqual(hash_, test_non_ascii_hash, 'Qt-MD5 should have returned a valid hash')
+        assert hash_ == test_non_ascii_hash, 'Qt-MD5 should have returned a valid hash'
