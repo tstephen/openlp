@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -19,7 +19,6 @@
 # with this program; if not, write to the Free Software Foundation, Inc., 59  #
 # Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
 ###############################################################################
-import os
 import sys
 from unittest import TestCase, skip
 from unittest.mock import MagicMock, patch
@@ -28,8 +27,7 @@ from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.app import OpenLP, parse_options
 from openlp.core.common.settings import Settings
-
-TEST_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'resources'))
+from tests.utils.constants import RESOURCE_PATH
 
 
 def test_parse_options_basic():
@@ -38,14 +36,15 @@ def test_parse_options_basic():
     """
     # GIVEN: a a set of system arguments.
     sys.argv[1:] = []
+
     # WHEN: We we parse them to expand to options
-    args = parse_options(None)
+    args = parse_options()
+
     # THEN: the following fields will have been extracted.
     assert args.dev_version is False, 'The dev_version flag should be False'
     assert args.loglevel == 'warning', 'The log level should be set to warning'
     assert args.no_error_form is False, 'The no_error_form should be set to False'
     assert args.portable is False, 'The portable flag should be set to false'
-    assert args.style is None, 'There are no style flags to be processed'
     assert args.rargs == [], 'The service file should be blank'
 
 
@@ -55,14 +54,15 @@ def test_parse_options_debug():
     """
     # GIVEN: a a set of system arguments.
     sys.argv[1:] = ['-l debug']
+
     # WHEN: We we parse them to expand to options
-    args = parse_options(None)
+    args = parse_options()
+
     # THEN: the following fields will have been extracted.
     assert args.dev_version is False, 'The dev_version flag should be False'
     assert args.loglevel == ' debug', 'The log level should be set to debug'
     assert args.no_error_form is False, 'The no_error_form should be set to False'
     assert args.portable is False, 'The portable flag should be set to false'
-    assert args.style is None, 'There are no style flags to be processed'
     assert args.rargs == [], 'The service file should be blank'
 
 
@@ -72,14 +72,15 @@ def test_parse_options_debug_and_portable():
     """
     # GIVEN: a a set of system arguments.
     sys.argv[1:] = ['--portable']
+
     # WHEN: We we parse them to expand to options
-    args = parse_options(None)
+    args = parse_options()
+
     # THEN: the following fields will have been extracted.
     assert args.dev_version is False, 'The dev_version flag should be False'
     assert args.loglevel == 'warning', 'The log level should be set to warning'
     assert args.no_error_form is False, 'The no_error_form should be set to False'
     assert args.portable is True, 'The portable flag should be set to true'
-    assert args.style is None, 'There are no style flags to be processed'
     assert args.rargs == [], 'The service file should be blank'
 
 
@@ -89,14 +90,15 @@ def test_parse_options_all_no_file():
     """
     # GIVEN: a a set of system arguments.
     sys.argv[1:] = ['-l debug', '-d']
+
     # WHEN: We we parse them to expand to options
-    args = parse_options(None)
+    args = parse_options()
+
     # THEN: the following fields will have been extracted.
     assert args.dev_version is True, 'The dev_version flag should be True'
     assert args.loglevel == ' debug', 'The log level should be set to debug'
     assert args.no_error_form is False, 'The no_error_form should be set to False'
     assert args.portable is False, 'The portable flag should be set to false'
-    assert args.style is None, 'There are no style flags to be processed'
     assert args.rargs == [], 'The service file should be blank'
 
 
@@ -106,14 +108,15 @@ def test_parse_options_file():
     """
     # GIVEN: a a set of system arguments.
     sys.argv[1:] = ['dummy_temp']
+
     # WHEN: We we parse them to expand to options
-    args = parse_options(None)
+    args = parse_options()
+
     # THEN: the following fields will have been extracted.
     assert args.dev_version is False, 'The dev_version flag should be False'
     assert args.loglevel == 'warning', 'The log level should be set to warning'
     assert args.no_error_form is False, 'The no_error_form should be set to False'
     assert args.portable is False, 'The portable flag should be set to false'
-    assert args.style is None, 'There are no style flags to be processed'
     assert args.rargs == 'dummy_temp', 'The service file should not be blank'
 
 
@@ -123,14 +126,15 @@ def test_parse_options_file_and_debug():
     """
     # GIVEN: a a set of system arguments.
     sys.argv[1:] = ['-l debug', 'dummy_temp']
+
     # WHEN: We we parse them to expand to options
-    args = parse_options(None)
+    args = parse_options()
+
     # THEN: the following fields will have been extracted.
     assert args.dev_version is False, 'The dev_version flag should be False'
     assert args.loglevel == ' debug', 'The log level should be set to debug'
     assert args.no_error_form is False, 'The no_error_form should be set to False'
     assert args.portable is False, 'The portable flag should be set to false'
-    assert args.style is None, 'There are no style flags to be processed'
     assert args.rargs == 'dummy_temp', 'The service file should not be blank'
 
 
@@ -280,7 +284,7 @@ class TestOpenLP(TestCase):
         Test the reimplemented event method
         """
         # GIVEN: A file path and a QEvent.
-        file_path = os.path.join(TEST_PATH, 'church.jpg')
+        file_path = str(RESOURCE_PATH / 'church.jpg')
         mocked_file_method = MagicMock(return_value=file_path)
         event = QtCore.QEvent(QtCore.QEvent.FileOpen)
         event.file = mocked_file_method
@@ -289,9 +293,9 @@ class TestOpenLP(TestCase):
         result = self.openlp.event(event)
 
         # THEN: The path should be inserted.
-        self.assertTrue(result, "The method should have returned True.")
+        assert result is True, "The method should have returned True."
         mocked_file_method.assert_called_once_with()
-        self.assertEqual(self.openlp.args[0], file_path, "The path should be in args.")
+        assert self.openlp.args[0] == file_path, "The path should be in args."
 
     @patch('openlp.core.app.is_macosx')
     def test_application_activate_event(self, mocked_is_macosx):
@@ -309,8 +313,8 @@ class TestOpenLP(TestCase):
         result = self.openlp.event(event)
 
         # THEN:
-        self.assertTrue(result, "The method should have returned True.")
-        # self.assertFalse(self.openlp.main_window.isMinimized())
+        assert result is True, "The method should have returned True."
+        # assert self.openlp.main_window.isMinimized() is False
 
     @patch('openlp.core.app.get_version')
     @patch('openlp.core.app.QtWidgets.QMessageBox.question')
@@ -321,11 +325,11 @@ class TestOpenLP(TestCase):
         # GIVEN: Mocked data version and OpenLP version which are the same
         old_install = False
         MOCKED_VERSION = {
-            'full': '2.2.0-bzr000',
-            'version': '2.2.0',
+            'full': '2.4.0-bzr000',
+            'version': '2.4.0',
             'build': 'bzr000'
         }
-        Settings().setValue('core/application version', '2.2.0')
+        Settings().setValue('core/application version', '2.4.0')
         mocked_get_version.return_value = MOCKED_VERSION
         mocked_question.return_value = QtWidgets.QMessageBox.No
 
@@ -333,8 +337,8 @@ class TestOpenLP(TestCase):
         self.openlp.backup_on_upgrade(old_install, False)
 
         # THEN: It should not ask if we want to create a backup
-        self.assertEqual(Settings().value('core/application version'), '2.2.0', 'Version should be the same!')
-        self.assertEqual(mocked_question.call_count, 0, 'No question should have been asked!')
+        assert Settings().value('core/application version') == '2.4.0', 'Version should be the same!'
+        assert mocked_question.call_count == 0, 'No question should have been asked!'
 
     @patch('openlp.core.app.get_version')
     @patch('openlp.core.app.QtWidgets.QMessageBox.question')
@@ -345,8 +349,8 @@ class TestOpenLP(TestCase):
         # GIVEN: Mocked data version and OpenLP version which are different
         old_install = True
         MOCKED_VERSION = {
-            'full': '2.2.0-bzr000',
-            'version': '2.2.0',
+            'full': '2.4.0-bzr000',
+            'version': '2.4.0',
             'build': 'bzr000'
         }
         Settings().setValue('core/application version', '2.0.5')
@@ -359,7 +363,7 @@ class TestOpenLP(TestCase):
         self.openlp.backup_on_upgrade(old_install, True)
 
         # THEN: It should ask if we want to create a backup
-        self.assertEqual(Settings().value('core/application version'), '2.2.0', 'Version should be upgraded!')
-        self.assertEqual(mocked_question.call_count, 1, 'A question should have been asked!')
+        assert Settings().value('core/application version') == '2.4.0', 'Version should be upgraded!'
+        assert mocked_question.call_count == 1, 'A question should have been asked!'
         self.openlp.splash.hide.assert_called_once_with()
         self.openlp.splash.show.assert_called_once_with()

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -42,7 +42,6 @@ from openlp.core.common.mixins import LogMixin
 from openlp.core.common.path import create_paths, copytree
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
-from openlp.core.version import check_for_update, get_version
 from openlp.core.display.screens import ScreenList
 from openlp.core.resources import qInitResources
 from openlp.core.ui import SplashScreen
@@ -51,7 +50,7 @@ from openlp.core.ui.firsttimeform import FirstTimeForm
 from openlp.core.ui.firsttimelanguageform import FirstTimeLanguageForm
 from openlp.core.ui.mainwindow import MainWindow
 from openlp.core.ui.style import get_application_stylesheet
-
+from openlp.core.version import check_for_update, get_version
 
 __all__ = ['OpenLP', 'main']
 
@@ -64,8 +63,8 @@ class OpenLP(QtWidgets.QApplication, LogMixin):
     The core application class. This class inherits from Qt's QApplication
     class in order to provide the core of the application.
     """
-
     args = []
+    worker_threads = {}
 
     def exec(self):
         """
@@ -305,8 +304,7 @@ def parse_options(args=None):
                              'off a USB flash drive (not implemented).')
     parser.add_argument('-d', '--dev-version', dest='dev_version', action='store_true',
                         help='Ignore the version file and pull the version directly from Bazaar')
-    parser.add_argument('-s', '--style', dest='style', help='Set the Qt5 style (passed directly to Qt5).')
-    parser.add_argument('-w', '--no-web-server', dest='no_web_server', action='store_false',
+    parser.add_argument('-w', '--no-web-server', dest='no_web_server', action='store_true',
                         help='Turn off the Web and Socket Server ')
     parser.add_argument('rargs', nargs='?', default=[])
     # Parse command line options and deal with them. Use args supplied pragmatically if possible.
@@ -344,8 +342,6 @@ def main(args=None):
         log.setLevel(logging.WARNING)
     else:
         log.setLevel(logging.INFO)
-    if args and args.style:
-        qt_args.extend(['-style', args.style])
     # Throw the rest of the arguments at Qt, just in case.
     qt_args.extend(args.rargs)
     # Bug #1018855: Set the WM_CLASS property in X11
@@ -359,7 +355,7 @@ def main(args=None):
     application.setOrganizationDomain('openlp.org')
     application.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
     application.setAttribute(QtCore.Qt.AA_DontCreateNativeWidgetSiblings, True)
-    if args and args.portable:
+    if args.portable:
         application.setApplicationName('OpenLPPortable')
         Settings.setDefaultFormat(Settings.IniFormat)
         # Get location OpenLPPortable.ini

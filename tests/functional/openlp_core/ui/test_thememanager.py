@@ -30,11 +30,10 @@ from unittest.mock import ANY, MagicMock, patch
 
 from PyQt5 import QtWidgets
 
-from openlp.core.common.registry import Registry
 from openlp.core.common.path import Path
+from openlp.core.common.registry import Registry
 from openlp.core.ui import ThemeManager
-
-from tests.utils.constants import TEST_RESOURCES_PATH
+from tests.utils.constants import RESOURCE_PATH
 
 
 class TestThemeManager(TestCase):
@@ -60,7 +59,7 @@ class TestThemeManager(TestCase):
         """
         # GIVEN: A new ThemeManager instance.
         theme_manager = ThemeManager()
-        theme_manager.theme_path = Path(TEST_RESOURCES_PATH, 'themes')
+        theme_manager.theme_path = RESOURCE_PATH / 'themes'
         mocked_zipfile_init.return_value = None
 
         # WHEN: The theme is exported
@@ -68,7 +67,7 @@ class TestThemeManager(TestCase):
 
         # THEN: The zipfile should be created at the given path
         mocked_zipfile_init.assert_called_with(os.path.join('some', 'path', 'Default.otz'), 'w')
-        mocked_zipfile_write.assert_called_with(os.path.join(TEST_RESOURCES_PATH, 'themes', 'Default', 'Default.xml'),
+        mocked_zipfile_write.assert_called_with(str(RESOURCE_PATH / 'themes' / 'Default' / 'Default.xml'),
                                                 os.path.join('Default', 'Default.xml'))
 
     def test_initial_theme_manager(self):
@@ -80,7 +79,7 @@ class TestThemeManager(TestCase):
 
         # WHEN: the default theme manager is built.
         # THEN: The the controller should be registered in the registry.
-        self.assertIsNotNone(Registry().get('theme_manager'), 'The base theme manager should be registered')
+        assert Registry().get('theme_manager') is not None, 'The base theme manager should be registered'
 
     @patch('openlp.core.ui.thememanager.copyfile')
     @patch('openlp.core.ui.thememanager.create_paths')
@@ -100,8 +99,8 @@ class TestThemeManager(TestCase):
         mocked_theme.extract_formatted_xml.return_value = 'fake_theme_xml'.encode()
 
         # WHEN: Calling _write_theme with path to the same image, but the path written slightly different
-        file_name1 = Path(TEST_RESOURCES_PATH, 'church.jpg')
-        theme_manager._write_theme(mocked_theme, file_name1, file_name1)
+        file_path_1 = RESOURCE_PATH / 'church.jpg'
+        theme_manager._write_theme(mocked_theme, file_path_1, file_path_1)
 
         # THEN: The mocked_copyfile should not have been called
         assert mocked_copyfile.called is False, 'copyfile should not be called'
@@ -123,9 +122,9 @@ class TestThemeManager(TestCase):
         mocked_theme.filename = "filename"
 
         # WHEN: Calling _write_theme with path to different images
-        file_name1 = Path(TEST_RESOURCES_PATH, 'church.jpg')
-        file_name2 = Path(TEST_RESOURCES_PATH, 'church2.jpg')
-        theme_manager._write_theme(mocked_theme, file_name1, file_name2)
+        file_path_1 = RESOURCE_PATH / 'church.jpg'
+        file_path_2 = RESOURCE_PATH / 'church2.jpg'
+        theme_manager._write_theme(mocked_theme, file_path_1, file_path_2)
 
         # THEN: The mocked_copyfile should not have been called
         assert mocked_copyfile.called is True, 'copyfile should be called'
@@ -147,8 +146,8 @@ class TestThemeManager(TestCase):
         theme_manager._write_theme(mocked_theme, None, None)
 
         # THEN: It should have been created
-        self.assertTrue(os.path.exists(os.path.join(self.temp_folder, 'theme 愛 name', 'theme 愛 name.json')),
-                        'Theme with special characters should have been created!')
+        assert os.path.exists(os.path.join(self.temp_folder, 'theme 愛 name', 'theme 愛 name.json')) is True, \
+            'Theme with special characters should have been created!'
 
     @patch('openlp.core.ui.thememanager.QtWidgets.QMessageBox.question', return_value=QtWidgets.QMessageBox.Yes)
     @patch('openlp.core.ui.thememanager.translate')
@@ -200,14 +199,14 @@ class TestThemeManager(TestCase):
             theme_manager.generate_and_save_image = MagicMock()
             theme_manager.theme_path = None
             folder_path = Path(mkdtemp())
-            theme_file = Path(TEST_RESOURCES_PATH, 'themes', 'Moss_on_tree.otz')
+            theme_file_path = RESOURCE_PATH / 'themes' / 'Moss_on_tree.otz'
 
             # WHEN: We try to unzip it
-            theme_manager.unzip_theme(theme_file, folder_path)
+            theme_manager.unzip_theme(theme_file_path, folder_path)
 
             # THEN: Files should be unpacked
-            self.assertTrue((folder_path / 'Moss on tree' / 'Moss on tree.xml').exists())
-            self.assertEqual(mocked_critical_error_message_box.call_count, 0, 'No errors should have happened')
+            assert (folder_path / 'Moss on tree' / 'Moss on tree.xml').exists() is True
+            assert mocked_critical_error_message_box.call_count == 0, 'No errors should have happened'
             folder_path.rmtree()
 
     def test_unzip_theme_invalid_version(self):
@@ -228,4 +227,4 @@ class TestThemeManager(TestCase):
             theme_manager.unzip_theme('theme.file', 'folder')
 
             # THEN: The critical_error_message_box should have been called
-            self.assertEqual(mocked_critical_error_message_box.call_count, 1, 'Should have been called once')
+            assert mocked_critical_error_message_box.call_count == 1, 'Should have been called once'

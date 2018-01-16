@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -24,9 +24,10 @@ The bible import functions for OpenLP
 """
 import logging
 import urllib.error
-from lxml import etree
 
 from PyQt5 import QtWidgets
+from lxml import etree
+
 try:
     from pysword import modules
     PYSWORD_AVAILABLE = True
@@ -336,6 +337,7 @@ class BibleImportForm(OpenLPWizard):
         self.sword_layout.addWidget(self.sword_tab_widget)
         self.sword_disabled_label = QtWidgets.QLabel(self.sword_widget)
         self.sword_disabled_label.setObjectName('SwordDisabledLabel')
+        self.sword_disabled_label.setWordWrap(True)
         self.sword_layout.addWidget(self.sword_disabled_label)
         self.select_stack.addWidget(self.sword_widget)
         self.wordproject_widget = QtWidgets.QWidget(self.select_page)

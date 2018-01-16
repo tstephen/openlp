@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -27,40 +27,33 @@ import logging
 import time
 
 from PyQt5 import QtCore, QtWidgets
-from waitress import serve
+from waitress.server import create_server
 
 from openlp.core.api.deploy import download_and_check, download_sha256
 from openlp.core.api.endpoint.controller import controller_endpoint, api_controller_endpoint
 from openlp.core.api.endpoint.core import chords_endpoint, stage_endpoint, blank_endpoint, main_endpoint
-from openlp.core.api.endpoint.service import service_endpoint, api_service_endpoint
 from openlp.core.api.endpoint.remote import remote_endpoint
-from openlp.core.api.http import register_endpoint
+from openlp.core.api.endpoint.service import service_endpoint, api_service_endpoint
 from openlp.core.api.http import application
+from openlp.core.api.http import register_endpoint
 from openlp.core.api.poll import Poller
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.i18n import UiStrings
+from openlp.core.common.i18n import translate
 from openlp.core.common.mixins import LogMixin, RegistryProperties
 from openlp.core.common.path import create_paths
 from openlp.core.common.registry import Registry, RegistryBase
 from openlp.core.common.settings import Settings
-from openlp.core.common.i18n import translate
+from openlp.core.threading import ThreadWorker, run_thread
 
 log = logging.getLogger(__name__)
 
 
-class HttpWorker(QtCore.QObject):
+class HttpWorker(ThreadWorker):
     """
     A special Qt thread class to allow the HTTP server to run at the same time as the UI.
     """
-    def __init__(self):
-        """
-        Constructor for the thread class.
-
-        :param server: The http server class.
-        """
-        super(HttpWorker, self).__init__()
-
-    def run(self):
+    def start(self):
         """
         Run the thread.
         """
@@ -68,12 +61,21 @@ class HttpWorker(QtCore.QObject):
         port = Settings().value('api/port')
         Registry().execute('get_website_version')
         try:
-            serve(application, host=address, port=port)
+            self.server = create_server(application, host=address, port=port)
+            self.server.run()
         except OSError:
             log.exception('An error occurred when serving the application.')
+        self.quit.emit()
 
     def stop(self):
-        pass
+        """
+        A method to stop the worker
+        """
+        if hasattr(self, 'server'):
+            # Loop through all the channels and close them to stop the server
+            for channel in self.server._map.values():
+                if hasattr(channel, 'close'):
+                    channel.close()
 
 
 class HttpServer(RegistryBase, RegistryProperties, LogMixin):
@@ -85,12 +87,9 @@ class HttpServer(RegistryBase, RegistryProperties, LogMixin):
         Initialise the http server, and start the http server
         """
         super(HttpServer, self).__init__(parent)
-        if Registry().get_flag('no_web_server'):
-            self.worker = HttpWorker()
-            self.thread = QtCore.QThread()
-            self.worker.moveToThread(self.thread)
-            self.thread.started.connect(self.worker.run)
-            self.thread.start()
+        if not Registry().get_flag('no_web_server'):
+            worker = HttpWorker()
+            run_thread(worker, 'http_server')
             Registry().register_function('download_website', self.first_time)
             Registry().register_function('get_website_version', self.website_version)
         Registry().set_flag('website_version', '0.0')
@@ -167,7 +166,7 @@ class DownloadProgressDialog(QtWidgets.QProgressDialog):
         self.was_cancelled = False
         self.previous_size = 0
 
-    def _download_progress(self, count, block_size):
+    def update_progress(self, count, block_size):
         """
         Calculate and display the download progress.
         """

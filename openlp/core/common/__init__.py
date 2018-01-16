@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -30,13 +30,13 @@ import os
 import re
 import sys
 import traceback
-from chardet.universaldetector import UniversalDetector
 from ipaddress import IPv4Address, IPv6Address, AddressValueError
 from shutil import which
 from subprocess import check_output, CalledProcessError, STDOUT
 
 from PyQt5 import QtGui
 from PyQt5.QtCore import QCryptographicHash as QHash
+from chardet.universaldetector import UniversalDetector
 
 log = logging.getLogger(__name__ + '.__init__')
 
@@ -80,6 +80,7 @@ def extension_loader(glob_pattern, excluded_files=[]):
         extension_path = extension_path.relative_to(app_dir)
         if extension_path.name in excluded_files:
             continue
+        log.debug('Attempting to import %s', extension_path)
         module_name = path_to_module(extension_path)
         try:
             importlib.import_module(module_name)

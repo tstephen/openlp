@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -27,9 +27,8 @@ import tempfile
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
-from openlp.core.common.httputils import get_user_agent, get_web_page, get_url_file_size, url_get_file
+from openlp.core.common.httputils import get_user_agent, get_web_page, get_url_file_size, download_file
 from openlp.core.common.path import Path
-
 from tests.helpers.testmixin import TestMixin
 
 
@@ -236,7 +235,7 @@ class TestHttpUtils(TestCase, TestMixin):
         mocked_requests.get.side_effect = OSError
 
         # WHEN: Attempt to retrieve a file
-        url_get_file(MagicMock(), url='http://localhost/test', file_path=Path(self.tempfile))
+        download_file(MagicMock(), url='http://localhost/test', file_path=Path(self.tempfile))
 
         # THEN: socket.timeout should have been caught
         # NOTE: Test is if $tmpdir/tempfile is still there, then test fails since ftw deletes bad downloaded files

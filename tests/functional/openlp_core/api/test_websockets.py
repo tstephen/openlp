@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -25,10 +25,10 @@ Functional tests to test the Http Server Class.
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
+from openlp.core.api.poll import Poller
+from openlp.core.api.websockets import WebSocketServer
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
-from openlp.core.api.websockets import WebSocketServer
-from openlp.core.api.poll import Poller
 from tests.helpers.testmixin import TestMixin
 
 __default_settings__ = {
@@ -63,34 +63,34 @@ class TestWSServer(TestCase, TestMixin):
         self.destroy_settings()
 
     @patch('openlp.core.api.websockets.WebSocketWorker')
-    @patch('openlp.core.api.websockets.QtCore.QThread')
-    def test_serverstart(self, mock_qthread, mock_worker):
+    @patch('openlp.core.api.websockets.run_thread')
+    def test_serverstart(self, mocked_run_thread, MockWebSocketWorker):
         """
         Test the starting of the WebSockets Server with the disabled flag set on
         """
         # GIVEN: A new httpserver
         # WHEN: I start the server
-        Registry().set_flag('no_web_server', True)
+        Registry().set_flag('no_web_server', False)
         WebSocketServer()
 
         # THEN: the api environment should have been created
-        assert mock_qthread.call_count == 1, 'The qthread should have been called once'
-        assert mock_worker.call_count == 1, 'The http thread should have been called once'
+        assert mocked_run_thread.call_count == 1, 'The qthread should have been called once'
+        assert MockWebSocketWorker.call_count == 1, 'The http thread should have been called once'
 
     @patch('openlp.core.api.websockets.WebSocketWorker')
-    @patch('openlp.core.api.websockets.QtCore.QThread')
-    def test_serverstart_not_required(self, mock_qthread, mock_worker):
+    @patch('openlp.core.api.websockets.run_thread')
+    def test_serverstart_not_required(self, mocked_run_thread, MockWebSocketWorker):
         """
         Test the starting of the WebSockets Server with the disabled flag set off
         """
         # GIVEN: A new httpserver and the server is not required
         # WHEN: I start the server
-        Registry().set_flag('no_web_server', False)
+        Registry().set_flag('no_web_server', True)
         WebSocketServer()
 
         # THEN: the api environment should have been created
-        assert mock_qthread.call_count == 0, 'The qthread should not have been called'
-        assert mock_worker.call_count == 0, 'The http thread should not have been called'
+        assert mocked_run_thread.call_count == 0, 'The qthread should not have been called'
+        assert MockWebSocketWorker.call_count == 0, 'The http thread should not have been called'
 
     def test_main_poll(self):
         """

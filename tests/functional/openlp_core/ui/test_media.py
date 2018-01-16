@@ -28,7 +28,6 @@ from unittest.mock import patch
 from PyQt5 import QtCore
 
 from openlp.core.ui.media import get_media_players, parse_optical_path
-
 from tests.helpers.testmixin import TestMixin
 
 
@@ -52,8 +51,8 @@ class TestMedia(TestCase, TestMixin):
             used_players, overridden_player = get_media_players()
 
             # THEN: the used_players should be an empty list, and the overridden player should be an empty string
-            self.assertEqual([], used_players, 'Used players should be an empty list')
-            self.assertEqual('', overridden_player, 'Overridden player should be an empty string')
+            assert [] == used_players, 'Used players should be an empty list'
+            assert '' == overridden_player, 'Overridden player should be an empty string'
 
     def test_get_media_players_no_players(self):
         """
@@ -73,8 +72,8 @@ class TestMedia(TestCase, TestMixin):
             used_players, overridden_player = get_media_players()
 
             # THEN: the used_players should be an empty list, and the overridden player should be an empty string
-            self.assertEqual([], used_players, 'Used players should be an empty list')
-            self.assertEqual('auto', overridden_player, 'Overridden player should be "auto"')
+            assert [] == used_players, 'Used players should be an empty list'
+            assert 'auto' == overridden_player, 'Overridden player should be "auto"'
 
     def test_get_media_players_with_valid_list(self):
         """
@@ -94,8 +93,8 @@ class TestMedia(TestCase, TestMixin):
             used_players, overridden_player = get_media_players()
 
             # THEN: the used_players should be an empty list, and the overridden player should be an empty string
-            self.assertEqual(['vlc', 'webkit', 'system'], used_players, 'Used players should be correct')
-            self.assertEqual('', overridden_player, 'Overridden player should be an empty string')
+            assert ['vlc', 'webkit', 'system'] == used_players, 'Used players should be correct'
+            assert '' == overridden_player, 'Overridden player should be an empty string'
 
     def test_get_media_players_with_overridden_player(self):
         """
@@ -115,8 +114,8 @@ class TestMedia(TestCase, TestMixin):
             used_players, overridden_player = get_media_players()
 
             # THEN: the used_players should be an empty list, and the overridden player should be an empty string
-            self.assertEqual(['vlc', 'webkit', 'system'], used_players, 'Used players should be correct')
-            self.assertEqual('vlc,webkit,system', overridden_player, 'Overridden player should be a string of players')
+            assert ['vlc', 'webkit', 'system'] == used_players, 'Used players should be correct'
+            assert 'vlc,webkit,system' == overridden_player, 'Overridden player should be a string of players'
 
     def test_parse_optical_path_linux(self):
         """
@@ -138,13 +137,13 @@ class TestMedia(TestCase, TestMixin):
         (device_path, title_track, audio_track, subtitle_track, start, end, name) = parse_optical_path(path)
 
         # THEN: The return values should match the original values
-        self.assertEqual(org_title_track, title_track, 'Returned title_track should match the original')
-        self.assertEqual(org_audio_track, audio_track, 'Returned audio_track should match the original')
-        self.assertEqual(org_subtitle_track, subtitle_track, 'Returned subtitle_track should match the original')
-        self.assertEqual(org_start, start, 'Returned start should match the original')
-        self.assertEqual(org_end, end, 'Returned end should match the original')
-        self.assertEqual(org_name, name, 'Returned end should match the original')
-        self.assertEqual(org_device_path, device_path, 'Returned device_path should match the original')
+        assert org_title_track == title_track, 'Returned title_track should match the original'
+        assert org_audio_track == audio_track, 'Returned audio_track should match the original'
+        assert org_subtitle_track == subtitle_track, 'Returned subtitle_track should match the original'
+        assert org_start == start, 'Returned start should match the original'
+        assert org_end == end, 'Returned end should match the original'
+        assert org_name == name, 'Returned end should match the original'
+        assert org_device_path == device_path, 'Returned device_path should match the original'
 
     def test_parse_optical_path_win(self):
         """
@@ -166,10 +165,10 @@ class TestMedia(TestCase, TestMixin):
         (device_path, title_track, audio_track, subtitle_track, start, end, name) = parse_optical_path(path)
 
         # THEN: The return values should match the original values
-        self.assertEqual(org_title_track, title_track, 'Returned title_track should match the original')
-        self.assertEqual(org_audio_track, audio_track, 'Returned audio_track should match the original')
-        self.assertEqual(org_subtitle_track, subtitle_track, 'Returned subtitle_track should match the original')
-        self.assertEqual(org_start, start, 'Returned start should match the original')
-        self.assertEqual(org_end, end, 'Returned end should match the original')
-        self.assertEqual(org_name, name, 'Returned end should match the original')
-        self.assertEqual(org_device_path, device_path, 'Returned device_path should match the original')
+        assert org_title_track == title_track, 'Returned title_track should match the original'
+        assert org_audio_track == audio_track, 'Returned audio_track should match the original'
+        assert org_subtitle_track == subtitle_track, 'Returned subtitle_track should match the original'
+        assert org_start == start, 'Returned start should match the original'
+        assert org_end == end, 'Returned end should match the original'
+        assert org_name == name, 'Returned end should match the original'
+        assert org_device_path == device_path, 'Returned device_path should match the original'

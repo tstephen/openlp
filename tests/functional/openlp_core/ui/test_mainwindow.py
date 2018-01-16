@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -32,7 +32,6 @@ from openlp.core.common.i18n import UiStrings
 from openlp.core.common.registry import Registry
 from openlp.core.display.screens import ScreenList
 from openlp.core.ui.mainwindow import MainWindow
-
 from tests.helpers.testmixin import TestMixin
 from tests.utils.constants import TEST_RESOURCES_PATH
 
@@ -61,9 +60,10 @@ class TestMainWindow(TestCase, TestMixin):
         # Mock cursor busy/normal methods.
         self.app.set_busy_cursor = MagicMock()
         self.app.set_normal_cursor = MagicMock()
+        self.app.process_events = MagicMock()
         self.app.args = []
         Registry().register('application', self.app)
-        Registry().set_flag('no_web_server', False)
+        Registry().set_flag('no_web_server', True)
         self.add_toolbar_action_patcher = patch('openlp.core.ui.mainwindow.create_action')
         self.mocked_add_toolbar_action = self.add_toolbar_action_patcher.start()
         self.mocked_add_toolbar_action.side_effect = self._create_mock_action
@@ -75,8 +75,8 @@ class TestMainWindow(TestCase, TestMixin):
         """
         Delete all the C++ objects and stop all the patchers
         """
-        self.add_toolbar_action_patcher.stop()
         del self.main_window
+        self.add_toolbar_action_patcher.stop()
 
     def test_cmd_line_file(self):
         """
@@ -93,20 +93,20 @@ class TestMainWindow(TestCase, TestMixin):
         # THEN the service from the arguments is loaded
         mocked_load_file.assert_called_with(service)
 
-    def test_cmd_line_arg(self):
+    @patch('openlp.core.ui.servicemanager.ServiceManager.load_file')
+    def test_cmd_line_arg(self, mocked_load_file):
         """
         Test that passing a non service file does nothing.
         """
         # GIVEN a non service file as an argument to openlp
         service = os.path.join('openlp.py')
         self.main_window.arguments = [service]
-        with patch('openlp.core.ui.servicemanager.ServiceManager.load_file') as mocked_load_file:
 
-            # WHEN the argument is processed
-            self.main_window.open_cmd_line_files("")
+        # WHEN the argument is processed
+        self.main_window.open_cmd_line_files(service)
 
-            # THEN the file should not be opened
-            assert mocked_load_file.called is False, 'load_file should not have been called'
+        # THEN the file should not be opened
+        assert mocked_load_file.called is False, 'load_file should not have been called'
 
     def test_main_window_title(self):
         """
@@ -117,8 +117,8 @@ class TestMainWindow(TestCase, TestMixin):
         # WHEN no changes are made to the service
 
         # THEN the main window's title shoud be the same as the OpenLP string in the UiStrings class
-        self.assertEqual(self.main_window.windowTitle(), UiStrings().OpenLP,
-                         'The main window\'s title should be the same as the OpenLP string in UiStrings class')
+        assert self.main_window.windowTitle() == UiStrings().OpenLP, \
+            'The main window\'s title should be the same as the OpenLP string in UiStrings class'
 
     def test_set_service_modifed(self):
         """
@@ -130,8 +130,8 @@ class TestMainWindow(TestCase, TestMixin):
         self.main_window.set_service_modified(True, 'test.osz')
 
         # THEN the main window's title should be set to the
-        self.assertEqual(self.main_window.windowTitle(), '%s - %s*' % (UiStrings().OpenLP, 'test.osz'),
-                         'The main window\'s title should be set to "<the contents of UiStrings().OpenLP> - test.osz*"')
+        assert self.main_window.windowTitle(), '%s - %s*' % (UiStrings().OpenLP, 'test.osz') == \
+            'The main window\'s title should be set to "<the contents of UiStrings().OpenLP> - test.osz*"'
 
     def test_set_service_unmodified(self):
         """
@@ -143,8 +143,8 @@ class TestMainWindow(TestCase, TestMixin):
         self.main_window.set_service_modified(False, 'test.osz')
 
         # THEN the main window's title should be set to the
-        self.assertEqual(self.main_window.windowTitle(), '%s - %s' % (UiStrings().OpenLP, 'test.osz'),
-                         'The main window\'s title should be set to "<the contents of UiStrings().OpenLP> - test.osz"')
+        assert self.main_window.windowTitle(), '%s - %s' % (UiStrings().OpenLP, 'test.osz') == \
+            'The main window\'s title should be set to "<the contents of UiStrings().OpenLP> - test.osz"'
 
     def test_mainwindow_configuration(self):
         """
@@ -204,7 +204,7 @@ class TestMainWindow(TestCase, TestMixin):
             self.main_window.on_search_shortcut_triggered()
 
             # THEN: The media manager dock is made visible
-            self.assertEqual(0, mocked_media_manager_dock.setVisible.call_count)
+            assert 0 == mocked_media_manager_dock.setVisible.call_count
             mocked_widget.on_focus.assert_called_with()
 
     @patch('openlp.core.ui.mainwindow.FirstTimeForm')

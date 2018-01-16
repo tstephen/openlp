@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -47,8 +47,7 @@ class TestWebkitPlayer(TestCase):
             available = webkit_player.check_available()
 
             # THEN: The player should not be available when '[object HTMLUnknownElement]' is returned
-            self.assertEqual(False, available,
-                             'The WebkitPlayer should not be available when video feature detection fails')
+            assert available is False, 'The WebkitPlayer should not be available when video feature detection fails'
 
     def test_check_available_video_enabled(self):
         """
@@ -64,5 +63,4 @@ class TestWebkitPlayer(TestCase):
             available = webkit_player.check_available()
 
             # THEN: The player should be available when '[object HTMLVideoElement]' is returned
-            self.assertEqual(True, available,
-                             'The WebkitPlayer should be available when video feature detection passes')
+            assert available is True, 'The WebkitPlayer should be available when video feature detection passes'

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -157,7 +157,7 @@ def _get_os_dir_path(dir_type):
                 return directory
             return Path('/usr', 'share', 'openlp')
         if XDG_BASE_AVAILABLE:
-            if dir_type == AppLocation.DataDir or dir_type == AppLocation.CacheDir:
+            if dir_type == AppLocation.DataDir:
                 return Path(BaseDirectory.xdg_data_home, 'openlp')
             elif dir_type == AppLocation.CacheDir:
                 return Path(BaseDirectory.xdg_cache_home, 'openlp')
