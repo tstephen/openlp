@@ -133,7 +133,7 @@ AudioPlayer.prototype.createAudioElement = function () {
   this._audioElement.addEventListener("volumechange", this._callListener);
   this._audioElement.addEventListener("durationchange", this._callListener);
   this._audioElement.addEventListener("loadeddata", this._callListener);
-  document.addEventListener("complete", function(event) { 
+  document.addEventListener("complete", function(event) {
     document.body.appendChild(this._audioElement);
   });
 };
@@ -551,7 +551,7 @@ var Display = {
       "padding": "0"*/
     };
     if (!!theme.font_main_outline) {
-      mainStyle["-webkit-text-stroke"] = "" + (parseFloat(theme.font_main_outline_size) / 16.0) + "em " +
+      mainStyle["-webkit-text-stroke"] = "" + theme.font_main_outline_size + "pt " +
                                          theme.font_main_outline_color;
       mainStyle["-webkit-text-fill-color"] = theme.font_main_color;
     }
@@ -571,7 +571,7 @@ var Display = {
                                  theme.font_main_shadow_size + "px";
     }
     mainStyle["padding-bottom"] = theme.display_vertical_align == VerticalAlign.Bottom ? "0.5em" : "0";
-    mainStyle["padding-left"] = !!theme.font_main_outline ? "" + (theme.font_main_outline_size * 2) + "px" : "0";
+    mainStyle["padding-left"] = !!theme.font_main_outline ? "" + (theme.font_main_outline_size * 2) + "pt" : "0";
     // These need to be fixed, in the Python they use a width passed in as a parameter
     mainStyle["position"] = "absolute";
     mainStyle["width"] = "" + (window.innerWidth - (theme.font_main_outline_size * 4)) + "px";
@@ -621,7 +621,6 @@ var Display = {
       videoTypes.push(['video/webm', '*.webm']);
     }
     return videoTypes;
-  }
   }
 };
 new QWebChannel(qt.webChannelTransport, function (channel) {
