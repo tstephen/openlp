@@ -193,6 +193,15 @@ describe("Display.setTextSlides", function () {
     var slidesDiv = document.createElement("div");
     slidesDiv.setAttribute("class", "slides");
     document.body.appendChild(slidesDiv);
+
+    var background = document.createElement("div");
+    background.setAttribute("id", "global-background");
+    document.body.appendChild(background);
+
+    var footer = document.createElement("div");
+    footer.setAttribute("class", "footer");
+    document.body.appendChild(footer);
+
     Display._slides = {};
   });
 
@@ -222,6 +231,34 @@ describe("Display.setTextSlides", function () {
     expect(Display.reinit).toHaveBeenCalledTimes(1);
     expect(Reveal.slide).toHaveBeenCalledWith(0);
   });
+
+  it("should correctly set outline width", function () {
+    const slides = [
+      {
+        "verse": "v1",
+        "text": "Amazing grace, how sweet the sound\nThat saved a wretch like me\n" +
+                "I once was lost, but now I'm found\nWas blind but now I see"
+      }
+    ];
+
+    const theme = {
+      'font_main_color': 'yellow',
+      'font_main_outline': true,
+      'font_main_outline_size': 42,
+      'font_main_outline_color': 'red'
+    };
+
+    spyOn(Display, "reinit");
+
+    Display.setTextSlides(slides);
+    Display.setTheme(theme);
+
+    const slidesDiv = $(".slides")[0];
+
+    expect(slidesDiv.style['-webkit-text-stroke']).toEqual('42pt red');
+    expect(slidesDiv.style['padding-left']).toEqual('84pt');
+    expect(slidesDiv.style['-webkit-text-fill-color']).toEqual('yellow');
+  })
 });
 
 describe("Display.setImageSlides", function () {
