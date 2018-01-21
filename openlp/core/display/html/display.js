@@ -133,7 +133,7 @@ AudioPlayer.prototype.createAudioElement = function () {
   this._audioElement.addEventListener("volumechange", this._callListener);
   this._audioElement.addEventListener("durationchange", this._callListener);
   this._audioElement.addEventListener("loadeddata", this._callListener);
-  document.addEventListener("complete", function(event) { 
+  document.addEventListener("complete", function(event) {
     document.body.appendChild(this._audioElement);
   });
 };
@@ -621,7 +621,6 @@ var Display = {
       videoTypes.push(['video/webm', '*.webm']);
     }
     return videoTypes;
-  }
   }
 };
 new QWebChannel(qt.webChannelTransport, function (channel) {
