@@ -23,7 +23,6 @@
 The :mod:`screen` module provides management functionality for a machines'
 displays.
 """
-import copy
 import logging
 
 from PyQt5 import QtCore
@@ -65,6 +64,58 @@ class Screen(object):
             name = '{name} ({primary})'.format(name=name, primary=translate('OpenLP.ScreenList', 'primary'))
         return name
 
+    @classmethod
+    def from_dict(cls, screen_dict):
+        """
+        Create a screen object from a dictionary
+
+        :param dict screen_dict: The dictionary from which to make the Screen object
+        :return: A Screen object with the values from screen_dict
+        :rtype: openlp.core.display.screens.Screen
+        """
+        screen_dict['geometry'] = QtCore.QRect(**screen_dict['geometry'])
+        if 'display_geometry' in screen_dict:
+            screen_dict['display_geometry'] = QtCore.QRect(**screen_dict['display_geometry'])
+        return cls(**screen_dict)
+
+    def to_dict(self):
+        """
+        Convert a screen object to a dictionary
+
+        :return: A dictionary of this screen
+        :rtype: dict
+        """
+        screen_dict = {
+            'number': self.number,
+            'geometry': {
+                'x': self.geometry.x(),
+                'y': self.geometry.y(),
+                'width': self.geometry.width(),
+                'height': self.geometry.height()
+            },
+            'is_primary': self.is_primary,
+            'is_display': self.is_display
+        }
+        if self.display_geometry != self.geometry:
+            screen_dict['display_geometry'] = {
+                'x': self.display_geometry.x(),
+                'y': self.display_geometry.y(),
+                'width': self.display_geometry.width(),
+                'height': self.display_geometry.height()
+            }
+        return screen_dict
+
+    def update(self, screen_dict):
+        """
+        Update this instance from a dictionary
+
+        :param dict screen_dict: The dictionary which we want to apply to the screen
+        """
+        self.number = screen_dict['number']
+        self.is_display = screen_dict['is_display']
+        self.is_primary = screen_dict['is_primary']
+        self.geometry = QtCore.QRect(**screen_dict['geometry'])
+
 
 class ScreenList(object):
     """
@@ -74,6 +125,7 @@ class ScreenList(object):
     """
     log.info('Screen loaded')
     __instance__ = None
+    screens = []
 
     def __new__(cls):
         """
@@ -89,6 +141,16 @@ class ScreenList(object):
         """
         for screen in self.screens:
             yield screen
+
+    def __getitem__(self, key):
+        """
+        Make sure this object is indexable, e.g. screen_list[1] => Screen(number=1)
+        """
+        for screen in self:
+            if screen.number == key:
+                return screen
+        else:
+            raise IndexError('No screen with number {number} in list'.format(number=key))
 
     def __len__(self):
         """
@@ -112,7 +174,10 @@ class ScreenList(object):
             if screen.is_primary:
                 return screen
         # Otherwise just return the first screen
-        return self.screens[0]
+        if len(self.screens) > 0:
+            return self.screens[0]
+        else:
+            return None
 
     @classmethod
     def create(cls, desktop):
@@ -123,13 +188,100 @@ class ScreenList(object):
         """
         screen_list = cls()
         screen_list.desktop = desktop
-        screen_list.screens = []
-        screen_list.on_screen_count_changed()
-        screen_list.load_screen_settings()
         screen_list.desktop.resized.connect(screen_list.on_screen_resolution_changed)
         screen_list.desktop.screenCountChanged.connect(screen_list.on_screen_count_changed)
         screen_list.desktop.primaryScreenChanged.connect(screen_list.on_primary_screen_changed)
+        screen_list.update_screens()
+        screen_list.load_screen_settings()
         return screen_list
+
+    def load_screen_settings(self):
+        """
+        Loads the screen size and the monitor number from the settings.
+        """
+        # Add the screen settings to the settings dict. This has to be done here due to cyclic dependency.
+        # Do not do this anywhere else.
+        screen_settings = {
+            'core/monitors': '{}'
+        }
+        Settings.extend_default_settings(screen_settings)
+        monitors = Settings().value('core/monitors')
+        for number, monitor in monitors.items():
+            if self.has_screen(number):
+                self[number].update(monitor)
+            else:
+                self.screens.append(Screen.from_dict(monitor))
+
+    def save_screen_settings(self):
+        """
+        Saves the screen size and monitor settings
+        """
+        Settings().setValue('core/monitors', {screen.number: screen.to_dict() for screen in self.screens})
+
+    def get_display_screen_list(self):
+        """
+        Returns a list with the screens. This should only be used to display available screens to the user::
+
+            ['Screen 1 (primary)', 'Screen 2']
+        """
+        screen_list = []
+        for screen in self.screens:
+            screen_name = '{name} {number:d}'.format(name=translate('OpenLP.ScreenList', 'Screen'),
+                                                     number=screen.number + 1)
+            if screen.is_primary:
+                screen_name = '{name} ({primary})'.format(name=screen_name,
+                                                          primary=translate('OpenLP.ScreenList', 'primary'))
+            screen_list.append(screen_name)
+        return screen_list
+
+    def get_number_for_window(self, window):
+        """
+        Return the screen number that the centre of the passed window is in.
+
+        :param window: A QWidget we are finding the location of.
+        """
+        for screen in self.screens:
+            if screen.geometry == window.geometry() or screen.display_geometry == window.geometry():
+                return screen
+        return None
+
+    def set_display_screen(self, number, can_save=False):
+        """
+        Set screen number ``number`` to be the display screen.
+
+        At the moment, this is forced to be only a single screen, but later when we support multiple monitors it
+        will need to be updated.
+
+        :param int number: The number of the screen
+        :param bool can_save: If the screen settings should be saved, defaults to False.
+        """
+        for screen in self.screens:
+            if screen.number == number:
+                screen.is_display = True
+            else:
+                screen.is_display = False
+        if can_save:
+            self.save_screen_settings()
+
+    def has_screen(self, number):
+        """
+        Confirms a screen is known.
+
+        :param number: The screen number (int).
+        """
+        for screen in self.screens:
+            if screen.number == number:
+                return True
+        return False
+
+    def update_screens(self):
+        """
+        Update the list of screens
+        """
+        self.screens = []
+        for number in range(self.desktop.screenCount()):
+            self.screens.append(
+                Screen(number, self.desktop.screenGeometry(number), self.desktop.primaryScreen() == number))
 
     def on_screen_resolution_changed(self, number):
         """
@@ -153,21 +305,12 @@ class ScreenList(object):
         ``changed_screen``
             The screen's number which has been (un)plugged.
         """
-        # Do not log at start up.
         screen_count = self.desktop.screenCount()
-        if changed_screen is not None:
-            log.info('screen_count_changed {count:d}'.format(count=screen_count))
-        # Remove unplugged screens.
-        del self.screens[screen_count - 1:]
-        # Add new screens.
-        for number in range(self.desktop.screenCount()):
-            if not self.has_screen(number):
-                self.screens.append(Screen(number, self.desktop.screenGeometry(number),
-                                           self.desktop.primaryScreen() == number))
-        # We do not want to send this message at start up.
-        if changed_screen is not None:
-            # Reload setting tabs to apply possible changes.
-            Registry().execute('config_screen_changed')
+        log.info('screen_count_changed {count:d}'.format(count=screen_count))
+        # Update the list of screens
+        self.update_screens()
+        # Reload setting tabs to apply possible changes.
+        Registry().execute('config_screen_changed')
 
     def on_primary_screen_changed(self):
         """
@@ -176,58 +319,3 @@ class ScreenList(object):
         for screen in self.screens:
             screen.is_primary = self.desktop.primaryScreen() == screen.number
         Registry().execute('config_screen_changed')
-
-    def get_display_screen_list(self):
-        """
-        Returns a list with the screens. This should only be used to display available screens to the user::
-
-            ['Screen 1 (primary)', 'Screen 2']
-        """
-        screen_list = []
-        for screen in self.screens:
-            screen_name = '{name} {number:d}'.format(name=translate('OpenLP.ScreenList', 'Screen'),
-                                                     number=screen.number + 1)
-            if screen.is_primary:
-                screen_name = '{name} ({primary})'.format(name=screen_name,
-                                                          primary=translate('OpenLP.ScreenList', 'primary'))
-            screen_list.append(screen_name)
-        return screen_list
-
-    def has_screen(self, number):
-        """
-        Confirms a screen is known.
-
-        :param number: The screen number (int).
-        """
-        for screen in self.screens:
-            if screen.number == number:
-                return True
-        return False
-
-    def get_number_for_window(self, window):
-        """
-        Return the screen number that the centre of the passed window is in.
-
-        :param window: A QWidget we are finding the location of.
-        """
-        for screen in self.screens:
-            if screen.geometry == window.geometry() or screen.display_geometry == window.geometry():
-                return screen
-        return None
-
-    def load_screen_settings(self):
-        """
-        Loads the screen size and the monitor number from the settings.
-        """
-        # Add the screen settings to the settings dict. This has to be done here due to cyclic dependency.
-        # Do not do this anywhere else.
-        screen_settings = {
-            'core/monitors': '{}'
-        }
-        Settings.extend_default_settings(screen_settings)
-        monitors = Settings().value('core/monitors')
-        for screen in self.screens:
-            monitor = monitors.get(screen.number)
-            if monitor:
-                screen.display_geometry = QtCore.QRect(monitor['x'], monitor['y'], monitor['width'], monitor['height'])
-                screen.is_display = True
