@@ -677,7 +677,8 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
                     copyfile(image_source_path, image_destination_path)
                 except OSError:
                     self.log_exception('Failed to save theme image')
-        self.generate_and_save_image(name, theme)
+        # TODO: When we get preview generation working again, fix this
+        # self.generate_and_save_image(name, theme)
 
     def generate_and_save_image(self, theme_name, theme):
         """
