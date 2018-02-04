@@ -242,6 +242,9 @@ class ImpressDocument(PresentationDocument):
         except:
             log.warning('Failed to load presentation {url}'.format(url=url))
             return False
+        if self.document is None:
+            log.warning('Presentation {url} could not be loaded'.format(url=url))
+            return False
         self.presentation = self.document.getPresentation()
         self.presentation.Display = ScreenList().current['number'] + 1
         self.control = None
