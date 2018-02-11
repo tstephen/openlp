@@ -33,7 +33,7 @@ import time
 from datetime import datetime
 from traceback import format_exception
 
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtWidgets, QtWebEngineWidgets                                                 # noqa
 
 from openlp.core.common import is_macosx, is_win
 from openlp.core.common.applocation import AppLocation

@@ -49,7 +49,7 @@ class GeneralTab(SettingsTab):
         """
         self.logo_file = ':/graphics/openlp-splash-screen.png'
         self.logo_background_color = '#ffffff'
-        self.screen_list = ScreenList()
+        self.screens = ScreenList()
         self.icon_path = ':/icon/openlp-logo.svg'
         general_translated = translate('OpenLP.GeneralTab', 'General')
         super(GeneralTab, self).__init__(parent, 'Core', general_translated)
@@ -283,16 +283,21 @@ class GeneralTab(SettingsTab):
         settings = Settings()
         settings.beginGroup(self.settings_section)
         self.monitor_combo_box.clear()
-        self.monitor_combo_box.addItems([str(screen) for screen in self.screen_list])
-        monitor_number = settings.value('monitor')
-        self.monitor_combo_box.setCurrentIndex(monitor_number)
+        self.monitor_combo_box.addItems([str(screen) for screen in self.screens])
+        monitors = settings.value('monitors')
+        for number, monitor in monitors.items():
+            if monitor['is_display']:
+                self.monitor_combo_box.setCurrentIndex(int(number))
+        else:
+            self.monitor_combo_box.setCurrentIndex(0)
         self.number_edit.setText(settings.value('ccli number'))
         self.username_edit.setText(settings.value('songselect username'))
         self.password_edit.setText(settings.value('songselect password'))
         self.save_check_service_check_box.setChecked(settings.value('save prompt'))
         self.auto_unblank_check_box.setChecked(settings.value('auto unblank'))
         self.click_live_slide_to_unblank_check_box.setChecked(settings.value('click live slide to unblank'))
-        self.display_on_monitor_check.setChecked(self.screens.display)
+        # TODO: This is going to be a more complicated setup
+        # self.display_on_monitor_check.setChecked(self.screens.display)
         self.warning_check_box.setChecked(settings.value('blank warning'))
         self.auto_open_check_box.setChecked(settings.value('auto open'))
         self.show_splash_check_box.setChecked(settings.value('show splash'))
@@ -305,10 +310,10 @@ class GeneralTab(SettingsTab):
         self.timeout_spin_box.setValue(settings.value('loop delay'))
         self.monitor_radio_button.setChecked(not settings.value('override position',))
         self.override_radio_button.setChecked(settings.value('override position'))
-        self.custom_X_value_edit.setValue(settings.value('x position'))
-        self.custom_Y_value_edit.setValue(settings.value('y position'))
-        self.custom_height_value_edit.setValue(settings.value('height'))
-        self.custom_width_value_edit.setValue(settings.value('width'))
+        # self.custom_X_value_edit.setValue(settings.value('x position'))
+        # self.custom_Y_value_edit.setValue(settings.value('y position'))
+        # self.custom_height_value_edit.setValue(settings.value('height'))
+        # self.custom_width_value_edit.setValue(settings.value('width'))
         self.start_paused_check_box.setChecked(settings.value('audio start paused'))
         self.repeat_list_check_box.setChecked(settings.value('audio repeat list'))
         settings.endGroup()

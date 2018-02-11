@@ -584,8 +584,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, RegistryProperties):
         """
         process the bootstrap post setup request
         """
-        self.preview_controller.panel.setVisible(Settings().value('user interface/preview panel'))
-        self.live_controller.panel.setVisible(Settings().value('user interface/live panel'))
+        # self.preview_controller.panel.setVisible(Settings().value('user interface/preview panel'))
+        # self.live_controller.panel.setVisible(Settings().value('user interface/live panel'))
         self.load_settings()
         self.restore_current_media_manager_item()
         Registry().execute('theme_update_global')
@@ -637,8 +637,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, RegistryProperties):
         Show the main form, as well as the display form
         """
         QtWidgets.QWidget.show(self)
-        if self.live_controller.display.isVisible():
-            self.live_controller.display.setFocus()
+        # if self.live_controller.display.isVisible():
+        #     self.live_controller.display.setFocus()
         self.activateWindow()
         if self.arguments:
             self.open_cmd_line_files(self.arguments)
@@ -828,13 +828,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, RegistryProperties):
         Show the Settings dialog
         """
         self.settings_form.exec()
-
-    def paintEvent(self, event):
-        """
-        We need to make sure, that the SlidePreview's size is correct.
-        """
-        self.preview_controller.preview_size_changed()
-        self.live_controller.preview_size_changed()
 
     def on_settings_shortcuts_item_clicked(self):
         """

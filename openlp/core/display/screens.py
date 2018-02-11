@@ -206,11 +206,11 @@ class ScreenList(object):
         }
         Settings.extend_default_settings(screen_settings)
         monitors = Settings().value('core/monitors')
-        for number, monitor in monitors.items():
-            if self.has_screen(number):
-                self[number].update(monitor)
-            else:
-                self.screens.append(Screen.from_dict(monitor))
+        # for number, monitor in monitors.items():
+        #     if self.has_screen(number):
+        #         self[number].update(monitor)
+        #     else:
+        #         self.screens.append(Screen.from_dict(monitor))
 
     def save_screen_settings(self):
         """

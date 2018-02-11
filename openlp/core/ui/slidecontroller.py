@@ -40,6 +40,7 @@ from openlp.core.lib import ItemCapabilities, ImageSource, ServiceItemAction, bu
 from openlp.core.lib.ui import create_action
 from openlp.core.ui import HideMode, DisplayControllerType
 from openlp.core.display.window import DisplayWindow
+from openlp.core.widgets.layouts import AspectRatioLayout
 from openlp.core.widgets.toolbar import OpenLPToolbar
 from openlp.core.widgets.views import ListPreviewWidget
 
@@ -118,6 +119,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         self.is_live = False
         self.controller_type = None
         self.displays = []
+        self.screens = ScreenList()
         Registry().set_flag('has doubleclick added item to service', True)
         Registry().set_flag('replace service manager item', False)
 
@@ -141,13 +143,16 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         self.displays.append(display)
         #    display.media_watcher.progress.connect(self.on_audio_time_remaining)
 
+    @property
+    def display(self):
+        return self.displays[0] if self.displays else None
+
     def initialise(self):
         """
         Initialise the UI elements of the controller
         """
-        self.screens = ScreenList()
         try:
-            self.ratio = self.screens.current['size'].width() / self.screens.current['size'].height()
+            self.ratio = self.screens.current.geometry.width() / self.screens.current.geometry.height()
         except ZeroDivisionError:
             self.ratio = 1
         self.process_queue_lock = Lock()
@@ -359,31 +364,14 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         self.preview_frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.preview_frame.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.preview_frame.setObjectName('preview_frame')
-        self.grid = QtWidgets.QGridLayout(self.preview_frame)
-        self.grid.setContentsMargins(8, 8, 8, 8)
-        self.grid.setObjectName('grid')
-        self.slide_layout = QtWidgets.QVBoxLayout()
+        self.slide_layout = AspectRatioLayout(self.preview_frame, self.ratio)
+        self.slide_layout.margin = 8
         self.slide_layout.setSpacing(0)
-        self.slide_layout.setContentsMargins(0, 0, 0, 0)
         self.slide_layout.setObjectName('SlideLayout')
         # Set up the preview display
-        # self.preview_display = DisplayWindow(self)
-        # self.slide_layout.insertWidget(0, self.preview_display)
-        # self.preview_display.hide()
+        self.preview_display = DisplayWindow(self)
+        self.slide_layout.addWidget(self.preview_display)
         # Actual preview screen
-        self.slide_preview = QtWidgets.QLabel(self)
-        size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-        size_policy.setHorizontalStretch(0)
-        size_policy.setVerticalStretch(0)
-        size_policy.setHeightForWidth(self.slide_preview.sizePolicy().hasHeightForWidth())
-        self.slide_preview.setSizePolicy(size_policy)
-        self.slide_preview.setFrameShape(QtWidgets.QFrame.Box)
-        self.slide_preview.setFrameShadow(QtWidgets.QFrame.Plain)
-        self.slide_preview.setLineWidth(1)
-        self.slide_preview.setScaledContents(True)
-        self.slide_preview.setObjectName('slide_preview')
-        self.slide_layout.insertWidget(0, self.slide_preview)
-        self.grid.addLayout(self.slide_layout, 0, 0, 1, 1)
         if self.is_live:
             self.current_shortcut = ''
             self.shortcut_timer = QtCore.QTimer()
@@ -589,8 +577,8 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         if self.displays:
             for display in self.displays:
                 display.resize(self.screens.current['size'])
-        if self.is_live:
-            self.__add_actions_to_widget(self.display)
+        # if self.is_live:
+        #     self.__add_actions_to_widget(self.display)
         # The SlidePreview's ratio.
         # TODO: Need to basically update everything
 
@@ -612,28 +600,6 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
             self.desktop_screen,
             self.theme_screen,
             self.blank_screen])
-
-    def preview_size_changed(self):
-        """
-        Takes care of the SlidePreview's size. Is called when one of the the splitters is moved or when the screen
-        size is changed. Note, that this method is (also) called frequently from the mainwindow *paintEvent*.
-        """
-        if self.ratio < self.preview_frame.width() / self.preview_frame.height():
-            # We have to take the height as limit.
-            max_height = self.preview_frame.height() - self.grid.contentsMargins().top() * 2
-            self.slide_preview.setFixedSize(QtCore.QSize(max_height * self.ratio, max_height))
-            self.preview_display.setFixedSize(QtCore.QSize(max_height * self.ratio, max_height))
-            self.preview_display.screen = {'size': self.preview_display.geometry()}
-        else:
-            # We have to take the width as limit.
-            max_width = self.preview_frame.width() - self.grid.contentsMargins().top() * 2
-            self.slide_preview.setFixedSize(QtCore.QSize(max_width, max_width / self.ratio))
-            self.preview_display.setFixedSize(QtCore.QSize(max_width, max_width / self.ratio))
-            self.preview_display.screen = {'size': self.preview_display.geometry()}
-        # Only update controller layout if width has actually changed
-        if self.controller_width != self.controller.width():
-            self.controller_width = self.controller.width()
-            self.on_controller_size_changed(self.controller_width)
 
     def on_controller_size_changed(self, width):
         """
@@ -943,18 +909,18 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         Allow the main display to blank the main display at startup time
         """
         display_type = Settings().value(self.main_window.general_settings_section + '/screen blank')
-        if self.screens.which_screen(self.window()) != self.screens.which_screen(self.display):
-            # Order done to handle initial conversion
-            if display_type == 'themed':
-                self.on_theme_display(True)
-            elif display_type == 'hidden':
-                self.on_hide_display(True)
-            elif display_type == 'blanked':
-                self.on_blank_display(True)
-            else:
-                Registry().execute('live_display_show')
-        else:
-            self.on_hide_display_enable()
+        # if self.screens.which_screen(self.window()) != self.screens.which_screen(self.display):
+        #     # Order done to handle initial conversion
+        #     if display_type == 'themed':
+        #         self.on_theme_display(True)
+        #     elif display_type == 'hidden':
+        #         self.on_hide_display(True)
+        #     elif display_type == 'blanked':
+        #         self.on_blank_display(True)
+        #     else:
+        #         Registry().execute('live_display_show')
+        # else:
+        #     self.on_hide_display_enable()
 
     def on_slide_blank(self):
         """
@@ -1515,7 +1481,7 @@ class PreviewController(RegistryBase, SlideController):
         """
         Set up the base Controller as a preview.
         """
-        self.__registry_name = 'preview_slidecontroller'
+        self.__registry_name = 'preview_controller'
         super().__init__(*args, **kwargs)
         self.split = 0
         self.type_prefix = 'preview'

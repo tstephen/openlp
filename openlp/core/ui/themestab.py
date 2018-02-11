@@ -203,8 +203,8 @@ class ThemesTab(SettingsTab):
         self.default_combo_box.clear()
         self.default_combo_box.addItems(theme_list)
         find_and_set_in_combo_box(self.default_combo_box, self.global_theme)
-        self.renderer.set_global_theme()
-        self.renderer.set_theme_level(self.theme_level)
+        # self.renderer.set_global_theme()
+        # self.renderer.set_theme_level(self.theme_level)
         if self.global_theme is not '':
             self._preview_global_theme()
 
