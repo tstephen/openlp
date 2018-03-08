@@ -586,6 +586,8 @@ class Settings(QtCore.QSettings):
             # Sometimes setting is string instead of a boolean.
             return setting == 'true'
         if isinstance(default_value, int):
+            if setting is None:
+                return 0
             return int(setting)
         return setting
 
