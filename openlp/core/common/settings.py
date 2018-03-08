@@ -285,6 +285,7 @@ class Settings(QtCore.QSettings):
         ('songuasge/db password', 'songusage/db password', []),
         ('songuasge/db hostname', 'songusage/db hostname', []),
         ('songuasge/db database', 'songusage/db database', []),
+        ('presentations / Powerpoint Viewer', '', []),
         (['core/monitor', 'core/x position', 'core/y position', 'core/height', 'core/width', 'core/override',
           'core/display on monitor'], 'core/monitors', [(upgrade_monitor, [1, 0, 0, None, None, False, False])])
     ]
