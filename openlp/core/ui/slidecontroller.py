@@ -576,7 +576,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         # rebuild display as screen size changed
         if self.displays:
             for display in self.displays:
-                display.resize(self.screens.current['size'])
+                display.resize(self.screens.current.display_geometry.size())
         # if self.is_live:
         #     self.__add_actions_to_widget(self.display)
         # The SlidePreview's ratio.
@@ -743,12 +743,17 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
 
         :param item: The current service item
         """
-        item.render()
-        slide_no = 0
-        if self.song_edit:
-            slide_no = self.selected_row
-        self.song_edit = False
-        self._process_item(item, slide_no)
+        if item.theme:
+            self.preview_display.set_theme(item.theme)
+        if item.is_text():
+            self.preview_display.load_verses([{'verse': f['verseTag'], 'text': f['raw_slide']}
+                                              for f in item._raw_frames])
+            self.display
+        # slide_no = 0
+        # if self.song_edit:
+        #     slide_no = self.selected_row
+        # self.song_edit = False
+        # self._process_item(item, slide_no)
 
     def replace_service_manager_item(self, item):
         """
@@ -908,7 +913,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         """
         Allow the main display to blank the main display at startup time
         """
-        display_type = Settings().value(self.main_window.general_settings_section + '/screen blank')
+        # display_type = Settings().value(self.main_window.general_settings_section + '/screen blank')
         # if self.screens.which_screen(self.window()) != self.screens.which_screen(self.display):
         #     # Order done to handle initial conversion
         #     if display_type == 'themed':
@@ -1510,6 +1515,7 @@ class LiveController(RegistryBase, SlideController):
         """
         Set up the base Controller as a live.
         """
+        self.__registry_name = 'live_controller'
         super().__init__(*args, **kwargs)
         self.is_live = True
         self.split = 1

@@ -159,7 +159,7 @@ class ThemesTab(SettingsTab):
         settings.setValue('global theme', self.global_theme)
         settings.setValue('wrap footer', self.wrap_footer_check_box.isChecked())
         settings.endGroup()
-        self.renderer.set_theme_level(self.theme_level)
+        # self.renderer.set_theme_level(self.theme_level)
         if self.tab_visited:
             self.settings_form.register_post_process('theme_update_global')
         self.tab_visited = False

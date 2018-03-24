@@ -276,7 +276,7 @@ var Display = {
   },
   /**
    * Set text slides.
-   * @param {Object[]} slides - A list of slides to add as JS objects: {"verse": "v1", "html": "line 1<br>line2"}
+   * @param {Object[]} slides - A list of slides to add as JS objects: {"verse": "v1", "text": "line 1\nline2"}
    */
   setTextSlides: function (slides) {
     Display.clearSlides();

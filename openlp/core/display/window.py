@@ -25,12 +25,13 @@ The :mod:`~openlp.core.display.window` module contains the display window
 import logging
 import os
 import json
-from pathlib import Path
 
 from PyQt5 import QtCore, QtWidgets, QtWebChannel
 
+from openlp.core.common.path import Path, path_to_str
+
 log = logging.getLogger(__name__)
-DISPLAY_PATH = Path(__file__) / 'html' / 'display.html'
+DISPLAY_PATH = Path(__file__).parent / 'html' / 'display.html'
 
 
 class MediaWatcher(QtCore.QObject):
@@ -114,7 +115,7 @@ class DisplayWindow(QtWidgets.QWidget):
         self.webview = WebEngineView(self)
         self.layout.addWidget(self.webview)
         self.webview.loadFinished.connect(self.after_loaded)
-        self.set_url(QtCore.QUrl('file://' + os.getcwd() + '/display.html'))
+        self.set_url(QtCore.QUrl.fromLocalFile(path_to_str(DISPLAY_PATH)))
         self.media_watcher = MediaWatcher(self)
         self.channel = QtWebChannel.QWebChannel(self)
         self.channel.registerObject('mediaWatcher', self.media_watcher)
@@ -268,7 +269,6 @@ class DisplayWindow(QtWidgets.QWidget):
         """
         Set the theme of the display
         """
-        print(theme.export_theme())
         self.run_javascript('Display.setTheme({theme});'.format(theme=theme.export_theme()))
 
     def get_video_types(self):

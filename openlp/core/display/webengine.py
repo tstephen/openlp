@@ -45,7 +45,9 @@ class WebEnginePage(QtWebEngineWidgets.QWebEnginePage):
         """
         Override the parent method in order to log the messages in OpenLP
         """
-        log.log(LOG_LEVELS[level], message)
+        log.log(LOG_LEVELS[level], '{source_id}:{line_number} {message}'.format(source_id=source_id,
+                                                                                line_number=line_number,
+                                                                                message=message))
 
 
 class WebEngineView(QtWebEngineWidgets.QWebEngineView):
@@ -61,6 +63,12 @@ class WebEngineView(QtWebEngineWidgets.QWebEngineView):
         """
         super(WebEngineView, self).__init__(parent)
         self.setPage(WebEnginePage(self))
+        self.settings().setAttribute(QtWebEngineWidgets.QWebEngineSettings.LocalStorageEnabled, True)
+        self.settings().setAttribute(QtWebEngineWidgets.QWebEngineSettings.LocalContentCanAccessFileUrls, True)
+        self.settings().setAttribute(QtWebEngineWidgets.QWebEngineSettings.LocalContentCanAccessRemoteUrls, True)
+        self.page().settings().setAttribute(QtWebEngineWidgets.QWebEngineSettings.LocalStorageEnabled, True)
+        self.page().settings().setAttribute(QtWebEngineWidgets.QWebEngineSettings.LocalContentCanAccessFileUrls, True)
+        self.page().settings().setAttribute(QtWebEngineWidgets.QWebEngineSettings.LocalContentCanAccessRemoteUrls, True)
 
     def eventFilter(self, obj, ev):
         """

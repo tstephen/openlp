@@ -247,9 +247,9 @@ class ServiceItem(RegistryProperties):
         log.debug('Render called')
         self._display_frames = []
         self.bg_image_bytes = None
-        if not provides_own_theme_data:
-            self.renderer.set_item_theme(self.theme)
-            self.theme_data, self.main, self.footer = self.renderer.pre_render()
+        # if not provides_own_theme_data:
+        #     self.renderer.set_item_theme(self.theme)
+        #     self.theme_data, self.main, self.footer = self.renderer.pre_render()
         if self.service_item_type == ServiceItemType.Text:
             can_render_chords = hasattr(self, 'name') and self.name == 'songs' and Settings().value(
                 'songs/enable chords')
@@ -262,7 +262,7 @@ class ServiceItem(RegistryProperties):
                 if verse_tag in previous_pages and previous_pages[verse_tag][0] == slide['raw_slide']:
                     pages = previous_pages[verse_tag][1]
                 else:
-                    pages = self.renderer.format_slide(slide['raw_slide'], self)
+                    # pages = self.renderer.format_slide(slide['raw_slide'], self)
                     previous_pages[verse_tag] = (slide['raw_slide'], pages)
                 for page in pages:
                     page = page.replace('<br>', '{br}')

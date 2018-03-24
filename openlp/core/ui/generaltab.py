@@ -283,11 +283,14 @@ class GeneralTab(SettingsTab):
         settings = Settings()
         settings.beginGroup(self.settings_section)
         self.monitor_combo_box.clear()
-        self.monitor_combo_box.addItems([str(screen) for screen in self.screens])
+        for screen in self.screens:
+            self.monitor_combo_box.addItem(str(screen), screen.number)
         monitors = settings.value('monitors')
         for number, monitor in monitors.items():
             if monitor['is_display']:
-                self.monitor_combo_box.setCurrentIndex(int(number))
+                for item_index in range(self.monitor_combo_box.count()):
+                    if self.monitor_combo_box.itemData(item_index) == number:
+                        self.monitor_combo_box.setCurrentIndex(item_index)
         else:
             self.monitor_combo_box.setCurrentIndex(0)
         self.number_edit.setText(settings.value('ccli number'))
@@ -308,8 +311,8 @@ class GeneralTab(SettingsTab):
         self.check_for_updates_check_box.setChecked(settings.value('update check'))
         self.auto_preview_check_box.setChecked(settings.value('auto preview'))
         self.timeout_spin_box.setValue(settings.value('loop delay'))
-        self.monitor_radio_button.setChecked(not settings.value('override position',))
-        self.override_radio_button.setChecked(settings.value('override position'))
+        # self.monitor_radio_button.setChecked(not settings.value('override position',))
+        # self.override_radio_button.setChecked(settings.value('override position'))
         # self.custom_X_value_edit.setValue(settings.value('x position'))
         # self.custom_Y_value_edit.setValue(settings.value('y position'))
         # self.custom_height_value_edit.setValue(settings.value('height'))
@@ -317,11 +320,11 @@ class GeneralTab(SettingsTab):
         self.start_paused_check_box.setChecked(settings.value('audio start paused'))
         self.repeat_list_check_box.setChecked(settings.value('audio repeat list'))
         settings.endGroup()
-        self.monitor_combo_box.setDisabled(self.override_radio_button.isChecked())
-        self.custom_X_value_edit.setEnabled(self.override_radio_button.isChecked())
-        self.custom_Y_value_edit.setEnabled(self.override_radio_button.isChecked())
-        self.custom_height_value_edit.setEnabled(self.override_radio_button.isChecked())
-        self.custom_width_value_edit.setEnabled(self.override_radio_button.isChecked())
+        # self.monitor_combo_box.setDisabled(self.override_radio_button.isChecked())
+        # self.custom_X_value_edit.setEnabled(self.override_radio_button.isChecked())
+        # self.custom_Y_value_edit.setEnabled(self.override_radio_button.isChecked())
+        # self.custom_height_value_edit.setEnabled(self.override_radio_button.isChecked())
+        # self.custom_width_value_edit.setEnabled(self.override_radio_button.isChecked())
         self.display_changed = False
 
     def save(self):
@@ -330,7 +333,7 @@ class GeneralTab(SettingsTab):
         """
         settings = Settings()
         settings.beginGroup(self.settings_section)
-        settings.setValue('monitor', self.monitor_combo_box.currentIndex())
+        # settings.setValue('monitor', self.monitor_combo_box.currentIndex())
         settings.setValue('display on monitor', self.display_on_monitor_check.isChecked())
         settings.setValue('blank warning', self.warning_check_box.isChecked())
         settings.setValue('auto open', self.auto_open_check_box.isChecked())
@@ -347,38 +350,38 @@ class GeneralTab(SettingsTab):
         settings.setValue('ccli number', self.number_edit.displayText())
         settings.setValue('songselect username', self.username_edit.displayText())
         settings.setValue('songselect password', self.password_edit.displayText())
-        settings.setValue('x position', self.custom_X_value_edit.value())
-        settings.setValue('y position', self.custom_Y_value_edit.value())
-        settings.setValue('height', self.custom_height_value_edit.value())
-        settings.setValue('width', self.custom_width_value_edit.value())
-        settings.setValue('override position', self.override_radio_button.isChecked())
+        # settings.setValue('x position', self.custom_X_value_edit.value())
+        # settings.setValue('y position', self.custom_Y_value_edit.value())
+        # settings.setValue('height', self.custom_height_value_edit.value())
+        # settings.setValue('width', self.custom_width_value_edit.value())
+        # settings.setValue('override position', self.override_radio_button.isChecked())
         settings.setValue('audio start paused', self.start_paused_check_box.isChecked())
         settings.setValue('audio repeat list', self.repeat_list_check_box.isChecked())
         settings.endGroup()
         # On save update the screens as well
         self.post_set_up(True)
 
-    def post_set_up(self, postUpdate=False):
+    def post_set_up(self, is_post_update=False):
         """
         Apply settings after settings tab has loaded and most of the system so must be delayed
         """
         self.settings_form.register_post_process('slidecontroller_live_spin_delay')
         # Do not continue on start up.
-        if not postUpdate:
+        if not is_post_update:
             return
-        self.screens.set_current_display(self.monitor_combo_box.currentIndex())
-        self.screens.display = self.display_on_monitor_check.isChecked()
-        self.screens.override['size'] = QtCore.QRect(
-            self.custom_X_value_edit.value(),
-            self.custom_Y_value_edit.value(),
-            self.custom_width_value_edit.value(),
-            self.custom_height_value_edit.value())
-        self.screens.override['number'] = self.screens.which_screen(self.screens.override['size'])
-        self.screens.override['primary'] = (self.screens.desktop.primaryScreen() == self.screens.override['number'])
-        if self.override_radio_button.isChecked():
-            self.screens.set_override_display()
-        else:
-            self.screens.reset_current_display()
+        self.screens.set_display_screen(self.monitor_combo_box.currentData())
+        # self.screens.display = self.display_on_monitor_check.isChecked()
+        # self.screens.override['size'] = QtCore.QRect(
+        #     self.custom_X_value_edit.value(),
+        #     self.custom_Y_value_edit.value(),
+        #     self.custom_width_value_edit.value(),
+        #     self.custom_height_value_edit.value())
+        # self.screens.override['number'] = self.screens.which_screen(self.screens.override['size'])
+        # self.screens.override['primary'] = (self.screens.desktop.primaryScreen() == self.screens.override['number'])
+        # if self.override_radio_button.isChecked():
+        #     self.screens.set_override_display()
+        # else:
+        #     self.screens.reset_current_display()
         if self.display_changed:
             self.settings_form.register_post_process('config_screen_changed')
         self.display_changed = False

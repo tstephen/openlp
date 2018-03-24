@@ -22,7 +22,6 @@
 """
 This is the main window, where all the action happens.
 """
-import logging
 import sys
 from datetime import datetime
 from distutils import dir_util
@@ -1004,7 +1003,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
         """
         self.application.set_busy_cursor()
         self.image_manager.update_display()
-        self.renderer.update_display()
+        # self.renderer.update_display()
         self.preview_controller.screen_size_changed()
         self.live_controller.screen_size_changed()
         self.setFocus()
