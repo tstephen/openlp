@@ -25,6 +25,7 @@ The :mod:`~openlp.core.display.window` module contains the display window
 import logging
 import os
 import json
+from inspect import currentframe, getouterframes
 
 from PyQt5 import QtCore, QtWidgets, QtWebChannel
 
@@ -122,6 +123,7 @@ class DisplayWindow(QtWidgets.QWidget):
         self.webview.page().setWebChannel(self.channel)
         if screen and screen.is_display:
             self.update_from_screen(screen)
+        print(getouterframes(currentframe(), 2)[1][3])
 
     def update_from_screen(self, screen):
         """
@@ -276,3 +278,9 @@ class DisplayWindow(QtWidgets.QWidget):
         Get the types of videos playable by the embedded media player
         """
         return self.run_javascript('Display.getVideoTypes();', is_sync=True)
+
+    def show_display(self):
+        """
+        Show the display
+        """
+        self.run_javascript('Display.show();')

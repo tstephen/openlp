@@ -139,8 +139,8 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
             # Delete any existing displays
             del self.displays[:]
         # for screen in self.screens:
-        display = DisplayWindow(self, self.screens.current)
-        self.displays.append(display)
+        # display = DisplayWindow(self, self.screens.current)
+        # self.displays.append(display)
         #    display.media_watcher.progress.connect(self.on_audio_time_remaining)
 
     @property
@@ -748,7 +748,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         if item.is_text():
             self.preview_display.load_verses([{'verse': f['verseTag'], 'text': f['raw_slide']}
                                               for f in item._raw_frames])
-            self.display
+            self.preview_display.show_display()
         # slide_no = 0
         # if self.song_edit:
         #     slide_no = self.selected_row
