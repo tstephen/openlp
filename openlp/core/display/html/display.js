@@ -1,6 +1,7 @@
 /**
  * display.js is the main Javascript file that is used to drive the display.
  */
+
 /**
  * Background type enumeration
  */
@@ -11,6 +12,7 @@ var BackgroundType = {
   Video: "video",
   Image: "image"
 };
+
 /**
  * Gradient type enumeration
  */
@@ -21,6 +23,7 @@ var GradientType = {
   Vertical: "vertical",
   Circular: "circular"
 };
+
 /**
  * Horizontal alignment enumeration
  */
@@ -30,6 +33,7 @@ var HorizontalAlign = {
   Center: "center",
   Justify: "justify"
 };
+
 /**
  * Vertical alignment enumeration
  */
@@ -38,6 +42,7 @@ var VerticalAlign = {
   Middle: "middle",
   Bottom: "bottom"
 };
+
 /**
  * Audio state enumeration
  */
@@ -46,6 +51,7 @@ var AudioState = {
   Paused: "paused",
   Stopped: "stopped"
 };
+
 /**
  * Return an array of elements based on the selector query
  * @param {string} selector - The selector to find elements
@@ -54,6 +60,7 @@ var AudioState = {
 function $(selector) {
   return Array.from(document.querySelectorAll(selector));
 }
+
 /**
  * Build linear gradient CSS
  * @private
@@ -66,6 +73,7 @@ function $(selector) {
 function _buildLinearGradient(startDir, endDir, startColor, endColor) {
   return "-webkit-gradient(linear, " + startDir + ", " + endDir + ", from(" + startColor + "), to(" + endColor + ")) fixed";
 }
+
 /**
  * Build radial gradient CSS
  * @private
@@ -77,6 +85,7 @@ function _buildLinearGradient(startDir, endDir, startColor, endColor) {
 function _buildRadialGradient(width, startColor, endColor) {
   return "-webkit-gradient(radial, " + width + " 50%, 100, " + width + " 50%, " + width + ", from(" + startColor + "), to(" + endColor + ")) fixed";
 }
+
 /**
  * Get a style value from an element (computed or manual)
  * @private
@@ -87,6 +96,7 @@ function _buildRadialGradient(width, startColor, endColor) {
 function _getStyle(element, style) {
   return document.defaultView.getComputedStyle(element).getPropertyValue(style);
 }
+
 /**
  * Convert newlines to <br> tags
  * @private
@@ -96,6 +106,7 @@ function _getStyle(element, style) {
 function _nl2br(text) {
   return text.replace("\r\n", "\n").replace("\n", "<br>");
 }
+
 /**
  * Prepare text by creating paragraphs and calling _nl2br to convert newlines to <br> tags
  * @private
@@ -105,7 +116,24 @@ function _nl2br(text) {
 function _prepareText(text) {
   return "<p>" + _nl2br(text) + "</p>";
 }
-// An audio player with a play list
+
+/**
+ * The paths we get are JSON versions of Python Path objects, so let's just fix that.
+ * @private
+ * @param {object} path - The Path object
+ * @returns {string} The actual file path
+ */
+function _pathToString(path) {
+    var filename = path.__Path__.join("/").replace("//", "/");
+    if (!filename.startsWith("/")) {
+        filename = "/" + filename;
+    }
+    return filename;
+}
+
+/**
+ * An audio player with a play list
+ */
 var AudioPlayer = function (audioElement) {
   this._audioElement = null;
   this._eventListeners = {};
@@ -115,6 +143,12 @@ var AudioPlayer = function (audioElement) {
   this._state = AudioState.Stopped;
   this.createAudioElement();
 };
+
+/**
+ * Call all listeners associated with this event
+ * @private
+ * @param {object} event - The event that was emitted
+ */
 AudioPlayer.prototype._callListener = function (event) {
   if (this._eventListeners.hasOwnProperty(event.type)) {
     this._eventListeners[event.type].forEach(function (listener) {
@@ -125,6 +159,10 @@ AudioPlayer.prototype._callListener = function (event) {
     console.warn("Received unknown event \"" + event.type + "\", doing nothing.");
   }
 };
+
+/**
+ * Create the <audio> element that is used to play the audio
+ */
 AudioPlayer.prototype.createAudioElement = function () {
   this._audioElement = document.createElement("audio");
   this._audioElement.addEventListener("ended", this.onEnded);
@@ -524,18 +562,18 @@ var Display = {
         }
         break;
       case BackgroundType.Image:
-        backgroundStyle["background-color"] = theme.background_border_color;
-        backgroundStyle["background-image"] = "url('file://" + theme.background_filename + "')";
-        backgroundStyle["background-size"] = "cover";
+        background_filename = _pathToString(theme.background_filename);
+        backgroundStyle["background-image"] = "url('file://" + background_filename + "')";
         break;
       case BackgroundType.Video:
+        background_filename = _pathToString(theme.background_filename);
         backgroundStyle["background-color"] = theme.background_border_color;
-        backgroundHtml = "<video loop autoplay muted><source src='" + theme.background_filename + "'></video>";
-        backgroundStyle["background-size"] = "cover";
+        backgroundHtml = "<video loop autoplay muted><source src='file://" + background_filename + "'></video>";
         break;
       default:
         backgroundStyle["background"] = "#000";
     }
+    globalBackground.style.cssText = "";
     for (var key in backgroundStyle) {
       if (backgroundStyle.hasOwnProperty(key)) {
         globalBackground.style.setProperty(key, backgroundStyle[key]);
@@ -579,6 +617,7 @@ var Display = {
     mainStyle["left"] = "" + theme.font_main_x + "px";
     mainStyle["top"] = "" + theme.font_main_y + "px";
     var slidesDiv = $(".slides")[0];
+    slidesDiv.style.cssText = "";
     for (var key in mainStyle) {
       if (mainStyle.hasOwnProperty(key)) {
         slidesDiv.style.setProperty(key, mainStyle[key]);
@@ -597,6 +636,7 @@ var Display = {
     footerStyle["color"] = theme.font_footer_color;
     footerStyle["white-space"] = theme.font_footer_wrap ? "normal" : "nowrap";
     var footer = $(".footer")[0];
+    footer.style.cssText = "";
     for (var key in footerStyle) {
       if (footerStyle.hasOwnProperty(key)) {
         footer.style.setProperty(key, footerStyle[key]);

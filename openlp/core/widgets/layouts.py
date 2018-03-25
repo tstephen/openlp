@@ -31,6 +31,8 @@ class AspectRatioLayout(QtWidgets.QLayout):
 
     This is based on the C++ example here: https://gist.github.com/pavel-perina/1324ff064aedede0e01311aab315f83d
     """
+    resize = QtCore.pyqtSignal(QtCore.QSize)
+
     def __init__(self, parent=None, aspect_ratio=None):
         """
         Create a layout.
@@ -164,6 +166,7 @@ class AspectRatioLayout(QtWidgets.QLayout):
                 else:
                     x = self.margin + (available_width - width) / 2
                 widget.setGeometry(rect.x() + x, rect.y() + self.margin, width, height)
+            self.resize.emit(QtCore.QSize(width, height))
 
     def sizeHint(self):
         """

@@ -8,8 +8,17 @@
       background: #000 !important;
       color: #fff !important;
     }
-    .reveal .slides > section, .reveal .slides > section > section {
+    .reveal .slides > section,
+    .reveal .slides > section > section {
       padding: 0;
+    }
+    .reveal > .backgrounds > .present {
+      visibility: hidden !important;
+    }
+    #global-background {
+      display: block;
+      visibility: visible;
+      z-index: -1;
     }
     </style>
     <script type="text/javascript" src="qrc:///qtwebchannel/qwebchannel.js"></script>

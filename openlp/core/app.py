@@ -336,8 +336,8 @@ def main(args=None):
     :param args: Some args
     """
     args = parse_options(args)
-    # qt_args = ['--disable-web-security']
-    qt_args = []
+    qt_args = ['--disable-web-security']
+    # qt_args = []
     if args and args.loglevel.lower() in ['d', 'debug']:
         log.setLevel(logging.DEBUG)
     elif args and args.loglevel.lower() in ['w', 'warning']:

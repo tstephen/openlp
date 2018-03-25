@@ -371,6 +371,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         # Set up the preview display
         self.preview_display = DisplayWindow(self)
         self.slide_layout.addWidget(self.preview_display)
+        self.slide_layout.resize.connect(self.on_preview_resize)
         # Actual preview screen
         if self.is_live:
             self.current_shortcut = ''
@@ -635,16 +636,6 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         else:
             self.toolbar.set_widget_visible(NON_TEXT_MENU, visible)
 
-    def on_song_bar_handler(self):
-        """
-        Some song handler
-        """
-        request = self.sender().text()
-        slide_no = self.slide_list[request]
-        width = self.main_window.control_splitter.sizes()[self.split]
-        self.preview_widget.replace_service_item(self.service_item, width, slide_no)
-        self.slide_selected()
-
     def receive_spin_delay(self):
         """
         Adjusts the value of the ``delay_spin_box`` to the given one.
@@ -743,8 +734,8 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
 
         :param item: The current service item
         """
-        if item.theme:
-            self.preview_display.set_theme(item.theme)
+        theme_name = item.theme if item.theme else Registry().get('theme_manager').global_theme
+        self.preview_display.set_theme(Registry().get('theme_manager').get_theme_data(theme_name))
         if item.is_text():
             self.preview_display.load_verses([{'verse': f['verseTag'], 'text': f['raw_slide']}
                                               for f in item._raw_frames])
@@ -908,6 +899,23 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         else:
             self.preview_widget.change_slide(index)
             self.slide_selected()
+
+    def on_song_bar_handler(self):
+        """
+        Some song handler
+        """
+        request = self.sender().text()
+        slide_no = self.slide_list[request]
+        width = self.main_window.control_splitter.sizes()[self.split]
+        self.preview_widget.replace_service_item(self.service_item, width, slide_no)
+        self.slide_selected()
+
+    def on_preview_resize(self, size):
+        """
+        Set the preview display's zoom factor based on the size relative to the display size
+        """
+        ratio = float(size.width()) / 1920.0
+        self.preview_display.webview.setZoomFactor(ratio)
 
     def main_display_set_background(self):
         """
