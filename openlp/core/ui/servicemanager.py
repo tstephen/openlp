@@ -1165,7 +1165,7 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
         # Repaint the screen
         self.service_manager_list.clear()
         self.service_manager_list.clearSelection()
-        for item_count, item in enumerate(self.service_items):
+        for item_index, item in enumerate(self.service_items):
             service_item_from_item = item['service_item']
             tree_widget_item = QtWidgets.QTreeWidgetItem(self.service_manager_list)
             if service_item_from_item.is_valid:
@@ -1211,17 +1211,17 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
             tree_widget_item.setData(0, QtCore.Qt.UserRole, item['order'])
             tree_widget_item.setSelected(item['selected'])
             # Add the children to their parent tree_widget_item.
-            for count, frame in enumerate(service_item_from_item.get_frames()):
+            for slide_index, slide in enumerate(service_item_from_item.slides):
                 child = QtWidgets.QTreeWidgetItem(tree_widget_item)
                 # prefer to use a display_title
                 if service_item_from_item.is_capable(ItemCapabilities.HasDisplayTitle):
-                    text = frame['display_title'].replace('\n', ' ')
+                    text = slide['display_title'].replace('\n', ' ')
                 else:
-                    text = frame['title'].replace('\n', ' ')
+                    text = slide['title'].replace('\n', ' ')
                 child.setText(0, text[:40])
-                child.setData(0, QtCore.Qt.UserRole, count)
-                if service_item == item_count:
-                    if item['expanded'] and service_item_child == count:
+                child.setData(0, QtCore.Qt.UserRole, slide_index)
+                if service_item == item_index:
+                    if item['expanded'] and service_item_child == slide_index:
                         self.service_manager_list.setCurrentItem(child)
                     elif service_item_child == -1:
                         self.service_manager_list.setCurrentItem(tree_widget_item)
@@ -1339,7 +1339,7 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
             self.repaint_service_list(s_item, child)
             self.live_controller.replace_service_manager_item(item)
         else:
-            item.render()
+            # item.render()
             # nothing selected for dnd
             if self.drop_position == -1:
                 if isinstance(item, list):

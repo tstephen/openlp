@@ -23,7 +23,6 @@
 The :mod:`slidecontroller` module contains the most important part of OpenLP - the slide controller
 """
 import copy
-import os
 from collections import deque
 from threading import Lock
 
@@ -135,12 +134,15 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         """
         Set up the display
         """
+        if not self.is_live:
+            return
         if self.displays:
             # Delete any existing displays
             del self.displays[:]
-        # for screen in self.screens:
-        # display = DisplayWindow(self, self.screens.current)
-        # self.displays.append(display)
+        for screen in self.screens:
+            if screen.is_display:
+                display = DisplayWindow(self, screen)
+                self.displays.append(display)
         #    display.media_watcher.progress.connect(self.on_audio_time_remaining)
 
     @property
@@ -574,8 +576,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         """
         Settings dialog has changed the screen size of adjust output and screen previews.
         """
-        # rebuild display as screen size changed
-        if self.displays:
+        if self.is_live and self.displays:
             for display in self.displays:
                 display.resize(self.screens.current.display_geometry.size())
         # if self.is_live:
@@ -683,7 +684,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
             if (Settings().value(self.main_window.songs_settings_section + '/display songbar') and
                     not self.song_menu.menu().isEmpty()):
                 self.toolbar.set_widget_visible(['song_menu'], True)
-        if item.is_capable(ItemCapabilities.CanLoop) and len(item.get_frames()) > 1:
+        if item.is_capable(ItemCapabilities.CanLoop) and len(item.slides) > 1:
             self.toolbar.set_widget_visible(LOOP_LIST)
         if item.is_media():
             self.mediabar.show()
@@ -737,14 +738,14 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         theme_name = item.theme if item.theme else Registry().get('theme_manager').global_theme
         self.preview_display.set_theme(Registry().get('theme_manager').get_theme_data(theme_name))
         if item.is_text():
-            self.preview_display.load_verses([{'verse': f['verseTag'], 'text': f['raw_slide']}
-                                              for f in item._raw_frames])
-            self.preview_display.show_display()
-        # slide_no = 0
+            self.preview_display.load_verses(item.slides)
+        elif item.is_image():
+            self.preview_display.load_images(item.slides)
+        slide_no = 0
         # if self.song_edit:
         #     slide_no = self.selected_row
         # self.song_edit = False
-        # self._process_item(item, slide_no)
+        self._process_item(item, slide_no)
 
     def replace_service_manager_item(self, item):
         """
@@ -797,6 +798,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         old_item = self.service_item
         # rest to allow the remote pick up verse 1 if large imaged
         self.selected_row = 0
+        self.preview_display.go_to_slide(0)
         # take a copy not a link to the servicemanager copy.
         self.service_item = copy.copy(service_item)
         if self.service_item.is_command():
@@ -811,40 +813,40 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         self.slide_list = {}
         if self.is_live:
             self.song_menu.menu().clear()
-            if self.display.audio_player:
-                self.display.audio_player.reset()
-                self.set_audio_items_visibility(False)
-                self.audio_pause_item.setChecked(False)
-                # If the current item has background audio
-                if self.service_item.is_capable(ItemCapabilities.HasBackgroundAudio):
-                    self.log_debug('Starting to play...')
-                    self.display.audio_player.add_to_playlist(self.service_item.background_audio)
-                    self.track_menu.clear()
-                    for counter in range(len(self.service_item.background_audio)):
-                        action = self.track_menu.addAction(
-                            os.path.basename(str(self.service_item.background_audio[counter])))
-                        action.setData(counter)
-                        action.triggered.connect(self.on_track_triggered)
-                    self.display.audio_player.repeat = \
-                        Settings().value(self.main_window.general_settings_section + '/audio repeat list')
-                    if Settings().value(self.main_window.general_settings_section + '/audio start paused'):
-                        self.audio_pause_item.setChecked(True)
-                        self.display.audio_player.pause()
-                    else:
-                        self.display.audio_player.play()
-                    self.set_audio_items_visibility(True)
+            # if self.display.audio_player:
+            #     self.display.audio_player.reset()
+            #     self.set_audio_items_visibility(False)
+            #     self.audio_pause_item.setChecked(False)
+            #     # If the current item has background audio
+            #     if self.service_item.is_capable(ItemCapabilities.HasBackgroundAudio):
+            #         self.log_debug('Starting to play...')
+            #         self.display.audio_player.add_to_playlist(self.service_item.background_audio)
+            #         self.track_menu.clear()
+            #         for counter in range(len(self.service_item.background_audio)):
+            #             action = self.track_menu.addAction(
+            #                 os.path.basename(str(self.service_item.background_audio[counter])))
+            #             action.setData(counter)
+            #             action.triggered.connect(self.on_track_triggered)
+            #         self.display.audio_player.repeat = \
+            #             Settings().value(self.main_window.general_settings_section + '/audio repeat list')
+            #         if Settings().value(self.main_window.general_settings_section + '/audio start paused'):
+            #             self.audio_pause_item.setChecked(True)
+            #             self.display.audio_player.pause()
+            #         else:
+            #             self.display.audio_player.play()
+            #         self.set_audio_items_visibility(True)
         row = 0
         width = self.main_window.control_splitter.sizes()[self.split]
-        for frame_number, frame in enumerate(self.service_item.get_frames()):
+        for slide_index, slide in enumerate(self.service_item.slides):
             if self.service_item.is_text():
-                if frame['verseTag']:
+                if slide['verse']:
                     # These tags are already translated.
-                    verse_def = frame['verseTag']
+                    verse_def = slide['verse']
                     verse_def = '{def1}{def2}'.format(def1=verse_def[0], def2=verse_def[1:])
                     two_line_def = '{def1}\n{def2}'.format(def1=verse_def[0], def2=verse_def[1:])
                     row = two_line_def
                     if verse_def not in self.slide_list:
-                        self.slide_list[verse_def] = frame_number
+                        self.slide_list[verse_def] = slide_index
                         if self.is_live:
                             self.song_menu.menu().addAction(verse_def, self.on_song_bar_handler)
                 else:
@@ -854,16 +856,16 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
                 row += 1
                 self.slide_list[str(row)] = row - 1
                 # If current slide set background to image
-                if not self.service_item.is_command() and frame_number == slide_no:
+                if not self.service_item.is_command() and slide_index == slide_no:
                     self.service_item.bg_image_bytes = \
-                        self.image_manager.get_image_bytes(frame['path'], ImageSource.ImagePlugin)
+                        self.image_manager.get_image_bytes(slide['filename'], ImageSource.ImagePlugin)
         self.preview_widget.replace_service_item(self.service_item, width, slide_no)
         self.enable_tool_bar(self.service_item)
         # Pass to display for viewing.
         # Postpone image build, we need to do this later to avoid the theme
         # flashing on the screen
-        if not self.service_item.is_image():
-            self.display.build_html(self.service_item)
+        # if not self.service_item.is_image():
+        #     self.display.build_html(self.service_item)
         if self.service_item.is_media():
             self.on_media_start(self.service_item)
         self.slide_selected(True)
@@ -1098,7 +1100,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
             if not start:
                 Registry().execute('slidecontroller_live_unblank')
         row = self.preview_widget.current_slide_number()
-        old_selected_row = self.selected_row
+        # old_selected_row = self.selected_row
         self.selected_row = 0
         if -1 < row < self.preview_widget.slide_count():
             if self.service_item.is_command():
@@ -1106,20 +1108,26 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
                     Registry().execute('{text}_slide'.format(text=self.service_item.name.lower()),
                                        [self.service_item, self.is_live, row])
             else:
-                to_display = self.service_item.get_rendered_frame(row)
+                # to_display = self.service_item.get_rendered_frame(row)
                 if self.service_item.is_text():
-                    self.display.text(to_display, row != old_selected_row)
+                    for display in self.displays:
+                        display.go_to_slide(row)
+                    # self.display.text(to_display, row != old_selected_row)
                 else:
                     if start:
-                        self.display.build_html(self.service_item, to_display)
+                        for display in self.displays:
+                            display.load_images([])
+                        # self.display.build_html(self.service_item, to_display)
                     else:
-                        self.display.image(to_display)
+                        for display in self.displays:
+                            display.go_to_slide(row)
+                        # self.display.image(to_display)
                     # reset the store used to display first image
                     self.service_item.bg_image_bytes = None
             self.selected_row = row
             self.update_preview()
             self.preview_widget.change_slide(row)
-        self.display.setFocus()
+        # TODO: self.display.setFocus()
         # Release lock
         self.slide_selected_lock.release()
 
@@ -1137,7 +1145,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         """
         This updates the preview frame, for example after changing a slide or using *Blank to Theme*.
         """
-        self.log_debug('update_preview {text} '.format(text=self.screens.current['primary']))
+        self.log_debug('update_preview {text} '.format(text=self.screens.current))
         if self.service_item and self.service_item.is_capable(ItemCapabilities.ProvidesOwnDisplay):
             if self.is_live:
                 # If live, grab screen-cap of main display now
@@ -1155,9 +1163,11 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
                 self.slide_image.setDevicePixelRatio(self.main_window.devicePixelRatio())
                 self.slide_preview.setPixmap(self.slide_image)
         else:
-            self.slide_image = self.display.preview()
-            self.slide_image.setDevicePixelRatio(self.main_window.devicePixelRatio())
-            self.slide_preview.setPixmap(self.slide_image)
+            print('Updating preview ... need to figure out what is supposed to happen here')
+            self.preview_display.go_to_slide(self.selected_row)
+            # self.slide_image = self.display.preview()
+            # self.slide_image.setDevicePixelRatio(self.main_window.devicePixelRatio())
+            # self.slide_preview.setPixmap(self.slide_image)
         self.slide_count += 1
 
     def grab_maindisplay(self):

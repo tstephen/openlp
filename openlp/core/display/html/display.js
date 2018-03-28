@@ -226,15 +226,24 @@ AudioPlayer.prototype.play = function () {
     console.warn("No track currently paused and no track specified, doing nothing.");
   }
 };
+
+/**
+ * Pause
+ */
 AudioPlayer.prototype.pause = function () {
   this._audioElement.pause();
   this._state = AudioState.Paused;
 };
+
+/**
+ * Stop playing
+ */
 AudioPlayer.prototype.stop = function () {
   this._audioElement.pause();
   this._audioElement.src = "";
   this._state = AudioState.Stopped;
 };
+
 /**
  * The Display object is what we use from OpenLP
  */
@@ -250,8 +259,8 @@ var Display = {
     overview: false,
     center: false,
     help: false,
-    transition: "slide",
-    backgroundTransition: "fade",
+    transition: "none",
+    backgroundTransition: "none",
     viewDistance: 9999,
     width: "100%",
     height: "100%"
@@ -321,15 +330,15 @@ var Display = {
     slides.forEach(function (slide) {
       Display.addTextSlide(slide.verse, slide.text, false);
     });
-    this.reinit();
+    Display.reinit();
+    Display.goToSlide(0);
   },
   /**
    * Set image slides
    * @param {Object[]} slides - A list of images to add as JS objects [{"file": "url/to/file"}]
    */
   setImageSlides: function (slides) {
-    var $this = this;
-    $this.clearSlides();
+    Display.clearSlides();
     var slidesDiv = $(".slides")[0];
     slides.forEach(function (slide, index) {
       var section = document.createElement("section");
@@ -340,9 +349,9 @@ var Display = {
       img.setAttribute("style", "height: 100%; width: 100%;");
       section.appendChild(img);
       slidesDiv.appendChild(section);
-      $this._slides[index.toString()] = index;
+      Display._slides[index.toString()] = index;
     });
-    this.reinit();
+    Display.reinit();
   },
   /**
    * Set a video
@@ -461,7 +470,12 @@ var Display = {
    * @param slide The slide number or name, e.g. "v1", 0
    */
   goToSlide: function (slide) {
-    Reveal.slide(this._slides[slide]);
+    if (this._slides.hasOwnProperty(slide)) {
+      Reveal.slide(this._slides[slide]);
+    }
+    else {
+      Reveal.slide(slide);
+    }
   },
   /**
    * Go to the next slide in the list

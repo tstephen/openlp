@@ -24,7 +24,6 @@ The :mod:`serviceitem` provides the service item functionality including the
 type and capability of an item.
 """
 import datetime
-import html
 import logging
 import ntpath
 import os
@@ -36,9 +35,9 @@ from openlp.core.common import md5_hash
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.i18n import translate
 from openlp.core.common.mixins import RegistryProperties
-from openlp.core.common.path import Path
+from openlp.core.common.path import Path, path_to_str
 from openlp.core.common.settings import Settings
-from openlp.core.display.render import remove_tags, render_tags, render_chords
+# from openlp.core.display.render import remove_tags, render_tags, render_chords
 from openlp.core.lib import ImageSource, build_icon
 
 log = logging.getLogger(__name__)
@@ -163,6 +162,7 @@ class ServiceItem(RegistryProperties):
         if plugin:
             self.name = plugin.name
         self.title = ''
+        self.slides = []
         self.processor = None
         self.audit = ''
         self.items = []
@@ -171,8 +171,8 @@ class ServiceItem(RegistryProperties):
         self.foot_text = ''
         self.theme = None
         self.service_item_type = None
-        self._raw_frames = []
-        self._display_frames = []
+        # self._raw_frames = []
+        # self._display_frames = []
         self.unique_identifier = 0
         self.notes = ''
         self.from_plugin = False
@@ -234,91 +234,91 @@ class ServiceItem(RegistryProperties):
         self.icon = icon
         self.iconic_representation = build_icon(icon)
 
-    def render(self, provides_own_theme_data=False):
-        """
-        The render method is what generates the frames for the screen and obtains the display information from the
-        renderer. At this point all slides are built for the given display size.
+    # def render(self, provides_own_theme_data=False):
+    #    """
+    #    The render method is what generates the frames for the screen and obtains the display information from the
+    #    renderer. At this point all slides are built for the given display size.
+    #
+    #    :param provides_own_theme_data: This switch disables the usage of the item's theme. However, this is
+    #        disabled by default. If this is used, it has to be taken care, that
+    #        the renderer knows the correct theme data. However, this is needed
+    #        for the theme manager.
+    #    """
+    #    log.debug('Render called')
+    #    self._display_frames = []
+    #    self.bg_image_bytes = None
+    #    # if not provides_own_theme_data:
+    #    #     self.renderer.set_item_theme(self.theme)
+    #    #     self.theme_data, self.main, self.footer = self.renderer.pre_render()
+    #    if self.service_item_type == ServiceItemType.Text:
+    #        can_render_chords = hasattr(self, 'name') and self.name == 'songs' and Settings().value(
+    #            'songs/enable chords')
+    #        log.debug('Formatting slides: {title}'.format(title=self.title))
+    #        # Save rendered pages to this dict. In the case that a slide is used twice we can use the pages saved to
+    #        # the dict instead of rendering them again.
+    #        previous_pages = {}
+    #        for slide in self._raw_frames:
+    #            verse_tag = slide['verseTag']
+    #            if verse_tag in previous_pages and previous_pages[verse_tag][0] == slide['raw_slide']:
+    #                pages = previous_pages[verse_tag][1]
+    #            else:
+    #                # pages = self.renderer.format_slide(slide['raw_slide'], self)
+    #                previous_pages[verse_tag] = (slide['raw_slide'], pages)
+    #            for page in pages:
+    #                page = page.replace('<br>', '{br}')
+    #                html_data = render_tags(page.rstrip(), can_render_chords)
+    #                new_frame = {
+    #                    'title': remove_tags(page),
+    #                    'text': remove_tags(page.rstrip(), can_render_chords),
+    #                    'chords_text': render_chords(remove_tags(page.rstrip(), False)),
+    #                    'html': html_data.replace('&amp;nbsp;', '&nbsp;'),
+    #                    'printing_html': render_tags(html.escape(page.rstrip()), can_render_chords, is_printing=True),
+    #                    'verseTag': verse_tag,
+    #                }
+    #                self._display_frames.append(new_frame)
+    #    elif self.service_item_type == ServiceItemType.Image or self.service_item_type == ServiceItemType.Command:
+    #        pass
+    #    else:
+    #        log.error('Invalid value renderer: {item}'.format(item=self.service_item_type))
+    #    self.title = remove_tags(self.title)
+    #    # The footer should never be None, but to be compatible with a few
+    #    # nightly builds between 1.9.4 and 1.9.5, we have to correct this to
+    #    # avoid tracebacks.
+    #    if self.raw_footer is None:
+    #        self.raw_footer = []
+    #    self.foot_text = '<br>'.join([_f for _f in self.raw_footer if _f])
 
-        :param provides_own_theme_data: This switch disables the usage of the item's theme. However, this is
-            disabled by default. If this is used, it has to be taken care, that
-            the renderer knows the correct theme data. However, this is needed
-            for the theme manager.
-        """
-        log.debug('Render called')
-        self._display_frames = []
-        self.bg_image_bytes = None
-        # if not provides_own_theme_data:
-        #     self.renderer.set_item_theme(self.theme)
-        #     self.theme_data, self.main, self.footer = self.renderer.pre_render()
-        if self.service_item_type == ServiceItemType.Text:
-            can_render_chords = hasattr(self, 'name') and self.name == 'songs' and Settings().value(
-                'songs/enable chords')
-            log.debug('Formatting slides: {title}'.format(title=self.title))
-            # Save rendered pages to this dict. In the case that a slide is used twice we can use the pages saved to
-            # the dict instead of rendering them again.
-            previous_pages = {}
-            for slide in self._raw_frames:
-                verse_tag = slide['verseTag']
-                if verse_tag in previous_pages and previous_pages[verse_tag][0] == slide['raw_slide']:
-                    pages = previous_pages[verse_tag][1]
-                else:
-                    # pages = self.renderer.format_slide(slide['raw_slide'], self)
-                    previous_pages[verse_tag] = (slide['raw_slide'], pages)
-                for page in pages:
-                    page = page.replace('<br>', '{br}')
-                    html_data = render_tags(page.rstrip(), can_render_chords)
-                    new_frame = {
-                        'title': remove_tags(page),
-                        'text': remove_tags(page.rstrip(), can_render_chords),
-                        'chords_text': render_chords(remove_tags(page.rstrip(), False)),
-                        'html': html_data.replace('&amp;nbsp;', '&nbsp;'),
-                        'printing_html': render_tags(html.escape(page.rstrip()), can_render_chords, is_printing=True),
-                        'verseTag': verse_tag,
-                    }
-                    self._display_frames.append(new_frame)
-        elif self.service_item_type == ServiceItemType.Image or self.service_item_type == ServiceItemType.Command:
-            pass
-        else:
-            log.error('Invalid value renderer: {item}'.format(item=self.service_item_type))
-        self.title = remove_tags(self.title)
-        # The footer should never be None, but to be compatible with a few
-        # nightly builds between 1.9.4 and 1.9.5, we have to correct this to
-        # avoid tracebacks.
-        if self.raw_footer is None:
-            self.raw_footer = []
-        self.foot_text = '<br>'.join([_f for _f in self.raw_footer if _f])
-
-    def add_from_image(self, path, title, background=None, thumbnail=None):
+    def add_from_image(self, filename, title, background=None, thumbnail=None):
         """
         Add an image slide to the service item.
 
-        :param path: The directory in which the image file is located.
+        :param filename: The directory in which the image file is located.
         :param title: A title for the slide in the service item.
-        :param background:
+        :param background: The background colour
         :param thumbnail: Optional alternative thumbnail, used for remote thumbnails.
         """
         if background:
             self.image_border = background
         self.service_item_type = ServiceItemType.Image
-        if not thumbnail:
-            self._raw_frames.append({'title': title, 'path': path})
-        else:
-            self._raw_frames.append({'title': title, 'path': path, 'image': thumbnail})
-        self.image_manager.add_image(path, ImageSource.ImagePlugin, self.image_border)
+        slide = {'title': title, 'filename': filename}
+        if thumbnail:
+            slide['thumbnail'] = thumbnail
+        self.slides.append(slide)
+        # self.image_manager.add_image(path, ImageSource.ImagePlugin, self.image_border)
         self._new_item()
 
-    def add_from_text(self, raw_slide, verse_tag=None):
+    def add_from_text(self, text, verse_tag=None):
         """
         Add a text slide to the service item.
 
-        :param raw_slide: The raw text of the slide.
+        :param text: The raw text of the slide.
         :param verse_tag:
         """
         if verse_tag:
             verse_tag = verse_tag.upper()
         self.service_item_type = ServiceItemType.Text
-        title = raw_slide[:30].split('\n')[0]
-        self._raw_frames.append({'title': title, 'raw_slide': raw_slide, 'verseTag': verse_tag})
+        title = text[:30].split('\n')[0]
+        self.slides.append({'title': title, 'text': text, 'verse': verse_tag})
         self._new_item()
 
     def add_from_command(self, path, file_name, image, display_title=None, notes=None):
@@ -342,8 +342,8 @@ class ServiceItem(RegistryProperties):
             file_location_hash = md5_hash(file_location.encode('utf-8'))
             image = os.path.join(str(AppLocation.get_section_data_path(self.name)), 'thumbnails',
                                  file_location_hash, ntpath.basename(image))
-        self._raw_frames.append({'title': file_name, 'image': image, 'path': path,
-                                 'display_title': display_title, 'notes': notes})
+        self.slides.append({'title': file_name, 'image': image, 'path': path,
+                            'display_title': display_title, 'notes': notes})
         if self.is_capable(ItemCapabilities.HasThumbnails):
             self.image_manager.add_image(image, ImageSource.CommandPlugins, '#000000')
         self._new_item()
@@ -474,10 +474,10 @@ class ServiceItem(RegistryProperties):
                 or self.is_capable(ItemCapabilities.CanEditTitle):
             return self.title
         else:
-            if len(self._raw_frames) > 1:
+            if len(self.slides) > 1:
                 return self.title
             else:
-                return self._raw_frames[0]['title']
+                return self.slides[0]['title']
 
     def merge(self, other):
         """
@@ -665,22 +665,22 @@ class ServiceItem(RegistryProperties):
         Validates a service item to make sure it is valid
         """
         self.is_valid = True
-        for frame in self._raw_frames:
-            if self.is_image() and not os.path.exists(frame['path']):
+        for slide in self.slides:
+            if self.is_image() and not os.path.exists(slide['filename']):
                 self.is_valid = False
                 break
             elif self.is_command():
                 if self.is_capable(ItemCapabilities.IsOptical):
-                    if not os.path.exists(frame['title']):
+                    if not os.path.exists(slide['title']):
                         self.is_valid = False
                         break
                 else:
-                    file_name = os.path.join(frame['path'], frame['title'])
+                    file_name = os.path.join(slide['path'], slide['title'])
                     if not os.path.exists(file_name):
                         self.is_valid = False
                         break
                     if suffix_list and not self.is_text():
-                        file_suffix = frame['title'].split('.')[-1]
+                        file_suffix = slide['title'].split('.')[-1]
                         if file_suffix.lower() not in suffix_list:
                             self.is_valid = False
                             break

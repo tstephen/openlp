@@ -120,8 +120,8 @@ class ListPreviewWidget(QtWidgets.QTableWidget, RegistryProperties):
                         self.auto_row_height = max(self.viewport().height() / (-1 * max_img_row_height), 100)
                         height = min(height, self.auto_row_height)
                 # Apply new height to slides
-                for frame_number in range(len(self.service_item.get_frames())):
-                    self.setRowHeight(frame_number, height)
+                for slide_index in range(len(self.service_item.slides)):
+                    self.setRowHeight(slide_index, height)
 
     def row_resized(self, row, old_height, new_height):
         """
@@ -134,7 +134,8 @@ class ListPreviewWidget(QtWidgets.QTableWidget, RegistryProperties):
         # Get and validate label widget containing slide & adjust max width
         try:
             self.cellWidget(row, 0).children()[1].setMaximumWidth(new_height * self.screen_ratio)
-        except:
+        except Exception:
+            # TODO: Figure out what sort of exceptions are thrown
             return
 
     def screen_size_changed(self, screen_ratio):
@@ -160,20 +161,20 @@ class ListPreviewWidget(QtWidgets.QTableWidget, RegistryProperties):
         self.setColumnWidth(0, width)
         row = 0
         text = []
-        for frame_number, frame in enumerate(self.service_item.get_frames()):
+        for slide_index, slide in enumerate(self.service_item.slides):
             self.setRowCount(self.slide_count() + 1)
             item = QtWidgets.QTableWidgetItem()
             slide_height = 0
             if self.service_item.is_text():
-                if frame['verseTag']:
+                if slide['verse']:
                     # These tags are already translated.
-                    verse_def = frame['verseTag']
+                    verse_def = slide['verse']
                     verse_def = '%s%s' % (verse_def[0], verse_def[1:])
                     two_line_def = '%s\n%s' % (verse_def[0], verse_def[1:])
                     row = two_line_def
                 else:
                     row += 1
-                item.setText(frame['text'])
+                item.setText(slide['text'])
             else:
                 label = QtWidgets.QLabel()
                 label.setContentsMargins(4, 4, 4, 4)
@@ -183,12 +184,12 @@ class ListPreviewWidget(QtWidgets.QTableWidget, RegistryProperties):
                     label.setScaledContents(True)
                 if self.service_item.is_command():
                     if self.service_item.is_capable(ItemCapabilities.HasThumbnails):
-                        image = self.image_manager.get_image(frame['image'], ImageSource.CommandPlugins)
+                        image = self.image_manager.get_image(slide['image'], ImageSource.CommandPlugins)
                         pixmap = QtGui.QPixmap.fromImage(image)
                     else:
-                        pixmap = QtGui.QPixmap(frame['image'])
+                        pixmap = QtGui.QPixmap(slide['image'])
                 else:
-                    image = self.image_manager.get_image(frame['path'], ImageSource.ImagePlugin)
+                    image = self.image_manager.get_image(slide['filename'], ImageSource.ImagePlugin)
                     pixmap = QtGui.QPixmap.fromImage(image)
                 pixmap.setDevicePixelRatio(label.devicePixelRatio())
                 label.setPixmap(pixmap)
@@ -212,15 +213,15 @@ class ListPreviewWidget(QtWidgets.QTableWidget, RegistryProperties):
                     hbox.addStretch(0)
                     container.setLayout(hbox)
                     # Add to table
-                    self.setCellWidget(frame_number, 0, container)
+                    self.setCellWidget(slide_index, 0, container)
                 else:
                     # Add to table
-                    self.setCellWidget(frame_number, 0, label)
+                    self.setCellWidget(slide_index, 0, label)
                 row += 1
             text.append(str(row))
-            self.setItem(frame_number, 0, item)
+            self.setItem(slide_index, 0, item)
             if slide_height:
-                self.setRowHeight(frame_number, slide_height)
+                self.setRowHeight(slide_index, slide_height)
         self.setVerticalHeaderLabels(text)
         if self.service_item.is_text():
             self.resizeRowsToContents()

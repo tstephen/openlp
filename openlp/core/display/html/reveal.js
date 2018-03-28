@@ -337,10 +337,10 @@
 	/**
 	 * Restarts up the presentation if the client is capable.
 	 */
-	function reinitialize() {
-		initialized = false;
-                initialize(config);
-        }
+    function reinitialize() {
+        initialized = false;
+        initialize(config);
+    }
 
 	/**
 	 * Inspect the client to see what it's capable of, this

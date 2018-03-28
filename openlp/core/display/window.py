@@ -182,6 +182,14 @@ class DisplayWindow(QtWidgets.QWidget):
                 QtWidgets.QApplication.instance().processEvents()
             return self.__script_result
 
+    def go_to_slide(self, verse):
+        """
+        Go to a particular slide.
+
+        :param str verse: The verse to go to, e.g. "V1" for songs, or just "0" for other types
+        """
+        self.run_javascript('Display.goToSlide("{verse}");'.format(verse=verse))
+
     def load_verses(self, verses):
         """
         Set verses in the display
