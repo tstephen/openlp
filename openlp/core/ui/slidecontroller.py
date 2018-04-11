@@ -39,6 +39,7 @@ from openlp.core.lib import ItemCapabilities, ImageSource, ServiceItemAction, bu
 from openlp.core.lib.ui import create_action
 from openlp.core.ui import HideMode, DisplayControllerType
 from openlp.core.display.window import DisplayWindow
+from openlp.core.display.render import render_tags
 from openlp.core.widgets.layouts import AspectRatioLayout
 from openlp.core.widgets.toolbar import OpenLPToolbar
 from openlp.core.widgets.views import ListPreviewWidget
@@ -738,7 +739,10 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         theme_name = item.theme if item.theme else Registry().get('theme_manager').global_theme
         self.preview_display.set_theme(Registry().get('theme_manager').get_theme_data(theme_name))
         if item.is_text():
-            self.preview_display.load_verses(item.slides)
+            slides = item.slides.copy()
+            for slide in slides:
+                slide['text'] = render_tags(slide['text'])
+            self.preview_display.load_verses(slides)
         elif item.is_image():
             self.preview_display.load_images(item.slides)
         slide_no = 0
@@ -1163,11 +1167,9 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
                 self.slide_image.setDevicePixelRatio(self.main_window.devicePixelRatio())
                 self.slide_preview.setPixmap(self.slide_image)
         else:
-            print('Updating preview ... need to figure out what is supposed to happen here')
             self.preview_display.go_to_slide(self.selected_row)
-            # self.slide_image = self.display.preview()
-            # self.slide_image.setDevicePixelRatio(self.main_window.devicePixelRatio())
-            # self.slide_preview.setPixmap(self.slide_image)
+            for display in self.displays:
+                display.go_to_slide(self.selected_row)
         self.slide_count += 1
 
     def grab_maindisplay(self):
