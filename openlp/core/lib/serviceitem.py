@@ -35,7 +35,7 @@ from openlp.core.common import md5_hash
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.i18n import translate
 from openlp.core.common.mixins import RegistryProperties
-from openlp.core.common.path import Path, path_to_str
+from openlp.core.common.path import Path
 from openlp.core.common.settings import Settings
 # from openlp.core.display.render import remove_tags, render_tags, render_chords
 from openlp.core.lib import ImageSource, build_icon
@@ -321,6 +321,9 @@ class ServiceItem(RegistryProperties):
         """
         if verse_tag:
             verse_tag = verse_tag.upper()
+        else:
+            # For items that don't have a verse tag, autoincrement the slide numbers
+            verse_tag = str(len(self.slides))
         self.service_item_type = ServiceItemType.Text
         title = text[:30].split('\n')[0]
         self.slides.append({'title': title, 'text': text, 'verse': verse_tag})

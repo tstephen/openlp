@@ -1174,8 +1174,6 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
                 self.slide_preview.setPixmap(self.slide_image)
         else:
             self.preview_display.go_to_slide(self.selected_row)
-            for display in self.displays:
-                display.go_to_slide(self.selected_row)
         self.slide_count += 1
 
     def grab_maindisplay(self):
