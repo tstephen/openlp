@@ -318,6 +318,10 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
                                             tooltip=translate('OpenLP.SlideController',
                                                               'Edit and reload song preview.'),
                                             triggers=self.on_edit_song)
+            self.toolbar.add_toolbar_action('clear', icon=':/general/general_delete.png',
+                                            tooltip=translate('OpenLP.SlideController',
+                                                              'Clear'),
+                                            triggers=self.on_clear)
         self.controller_layout.addWidget(self.toolbar)
         # Build the Media Toolbar
         self.media_controller.register_controller(self)
@@ -356,7 +360,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
             self.audio_time_label.setObjectName('audio_time_label')
             self.toolbar.add_toolbar_widget(self.audio_time_label)
             self.toolbar.set_widget_visible(AUDIO_LIST, False)
-            self.toolbar.set_widget_visible(['song_menu'], False)
+            self.toolbar.set_widget_visible('song_menu', False)
         # Screen preview area
         self.preview_frame = QtWidgets.QFrame(self.splitter)
         self.preview_frame.setGeometry(QtCore.QRect(0, 0, 300, 300 * self.ratio))
@@ -412,7 +416,8 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
             self.__add_actions_to_widget(self.controller)
         else:
             self.preview_widget.doubleClicked.connect(self.on_preview_double_click)
-            self.toolbar.set_widget_visible(['editSong'], False)
+            self.toolbar.set_widget_visible('editSong', False)
+            self.toolbar.set_widget_visible('clear', False)
             self.controller.addActions([self.next_item, self.previous_item])
         Registry().register_function('slidecontroller_{text}_stop_loop'.format(text=self.type_prefix),
                                      self.on_stop_loop)
@@ -673,7 +678,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         self.mediabar.hide()
         self.song_menu.hide()
         self.toolbar.set_widget_visible(LOOP_LIST, False)
-        self.toolbar.set_widget_visible(['song_menu'], False)
+        self.toolbar.set_widget_visible('song_menu', False)
         # Reset the button
         self.play_slides_once.setChecked(False)
         self.play_slides_once.setIcon(build_icon(':/media/media_time.png'))
@@ -684,7 +689,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         if item.is_text():
             if (Settings().value(self.main_window.songs_settings_section + '/display songbar') and
                     not self.song_menu.menu().isEmpty()):
-                self.toolbar.set_widget_visible(['song_menu'], True)
+                self.toolbar.set_widget_visible('song_menu', True)
         if item.is_capable(ItemCapabilities.CanLoop) and len(item.slides) > 1:
             self.toolbar.set_widget_visible(LOOP_LIST)
         if item.is_media():
@@ -709,9 +714,10 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         # See bug #791050
         self.toolbar.hide()
         self.mediabar.hide()
-        self.toolbar.set_widget_visible(['editSong'], False)
+        self.toolbar.set_widget_visible('editSong', False)
+        self.toolbar.set_widget_visible('clear', True)
         if item.is_capable(ItemCapabilities.CanEdit) and item.from_plugin:
-            self.toolbar.set_widget_visible(['editSong'])
+            self.toolbar.set_widget_visible('editSong')
         elif item.is_media():
             self.mediabar.show()
         self.previous_item.setVisible(not item.is_media())
@@ -1359,6 +1365,14 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         new_item = Registry().get(self.service_item.name).on_remote_edit(self.service_item.edit_id, True)
         if new_item:
             self.add_service_item(new_item)
+
+    def on_clear(self):
+        """
+        Clear the preview bar.
+        """
+        self.preview_widget.clear_list()
+        self.toolbar.set_widget_visible('editSong', False)
+        self.toolbar.set_widget_visible('clear', False)
 
     def on_preview_add_to_service(self):
         """
