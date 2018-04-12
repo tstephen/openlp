@@ -168,7 +168,8 @@ class ListPreviewWidget(QtWidgets.QTableWidget, RegistryProperties):
         self.clear_list()
         row = 0
         text = []
-        for slide_index, slide in enumerate(self.service_item.slides):
+        slides = self.service_item.display_slides if self.service_item.is_text() else self.service_item.slides
+        for slide_index, slide in enumerate(slides):
             self.setRowCount(self.slide_count() + 1)
             item = QtWidgets.QTableWidgetItem()
             slide_height = 0

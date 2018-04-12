@@ -39,7 +39,6 @@ from openlp.core.lib import ItemCapabilities, ImageSource, ServiceItemAction, bu
 from openlp.core.lib.ui import create_action
 from openlp.core.ui import HideMode, DisplayControllerType
 from openlp.core.display.window import DisplayWindow
-from openlp.core.display.render import render_tags
 from openlp.core.widgets.layouts import AspectRatioLayout
 from openlp.core.widgets.toolbar import OpenLPToolbar
 from openlp.core.widgets.views import ListPreviewWidget
@@ -745,10 +744,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         theme_name = item.theme if item.theme else Registry().get('theme_manager').global_theme
         self.preview_display.set_theme(Registry().get('theme_manager').get_theme_data(theme_name))
         if item.is_text():
-            slides = item.slides.copy()
-            for slide in slides:
-                slide['text'] = render_tags(slide['text'])
-            self.preview_display.load_verses(slides)
+            self.preview_display.load_verses(item.rendered_slides)
         elif item.is_image():
             self.preview_display.load_images(item.slides)
         slide_no = 0
@@ -847,9 +843,9 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
             #         self.set_audio_items_visibility(True)
         row = 0
         width = self.main_window.control_splitter.sizes()[self.split]
-        for slide_index, slide in enumerate(self.service_item.slides):
-            if self.service_item.is_text():
-                if slide['verse']:
+        if self.service_item.is_text():
+            for slide_index, slide in enumerate(self.service_item.display_slides):
+                if not slide['verse'].isdigit():
                     # These tags are already translated.
                     verse_def = slide['verse']
                     verse_def = '{def1}{def2}'.format(def1=verse_def[0], def2=verse_def[1:])
@@ -862,7 +858,8 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
                 else:
                     row += 1
                     self.slide_list[str(row)] = row - 1
-            else:
+        else:
+            for slide_index, slide in enumerate(self.service_item.slides):
                 row += 1
                 self.slide_list[str(row)] = row - 1
                 # If current slide set background to image

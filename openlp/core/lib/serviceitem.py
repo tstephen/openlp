@@ -28,6 +28,7 @@ import logging
 import ntpath
 import os
 import uuid
+from copy import deepcopy
 
 from PyQt5 import QtGui
 
@@ -37,7 +38,7 @@ from openlp.core.common.i18n import translate
 from openlp.core.common.mixins import RegistryProperties
 from openlp.core.common.path import Path
 from openlp.core.common.settings import Settings
-# from openlp.core.display.render import remove_tags, render_tags, render_chords
+from openlp.core.display.render import remove_tags, render_tags
 from openlp.core.lib import ImageSource, build_icon
 
 log = logging.getLogger(__name__)
@@ -165,6 +166,8 @@ class ServiceItem(RegistryProperties):
         """
         if plugin:
             self.name = plugin.name
+        self._rendered_slides = None
+        self._display_slides = None
         self.title = ''
         self.slides = []
         self.processor = None
@@ -175,8 +178,6 @@ class ServiceItem(RegistryProperties):
         self.foot_text = ''
         self.theme = None
         self.service_item_type = None
-        # self._raw_frames = []
-        # self._display_frames = []
         self.unique_identifier = 0
         self.notes = ''
         self.from_plugin = False
@@ -238,6 +239,32 @@ class ServiceItem(RegistryProperties):
         """
         self.icon = icon
         self.iconic_representation = build_icon(icon)
+
+    @property
+    def rendered_slides(self):
+        """
+        Render the frames and return them
+        """
+        if not self._rendered_slides:
+            self._rendered_slides = []
+            for raw_slide in self.slides:
+                rendered_slide = deepcopy(raw_slide)
+                rendered_slide['text'] = render_tags(rendered_slide['text'])
+                self._rendered_slides.append(rendered_slide)
+        return self._rendered_slides
+
+    @property
+    def display_slides(self):
+        """
+        Render the frames and return them
+        """
+        if not self._display_slides:
+            self._display_slides = []
+            for raw_slide in self.slides:
+                display_slide = deepcopy(raw_slide)
+                display_slide['text'] = remove_tags(display_slide['text'])
+                self._display_slides.append(display_slide)
+        return self._display_slides
 
     # def render(self, provides_own_theme_data=False):
     #    """

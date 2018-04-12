@@ -376,7 +376,6 @@ class MainCanvas(OpenLPMixin, Canvas, RegistryProperties):
             self.application.process_events()
         self.setGeometry(self.screen['size'])
         json_verses = json.dumps(slide)
-        print(json_verses)
         self.run_javascript('Display.setTextSlides({verses});'.format(verses=json_verses))
         #if animate:
         #    # NOTE: Verify this works with ''.format()
