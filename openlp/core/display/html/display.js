@@ -335,7 +335,7 @@ var Display = {
   },
   /**
    * Set image slides
-   * @param {Object[]} slides - A list of images to add as JS objects [{"file": "url/to/file"}]
+   * @param {Object[]} slides - A list of images to add as JS objects [{"filename": "url/to/file"}]
    */
   setImageSlides: function (slides) {
     Display.clearSlides();
@@ -345,7 +345,7 @@ var Display = {
       section.setAttribute("id", index);
       section.setAttribute("data-background", "#000");
       var img = document.createElement('img');
-      img.src = slide["file"];
+      img.src = slide["filename"];
       img.setAttribute("style", "height: 100%; width: 100%;");
       section.appendChild(img);
       slidesDiv.appendChild(section);
@@ -355,14 +355,14 @@ var Display = {
   },
   /**
    * Set a video
-   * @param {Object} video - The video to show as a JS object: {"file": "url/to/file"}
+   * @param {Object} video - The video to show as a JS object: {"filename": "url/to/file"}
    */
   setVideo: function (video) {
     this.clearSlides();
     var section = document.createElement("section");
     section.setAttribute("data-background", "#000");
     var videoElement = document.createElement("video");
-    videoElement.src = video["file"];
+    videoElement.src = video["filename"];
     videoElement.preload = "auto";
     videoElement.setAttribute("id", "video");
     videoElement.setAttribute("style", "height: 100%; width: 100%;");

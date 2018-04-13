@@ -863,9 +863,9 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
                 row += 1
                 self.slide_list[str(row)] = row - 1
                 # If current slide set background to image
-                if not self.service_item.is_command() and slide_index == slide_no:
-                    self.service_item.bg_image_bytes = \
-                        self.image_manager.get_image_bytes(slide['filename'], ImageSource.ImagePlugin)
+                # if not self.service_item.is_command() and slide_index == slide_no:
+                #     self.service_item.bg_image_bytes = \
+                #         self.image_manager.get_image_bytes(slide['filename'], ImageSource.ImagePlugin)
         self.preview_widget.replace_service_item(self.service_item, width, slide_no)
         self.enable_tool_bar(self.service_item)
         # Pass to display for viewing.
