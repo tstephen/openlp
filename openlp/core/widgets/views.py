@@ -31,7 +31,7 @@ from openlp.core.common.mixins import RegistryProperties
 from openlp.core.common.path import Path
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
-from openlp.core.lib import ImageSource, ItemCapabilities, ServiceItem
+from openlp.core.lib import ItemCapabilities, ServiceItem
 from openlp.core.widgets.layouts import AspectRatioLayout
 
 
@@ -52,6 +52,16 @@ def handle_mime_data_urls(mime_data):
             for path in local_path.iterdir():
                 file_paths.append(path)
     return file_paths
+
+
+def remove_url_prefix(filename):
+    """
+    Remove the "file://" URL prefix
+
+    :param str filename: The filename that may have a file URL prefix
+    :returns str: The file name without the file URL prefix
+    """
+    return filename.replace('file://', '')
 
 
 class ListPreviewWidget(QtWidgets.QTableWidget, RegistryProperties):
@@ -187,52 +197,28 @@ class ListPreviewWidget(QtWidgets.QTableWidget, RegistryProperties):
             else:
                 label = QtWidgets.QLabel()
                 label.setContentsMargins(4, 4, 4, 4)
-                if self.service_item.is_media():
-                    label.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
-                else:
+                label.setAlignment(QtCore.Qt.AlignCenter)
+                if not self.service_item.is_media():
                     label.setScaledContents(True)
                 if self.service_item.is_command():
                     if self.service_item.is_capable(ItemCapabilities.HasThumbnails):
-                        image = self.image_manager.get_image(slide['image'], ImageSource.CommandPlugins)
-                        pixmap = QtGui.QPixmap.fromImage(image)
+                        pixmap = QtGui.QPixmap(remove_url_prefix(slide['thumbnail']))
                     else:
-                        pixmap = QtGui.QPixmap(slide['image'])
+                        pixmap = QtGui.QPixmap(remove_url_prefix(slide['image']))
                 else:
-                    # image = self.image_manager.get_image(slide['filename'], ImageSource.ImagePlugin)
-                    # pixmap = QtGui.QPixmap.fromImage(image)
-                    pixmap = QtGui.QPixmap(slide['filename'].replace('file://', ''))
-                # pixmap.setDevicePixelRatio(label.devicePixelRatio())
+                    pixmap = QtGui.QPixmap(remove_url_prefix(slide['filename']))
                 label.setPixmap(pixmap)
-                label.setScaledContents(True)
-                label.setAlignment(QtCore.Qt.AlignCenter)
                 container = QtWidgets.QWidget()
                 layout = AspectRatioLayout(container, self.screen_ratio)
                 layout.setContentsMargins(0, 0, 0, 0)
                 layout.addWidget(label)
                 container.setLayout(layout)
-                # slide_height = width // self.screen_ratio
-                # Setup and validate row height cap if in use.
-                # max_img_row_height = Settings().value('advanced/slide max height')
-                # if isinstance(max_img_row_height, int) and max_img_row_height != 0:
-                # if max_img_row_height > 0 and slide_height > max_img_row_height:
-                # # Manual Setting
-                # slide_height = max_img_row_height
-                # elif max_img_row_height < 0 and slide_height > self.auto_row_height:
-                # # Auto Setting
-                # slide_height = self.auto_row_height
-                # label.setMaximumWidth(slide_height * self.screen_ratio)
-                # label.resize(slide_height * self.screen_ratio, slide_height)
-                # # Build widget with stretch padding
-                # container = QtWidgets.QWidget()
-                # hbox = QtWidgets.QHBoxLayout()
-                # hbox.setContentsMargins(0, 0, 0, 0)
-                # hbox.addWidget(label, stretch=1)
-                # hbox.addStretch(0)
-                # container.setLayout(hbox)
-                # # Add to table
-                # self.setCellWidget(slide_index, 0, container)
-                # else:
-                # Add to table
+                slide_height = width // self.screen_ratio
+                max_slide_height = Settings().value('advanced/slide max height')
+                if slide_height < 0:
+                    slide_height = max_slide_height
+                else:
+                    slide_height = min(slide_height, max_slide_height)
                 self.setCellWidget(slide_index, 0, container)
                 row += 1
             text.append(str(row))

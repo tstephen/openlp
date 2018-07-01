@@ -24,8 +24,11 @@ Provide plugin management
 """
 import os
 
+from PyQt5 import QtWidgets
+
 from openlp.core.common import extension_loader
 from openlp.core.common.applocation import AppLocation
+from openlp.core.common.i18n import UiStrings
 from openlp.core.common.mixins import LogMixin, RegistryProperties
 from openlp.core.common.registry import RegistryBase
 from openlp.core.lib import Plugin, PluginStatus
@@ -152,12 +155,21 @@ class PluginManager(RegistryBase, LogMixin, RegistryProperties):
         """
         Loop through all the plugins and give them an opportunity to initialise themselves.
         """
+        uninitialised_plugins = []
         for plugin in self.plugins:
             self.log_info('initialising plugins {plugin} in a {state} state'.format(plugin=plugin.name,
                                                                                     state=plugin.is_active()))
             if plugin.is_active():
-                plugin.initialise()
-                self.log_info('Initialisation Complete for {plugin}'.format(plugin=plugin.name))
+                try:
+                    plugin.initialise()
+                    self.log_info('Initialisation Complete for {plugin}'.format(plugin=plugin.name))
+                except Exception:
+                    uninitialised_plugins.append(plugin.name.title())
+                    self.log_exception('Unable to initialise plugin {plugin}'.format(plugin=plugin.name))
+        if uninitialised_plugins:
+            QtWidgets.QMessageBox.critical(None, UiStrings().Error, 'Unable to initialise the following plugins:\n' +
+                                           '\n'.join(uninitialised_plugins) + '\n\nSee the log file for more details',
+                                           QtWidgets.QMessageBox.StandardButtons(QtWidgets.QMessageBox.Ok))
 
     def finalise_plugins(self):
         """
