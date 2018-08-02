@@ -35,24 +35,9 @@ from openlp.core.common.registry import RegistryBase
 from openlp.core.common.settings import Settings
 from openlp.core.lib.ui import create_widget_action
 from openlp.core.projectors import DialogSourceStyle
-from openlp.core.projectors.constants import \
-    E_AUTHENTICATION, \
-    E_ERROR, \
-    E_NETWORK, \
-    E_NOT_CONNECTED, \
-    E_UNKNOWN_SOCKET_ERROR, \
-    S_CONNECTED, \
-    S_CONNECTING, \
-    S_COOLDOWN, \
-    S_INITIALIZE, \
-    S_NOT_CONNECTED, \
-    S_OFF, \
-    S_ON, \
-    S_STANDBY, \
-    S_WARMUP,    \
-    STATUS_CODE, \
-    STATUS_MSG, \
-    QSOCKET_STATE
+from openlp.core.projectors.constants import E_AUTHENTICATION, E_ERROR, E_NETWORK, E_NOT_CONNECTED, \
+    E_SOCKET_TIMEOUT, E_UNKNOWN_SOCKET_ERROR, S_CONNECTED, S_CONNECTING, S_COOLDOWN, S_INITIALIZE, \
+    S_NOT_CONNECTED, S_OFF, S_ON, S_STANDBY, S_WARMUP, PJLINK_PORT, STATUS_CODE, STATUS_MSG, QSOCKET_STATE
 
 from openlp.core.projectors.db import ProjectorDB
 from openlp.core.projectors.editform import ProjectorEditForm
@@ -77,6 +62,7 @@ STATUS_ICONS = {
     S_COOLDOWN: ':/projector/projector_cooldown.png',
     E_ERROR: ':/projector/projector_error.png',
     E_NETWORK: ':/projector/projector_not_connected_error.png',
+    E_SOCKET_TIMEOUT: ':/projector/projector_not_connected_error.png',
     E_AUTHENTICATION: ':/projector/projector_not_connected_error.png',
     E_UNKNOWN_SOCKET_ERROR: ':/projector/projector_not_connected_error.png',
     E_NOT_CONNECTED: ':/projector/projector_not_connected_error.png'
@@ -308,8 +294,10 @@ class ProjectorManager(QtWidgets.QWidget, RegistryBase, UiProjectorManager, LogM
         self.settings_section = 'projector'
         self.projectordb = projectordb
         self.projector_list = []
-        self.pjlink_udp = PJLinkUDP(self.projector_list)
         self.source_select_form = None
+        # Dictionary of PJLinkUDP objects to listen for UDP broadcasts from PJLink 2+ projectors.
+        # Key is port number that projectors use
+        self.pjlink_udp = {}
 
     def bootstrap_initialise(self):
         """
@@ -328,6 +316,10 @@ class ProjectorManager(QtWidgets.QWidget, RegistryBase, UiProjectorManager, LogM
         """
         Post-initialize setups.
         """
+        # Default PJLink port UDP socket
+        log.debug('Creating PJLinkUDP listener for default port {port}'.format(port=PJLINK_PORT))
+        self.pjlink_udp = {PJLINK_PORT: PJLinkUDP(port=PJLINK_PORT)}
+        self.pjlink_udp[PJLINK_PORT].bind(PJLINK_PORT)
         # Set 1.5 second delay before loading all projectors
         if self.autostart:
             log.debug('Delaying 1.5 seconds before loading all projectors')
@@ -344,14 +336,11 @@ class ProjectorManager(QtWidgets.QWidget, RegistryBase, UiProjectorManager, LogM
         """
         Retrieve the saved settings
         """
-        settings = Settings()
-        settings.beginGroup(self.settings_section)
-        self.autostart = settings.value('connect on start')
-        self.poll_time = settings.value('poll time')
-        self.socket_timeout = settings.value('socket timeout')
-        self.source_select_dialog_type = settings.value('source dialog type')
-        settings.endGroup()
-        del settings
+        log.debug('Updating ProjectorManager settings')
+        self.autostart = Settings().value('projector/connect on start')
+        self.poll_time = Settings().value('projector/poll time')
+        self.socket_timeout = Settings().value('projector/socket timeout')
+        self.source_select_dialog_type = Settings().value('projector/source dialog type')
 
     def context_menu(self, point):
         """
@@ -372,22 +361,14 @@ class ProjectorManager(QtWidgets.QWidget, RegistryBase, UiProjectorManager, LogM
         self.connect_action.setVisible(not visible)
         self.disconnect_action.setVisible(visible)
         self.status_action.setVisible(visible)
-        if visible:
-            self.select_input_action.setVisible(real_projector.link.power == S_ON)
-            self.edit_input_action.setVisible(real_projector.link.power == S_ON)
-            self.poweron_action.setVisible(real_projector.link.power == S_STANDBY)
-            self.poweroff_action.setVisible(real_projector.link.power == S_ON)
-            self.blank_action.setVisible(real_projector.link.power == S_ON and
-                                         not real_projector.link.shutter)
-            self.show_action.setVisible(real_projector.link.power == S_ON and
-                                        real_projector.link.shutter)
-        else:
-            self.select_input_action.setVisible(False)
-            self.edit_input_action.setVisible(False)
-            self.poweron_action.setVisible(False)
-            self.poweroff_action.setVisible(False)
-            self.blank_action.setVisible(False)
-            self.show_action.setVisible(False)
+        self.select_input_action.setVisible(visible and real_projector.link.power == S_ON)
+        self.edit_input_action.setVisible(visible and real_projector.link.power == S_ON)
+        self.poweron_action.setVisible(visible and real_projector.link.power == S_STANDBY)
+        self.poweroff_action.setVisible(visible and real_projector.link.power == S_ON)
+        self.blank_action.setVisible(visible and real_projector.link.power == S_ON and
+                                     not real_projector.link.shutter)
+        self.show_action.setVisible(visible and real_projector.link.power == S_ON and
+                                    real_projector.link.shutter)
         self.menu.projector = real_projector
         self.menu.exec(self.projector_list_widget.mapToGlobal(point))
 
@@ -502,10 +483,6 @@ class ProjectorManager(QtWidgets.QWidget, RegistryBase, UiProjectorManager, LogM
         if ans == msg.Cancel:
             return
         try:
-            projector.link.projectorNetwork.disconnect(self.update_status)
-        except (AttributeError, TypeError):
-            pass
-        try:
             projector.link.changeStatus.disconnect(self.update_status)
         except (AttributeError, TypeError):
             pass
@@ -531,6 +508,13 @@ class ProjectorManager(QtWidgets.QWidget, RegistryBase, UiProjectorManager, LogM
             projector.socket_timer.timeout.disconnect(projector.link.socket_abort)
         except (AttributeError, TypeError):
             pass
+        # Disconnect signals from projector being deleted
+        try:
+            self.pjlink_udp[projector.link.port].data_received.disconnect(projector.link.get_buffer)
+        except (AttributeError, TypeError):
+            pass
+
+        # Rebuild projector list
         new_list = []
         for item in self.projector_list:
             if item.link.db_item.id == projector.link.db_item.id:
@@ -658,6 +642,21 @@ class ProjectorManager(QtWidgets.QWidget, RegistryBase, UiProjectorManager, LogM
                                                              data=projector.link.manufacturer)
             message += '<b>{title}</b>: {data}<br />'.format(title=translate('OpenLP.ProjectorManager', 'Model'),
                                                              data=projector.link.model)
+            message += '<b>{title}</b>: {data}<br />'.format(title=translate('OpenLP.ProjectorManager', 'PJLink Class'),
+                                                             data=projector.link.pjlink_class)
+            if projector.link.pjlink_class != 1:
+                message += '<b>{title}</b>: {data}<br />'.format(title=translate('OpenLP.ProjectorManager',
+                                                                                 'Software Version'),
+                                                                 data=projector.link.sw_version)
+                message += '<b>{title}</b>: {data}<br />'.format(title=translate('OpenLP.ProjectorManager',
+                                                                                 'Serial Number'),
+                                                                 data=projector.link.serial_no)
+                message += '<b>{title}</b>: {data}<br />'.format(title=translate('OpenLP.ProjectorManager',
+                                                                                 'Lamp Model Number'),
+                                                                 data=projector.link.model_lamp)
+                message += '<b>{title}</b>: {data}<br />'.format(title=translate('OpenLP.ProjectorManager',
+                                                                                 'Filter Model Number'),
+                                                                 data=projector.link.model_filter)
             message += '<b>{title}</b>: {data}<br /><br />'.format(title=translate('OpenLP.ProjectorManager',
                                                                                    'Other info'),
                                                                    data=projector.link.other_info)
@@ -671,20 +670,6 @@ class ProjectorManager(QtWidgets.QWidget, RegistryBase, UiProjectorManager, LogM
                                                                       source=translate('OpenLP.ProjectorManager',
                                                                                        'Current source input is'),
                                                                       selected=projector.link.source)
-            if projector.link.pjlink_class == '2':
-                # Information only available for PJLink Class 2 projectors
-                message += '<b>{title}</b>: {data}<br /><br />'.format(title=translate('OpenLP.ProjectorManager',
-                                                                                       'Serial Number'),
-                                                                       data=projector.serial_no)
-                message += '<b>{title}</b>: {data}<br /><br />'.format(title=translate('OpenLP.ProjectorManager',
-                                                                                       'Software Version'),
-                                                                       data=projector.sw_version)
-                message += '<b>{title}</b>: {data}<br /><br />'.format(title=translate('OpenLP.ProjectorManager',
-                                                                                       'Lamp type'),
-                                                                       data=projector.model_lamp)
-                message += '<b>{title}</b>: {data}<br /><br />'.format(title=translate('OpenLP.ProjectorManager',
-                                                                                       'Filter type'),
-                                                                       data=projector.model_filter)
             count = 1
             for item in projector.link.lamp:
                 if item['On'] is None:
@@ -744,6 +729,15 @@ class ProjectorManager(QtWidgets.QWidget, RegistryBase, UiProjectorManager, LogM
         item.link.projectorAuthentication.connect(self.authentication_error)
         item.link.projectorNoAuthentication.connect(self.no_authentication_error)
         item.link.projectorUpdateIcons.connect(self.update_icons)
+        # Connect UDP signal to projector instances with same port
+        if item.link.port not in self.pjlink_udp:
+            log.debug('Adding new PJLinkUDP listener fo port {port}'.format(port=item.link.port))
+            self.pjlink_udp[item.link.port] = PJLinkUDP(port=item.link.port)
+            self.pjlink_udp[item.link.port].bind(item.link.port)
+        log.debug('Connecting PJLinkUDP port {port} signal to "{item}"'.format(port=item.link.port,
+                                                                               item=item.link.name))
+        self.pjlink_udp[item.link.port].data_received.connect(item.link.get_buffer)
+
         self.projector_list.append(item)
         if start:
             item.link.connect_to_host()
@@ -956,6 +950,10 @@ class ProjectorItem(QtCore.QObject):
         self.poll_time = None
         self.socket_timeout = None
         self.status = S_NOT_CONNECTED
+        self.serial_no = None
+        self.sw_version = None
+        self.model_filter = None
+        self.model_lamp = None
         super().__init__()
 
 

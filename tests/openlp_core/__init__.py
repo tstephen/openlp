@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
@@ -20,19 +19,8 @@
 # with this program; if not, write to the Free Software Foundation, Inc., 59  #
 # Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
 ###############################################################################
+"""
+:mod: `tests.openlp_core` module
 
-import asyncio
-import websockets
-import random
-
-
-async def tester():
-    async with websockets.connect('ws://localhost:4317/poll') as websocket:
-
-        while True:
-            greeting = await websocket.recv()
-            print("< {}".format(greeting))
-            import time
-            time.sleep(random.random() * 3)
-
-asyncio.get_event_loop().run_until_complete(tester())
+Tests modules/files for module openlp.core
+"""
