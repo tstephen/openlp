@@ -38,7 +38,7 @@ from PyQt5 import QtCore, QtWidgets
 from openlp.core.common import is_macosx, is_win
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.i18n import LanguageManager, UiStrings, translate
-from openlp.core.common.path import create_paths, copytree
+from openlp.core.common.path import create_paths, copytree, str_to_path
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.display.screens import ScreenList
@@ -295,6 +295,8 @@ def parse_options(args=None):
                         help='Set logging to LEVEL level. Valid values are "debug", "info", "warning".')
     parser.add_argument('-p', '--portable', dest='portable', action='store_true',
                         help='Specify if this should be run as a portable app, ')
+    parser.add_argument('-pp', '--portable-path', dest='portablepath', default=None,
+                        help='Specify the path of the portable data, defaults to "<AppDir>/../../".')
     parser.add_argument('-w', '--no-web-server', dest='no_web_server', action='store_true',
                         help='Turn off the Web and Socket Server ')
     parser.add_argument('rargs', nargs='?', default=[])
@@ -350,7 +352,10 @@ def main(args=None):
         application.setApplicationName('OpenLPPortable')
         Settings.setDefaultFormat(Settings.IniFormat)
         # Get location OpenLPPortable.ini
-        portable_path = (AppLocation.get_directory(AppLocation.AppDir) / '..' / '..').resolve()
+        if args.portablepath:
+            portable_path = str_to_path(args.portablepath)
+        else:
+            portable_path = (AppLocation.get_directory(AppLocation.AppDir) / '..' / '..').resolve()
         data_path = portable_path / 'Data'
         set_up_logging(portable_path / 'Other')
         log.info('Running portable')

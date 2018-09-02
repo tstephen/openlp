@@ -81,6 +81,24 @@ def test_parse_options_debug_and_portable():
     assert args.rargs == [], 'The service file should be blank'
 
 
+def test_parse_options_portable_and_portable_path():
+    """
+    Test the parse options process works portable and portable-path
+    """
+    # GIVEN: a a set of system arguments.
+    sys.argv[1:] = ['--portable', '--portable-path .']
+
+    # WHEN: We we parse them to expand to options
+    args = parse_options()
+
+    # THEN: the following fields will have been extracted.
+    assert args.loglevel == 'warning', 'The log level should be set to warning'
+    assert args.no_error_form is False, 'The no_error_form should be set to False'
+    assert args.portable is True, 'The portable flag should be set to true'
+    assert args.portablepath == '.', 'The portable path should be set to "."'
+    assert args.rargs == [], 'The service file should be blank'
+
+
 def test_parse_options_all_no_file():
     """
     Test the parse options process works with two options
