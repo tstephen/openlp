@@ -115,6 +115,8 @@ class Screen(object):
         self.is_display = screen_dict['is_display']
         self.is_primary = screen_dict['is_primary']
         self.geometry = QtCore.QRect(**screen_dict['geometry'])
+        if 'display_geometry' in screen_dict:
+            self.display_geometry = QtCore.QRect(**screen_dict['display_geometry'])
 
 
 class ScreenList(object):
@@ -197,26 +199,26 @@ class ScreenList(object):
 
     def load_screen_settings(self):
         """
-        Loads the screen size and the monitor number from the settings.
+        Loads the screen size and the screen number from the settings.
         """
         # Add the screen settings to the settings dict. This has to be done here due to cyclic dependency.
         # Do not do this anywhere else.
         screen_settings = {
-            'core/monitors': '{}'
+            'core/screens': '{}'
         }
         Settings.extend_default_settings(screen_settings)
-        monitors = Settings().value('core/monitors')
-        # for number, monitor in monitors.items():
-        #     if self.has_screen(number):
-        #         self[number].update(monitor)
-        #     else:
-        #         self.screens.append(Screen.from_dict(monitor))
+        screen_settings = Settings().value('core/screens')
+        for number, screen_dict in screen_settings.items():
+            if self.has_screen(number):
+                self[number].update(screen_dict)
+            else:
+                self.screens.append(Screen.from_dict(screen_dict))
 
     def save_screen_settings(self):
         """
-        Saves the screen size and monitor settings
+        Saves the screen size and screen settings
         """
-        Settings().setValue('core/monitors', {screen.number: screen.to_dict() for screen in self.screens})
+        Settings().setValue('core/screens', {screen.number: screen.to_dict() for screen in self.screens})
 
     def get_display_screen_list(self):
         """

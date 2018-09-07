@@ -26,6 +26,7 @@ import datetime
 import json
 import logging
 import os
+from enum import IntEnum
 from tempfile import gettempdir
 
 from PyQt5 import QtCore, QtGui
@@ -37,6 +38,13 @@ from openlp.core.common.path import Path, str_to_path, files_to_paths
 log = logging.getLogger(__name__)
 
 __version__ = 2
+
+
+class ProxyMode(IntEnum):
+    NO_PROXY = 1
+    SYSTEM_PROXY = 2
+    MANUAL_PROXY = 3
+
 
 # Fix for bug #1014422.
 X11_BYPASS_DEFAULT = True
@@ -62,7 +70,7 @@ def media_players_conv(string):
     return string
 
 
-def upgrade_monitor(number, x_position, y_position, height, width, can_override, can_display_on_monitor):
+def upgrade_screens(number, x_position, y_position, height, width, can_override, is_display_screen):
     """
     Upgrade them monitor setting from a few single entries to a composite JSON entry
 
@@ -70,19 +78,23 @@ def upgrade_monitor(number, x_position, y_position, height, width, can_override,
     :param int x_position: The X position
     :param int y_position: The Y position
     :param bool can_override: Are the screen positions overridden
-    :param bool can_display_on_monitor: Can OpenLP display on the monitor
+    :param bool is_display_screen: Is this a display screen
     :returns dict: Dictionary with the new value
     """
+    geometry_key = 'geometry'
+    if can_override:
+        geometry_key = 'display_geometry'
     return {
         number: {
-            'displayGeometry': {
+            'number': number,
+            geometry_key: {
                 'x': x_position,
                 'y': y_position,
                 'height': height,
                 'width': width
-            }
-        },
-        'canDisplayOnMonitor': can_display_on_monitor
+            },
+            'is_display': is_display_screen
+        }
     }
 
 
@@ -140,6 +152,11 @@ class Settings(QtCore.QSettings):
         'advanced/print file meta data': False,
         'advanced/print notes': False,
         'advanced/print slide text': False,
+        'advanced/proxy mode': ProxyMode.SYSTEM_PROXY,
+        'advanced/proxy http': '',
+        'advanced/proxy https': '',
+        'advanced/proxy username': '',
+        'advanced/proxy password': '',
         'advanced/recent file count': 4,
         'advanced/save current plugin': False,
         'advanced/slide limits': SlideLimits.End,
@@ -224,6 +241,7 @@ class Settings(QtCore.QSettings):
         'projector/db database': '',
         'projector/enable': True,
         'projector/connect on start': False,
+        'projector/connect when LKUP received': True,  # PJLink v2: Projector sends LKUP command after it powers up
         'projector/last directory import': None,
         'projector/last directory export': None,
         'projector/poll time': 20,  # PJLink  timeout is 30 seconds
@@ -287,7 +305,7 @@ class Settings(QtCore.QSettings):
         ('songuasge/db database', 'songusage/db database', []),
         ('presentations / Powerpoint Viewer', '', []),
         (['core/monitor', 'core/x position', 'core/y position', 'core/height', 'core/width', 'core/override',
-          'core/display on monitor'], 'core/monitors', [(upgrade_monitor, [1, 0, 0, None, None, False, False])])
+          'core/display on monitor'], 'core/screens', [(upgrade_screens, [1, 0, 0, None, None, False, False])])
     ]
 
     @staticmethod
@@ -553,7 +571,7 @@ class Settings(QtCore.QSettings):
         :param value: The value to save
         :rtype: None
         """
-        if isinstance(value, Path) or (isinstance(value, list) and value and isinstance(value[0], Path)):
+        if isinstance(value, (Path, dict)) or (isinstance(value, list) and value and isinstance(value[0], Path)):
             value = json.dumps(value, cls=OpenLPJsonEncoder)
         super().setValue(key, value)
 
@@ -576,6 +594,9 @@ class Settings(QtCore.QSettings):
             # An empty list saved to the settings results in a None type being returned.
             elif isinstance(default_value, list):
                 return []
+            # An empty dictionary saved to the settings results in a None type being returned.
+            elif isinstance(default_value, dict):
+                return {}
         elif isinstance(setting, str):
             if '__Path__' in setting or setting.startswith('{'):
                 return json.loads(setting, cls=OpenLPJsonDecoder)

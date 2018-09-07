@@ -51,9 +51,7 @@ class TestApiTab(TestCase, TestMixin):
     """
     Test the functions in the :mod:`lib` module.
     """
-    @patch('openlp.core.api.tab.ApiTab.define_main_window_icon')
-    @patch('openlp.core.api.tab.ApiTab.generate_icon')
-    def setUp(self, mocked_main_window, mocked_icon):
+    def setUp(self):
         """
         Create the UI
         """
@@ -87,7 +85,7 @@ class TestApiTab(TestCase, TestMixin):
         ip_address = self.form.get_ip_address(ZERO_URL)
 
         # THEN: the default ip address will be returned
-        assert re.match('\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', ip_address), \
+        assert re.match(r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', ip_address), \
             'The return value should be a valid ip address'
         assert ip_address in ip4_list, 'The return address should be in the list of local IP addresses'
 

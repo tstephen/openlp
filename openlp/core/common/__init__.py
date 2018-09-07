@@ -44,7 +44,7 @@ log = logging.getLogger(__name__ + '.__init__')
 
 FIRST_CAMEL_REGEX = re.compile('(.)([A-Z][a-z]+)')
 SECOND_CAMEL_REGEX = re.compile('([a-z0-9])([A-Z])')
-CONTROL_CHARS = re.compile(r'[\x00-\x1F\x7F-\x9F]')
+CONTROL_CHARS = re.compile(r'[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]')
 INVALID_FILE_CHARS = re.compile(r'[\\/:\*\?"<>\|\+\[\]%]')
 IMAGES_FILTER = None
 REPLACMENT_CHARS_MAP = str.maketrans({'\u2018': '\'', '\u2019': '\'', '\u201c': '"', '\u201d': '"', '\u2026': '...',
@@ -64,13 +64,17 @@ def get_local_ip4():
     log.debug('Getting local IPv4 interface(es) information')
     my_ip4 = {}
     for iface in QNetworkInterface.allInterfaces():
+        log.debug('Checking for isValid and flags == IsUP | IsRunning')
         if not iface.isValid() or not (iface.flags() & (QNetworkInterface.IsUp | QNetworkInterface.IsRunning)):
             continue
+        log.debug('Checking address(es) protocol')
         for address in iface.addressEntries():
             ip = address.ip()
             # NOTE: Next line will skip if interface is localhost - keep for now until we decide about it later
             # if (ip.protocol() == QAbstractSocket.IPv4Protocol) and (ip != QHostAddress.LocalHost):
+            log.debug('Checking for protocol == IPv4Protocol')
             if ip.protocol() == QAbstractSocket.IPv4Protocol:
+                log.debug('Getting interface information')
                 my_ip4[iface.name()] = {'ip': ip.toString(),
                                         'broadcast': address.broadcast().toString(),
                                         'netmask': address.netmask().toString(),
@@ -79,14 +83,21 @@ def get_local_ip4():
                                                                  ip.toIPv4Address()).toString()
                                         }
                 log.debug('Adding {iface} to active list'.format(iface=iface.name()))
+    if 'localhost' in my_ip4:
+        log.debug('Renaming windows localhost to lo')
+        my_ip4['lo'] = my_ip4['localhost']
+        my_ip4.pop('localhost')
+    if len(my_ip4) == 0:
+        log.warning('No active IPv4 network interfaces detected')
     if len(my_ip4) == 1:
         if 'lo' in my_ip4:
             # No active interfaces - so leave localhost in there
             log.warning('No active IPv4 interfaces found except localhost')
     else:
         # Since we have a valid IP4 interface, remove localhost
-        log.debug('Found at least one IPv4 interface, removing localhost')
-        my_ip4.pop('lo')
+        if 'lo' in my_ip4:
+            log.debug('Found at least one IPv4 interface, removing localhost')
+            my_ip4.pop('lo')
 
     return my_ip4
 
@@ -471,15 +482,15 @@ def get_file_encoding(file_path):
         log.exception('Error detecting file encoding')
 
 
-def normalize_str(irreg_str):
+def normalize_str(irregular_string):
     """
     Normalize the supplied string. Remove unicode control chars and tidy up white space.
 
-    :param str irreg_str: The string to normalize.
+    :param str irregular_string: The string to normalize.
     :return: The normalized string
     :rtype: str
     """
-    irreg_str = irreg_str.translate(REPLACMENT_CHARS_MAP)
-    irreg_str = CONTROL_CHARS.sub('', irreg_str)
-    irreg_str = NEW_LINE_REGEX.sub('\n', irreg_str)
-    return WHITESPACE_REGEX.sub(' ', irreg_str)
+    irregular_string = irregular_string.translate(REPLACMENT_CHARS_MAP)
+    irregular_string = CONTROL_CHARS.sub('', irregular_string)
+    irregular_string = NEW_LINE_REGEX.sub('\n', irregular_string)
+    return WHITESPACE_REGEX.sub(' ', irregular_string)

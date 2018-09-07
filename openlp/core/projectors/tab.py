@@ -29,6 +29,7 @@ from PyQt5 import QtWidgets
 from openlp.core.common.i18n import UiStrings, translate
 from openlp.core.common.settings import Settings
 from openlp.core.lib import SettingsTab
+from openlp.core.ui.icons import UiIcons
 from openlp.core.projectors import DialogSourceStyle
 
 log = logging.getLogger(__name__)
@@ -45,7 +46,7 @@ class ProjectorTab(SettingsTab):
 
         :param parent: Parent widget
         """
-        self.icon_path = ':/projector/projector_manager.png'
+        self.icon_path = UiIcons().projector
         projector_translated = translate('OpenLP.ProjectorTab', 'Projector')
         super(ProjectorTab, self).__init__(parent, 'Projector', projector_translated)
 
@@ -89,6 +90,10 @@ class ProjectorTab(SettingsTab):
         self.connect_box_layout.addRow(self.dialog_type_label, self.dialog_type_combo_box)
         self.left_layout.addStretch()
         self.dialog_type_combo_box.activated.connect(self.on_dialog_type_combo_box_changed)
+        # Connect on LKUP packet received (PJLink v2+ only)
+        self.connect_on_linkup = QtWidgets.QCheckBox(self.connect_box)
+        self.connect_on_linkup.setObjectName('connect_on_linkup')
+        self.connect_box_layout.addRow(self.connect_on_linkup)
 
     def retranslateUi(self):
         """
@@ -109,30 +114,28 @@ class ProjectorTab(SettingsTab):
                                                translate('OpenLP.ProjectorTab', 'Tabbed dialog box'))
         self.dialog_type_combo_box.setItemText(DialogSourceStyle.Single,
                                                translate('OpenLP.ProjectorTab', 'Single dialog box'))
+        self.connect_on_linkup.setText(
+            translate('OpenLP.ProjectorTab', 'Connect to projector when LINKUP received (v2 only)'))
 
     def load(self):
         """
         Load the projector settings on startup
         """
-        settings = Settings()
-        settings.beginGroup(self.settings_section)
-        self.connect_on_startup.setChecked(settings.value('connect on start'))
-        self.socket_timeout_spin_box.setValue(settings.value('socket timeout'))
-        self.socket_poll_spin_box.setValue(settings.value('poll time'))
-        self.dialog_type_combo_box.setCurrentIndex(settings.value('source dialog type'))
-        settings.endGroup()
+        self.connect_on_startup.setChecked(Settings().value('projector/connect on start'))
+        self.socket_timeout_spin_box.setValue(Settings().value('projector/socket timeout'))
+        self.socket_poll_spin_box.setValue(Settings().value('projector/poll time'))
+        self.dialog_type_combo_box.setCurrentIndex(Settings().value('projector/source dialog type'))
+        self.connect_on_linkup.setChecked(Settings().value('projector/connect when LKUP received'))
 
     def save(self):
         """
         Save the projector settings
         """
-        settings = Settings()
-        settings.beginGroup(self.settings_section)
-        settings.setValue('connect on start', self.connect_on_startup.isChecked())
-        settings.setValue('socket timeout', self.socket_timeout_spin_box.value())
-        settings.setValue('poll time', self.socket_poll_spin_box.value())
-        settings.setValue('source dialog type', self.dialog_type_combo_box.currentIndex())
-        settings.endGroup()
+        Settings().setValue('projector/connect on start', self.connect_on_startup.isChecked())
+        Settings().setValue('projector/socket timeout', self.socket_timeout_spin_box.value())
+        Settings().setValue('projector/poll time', self.socket_poll_spin_box.value())
+        Settings().setValue('projector/source dialog type', self.dialog_type_combo_box.currentIndex())
+        Settings().setValue('projector/connect when LKUP received', self.connect_on_linkup.isChecked())
 
     def on_dialog_type_combo_box_changed(self):
         self.dialog_type = self.dialog_type_combo_box.currentIndex()

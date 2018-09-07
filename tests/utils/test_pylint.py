@@ -36,7 +36,8 @@ from openlp.core.common import is_win
 
 TOLERATED_ERRORS = {'registryproperties.py': ['access-member-before-definition'],
                     'opensong.py': ['no-name-in-module'],
-                    'maindisplay.py': ['no-name-in-module']}
+                    'maindisplay.py': ['no-name-in-module'],
+                    'icons.py': ['too-many-function-args']}
 
 
 class TestPylint(TestCase):
@@ -68,7 +69,7 @@ class TestPylint(TestCase):
 
         # WHEN: Running pylint
         (pylint_stdout, pylint_stderr) = \
-            lint.py_run('openlp --errors-only --disable={disabled} --enable={enabled} '
+            lint.py_run('openlp --errors-only -j 4 --disable={disabled} --enable={enabled} '
                         '--reports=no --output-format=parseable'.format(disabled=disabled_checks,
                                                                         enabled=enabled_checks),
                         **pylint_kwargs)
@@ -88,7 +89,7 @@ class TestPylint(TestCase):
         filtered_output = ''
         for line in pylint_output.splitlines():
             # Filter out module info lines
-            if line.startswith('**'):
+            if '***' in line:
                 continue
             # Filter out undefined-variable error releated to WindowsError
             elif 'undefined-variable' in line and 'WindowsError' in line:

@@ -103,7 +103,8 @@ class VersionWorker(ThreadWorker):
         while retries < 3:
             try:
                 response = requests.get(download_url, headers=headers)
-                remote_version = response.text.strip()
+                if response.status_code == 200:
+                    remote_version = response.text.strip()
                 log.debug('New version found: %s', remote_version)
                 break
             except OSError:
@@ -155,7 +156,7 @@ def get_version():
         full_version = file_path.read_text().rstrip()
     except OSError:
         log.exception('Error in version file.')
-        full_version = '0.0.0-bzr000'
+        full_version = '0.0.0'
     bits = full_version.split('-')
     APPLICATION_VERSION = {
         'full': full_version,
