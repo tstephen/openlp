@@ -35,7 +35,8 @@ from openlp.core.common.mixins import LogMixin, RegistryProperties
 from openlp.core.common.registry import Registry, RegistryBase
 from openlp.core.common.settings import Settings
 from openlp.core.display.screens import ScreenList
-from openlp.core.lib import ItemCapabilities, ImageSource, ServiceItemAction, build_icon
+from openlp.core.lib import ImageSource, ServiceItemAction
+from openlp.core.lib.serviceitem import ItemCapabilities
 from openlp.core.lib.ui import create_action
 from openlp.core.ui import HideMode, DisplayControllerType
 from openlp.core.ui.icons import UiIcons
@@ -769,7 +770,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
     def add_service_manager_item(self, item, slide_no):
         """
         Method to install the service item into the controller and request the correct toolbar for the plugin. Called by
-        :class:`~openlp.core.ui.ServiceManager`
+        :class:`~openlp.core.ui.servicemanager.ServiceManager`
 
         :param item: The current service item
         :param slide_no: The slide number to select

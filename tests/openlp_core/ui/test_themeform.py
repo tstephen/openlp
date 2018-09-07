@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -20,34 +20,30 @@
 # Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
 ###############################################################################
 """
-Package to test the openlp.core.ui.themeform package.
+Interface tests to test the ThemeWizard class and related methods.
 """
 from unittest import TestCase
-from unittest.mock import MagicMock, patch
 
-from openlp.core.common.path import Path
+from openlp.core.common.registry import Registry
 from openlp.core.ui.themeform import ThemeForm
+from tests.helpers.testmixin import TestMixin
 
 
-class TestThemeManager(TestCase):
+class TestThemeManager(TestCase, TestMixin):
     """
-    Test the functions in the ThemeManager Class
+    Test the functions in the ThemeManager module
     """
     def setUp(self):
-        with patch('openlp.core.ui.themeform.ThemeForm._setup'):
-            self.instance = ThemeForm(None)
-
-    def test_on_image_path_edit_path_changed(self):
         """
-        Test the `image_path_edit.pathChanged` handler
+        Create the UI
         """
-        # GIVEN: An instance of Theme Form
-        with patch.object(self.instance, 'set_background_page_values') as mocked_set_background_page_values:
-            self.instance.theme = MagicMock()
+        Registry.create()
 
-            # WHEN: `on_image_path_edit_path_changed` is clicked
-            self.instance.on_image_path_edit_path_changed(Path('/', 'new', 'pat.h'))
-
-            # THEN: The theme background file should be set and `set_background_page_values` should have been called
-            assert self.instance.theme.background_filename == Path('/', 'new', 'pat.h')
-            mocked_set_background_page_values.assert_called_once_with()
+    def test_create_theme_wizard(self):
+        """
+        Test creating a ThemeForm instance
+        """
+        # GIVEN: A ThemeForm class
+        # WHEN: An object is created
+        # THEN: There should be no problems
+        ThemeForm(None)

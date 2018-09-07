@@ -32,7 +32,7 @@ from openlp.core.common.mixins import RegistryProperties
 from openlp.core.common.registry import Registry
 from openlp.core.lib.theme import BackgroundType, BackgroundGradientType
 from openlp.core.lib.ui import critical_error_message_box
-from openlp.core.ui import ThemeLayoutForm
+from openlp.core.ui.themelayoutform import ThemeLayoutForm
 from openlp.core.ui.themewizard import Ui_ThemeWizard
 # TODO: Fix this. Use a "get_video_extensions" method which uses the current media player
 from openlp.core.ui.media.vlcplayer import VIDEO_EXT
@@ -154,7 +154,7 @@ class ThemeForm(QtWidgets.QWizard, Ui_ThemeWizard, RegistryProperties):
         Calculate the number of lines on a page by rendering text
         """
         # Do not trigger on start up
-        if self.currentPage != self.welcome_page:
+        if self.currentPage() != self.welcome_page:
             self.update_theme()
             self.theme_manager.generate_image(self.theme, True)
 

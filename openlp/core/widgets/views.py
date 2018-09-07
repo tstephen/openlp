@@ -31,7 +31,7 @@ from openlp.core.common.mixins import RegistryProperties
 from openlp.core.common.path import Path
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
-from openlp.core.lib import ItemCapabilities, ServiceItem
+from openlp.core.lib.serviceitem import ItemCapabilities, ServiceItem
 from openlp.core.widgets.layouts import AspectRatioLayout
 
 
