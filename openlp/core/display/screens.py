@@ -282,8 +282,9 @@ class ScreenList(object):
         """
         self.screens = []
         for number in range(self.desktop.screenCount()):
+            # TODO: Remove hardcoded last argument when the screen-settings tab works
             self.screens.append(
-                Screen(number, self.desktop.screenGeometry(number), self.desktop.primaryScreen() == number))
+                Screen(number, self.desktop.screenGeometry(number), self.desktop.primaryScreen() == number, True))
 
     def on_screen_resolution_changed(self, number):
         """

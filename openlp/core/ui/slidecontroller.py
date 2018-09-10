@@ -743,12 +743,6 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
 
         :param item: The current service item
         """
-        theme_name = item.theme if item.theme else Registry().get('theme_manager').global_theme
-        self.preview_display.set_theme(Registry().get('theme_manager').get_theme_data(theme_name))
-        if item.is_text():
-            self.preview_display.load_verses(item.rendered_slides)
-        elif item.is_image():
-            self.preview_display.load_images(item.slides)
         slide_no = 0
         # if self.song_edit:
         #     slide_no = self.selected_row
@@ -813,6 +807,16 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
             Registry().execute(
                 '{text}_start'.format(text=service_item.name.lower()),
                 [self.service_item, self.is_live, self.hide_mode(), slide_no])
+        else:
+            # Get theme
+            theme_name = service_item.theme if service_item.theme else Registry().get('theme_manager').global_theme
+            theme_data = Registry().get('theme_manager').get_theme_data(theme_name)
+            # Set theme for preview
+            self.preview_display.set_theme(theme_data)
+            # Set theme for displays
+            for display in self.displays:
+                display.set_theme(theme_data)
+
         # Reset blanking if needed
         if old_item and self.is_live and (old_item.is_capable(ItemCapabilities.ProvidesOwnDisplay) or
                                           self.service_item.is_capable(ItemCapabilities.ProvidesOwnDisplay)):
@@ -846,6 +850,9 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         row = 0
         width = self.main_window.control_splitter.sizes()[self.split]
         if self.service_item.is_text():
+            self.preview_display.load_verses(service_item.rendered_slides)
+            for display in self.displays:
+                display.load_verses(service_item.rendered_slides)
             for slide_index, slide in enumerate(self.service_item.display_slides):
                 if not slide['verse'].isdigit():
                     # These tags are already translated.
@@ -861,6 +868,10 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
                     row += 1
                     self.slide_list[str(row)] = row - 1
         else:
+            if service_item.is_image():
+                self.preview_display.load_images(service_item.slides)
+                for display in self.displays:
+                    display.load_images(service_item.slides)
             for slide_index, slide in enumerate(self.service_item.slides):
                 row += 1
                 self.slide_list[str(row)] = row - 1
@@ -925,7 +936,15 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         """
         Set the preview display's zoom factor based on the size relative to the display size
         """
-        ratio = float(size.width()) / 1920.0
+        display_with = 0
+        for screen in self.screens:
+            if screen.is_display:
+                display_with = screen.geometry.width()
+        if display_with == 0:
+            ratio = 0.25
+        else:
+            ratio = float(size.width()) / display_with
+        # TODO: Find a different scale solution, setZoomFactor only supports 0.25-5.0. Maybe HTML scale?
         self.preview_display.webview.setZoomFactor(ratio)
 
     def main_display_set_background(self):
