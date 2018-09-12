@@ -57,12 +57,12 @@ class SongImportForm(OpenLPWizard, RegistryProperties):
         super(SongImportForm, self).__init__(parent, plugin, 'songImportWizard', ':/wizards/wizard_song.bmp')
         self.clipboard = self.main_window.clipboard
 
-    def setupUi(self, image):
+    def setup_ui(self, image):
         """
         Set up the song wizard UI.
         """
         self.format_widgets = dict([(song_format, {}) for song_format in SongFormat.get_format_list()])
-        super(SongImportForm, self).setupUi(image)
+        super(SongImportForm, self).setup_ui(image)
         self.current_format = SongFormat.OpenLyrics
         self.format_stack.setCurrentIndex(self.current_format)
         self.format_combo_box.currentIndexChanged.connect(self.on_current_index_changed)
@@ -127,7 +127,7 @@ class SongImportForm(OpenLPWizard, RegistryProperties):
         self.source_layout.addLayout(self.format_stack)
         self.addPage(self.source_page)
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         """
         Song wizard localisation.
         """

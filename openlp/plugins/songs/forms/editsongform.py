@@ -64,7 +64,7 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
         self.song = None
         # can this be automated?
         self.width = 400
-        self.setupUi(self)
+        self.setup_ui(self)
         # Connecting signals and slots
         self.author_add_button.clicked.connect(self.on_author_add_button_clicked)
         self.author_edit_button.clicked.connect(self.on_author_edit_button_clicked)

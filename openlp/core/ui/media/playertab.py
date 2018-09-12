@@ -61,12 +61,12 @@ class PlayerTab(SettingsTab):
         player_translated = translate('OpenLP.PlayerTab', 'Players')
         super(PlayerTab, self).__init__(parent, 'Players', player_translated)
 
-    def setupUi(self):
+    def setup_ui(self):
         """
         Set up the UI
         """
         self.setObjectName('MediaTab')
-        super(PlayerTab, self).setupUi()
+        super(PlayerTab, self).setup_ui()
         self.background_color_group_box = QtWidgets.QGroupBox(self.left_column)
         self.background_color_group_box.setObjectName('background_color_group_box')
         self.form_layout = QtWidgets.QFormLayout(self.background_color_group_box)
@@ -123,7 +123,7 @@ class PlayerTab(SettingsTab):
         # Signals and slots
         self.background_color_button.colorChanged.connect(self.on_background_color_changed)
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         """
         Translate the UI on the fly
         """

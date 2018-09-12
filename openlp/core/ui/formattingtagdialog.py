@@ -33,7 +33,7 @@ class Ui_FormattingTagDialog(object):
     """
     The UI widgets for the formatting tags window.
     """
-    def setupUi(self, formatting_tag_dialog):
+    def setup_ui(self, formatting_tag_dialog):
         """
         Set up the UI
         """
@@ -103,9 +103,9 @@ class Ui_FormattingTagDialog(object):
         self.restore_button.setIcon(UiIcons().undo)
         self.restore_button.setObjectName('restore_button')
         self.list_data_grid_layout.addWidget(self.button_box)
-        self.retranslateUi(formatting_tag_dialog)
+        self.retranslate_ui(formatting_tag_dialog)
 
-    def retranslateUi(self, formatting_tag_dialog):
+    def retranslate_ui(self, formatting_tag_dialog):
         """
         Translate the UI on the fly
         """

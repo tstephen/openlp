@@ -102,7 +102,7 @@ class CustomMediaItem(MediaManagerItem):
         self.add_custom_from_service = Settings().value(self.settings_section + '/add custom from service')
         self.is_search_as_you_type_enabled = Settings().value('advanced/search as type')
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         """
 
         """

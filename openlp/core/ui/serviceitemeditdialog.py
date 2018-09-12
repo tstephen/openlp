@@ -33,7 +33,7 @@ class Ui_ServiceItemEditDialog(object):
     """
     The UI widgets for the service item edit dialog
     """
-    def setupUi(self, serviceItemEditDialog):
+    def setup_ui(self, serviceItemEditDialog):
         """
         Set up the UI
         """
@@ -62,9 +62,9 @@ class Ui_ServiceItemEditDialog(object):
         self.dialog_layout.addLayout(self.button_layout, 0, 1)
         self.button_box = create_button_box(serviceItemEditDialog, 'button_box', ['cancel', 'save'])
         self.dialog_layout.addWidget(self.button_box, 1, 0, 1, 2)
-        self.retranslateUi(serviceItemEditDialog)
+        self.retranslate_ui(serviceItemEditDialog)
 
-    def retranslateUi(self, serviceItemEditDialog):
+    def retranslate_ui(self, serviceItemEditDialog):
         """
         Translate the UI on the fly
         """

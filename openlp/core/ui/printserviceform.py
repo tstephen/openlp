@@ -133,7 +133,7 @@ class PrintServiceForm(QtWidgets.QDialog, Ui_PrintServiceDialog, RegistryPropert
         self.print_dialog = QtPrintSupport.QPrintDialog(self.printer, self)
         self.document = QtGui.QTextDocument()
         self.zoom = 0
-        self.setupUi(self)
+        self.setup_ui(self)
         # Load the settings for the dialog.
         settings = Settings()
         settings.beginGroup('advanced')

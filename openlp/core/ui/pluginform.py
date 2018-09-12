@@ -46,7 +46,7 @@ class PluginForm(QtWidgets.QDialog, Ui_PluginViewDialog, RegistryProperties):
                                          QtCore.Qt.WindowCloseButtonHint)
         self.active_plugin = None
         self.programatic_change = False
-        self.setupUi(self)
+        self.setup_ui(self)
         self.load()
         self._clear_details()
         # Right, now let's put some signals and slots together!

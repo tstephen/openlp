@@ -59,12 +59,12 @@ class AdvancedTab(SettingsTab):
         advanced_translated = translate('OpenLP.AdvancedTab', 'Advanced')
         super(AdvancedTab, self).__init__(parent, 'Advanced', advanced_translated)
 
-    def setupUi(self):
+    def setup_ui(self):
         """
         Configure the UI elements for the tab.
         """
         self.setObjectName('AdvancedTab')
-        super(AdvancedTab, self).setupUi()
+        super(AdvancedTab, self).setup_ui()
         self.ui_group_box = QtWidgets.QGroupBox(self.left_column)
         self.ui_group_box.setObjectName('ui_group_box')
         self.ui_layout = QtWidgets.QFormLayout(self.ui_group_box)
@@ -241,7 +241,7 @@ class AdvancedTab(SettingsTab):
         self.next_item_radio_button.clicked.connect(self.on_next_item_button_clicked)
         self.search_as_type_check_box.stateChanged.connect(self.on_search_as_type_check_box_changed)
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         """
         Setup the interface translation strings.
         """

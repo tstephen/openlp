@@ -226,7 +226,7 @@ class MainCanvas(OpenLPMixin, Canvas, RegistryProperties):
         self.rebuild_css = False
         self.hide_mode = None
         self.override = {}
-        self.retranslateUi()
+        self.retranslate_ui()
         self.media_object = None
         if self.is_live:
             self.audio_player = AudioPlayer(self)
@@ -325,7 +325,7 @@ class MainCanvas(OpenLPMixin, Canvas, RegistryProperties):
         for plugin in self.plugin_manager.plugins:
             plugin.refresh_css(self.frame)
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         """
         Setup the interface translation strings.
         """

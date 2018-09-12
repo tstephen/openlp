@@ -108,8 +108,8 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
         self.page_layout.setSpacing(0)
         self.page_layout.setContentsMargins(0, 0, 0, 0)
         self.required_icons()
-        self.setupUi()
-        self.retranslateUi()
+        self.setup_ui()
+        self.retranslate_ui()
         self.auto_select_id = -1
 
     def setup_item(self):
@@ -130,7 +130,7 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
         self.has_delete_icon = True
         self.add_to_service_item = False
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         """
         This method is called automatically to provide OpenLP with the opportunity to translate the ``MediaManagerItem``
         to another language.
@@ -145,7 +145,7 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
             self.toolbar = OpenLPToolbar(self)
             self.page_layout.addWidget(self.toolbar)
 
-    def setupUi(self):
+    def setup_ui(self):
         """
         This method sets up the interface on the button. Plugin developers use this to add and create toolbars, and the
         rest of the interface of the media manager item.

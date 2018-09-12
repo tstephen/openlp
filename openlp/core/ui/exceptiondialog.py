@@ -34,7 +34,7 @@ class Ui_ExceptionDialog(object):
     """
     The GUI widgets of the exception dialog.
     """
-    def setupUi(self, exception_dialog):
+    def setup_ui(self, exception_dialog):
         """
         Set up the UI.
         """
@@ -84,10 +84,10 @@ class Ui_ExceptionDialog(object):
                                             [self.send_report_button, self.save_report_button, self.attach_tile_button])
         self.exception_layout.addWidget(self.button_box)
 
-        self.retranslateUi(exception_dialog)
+        self.retranslate_ui(exception_dialog)
         self.description_text_edit.textChanged.connect(self.on_description_updated)
 
-    def retranslateUi(self, exception_dialog):
+    def retranslate_ui(self, exception_dialog):
         """
         Translate the widgets on the fly.
         """

@@ -45,7 +45,7 @@ class Ui_PrintServiceDialog(object):
     """
     The UI of the print service dialog
     """
-    def setupUi(self, print_service_dialog):
+    def setup_ui(self, print_service_dialog):
         """
         Set up the UI
         """
@@ -127,10 +127,10 @@ class Ui_PrintServiceDialog(object):
         self.options_group_box.setLayout(self.group_layout)
         self.options_layout.addWidget(self.options_group_box)
 
-        self.retranslateUi(print_service_dialog)
+        self.retranslate_ui(print_service_dialog)
         self.options_button.toggled.connect(self.toggle_options)
 
-    def retranslateUi(self, print_service_dialog):
+    def retranslate_ui(self, print_service_dialog):
         """
         Translate the UI on the fly
         """

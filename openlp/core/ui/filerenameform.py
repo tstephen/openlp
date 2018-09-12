@@ -46,7 +46,7 @@ class FileRenameForm(QtWidgets.QDialog, Ui_FileRenameDialog, RegistryProperties)
         """
         Set up the class. This method is mocked out by the tests.
         """
-        self.setupUi(self)
+        self.setup_ui(self)
 
     def exec(self, copy=False):
         """

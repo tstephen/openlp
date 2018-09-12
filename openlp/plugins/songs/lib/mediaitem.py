@@ -133,7 +133,7 @@ class SongMediaItem(MediaManagerItem):
         self.display_written_by_text = Settings().value(self.settings_section + '/display written by')
         self.display_copyright_symbol = Settings().value(self.settings_section + '/display copyright symbol')
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         self.search_text_label.setText('{text}:'.format(text=UiStrings().Search))
         self.search_text_button.setText(UiStrings().Search)
         self.maintenance_action.setText(SongStrings.SongMaintenance)

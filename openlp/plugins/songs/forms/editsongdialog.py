@@ -34,7 +34,7 @@ class Ui_EditSongDialog(object):
     The :class:`~openlp.plugins.songs.forms.editsongdialog.Ui_EditSongDialog` class defines the user interface for the
     EditSongForm dialog.
     """
-    def setupUi(self, edit_song_dialog):
+    def setup_ui(self, edit_song_dialog):
         edit_song_dialog.setObjectName('edit_song_dialog')
         edit_song_dialog.setWindowIcon(UiIcons().main_icon)
         edit_song_dialog.resize(900, 600)
@@ -293,9 +293,9 @@ class Ui_EditSongDialog(object):
         self.button_box = create_button_box(edit_song_dialog, 'button_box', ['cancel', 'save'])
         self.bottom_layout.addWidget(self.button_box)
         self.dialog_layout.addLayout(self.bottom_layout)
-        self.retranslateUi(edit_song_dialog)
+        self.retranslate_ui(edit_song_dialog)
 
-    def retranslateUi(self, edit_song_dialog):
+    def retranslate_ui(self, edit_song_dialog):
         """
         Translate the UI on the fly.
         """

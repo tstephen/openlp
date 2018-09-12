@@ -37,7 +37,7 @@ class Ui_ThemeWizard(object):
     """
     The Create/Edit theme wizard
     """
-    def setupUi(self, theme_wizard):
+    def setup_ui(self, theme_wizard):
         """
         Set up the UI
         """
@@ -375,7 +375,7 @@ class Ui_ThemeWizard(object):
         self.preview_area_layout.addWidget(self.preview_box_label)
         self.preview_layout.addWidget(self.preview_area)
         theme_wizard.addPage(self.preview_page)
-        self.retranslateUi(theme_wizard)
+        self.retranslate_ui(theme_wizard)
         self.background_combo_box.currentIndexChanged.connect(self.background_stack.setCurrentIndex)
         self.outline_check_box.toggled.connect(self.outline_color_button.setEnabled)
         self.outline_check_box.toggled.connect(self.outline_size_spin_box.setEnabled)
@@ -390,7 +390,7 @@ class Ui_ThemeWizard(object):
         self.footer_position_check_box.toggled.connect(self.footer_width_spin_box.setDisabled)
         self.footer_position_check_box.toggled.connect(self.footer_height_spin_box.setDisabled)
 
-    def retranslateUi(self, theme_wizard):
+    def retranslate_ui(self, theme_wizard):
         """
         Translate the UI on the fly
         """

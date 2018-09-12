@@ -86,7 +86,7 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
         # Allow DnD from the desktop
         self.list_view.activateDnD()
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         """
         This method is called automatically to provide OpenLP with the opportunity to translate the ``MediaManagerItem``
         to another language.

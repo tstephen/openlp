@@ -65,7 +65,7 @@ class MediaClipSelectorForm(QtWidgets.QDialog, Ui_MediaClipSelector, RegistryPro
         self.audio_cd = False
         self.playback_length = 0
         self.media_item = media_item
-        self.setupUi(self)
+        self.setup_ui(self)
         # setup play/pause icon
         self.play_icon = UiIcons().play
         self.pause_icon = UiIcons().pause

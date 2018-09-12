@@ -30,7 +30,7 @@ from openlp.core.ui.icons import UiIcons
 
 
 class Ui_EditBibleDialog(object):
-    def setupUi(self, edit_bible_dialog):
+    def setup_ui(self, edit_bible_dialog):
         edit_bible_dialog.setObjectName('edit_bible_dialog')
         edit_bible_dialog.setWindowIcon(UiIcons().main_icon)
         edit_bible_dialog.resize(520, 400)
@@ -125,10 +125,10 @@ class Ui_EditBibleDialog(object):
         self.dialog_layout.addWidget(self.bible_tab_widget)
         self.button_box = create_button_box(edit_bible_dialog, 'button_box', ['cancel', 'save'])
         self.dialog_layout.addWidget(self.button_box)
-        self.retranslateUi(edit_bible_dialog)
+        self.retranslate_ui(edit_bible_dialog)
         QtCore.QMetaObject.connectSlotsByName(edit_bible_dialog)
 
-    def retranslateUi(self, edit_bible_dialog):
+    def retranslate_ui(self, edit_bible_dialog):
         self.book_names = BibleStrings().BookNames
         edit_bible_dialog.setWindowTitle(translate('BiblesPlugin.EditBibleForm', 'Bible Editor'))
         # Meta tab

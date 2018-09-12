@@ -36,7 +36,7 @@ class ThemeLayoutForm(QtWidgets.QDialog, Ui_ThemeLayoutDialog):
         Constructor
         """
         super(ThemeLayoutForm, self).__init__(parent)
-        self.setupUi(self)
+        self.setup_ui(self)
 
     def exec(self, image):
         """

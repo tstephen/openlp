@@ -68,7 +68,7 @@ class Ui_MainWindow(object):
     """
     This is the UI part of the main window.
     """
-    def setupUi(self, main_window):
+    def setup_ui(self, main_window):
         """
         Set up the user interface
         """
@@ -346,7 +346,7 @@ class Ui_MainWindow(object):
                     self.tools_menu.menuAction(), self.settings_menu.menuAction(), self.help_menu.menuAction()))
         add_actions(self, [self.search_shortcut_action])
         # Initialise the translation
-        self.retranslateUi(main_window)
+        self.retranslate_ui(main_window)
         self.media_tool_box.setCurrentIndex(0)
         # Connect up some signals and slots
         self.file_menu.aboutToShow.connect(self.update_recent_files_menu)
@@ -357,7 +357,7 @@ class Ui_MainWindow(object):
         self.set_lock_panel(panel_locked)
         self.settings_imported = False
 
-    def retranslateUi(self, main_window):
+    def retranslate_ui(self, main_window):
         """
         Set up the translation system
         """
@@ -510,10 +510,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
         PluginManager(self)
         ImageManager()
         # Set up the interface
-        self.setupUi(self)
+        self.setup_ui(self)
         # Define the media Dock Manager
         self.media_dock_manager = MediaDockManager(self.media_tool_box)
-        # Load settings after setupUi so default UI sizes are overwritten
+        # Load settings after setup_ui so default UI sizes are overwritten
         # Once settings are loaded update the menu with the recent files.
         self.update_recent_files_menu()
         self.plugin_form = PluginForm(self)

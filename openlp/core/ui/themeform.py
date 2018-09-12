@@ -60,7 +60,7 @@ class ThemeForm(QtWidgets.QWizard, Ui_ThemeWizard, RegistryProperties):
         """
         Set up the class. This method is mocked out by the tests.
         """
-        self.setupUi(self)
+        self.setup_ui(self)
         self.registerFields()
         self.update_theme_allowed = True
         self.temp_background_filename = None

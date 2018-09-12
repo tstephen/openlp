@@ -45,12 +45,12 @@ class ThemesTab(SettingsTab):
         theme_translated = translate('OpenLP.ThemesTab', 'Themes')
         super(ThemesTab, self).__init__(parent, 'Themes', theme_translated)
 
-    def setupUi(self):
+    def setup_ui(self):
         """
         Set up the UI
         """
         self.setObjectName('ThemesTab')
-        super(ThemesTab, self).setupUi()
+        super(ThemesTab, self).setup_ui()
         self.global_group_box = QtWidgets.QGroupBox(self.left_column)
         self.global_group_box.setObjectName('global_group_box')
         self.global_group_box_layout = QtWidgets.QVBoxLayout(self.global_group_box)
@@ -109,7 +109,7 @@ class ThemesTab(SettingsTab):
         self.default_combo_box.activated.connect(self.on_default_combo_box_changed)
         Registry().register_function('theme_update_list', self.update_theme_list)
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         """
         Translate the UI on the fly
         """

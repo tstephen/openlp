@@ -29,7 +29,6 @@ from PyQt5 import QtGui, QtWidgets
 from openlp.core.common import get_images_filter
 from openlp.core.common.i18n import UiStrings, translate
 from openlp.core.common.path import Path
-from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.display.screens import ScreenList
 from openlp.core.lib.settingstab import SettingsTab
@@ -54,73 +53,13 @@ class GeneralTab(SettingsTab):
         general_translated = translate('OpenLP.GeneralTab', 'General')
         super(GeneralTab, self).__init__(parent, 'Core', general_translated)
 
-    def setupUi(self):
+    def setup_ui(self):
         """
         Create the user interface for the general settings tab
         """
         self.setObjectName('GeneralTab')
-        super(GeneralTab, self).setupUi()
+        super(GeneralTab, self).setup_ui()
         self.tab_layout.setStretch(1, 1)
-        # Monitors
-        self.screen_group_box = QtWidgets.QGroupBox(self.left_column)
-        self.screen_group_box.setObjectName('screen_group_box')
-        self.screen_layout = QtWidgets.QVBoxLayout(self.screen_group_box)
-        self.screen_layout.setObjectName('screen_layout')
-        self.screen_combo_box = QtWidgets.QComboBox(self.screen_group_box)
-        self.screen_combo_box.setObjectName('screen_combo_box')
-        self.screen_layout.addWidget(self.screen_combo_box)
-        # Actual screen details
-        self.screen_detail_layout = QtWidgets.QGridLayout()
-        self.screen_detail_layout.setContentsMargins(0, 0, 0, 0)
-        # self.screen_detail_layout.setSpacing(8)
-        self.screen_detail_layout.setObjectName('screen_detail_layout')
-        self.screen_use_this_checkbox = QtWidgets.QCheckBox(self.screen_group_box)
-        self.screen_use_this_checkbox.setObjectName('screen_use_this_checkbox')
-        self.screen_detail_layout.addWidget(self.screen_use_this_checkbox)
-        # Display Position
-        # self.override_radio_button = QtWidgets.QRadioButton(self.screen_group_box)
-        # self.override_radio_button.setObjectName('override_radio_button')
-        # self.screen_detail_layout.addWidget(self.override_radio_button)
-        # self.custom_x_label = QtWidgets.QLabel(self.screen_group_box)
-        # self.custom_x_label.setObjectName('custom_x_label')
-        # self.screen_layout.addWidget(self.custom_x_label)
-        # self.custom_X_value_edit = QtWidgets.QSpinBox(self.screen_group_box)
-        # self.custom_X_value_edit.setObjectName('custom_X_value_edit')
-        # self.custom_X_value_edit.setRange(-9999, 9999)
-        # self.screen_layout.addWidget(self.custom_X_value_edit)
-        # self.custom_y_label = QtWidgets.QLabel(self.screen_group_box)
-        # self.custom_y_label.setObjectName('custom_y_label')
-        # self.screen_layout.addWidget(self.custom_y_label)
-        # self.custom_Y_value_edit = QtWidgets.QSpinBox(self.screen_group_box)
-        # self.custom_Y_value_edit.setObjectName('custom_Y_value_edit')
-        # self.custom_Y_value_edit.setRange(-9999, 9999)
-        # self.screen_layout.addWidget(self.custom_Y_value_edit)
-        # self.custom_width_label = QtWidgets.QLabel(self.screen_group_box)
-        # self.custom_width_label.setObjectName('custom_width_label')
-        # self.screen_layout.addWidget(self.custom_width_label)
-        # self.custom_width_value_edit = QtWidgets.QSpinBox(self.screen_group_box)
-        # self.custom_width_value_edit.setObjectName('custom_width_value_edit')
-        # self.custom_width_value_edit.setRange(1, 9999)
-        # self.screen_layout.addWidget(self.custom_width_value_edit)
-        # self.custom_height_label = QtWidgets.QLabel(self.screen_group_box)
-        # self.custom_height_label.setObjectName('custom_height_label')
-        # self.screen_layout.addWidget(self.custom_height_label)
-        # self.custom_height_value_edit = QtWidgets.QSpinBox(self.screen_group_box)
-        # self.custom_height_value_edit.setObjectName('custom_height_value_edit')
-        # self.custom_height_value_edit.setRange(1, 9999)
-        # self.screen_layout.addWidget(self.custom_height_value_edit)
-        # self.display_on_screen_check = QtWidgets.QCheckBox(self.screen_group_box)
-        # self.display_on_screen_check.setObjectName('screen_combo_box')
-        # self.screen_layout.addWidget(self.display_on_screen_check)
-        # Set up the stretchiness of each column, so that the first column
-        # less stretchy (and therefore smaller) than the others
-        # self.screen_layout.setColumnStretch(0, 1)
-        # self.screen_layout.setColumnStretch(1, 3)
-        # self.screen_layout.setColumnStretch(2, 3)
-        # self.screen_layout.setColumnStretch(3, 3)
-        # self.screen_layout.setColumnStretch(4, 3)
-        self.screen_layout.addLayout(self.screen_detail_layout)
-        self.left_layout.addWidget(self.screen_group_box)
         # CCLI Details
         self.ccli_group_box = QtWidgets.QGroupBox(self.left_column)
         self.ccli_group_box.setObjectName('ccli_group_box')
@@ -221,30 +160,17 @@ class GeneralTab(SettingsTab):
         self.settings_layout.addRow(self.timeout_label, self.timeout_spin_box)
         self.right_layout.addWidget(self.settings_group_box)
         self.right_layout.addStretch()
-        # Signals and slots
-        # self.override_radio_button.toggled.connect(self.on_override_radio_button_pressed)
-        # self.custom_height_value_edit.valueChanged.connect(self.on_display_changed)
-        # self.custom_width_value_edit.valueChanged.connect(self.on_display_changed)
-        # self.custom_Y_value_edit.valueChanged.connect(self.on_display_changed)
-        # self.custom_X_value_edit.valueChanged.connect(self.on_display_changed)
-        self.screen_combo_box.currentIndexChanged.connect(self.on_display_changed)
-        # Reload the tab, as the screen resolution/count may have changed.
-        Registry().register_function('config_screen_changed', self.load)
         # Remove for now
         self.username_label.setVisible(False)
         self.username_edit.setVisible(False)
         self.password_label.setVisible(False)
         self.password_edit.setVisible(False)
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         """
         Translate the general settings tab to the currently selected language
         """
         self.tab_title_visible = translate('OpenLP.GeneralTab', 'General')
-        self.screen_group_box.setTitle(translate('OpenLP.GeneralTab', 'Monitors'))
-        # self.screen_radio_button.setText(translate('OpenLP.GeneralTab', 'Select screen for output display:'))
-        self.screen_use_this_checkbox.setText(translate('OpenLP.GeneralTab', 'Use this screen as a display'))
-        # self.display_on_screen_check.setText(translate('OpenLP.GeneralTab', 'Display if a single screen'))
         self.startup_group_box.setTitle(translate('OpenLP.GeneralTab', 'Application Startup'))
         self.warning_check_box.setText(translate('OpenLP.GeneralTab', 'Show blank screen warning'))
         self.auto_open_check_box.setText(translate('OpenLP.GeneralTab', 'Automatically open the previous service file'))
@@ -269,12 +195,6 @@ class GeneralTab(SettingsTab):
         self.number_label.setText(UiStrings().CCLINumberLabel)
         self.username_label.setText(translate('OpenLP.GeneralTab', 'SongSelect username:'))
         self.password_label.setText(translate('OpenLP.GeneralTab', 'SongSelect password:'))
-        # Moved from display tab
-        # self.override_radio_button.setText(translate('OpenLP.GeneralTab', 'Override display position:'))
-        # self.custom_x_label.setText(translate('OpenLP.GeneralTab', 'X'))
-        # self.custom_y_label.setText(translate('OpenLP.GeneralTab', 'Y'))
-        # self.custom_height_label.setText(translate('OpenLP.GeneralTab', 'Height'))
-        # self.custom_width_label.setText(translate('OpenLP.GeneralTab', 'Width'))
         self.audio_group_box.setTitle(translate('OpenLP.GeneralTab', 'Background Audio'))
         self.start_paused_check_box.setText(translate('OpenLP.GeneralTab', 'Start background audio paused'))
         self.repeat_list_check_box.setText(translate('OpenLP.GeneralTab', 'Repeat track list'))
@@ -288,25 +208,12 @@ class GeneralTab(SettingsTab):
         """
         settings = Settings()
         settings.beginGroup(self.settings_section)
-        self.screen_combo_box.clear()
-        for screen in self.screens:
-            self.screen_combo_box.addItem(str(screen), screen.number)
-        screens = settings.value('screens')
-        for number, screen in screens.items():
-            if screen['is_display']:
-                for item_index in range(self.screen_combo_box.count()):
-                    if self.screen_combo_box.itemData(item_index) == number:
-                        self.screen_combo_box.setCurrentIndex(item_index)
-        else:
-            self.screen_combo_box.setCurrentIndex(0)
         self.number_edit.setText(settings.value('ccli number'))
         self.username_edit.setText(settings.value('songselect username'))
         self.password_edit.setText(settings.value('songselect password'))
         self.save_check_service_check_box.setChecked(settings.value('save prompt'))
         self.auto_unblank_check_box.setChecked(settings.value('auto unblank'))
         self.click_live_slide_to_unblank_check_box.setChecked(settings.value('click live slide to unblank'))
-        # TODO: This is going to be a more complicated setup
-        # self.display_on_screen_check.setChecked(self.screens.display)
         self.warning_check_box.setChecked(settings.value('blank warning'))
         self.auto_open_check_box.setChecked(settings.value('auto open'))
         self.show_splash_check_box.setChecked(settings.value('show splash'))
@@ -317,21 +224,9 @@ class GeneralTab(SettingsTab):
         self.check_for_updates_check_box.setChecked(settings.value('update check'))
         self.auto_preview_check_box.setChecked(settings.value('auto preview'))
         self.timeout_spin_box.setValue(settings.value('loop delay'))
-        # self.screen_radio_button.setChecked(not settings.value('override position',))
-        # self.override_radio_button.setChecked(settings.value('override position'))
-        # self.custom_X_value_edit.setValue(settings.value('x position'))
-        # self.custom_Y_value_edit.setValue(settings.value('y position'))
-        # self.custom_height_value_edit.setValue(settings.value('height'))
-        # self.custom_width_value_edit.setValue(settings.value('width'))
         self.start_paused_check_box.setChecked(settings.value('audio start paused'))
         self.repeat_list_check_box.setChecked(settings.value('audio repeat list'))
         settings.endGroup()
-        # self.screen_combo_box.setDisabled(self.override_radio_button.isChecked())
-        # self.custom_X_value_edit.setEnabled(self.override_radio_button.isChecked())
-        # self.custom_Y_value_edit.setEnabled(self.override_radio_button.isChecked())
-        # self.custom_height_value_edit.setEnabled(self.override_radio_button.isChecked())
-        # self.custom_width_value_edit.setEnabled(self.override_radio_button.isChecked())
-        self.display_changed = False
 
     def save(self):
         """
@@ -339,8 +234,6 @@ class GeneralTab(SettingsTab):
         """
         settings = Settings()
         settings.beginGroup(self.settings_section)
-        # settings.setValue('screen', self.screen_combo_box.currentIndex())
-        # settings.setValue('display on screen', self.display_on_screen_check.isChecked())
         settings.setValue('blank warning', self.warning_check_box.isChecked())
         settings.setValue('auto open', self.auto_open_check_box.isChecked())
         settings.setValue('show splash', self.show_splash_check_box.isChecked())
@@ -356,60 +249,16 @@ class GeneralTab(SettingsTab):
         settings.setValue('ccli number', self.number_edit.displayText())
         settings.setValue('songselect username', self.username_edit.displayText())
         settings.setValue('songselect password', self.password_edit.displayText())
-        # settings.setValue('x position', self.custom_X_value_edit.value())
-        # settings.setValue('y position', self.custom_Y_value_edit.value())
-        # settings.setValue('height', self.custom_height_value_edit.value())
-        # settings.setValue('width', self.custom_width_value_edit.value())
-        # settings.setValue('override position', self.override_radio_button.isChecked())
         settings.setValue('audio start paused', self.start_paused_check_box.isChecked())
         settings.setValue('audio repeat list', self.repeat_list_check_box.isChecked())
         settings.endGroup()
-        # On save update the screens as well
-        self.post_set_up(True)
+        self.post_set_up()
 
-    def post_set_up(self, is_post_update=False):
+    def post_set_up(self):
         """
-        Apply settings after settings tab has loaded and most of the system so must be delayed
+        Apply settings after the tab has loaded
         """
         self.settings_form.register_post_process('slidecontroller_live_spin_delay')
-        # Do not continue on start up.
-        if not is_post_update:
-            return
-        self.screens.set_display_screen(self.screen_combo_box.currentData())
-        # self.screens.display = self.display_on_screen_check.isChecked()
-        # self.screens.override['size'] = QtCore.QRect(
-        #     self.custom_X_value_edit.value(),
-        #     self.custom_Y_value_edit.value(),
-        #     self.custom_width_value_edit.value(),
-        #     self.custom_height_value_edit.value())
-        # self.screens.override['number'] = self.screens.which_screen(self.screens.override['size'])
-        # self.screens.override['primary'] = (self.screens.desktop.primaryScreen() == self.screens.override['number'])
-        # if self.override_radio_button.isChecked():
-        #     self.screens.set_override_display()
-        # else:
-        #     self.screens.reset_current_display()
-        if self.display_changed:
-            self.settings_form.register_post_process('config_screen_changed')
-        self.display_changed = False
-
-    def on_override_radio_button_pressed(self, checked):
-        """
-        Toggle screen state depending on check box state.
-
-        :param checked: The state of the check box (boolean).
-        """
-        self.screen_combo_box.setDisabled(checked)
-        self.custom_X_value_edit.setEnabled(checked)
-        self.custom_Y_value_edit.setEnabled(checked)
-        self.custom_height_value_edit.setEnabled(checked)
-        self.custom_width_value_edit.setEnabled(checked)
-        self.display_changed = True
-
-    def on_display_changed(self):
-        """
-        Called when the width, height, x position or y position has changed.
-        """
-        self.display_changed = True
 
     def on_logo_background_color_changed(self, color):
         """

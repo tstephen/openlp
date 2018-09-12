@@ -49,7 +49,7 @@ class EditBibleForm(QtWidgets.QDialog, Ui_EditBibleDialog, RegistryProperties):
                                             QtCore.Qt.WindowCloseButtonHint)
         self.media_item = media_item
         self.book_names = BibleStrings().BookNames
-        self.setupUi(self)
+        self.setup_ui(self)
         self.manager = manager
 
     def load_bible(self, bible):

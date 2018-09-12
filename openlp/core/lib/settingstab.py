@@ -54,12 +54,12 @@ class SettingsTab(QtWidgets.QWidget, RegistryProperties):
         """
         Run some initial setup. This method is separate from __init__ in order to mock it out in tests.
         """
-        self.setupUi()
-        self.retranslateUi()
+        self.setup_ui()
+        self.retranslate_ui()
         self.initialise()
         self.load()
 
-    def setupUi(self):
+    def setup_ui(self):
         """
         Setup the tab's interface.
         """
@@ -90,7 +90,7 @@ class SettingsTab(QtWidgets.QWidget, RegistryProperties):
         left_width = max(left_width, self.left_column.minimumSizeHint().width())
         self.left_column.setFixedWidth(left_width)
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         """
         Setup the interface translation strings.
         """

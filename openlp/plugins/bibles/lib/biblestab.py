@@ -47,9 +47,9 @@ class BiblesTab(SettingsTab):
         self.display_style = 0
         super().__init__(*args, **kwargs)
 
-    def setupUi(self):
+    def setup_ui(self):
         self.setObjectName('BiblesTab')
-        super(BiblesTab, self).setupUi()
+        super(BiblesTab, self).setup_ui()
         self.verse_display_group_box = QtWidgets.QGroupBox(self.left_column)
         self.verse_display_group_box.setObjectName('verse_display_group_box')
         self.verse_display_layout = QtWidgets.QFormLayout(self.verse_display_group_box)
@@ -174,7 +174,7 @@ class BiblesTab(SettingsTab):
         self.bible_search_while_typing_check_box.stateChanged.connect(
             self.on_bible_search_while_typing_check_box_changed)
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         self.verse_display_group_box.setTitle(translate('BiblesPlugin.BiblesTab', 'Verse Display'))
         self.is_verse_number_visible_check_box.setText(translate('BiblesPlugin.BiblesTab', 'Show verse numbers'))
         self.new_chapters_check_box.setText(translate('BiblesPlugin.BiblesTab', 'Only show new chapter numbers'))

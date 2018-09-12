@@ -50,12 +50,12 @@ class ProjectorTab(SettingsTab):
         projector_translated = translate('OpenLP.ProjectorTab', 'Projector')
         super(ProjectorTab, self).__init__(parent, 'Projector', projector_translated)
 
-    def setupUi(self):
+    def setup_ui(self):
         """
         Setup the UI
         """
         self.setObjectName('ProjectorTab')
-        super(ProjectorTab, self).setupUi()
+        super(ProjectorTab, self).setup_ui()
         self.connect_box = QtWidgets.QGroupBox(self.left_column)
         self.connect_box.setObjectName('connect_box')
         self.connect_box_layout = QtWidgets.QFormLayout(self.connect_box)
@@ -95,7 +95,7 @@ class ProjectorTab(SettingsTab):
         self.connect_on_linkup.setObjectName('connect_on_linkup')
         self.connect_box_layout.addRow(self.connect_on_linkup)
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         """
         Translate the UI on the fly
         """

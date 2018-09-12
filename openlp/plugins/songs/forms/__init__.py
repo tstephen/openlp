@@ -39,7 +39,7 @@ mentioned above, like so::
 
         def __init__(self, parent=None):
             super(AuthorsForm, self).__init__(parent)
-            self.setupUi(self)
+            self.setup_ui(self)
 
 This allows OpenLP to use ``self.object`` for all the GUI elements while keeping
 them separate from the functionality, so that it is easier to recreate the GUI

@@ -24,8 +24,9 @@ The :mod:`screen` module provides management functionality for a machines'
 displays.
 """
 import logging
+from functools import cmp_to_key
 
-from PyQt5 import QtCore
+from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.common.i18n import translate
 from openlp.core.common.registry import Registry
@@ -49,7 +50,7 @@ class Screen(object):
         """
         self.number = number
         self.geometry = geometry
-        self.display_geometry = geometry
+        self.custom_geometry = None
         self.is_primary = is_primary
         self.is_display = is_display
 
@@ -63,6 +64,13 @@ class Screen(object):
         if self.is_primary:
             name = '{name} ({primary})'.format(name=name, primary=translate('OpenLP.ScreenList', 'primary'))
         return name
+
+    @property
+    def display_geometry(self):
+        """
+        Returns the geometry to use when displaying. This property decides between the native and custom geometries
+        """
+        return self.custom_geometry or self.geometry
 
     @classmethod
     def from_dict(cls, screen_dict):
@@ -280,10 +288,27 @@ class ScreenList(object):
         """
         Update the list of screens
         """
+        def _screen_compare(this, other):
+            """
+            Compare screens. Can't use a key here because of the nested property and method to be called
+            """
+            if this.geometry().x() < other.geometry().x():
+                return -1
+            elif this.geometry().x() > other.geometry().x():
+                return 1
+            else:
+                if this.geometry().y() < other.geometry().y():
+                    return -1
+                elif this.geometry().y() > other.geometry().y():
+                    return 1
+                else:
+                    return 0
         self.screens = []
-        for number in range(self.desktop.screenCount()):
+        os_screens = QtWidgets.QApplication.screens()
+        os_screens.sort(key=cmp_to_key(_screen_compare))
+        for number, screen in enumerate(os_screens):
             self.screens.append(
-                Screen(number, self.desktop.screenGeometry(number), self.desktop.primaryScreen() == number))
+                Screen(number, screen.geometry(), self.desktop.primaryScreen() == number))
 
     def on_screen_resolution_changed(self, number):
         """

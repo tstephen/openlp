@@ -56,7 +56,7 @@ class PresentationMediaItem(MediaManagerItem):
         self.controllers = controllers
         super(PresentationMediaItem, self).__init__(parent, plugin)
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         """
         The name of the plugin media displayed in UI
         """

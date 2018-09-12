@@ -233,8 +233,8 @@ class BibleMediaItem(MediaManagerItem):
         self.results_view_tab.setCurrentIndex(ResultsTab.Search)
         self.page_layout.addWidget(self.results_view_tab)
 
-    def setupUi(self):
-        super().setupUi()
+    def setup_ui(self):
+        super().setup_ui()
         sort_model = QtCore.QSortFilterProxyModel(self.select_book_combo_box)
         model = self.select_book_combo_box.model()
         # Reparent the combo box model to the sort proxy, otherwise it will be deleted when we change the comobox's
@@ -268,8 +268,8 @@ class BibleMediaItem(MediaManagerItem):
         self.on_results_view_tab_total_update(ResultsTab.Saved)
         self.on_results_view_tab_total_update(ResultsTab.Search)
 
-    def retranslateUi(self):
-        log.debug('retranslateUi')
+    def retranslate_ui(self):
+        log.debug('retranslate_ui')
         self.chapter_label.setText(translate('BiblesPlugin.MediaItem', 'Chapter:'))
         self.verse_label.setText(translate('BiblesPlugin.MediaItem', 'Verse:'))
         self.style_combo_box.setItemText(LayoutStyle.VersePerSlide, UiStrings().VersePerSlide)

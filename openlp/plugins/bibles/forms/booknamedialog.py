@@ -28,7 +28,7 @@ from openlp.core.ui.icons import UiIcons
 
 
 class Ui_BookNameDialog(object):
-    def setupUi(self, book_name_dialog):
+    def setup_ui(self, book_name_dialog):
         book_name_dialog.setObjectName('book_name_dialog')
         book_name_dialog.setWindowIcon(UiIcons().main_icon)
         book_name_dialog.resize(400, 271)
@@ -79,9 +79,9 @@ class Ui_BookNameDialog(object):
         self.button_box = create_button_box(book_name_dialog, 'button_box', ['cancel', 'ok'])
         self.book_name_layout.addWidget(self.button_box)
 
-        self.retranslateUi(book_name_dialog)
+        self.retranslate_ui(book_name_dialog)
 
-    def retranslateUi(self, book_name_dialog):
+    def retranslate_ui(self, book_name_dialog):
         book_name_dialog.setWindowTitle(translate('BiblesPlugin.BookNameDialog', 'Select Book Name'))
         self.info_label.setText(
             translate('BiblesPlugin.BookNameDialog', 'The following book name cannot be matched up internally. '

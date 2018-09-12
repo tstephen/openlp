@@ -76,7 +76,7 @@ class ImageMediaItem(MediaManagerItem):
         # Allow DnD from the desktop.
         self.list_view.activateDnD()
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         self.on_new_prompt = translate('ImagePlugin.MediaItem', 'Select Image(s)')
         file_formats = get_images_filter()
         self.on_new_file_masks = '{formats};;{files} (*)'.format(formats=file_formats, files=UiStrings().AllFiles)

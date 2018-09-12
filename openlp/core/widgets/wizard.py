@@ -110,7 +110,7 @@ class OpenLPWizard(QtWidgets.QWizard, RegistryProperties):
         self.delete_icon = UiIcons().delete
         self.finish_button = self.button(QtWidgets.QWizard.FinishButton)
         self.cancel_button = self.button(QtWidgets.QWizard.CancelButton)
-        self.setupUi(image)
+        self.setup_ui(image)
         self.register_fields()
         self.custom_init()
         self.custom_signals()
@@ -119,7 +119,7 @@ class OpenLPWizard(QtWidgets.QWizard, RegistryProperties):
             self.error_copy_to_button.clicked.connect(self.on_error_copy_to_button_clicked)
             self.error_save_to_button.clicked.connect(self.on_error_save_to_button_clicked)
 
-    def setupUi(self, image):
+    def setup_ui(self, image):
         """
         Set up the wizard UI.
         :param image: path to start up image
@@ -136,7 +136,7 @@ class OpenLPWizard(QtWidgets.QWizard, RegistryProperties):
         self.add_custom_pages()
         if self.with_progress_page:
             self.add_progress_page()
-        self.retranslateUi()
+        self.retranslate_ui()
 
     def register_fields(self):
         """

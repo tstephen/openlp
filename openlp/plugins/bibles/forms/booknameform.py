@@ -51,7 +51,7 @@ class BookNameForm(QDialog, Ui_BookNameDialog):
         """
         super(BookNameForm, self).__init__(parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint |
                                            QtCore.Qt.WindowCloseButtonHint)
-        self.setupUi(self)
+        self.setup_ui(self)
         self.custom_signals()
         self.book_names = BibleStrings().BookNames
         self.book_id = False

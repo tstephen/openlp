@@ -82,11 +82,11 @@ class BibleImportForm(OpenLPWizard):
         super(BibleImportForm, self).__init__(parent, bible_plugin,
                                               'bibleImportWizard', ':/wizards/wizard_importbible.bmp')
 
-    def setupUi(self, image):
+    def setup_ui(self, image):
         """
         Set up the UI for the bible wizard.
         """
-        super(BibleImportForm, self).setupUi(image)
+        super(BibleImportForm, self).setup_ui(image)
         self.format_combo_box.currentIndexChanged.connect(self.on_current_index_changed)
 
     def on_current_index_changed(self, index):
@@ -388,7 +388,7 @@ class BibleImportForm(OpenLPWizard):
         self.license_details_layout.setWidget(3, QtWidgets.QFormLayout.FieldRole, self.full_license_edit)
         self.addPage(self.license_details_page)
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         """
         Allow for localisation of the bible import wizard.
         """
