@@ -108,7 +108,7 @@ class DisplayWindow(QtWidgets.QWidget):
         from openlp.core.display.webengine import WebEngineView
         self._is_initialised = False
         self._fbo = None
-        self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.Tool | QtCore.Qt.WindowStaysOnTopHint)
+        self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.Tool) #| QtCore.Qt.WindowStaysOnTopHint
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.layout = QtWidgets.QVBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
@@ -122,6 +122,7 @@ class DisplayWindow(QtWidgets.QWidget):
         self.webview.page().setWebChannel(self.channel)
         if screen and screen.is_display:
             self.update_from_screen(screen)
+            self.show()
 
     def update_from_screen(self, screen):
         """
