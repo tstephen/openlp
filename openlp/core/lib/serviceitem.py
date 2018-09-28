@@ -40,7 +40,7 @@ from openlp.core.common.mixins import RegistryProperties
 from openlp.core.common.path import Path
 from openlp.core.common.settings import Settings
 from openlp.core.display.render import remove_tags, render_tags
-from openlp.core.lib import ImageSource, build_icon
+from openlp.core.lib import ImageSource, ItemCapabilities, build_icon
 
 log = logging.getLogger(__name__)
 
@@ -52,103 +52,6 @@ class ServiceItemType(object):
     Text = 1
     Image = 2
     Command = 3
-
-
-class ItemCapabilities(object):
-    """
-    Provides an enumeration of a service item's capabilities
-
-    ``CanPreview``
-            The capability to allow the ServiceManager to add to the preview tab when making the previous item live.
-
-    ``CanEdit``
-            The capability to allow the ServiceManager to allow the item to be edited
-
-    ``CanMaintain``
-            The capability to allow the ServiceManager to allow the item to be reordered.
-
-    ``RequiresMedia``
-            Determines is the service_item needs a Media Player
-
-    ``CanLoop``
-            The capability to allow the SlideController to allow the loop processing.
-
-    ``CanAppend``
-            The capability to allow the ServiceManager to add leaves to the
-            item
-
-    ``NoLineBreaks``
-            The capability to remove lines breaks in the renderer
-
-    ``OnLoadUpdate``
-            The capability to update MediaManager when a service Item is loaded.
-
-    ``AddIfNewItem``
-            Not Used
-
-    ``ProvidesOwnDisplay``
-            The capability to tell the SlideController the service Item has a different display.
-
-    ``HasDetailedTitleDisplay``
-            Being Removed and decommissioned.
-
-    ``HasVariableStartTime``
-            The capability to tell the ServiceManager that a change to start time is possible.
-
-    ``CanSoftBreak``
-            The capability to tell the renderer that Soft Break is allowed
-
-    ``CanWordSplit``
-            The capability to tell the renderer that it can split words is
-            allowed
-
-    ``HasBackgroundAudio``
-            That a audio file is present with the text.
-
-    ``CanAutoStartForLive``
-            The capability to ignore the do not play if display blank flag.
-
-    ``CanEditTitle``
-            The capability to edit the title of the item
-
-    ``IsOptical``
-            Determines is the service_item is based on an optical device
-
-    ``HasDisplayTitle``
-            The item contains 'displaytitle' on every frame which should be
-            preferred over 'title' when displaying the item
-
-    ``HasNotes``
-            The item contains 'notes'
-
-    ``HasThumbnails``
-            The item has related thumbnails available
-
-    ``HasMetaData``
-            The item has Meta Data about item
-    """
-    CanPreview = 1
-    CanEdit = 2
-    CanMaintain = 3
-    RequiresMedia = 4
-    CanLoop = 5
-    CanAppend = 6
-    NoLineBreaks = 7
-    OnLoadUpdate = 8
-    AddIfNewItem = 9
-    ProvidesOwnDisplay = 10
-    # HasDetailedTitleDisplay = 11
-    HasVariableStartTime = 12
-    CanSoftBreak = 13
-    CanWordSplit = 14
-    HasBackgroundAudio = 15
-    CanAutoStartForLive = 16
-    CanEditTitle = 17
-    IsOptical = 18
-    HasDisplayTitle = 19
-    HasNotes = 20
-    HasThumbnails = 21
-    HasMetaData = 22
 
 
 class ServiceItem(RegistryProperties):
@@ -249,17 +152,45 @@ class ServiceItem(RegistryProperties):
         else:
             self.icon = UiIcons().clone
 
+    def _create_slides(self):
+        """
+        Create frames for rendering and display
+        """
+        self._rendered_slides = []
+        self._display_slides = []
+
+        # Save rendered pages to this dict. In the case that a slide is used twice we can use the pages saved to
+        # the dict instead of rendering them again.
+        previous_pages = {}
+        #for slide in self._raw_frames:
+        for raw_slide in self.slides:
+            verse_tag = raw_slide['verse']
+            if verse_tag in previous_pages and previous_pages[verse_tag][0] == raw_slide:
+                pages = previous_pages[verse_tag][1]
+            else:
+                pages = self.renderer.format_slide(raw_slide['text'], self)
+                previous_pages[verse_tag] = (raw_slide, pages)
+            for page in pages:
+                rendered_slide = {
+                    'title': raw_slide['title'],
+                    'text': render_tags(page),
+                    'verse': verse_tag,
+                }
+                self._rendered_slides.append(rendered_slide)
+                display_slide = {
+                    'title': raw_slide['title'],
+                    'text': remove_tags(page),
+                    'verse': verse_tag,
+                }
+                self._display_slides.append(display_slide)
+
     @property
     def rendered_slides(self):
         """
         Render the frames and return them
         """
         if not self._rendered_slides:
-            self._rendered_slides = []
-            for raw_slide in self.slides:
-                rendered_slide = deepcopy(raw_slide)
-                rendered_slide['text'] = render_tags(rendered_slide['text'])
-                self._rendered_slides.append(rendered_slide)
+            self._create_slides()
         return self._rendered_slides
 
     @property
@@ -268,11 +199,7 @@ class ServiceItem(RegistryProperties):
         Render the frames and return them
         """
         if not self._display_slides:
-            self._display_slides = []
-            for raw_slide in self.slides:
-                display_slide = deepcopy(raw_slide)
-                display_slide['text'] = remove_tags(display_slide['text'])
-                self._display_slides.append(display_slide)
+            self._create_slides()
         return self._display_slides
 
     # def render(self, provides_own_theme_data=False):

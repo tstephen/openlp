@@ -81,9 +81,13 @@ class Screen(object):
         :return: A Screen object with the values from screen_dict
         :rtype: openlp.core.display.screens.Screen
         """
-        screen_dict['geometry'] = QtCore.QRect(**screen_dict['geometry'])
+        screen_dict['geometry'] = QtCore.QRect(screen_dict['geometry']['x'], screen_dict['geometry']['y'],
+                                               screen_dict['geometry']['width'], screen_dict['geometry']['height'])
         if 'display_geometry' in screen_dict:
-            screen_dict['display_geometry'] = QtCore.QRect(**screen_dict['display_geometry'])
+            screen_dict['display_geometry'] = QtCore.QRect(screen_dict['display_geometry']['x'],
+                                                           screen_dict['display_geometry']['y'],
+                                                           screen_dict['display_geometry']['width'],
+                                                           screen_dict['display_geometry']['height'])
         return cls(**screen_dict)
 
     def to_dict(self):

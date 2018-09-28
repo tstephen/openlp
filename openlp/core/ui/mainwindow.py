@@ -43,6 +43,7 @@ from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.display.screens import ScreenList
 from openlp.core.lib.imagemanager import ImageManager
+from openlp.core.display.render import Renderer
 from openlp.core.lib.plugin import PluginStatus
 from openlp.core.lib.pluginmanager import PluginManager
 from openlp.core.lib.ui import create_action
@@ -509,6 +510,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
         # Set up the path with plugins
         PluginManager(self)
         ImageManager()
+        Renderer()
         # Set up the interface
         self.setup_ui(self)
         # Define the media Dock Manager

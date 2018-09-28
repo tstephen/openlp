@@ -27,7 +27,14 @@ import logging
 import math
 import re
 
+from PyQt5 import QtWidgets
+
 from openlp.core.lib.formattingtags import FormattingTags
+from openlp.core.common.registry import Registry, RegistryBase
+from openlp.core.common.mixins import LogMixin, RegistryProperties
+from openlp.core.display.window import DisplayWindow
+from openlp.core.display.screens import ScreenList
+from openlp.core.lib import ItemCapabilities
 
 log = logging.getLogger(__name__)
 
@@ -354,3 +361,318 @@ def render_tags(text, can_render_chords=False, is_printing=False):
         text = text.replace(tag['start tag'], tag['start html'])
         text = text.replace(tag['end tag'], tag['end html'])
     return text
+
+
+def words_split(line):
+    """
+    Split the slide up by word so can wrap better
+
+    :param line: Line to be split
+    """
+    # this parse we are to be wordy
+    return re.split(r'\s+', line)
+
+
+def get_start_tags(raw_text):
+    """
+    Tests the given text for not closed formatting tags and returns a tuple consisting of three unicode strings::
+
+        ('{st}{r}Text text text{/r}{/st}', '{st}{r}', '<strong><span style="-webkit-text-fill-color:red">')
+
+    The first unicode string is the text, with correct closing tags. The second unicode string are OpenLP's opening
+    formatting tags and the third unicode string the html opening formatting tags.
+
+    :param raw_text: The text to test. The text must **not** contain html tags, only OpenLP formatting tags
+    are allowed::
+            {st}{r}Text text text
+    """
+    raw_tags = []
+    html_tags = []
+    for tag in FormattingTags.get_html_tags():
+        if tag['start tag'] == '{br}':
+            continue
+        if raw_text.count(tag['start tag']) != raw_text.count(tag['end tag']):
+            raw_tags.append((raw_text.find(tag['start tag']), tag['start tag'], tag['end tag']))
+            html_tags.append((raw_text.find(tag['start tag']), tag['start html']))
+    # Sort the lists, so that the tags which were opened first on the first slide (the text we are checking) will be
+    # opened first on the next slide as well.
+    raw_tags.sort(key=lambda tag: tag[0])
+    html_tags.sort(key=lambda tag: tag[0])
+    # Create a list with closing tags for the raw_text.
+    end_tags = []
+    start_tags = []
+    for tag in raw_tags:
+        start_tags.append(tag[1])
+        end_tags.append(tag[2])
+    end_tags.reverse()
+    # Remove the indexes.
+    html_tags = [tag[1] for tag in html_tags]
+    return raw_text + ''.join(end_tags), ''.join(start_tags), ''.join(html_tags)
+
+
+class Renderer(RegistryBase, LogMixin, RegistryProperties, DisplayWindow):
+    """
+    A virtual display used for rendering thumbnails and other offscreen tasks
+    """
+    def __init__(self, *args, **kwargs):
+        """
+        Constructor
+        """
+        super().__init__(*args, **kwargs)
+        self.force_page = False
+        for screen in ScreenList():
+            if screen.is_display:
+                self.setGeometry(screen.geometry.x(), screen.geometry.y(),
+                                 screen.geometry.width(), screen.geometry.height())
+                break
+        # If the display is not show'ed and hidden like this webegine will not render 
+        self.show()
+        self.hide()
+        self.theme_height = 0
+    
+    def calculate_line_count(self):
+        """
+        Calculate the number of lines that fits on one slide
+        """
+        return self.run_javascript('Display.calculateLineCount();', is_sync=True)
+
+    def clear_slides(self):
+        """
+        Clear slides
+        """
+        return self.run_javascript('Display.clearSlides();')
+
+    def format_slide(self, text, item):
+        """
+        Calculate how much text can fit on a slide.
+
+        :param text:  The words to go on the slides.
+        :param item: The :class:`~openlp.core.lib.serviceitem.ServiceItem` item object.
+
+        """
+        while not self._is_initialised:
+            QtWidgets.QApplication.instance().processEvents()
+        self.log_debug('format slide')
+        theme_name = item.theme if item.theme else Registry().get('theme_manager').global_theme
+        theme_data = Registry().get('theme_manager').get_theme_data(theme_name)
+        self.theme_height = theme_data.font_main_height
+
+        # Set theme for preview
+        self.set_theme(theme_data)
+        # Add line endings after each line of text used for bibles.
+        line_end = '<br>'
+        if item.is_capable(ItemCapabilities.NoLineBreaks):
+            line_end = ' '
+        # Bibles
+        if item.is_capable(ItemCapabilities.CanWordSplit):
+            pages = self._paginate_slide_words(text.split('\n'), line_end)
+        # Songs and Custom
+        elif item.is_capable(ItemCapabilities.CanSoftBreak):
+            pages = []
+            if '[---]' in text:
+                # Remove Overflow split if at start of the text
+                if text.startswith('[---]'):
+                    text = text[5:]
+                # Remove two or more option slide breaks next to each other (causing infinite loop).
+                while '\n[---]\n[---]\n' in text:
+                    text = text.replace('\n[---]\n[---]\n', '\n[---]\n')
+                while ' [---]' in text:
+                    text = text.replace(' [---]', '[---]')
+                while '[---] ' in text:
+                    text = text.replace('[---] ', '[---]')
+                count = 0
+                # only loop 5 times as there will never be more than 5 incorrect logical splits on a single slide.
+                while True and count < 5:
+                    slides = text.split('\n[---]\n', 2)
+                    # If there are (at least) two occurrences of [---] we use the first two slides (and neglect the last
+                    # for now).
+                    if len(slides) == 3:
+                        html_text = expand_tags('\n'.join(slides[:2]))
+                    # We check both slides to determine if the optional split is needed (there is only one optional
+                    # split).
+                    else:
+                        html_text = expand_tags('\n'.join(slides))
+                    html_text = html_text.replace('\n', '<br>')
+                    if self._text_fits_on_slide(html_text):
+                        # The first two optional slides fit (as a whole) on one slide. Replace the first occurrence
+                        # of [---].
+                        text = text.replace('\n[---]', '', 1)
+                    else:
+                        # The first optional slide fits, which means we have to render the first optional slide.
+                        text_contains_split = '[---]' in text
+                        if text_contains_split:
+                            try:
+                                text_to_render, text = text.split('\n[---]\n', 1)
+                            except ValueError:
+                                text_to_render = text.split('\n[---]\n')[0]
+                                text = ''
+                            text_to_render, raw_tags, html_tags = get_start_tags(text_to_render)
+                            if text:
+                                text = raw_tags + text
+                        else:
+                            text_to_render = text
+                            text = ''
+                        lines = text_to_render.strip('\n').split('\n')
+                        slides = self._paginate_slide(lines, line_end)
+                        if len(slides) > 1 and text:
+                            # Add all slides apart from the last one the list.
+                            pages.extend(slides[:-1])
+                            if text_contains_split:
+                                text = slides[-1] + '\n[---]\n' + text
+                            else:
+                                text = slides[-1] + '\n' + text
+                            text = text.replace('<br>', '\n')
+                        else:
+                            pages.extend(slides)
+                    if '[---]' not in text:
+                        lines = text.strip('\n').split('\n')
+                        pages.extend(self._paginate_slide(lines, line_end))
+                        break
+                    count += 1
+            else:
+                # Clean up line endings.
+                pages = self._paginate_slide(text.split('\n'), line_end)
+        else:
+            pages = self._paginate_slide(text.split('\n'), line_end)
+        new_pages = []
+        for page in pages:
+            while page.endswith('<br>'):
+                page = page[:-4]
+            new_pages.append(page)
+        return new_pages
+
+    def _paginate_slide(self, lines, line_end):
+        """
+        Figure out how much text can appear on a slide, using the current theme settings.
+
+        **Note:** The smallest possible "unit" of text for a slide is one line. If the line is too long it will be cut
+        off when displayed.
+
+        :param lines: The text to be fitted on the slide split into lines.
+        :param line_end: The text added after each line. Either ``' '`` or ``'<br>``.
+        """
+        formatted = []
+        previous_html = ''
+        previous_raw = ''
+        separator = '<br>'
+        html_lines = list(map(render_tags, lines))
+        # Text too long so go to next page.
+        if not self._text_fits_on_slide(separator.join(html_lines)):
+            html_text, previous_raw = self._binary_chop(
+                formatted, previous_html, previous_raw, html_lines, lines, separator, '')
+        else:
+            previous_raw = separator.join(lines)
+        formatted.append(previous_raw)
+        return formatted
+
+    def _paginate_slide_words(self, lines, line_end):
+        """
+        Figure out how much text can appear on a slide, using the current theme settings.
+
+        **Note:** The smallest possible "unit" of text for a slide is one word. If one line is too long it will be
+        processed word by word. This is sometimes need for **bible** verses.
+
+        :param lines: The text to be fitted on the slide split into lines.
+        :param line_end: The text added after each line. Either ``' '`` or ``'<br>``. This is needed for **bibles**.
+        """
+        formatted = []
+        previous_html = ''
+        previous_raw = ''
+        for line in lines:
+            line = line.strip()
+            html_line = expand_tags(line)
+            # Text too long so go to next page.
+            if not self._text_fits_on_slide(previous_html + html_line):
+                # Check if there was a verse before the current one and append it, when it fits on the page.
+                if previous_html:
+                    if self._text_fits_on_slide(previous_html):
+                        formatted.append(previous_raw)
+                        previous_html = ''
+                        previous_raw = ''
+                        # Now check if the current verse will fit, if it does not we have to start to process the verse
+                        # word by word.
+                        if self._text_fits_on_slide(html_line):
+                            previous_html = html_line + line_end
+                            previous_raw = line + line_end
+                            continue
+                # Figure out how many words of the line will fit on screen as the line will not fit as a whole.
+                raw_words = words_split(line)
+                html_words = list(map(expand_tags, raw_words))
+                previous_html, previous_raw = \
+                    self._binary_chop(formatted, previous_html, previous_raw, html_words, raw_words, ' ', line_end)
+            else:
+                previous_html += html_line + line_end
+                previous_raw += line + line_end
+        formatted.append(previous_raw)
+        return formatted
+
+    def _binary_chop(self, formatted, previous_html, previous_raw, html_list, raw_list, separator, line_end):
+        """
+        This implements the binary chop algorithm for faster rendering. This algorithm works line based (line by line)
+        and word based (word by word). It is assumed that this method is **only** called, when the lines/words to be
+        rendered do **not** fit as a whole.
+
+        :param formatted: The list to append any slides.
+        :param previous_html: The html text which is know to fit on a slide, but is not yet added to the list of
+        slides. (unicode string)
+        :param previous_raw: The raw text (with formatting tags) which is know to fit on a slide, but is not yet added
+        to the list of slides. (unicode string)
+        :param html_list: The elements which do not fit on a slide and needs to be processed using the binary chop.
+        The text contains html.
+        :param raw_list: The elements which do not fit on a slide and needs to be processed using the binary chop.
+        The elements can contain formatting tags.
+        :param separator: The separator for the elements. For lines this is ``'<br>'`` and for words this is ``' '``.
+        :param line_end: The text added after each "element line". Either ``' '`` or ``'<br>``. This is needed for
+         bibles.
+        """
+        smallest_index = 0
+        highest_index = len(html_list) - 1
+        index = highest_index // 2
+        while True:
+            if not self._text_fits_on_slide(previous_html + separator.join(html_list[:index + 1]).strip()):
+                # We know that it does not fit, so change/calculate the new index and highest_index accordingly.
+                highest_index = index
+                index = index - (index - smallest_index) // 2
+            else:
+                smallest_index = index
+                index = index + (highest_index - index) // 2
+            # We found the number of words which will fit.
+            if smallest_index == index or highest_index == index:
+                index = smallest_index
+                text = previous_raw.rstrip('<br>') + separator.join(raw_list[:index + 1])
+                text, raw_tags, html_tags = get_start_tags(text)
+                formatted.append(text)
+                previous_html = ''
+                previous_raw = ''
+                # Stop here as the theme line count was requested.
+                if self.force_page:
+                    Registry().execute('theme_line_count', index + 1)
+                    break
+            else:
+                continue
+            # Check if the remaining elements fit on the slide.
+            if self._text_fits_on_slide(html_tags + separator.join(html_list[index + 1:]).strip()):
+                previous_html = html_tags + separator.join(html_list[index + 1:]).strip() + line_end
+                previous_raw = raw_tags + separator.join(raw_list[index + 1:]).strip() + line_end
+                break
+            else:
+                # The remaining elements do not fit, thus reset the indexes, create a new list and continue.
+                raw_list = raw_list[index + 1:]
+                raw_list[0] = raw_tags + raw_list[0]
+                html_list = html_list[index + 1:]
+                html_list[0] = html_tags + html_list[0]
+                smallest_index = 0
+                highest_index = len(html_list) - 1
+                index = highest_index // 2
+        return previous_html, previous_raw
+
+    def _text_fits_on_slide(self, text):
+        """
+        Checks if the given ``text`` fits on a slide. If it does ``True`` is returned, otherwise ``False``.
+
+        :param text:  The text to check. It may contain HTML tags.
+        """
+        self.clear_slides()
+        self.run_javascript('Display.addTextSlide("v1", "{text}");'.format(text=text), is_sync=True)
+        does_text_fits = self.run_javascript('Display.doesContentFit();', is_sync=True)
+        return does_text_fits

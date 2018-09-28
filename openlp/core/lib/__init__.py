@@ -80,6 +80,103 @@ class ServiceItemAction(object):
     Next = 3
 
 
+class ItemCapabilities(object):
+    """
+    Provides an enumeration of a service item's capabilities
+
+    ``CanPreview``
+            The capability to allow the ServiceManager to add to the preview tab when making the previous item live.
+
+    ``CanEdit``
+            The capability to allow the ServiceManager to allow the item to be edited
+
+    ``CanMaintain``
+            The capability to allow the ServiceManager to allow the item to be reordered.
+
+    ``RequiresMedia``
+            Determines is the service_item needs a Media Player
+
+    ``CanLoop``
+            The capability to allow the SlideController to allow the loop processing.
+
+    ``CanAppend``
+            The capability to allow the ServiceManager to add leaves to the
+            item
+
+    ``NoLineBreaks``
+            The capability to remove lines breaks in the renderer
+
+    ``OnLoadUpdate``
+            The capability to update MediaManager when a service Item is loaded.
+
+    ``AddIfNewItem``
+            Not Used
+
+    ``ProvidesOwnDisplay``
+            The capability to tell the SlideController the service Item has a different display.
+
+    ``HasDetailedTitleDisplay``
+            Being Removed and decommissioned.
+
+    ``HasVariableStartTime``
+            The capability to tell the ServiceManager that a change to start time is possible.
+
+    ``CanSoftBreak``
+            The capability to tell the renderer that Soft Break is allowed
+
+    ``CanWordSplit``
+            The capability to tell the renderer that it can split words is
+            allowed
+
+    ``HasBackgroundAudio``
+            That a audio file is present with the text.
+
+    ``CanAutoStartForLive``
+            The capability to ignore the do not play if display blank flag.
+
+    ``CanEditTitle``
+            The capability to edit the title of the item
+
+    ``IsOptical``
+            Determines is the service_item is based on an optical device
+
+    ``HasDisplayTitle``
+            The item contains 'displaytitle' on every frame which should be
+            preferred over 'title' when displaying the item
+
+    ``HasNotes``
+            The item contains 'notes'
+
+    ``HasThumbnails``
+            The item has related thumbnails available
+
+    ``HasMetaData``
+            The item has Meta Data about item
+    """
+    CanPreview = 1
+    CanEdit = 2
+    CanMaintain = 3
+    RequiresMedia = 4
+    CanLoop = 5
+    CanAppend = 6
+    NoLineBreaks = 7
+    OnLoadUpdate = 8
+    AddIfNewItem = 9
+    ProvidesOwnDisplay = 10
+    # HasDetailedTitleDisplay = 11
+    HasVariableStartTime = 12
+    CanSoftBreak = 13
+    CanWordSplit = 14
+    HasBackgroundAudio = 15
+    CanAutoStartForLive = 16
+    CanEditTitle = 17
+    IsOptical = 18
+    HasDisplayTitle = 19
+    HasNotes = 20
+    HasThumbnails = 21
+    HasMetaData = 22
+
+
 def get_text_file_string(text_file_path):
     """
     Open a file and return its content as a string. If the supplied file path is not a file then the function

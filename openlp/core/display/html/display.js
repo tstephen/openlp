@@ -292,6 +292,13 @@ var Display = {
     this._slides = {};
   },
   /**
+   * Checks if the present slide content fits within the slide
+  */
+  doesContentFit: function () {
+    console.debug("scrollHeight: " + $(".slides")[0].scrollHeight);
+    return $(".slides")[0].clientHeight >= $(".slides")[0].scrollHeight;
+  },
+  /**
    * Add a slides. If the slide exists but the HTML is different, update the slide.
    * @param {string} verse - The verse number, e.g. "v1"
    * @param {string} html - The HTML for the verse, e.g. "line1<br>line2"

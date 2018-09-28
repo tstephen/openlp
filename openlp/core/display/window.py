@@ -154,6 +154,7 @@ class DisplayWindow(QtWidgets.QWidget):
         Add stuff after page initialisation
         """
         self.run_javascript('Display.init();')
+        self._is_initialised = True
 
     def run_javascript(self, script, is_sync=False):
         """
