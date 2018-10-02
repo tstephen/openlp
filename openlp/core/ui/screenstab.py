@@ -81,6 +81,7 @@ class ScreensTab(SettingsTab):
         super(ScreensTab, self).__init__(parent, 'Screens', screens_translated)
         self.settings_section = 'core'
         self.current_screen = None
+        self.identify_labels = []
 
     def setup_ui(self):
         """
@@ -262,11 +263,18 @@ class ScreensTab(SettingsTab):
         # On save update the screens as well
         self.settings_form.register_post_process('config_screen_changed')
 
+    @QtCore.pyqtSlot()
+    def _on_identify_timer_shot(self):
+        for label in self.identify_labels:
+            label.hide()
+            label.setParent(None)
+            label.deleteLater()
+        self.identify_labels = []
+
     def on_identify_button_clicked(self):
         """
         Display a widget on every screen for 5 seconds
         """
-        labels = []
         for screen in self.screens:
             label = QtWidgets.QLabel(None)
             label.setAlignment(QtCore.Qt.AlignCenter)
@@ -278,17 +286,9 @@ class ScreensTab(SettingsTab):
             label.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.Tool | QtCore.Qt.WindowStaysOnTopHint |
                                  QtCore.Qt.WindowDoesNotAcceptFocus)
             label.show()
-            labels.append(label)
+            self.identify_labels.append(label)
 
-            @QtCore.pyqtSlot()
-            def _close_label():
-                label.hide()
-                if label in labels:
-                    labels.remove(label)
-                label.setParent(None)
-                label.deleteLater()
-
-            QtCore.QTimer.singleShot(3000, _close_label)
+        QtCore.QTimer.singleShot(3000, self._on_identify_timer_shot)
 
     def on_screen_button_clicked(self):
         """
