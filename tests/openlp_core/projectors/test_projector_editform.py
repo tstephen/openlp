@@ -31,7 +31,7 @@ from openlp.core.common.registry import Registry
 from openlp.core.projectors.db import Projector, ProjectorDB
 from openlp.core.projectors.editform import ProjectorEditForm
 from tests.helpers.testmixin import TestMixin
-from tests.resources.projector.data import TEST_DB, TEST1_DATA
+from tests.resources.projector.data import TEST1_DATA, TEST_DB
 
 
 class TestProjectorEditForm(TestCase, TestMixin):

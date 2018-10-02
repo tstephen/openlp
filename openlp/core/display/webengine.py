@@ -25,7 +25,8 @@ Heavily inspired by https://stackoverflow.com/questions/33467776/qt-qwebengine-r
 """
 import logging
 
-from PyQt5 import QtCore, QtWidgets, QtWebEngineWidgets
+from PyQt5 import QtCore, QtWebEngineWidgets, QtWidgets
+
 
 LOG_LEVELS = {
     QtWebEngineWidgets.QWebEnginePage.InfoMessageLevel: logging.INFO,

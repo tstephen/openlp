@@ -408,10 +408,12 @@ is the function which has to be called from outside. The generated and returned 
 """
 import logging
 from string import Template
+
 from PyQt5 import QtWebEngine
 
 from openlp.core.common.settings import Settings
-from openlp.core.lib.theme import BackgroundType, BackgroundGradientType, VerticalType, HorizontalType
+from openlp.core.lib.theme import BackgroundGradientType, BackgroundType, HorizontalType, VerticalType
+
 
 log = logging.getLogger(__name__)
 

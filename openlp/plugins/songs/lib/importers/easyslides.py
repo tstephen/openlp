@@ -29,6 +29,7 @@ from openlp.core.common import normalize_str
 from openlp.plugins.songs.lib import VerseType
 from openlp.plugins.songs.lib.importers.songimport import SongImport
 
+
 log = logging.getLogger(__name__)
 
 

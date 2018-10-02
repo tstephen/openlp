@@ -25,18 +25,12 @@ The bible import functions for OpenLP
 import logging
 import urllib.error
 
-from PyQt5 import QtWidgets
 from lxml import etree
-
-try:
-    from pysword import modules
-    PYSWORD_AVAILABLE = True
-except:
-    PYSWORD_AVAILABLE = False
+from PyQt5 import QtWidgets
 
 from openlp.core.common import trace_error_handler
 from openlp.core.common.applocation import AppLocation
-from openlp.core.common.i18n import UiStrings, translate, get_locale_key
+from openlp.core.common.i18n import UiStrings, get_locale_key, translate
 from openlp.core.common.settings import Settings
 from openlp.core.lib.db import delete_database
 from openlp.core.lib.exceptions import ValidationError
@@ -44,8 +38,16 @@ from openlp.core.lib.ui import critical_error_message_box
 from openlp.core.widgets.edits import PathEdit
 from openlp.core.widgets.wizard import OpenLPWizard, WizardStrings
 from openlp.plugins.bibles.lib.db import clean_filename
-from openlp.plugins.bibles.lib.importers.http import CWExtract, BGExtract, BSExtract
+from openlp.plugins.bibles.lib.importers.http import BGExtract, BSExtract, CWExtract
 from openlp.plugins.bibles.lib.manager import BibleFormat
+
+
+try:
+    from pysword import modules
+    PYSWORD_AVAILABLE = True
+except:
+    PYSWORD_AVAILABLE = False
+
 
 log = logging.getLogger(__name__)
 

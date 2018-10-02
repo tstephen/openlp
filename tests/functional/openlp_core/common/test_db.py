@@ -32,7 +32,7 @@ from unittest import TestCase
 import sqlalchemy
 
 from openlp.core.common.db import drop_column, drop_columns
-from openlp.core.lib.db import init_db, get_upgrade_op
+from openlp.core.lib.db import get_upgrade_op, init_db
 from tests.utils.constants import TEST_RESOURCES_PATH
 
 

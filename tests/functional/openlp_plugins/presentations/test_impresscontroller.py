@@ -31,9 +31,8 @@ from openlp.core.common.path import Path
 from openlp.core.common.settings import Settings
 from openlp.plugins.presentations.lib.impresscontroller import ImpressController, ImpressDocument, TextType
 from openlp.plugins.presentations.presentationplugin import __default_settings__
-
-from tests.utils.constants import RESOURCE_PATH
 from tests.helpers.testmixin import TestMixin
+from tests.utils.constants import RESOURCE_PATH
 
 
 class TestImpressController(TestCase, TestMixin):

@@ -26,8 +26,8 @@ import os
 from unittest import TestCase
 from unittest.mock import ANY, MagicMock, patch
 
-from openlp.core.common.path import Path, copy, copyfile, copytree, create_paths, path_to_str, replace_params, \
-    str_to_path, which, files_to_paths
+from openlp.core.common.path import Path, copy, copyfile, copytree, create_paths, files_to_paths, path_to_str, \
+    replace_params, str_to_path, which
 
 
 class TestShutil(TestCase):

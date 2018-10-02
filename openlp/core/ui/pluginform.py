@@ -31,6 +31,7 @@ from openlp.core.common.mixins import RegistryProperties
 from openlp.core.lib.plugin import PluginStatus
 from openlp.core.ui.plugindialog import Ui_PluginViewDialog
 
+
 log = logging.getLogger(__name__)
 
 

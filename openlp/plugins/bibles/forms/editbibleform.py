@@ -30,7 +30,9 @@ from openlp.core.common.mixins import RegistryProperties
 from openlp.core.lib.ui import critical_error_message_box
 from openlp.plugins.bibles.lib import BibleStrings
 from openlp.plugins.bibles.lib.db import BiblesResourcesDB
+
 from .editbibledialog import Ui_EditBibleDialog
+
 
 log = logging.getLogger(__name__)
 

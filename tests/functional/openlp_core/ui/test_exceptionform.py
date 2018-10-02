@@ -33,6 +33,7 @@ from openlp.core.common.registry import Registry
 from openlp.core.ui import exceptionform
 from tests.helpers.testmixin import TestMixin
 
+
 exceptionform.WEBKIT_VERSION = 'Webkit Test'
 exceptionform.MIGRATE_VERSION = 'Migrate Test'
 exceptionform.CHARDET_VERSION = 'CHARDET Test'

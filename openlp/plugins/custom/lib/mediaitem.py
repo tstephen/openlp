@@ -23,20 +23,21 @@
 import logging
 
 from PyQt5 import QtCore, QtWidgets
-from sqlalchemy.sql import or_, func, and_
+from sqlalchemy.sql import and_, func, or_
 
 from openlp.core.common.i18n import UiStrings, translate
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.lib import ServiceItemContext, check_item_selected
 from openlp.core.lib.mediamanageritem import MediaManagerItem
-from openlp.core.lib.serviceitem import ItemCapabilities
 from openlp.core.lib.plugin import PluginStatus
+from openlp.core.lib.serviceitem import ItemCapabilities
 from openlp.core.lib.ui import create_widget_action
 from openlp.core.ui.icons import UiIcons
 from openlp.plugins.custom.forms.editcustomform import EditCustomForm
-from openlp.plugins.custom.lib import CustomXMLParser, CustomXMLBuilder
+from openlp.plugins.custom.lib import CustomXMLBuilder, CustomXMLParser
 from openlp.plugins.custom.lib.db import CustomSlide
+
 
 log = logging.getLogger(__name__)
 

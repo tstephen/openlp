@@ -24,6 +24,7 @@ The :mod:`upgrade` module provides a way for the database and schema that is the
 """
 import logging
 
+
 log = logging.getLogger(__name__)
 __version__ = 1
 

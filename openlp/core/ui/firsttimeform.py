@@ -34,7 +34,7 @@ from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.common import clean_button_text, trace_error_handler
 from openlp.core.common.applocation import AppLocation
-from openlp.core.common.httputils import get_web_page, get_url_file_size, download_file
+from openlp.core.common.httputils import download_file, get_url_file_size, get_web_page
 from openlp.core.common.i18n import translate
 from openlp.core.common.mixins import RegistryProperties
 from openlp.core.common.path import Path, create_paths
@@ -43,8 +43,9 @@ from openlp.core.common.settings import Settings
 from openlp.core.lib import build_icon
 from openlp.core.lib.plugin import PluginStatus
 from openlp.core.lib.ui import critical_error_message_box
-from openlp.core.threading import ThreadWorker, run_thread, get_thread_worker, is_thread_finished
-from openlp.core.ui.firsttimewizard import UiFirstTimeWizard, FirstTimePage
+from openlp.core.threading import ThreadWorker, get_thread_worker, is_thread_finished, run_thread
+from openlp.core.ui.firsttimewizard import FirstTimePage, UiFirstTimeWizard
+
 
 log = logging.getLogger(__name__)
 

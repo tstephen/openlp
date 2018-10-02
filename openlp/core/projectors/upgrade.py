@@ -25,10 +25,11 @@ backend for the projector setup.
 """
 import logging
 
-from sqlalchemy import Table, Column, types
+from sqlalchemy import Column, Table, types
 from sqlalchemy.sql.expression import null
 
 from openlp.core.lib.db import get_upgrade_op
+
 
 log = logging.getLogger(__name__)
 

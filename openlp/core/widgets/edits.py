@@ -33,10 +33,11 @@ from openlp.core.common.path import Path, path_to_str, str_to_path
 from openlp.core.common.settings import Settings
 from openlp.core.lib import build_icon
 from openlp.core.lib.formattingtags import FormattingTags
-from openlp.core.lib.ui import create_widget_action, create_action
+from openlp.core.lib.ui import create_action, create_widget_action
 from openlp.core.ui.icons import UiIcons
 from openlp.core.widgets.dialogs import FileDialog
 from openlp.core.widgets.enums import PathEditType
+
 
 try:
     import enchant

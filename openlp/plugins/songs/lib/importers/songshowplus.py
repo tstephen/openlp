@@ -31,6 +31,7 @@ from openlp.core.widgets.wizard import WizardStrings
 from openlp.plugins.songs.lib import VerseType, retrieve_windows_encoding
 from openlp.plugins.songs.lib.importers.songimport import SongImport
 
+
 TITLE = 1
 AUTHOR = 2
 COPYRIGHT = 3

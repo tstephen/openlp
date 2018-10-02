@@ -27,6 +27,7 @@ import sys
 
 from openlp.core.common import de_hump, trace_error_handler
 
+
 log = logging.getLogger(__name__)
 
 

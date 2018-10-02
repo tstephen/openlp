@@ -25,7 +25,7 @@ Module to test the EditCustomForm.
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
-from PyQt5 import QtTest, QtCore, QtWidgets
+from PyQt5 import QtCore, QtTest, QtWidgets
 
 from openlp.core.common.registry import Registry
 from openlp.plugins.custom.forms.editcustomform import EditCustomForm

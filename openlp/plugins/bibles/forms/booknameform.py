@@ -35,6 +35,7 @@ from openlp.plugins.bibles.forms.booknamedialog import Ui_BookNameDialog
 from openlp.plugins.bibles.lib import BibleStrings
 from openlp.plugins.bibles.lib.db import BiblesResourcesDB
 
+
 log = logging.getLogger(__name__)
 
 

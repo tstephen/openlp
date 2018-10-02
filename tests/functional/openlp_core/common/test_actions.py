@@ -25,10 +25,10 @@ Package to test the openlp.core.common.actions package.
 from unittest import TestCase
 from unittest.mock import MagicMock, call, patch
 
-from PyQt5 import QtGui, QtCore, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 import openlp.core.common.actions
-from openlp.core.common.actions import CategoryActionList, ActionList
+from openlp.core.common.actions import ActionList, CategoryActionList
 from openlp.core.common.settings import Settings
 from tests.helpers.testmixin import TestMixin
 

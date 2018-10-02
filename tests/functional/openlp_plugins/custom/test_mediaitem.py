@@ -23,7 +23,7 @@
 This module contains tests for the lib submodule of the Songs plugin.
 """
 from unittest import TestCase
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 from PyQt5 import QtCore
 
@@ -32,6 +32,7 @@ from openlp.core.lib.plugin import PluginStatus
 from openlp.core.lib.serviceitem import ServiceItem
 from openlp.plugins.custom.lib import CustomMediaItem
 from tests.helpers.testmixin import TestMixin
+
 
 FOOTER = ['Arky Arky (Unknown)', 'Public Domain', 'CCLI 123456']
 

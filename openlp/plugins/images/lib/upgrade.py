@@ -33,6 +33,7 @@ from openlp.core.common.json import OpenLPJsonEncoder
 from openlp.core.common.path import Path
 from openlp.core.lib.db import PathType, get_upgrade_op
 
+
 log = logging.getLogger(__name__)
 __version__ = 2
 

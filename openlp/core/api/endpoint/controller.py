@@ -34,6 +34,7 @@ from openlp.core.common.settings import Settings
 from openlp.core.lib import create_thumb
 from openlp.core.lib.serviceitem import ItemCapabilities
 
+
 log = logging.getLogger(__name__)
 
 controller_endpoint = Endpoint('controller')

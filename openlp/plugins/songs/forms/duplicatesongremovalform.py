@@ -37,6 +37,7 @@ from openlp.plugins.songs.lib import delete_song
 from openlp.plugins.songs.lib.db import Song
 from openlp.plugins.songs.lib.songcompare import songs_probably_equal
 
+
 log = logging.getLogger(__name__)
 
 

@@ -32,6 +32,7 @@ from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.version import get_version
 
+
 log = logging.getLogger(__name__)
 
 

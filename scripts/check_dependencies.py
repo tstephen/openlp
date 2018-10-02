@@ -33,6 +33,7 @@ import os
 import sys
 from distutils.version import LooseVersion
 
+
 # If we try to import uno before nose this will create a warning. Just try to import nose first to suppress the warning.
 try:
     import nose

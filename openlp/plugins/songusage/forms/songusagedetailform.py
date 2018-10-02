@@ -30,7 +30,9 @@ from openlp.core.common.path import create_paths
 from openlp.core.common.settings import Settings
 from openlp.core.lib.ui import critical_error_message_box
 from openlp.plugins.songusage.lib.db import SongUsageItem
+
 from .songusagedetaildialog import Ui_SongUsageDetailDialog
+
 
 log = logging.getLogger(__name__)
 

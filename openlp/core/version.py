@@ -29,7 +29,7 @@ import time
 from collections import OrderedDict
 from datetime import date
 from distutils.version import LooseVersion
-from subprocess import Popen, PIPE
+from subprocess import PIPE, Popen
 
 import requests
 from PyQt5 import QtCore
@@ -37,6 +37,7 @@ from PyQt5 import QtCore
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.settings import Settings
 from openlp.core.threading import ThreadWorker, run_thread
+
 
 log = logging.getLogger(__name__)
 

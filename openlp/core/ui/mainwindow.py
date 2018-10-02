@@ -32,11 +32,10 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 from openlp.core.api import websockets
 from openlp.core.api.http import server
-from openlp.core.common import is_win, is_macosx, add_actions
+from openlp.core.common import add_actions, is_macosx, is_win
 from openlp.core.common.actions import ActionList, CategoryOrder
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.i18n import LanguageManager, UiStrings, translate
-from openlp.core.ui.icons import UiIcons
 from openlp.core.common.mixins import LogMixin, RegistryProperties
 from openlp.core.common.path import Path, copyfile, create_paths
 from openlp.core.common.registry import Registry
@@ -48,21 +47,22 @@ from openlp.core.lib.plugin import PluginStatus
 from openlp.core.lib.pluginmanager import PluginManager
 from openlp.core.lib.ui import create_action
 from openlp.core.projectors.manager import ProjectorManager
-from openlp.core.ui.shortcutlistform import ShortcutListForm
-from openlp.core.ui.formattingtagform import FormattingTagForm
-from openlp.core.ui.thememanager import ThemeManager
-from openlp.core.ui.servicemanager import ServiceManager
 from openlp.core.ui.aboutform import AboutForm
-from openlp.core.ui.pluginform import PluginForm
-from openlp.core.ui.slidecontroller import LiveController, PreviewController
-from openlp.core.ui.settingsform import SettingsForm
 from openlp.core.ui.firsttimeform import FirstTimeForm
+from openlp.core.ui.formattingtagform import FormattingTagForm
+from openlp.core.ui.icons import UiIcons
 from openlp.core.ui.media import MediaController
+from openlp.core.ui.pluginform import PluginForm
 from openlp.core.ui.printserviceform import PrintServiceForm
+from openlp.core.ui.servicemanager import ServiceManager
+from openlp.core.ui.settingsform import SettingsForm
+from openlp.core.ui.shortcutlistform import ShortcutListForm
+from openlp.core.ui.slidecontroller import LiveController, PreviewController
 from openlp.core.ui.style import PROGRESSBAR_STYLE, get_library_stylesheet
+from openlp.core.ui.thememanager import ThemeManager
 from openlp.core.version import get_version
 from openlp.core.widgets.dialogs import FileDialog
-from openlp.core.widgets.docks import OpenLPDockWidget, MediaDockManager
+from openlp.core.widgets.docks import MediaDockManager, OpenLPDockWidget
 
 
 class Ui_MainWindow(object):

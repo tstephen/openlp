@@ -33,6 +33,7 @@ from webob.static import DirectoryApp
 from openlp.core.api.http.errors import HttpError, NotFound, ServerError
 from openlp.core.common.applocation import AppLocation
 
+
 ARGS_REGEX = re.compile(r'''\{(\w+)(?::([^}]+))?\}''', re.VERBOSE)
 
 log = logging.getLogger(__name__)

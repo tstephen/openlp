@@ -32,6 +32,7 @@ from openlp.core.widgets.wizard import WizardStrings
 from openlp.plugins.songs.lib import strip_rtf
 from openlp.plugins.songs.lib.importers.songimport import SongImport
 
+
 log = logging.getLogger(__name__)
 
 

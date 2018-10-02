@@ -32,11 +32,12 @@ from openlp.core.common.applocation import AppLocation
 from openlp.core.common.i18n import UiStrings, format_time, translate
 from openlp.core.common.settings import Settings
 from openlp.core.lib.settingstab import SettingsTab
-from openlp.core.ui.style import HAS_DARK_STYLE
 from openlp.core.ui.icons import UiIcons
+from openlp.core.ui.style import HAS_DARK_STYLE
 from openlp.core.widgets.edits import PathEdit
 from openlp.core.widgets.enums import PathEditType
 from openlp.core.widgets.widgets import ProxyWidget
+
 
 log = logging.getLogger(__name__)
 

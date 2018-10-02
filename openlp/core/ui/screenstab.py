@@ -32,6 +32,7 @@ from openlp.core.display.screens import ScreenList
 from openlp.core.lib.settingstab import SettingsTab
 from openlp.core.ui.icons import UiIcons
 
+
 SCREENS_LAYOUT_STYLE = """
 #screen_frame {
   background-color: palette(base);

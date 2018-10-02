@@ -29,7 +29,7 @@ from PyQt5 import QtCore, QtMultimedia
 
 from openlp.core.common.registry import Registry
 from openlp.core.ui.media import MediaState
-from openlp.core.ui.media.systemplayer import SystemPlayer, CheckMediaWorker, ADDITIONAL_EXT
+from openlp.core.ui.media.systemplayer import ADDITIONAL_EXT, CheckMediaWorker, SystemPlayer
 
 
 class TestSystemPlayer(TestCase):

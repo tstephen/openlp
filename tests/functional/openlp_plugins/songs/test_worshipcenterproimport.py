@@ -23,7 +23,8 @@
 This module contains tests for the WorshipCenter Pro song importer.
 """
 from unittest import TestCase, skipUnless
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
 
 try:
     import pyodbc

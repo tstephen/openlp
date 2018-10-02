@@ -30,7 +30,7 @@ import sys
 from OpenGL import GL
 
 from openlp.core.app import main
-from openlp.core.common import is_win, is_macosx
+from openlp.core.common import is_macosx, is_win
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.path import create_paths
 

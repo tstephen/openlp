@@ -35,12 +35,13 @@ from PyQt5 import QtGui
 from openlp.core.common import md5_hash
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.i18n import translate
-from openlp.core.ui.icons import UiIcons
 from openlp.core.common.mixins import RegistryProperties
 from openlp.core.common.path import Path
 from openlp.core.common.settings import Settings
 from openlp.core.display.render import remove_tags, render_tags
 from openlp.core.lib import ImageSource, ItemCapabilities, build_icon
+from openlp.core.ui.icons import UiIcons
+
 
 log = logging.getLogger(__name__)
 

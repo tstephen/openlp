@@ -35,6 +35,7 @@ from openlp.core.lib.settingstab import SettingsTab
 from openlp.core.widgets.buttons import ColorButton
 from openlp.core.widgets.edits import PathEdit
 
+
 log = logging.getLogger(__name__)
 
 

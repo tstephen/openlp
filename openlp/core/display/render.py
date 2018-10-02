@@ -36,6 +36,7 @@ from openlp.core.display.window import DisplayWindow
 from openlp.core.display.screens import ScreenList
 from openlp.core.lib import ItemCapabilities
 
+
 log = logging.getLogger(__name__)
 
 SLIM_CHARS = 'fiíIÍjlĺľrtť.,;/ ()|"\'!:\\'

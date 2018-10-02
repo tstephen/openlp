@@ -32,6 +32,7 @@ from openlp.core.common.i18n import translate
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 
+
 log = logging.getLogger(__name__)
 
 

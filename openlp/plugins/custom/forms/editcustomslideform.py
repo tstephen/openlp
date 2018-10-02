@@ -26,6 +26,7 @@ from PyQt5 import QtCore, QtWidgets
 
 from .editcustomslidedialog import Ui_CustomSlideEditDialog
 
+
 log = logging.getLogger(__name__)
 
 

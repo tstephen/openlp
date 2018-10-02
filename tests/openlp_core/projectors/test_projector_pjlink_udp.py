@@ -29,7 +29,6 @@ from unittest.mock import call, patch
 
 import openlp.core.projectors.pjlink
 from openlp.core.projectors.constants import PJLINK_PORT
-
 from openlp.core.projectors.pjlink import PJLinkUDP
 from tests.resources.projector.data import TEST1_DATA
 

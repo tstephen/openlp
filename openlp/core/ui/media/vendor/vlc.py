@@ -47,6 +47,7 @@ from ctypes.util import find_library
 # Used by EventManager in override.py
 from inspect import getargspec
 
+
 __version__ = "N/A"
 build_date  = "Mon Jan 25 19:40:05 2016"
 

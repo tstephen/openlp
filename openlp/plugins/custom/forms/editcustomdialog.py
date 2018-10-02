@@ -22,7 +22,7 @@
 from PyQt5 import QtWidgets
 
 from openlp.core.common.i18n import UiStrings, translate
-from openlp.core.lib.ui import create_button_box, create_button
+from openlp.core.lib.ui import create_button, create_button_box
 from openlp.core.ui.icons import UiIcons
 
 

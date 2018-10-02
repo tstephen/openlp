@@ -32,6 +32,7 @@ from openlp.core.common.i18n import LANGUAGES, translate
 from openlp.core.lib.ui import critical_error_message_box
 from openlp.plugins.bibles.forms.languagedialog import Ui_LanguageDialog
 
+
 log = logging.getLogger(__name__)
 
 

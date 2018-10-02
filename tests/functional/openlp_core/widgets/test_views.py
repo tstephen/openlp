@@ -25,7 +25,7 @@ Package to test the openlp.core.widgets.views package.
 import os
 from types import GeneratorType
 from unittest import TestCase
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock, call, patch
 
 from PyQt5 import QtGui
 

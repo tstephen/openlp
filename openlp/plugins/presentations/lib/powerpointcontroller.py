@@ -35,6 +35,7 @@ from openlp.core.display.screens import ScreenList
 from openlp.core.lib.ui import critical_error_message_box, translate
 from openlp.plugins.presentations.lib.presentationcontroller import PresentationController, PresentationDocument
 
+
 if is_win():
     from win32com.client import Dispatch
     import win32con

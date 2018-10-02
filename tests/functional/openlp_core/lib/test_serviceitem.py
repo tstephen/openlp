@@ -36,6 +36,7 @@ from tests.helpers.testmixin import TestMixin
 from tests.utils import assert_length, convert_file_service_item
 from tests.utils.constants import RESOURCE_PATH
 
+
 VERSE = 'The Lord said to {r}Noah{/r}: \n'\
         'There\'s gonna be a {su}floody{/su}, {sb}floody{/sb}\n'\
         'The Lord said to {g}Noah{/g}:\n'\

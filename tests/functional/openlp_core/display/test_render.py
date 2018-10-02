@@ -24,8 +24,8 @@ Test the :mod:`~openlp.core.display.render` package.
 """
 from unittest.mock import patch
 
-from openlp.core.display.render import remove_tags, render_tags, render_chords, compare_chord_lyric_width, \
-    render_chords_for_printing, find_formatting_tags
+from openlp.core.display.render import compare_chord_lyric_width, find_formatting_tags, remove_tags, render_chords, \
+    render_chords_for_printing, render_tags
 from openlp.core.lib.formattingtags import FormattingTags
 
 

@@ -23,13 +23,11 @@
 Package to test the openlp.core.projectors.pjlink base package.
 """
 from unittest import TestCase
-from unittest.mock import call, patch, MagicMock
+from unittest.mock import MagicMock, call, patch
 
 import openlp.core.projectors.pjlink
-from openlp.core.projectors.constants import \
-    E_NOT_CONNECTED, E_PARAMETER, E_UNKNOWN_SOCKET_ERROR, STATUS_CODE, STATUS_MSG, \
-    S_CONNECTED, S_CONNECTING, S_NOT_CONNECTED, S_OK, S_ON, \
-    QSOCKET_STATE
+from openlp.core.projectors.constants import E_NOT_CONNECTED, E_PARAMETER, E_UNKNOWN_SOCKET_ERROR, QSOCKET_STATE, \
+    S_CONNECTED, S_CONNECTING, S_NOT_CONNECTED, S_OK, S_ON, STATUS_CODE, STATUS_MSG
 from openlp.core.projectors.db import Projector
 from openlp.core.projectors.pjlink import PJLink
 from tests.resources.projector.data import TEST1_DATA

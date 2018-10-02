@@ -29,6 +29,7 @@ from subprocess import check_output
 
 from bs4 import BeautifulSoup, NavigableString
 
+
 ENV_DICT = os.environ
 
 

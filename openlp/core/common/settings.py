@@ -33,7 +33,8 @@ from PyQt5 import QtCore, QtGui
 
 from openlp.core.common import SlideLimits, ThemeLevel, is_linux, is_win
 from openlp.core.common.json import OpenLPJsonDecoder, OpenLPJsonEncoder
-from openlp.core.common.path import Path, str_to_path, files_to_paths
+from openlp.core.common.path import Path, files_to_paths, str_to_path
+
 
 log = logging.getLogger(__name__)
 

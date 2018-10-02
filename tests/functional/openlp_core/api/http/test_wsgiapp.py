@@ -26,8 +26,9 @@ import os
 from unittest import TestCase
 from unittest.mock import MagicMock
 
-from openlp.core.api.http import register_endpoint, application, NotFound
+from openlp.core.api.http import NotFound, application, register_endpoint
 from openlp.core.api.http.endpoint import Endpoint
+
 
 ROOT_DIR = os.path.dirname(os.path.realpath(__file__))
 

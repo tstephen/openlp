@@ -23,7 +23,7 @@
 Package to test the openlp.plugins.songs.forms.songmaintenanceform package.
 """
 from unittest import TestCase
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock, call, patch
 
 from PyQt5 import QtCore, QtWidgets
 

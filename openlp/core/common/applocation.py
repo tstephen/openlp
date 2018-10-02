@@ -27,9 +27,10 @@ import os
 import sys
 
 import openlp
-from openlp.core.common import get_frozen_path, is_win, is_macosx
+from openlp.core.common import get_frozen_path, is_macosx, is_win
 from openlp.core.common.path import Path, create_paths
 from openlp.core.common.settings import Settings
+
 
 if not is_win() and not is_macosx():
     try:

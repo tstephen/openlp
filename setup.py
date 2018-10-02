@@ -21,8 +21,9 @@
 ###############################################################################
 
 import re
-from setuptools import setup, find_packages
-from subprocess import Popen, PIPE
+from subprocess import PIPE, Popen
+
+from setuptools import find_packages, setup
 
 
 VERSION_FILE = 'openlp/.version'

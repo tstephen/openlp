@@ -33,6 +33,7 @@ from openlp.core.common.mixins import RegistryProperties
 from openlp.core.common.settings import Settings
 from openlp.core.ui.shortcutlistdialog import Ui_ShortcutListDialog
 
+
 REMOVE_AMPERSAND = re.compile(r'&{1}')
 
 log = logging.getLogger(__name__)

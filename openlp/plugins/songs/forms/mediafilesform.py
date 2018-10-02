@@ -26,6 +26,7 @@ from PyQt5 import QtCore, QtWidgets
 
 from .mediafilesdialog import Ui_MediaFilesDialog
 
+
 log = logging.getLogger(__name__)
 
 

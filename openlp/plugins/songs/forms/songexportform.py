@@ -38,6 +38,7 @@ from openlp.core.widgets.wizard import OpenLPWizard, WizardStrings
 from openlp.plugins.songs.lib.db import Song
 from openlp.plugins.songs.lib.openlyricsexport import OpenLyricsExport
 
+
 log = logging.getLogger(__name__)
 
 

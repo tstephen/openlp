@@ -30,6 +30,7 @@ from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.lib import create_thumb, validate_thumb
 
+
 log = logging.getLogger(__name__)
 
 

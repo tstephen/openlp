@@ -22,7 +22,7 @@
 """
 The UI widgets of the print service dialog.
 """
-from PyQt5 import QtCore, QtWidgets, QtPrintSupport
+from PyQt5 import QtCore, QtPrintSupport, QtWidgets
 
 from openlp.core.common.i18n import UiStrings, translate
 from openlp.core.ui.icons import UiIcons

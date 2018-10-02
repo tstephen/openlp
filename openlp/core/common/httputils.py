@@ -34,6 +34,7 @@ from openlp.core.common import trace_error_handler
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import ProxyMode, Settings
 
+
 log = logging.getLogger(__name__ + '.__init__')
 
 USER_AGENTS = {

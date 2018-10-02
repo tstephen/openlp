@@ -34,6 +34,7 @@ from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from tests.helpers.testmixin import TestMixin
 
+
 __default_settings__ = {
     'api/twelve hour': True,
     'api/port': 4316,

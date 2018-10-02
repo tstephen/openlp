@@ -32,6 +32,7 @@ from openlp.core.common.registry import Registry
 from openlp.core.ui.firsttimeform import FirstTimeForm
 from tests.helpers.testmixin import TestMixin
 
+
 FAKE_CONFIG = """
 [general]
 base url = http://example.com/frw/

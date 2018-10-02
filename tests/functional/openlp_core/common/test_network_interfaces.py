@@ -27,8 +27,8 @@ from unittest.mock import MagicMock, call, patch
 
 import openlp.core.common
 from openlp.core.common import get_local_ip4
-
 from tests.helpers.testmixin import TestMixin
+
 
 lo_address_attrs = {'isValid.return_value': True,
                     'flags.return_value': True,

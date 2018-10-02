@@ -27,11 +27,10 @@ from unittest import TestCase
 from unittest.mock import MagicMock, call, patch
 
 import openlp.core.projectors.pjlink
-from openlp.core.projectors.constants import PJLINK_ERRORS, PJLINK_PREFIX, STATUS_MSG, \
-    E_AUTHENTICATION, E_PARAMETER, E_PROJECTOR, E_UNAVAILABLE, E_UNDEFINED
+from openlp.core.projectors.constants import E_AUTHENTICATION, E_PARAMETER, E_PROJECTOR, E_UNAVAILABLE, E_UNDEFINED, \
+    PJLINK_ERRORS, PJLINK_PREFIX, STATUS_MSG
 from openlp.core.projectors.db import Projector
 from openlp.core.projectors.pjlink import PJLink
-
 from tests.resources.projector.data import TEST1_DATA
 
 

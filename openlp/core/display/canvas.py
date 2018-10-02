@@ -32,7 +32,7 @@ import json
 import logging
 import os
 
-from PyQt5 import QtCore, QtWidgets, QtGui, QtMultimedia, QtWebChannel, QtWebEngineWidgets
+from PyQt5 import QtCore, QtGui, QtMultimedia, QtWebChannel, QtWebEngineWidgets, QtWidgets
 
 from openlp.core.common import is_macosx, is_win
 from openlp.core.common.applocation import AppLocation
@@ -41,12 +41,13 @@ from openlp.core.common.mixins import LogMixin, RegistryProperties
 from openlp.core.common.path import path_to_str
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
+from openlp.core.display.screens import ScreenList
 from openlp.core.display.webengine import WebEngineView
 from openlp.core.display.window import MediaWatcher
-from openlp.core.display.screens import ScreenList
-from openlp.core.lib import ServiceItem, ImageSource, build_html, expand_tags, image_to_byte
+from openlp.core.lib import ImageSource, ServiceItem, build_html, expand_tags, image_to_byte
 from openlp.core.lib.theme import BackgroundType
-from openlp.core.ui import HideMode, AlertLocation, DisplayControllerType
+from openlp.core.ui import AlertLocation, DisplayControllerType, HideMode
+
 
 if is_macosx():
     from ctypes import pythonapi, c_void_p, c_char_p, py_object

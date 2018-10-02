@@ -26,6 +26,7 @@ import os
 
 from lxml import etree
 
+
 resource_path = os.path.join('..', 'resources', 'images')
 resource_file_path = os.path.join(resource_path, 'openlp-2.qrc')
 src_directory = os.path.join('..', 'openlp')

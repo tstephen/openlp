@@ -28,7 +28,8 @@ from unittest.mock import MagicMock
 from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.common.registry import Registry
-from openlp.core.display.screens import ScreenList, Screen
+from openlp.core.display.screens import Screen, ScreenList
+
 
 SCREEN = {
     'primary': False,

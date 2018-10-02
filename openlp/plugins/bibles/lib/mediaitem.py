@@ -26,20 +26,21 @@ from enum import IntEnum, unique
 
 from PyQt5 import QtCore, QtWidgets
 
-from openlp.core.common.i18n import UiStrings, translate, get_locale_key
+from openlp.core.common.i18n import UiStrings, get_locale_key, translate
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.lib import ServiceItemContext
 from openlp.core.lib.mediamanageritem import MediaManagerItem
 from openlp.core.lib.serviceitem import ItemCapabilities
-from openlp.core.lib.ui import set_case_insensitive_completer, create_horizontal_adjusting_combo_box, \
-    critical_error_message_box, find_and_set_in_combo_box
+from openlp.core.lib.ui import create_horizontal_adjusting_combo_box, critical_error_message_box, \
+    find_and_set_in_combo_box, set_case_insensitive_completer
 from openlp.core.ui.icons import UiIcons
 from openlp.core.widgets.edits import SearchEdit
 from openlp.plugins.bibles.forms.bibleimportform import BibleImportForm
 from openlp.plugins.bibles.forms.editbibleform import EditBibleForm
-from openlp.plugins.bibles.lib import DisplayStyle, LayoutStyle, VerseReferenceList, \
-    get_reference_match, get_reference_separator
+from openlp.plugins.bibles.lib import DisplayStyle, LayoutStyle, VerseReferenceList, get_reference_match, \
+    get_reference_separator
+
 
 log = logging.getLogger(__name__)
 

@@ -22,13 +22,14 @@
 """
 The :mod:`~openlp.core.display.window` module contains the display window
 """
+import json
 import logging
 import os
-import json
 
-from PyQt5 import QtCore, QtWidgets, QtWebChannel
+from PyQt5 import QtCore, QtWebChannel, QtWidgets
 
 from openlp.core.common.path import Path, path_to_str
+
 
 log = logging.getLogger(__name__)
 DISPLAY_PATH = Path(__file__).parent / 'html' / 'display.html'

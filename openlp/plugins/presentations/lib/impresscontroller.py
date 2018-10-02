@@ -42,6 +42,7 @@ from openlp.core.display.screens import ScreenList
 from openlp.plugins.presentations.lib.presentationcontroller import PresentationController, PresentationDocument, \
     TextType
 
+
 if is_win():
     from win32com.client import Dispatch
     import pywintypes

@@ -24,9 +24,10 @@ Test the MediaShout importer
 """
 from collections import namedtuple
 from unittest import TestCase, skipUnless
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock, call, patch
 
 from openlp.core.common.registry import Registry
+
 
 try:
     from openlp.plugins.songs.lib.importers.mediashout import MediaShoutImport

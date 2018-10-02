@@ -20,14 +20,14 @@
 # Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
 ###############################################################################
 
-import chardet
 import logging
 import re
 import sqlite3
 import time
 
+import chardet
 from PyQt5 import QtCore
-from sqlalchemy import Column, ForeignKey, Table, or_, types, func
+from sqlalchemy import Column, ForeignKey, Table, func, or_, types
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import class_mapper, mapper, relation
 from sqlalchemy.orm.exc import UnmappedClassError
@@ -36,9 +36,10 @@ from openlp.core.common import clean_filename
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.i18n import translate
 from openlp.core.common.path import Path
-from openlp.core.lib.db import BaseModel, init_db, Manager
+from openlp.core.lib.db import BaseModel, Manager, init_db
 from openlp.core.lib.ui import critical_error_message_box
 from openlp.plugins.bibles.lib import BibleStrings, LanguageSelection, upgrade
+
 
 log = logging.getLogger(__name__)
 

@@ -26,19 +26,20 @@ import os
 from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.common.applocation import AppLocation
-from openlp.core.common.i18n import UiStrings, translate, get_natural_key
+from openlp.core.common.i18n import UiStrings, get_natural_key, translate
 from openlp.core.common.mixins import RegistryProperties
-from openlp.core.common.path import Path, path_to_str, create_paths
+from openlp.core.common.path import Path, create_paths, path_to_str
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.lib import MediaType, ServiceItemContext, check_item_selected
 from openlp.core.lib.mediamanageritem import MediaManagerItem
 from openlp.core.lib.serviceitem import ItemCapabilities, ServiceItem
-from openlp.core.lib.ui import create_widget_action, critical_error_message_box, create_horizontal_adjusting_combo_box
+from openlp.core.lib.ui import create_horizontal_adjusting_combo_box, create_widget_action, critical_error_message_box
 from openlp.core.ui import DisplayControllerType
 from openlp.core.ui.icons import UiIcons
-from openlp.core.ui.media import get_media_players, set_media_players, parse_optical_path, format_milliseconds
+from openlp.core.ui.media import format_milliseconds, get_media_players, parse_optical_path, set_media_players
 from openlp.core.ui.media.vlcplayer import get_vlc
+
 
 if get_vlc() is not None:
     from openlp.plugins.media.forms.mediaclipselectorform import MediaClipSelectorForm

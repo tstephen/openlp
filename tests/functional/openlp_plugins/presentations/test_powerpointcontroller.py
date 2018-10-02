@@ -26,7 +26,7 @@ import os
 import shutil
 from tempfile import mkdtemp
 from unittest import TestCase
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 from openlp.core.common import is_win
 from openlp.core.common.settings import Settings
@@ -34,6 +34,7 @@ from openlp.plugins.presentations.lib.powerpointcontroller import PowerpointCont
     _get_text_from_shapes
 from tests.helpers.testmixin import TestMixin
 from tests.utils.constants import TEST_RESOURCES_PATH
+
 
 if is_win():
     import pywintypes

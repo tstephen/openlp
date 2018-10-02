@@ -44,9 +44,10 @@ import os
 import re
 import time
 from argparse import ArgumentParser
-from subprocess import Popen, PIPE
+from subprocess import PIPE, Popen
 
 from jenkins import Jenkins
+
 
 JENKINS_URL = 'https://ci.openlp.io/'
 REPO_REGEX = r'(.*/+)(~.*)'

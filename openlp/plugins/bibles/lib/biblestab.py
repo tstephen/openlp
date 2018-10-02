@@ -29,8 +29,9 @@ from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.lib.settingstab import SettingsTab
 from openlp.core.lib.ui import find_and_set_in_combo_box
-from openlp.plugins.bibles.lib import LayoutStyle, DisplayStyle, update_reference_separators, \
-    get_reference_separator, LanguageSelection
+from openlp.plugins.bibles.lib import DisplayStyle, LanguageSelection, LayoutStyle, get_reference_separator, \
+    update_reference_separators
+
 
 log = logging.getLogger(__name__)
 

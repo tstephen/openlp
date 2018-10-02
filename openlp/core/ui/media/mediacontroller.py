@@ -39,12 +39,13 @@ from openlp.core.lib.serviceitem import ItemCapabilities
 from openlp.core.lib.ui import critical_error_message_box
 from openlp.core.ui import DisplayControllerType
 from openlp.core.ui.icons import UiIcons
-from openlp.core.ui.media import MediaState, MediaInfo, MediaType, get_media_players, set_media_players, \
-    parse_optical_path
+from openlp.core.ui.media import MediaInfo, MediaState, MediaType, get_media_players, parse_optical_path, \
+    set_media_players
 from openlp.core.ui.media.endpoint import media_endpoint
 from openlp.core.ui.media.mediaplayer import MediaPlayer
 from openlp.core.ui.media.vendor.mediainfoWrapper import MediaInfoWrapper
 from openlp.core.widgets.toolbar import OpenLPToolbar
+
 
 log = logging.getLogger(__name__)
 

@@ -28,6 +28,7 @@ from unittest.mock import MagicMock, patch
 from openlp.core.common.registry import Registry
 from tests.helpers.testmixin import TestMixin
 
+
 try:
     from openlp.plugins.songs.lib.importers.openoffice import OpenOfficeImport
 except ImportError:

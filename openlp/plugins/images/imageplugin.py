@@ -26,14 +26,15 @@ from PyQt5 import QtGui
 
 from openlp.core.api.http import register_endpoint
 from openlp.core.common.i18n import translate
-from openlp.core.ui.icons import UiIcons
 from openlp.core.common.settings import Settings
 from openlp.core.lib import ImageSource, build_icon
-from openlp.core.lib.plugin import Plugin, StringContent
 from openlp.core.lib.db import Manager
+from openlp.core.lib.plugin import Plugin, StringContent
+from openlp.core.ui.icons import UiIcons
 from openlp.plugins.images.endpoint import api_images_endpoint, images_endpoint
 from openlp.plugins.images.lib import ImageMediaItem, ImageTab, upgrade
 from openlp.plugins.images.lib.db import init_schema
+
 
 log = logging.getLogger(__name__)
 

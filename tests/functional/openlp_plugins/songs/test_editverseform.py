@@ -31,6 +31,7 @@ from openlp.core.common.settings import Settings
 from openlp.plugins.songs.forms.editverseform import EditVerseForm
 from tests.helpers.testmixin import TestMixin
 
+
 __default_settings__ = {
     'songs/enable chords': True,
 }

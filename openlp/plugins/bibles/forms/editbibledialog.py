@@ -24,9 +24,9 @@ from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.common.i18n import translate
 from openlp.core.lib.ui import create_button_box
-from openlp.plugins.bibles.lib import LanguageSelection, BibleStrings
-from openlp.plugins.bibles.lib.db import BiblesResourcesDB
 from openlp.core.ui.icons import UiIcons
+from openlp.plugins.bibles.lib import BibleStrings, LanguageSelection
+from openlp.plugins.bibles.lib.db import BiblesResourcesDB
 
 
 class Ui_EditBibleDialog(object):

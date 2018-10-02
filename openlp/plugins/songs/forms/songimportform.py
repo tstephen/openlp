@@ -36,6 +36,7 @@ from openlp.core.widgets.enums import PathEditType
 from openlp.core.widgets.wizard import OpenLPWizard, WizardStrings
 from openlp.plugins.songs.lib.importer import SongFormat, SongFormatSelect
 
+
 log = logging.getLogger(__name__)
 
 

@@ -29,9 +29,10 @@ from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.common import verify_ip_address
 from openlp.core.common.i18n import translate
-from openlp.core.ui.icons import UiIcons
 from openlp.core.projectors.constants import PJLINK_PORT
 from openlp.core.projectors.db import Projector
+from openlp.core.ui.icons import UiIcons
+
 
 log = logging.getLogger(__name__)
 log.debug('editform loaded')
