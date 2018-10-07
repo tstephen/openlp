@@ -199,13 +199,13 @@ class Theme(object):
         Set the header and footer size into the current primary screen.
         10 px on each side is removed to allow for a border.
         """
-        current_screen = ScreenList().current
+        current_screen_geometry = ScreenList().current.display_geometry
         self.font_main_y = 0
-        self.font_main_width = current_screen['size'].width() - 20
-        self.font_main_height = current_screen['size'].height() * 9 / 10
-        self.font_footer_width = current_screen['size'].width() - 20
-        self.font_footer_y = current_screen['size'].height() * 9 / 10
-        self.font_footer_height = current_screen['size'].height() / 10
+        self.font_main_width = current_screen_geometry.width() - 20
+        self.font_main_height = current_screen_geometry.height() * 9 / 10
+        self.font_footer_width = current_screen_geometry.width() - 20
+        self.font_footer_y = current_screen_geometry.height() * 9 / 10
+        self.font_footer_height = current_screen_geometry.height() / 10
 
     def load_theme(self, theme, theme_path=None):
         """

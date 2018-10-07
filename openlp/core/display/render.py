@@ -47,6 +47,16 @@ FIRST_CHORD_TEMPLATE = '<span class="chordline firstchordline">{chord}</span>'
 CHORD_LINE_TEMPLATE = '<span class="chord"><span><strong>{chord}</strong></span></span>{tail}{whitespace}{remainder}'
 WHITESPACE_TEMPLATE = '<span class="ws">{whitespaces}</span>'
 
+VERSE = 'The Lord said to {r}Noah{/r}: \n' \
+    'There\'s gonna be a {su}floody{/su}, {sb}floody{/sb}\n' \
+    'The Lord said to {g}Noah{/g}:\n' \
+    'There\'s gonna be a {st}floody{/st}, {it}floody{/it}\n' \
+    'Get those children out of the muddy, muddy \n' \
+    '{r}C{/r}{b}h{/b}{bl}i{/bl}{y}l{/y}{g}d{/g}{pk}' \
+    'r{/pk}{o}e{/o}{pp}n{/pp} of the Lord\n'
+VERSE_FOR_LINE_COUNT = '\n'.join(map(str, range(100)))
+FOOTER = ['Arky Arky (Unknown)', 'Public Domain', 'CCLI 123456']
+
 
 def remove_tags(text, can_remove_chords=False):
     """
@@ -442,6 +452,26 @@ class Renderer(RegistryBase, LogMixin, RegistryProperties, DisplayWindow):
         Clear slides
         """
         return self.run_javascript('Display.clearSlides();')
+
+    def generate_preview(self, theme_data, force_page=False):
+        """
+        Generate a preview of a theme.
+
+        :param theme_data:  The theme to generated a preview for.
+        :param force_page: Flag to tell message lines per page need to be generated.
+        :rtype: QtGui.QPixmap
+        """
+        # save value for use in format_slide
+        self.force_page = force_page
+        if not self.force_page:
+            self.set_theme(theme_data)
+            verses = dict()
+            verses['v1'] = VERSE
+            self.load_verses(verses)
+            self.force_page = False
+            return self.save_screenshot()
+        self.force_page = False
+        return None
 
     def format_slide(self, text, item):
         """
