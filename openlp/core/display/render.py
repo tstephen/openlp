@@ -26,6 +26,7 @@ import html
 import logging
 import math
 import re
+import time
 
 from PyQt5 import QtWidgets
 
@@ -55,7 +56,8 @@ VERSE = 'The Lord said to {r}Noah{/r}: \n' \
     '{r}C{/r}{b}h{/b}{bl}i{/bl}{y}l{/y}{g}d{/g}{pk}' \
     'r{/pk}{o}e{/o}{pp}n{/pp} of the Lord\n'
 VERSE_FOR_LINE_COUNT = '\n'.join(map(str, range(100)))
-FOOTER = ['Arky Arky (Unknown)', 'Public Domain', 'CCLI 123456']
+TITLE = 'Arky Arky (Unknown)'
+FOOTER = ['Public Domain', 'CCLI 123456']
 
 
 def remove_tags(text, can_remove_chords=False):
@@ -465,11 +467,26 @@ class Renderer(RegistryBase, LogMixin, RegistryProperties, DisplayWindow):
         self.force_page = force_page
         if not self.force_page:
             self.set_theme(theme_data)
+            self.theme_height = theme_data.font_main_height
+            slides = self.format_slide(render_tags(VERSE), None)
+            print(slides)
             verses = dict()
-            verses['v1'] = VERSE
-            self.load_verses(verses)
+            verses['title'] = TITLE
+            verses['text'] = slides[0]
+            verses['verse'] = 'V1'
+            self.load_verses([verses])
             self.force_page = False
-            return self.save_screenshot()
+            QtWidgets.QApplication.instance().processEvents()
+            pixmap = self.webview.grab()
+            QtWidgets.QApplication.instance().processEvents()
+            pixmap = self.webview.grab()
+            time.sleep(0.5)
+            self.show()
+            QtWidgets.QApplication.instance().processEvents()
+            pixmap = self.grab()
+            self.hide()
+            pixmap.save('/tmp/screen-grab.png', 'png')
+            return pixmap
         self.force_page = False
         return None
 
@@ -484,21 +501,21 @@ class Renderer(RegistryBase, LogMixin, RegistryProperties, DisplayWindow):
         while not self._is_initialised:
             QtWidgets.QApplication.instance().processEvents()
         self.log_debug('format slide')
-        theme_name = item.theme if item.theme else Registry().get('theme_manager').global_theme
-        theme_data = Registry().get('theme_manager').get_theme_data(theme_name)
-        self.theme_height = theme_data.font_main_height
-
-        # Set theme for preview
-        self.set_theme(theme_data)
+        if item:
+            theme_name = item.theme if item.theme else Registry().get('theme_manager').global_theme
+            theme_data = Registry().get('theme_manager').get_theme_data(theme_name)
+            self.theme_height = theme_data.font_main_height
+            # Set theme for preview
+            self.set_theme(theme_data)
         # Add line endings after each line of text used for bibles.
         line_end = '<br>'
-        if item.is_capable(ItemCapabilities.NoLineBreaks):
+        if item and item.is_capable(ItemCapabilities.NoLineBreaks):
             line_end = ' '
         # Bibles
-        if item.is_capable(ItemCapabilities.CanWordSplit):
+        if item and item.is_capable(ItemCapabilities.CanWordSplit):
             pages = self._paginate_slide_words(text.split('\n'), line_end)
         # Songs and Custom
-        elif item.is_capable(ItemCapabilities.CanSoftBreak):
+        elif item is None or item.is_capable(ItemCapabilities.CanSoftBreak):
             pages = []
             if '[---]' in text:
                 # Remove Overflow split if at start of the text

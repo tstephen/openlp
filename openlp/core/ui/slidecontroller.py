@@ -1145,7 +1145,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
                 else:
                     if start:
                         for display in self.displays:
-                            display.load_images([])
+                            display.load_images(self.service_item.slides)
                         # self.display.build_html(self.service_item, to_display)
                     else:
                         for display in self.displays:

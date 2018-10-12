@@ -25,6 +25,7 @@ The :mod:`~openlp.core.display.window` module contains the display window
 import json
 import logging
 import os
+import copy
 
 from PyQt5 import QtCore, QtWebChannel, QtWidgets
 
@@ -33,6 +34,7 @@ from openlp.core.common.path import Path, path_to_str
 
 log = logging.getLogger(__name__)
 DISPLAY_PATH = Path(__file__).parent / 'html' / 'display.html'
+CHECKERBOARD_PATH = Path(__file__).parent / 'html' / 'checkerboard.png'
 
 
 class MediaWatcher(QtCore.QObject):
@@ -110,10 +112,14 @@ class DisplayWindow(QtWidgets.QWidget):
         self._is_initialised = False
         self._fbo = None
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.Tool) #| QtCore.Qt.WindowStaysOnTopHint
+        self.setAttribute(QtCore.Qt.WA_TranslucentBackground);
+        self.setAutoFillBackground(True);
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.layout = QtWidgets.QVBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.webview = WebEngineView(self)
+        self.webview.setAttribute(QtCore.Qt.WA_TranslucentBackground);
+        self.webview.page().setBackgroundColor(QtCore.Qt.transparent);
         self.layout.addWidget(self.webview)
         self.webview.loadFinished.connect(self.after_loaded)
         self.set_url(QtCore.QUrl.fromLocalFile(path_to_str(DISPLAY_PATH)))
@@ -121,8 +127,10 @@ class DisplayWindow(QtWidgets.QWidget):
         self.channel = QtWebChannel.QWebChannel(self)
         self.channel.registerObject('mediaWatcher', self.media_watcher)
         self.webview.page().setWebChannel(self.channel)
+        self.is_display = False
         if screen and screen.is_display:
             self.update_from_screen(screen)
+            self.is_display = True
             self.show()
 
     def update_from_screen(self, screen):
@@ -164,6 +172,7 @@ class DisplayWindow(QtWidgets.QWidget):
         :param script: The script to run, a string
         :param is_sync: Run the script synchronously. Defaults to False
         """
+        log.debug(script)
         if not is_sync:
             self.webview.page().runJavaScript(script)
         else:
@@ -280,7 +289,15 @@ class DisplayWindow(QtWidgets.QWidget):
         """
         Set the theme of the display
         """
-        self.run_javascript('Display.setTheme({theme});'.format(theme=theme.export_theme()))
+        # If background is transparent and this is not a display, inject checkerboard background image instead
+        if theme.background_type == 'transparent' and not self.is_display:
+            theme_copy = copy.deepcopy(theme)
+            theme_copy.background_type = 'image'
+            theme_copy.background_filename = CHECKERBOARD_PATH
+            exported_theme = theme_copy.export_theme()
+        else:
+            exported_theme = theme.export_theme()
+        self.run_javascript('Display.setTheme({theme});'.format(theme=exported_theme))
 
     def get_video_types(self):
         """
