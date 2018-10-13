@@ -310,3 +310,9 @@ class DisplayWindow(QtWidgets.QWidget):
         Show the display
         """
         self.run_javascript('Display.show();')
+
+    def set_scale(self, scale):
+        """
+        Set the HTML scale
+        """
+        self.run_javascript('Display.setScale({scale});'.format(scale=scale*100))

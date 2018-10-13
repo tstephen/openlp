@@ -682,6 +682,12 @@ var Display = {
       videoTypes.push(['video/webm', '*.webm']);
     }
     return videoTypes;
+  },
+  /**
+   * Sets the scale of the page - used to make preview widgets scale 
+   */
+  setScale: function(scale) {
+    document.body.style.zoom = scale+"%";
   }
 };
 new QWebChannel(qt.webChannelTransport, function (channel) {

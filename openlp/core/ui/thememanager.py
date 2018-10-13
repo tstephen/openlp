@@ -295,7 +295,7 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
                     for plugin in self.plugin_manager.plugins:
                         if plugin.uses_theme(old_theme_name):
                             plugin.rename_theme(old_theme_name, new_theme_name)
-                    self.renderer.update_theme(new_theme_name, old_theme_name)
+                    #self.renderer.update_theme(new_theme_name, old_theme_name)
                     self.load_themes()
 
     def on_copy_theme(self, field=None):
@@ -347,7 +347,7 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
             self.theme_form.theme = theme
             self.theme_form.exec(True)
             self.old_background_image_path = None
-            self.renderer.update_theme(theme.theme_name)
+            #self.renderer.update_theme(theme.theme_name)
             self.load_themes()
 
     def on_delete_theme(self, field=None):
@@ -363,7 +363,7 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
             row = self.theme_list_widget.row(item)
             self.theme_list_widget.takeItem(row)
             self.delete_theme(theme)
-            self.renderer.update_theme(theme, only_delete=True)
+            #self.renderer.update_theme(theme, only_delete=True)
             # As we do not reload the themes, push out the change. Reload the
             # list as the internal lists and events need to be triggered.
             self._push_themes()

@@ -219,15 +219,19 @@ class ThemeForm(QtWidgets.QWizard, Ui_ThemeWizard, RegistryProperties):
         Generate layout preview and display the form.
         """
         self.update_theme()
-        width = self.renderer.width
-        height = self.renderer.height
+        width = self.renderer.width()
+        height = self.renderer.height()
         pixmap = QtGui.QPixmap(width, height)
         pixmap.fill(QtCore.Qt.white)
         paint = QtGui.QPainter(pixmap)
         paint.setPen(QtGui.QPen(QtCore.Qt.blue, 2))
-        paint.drawRect(self.renderer.get_main_rectangle(self.theme))
+        main_rect = QtCore.QRect(self.theme.font_main_x, self.theme.font_main_y,
+                                self.theme.font_main_width - 1, self.theme.font_main_height - 1)
+        paint.drawRect(main_rect)
         paint.setPen(QtGui.QPen(QtCore.Qt.red, 2))
-        paint.drawRect(self.renderer.get_footer_rectangle(self.theme))
+        footer_rect = QtCore.QRect(self.theme.font_footer_x, self.theme.font_footer_y,
+                                   self.theme.font_footer_width - 1, self.theme.font_footer_height - 1)
+        paint.drawRect(footer_rect)
         paint.end()
         self.theme_layout_form.exec(pixmap)
 

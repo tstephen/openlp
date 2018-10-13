@@ -945,8 +945,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
             ratio = 0.25
         else:
             ratio = float(size.width()) / display_with
-        # TODO: Find a different scale solution, setZoomFactor only supports 0.25-5.0. Maybe HTML scale?
-        self.preview_display.webview.setZoomFactor(ratio)
+        self.preview_display.set_scale(ratio)
 
     def main_display_set_background(self):
         """
