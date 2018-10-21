@@ -485,7 +485,7 @@ class Renderer(RegistryBase, LogMixin, RegistryProperties, DisplayWindow):
             QtWidgets.QApplication.instance().processEvents()
             pixmap = self.grab()
             self.hide()
-            pixmap.save('/tmp/screen-grab.png', 'png')
+            #pixmap.save('/tmp/screen-grab.png', 'png')
             return pixmap
         self.force_page = False
         return None
