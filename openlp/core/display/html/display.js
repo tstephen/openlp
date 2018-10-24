@@ -299,6 +299,29 @@ var Display = {
     return $(".slides")[0].clientHeight >= $(".slides")[0].scrollHeight;
   },
   /**
+   * Generate the OpenLP startup splashscreen
+   * @param {string} bg_color - The background color
+   * @param {string} image - Path to the splash image
+   */
+  setStartupSplashScreen: function(bg_color, image) {
+    Display.clearSlides();
+    var globalBackground = $("#global-background")[0];
+    globalBackground.style.cssText = "";
+    globalBackground.style.setProperty("background", bg_color);
+    var slidesDiv = $(".slides")[0];
+    var section = document.createElement("section");
+    section.setAttribute("id", 0);
+    section.setAttribute("data-background", bg_color);
+    section.setAttribute("style", "height: 100%; width: 100%; position: relative;");
+    var img = document.createElement('img');
+    img.src = image;
+    img.setAttribute("style", "position: absolute; top: 0; bottom: 0; left: 0; right: 0; margin: auto;");
+    section.appendChild(img);
+    slidesDiv.appendChild(section);
+    Display._slides['0'] = 0;
+    Display.reinit();
+  },
+  /**
    * Add a slides. If the slide exists but the HTML is different, update the slide.
    * @param {string} verse - The verse number, e.g. "v1"
    * @param {string} html - The HTML for the verse, e.g. "line1<br>line2"

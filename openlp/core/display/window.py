@@ -30,11 +30,13 @@ import copy
 from PyQt5 import QtCore, QtWebChannel, QtWidgets
 
 from openlp.core.common.path import Path, path_to_str
+from openlp.core.common.settings import Settings
 
 
 log = logging.getLogger(__name__)
 DISPLAY_PATH = Path(__file__).parent / 'html' / 'display.html'
 CHECKERBOARD_PATH = Path(__file__).parent / 'html' / 'checkerboard.png'
+OPENLP_SPLASH_SCREEN_PATH = Path(__file__).parent / 'html' / 'openlp-splash-screen.png'
 
 
 class MediaWatcher(QtCore.QObject):
@@ -128,6 +130,7 @@ class DisplayWindow(QtWidgets.QWidget):
         self.channel.registerObject('mediaWatcher', self.media_watcher)
         self.webview.page().setWebChannel(self.channel)
         self.is_display = False
+        self.scale = 1
         if screen and screen.is_display:
             self.update_from_screen(screen)
             self.is_display = True
@@ -141,6 +144,13 @@ class DisplayWindow(QtWidgets.QWidget):
         """
         self.setGeometry(screen.display_geometry)
         self.screen_number = screen.number
+
+    def set_startup_screen(self):
+        bg_color = Settings().value('core/logo background color')
+        image = Settings().value('core/logo file')
+        if path_to_str(image).startswith(':'):
+            image = OPENLP_SPLASH_SCREEN_PATH
+        self.run_javascript('Display.setStartupSplashScreen("{bg_color}", "{image}");'.format(bg_color=bg_color, image=image))
 
     def set_url(self, url):
         """
@@ -164,6 +174,10 @@ class DisplayWindow(QtWidgets.QWidget):
         """
         self.run_javascript('Display.init();')
         self._is_initialised = True
+        self.set_startup_screen()
+        # Make sure the scale is set if it was attempted set before init
+        if self.scale != 1:
+            self.set_scale(self.scale)
 
     def run_javascript(self, script, is_sync=False):
         """
@@ -315,4 +329,5 @@ class DisplayWindow(QtWidgets.QWidget):
         """
         Set the HTML scale
         """
+        self.scale = scale
         self.run_javascript('Display.setScale({scale});'.format(scale=scale*100))
