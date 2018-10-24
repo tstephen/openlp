@@ -44,7 +44,7 @@ def set_up_fault_handling():
     faulthandler.enable((AppLocation.get_directory(AppLocation.CacheDir) / 'error.log').open('wb'))
 
 
-if __name__ == '__main__':
+def start():
     """
     Instantiate and run the application.
     """
@@ -60,3 +60,7 @@ if __name__ == '__main__':
     if is_macosx():
         sys.argv = [x for x in sys.argv if not x.startswith('-psn')]
     main()
+
+
+if __name__ == '__main__':
+    start()
