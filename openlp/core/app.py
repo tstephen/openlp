@@ -73,7 +73,8 @@ class OpenLP(QtWidgets.QApplication):
         """
         self.is_event_loop_active = True
         result = QtWidgets.QApplication.exec()
-        self.server.close_server()
+        if hasattr(self, 'server'):
+            self.server.close_server()
         return result
 
     def run(self, args):
