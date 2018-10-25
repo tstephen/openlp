@@ -11,7 +11,7 @@ environment:
 
 install:
   # Install dependencies from pypi
-  - "%PYTHON%\\python.exe -m pip install sqlalchemy alembic appdirs chardet beautifulsoup4 lxml Mako mysql-connector-python nose mock pyodbc psycopg2 pypiwin32 pyenchant websockets asyncio waitress six webob requests QtAwesome PyQt5"
+  - "%PYTHON%\\python.exe -m pip install sqlalchemy alembic appdirs chardet beautifulsoup4 lxml Mako mysql-connector-python nose mock pyodbc psycopg2 pypiwin32 websockets asyncio waitress six webob requests QtAwesome PyQt5"
   # Download and install pyicu (originally from http://www.lfd.uci.edu/~gohlke/pythonlibs/)
   - "%PYTHON%\\python.exe -m pip install https://get.openlp.org/win-sdk/PyICU-2.1-cp37-cp37m-win_amd64.whl"
   # Download and unpack mupdf
