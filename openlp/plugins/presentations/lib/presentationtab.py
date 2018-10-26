@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -22,11 +22,11 @@
 
 from PyQt5 import QtWidgets
 
-from openlp.core.common import Settings, UiStrings, translate
-from openlp.core.common.path import path_to_str, str_to_path
-from openlp.core.lib import SettingsTab
+from openlp.core.common.i18n import UiStrings, translate
+from openlp.core.common.settings import Settings
+from openlp.core.lib.settingstab import SettingsTab
 from openlp.core.lib.ui import critical_error_message_box
-from openlp.core.ui.lib import PathEdit
+from openlp.core.widgets.edits import PathEdit
 from openlp.plugins.presentations.lib.pdfcontroller import PdfController
 
 
@@ -38,7 +38,6 @@ class PresentationTab(SettingsTab):
         """
         Constructor
         """
-        self.parent = parent
         self.controllers = controllers
         super(PresentationTab, self).__init__(parent, title, visible_title, icon_path)
         self.activated = False
@@ -194,7 +193,7 @@ class PresentationTab(SettingsTab):
         pdf_program_path = self.program_path_edit.path
         enable_pdf_program = self.pdf_program_check_box.checkState()
         # If the given program is blank disable using the program
-        if not pdf_program_path:
+        if pdf_program_path is None:
             enable_pdf_program = 0
         if pdf_program_path != Settings().value(self.settings_section + '/pdf_program'):
             Settings().setValue(self.settings_section + '/pdf_program', pdf_program_path)
@@ -220,9 +219,11 @@ class PresentationTab(SettingsTab):
 
     def on_program_path_edit_path_changed(self, new_path):
         """
-        Select the mudraw or ghostscript binary that should be used.
+        Handle the `pathEditChanged` signal from program_path_edit
+
+        :param openlp.core.common.path.Path new_path: File path to the new program
+        :rtype: None
         """
-        new_path = path_to_str(new_path)
         if new_path:
             if not PdfController.process_check_binary(new_path):
                 critical_error_message_box(UiStrings().Error,

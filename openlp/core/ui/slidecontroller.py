@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -22,7 +22,6 @@
 """
 The :mod:`slidecontroller` module contains the most important part of OpenLP - the slide controller
 """
-
 import copy
 import os
 from collections import deque
@@ -30,16 +29,22 @@ from threading import Lock
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from openlp.core.common import Registry, RegistryProperties, Settings, SlideLimits, UiStrings, translate, \
-    RegistryMixin, OpenLPMixin
+from openlp.core.common import SlideLimits
 from openlp.core.common.actions import ActionList, CategoryOrder
-from openlp.core.lib import ItemCapabilities, ServiceItem, ImageSource, ServiceItemAction, ScreenList, build_icon, \
-    build_html
+from openlp.core.common.i18n import UiStrings, translate
+from openlp.core.common.mixins import LogMixin, RegistryProperties
+from openlp.core.common.registry import Registry, RegistryBase
+from openlp.core.common.settings import Settings
+from openlp.core.display.screens import ScreenList
+from openlp.core.lib import ImageSource, ServiceItemAction, build_icon
+from openlp.core.lib.htmlbuilder import build_html
+from openlp.core.lib.serviceitem import ServiceItem, ItemCapabilities
 from openlp.core.lib.ui import create_action
-from openlp.core.ui.lib.toolbar import OpenLPToolbar
-from openlp.core.ui.lib.listpreviewwidget import ListPreviewWidget
-from openlp.core.ui import HideMode, MainDisplay, Display, DisplayControllerType
-
+from openlp.core.ui import HideMode, DisplayControllerType
+from openlp.core.ui.maindisplay import MainDisplay, Display
+from openlp.core.ui.icons import UiIcons
+from openlp.core.widgets.toolbar import OpenLPToolbar
+from openlp.core.widgets.views import ListPreviewWidget
 
 # Threshold which has to be trespassed to toggle.
 HIDE_MENU_THRESHOLD = 27
@@ -79,11 +84,11 @@ class DisplayController(QtWidgets.QWidget):
     """
     Controller is a general display controller widget.
     """
-    def __init__(self, parent):
+    def __init__(self, *args, **kwargs):
         """
         Set up the general Controller.
         """
-        super(DisplayController, self).__init__(parent)
+        super().__init__(*args, **kwargs)
         self.is_live = False
         self.display = None
         self.controller_type = None
@@ -130,16 +135,16 @@ class InfoLabel(QtWidgets.QLabel):
         super().setText(text)
 
 
-class SlideController(DisplayController, RegistryProperties):
+class SlideController(DisplayController, LogMixin, RegistryProperties):
     """
     SlideController is the slide controller widget. This widget is what the
     user uses to control the displaying of verses/slides/etc on the screen.
     """
-    def __init__(self, parent):
+    def __init__(self, *args, **kwargs):
         """
         Set up the Slide Controller.
         """
-        super(SlideController, self).__init__(parent)
+        super().__init__(*args, **kwargs)
 
     def post_set_up(self):
         """
@@ -211,14 +216,14 @@ class SlideController(DisplayController, RegistryProperties):
         self.toolbar.setSizePolicy(size_toolbar_policy)
         self.previous_item = create_action(self, 'previousItem_' + self.type_prefix,
                                            text=translate('OpenLP.SlideController', 'Previous Slide'),
-                                           icon=':/slides/slide_previous.png',
+                                           icon=UiIcons().arrow_left,
                                            tooltip=translate('OpenLP.SlideController', 'Move to previous.'),
                                            can_shortcuts=True, context=QtCore.Qt.WidgetWithChildrenShortcut,
                                            category=self.category, triggers=self.on_slide_selected_previous)
         self.toolbar.addAction(self.previous_item)
         self.next_item = create_action(self, 'nextItem_' + self.type_prefix,
                                        text=translate('OpenLP.SlideController', 'Next Slide'),
-                                       icon=':/slides/slide_next.png',
+                                       icon=UiIcons().arrow_right,
                                        tooltip=translate('OpenLP.SlideController', 'Move to next.'),
                                        can_shortcuts=True, context=QtCore.Qt.WidgetWithChildrenShortcut,
                                        category=self.category, triggers=self.on_slide_selected_next_action)
@@ -234,25 +239,28 @@ class SlideController(DisplayController, RegistryProperties):
             self.hide_menu.setPopupMode(QtWidgets.QToolButton.MenuButtonPopup)
             self.hide_menu.setMenu(QtWidgets.QMenu(translate('OpenLP.SlideController', 'Hide'), self.toolbar))
             self.toolbar.add_toolbar_widget(self.hide_menu)
+            self.toolbar.add_toolbar_action('goPreview', icon=UiIcons().live,
+                                            tooltip=translate('OpenLP.SlideController', 'Move to preview.'),
+                                            triggers=self.on_go_preview)
             # The order of the blank to modes in Shortcuts list comes from here.
             self.desktop_screen_enable = create_action(self, 'desktopScreenEnable',
                                                        text=translate('OpenLP.SlideController', 'Show Desktop'),
-                                                       icon=':/slides/slide_desktop.png', can_shortcuts=True,
+                                                       icon=UiIcons().desktop, can_shortcuts=True,
                                                        context=QtCore.Qt.WidgetWithChildrenShortcut,
                                                        category=self.category, triggers=self.on_hide_display_enable)
             self.desktop_screen = create_action(self, 'desktopScreen',
                                                 text=translate('OpenLP.SlideController', 'Toggle Desktop'),
-                                                icon=':/slides/slide_desktop.png',
+                                                icon=UiIcons().desktop,
                                                 checked=False, can_shortcuts=True, category=self.category,
                                                 triggers=self.on_hide_display)
             self.theme_screen = create_action(self, 'themeScreen',
                                               text=translate('OpenLP.SlideController', 'Toggle Blank to Theme'),
-                                              icon=':/slides/slide_theme.png',
+                                              icon=UiIcons().blank_theme,
                                               checked=False, can_shortcuts=True, category=self.category,
                                               triggers=self.on_theme_display)
             self.blank_screen = create_action(self, 'blankScreen',
                                               text=translate('OpenLP.SlideController', 'Toggle Blank Screen'),
-                                              icon=':/slides/slide_blank.png',
+                                              icon=UiIcons().blank,
                                               checked=False, can_shortcuts=True, category=self.category,
                                               triggers=self.on_blank_display)
             self.hide_menu.setDefaultAction(self.blank_screen)
@@ -283,10 +291,10 @@ class SlideController(DisplayController, RegistryProperties):
                                                           self.toolbar))
             self.toolbar.add_toolbar_widget(self.play_slides_menu)
             self.play_slides_loop = create_action(self, 'playSlidesLoop', text=UiStrings().PlaySlidesInLoop,
-                                                  icon=':/media/media_time.png', checked=False, can_shortcuts=True,
+                                                  icon=UiIcons().clock, checked=False, can_shortcuts=True,
                                                   category=self.category, triggers=self.on_play_slides_loop)
             self.play_slides_once = create_action(self, 'playSlidesOnce', text=UiStrings().PlaySlidesToEnd,
-                                                  icon=':/media/media_time.png', checked=False, can_shortcuts=True,
+                                                  icon=UiIcons().clock, checked=False, can_shortcuts=True,
                                                   category=self.category, triggers=self.on_play_slides_once)
             if Settings().value(self.main_window.advanced_settings_section + '/slide limits') == SlideLimits.Wrap:
                 self.play_slides_menu.setDefaultAction(self.play_slides_loop)
@@ -303,17 +311,21 @@ class SlideController(DisplayController, RegistryProperties):
             self.receive_spin_delay()
             self.toolbar.add_toolbar_widget(self.delay_spin_box)
         else:
-            self.toolbar.add_toolbar_action('goLive', icon=':/general/general_live.png',
+            self.toolbar.add_toolbar_action('goLive', icon=UiIcons().live,
                                             tooltip=translate('OpenLP.SlideController', 'Move to live.'),
                                             triggers=self.on_go_live)
-            self.toolbar.add_toolbar_action('addToService', icon=':/general/general_add.png',
+            self.toolbar.add_toolbar_action('addToService', icon=UiIcons().add,
                                             tooltip=translate('OpenLP.SlideController', 'Add to Service.'),
                                             triggers=self.on_preview_add_to_service)
             self.toolbar.addSeparator()
-            self.toolbar.add_toolbar_action('editSong', icon=':/general/general_edit.png',
+            self.toolbar.add_toolbar_action('editSong', icon=UiIcons().edit,
                                             tooltip=translate('OpenLP.SlideController',
                                                               'Edit and reload song preview.'),
                                             triggers=self.on_edit_song)
+            self.toolbar.add_toolbar_action('clear', icon=UiIcons().delete,
+                                            tooltip=translate('OpenLP.SlideController',
+                                                              'Clear'),
+                                            triggers=self.on_clear)
         self.controller_layout.addWidget(self.toolbar)
         # Build the Media Toolbar
         self.media_controller.register_controller(self)
@@ -329,7 +341,7 @@ class SlideController(DisplayController, RegistryProperties):
             # FIXME: object name should be changed. But this requires that we migrate the shortcut.
             self.audio_pause_item = self.toolbar.add_toolbar_action(
                 'audioPauseItem',
-                icon=':/slides/media_playback_pause.png', text=translate('OpenLP.SlideController', 'Pause Audio'),
+                icon=UiIcons().pause, text=translate('OpenLP.SlideController', 'Pause Audio'),
                 tooltip=translate('OpenLP.SlideController', 'Pause audio.'),
                 checked=False, visible=False, category=self.category, context=QtCore.Qt.WindowShortcut,
                 can_shortcuts=True, triggers=self.set_audio_pause_clicked)
@@ -338,7 +350,7 @@ class SlideController(DisplayController, RegistryProperties):
             self.audio_pause_item.setParent(self.toolbar)
             self.toolbar.widgetForAction(self.audio_pause_item).setPopupMode(QtWidgets.QToolButton.MenuButtonPopup)
             self.next_track_item = create_action(self, 'nextTrackItem', text=UiStrings().NextTrack,
-                                                 icon=':/slides/media_playback_next.png',
+                                                 icon=UiIcons().arrow_right,
                                                  tooltip=translate('OpenLP.SlideController',
                                                                    'Go to next audio track.'),
                                                  category=self.category,
@@ -352,7 +364,7 @@ class SlideController(DisplayController, RegistryProperties):
             self.audio_time_label.setObjectName('audio_time_label')
             self.toolbar.add_toolbar_widget(self.audio_time_label)
             self.toolbar.set_widget_visible(AUDIO_LIST, False)
-            self.toolbar.set_widget_visible(['song_menu'], False)
+            self.toolbar.set_widget_visible('song_menu', False)
         # Screen preview area
         self.preview_frame = QtWidgets.QFrame(self.splitter)
         self.preview_frame.setGeometry(QtCore.QRect(0, 0, 300, 300 * self.ratio))
@@ -423,7 +435,8 @@ class SlideController(DisplayController, RegistryProperties):
             self.__add_actions_to_widget(self.controller)
         else:
             self.preview_widget.doubleClicked.connect(self.on_preview_double_click)
-            self.toolbar.set_widget_visible(['editSong'], False)
+            self.toolbar.set_widget_visible('editSong', False)
+            self.toolbar.set_widget_visible('clear', False)
             self.controller.addActions([self.next_item, self.previous_item])
         Registry().register_function('slidecontroller_{text}_stop_loop'.format(text=self.type_prefix),
                                      self.on_stop_loop)
@@ -541,14 +554,14 @@ class SlideController(DisplayController, RegistryProperties):
             self.on_theme_display(False)
             self.on_hide_display(False)
 
-    def service_previous(self, field=None):
+    def service_previous(self):
         """
         Live event to select the previous service item from the service manager.
         """
         self.keypress_queue.append(ServiceItemAction.Previous)
         self._process_queue()
 
-    def service_next(self, field=None):
+    def service_next(self):
         """
         Live event to select the next service item from the service manager.
         """
@@ -722,18 +735,18 @@ class SlideController(DisplayController, RegistryProperties):
         self.mediabar.hide()
         self.song_menu.hide()
         self.toolbar.set_widget_visible(LOOP_LIST, False)
-        self.toolbar.set_widget_visible(['song_menu'], False)
+        self.toolbar.set_widget_visible('song_menu', False)
         # Reset the button
         self.play_slides_once.setChecked(False)
-        self.play_slides_once.setIcon(build_icon(':/media/media_time.png'))
+        self.play_slides_once.setIcon(UiIcons().clock)
         self.play_slides_once.setText(UiStrings().PlaySlidesToEnd)
         self.play_slides_loop.setChecked(False)
-        self.play_slides_loop.setIcon(build_icon(':/media/media_time.png'))
+        self.play_slides_loop.setIcon(UiIcons().clock)
         self.play_slides_loop.setText(UiStrings().PlaySlidesInLoop)
         if item.is_text():
             if (Settings().value(self.main_window.songs_settings_section + '/display songbar') and
                     not self.song_menu.menu().isEmpty()):
-                self.toolbar.set_widget_visible(['song_menu'], True)
+                self.toolbar.set_widget_visible('song_menu', True)
         if item.is_capable(ItemCapabilities.CanLoop) and len(item.get_frames()) > 1:
             self.toolbar.set_widget_visible(LOOP_LIST)
         if item.is_media():
@@ -758,9 +771,10 @@ class SlideController(DisplayController, RegistryProperties):
         # See bug #791050
         self.toolbar.hide()
         self.mediabar.hide()
-        self.toolbar.set_widget_visible(['editSong'], False)
+        self.toolbar.set_widget_visible('editSong', False)
+        self.toolbar.set_widget_visible('clear', True)
         if item.is_capable(ItemCapabilities.CanEdit) and item.from_plugin:
-            self.toolbar.set_widget_visible(['editSong'])
+            self.toolbar.set_widget_visible('editSong')
         elif item.is_media():
             self.mediabar.show()
         self.previous_item.setVisible(not item.is_media())
@@ -807,7 +821,7 @@ class SlideController(DisplayController, RegistryProperties):
     def add_service_manager_item(self, item, slide_no):
         """
         Method to install the service item into the controller and request the correct toolbar for the plugin. Called by
-        :class:`~openlp.core.ui.ServiceManager`
+        :class:`~openlp.core.ui.servicemanager.ServiceManager`
 
         :param item: The current service item
         :param slide_no: The slide number to select
@@ -868,7 +882,7 @@ class SlideController(DisplayController, RegistryProperties):
                     self.track_menu.clear()
                     for counter in range(len(self.service_item.background_audio)):
                         action = self.track_menu.addAction(
-                            os.path.basename(self.service_item.background_audio[counter]))
+                            os.path.basename(str(self.service_item.background_audio[counter])))
                         action.setData(counter)
                         action.triggered.connect(self.on_track_triggered)
                     self.display.audio_player.repeat = \
@@ -1099,7 +1113,7 @@ class SlideController(DisplayController, RegistryProperties):
             else:
                 Registry().execute('live_display_show')
 
-    def on_slide_selected(self, field=None):
+    def on_slide_selected(self):
         """
         Slide selected in controller
         Note for some reason a dummy field is required.  Nothing is passed!
@@ -1116,7 +1130,7 @@ class SlideController(DisplayController, RegistryProperties):
         # done by the thread holding the lock. If it is a "start" slide, we must wait for the lock, but only for 0.2
         # seconds, since we don't want to cause a deadlock
         timeout = 0.2 if start else -1
-        if not self.slide_selected_lock.acquire(start, timeout):
+        if not self.slide_selected_lock.acquire(start, timeout):  # pylint: disable=too-many-function-args
             if start:
                 self.log_debug('Could not get lock in slide_selected after waiting %f, skip to avoid deadlock.'
                                % timeout)
@@ -1240,7 +1254,7 @@ class SlideController(DisplayController, RegistryProperties):
             self.preview_widget.change_slide(row)
             self.slide_selected()
 
-    def on_slide_selected_previous(self, field=None):
+    def on_slide_selected_previous(self):
         """
         Go to the previous slide.
         """
@@ -1302,16 +1316,16 @@ class SlideController(DisplayController, RegistryProperties):
             self.play_slides_loop.setChecked(checked)
         self.log_debug('on_play_slides_loop {text}'.format(text=checked))
         if checked:
-            self.play_slides_loop.setIcon(build_icon(':/media/media_stop.png'))
+            self.play_slides_loop.setIcon(UiIcons().stop)
             self.play_slides_loop.setText(UiStrings().StopPlaySlidesInLoop)
-            self.play_slides_once.setIcon(build_icon(':/media/media_time.png'))
+            self.play_slides_once.setIcon(UiIcons().clock)
             self.play_slides_once.setText(UiStrings().PlaySlidesToEnd)
             self.play_slides_menu.setDefaultAction(self.play_slides_loop)
             self.play_slides_once.setChecked(False)
             if Settings().value('core/click live slide to unblank'):
                 Registry().execute('slidecontroller_live_unblank')
         else:
-            self.play_slides_loop.setIcon(build_icon(':/media/media_time.png'))
+            self.play_slides_loop.setIcon(UiIcons().clock)
             self.play_slides_loop.setText(UiStrings().PlaySlidesInLoop)
         self.on_toggle_loop()
 
@@ -1327,16 +1341,16 @@ class SlideController(DisplayController, RegistryProperties):
             self.play_slides_once.setChecked(checked)
         self.log_debug('on_play_slides_once {text}'.format(text=checked))
         if checked:
-            self.play_slides_once.setIcon(build_icon(':/media/media_stop.png'))
+            self.play_slides_once.setIcon(UiIcons().stop)
             self.play_slides_once.setText(UiStrings().StopPlaySlidesToEnd)
-            self.play_slides_loop.setIcon(build_icon(':/media/media_time.png'))
+            self.play_slides_loop.setIcon(UiIcons().clock)
             self.play_slides_loop.setText(UiStrings().PlaySlidesInLoop)
             self.play_slides_menu.setDefaultAction(self.play_slides_once)
             self.play_slides_loop.setChecked(False)
             if Settings().value('core/click live slide to unblank'):
                 Registry().execute('slidecontroller_live_unblank')
         else:
-            self.play_slides_once.setIcon(build_icon(':/media/media_time'))
+            self.play_slides_once.setIcon(UiIcons().clock)
             self.play_slides_once.setText(UiStrings().PlaySlidesToEnd)
         self.on_toggle_loop()
 
@@ -1368,7 +1382,7 @@ class SlideController(DisplayController, RegistryProperties):
         if event.timerId() == self.timer_id:
             self.on_slide_selected_next(self.play_slides_loop.isChecked())
 
-    def on_edit_song(self, field=None):
+    def on_edit_song(self):
         """
         From the preview display requires the service Item to be editied
         """
@@ -1377,16 +1391,24 @@ class SlideController(DisplayController, RegistryProperties):
         if new_item:
             self.add_service_item(new_item)
 
-    def on_preview_add_to_service(self, field=None):
+    def on_clear(self):
+        """
+        Clear the preview bar.
+        """
+        self.preview_widget.clear_list()
+        self.toolbar.set_widget_visible('editSong', False)
+        self.toolbar.set_widget_visible('clear', False)
+
+    def on_preview_add_to_service(self):
         """
         From the preview display request the Item to be added to service
         """
         if self.service_item:
             self.service_manager.add_service_item(self.service_item)
 
-    def on_preview_double_click(self, field=None):
+    def on_preview_double_click(self):
         """
-        Triggered when a preview slide item is doubleclicked
+        Triggered when a preview slide item is double clicked
         """
         if self.service_item:
             if Settings().value('advanced/double click live') and Settings().value('core/auto unblank'):
@@ -1417,6 +1439,15 @@ class SlideController(DisplayController, RegistryProperties):
             else:
                 self.live_controller.add_service_manager_item(self.service_item, row)
             self.live_controller.preview_widget.setFocus()
+
+    def on_go_preview(self, field=None):
+        """
+        If live copy slide item to preview controller from live Controller
+        """
+        row = self.preview_widget.current_slide_number()
+        if -1 < row < self.preview_widget.slide_count():
+            self.preview_controller.add_service_manager_item(self.service_item, row)
+            self.preview_controller.preview_widget.setFocus()
 
     def on_media_start(self, item):
         """
@@ -1502,7 +1533,7 @@ class SlideController(DisplayController, RegistryProperties):
         self.display.audio_player.go_to(action.data())
 
 
-class PreviewController(RegistryMixin, OpenLPMixin, SlideController):
+class PreviewController(RegistryBase, SlideController):
     """
     Set up the Preview Controller.
     """
@@ -1510,11 +1541,12 @@ class PreviewController(RegistryMixin, OpenLPMixin, SlideController):
     slidecontroller_preview_next = QtCore.pyqtSignal()
     slidecontroller_preview_previous = QtCore.pyqtSignal()
 
-    def __init__(self, parent):
+    def __init__(self, *args, **kwargs):
         """
         Set up the base Controller as a preview.
         """
-        super(PreviewController, self).__init__(parent)
+        self.__registry_name = 'preview_slidecontroller'
+        super().__init__(*args, **kwargs)
         self.split = 0
         self.type_prefix = 'preview'
         self.category = 'Preview Toolbar'
@@ -1526,7 +1558,7 @@ class PreviewController(RegistryMixin, OpenLPMixin, SlideController):
         self.post_set_up()
 
 
-class LiveController(RegistryMixin, OpenLPMixin, SlideController):
+class LiveController(RegistryBase, SlideController):
     """
     Set up the Live Controller.
     """
@@ -1538,11 +1570,11 @@ class LiveController(RegistryMixin, OpenLPMixin, SlideController):
     mediacontroller_live_pause = QtCore.pyqtSignal()
     mediacontroller_live_stop = QtCore.pyqtSignal()
 
-    def __init__(self, parent):
+    def __init__(self, *args, **kwargs):
         """
         Set up the base Controller as a live.
         """
-        super(LiveController, self).__init__(parent)
+        super().__init__(*args, **kwargs)
         self.is_live = True
         self.split = 1
         self.type_prefix = 'live'

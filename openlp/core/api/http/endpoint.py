@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -22,11 +22,9 @@
 """
 The Endpoint class, which provides plugins with a way to serve their own portion of the API
 """
-
-import os
-
-from openlp.core.common import AppLocation
 from mako.template import Template
+
+from openlp.core.common.applocation import AppLocation
 
 
 class Endpoint(object):
@@ -67,13 +65,17 @@ class Endpoint(object):
     def render_template(self, filename, **kwargs):
         """
         Render a mako template
+
+        :param str filename: The file name of the template to render.
+        :return: The rendered template object.
+        :rtype: mako.template.Template
         """
-        root = str(AppLocation.get_section_data_path('remotes'))
+        root_path = AppLocation.get_section_data_path('remotes')
         if not self.template_dir:
             raise Exception('No template directory specified')
-        path = os.path.join(root, self.template_dir, filename)
+        path = root_path / self.template_dir / filename
         if self.static_dir:
             kwargs['static_url'] = '/{prefix}/static'.format(prefix=self.url_prefix)
             kwargs['static_url'] = kwargs['static_url'].replace('//', '/')
         kwargs['assets_url'] = '/assets'
-        return Template(filename=path, input_encoding='utf-8').render(**kwargs)
+        return Template(filename=str(path), input_encoding='utf-8').render(**kwargs)

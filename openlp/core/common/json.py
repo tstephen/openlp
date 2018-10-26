@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -40,7 +40,8 @@ class OpenLPJsonDecoder(JSONDecoder):
         self.kwargs = kwargs
         if object_hook is None:
             object_hook = self.custom_object_hook
-        super().__init__(object_hook, parse_float, parse_int, parse_constant, strict, object_pairs_hook)
+        super().__init__(object_hook=object_hook, parse_float=parse_float, parse_int=parse_int,
+                         parse_constant=parse_constant, strict=strict, object_pairs_hook=object_pairs_hook)
 
     def custom_object_hook(self, obj):
         """
@@ -71,7 +72,9 @@ class OpenLPJsonEncoder(JSONEncoder):
         self.kwargs = kwargs
         if default is None:
             default = self.custom_default
-        super().__init__(skipkeys, ensure_ascii, check_circular, allow_nan, sort_keys, indent, separators, default)
+        super().__init__(skipkeys=skipkeys, ensure_ascii=ensure_ascii, check_circular=check_circular,
+                         allow_nan=allow_nan, sort_keys=sort_keys, indent=indent, separators=separators,
+                         default=default)
 
     def custom_default(self, obj):
         """

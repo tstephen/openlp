@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -26,7 +26,7 @@ import logging
 
 from PyQt5 import QtCore
 
-from openlp.core.common import Settings
+from openlp.core.common.settings import Settings
 
 log = logging.getLogger(__name__ + '.__init__')
 
@@ -80,7 +80,7 @@ def get_media_players():
     """
     log.debug('get_media_players')
     saved_players = Settings().value('media/players')
-    reg_ex = QtCore.QRegExp(".*\[(.*)\].*")
+    reg_ex = QtCore.QRegExp(r'.*\[(.*)\].*')
     if Settings().value('media/override player') == QtCore.Qt.Checked:
         if reg_ex.exactMatch(saved_players):
             overridden_player = '{text}'.format(text=reg_ex.cap(1))

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -21,13 +21,13 @@
 ###############################################################################
 
 import logging
+
 from pysword import modules
 
-from openlp.core.common import translate
+from openlp.core.common.i18n import translate
 from openlp.core.lib.ui import critical_error_message_box
 from openlp.plugins.bibles.lib.bibleimport import BibleImport
 from openlp.plugins.bibles.lib.db import BiblesResourcesDB
-
 
 log = logging.getLogger(__name__)
 
@@ -60,7 +60,7 @@ class SwordBible(BibleImport):
             bible = pysword_modules.get_bible_from_module(self.sword_key)
             language = pysword_module_json['lang']
             language = language[language.find('.') + 1:]
-            language_id = self.get_language_id(language, bible_name=self.filename)
+            language_id = self.get_language_id(language, bible_name=str(self.file_path))
             if not language_id:
                 return False
             books = bible.get_structure().get_books()

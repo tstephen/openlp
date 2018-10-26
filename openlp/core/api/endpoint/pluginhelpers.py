@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -19,17 +19,17 @@
 # with this program; if not, write to the Free Software Foundation, Inc., 59  #
 # Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
 ###############################################################################
-import os
 import json
 import re
 import urllib
 
-from urllib.parse import urlparse
 from webob import Response
 
 from openlp.core.api.http.errors import NotFound
-from openlp.core.common import Registry, AppLocation
-from openlp.core.lib import PluginStatus, image_to_byte
+from openlp.core.common.applocation import AppLocation
+from openlp.core.common.registry import Registry
+from openlp.core.lib import image_to_byte
+from openlp.core.lib.plugin import PluginStatus
 
 
 def search(request, plugin_name, log):
@@ -103,7 +103,7 @@ def display_thumbnails(request, controller_name, log, dimensions, file_name, sli
     :param controller_name: which controller is requesting the image
     :param log: the logger object
     :param dimensions: the image size eg 88x88
-    :param file_name: the file name of the image
+    :param str file_name: the file name of the image
     :param slide: the individual image name
     :return:
     """
@@ -116,7 +116,7 @@ def display_thumbnails(request, controller_name, log, dimensions, file_name, sli
     height = -1
     image = None
     if dimensions:
-        match = re.search('(\d+)x(\d+)', dimensions)
+        match = re.search(r'(\d+)x(\d+)', dimensions)
         if match:
             # let's make sure that the dimensions are within reason
             width = sorted([10, int(match.group(1)), 1000])[1]
@@ -124,12 +124,10 @@ def display_thumbnails(request, controller_name, log, dimensions, file_name, sli
     if controller_name and file_name:
         file_name = urllib.parse.unquote(file_name)
         if '..' not in file_name:  # no hacking please
+            full_path = AppLocation.get_section_data_path(controller_name) / 'thumbnails' / file_name
             if slide:
-                full_path = str(AppLocation.get_section_data_path(controller_name) / 'thumbnails' / file_name / slide)
-            else:
-                full_path = str(AppLocation.get_section_data_path(controller_name) / 'thumbnails' / file_name)
-            if os.path.exists(full_path):
-                path, just_file_name = os.path.split(full_path)
-                Registry().get('image_manager').add_image(full_path, just_file_name, None, width, height)
-                image = Registry().get('image_manager').get_image(full_path, just_file_name, width, height)
+                full_path = full_path / slide
+            if full_path.exists():
+                Registry().get('image_manager').add_image(full_path, full_path.name, None, width, height)
+                image = Registry().get('image_manager').get_image(full_path, full_path.name, width, height)
     return Response(body=image_to_byte(image, False), status=200, content_type='image/png', charset='utf8')

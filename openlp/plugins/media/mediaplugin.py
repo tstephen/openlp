@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -22,19 +22,21 @@
 """
 The Media plugin
 """
-
 import logging
-import os
 import re
+
 from PyQt5 import QtCore
 
 from openlp.core.api.http import register_endpoint
-from openlp.core.common import AppLocation, translate, check_binary_exists
+from openlp.core.common import check_binary_exists
+from openlp.core.common.applocation import AppLocation
+from openlp.core.common.i18n import translate
+from openlp.core.ui.icons import UiIcons
 from openlp.core.common.path import Path
-from openlp.core.lib import Plugin, StringContent, build_icon
+from openlp.core.lib import build_icon
+from openlp.core.lib.plugin import Plugin, StringContent
 from openlp.plugins.media.endpoint import api_media_endpoint, media_endpoint
 from openlp.plugins.media.lib import MediaMediaItem, MediaTab
-
 
 log = logging.getLogger(__name__)
 
@@ -42,7 +44,8 @@ log = logging.getLogger(__name__)
 # Some settings starting with "media" are in core, because they are needed for core functionality.
 __default_settings__ = {
     'media/media auto start': QtCore.Qt.Unchecked,
-    'media/media files': []
+    'media/media files': [],
+    'media/last directory': None
 }
 
 
@@ -55,7 +58,7 @@ class MediaPlugin(Plugin):
     def __init__(self):
         super(MediaPlugin, self).__init__('media', __default_settings__, MediaMediaItem)
         self.weight = -6
-        self.icon_path = ':/plugins/plugin_media.png'
+        self.icon_path = UiIcons().video
         self.icon = build_icon(self.icon_path)
         # passed with drag and drop messages
         self.dnd_id = 'Media'
@@ -75,10 +78,10 @@ class MediaPlugin(Plugin):
         """
         log.debug('check_installed Mediainfo')
         # Try to find mediainfo in the path
-        exists = process_check_binary('mediainfo')
+        exists = process_check_binary(Path('mediainfo'))
         # If mediainfo is not in the path, try to find it in the application folder
         if not exists:
-            exists = process_check_binary(os.path.join(str(AppLocation.get_directory(AppLocation.AppDir)), 'mediainfo'))
+            exists = process_check_binary(AppLocation.get_directory(AppLocation.AppDir) / 'mediainfo')
         return exists
 
     def app_startup(self):
@@ -162,10 +165,11 @@ def process_check_binary(program_path):
     """
     Function that checks whether a binary MediaInfo is present
 
-    :param program_path:The full path to the binary to check.
+    :param openlp.core.common.path.Path program_path:The full path to the binary to check.
     :return: If exists or not
+    :rtype: bool
     """
-    runlog = check_binary_exists(Path(program_path))
+    runlog = check_binary_exists(program_path)
     # Analyse the output to see it the program is mediainfo
     for line in runlog.splitlines():
         decoded_line = line.decode()

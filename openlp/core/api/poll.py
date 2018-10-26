@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -22,8 +22,9 @@
 
 import json
 
-from openlp.core.common import RegistryProperties, Settings
 from openlp.core.common.httputils import get_web_page
+from openlp.core.common.mixins import RegistryProperties
+from openlp.core.common.settings import Settings
 
 
 class Poller(RegistryProperties):
@@ -52,7 +53,7 @@ class Poller(RegistryProperties):
             'isSecure': Settings().value('api/authentication enabled'),
             'isAuthorised': False,
             'chordNotation': Settings().value('songs/chord notation'),
-            'isStagedActive': self.is_stage_active(),
+            'isStageActive': self.is_stage_active(),
             'isLiveActive': self.is_live_active(),
             'isChordsActive': self.is_chords_active()
         }

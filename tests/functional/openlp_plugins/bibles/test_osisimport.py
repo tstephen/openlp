@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -22,16 +22,16 @@
 """
 This module contains tests for the OSIS Bible importer.
 """
-import os
-import json
 from unittest import TestCase
 from unittest.mock import MagicMock, call, patch
 
 from openlp.plugins.bibles.lib.bibleimport import BibleImport
 from openlp.plugins.bibles.lib.db import BibleDB
 from openlp.plugins.bibles.lib.importers.osis import OSISBible
+from tests.utils import load_external_result_data
+from tests.utils.constants import RESOURCE_PATH
 
-TEST_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'resources', 'bibles'))
+TEST_PATH = RESOURCE_PATH / 'bibles'
 
 
 class TestOsisImport(TestCase):
@@ -63,17 +63,17 @@ class TestOsisImport(TestCase):
         mocked_manager = MagicMock()
 
         # WHEN: An importer object is created
-        importer = OSISBible(mocked_manager, path='.', name='.', filename='')
+        importer = OSISBible(mocked_manager, path='.', name='.', file_path=None)
 
         # THEN: The importer should be an instance of BibleDB
-        self.assertIsInstance(importer, BibleDB)
+        assert isinstance(importer, BibleDB)
 
-    def process_books_stop_import_test(self):
+    def test_process_books_stop_import(self):
         """
         Test process_books when stop_import is set to True
         """
         # GIVEN: An instance of OSISBible adn some mocked data
-        importer = OSISBible(MagicMock(), path='.', name='.', filename='')
+        importer = OSISBible(MagicMock(), path='.', name='.', file_path=None)
         mocked_data = MagicMock(**{'xpath.return_value': ['Book']})
 
         # WHEN: stop_import_flag is set to True and process_books is called
@@ -81,16 +81,16 @@ class TestOsisImport(TestCase):
         importer.process_books(mocked_data)
 
         # THEN: find_and_create_book should not have been called
-        self.assertFalse(self.mocked_find_and_create_book.called)
+        assert self.mocked_find_and_create_book.called is False
 
-    def process_books_completes_test(self):
+    def test_process_books_completes(self):
         """
         Test process_books when it processes all books
         """
         # GIVEN: An instance of OSISBible Importer and two mocked books
         self.mocked_find_and_create_book.side_effect = ['db_book1', 'db_book2']
         with patch.object(OSISBible, 'process_chapters') as mocked_process_chapters:
-            importer = OSISBible(MagicMock(), path='.', name='.', filename='')
+            importer = OSISBible(MagicMock(), path='.', name='.', file_path=None)
 
             book1 = MagicMock()
             book1.get.return_value = 'Name1'
@@ -105,13 +105,11 @@ class TestOsisImport(TestCase):
             importer.process_books(mocked_data)
 
             # THEN: find_and_create_book and process_books should be called with the details from the mocked books
-            self.assertEqual(self.mocked_find_and_create_book.call_args_list,
-                             [call('Name1', 2, 10), call('Name2', 2, 10)])
-            self.assertEqual(mocked_process_chapters.call_args_list,
-                             [call('db_book1', book1), call('db_book2', book2)])
-            self.assertEqual(importer.session.commit.call_count, 2)
+            assert self.mocked_find_and_create_book.call_args_list == [call('Name1', 2, 10), call('Name2', 2, 10)]
+            assert mocked_process_chapters.call_args_list == [call('db_book1', book1), call('db_book2', book2)]
+            assert importer.session.commit.call_count == 2
 
-    def process_chapters_verse_in_chapter_verse_text_test(self):
+    def test_process_chapters_verse_in_chapter_verse_text(self):
         """
         Test process_chapters when supplied with an etree element with a verse element nested in it
         """
@@ -128,7 +126,7 @@ class TestOsisImport(TestCase):
             test_chapter = MagicMock()
             test_chapter.__iter__.return_value = [test_verse]
             test_chapter.get.side_effect = lambda x: {'osisID': '1.2.4', 'sID': '999'}.get(x)
-            importer = OSISBible(MagicMock(), path='.', name='.', filename='')
+            importer = OSISBible(MagicMock(), path='.', name='.', file_path=None)
 
             # WHEN: Calling process_chapters
             importer.process_chapters(test_book, [test_chapter])
@@ -137,7 +135,7 @@ class TestOsisImport(TestCase):
             mocked_set_current_chapter.assert_called_once_with(test_book.name, 2)
             mocked_process_verse.assert_called_once_with(test_book, 2, test_verse)
 
-    def process_chapters_verse_in_chapter_verse_milestone_test(self):
+    def test_process_chapters_verse_in_chapter_verse_milestone(self):
         """
         Test process_chapters when supplied with an etree element with a verse element nested, when the verse system is
         based on milestones
@@ -155,7 +153,7 @@ class TestOsisImport(TestCase):
             test_chapter = MagicMock()
             test_chapter.__iter__.return_value = [test_verse]
             test_chapter.get.side_effect = lambda x: {'osisID': '1.2.4', 'sID': '999'}.get(x)
-            importer = OSISBible(MagicMock(), path='.', name='.', filename='')
+            importer = OSISBible(MagicMock(), path='.', name='.', file_path=None)
 
             # WHEN: Calling process_chapters
             importer.process_chapters(test_book, [test_chapter])
@@ -164,7 +162,7 @@ class TestOsisImport(TestCase):
             mocked_set_current_chapter.assert_called_once_with(test_book.name, 2)
             mocked_process_verse.assert_called_once_with(test_book, 2, test_verse, use_milestones=True)
 
-    def process_chapters_milestones_chapter_no_sid_test(self):
+    def test_process_chapters_milestones_chapter_no_sid(self):
         """
         Test process_chapters when supplied with an etree element with a chapter and verse element in the milestone
         configuration, where the chapter is the "closing" milestone. (Missing the sID attribute)
@@ -180,14 +178,14 @@ class TestOsisImport(TestCase):
             test_chapter.get.side_effect = lambda x: {'osisID': '1.2.4'}.get(x)
 
             # WHEN: Calling process_chapters
-            importer = OSISBible(MagicMock(), path='.', name='.', filename='')
+            importer = OSISBible(MagicMock(), path='.', name='.', file_path=None)
             importer.process_chapters(test_book, [test_chapter])
 
             # THEN: neither set_current_chapter or process_verse should have been called
-            self.assertFalse(mocked_set_current_chapter.called)
-            self.assertFalse(mocked_process_verse.called)
+            assert mocked_set_current_chapter.called is False
+            assert mocked_process_verse.called is False
 
-    def process_chapters_milestones_chapter_sid_test(self):
+    def test_process_chapters_milestones_chapter_sid(self):
         """
         Test process_chapters when supplied with an etree element with a chapter and verse element in the milestone
         configuration, where the chapter is the "opening" milestone. (Has the sID attribute)
@@ -201,16 +199,16 @@ class TestOsisImport(TestCase):
             test_chapter = MagicMock()
             test_chapter.tag = '{http://www.bibletechnologies.net/2003/OSIS/namespace}chapter'
             test_chapter.get.side_effect = lambda x: {'osisID': '1.2.4', 'sID': '999'}.get(x)
-            importer = OSISBible(MagicMock(), path='.', name='.', filename='')
+            importer = OSISBible(MagicMock(), path='.', name='.', file_path=None)
 
             # WHEN: Calling process_chapters
             importer.process_chapters(test_book, [test_chapter])
 
             # THEN: set_current_chapter should have been called with the test data
             mocked_set_current_chapter.assert_called_once_with(test_book.name, 2)
-            self.assertFalse(mocked_process_verse.called)
+            assert mocked_process_verse.called is False
 
-    def process_chapters_milestones_verse_tag_test(self):
+    def test_process_chapters_milestones_verse_tag(self):
         """
         Test process_chapters when supplied with an etree element with a chapter and verse element in the milestone
         configuration, where the verse is the "opening" milestone. (Has the sID attribute)
@@ -228,14 +226,14 @@ class TestOsisImport(TestCase):
             test_verse.text = 'Verse Text'
 
             # WHEN: Calling process_chapters
-            importer = OSISBible(MagicMock(), path='.', name='.', filename='')
+            importer = OSISBible(MagicMock(), path='.', name='.', file_path=None)
             importer.process_chapters(test_book, [test_verse])
 
             # THEN: process_verse should have been called with the test data
-            self.assertFalse(mocked_set_current_chapter.called)
+            assert mocked_set_current_chapter.called is False
             mocked_process_verse.assert_called_once_with(test_book, 0, test_verse, use_milestones=True)
 
-    def process_verse_no_osis_id_test(self):
+    def test_process_verse_no_osis_id(self):
         """
         Test process_verse when the element supplied does not have and osisID attribute
         """
@@ -245,15 +243,15 @@ class TestOsisImport(TestCase):
         test_verse.get.side_effect = lambda x: {}.get(x)
         test_verse.tail = 'Verse Text'
         test_verse.text = None
-        importer = OSISBible(MagicMock(), path='.', name='.', filename='')
+        importer = OSISBible(MagicMock(), path='.', name='.', file_path=None)
 
         # WHEN: Calling process_verse with the test data
         importer.process_verse(test_book, 2, test_verse)
 
         # THEN: create_verse should not have been called
-        self.assertFalse(self.mocked_create_verse.called)
+        assert self.mocked_create_verse.called is False
 
-    def process_verse_use_milestones_no_s_id_test(self):
+    def test_process_verse_use_milestones_no_s_id(self):
         """
         Test process_verse when called with use_milestones set to True, but the element supplied does not have and sID
         attribute
@@ -264,15 +262,15 @@ class TestOsisImport(TestCase):
         test_verse.get.side_effect = lambda x: {}.get(x)
         test_verse.tail = 'Verse Text'
         test_verse.text = None
-        importer = OSISBible(MagicMock(), path='.', name='.', filename='')
+        importer = OSISBible(MagicMock(), path='.', name='.', file_path=None)
 
         # WHEN: Calling process_verse with the test data
         importer.process_verse(test_book, 2, test_verse)
 
         # THEN: create_verse should not have been called
-        self.assertFalse(self.mocked_create_verse.called)
+        assert self.mocked_create_verse.called is False
 
-    def process_verse_use_milestones_no_tail_test(self):
+    def test_process_verse_use_milestones_no_tail(self):
         """
         Test process_verse when called with use_milestones set to True, but the element supplied does not have a 'tail'
         """
@@ -282,15 +280,15 @@ class TestOsisImport(TestCase):
         test_verse.tail = None
         test_verse.text = None
         test_verse.get.side_effect = lambda x: {'osisID': '1.2.4', 'sID': '999'}.get(x)
-        importer = OSISBible(MagicMock(), path='.', name='.', filename='')
+        importer = OSISBible(MagicMock(), path='.', name='.', file_path=None)
 
         # WHEN: Calling process_verse with the test data
         importer.process_verse(test_book, 2, test_verse, use_milestones=True)
 
         # THEN: create_verse should not have been called
-        self.assertFalse(self.mocked_create_verse.called)
+        assert self.mocked_create_verse.called is False
 
-    def process_verse_use_milestones_success_test(self):
+    def test_process_verse_use_milestones_success(self):
         """
         Test process_verse when called with use_milestones set to True, and the verse element successfully imports
         """
@@ -301,7 +299,7 @@ class TestOsisImport(TestCase):
         test_verse.tail = 'Verse Text'
         test_verse.text = None
         test_verse.get.side_effect = lambda x: {'osisID': '1.2.4', 'sID': '999'}.get(x)
-        importer = OSISBible(MagicMock(), path='.', name='.', filename='')
+        importer = OSISBible(MagicMock(), path='.', name='.', file_path=None)
 
         # WHEN: Calling process_verse with the test data
         importer.process_verse(test_book, 2, test_verse, use_milestones=True)
@@ -309,7 +307,7 @@ class TestOsisImport(TestCase):
         # THEN: create_verse should have been called with the test data
         self.mocked_create_verse.assert_called_once_with(1, 2, 4, 'Verse Text')
 
-    def process_verse_no_text_test(self):
+    def test_process_verse_no_text(self):
         """
         Test process_verse when called with an empty verse element
         """
@@ -320,15 +318,15 @@ class TestOsisImport(TestCase):
         test_verse.tail = '\n    '  # Whitespace
         test_verse.text = None
         test_verse.get.side_effect = lambda x: {'osisID': '1.2.4', 'sID': '999'}.get(x)
-        importer = OSISBible(MagicMock(), path='.', name='.', filename='')
+        importer = OSISBible(MagicMock(), path='.', name='.', file_path=None)
 
         # WHEN: Calling process_verse with the test data
         importer.process_verse(test_book, 2, test_verse)
 
         # THEN: create_verse should not have been called
-        self.assertFalse(self.mocked_create_verse.called)
+        assert self.mocked_create_verse.called is False
 
-    def process_verse_success_test(self):
+    def test_process_verse_success(self):
         """
         Test process_verse when called with an element with text set
         """
@@ -339,7 +337,7 @@ class TestOsisImport(TestCase):
         test_verse.tail = '\n    '  # Whitespace
         test_verse.text = 'Verse Text'
         test_verse.get.side_effect = lambda x: {'osisID': '1.2.4', 'sID': '999'}.get(x)
-        importer = OSISBible(MagicMock(), path='.', name='.', filename='')
+        importer = OSISBible(MagicMock(), path='.', name='.', file_path=None)
 
         # WHEN: Calling process_verse with the test data
         importer.process_verse(test_book, 2, test_verse)
@@ -347,7 +345,7 @@ class TestOsisImport(TestCase):
         # THEN: create_verse should have been called with the test data
         self.mocked_create_verse.assert_called_once_with(1, 2, 4, 'Verse Text')
 
-    def do_import_parse_xml_fails_test(self):
+    def test_do_import_parse_xml_fails(self):
         """
         Test do_import when parse_xml fails (returns None)
         """
@@ -356,16 +354,16 @@ class TestOsisImport(TestCase):
                 patch.object(OSISBible, 'validate_xml_file'), \
                 patch.object(OSISBible, 'parse_xml', return_value=None), \
                 patch.object(OSISBible, 'get_language_id') as mocked_language_id:
-            importer = OSISBible(MagicMock(), path='.', name='.', filename='')
+            importer = OSISBible(MagicMock(), path='.', name='.', file_path=None)
 
             # WHEN: Calling do_import
             result = importer.do_import()
 
             # THEN: do_import should return False and get_language_id should have not been called
-            self.assertFalse(result)
-            self.assertFalse(mocked_language_id.called)
+            assert result is False
+            assert mocked_language_id.called is False
 
-    def do_import_no_language_test(self):
+    def test_do_import_no_language(self):
         """
         Test do_import when the user cancels the language selection dialog
         """
@@ -375,16 +373,16 @@ class TestOsisImport(TestCase):
                 patch.object(OSISBible, 'parse_xml'), \
                 patch.object(OSISBible, 'get_language_id', **{'return_value': False}), \
                 patch.object(OSISBible, 'process_books') as mocked_process_books:
-            importer = OSISBible(MagicMock(), path='.', name='.', filename='')
+            importer = OSISBible(MagicMock(), path='.', name='.', file_path=None)
 
             # WHEN: Calling do_import
             result = importer.do_import()
 
             # THEN: do_import should return False and process_books should have not been called
-            self.assertFalse(result)
-            self.assertFalse(mocked_process_books.called)
+            assert result is False
+            assert mocked_process_books.called is False
 
-    def do_import_completes_test(self):
+    def test_do_import_completes(self):
         """
         Test do_import when it completes successfully
         """
@@ -394,13 +392,13 @@ class TestOsisImport(TestCase):
                 patch.object(OSISBible, 'parse_xml'), \
                 patch.object(OSISBible, 'get_language_id', **{'return_value': 10}), \
                 patch.object(OSISBible, 'process_books'):
-            importer = OSISBible(MagicMock(), path='.', name='.', filename='')
+            importer = OSISBible(MagicMock(), path='.', name='.', file_path=None)
 
             # WHEN: Calling do_import
             result = importer.do_import()
 
             # THEN: do_import should return True
-            self.assertTrue(result)
+            assert result is True
 
 
 class TestOsisImportFileImports(TestCase):
@@ -421,13 +419,12 @@ class TestOsisImportFileImports(TestCase):
         """
         # GIVEN: Test files with a mocked out "manager", "import_wizard", and mocked functions
         #        get_book_ref_id_by_name, create_verse, create_book, session and get_language.
-        result_file = open(os.path.join(TEST_PATH, 'dk1933.json'), 'rb')
-        test_data = json.loads(result_file.read().decode())
+        test_data = load_external_result_data(TEST_PATH / 'dk1933.json')
         bible_file = 'osis-dk1933.xml'
         with patch('openlp.plugins.bibles.lib.importers.osis.OSISBible.application'):
             mocked_manager = MagicMock()
             mocked_import_wizard = MagicMock()
-            importer = OSISBible(mocked_manager, path='.', name='.', filename='')
+            importer = OSISBible(mocked_manager, path='.', name='.', file_path=None)
             importer.wizard = mocked_import_wizard
             importer.get_book_ref_id_by_name = MagicMock()
             importer.create_verse = MagicMock()
@@ -437,11 +434,11 @@ class TestOsisImportFileImports(TestCase):
             importer.get_language.return_value = 'Danish'
 
             # WHEN: Importing bible file
-            importer.filename = os.path.join(TEST_PATH, bible_file)
+            importer.file_path = TEST_PATH / bible_file
             importer.do_import()
 
             # THEN: The create_verse() method should have been called with each verse in the file.
-            self.assertTrue(importer.create_verse.called)
+            assert importer.create_verse.called is True
             for verse_tag, verse_text in test_data['verses']:
                 importer.create_verse.assert_any_call(importer.create_book().id, 1, verse_tag, verse_text)
 
@@ -451,13 +448,12 @@ class TestOsisImportFileImports(TestCase):
         """
         # GIVEN: Test files with a mocked out "manager", "import_wizard", and mocked functions
         #        get_book_ref_id_by_name, create_verse, create_book, session and get_language.
-        result_file = open(os.path.join(TEST_PATH, 'kjv.json'), 'rb')
-        test_data = json.loads(result_file.read().decode())
+        test_data = load_external_result_data(TEST_PATH / 'kjv.json')
         bible_file = 'osis-kjv.xml'
         with patch('openlp.plugins.bibles.lib.importers.osis.OSISBible.application'):
             mocked_manager = MagicMock()
             mocked_import_wizard = MagicMock()
-            importer = OSISBible(mocked_manager, path='.', name='.', filename='')
+            importer = OSISBible(mocked_manager, path='.', name='.', file_path=None)
             importer.wizard = mocked_import_wizard
             importer.get_book_ref_id_by_name = MagicMock()
             importer.create_verse = MagicMock()
@@ -467,11 +463,11 @@ class TestOsisImportFileImports(TestCase):
             importer.get_language.return_value = 'English'
 
             # WHEN: Importing bible file
-            importer.filename = os.path.join(TEST_PATH, bible_file)
+            importer.file_path = TEST_PATH / bible_file
             importer.do_import()
 
             # THEN: The create_verse() method should have been called with each verse in the file.
-            self.assertTrue(importer.create_verse.called)
+            assert importer.create_verse.called is True
             for verse_tag, verse_text in test_data['verses']:
                     importer.create_verse.assert_any_call(importer.create_book().id, 1, verse_tag, verse_text)
 
@@ -481,13 +477,12 @@ class TestOsisImportFileImports(TestCase):
         """
         # GIVEN: Test files with a mocked out "manager", "import_wizard", and mocked functions
         #        get_book_ref_id_by_name, create_verse, create_book, session and get_language.
-        result_file = open(os.path.join(TEST_PATH, 'web.json'), 'rb')
-        test_data = json.loads(result_file.read().decode())
+        test_data = load_external_result_data(TEST_PATH / 'web.json')
         bible_file = 'osis-web.xml'
         with patch('openlp.plugins.bibles.lib.importers.osis.OSISBible.application'):
             mocked_manager = MagicMock()
             mocked_import_wizard = MagicMock()
-            importer = OSISBible(mocked_manager, path='.', name='.', filename='')
+            importer = OSISBible(mocked_manager, path='.', name='.', file_path=None)
             importer.wizard = mocked_import_wizard
             importer.get_book_ref_id_by_name = MagicMock()
             importer.create_verse = MagicMock()
@@ -497,11 +492,11 @@ class TestOsisImportFileImports(TestCase):
             importer.get_language.return_value = 'English'
 
             # WHEN: Importing bible file
-            importer.filename = os.path.join(TEST_PATH, bible_file)
+            importer.file_path = TEST_PATH / bible_file
             importer.do_import()
 
             # THEN: The create_verse() method should have been called with each verse in the file.
-            self.assertTrue(importer.create_verse.called)
+            assert importer.create_verse.called
             for verse_tag, verse_text in test_data['verses']:
                 importer.create_verse.assert_any_call(importer.create_book().id, 1, verse_tag, verse_text)
 
@@ -511,13 +506,12 @@ class TestOsisImportFileImports(TestCase):
         """
         # GIVEN: Test files with a mocked out "manager", "import_wizard", and mocked functions
         #        get_book_ref_id_by_name, create_verse, create_book, session and get_language.
-        result_file = open(os.path.join(TEST_PATH, 'dk1933.json'), 'rb')
-        test_data = json.loads(result_file.read().decode())
+        test_data = load_external_result_data(TEST_PATH / 'dk1933.json')
         bible_file = 'osis-dk1933-empty-verse.xml'
         with patch('openlp.plugins.bibles.lib.importers.osis.OSISBible.application'):
             mocked_manager = MagicMock()
             mocked_import_wizard = MagicMock()
-            importer = OSISBible(mocked_manager, path='.', name='.', filename='')
+            importer = OSISBible(mocked_manager, path='.', name='.', file_path=None)
             importer.wizard = mocked_import_wizard
             importer.get_book_ref_id_by_name = MagicMock()
             importer.create_verse = MagicMock()
@@ -527,10 +521,10 @@ class TestOsisImportFileImports(TestCase):
             importer.get_language.return_value = 'Danish'
 
             # WHEN: Importing bible file
-            importer.filename = os.path.join(TEST_PATH, bible_file)
+            importer.file_path = TEST_PATH / bible_file
             importer.do_import()
 
             # THEN: The create_verse() method should have been called with each verse in the file.
-            self.assertTrue(importer.create_verse.called)
+            assert importer.create_verse.called is True
             for verse_tag, verse_text in test_data['verses']:
                 importer.create_verse.assert_any_call(importer.create_book().id, 1, verse_tag, verse_text)

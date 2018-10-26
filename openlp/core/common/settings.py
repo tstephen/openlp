@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,24 +23,32 @@
 This class contains the core default settings.
 """
 import datetime
-import logging
 import json
+import logging
 import os
+from enum import IntEnum
 from tempfile import gettempdir
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtGui
 
-from openlp.core.common import SlideLimits, ThemeLevel, UiStrings, is_linux, is_win, translate
+from openlp.core.common import SlideLimits, ThemeLevel, is_linux, is_win
 from openlp.core.common.json import OpenLPJsonDecoder, OpenLPJsonEncoder
-from openlp.core.common.path import Path, str_to_path
+from openlp.core.common.path import Path, str_to_path, files_to_paths
 
 log = logging.getLogger(__name__)
 
 __version__ = 2
 
+
+class ProxyMode(IntEnum):
+    NO_PROXY = 1
+    SYSTEM_PROXY = 2
+    MANUAL_PROXY = 3
+
+
 # Fix for bug #1014422.
 X11_BYPASS_DEFAULT = True
-if is_linux():
+if is_linux():                                                                              # pragma: no cover
     # Default to False on Gnome.
     X11_BYPASS_DEFAULT = bool(not os.environ.get('GNOME_DESKTOP_SESSION_ID'))
     # Default to False on Xfce.
@@ -60,18 +68,6 @@ def media_players_conv(string):
             values[index] = 'system'
     string = ','.join(values)
     return string
-
-
-def file_names_conv(file_names):
-    """
-    Convert a list of file names in to a list of file paths.
-
-    :param list[str] file_names: The list of file names to convert.
-    :return: The list converted to file paths
-    :rtype: openlp.core.common.path.Path
-    """
-    if file_names:
-        return [str_to_path(file_name) for file_name in file_names]
 
 
 class Settings(QtCore.QSettings):
@@ -116,7 +112,7 @@ class Settings(QtCore.QSettings):
         'advanced/default service enabled': True,
         'advanced/default service hour': 11,
         'advanced/default service minute': 0,
-        'advanced/default service name': UiStrings().DefaultServiceName,
+        'advanced/default service name': 'Service %Y-%m-%d %H-%M',
         'advanced/display size': 0,
         'advanced/double click live': False,
         'advanced/enable exit confirmation': True,
@@ -128,6 +124,11 @@ class Settings(QtCore.QSettings):
         'advanced/print file meta data': False,
         'advanced/print notes': False,
         'advanced/print slide text': False,
+        'advanced/proxy mode': ProxyMode.SYSTEM_PROXY,
+        'advanced/proxy http': '',
+        'advanced/proxy https': '',
+        'advanced/proxy username': '',
+        'advanced/proxy password': '',
         'advanced/recent file count': 4,
         'advanced/save current plugin': False,
         'advanced/slide limits': SlideLimits.End,
@@ -136,6 +137,7 @@ class Settings(QtCore.QSettings):
         'advanced/single click service preview': False,
         'advanced/x11 bypass wm': X11_BYPASS_DEFAULT,
         'advanced/search as type': True,
+        'advanced/use_dark_style': False,
         'api/twelve hour': True,
         'api/port': 4316,
         'api/websocket port': 4317,
@@ -177,6 +179,7 @@ class Settings(QtCore.QSettings):
         'images/background color': '#000000',
         'media/players': 'system,webkit',
         'media/override player': QtCore.Qt.Unchecked,
+        'remotes/download version': '0.0',
         'players/background color': '#000000',
         'servicemanager/last directory': None,
         'servicemanager/last file': None,
@@ -209,18 +212,23 @@ class Settings(QtCore.QSettings):
         'projector/db database': '',
         'projector/enable': True,
         'projector/connect on start': False,
+        'projector/connect when LKUP received': True,  # PJLink v2: Projector sends LKUP command after it powers up
         'projector/last directory import': None,
         'projector/last directory export': None,
         'projector/poll time': 20,  # PJLink  timeout is 30 seconds
         'projector/socket timeout': 5,  # 5 second socket timeout
-        'projector/source dialog type': 0  # Source select dialog box type
+        'projector/source dialog type': 0,  # Source select dialog box type
+        'projector/udp broadcast listen': False  # Enable/disable listening for PJLink 2 UDP broadcast packets
     }
     __file_path__ = ''
+    # Settings upgrades prior to 3.0
     __setting_upgrade_1__ = [
-        # Changed during 2.2.x development.
         ('songs/search as type', 'advanced/search as type', []),
         ('media/players', 'media/players_temp', [(media_players_conv, None)]),  # Convert phonon to system
         ('media/players_temp', 'media/players', []),  # Move temp setting from above to correct setting
+    ]
+    # Settings upgrades for 3.0 (aka 2.6)
+    __setting_upgrade_2__ = [
         ('advanced/default color', 'core/logo background color', []),  # Default image renamed + moved to general > 2.4.
         ('advanced/default image', 'core/logo file', []),  # Default image renamed + moved to general after 2.4.
         ('remotes/https enabled', '', []),
@@ -241,11 +249,9 @@ class Settings(QtCore.QSettings):
         # Last search type was renamed to last used search type in 2.6 since Bible search value type changed in 2.6.
         ('songs/last search type', 'songs/last used search type', []),
         ('bibles/last search type', '', []),
-        ('custom/last search type', 'custom/last used search type', [])]
-
-    __setting_upgrade_2__ = [
+        ('custom/last search type', 'custom/last used search type', []),
         # The following changes are being made for the conversion to using Path objects made in 2.6 development
-        ('advanced/data path', 'advanced/data path', [(str_to_path, None)]),
+        ('advanced/data path', 'advanced/data path', [(lambda p: Path(p) if p is not None else None, None)]),
         ('crashreport/last directory', 'crashreport/last directory', [(str_to_path, None)]),
         ('servicemanager/last directory', 'servicemanager/last directory', [(str_to_path, None)]),
         ('servicemanager/last file', 'servicemanager/last file', [(str_to_path, None)]),
@@ -259,10 +265,21 @@ class Settings(QtCore.QSettings):
         ('songs/last directory import', 'songs/last directory import', [(str_to_path, None)]),
         ('songs/last directory export', 'songs/last directory export', [(str_to_path, None)]),
         ('songusage/last directory export', 'songusage/last directory export', [(str_to_path, None)]),
-        ('core/recent files', 'core/recent files', [(file_names_conv, None)]),
-        ('media/media files', 'media/media files', [(file_names_conv, None)]),
-        ('presentations/presentations files', 'presentations/presentations files', [(file_names_conv, None)]),
-        ('core/logo file', 'core/logo file', [(str_to_path, None)])
+        ('core/recent files', 'core/recent files', [(files_to_paths, None)]),
+        ('media/media files', 'media/media files', [(files_to_paths, None)]),
+        ('presentations/presentations files', 'presentations/presentations files', [(files_to_paths, None)]),
+        ('core/logo file', 'core/logo file', [(str_to_path, None)]),
+        ('presentations/last directory', 'presentations/last directory', [(str_to_path, None)]),
+        ('images/last directory', 'images/last directory', [(str_to_path, None)]),
+        ('media/last directory', 'media/last directory', [(str_to_path, None)]),
+        ('songuasge/db password', 'songusage/db password', []),
+        ('songuasge/db hostname', 'songusage/db hostname', []),
+        ('songuasge/db database', 'songusage/db database', []),
+        ('presentations / Powerpoint Viewer', '', []),
+        ('bibles/proxy name', '', []),  # Just remove these bible proxy settings. They weren't used in 2.4!
+        ('bibles/proxy address', '', []),
+        ('bibles/proxy username', '', []),
+        ('bibles/proxy password', '', [])
     ]
 
     @staticmethod
@@ -293,6 +310,7 @@ class Settings(QtCore.QSettings):
         """
         # Make sure the string is translated (when building the dict the string is not translated because the translate
         # function was not set up as this stage).
+        from openlp.core.common.i18n import UiStrings
         Settings.__default_settings__['advanced/default service name'] = UiStrings().DefaultServiceName
 
     def __init__(self, *args):
@@ -470,32 +488,38 @@ class Settings(QtCore.QSettings):
         for version in range(current_version, __version__):
             version += 1
             upgrade_list = getattr(self, '__setting_upgrade_{version}__'.format(version=version))
-            for old_key, new_key, rules in upgrade_list:
+            for old_keys, new_key, rules in upgrade_list:
                 # Once removed we don't have to do this again. - Can be removed once fully switched to the versioning
                 # system.
-                if not self.contains(old_key):
+                if not isinstance(old_keys, (tuple, list)):
+                    old_keys = [old_keys]
+                if any([not self.contains(old_key) for old_key in old_keys]):
+                    log.warning('One of {} does not exist, skipping upgrade'.format(old_keys))
                     continue
                 if new_key:
                     # Get the value of the old_key.
-                    old_value = super(Settings, self).value(old_key)
+                    old_values = [super(Settings, self).value(old_key) for old_key in old_keys]
                     # When we want to convert the value, we have to figure out the default value (because we cannot get
                     # the default value from the central settings dict.
                     if rules:
-                        default_value = rules[0][1]
-                        old_value = self._convert_value(old_value, default_value)
+                        default_values = rules[0][1]
+                        if not isinstance(default_values, (list, tuple)):
+                            default_values = [default_values]
+                        old_values = [self._convert_value(old_value, default_value)
+                                      for old_value, default_value in zip(old_values, default_values)]
                     # Iterate over our rules and check what the old_value should be "converted" to.
-                    for new, old in rules:
+                    new_value = None
+                    for new_rule, old_rule in rules:
                         # If the value matches with the condition (rule), then use the provided value. This is used to
                         # convert values. E. g. an old value 1 results in True, and 0 in False.
-                        if callable(new):
-                            old_value = new(old_value)
-                        elif old == old_value:
-                            old_value = new
+                        if callable(new_rule):
+                            new_value = new_rule(*old_values)
+                        elif old_rule in old_values:
+                            new_value = new_rule
                             break
-                    self.setValue(new_key, old_value)
-                if new_key != old_key:
-                    self.remove(old_key)
-        self.setValue('settings/version', version)
+                    self.setValue(new_key, new_value)
+                [self.remove(old_key) for old_key in old_keys if old_key != new_key]
+            self.setValue('settings/version', version)
 
     def value(self, key):
         """
@@ -604,11 +628,5 @@ class Settings(QtCore.QSettings):
                     if file_record.find('@Invalid()') == -1:
                         file_record = file_record.replace('%20', ' ')
                         export_conf_file.write(file_record)
-        except OSError as ose:
-            QtWidgets.QMessageBox.critical(self, translate('OpenLP.MainWindow', 'Export setting error'),
-                                           translate('OpenLP.MainWindow',
-                                                     'An error occurred while exporting the settings: {err}'
-                                                     ).format(err=ose.strerror),
-                                           QtWidgets.QMessageBox.StandardButtons(QtWidgets.QMessageBox.Ok))
         finally:
             temp_path.unlink()

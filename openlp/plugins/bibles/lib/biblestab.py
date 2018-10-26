@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -24,8 +24,10 @@ import logging
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from openlp.core.common import Registry, Settings, UiStrings, translate
-from openlp.core.lib import SettingsTab
+from openlp.core.common.i18n import UiStrings, translate
+from openlp.core.common.registry import Registry
+from openlp.core.common.settings import Settings
+from openlp.core.lib.settingstab import SettingsTab
 from openlp.core.lib.ui import find_and_set_in_combo_box
 from openlp.plugins.bibles.lib import LayoutStyle, DisplayStyle, update_reference_separators, \
     get_reference_separator, LanguageSelection
@@ -39,11 +41,11 @@ class BiblesTab(SettingsTab):
     """
     log.info('Bible Tab loaded')
 
-    def _init_(self, parent, title, visible_title, icon_path):
+    def _init_(self, *args, **kwargs):
         self.paragraph_style = True
         self.show_new_chapters = False
         self.display_style = 0
-        super(BiblesTab, self).__init__(parent, title, visible_title, icon_path)
+        super().__init__(*args, **kwargs)
 
     def setupUi(self):
         self.setObjectName('BiblesTab')

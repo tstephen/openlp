@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -61,9 +61,10 @@ import re
 
 from lxml import etree, objectify
 
-from openlp.core.common import translate, Settings
-from openlp.core.common.versionchecker import get_application_version
-from openlp.core.lib import FormattingTags
+from openlp.core.common.i18n import translate
+from openlp.core.common.settings import Settings
+from openlp.core.lib.formattingtags import FormattingTags
+from openlp.core.version import get_version
 from openlp.plugins.songs.lib import VerseType, clean_song
 from openlp.plugins.songs.lib.db import Author, AuthorType, Book, Song, Topic
 
@@ -71,6 +72,7 @@ log = logging.getLogger(__name__)
 
 NAMESPACE = 'http://openlyrics.info/namespace/2009/song'
 NSMAP = '{{' + NAMESPACE + '}}{tag}'
+NEWPAGETAG = '<p style="page-break-after: always;"/>'
 
 
 class SongXML(object):
@@ -234,7 +236,7 @@ class OpenLyrics(object):
         # Append the necessary meta data to the song.
         song_xml.set('xmlns', NAMESPACE)
         song_xml.set('version', OpenLyrics.IMPLEMENTED_VERSION)
-        application_name = 'OpenLP ' + get_application_version()['version']
+        application_name = 'OpenLP ' + get_version()['version']
         song_xml.set('createdIn', application_name)
         song_xml.set('modifiedIn', application_name)
         # "Convert" 2012-08-27 11:49:15 to 2012-08-27T11:49:15.
@@ -279,9 +281,9 @@ class OpenLyrics(object):
         # Process the formatting tags.
         # Have we any tags in song lyrics?
         tags_element = None
-        match = re.search('\{/?\w+\}', song.lyrics, re.UNICODE)
+        match = re.search(r'\{/?\w+\}', song.lyrics)
         if match:
-            # Named 'format_' - 'format' is built-in fuction in Python.
+            # Named 'format_' - 'format' is built-in function in Python.
             format_ = etree.SubElement(song_xml, 'format')
             tags_element = etree.SubElement(format_, 'tags')
             tags_element.set('application', 'OpenLP')
@@ -472,6 +474,7 @@ class OpenLyrics(object):
             text = text.replace('{{/{tag}}}'.format(tag=tag), '</tag>')
         # Replace \n with <br/>.
         text = text.replace('\n', '<br/>')
+        text = text.replace('[--}{--]', NEWPAGETAG)
         element = etree.XML('<lines>{text}</lines>'.format(text=text))
         verse_element.append(element)
         return element
@@ -633,6 +636,9 @@ class OpenLyrics(object):
             text += '\n'
             if element.tail:
                 text += element.tail
+            return text
+        elif newlines and element.tag == NSMAP.format(tag='p') and 'page-break-after' in str(element.attrib):
+            text += '[--}{--]'
             return text
         # Start formatting tag.
         if element.tag == NSMAP.format(tag='tag'):

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,11 +23,13 @@
 import logging
 
 from openlp.core.api.http import register_endpoint
-from openlp.core.common import UiStrings
 from openlp.core.common.actions import ActionList
-from openlp.core.lib import Plugin, StringContent, build_icon, translate
-from openlp.plugins.bibles.endpoint import api_bibles_endpoint, bibles_endpoint
+from openlp.core.common.i18n import UiStrings, translate
+from openlp.core.ui.icons import UiIcons
+from openlp.core.lib import build_icon
+from openlp.core.lib.plugin import Plugin, StringContent
 from openlp.core.lib.ui import create_action
+from openlp.plugins.bibles.endpoint import api_bibles_endpoint, bibles_endpoint
 from openlp.plugins.bibles.lib import BibleManager, BiblesTab, BibleMediaItem, LayoutStyle, DisplayStyle, \
     LanguageSelection
 from openlp.plugins.bibles.lib.mediaitem import BibleSearch
@@ -50,10 +52,6 @@ __default_settings__ = {
     'bibles/display new chapter': False,
     'bibles/second bibles': True,
     'bibles/primary bible': '',
-    'bibles/proxy name': '',
-    'bibles/proxy address': '',
-    'bibles/proxy username': '',
-    'bibles/proxy password': '',
     'bibles/bible theme': '',
     'bibles/verse separator': '',
     'bibles/range separator': '',
@@ -74,8 +72,8 @@ class BiblePlugin(Plugin):
     def __init__(self):
         super(BiblePlugin, self).__init__('bibles', __default_settings__, BibleMediaItem, BiblesTab)
         self.weight = -9
-        self.icon_path = ':/plugins/plugin_bibles.png'
-        self.icon = build_icon(self.icon_path)
+        self.icon_path = UiIcons().bible
+        self.icon = UiIcons().bible
         self.manager = BibleManager(self)
         register_endpoint(bibles_endpoint)
         register_endpoint(api_bibles_endpoint)

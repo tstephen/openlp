@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -22,7 +22,6 @@
 """
 Package to test for proper bzr tags.
 """
-import os
 import platform
 import sys
 from unittest import TestCase, SkipTest
@@ -37,7 +36,8 @@ from openlp.core.common import is_win
 
 TOLERATED_ERRORS = {'registryproperties.py': ['access-member-before-definition'],
                     'opensong.py': ['no-name-in-module'],
-                    'maindisplay.py': ['no-name-in-module']}
+                    'maindisplay.py': ['no-name-in-module'],
+                    'icons.py': ['too-many-function-args']}
 
 
 class TestPylint(TestCase):
@@ -58,17 +58,21 @@ class TestPylint(TestCase):
         # GIVEN: Some checks to disable and enable, and the pylint script
         disabled_checks = 'import-error,no-member'
         enabled_checks = 'missing-format-argument-key,unused-format-string-argument,bad-format-string'
-        if is_win() or 'arch' in platform.dist()[0].lower():
-            pylint_script = 'pylint'
-        else:
-            pylint_script = 'pylint3'
+        pylint_kwargs = {
+            'return_std': True
+        }
+        if version < '1.7.0':
+            if is_win() or 'arch' in platform.dist()[0].lower():
+                pylint_kwargs.update({'script': 'pylint'})
+            else:
+                pylint_kwargs.update({'script': 'pylint3'})
 
         # WHEN: Running pylint
         (pylint_stdout, pylint_stderr) = \
-            lint.py_run('openlp --errors-only --disable={disabled} --enable={enabled} '
+            lint.py_run('openlp --errors-only -j 4 --disable={disabled} --enable={enabled} '
                         '--reports=no --output-format=parseable'.format(disabled=disabled_checks,
                                                                         enabled=enabled_checks),
-                        return_std=True, script=pylint_script)
+                        **pylint_kwargs)
         stdout = pylint_stdout.read()
         stderr = pylint_stderr.read()
         filtered_stdout = self._filter_tolerated_errors(stdout)
@@ -76,7 +80,7 @@ class TestPylint(TestCase):
         print(stderr)
 
         # THEN: The output should be empty
-        self.assertTrue(filtered_stdout == '', 'PyLint should find no errors')
+        assert filtered_stdout == '', 'PyLint should find no errors'
 
     def _filter_tolerated_errors(self, pylint_output):
         """
@@ -85,7 +89,7 @@ class TestPylint(TestCase):
         filtered_output = ''
         for line in pylint_output.splitlines():
             # Filter out module info lines
-            if line.startswith('**'):
+            if '***' in line:
                 continue
             # Filter out undefined-variable error releated to WindowsError
             elif 'undefined-variable' in line and 'WindowsError' in line:

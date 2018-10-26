@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,15 +23,14 @@
 The :mod:`propresenter` module provides the functionality for importing
 ProPresenter song files into the current installation database.
 """
-
-import os
 import base64
 import logging
+
 from lxml import objectify
 
-from openlp.core.ui.lib.wizard import WizardStrings
+from openlp.core.widgets.wizard import WizardStrings
 from openlp.plugins.songs.lib import strip_rtf
-from .songimport import SongImport
+from openlp.plugins.songs.lib.importers.songimport import SongImport
 
 log = logging.getLogger(__name__)
 
@@ -47,11 +46,17 @@ class ProPresenterImport(SongImport):
             if self.stop_import_flag:
                 return
             self.import_wizard.increment_progress_bar(
-                WizardStrings.ImportingType.format(source=os.path.basename(file_path)))
-            root = objectify.parse(open(file_path, 'rb')).getroot()
-            self.process_song(root, file_path)
+                WizardStrings.ImportingType.format(source=file_path.name))
+            with file_path.open('rb') as xml_file:
+                root = objectify.parse(xml_file).getroot()
+                self.process_song(root, file_path)
 
-    def process_song(self, root, filename):
+    def process_song(self, root, file_path):
+        """
+        :param root:
+        :param openlp.core.common.path.Path file_path: Path to the file thats being imported
+        :rtype: None
+        """
         self.set_defaults()
 
         # Extract ProPresenter versionNumber
@@ -64,9 +69,7 @@ class ProPresenterImport(SongImport):
         # Title
         self.title = root.get('CCLISongTitle')
         if not self.title or self.title == '':
-            self.title = os.path.basename(filename)
-            if self.title[-5:-1] == '.pro':
-                self.title = self.title[:-5]
+            self.title = file_path.stem
         # Notes
         self.comments = root.get('notes')
         # Author

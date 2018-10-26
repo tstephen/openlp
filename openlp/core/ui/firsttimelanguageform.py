@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -24,8 +24,8 @@ The language selection dialog.
 """
 from PyQt5 import QtCore, QtWidgets
 
+from openlp.core.common.i18n import LanguageManager
 from openlp.core.lib.ui import create_action
-from openlp.core.common import LanguageManager
 from .firsttimelanguagedialog import Ui_FirstTimeLanguageDialog
 
 

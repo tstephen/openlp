@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -21,11 +21,10 @@
 ###############################################################################
 import logging
 
-from openlp.core.api.http.endpoint import Endpoint
-from openlp.core.api.http.errors import NotFound
 from openlp.core.api.endpoint.pluginhelpers import search, live, service
 from openlp.core.api.http import requires_auth
-
+from openlp.core.api.http.endpoint import Endpoint
+from openlp.core.api.http.errors import NotFound
 
 log = logging.getLogger(__name__)
 
@@ -62,7 +61,7 @@ def bibles_service(request):
 
     :param request: The http request object.
     """
-    service(request, 'bibles', log)
+    return service(request, 'bibles', log)
 
 
 @api_bibles_endpoint.route('bibles/search')
@@ -95,6 +94,6 @@ def bibles_service_api(request):
     :param request: The http request object.
     """
     try:
-        search(request, 'bibles', log)
+        return search(request, 'bibles', log)
     except NotFound:
         return {'results': {'items': []}}

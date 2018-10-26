@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -25,15 +25,19 @@ import os
 
 from PyQt5 import QtCore, QtWidgets
 
-from openlp.core.common import Registry, RegistryProperties, AppLocation, Settings, check_directory_exists, UiStrings,\
-    translate
-from openlp.core.common.path import Path, path_to_str, str_to_path
-from openlp.core.lib import ItemCapabilities, MediaManagerItem, MediaType, ServiceItem, ServiceItemContext, \
-    build_icon, check_item_selected
+from openlp.core.common.applocation import AppLocation
+from openlp.core.common.i18n import UiStrings, translate, get_natural_key
+from openlp.core.common.mixins import RegistryProperties
+from openlp.core.common.path import Path, path_to_str, create_paths
+from openlp.core.common.registry import Registry
+from openlp.core.common.settings import Settings
+from openlp.core.lib import MediaType, ServiceItemContext, check_item_selected
+from openlp.core.lib.mediamanageritem import MediaManagerItem
+from openlp.core.lib.serviceitem import ItemCapabilities, ServiceItem
 from openlp.core.lib.ui import create_widget_action, critical_error_message_box, create_horizontal_adjusting_combo_box
 from openlp.core.ui import DisplayControllerType
+from openlp.core.ui.icons import UiIcons
 from openlp.core.ui.media import get_media_players, set_media_players, parse_optical_path, format_milliseconds
-from openlp.core.common.languagemanager import get_locale_key
 from openlp.core.ui.media.vlcplayer import get_vlc
 
 if get_vlc() is not None:
@@ -43,7 +47,7 @@ if get_vlc() is not None:
 log = logging.getLogger(__name__)
 
 
-CLAPPERBOARD = ':/media/slidecontroller_multimedia.png'
+CLAPPERBOARD = UiIcons().clapperboard
 
 
 class MediaMediaItem(MediaManagerItem, RegistryProperties):
@@ -65,10 +69,7 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
         self.icon_path = 'images/image'
         self.background = False
         self.automatic = ''
-        self.optical_icon = build_icon(':/media/media_optical.png')
-        self.video_icon = build_icon(':/media/media_video.png')
-        self.audio_icon = build_icon(':/media/media_audio.png')
-        self.error_icon = build_icon(':/general/general_delete.png')
+        self.error_icon = UiIcons().delete
 
     def setup_item(self):
         """
@@ -135,7 +136,7 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
             optical_button_text = translate('MediaPlugin.MediaItem', 'Load CD/DVD')
             optical_button_tooltip = translate('MediaPlugin.MediaItem',
                                                'CD/DVD playback is only supported if VLC is installed and enabled.')
-        self.load_optical = self.toolbar.add_toolbar_action('load_optical', icon=self.optical_icon,
+        self.load_optical = self.toolbar.add_toolbar_action('load_optical', icon=UiIcons().optical,
                                                             text=optical_button_text,
                                                             tooltip=optical_button_tooltip,
                                                             triggers=self.on_load_optical)
@@ -147,13 +148,13 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
         Adds buttons to the end of the header bar.
         """
         # Replace backgrounds do not work at present so remove functionality.
-        self.replace_action = self.toolbar.add_toolbar_action('replace_action', icon=':/slides/slide_theme.png',
+        self.replace_action = self.toolbar.add_toolbar_action('replace_action', icon=UiIcons().theme,
                                                               triggers=self.on_replace_click)
         if 'webkit' not in get_media_players()[0]:
             self.replace_action.setDisabled(True)
             if hasattr(self, 'replace_action_context'):
                 self.replace_action_context.setDisabled(True)
-        self.reset_action = self.toolbar.add_toolbar_action('reset_action', icon=':/system/system_close.png',
+        self.reset_action = self.toolbar.add_toolbar_action('reset_action', icon=UiIcons().close,
                                                             visible=False, triggers=self.on_reset_click)
         self.media_widget = QtWidgets.QWidget(self)
         self.media_widget.setObjectName('media_widget')
@@ -174,10 +175,10 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
     def add_custom_context_actions(self):
         create_widget_action(self.list_view, separator=True)
         self.replace_action_context = create_widget_action(
-            self.list_view, text=UiStrings().ReplaceBG, icon=':/slides/slide_blank.png',
+            self.list_view, text=UiStrings().ReplaceBG, icon=':/slides/slide_theme.png',
             triggers=self.on_replace_click)
         self.reset_action_context = create_widget_action(
-            self.list_view, text=UiStrings().ReplaceLiveBG, icon=':/system/system_close.png',
+            self.list_view, text=UiStrings().ReplaceLiveBG, icon=UiIcons().close,
             visible=False, triggers=self.on_reset_click)
 
     @staticmethod
@@ -203,7 +204,7 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
 
     def video_background_replaced(self):
         """
-        Triggered by main display on change of serviceitem.
+        Triggered by main display on change of service item.
         """
         self.reset_action.setVisible(False)
         self.reset_action_context.setVisible(False)
@@ -267,10 +268,9 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
             service_item.add_from_command(filename, name, CLAPPERBOARD)
             service_item.title = clip_name
             # Set the length
-            self.media_controller.media_setup_optical(name, title, audio_track, subtitle_track, start, end, None, None)
-            service_item.set_media_length((end - start) / 1000)
-            service_item.start_time = start / 1000
-            service_item.end_time = end / 1000
+            service_item.set_media_length(end - start)
+            service_item.start_time = start
+            service_item.end_time = end
             service_item.add_capability(ItemCapabilities.IsOptical)
         else:
             if not os.path.exists(filename):
@@ -301,8 +301,8 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
         Initialize media item.
         """
         self.list_view.clear()
-        self.service_path = os.path.join(str(AppLocation.get_section_data_path(self.settings_section)), 'thumbnails')
-        check_directory_exists(Path(self.service_path))
+        self.service_path = str(AppLocation.get_section_data_path(self.settings_section) / 'thumbnails')
+        create_paths(Path(self.service_path))
         self.load_list([path_to_str(file) for file in Settings().value(self.settings_section + '/media files')])
         self.rebuild_players()
 
@@ -360,7 +360,7 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
         :param media: The media
         :param target_group:
         """
-        media.sort(key=lambda file_name: get_locale_key(os.path.split(str(file_name))[1]))
+        media.sort(key=lambda file_name: get_natural_key(os.path.split(str(file_name))[1]))
         for track in media:
             track_info = QtCore.QFileInfo(track)
             item_name = None
@@ -368,7 +368,7 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
                 # Handle optical based item
                 (file_name, title, audio_track, subtitle_track, start, end, clip_name) = parse_optical_path(track)
                 item_name = QtWidgets.QListWidgetItem(clip_name)
-                item_name.setIcon(self.optical_icon)
+                item_name.setIcon(UiIcons().optical)
                 item_name.setData(QtCore.Qt.UserRole, track)
                 item_name.setToolTip('{name}@{start}-{end}'.format(name=file_name,
                                                                    start=format_milliseconds(start),
@@ -377,7 +377,7 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
                 # File doesn't exist, mark as error.
                 file_name = os.path.split(str(track))[1]
                 item_name = QtWidgets.QListWidgetItem(file_name)
-                item_name.setIcon(self.error_icon)
+                item_name.setIcon(UiIcons().error)
                 item_name.setData(QtCore.Qt.UserRole, track)
                 item_name.setToolTip(track)
             elif track_info.isFile():
@@ -386,9 +386,9 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
                 item_name = QtWidgets.QListWidgetItem(file_name)
                 search = file_name.split('.')[-1].lower()
                 if '*.{text}'.format(text=search) in self.media_controller.audio_extensions_list:
-                    item_name.setIcon(self.audio_icon)
+                    item_name.setIcon(UiIcons().audio)
                 else:
-                    item_name.setIcon(self.video_icon)
+                    item_name.setIcon(UiIcons().video)
                 item_name.setData(QtCore.Qt.UserRole, track)
                 item_name.setToolTip(track)
             if item_name:
@@ -402,7 +402,7 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
         :return: The media list
         """
         media_file_paths = Settings().value(self.settings_section + '/media files')
-        media_file_paths.sort(key=lambda file_path: get_locale_key(file_path.name))
+        media_file_paths.sort(key=lambda file_path: get_natural_key(file_path.name))
         if media_type == MediaType.Audio:
             extension = self.media_controller.audio_extensions_list
         else:
@@ -453,5 +453,5 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
             return
         # Append the optical string to the media list
         file_paths.append(optical)
-        self.load_list([optical])
+        self.load_list([str(optical)])
         Settings().setValue(self.settings_section + '/media files', file_paths)

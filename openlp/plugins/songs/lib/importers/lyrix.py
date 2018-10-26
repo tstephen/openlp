@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -26,7 +26,7 @@ exproted from Lyrix."""
 import logging
 import re
 
-from openlp.core.common import translate
+from openlp.core.common.i18n import translate
 from openlp.plugins.songs.lib.importers.songimport import SongImport
 
 log = logging.getLogger(__name__)
@@ -50,12 +50,11 @@ class LyrixImport(SongImport):
         if not isinstance(self.import_source, list):
             return
         self.import_wizard.progress_bar.setMaximum(len(self.import_source))
-        for filename in self.import_source:
+        for file_path in self.import_source:
             if self.stop_import_flag:
                 return
-            song_file = open(filename, 'rt', encoding='cp1251')
-            self.do_import_file(song_file)
-            song_file.close()
+            with file_path.open('rt', encoding='cp1251') as song_file:
+                self.do_import_file(song_file)
 
     def do_import_file(self, file):
         """
@@ -81,7 +80,7 @@ class LyrixImport(SongImport):
                     continue
                 # Detect and get CCLI number
                 if line.lower().startswith('ccli'):
-                    ccli = re.findall('\d+', line)[0]
+                    ccli = re.findall(r'\d+', line)[0]
                     try:
                         # If the CCLI was found, we are near the end
                         # Find author

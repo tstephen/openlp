@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -25,6 +25,7 @@ import re
 
 from lxml import etree, objectify
 
+from openlp.core.common import normalize_str
 from openlp.plugins.songs.lib import VerseType
 from openlp.plugins.songs.lib.importers.songimport import SongImport
 
@@ -36,7 +37,7 @@ class EasySlidesImport(SongImport):
     Import songs exported from EasySlides
 
     The format example is here:
-    http://wiki.openlp.org/Development:EasySlides\_-_Song_Data_Format
+    http://wiki.openlp.org/Development:EasySlides_-_Song_Data_Format
     """
     def __init__(self, manager, **kwargs):
         """
@@ -47,7 +48,7 @@ class EasySlidesImport(SongImport):
     def do_import(self):
         log.info('Importing EasySlides XML file {source}'.format(source=self.import_source))
         parser = etree.XMLParser(remove_blank_text=True, recover=True)
-        parsed_file = etree.parse(self.import_source, parser)
+        parsed_file = etree.parse(str(self.import_source), parser)
         xml = etree.tostring(parsed_file).decode()
         song_xml = objectify.fromstring(xml)
         self.import_wizard.progress_bar.setMaximum(len(song_xml.Item))
@@ -209,7 +210,7 @@ class EasySlidesImport(SongImport):
                 vn = '1'
                 # have we got any digits?
                 # If so, versenumber is everything from the digits to the end
-                match = re.match('(.*)(\d+.*)', marker)
+                match = re.match(r'(.*)(\d+.*)', marker)
                 if match:
                     marker = match.group(1).strip()
                     vn = match.group(2)
@@ -225,7 +226,7 @@ class EasySlidesImport(SongImport):
                 verses[reg].setdefault(vt, {})
                 verses[reg][vt].setdefault(vn, {})
                 verses[reg][vt][vn].setdefault(inst, [])
-                verses[reg][vt][vn][inst].append(self.tidy_text(line))
+                verses[reg][vt][vn][inst].append(normalize_str(line))
         # done parsing
         versetags = []
         # we use our_verse_order to ensure, we insert lyrics in the same order

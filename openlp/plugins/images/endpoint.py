@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -21,11 +21,10 @@
 ###############################################################################
 import logging
 
-from openlp.core.api.http.endpoint import Endpoint
-from openlp.core.api.http.errors import NotFound
 from openlp.core.api.endpoint.pluginhelpers import search, live, service, display_thumbnails
 from openlp.core.api.http import requires_auth
-
+from openlp.core.api.http.endpoint import Endpoint
+from openlp.core.api.http.errors import NotFound
 
 log = logging.getLogger(__name__)
 
@@ -75,7 +74,7 @@ def images_service(request):
 
     :param request: The http request object.
     """
-    service(request, 'images', log)
+    return service(request, 'images', log)
 
 
 @api_images_endpoint.route('images/search')
@@ -108,6 +107,6 @@ def images_service_api(request):
     :param request: The http request object.
     """
     try:
-        search(request, 'images', log)
+        return search(request, 'images', log)
     except NotFound:
         return {'results': {'items': []}}

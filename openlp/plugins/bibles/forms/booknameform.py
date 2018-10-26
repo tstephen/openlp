@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -26,10 +26,10 @@ Module implementing BookNameForm.
 import logging
 import re
 
-from PyQt5.QtWidgets import QDialog
 from PyQt5 import QtCore
+from PyQt5.QtWidgets import QDialog
 
-from openlp.core.common import translate
+from openlp.core.common.i18n import translate
 from openlp.core.lib.ui import critical_error_message_box
 from openlp.plugins.bibles.forms.booknamedialog import Ui_BookNameDialog
 from openlp.plugins.bibles.lib import BibleStrings
@@ -113,8 +113,7 @@ class BookNameForm(QDialog, Ui_BookNameDialog):
             cor_book = self.corresponding_combo_box.currentText()
             for character in '\\.^$*+?{}[]()':
                 cor_book = cor_book.replace(character, '\\' + character)
-            books = [key for key in list(self.book_names.keys()) if re.match(cor_book, str(self.book_names[key]),
-                                                                             re.UNICODE)]
+            books = [key for key in list(self.book_names.keys()) if re.match(cor_book, str(self.book_names[key]))]
             books = [_f for _f in map(BiblesResourcesDB.get_book, books) if _f]
             if books:
                 self.book_id = books[0]['id']

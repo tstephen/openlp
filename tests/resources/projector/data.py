@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -22,9 +22,6 @@
 """
 The :mod:`tests.resources.projector.data file contains test data
 """
-
-import os
-from tempfile import gettempdir
 
 # Test data
 TEST_DB_PJLINK1 = 'projector_pjlink1.sqlite'
@@ -48,7 +45,8 @@ TEST1_DATA = dict(ip='111.111.111.111',
                   serial_no='Serial Number 1',
                   sw_version='Version 1',
                   model_filter='Filter type 1',
-                  model_lamp='Lamp type 1')
+                  model_lamp='Lamp type 1',
+                  mac_adx='11:11:11:11:11:11')
 
 TEST2_DATA = dict(ip='222.222.222.222',
                   port='2222',
@@ -59,7 +57,8 @@ TEST2_DATA = dict(ip='222.222.222.222',
                   serial_no='Serial Number 2',
                   sw_version='Version 2',
                   model_filter='Filter type 2',
-                  model_lamp='Lamp type 2')
+                  model_lamp='Lamp type 2',
+                  mac_adx='22:22:22:22:22:22')
 
 TEST3_DATA = dict(ip='333.333.333.333',
                   port='3333',
@@ -70,7 +69,8 @@ TEST3_DATA = dict(ip='333.333.333.333',
                   serial_no='Serial Number 3',
                   sw_version='Version 3',
                   model_filter='Filter type 3',
-                  model_lamp='Lamp type 3')
+                  model_lamp='Lamp type 3',
+                  mac_adx='33:33:33:33:33:33')
 
 TEST_VIDEO_CODES = {
     '11': 'RGB 1',

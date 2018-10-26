@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -27,10 +27,11 @@ a MediaShout database into the OpenLP database.
 # WARNING: See https://docs.python.org/3/library/sqlite3.html for value substitution
 #          in SQL statements
 
-import pyodbc
 import logging
 
-from openlp.core.lib import translate
+import pyodbc
+
+from openlp.core.common.i18n import translate
 from openlp.plugins.songs.lib.importers.songimport import SongImport
 
 VERSE_TAGS = ['V', 'C', 'B', 'O', 'P', 'I', 'E']
@@ -101,7 +102,7 @@ class MediaShoutImport(SongImport):
             self.song_book_name = song.SongID
         for verse in verses:
             tag = VERSE_TAGS[verse.Type] + str(verse.Number) if verse.Type < len(VERSE_TAGS) else 'O'
-            self.add_verse(self.tidy_text(verse.Text), tag)
+            self.add_verse(verse.Text, tag)
         for order in verse_order:
             if order.Type < len(VERSE_TAGS):
                 self.verse_order_list.append(VERSE_TAGS[order.Type] + str(order.Number))

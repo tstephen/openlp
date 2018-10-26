@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -24,9 +24,9 @@ The UI widgets for the time dialog
 """
 from PyQt5 import QtCore, QtWidgets
 
-from openlp.core.common import UiStrings, translate
-from openlp.core.lib import build_icon
+from openlp.core.common.i18n import UiStrings, translate
 from openlp.core.lib.ui import create_button_box
+from openlp.core.ui.icons import UiIcons
 
 
 class Ui_StartTimeDialog(object):
@@ -38,7 +38,7 @@ class Ui_StartTimeDialog(object):
         Set up the UI
         """
         StartTimeDialog.setObjectName('StartTimeDialog')
-        StartTimeDialog.setWindowIcon(build_icon(':/icon/openlp-logo.svg'))
+        StartTimeDialog.setWindowIcon(UiIcons().main_icon)
         StartTimeDialog.resize(350, 10)
         self.dialog_layout = QtWidgets.QGridLayout(StartTimeDialog)
         self.dialog_layout.setObjectName('dialog_layout')

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -24,11 +24,14 @@ Provide plugin management
 """
 import os
 
-from openlp.core.lib import Plugin, PluginStatus
-from openlp.core.common import AppLocation, RegistryProperties, OpenLPMixin, RegistryMixin, extension_loader
+from openlp.core.common import extension_loader
+from openlp.core.common.applocation import AppLocation
+from openlp.core.common.mixins import LogMixin, RegistryProperties
+from openlp.core.common.registry import RegistryBase
+from openlp.core.lib.plugin import Plugin, PluginStatus
 
 
-class PluginManager(RegistryMixin, OpenLPMixin, RegistryProperties):
+class PluginManager(RegistryBase, LogMixin, RegistryProperties):
     """
     This is the Plugin manager, which loads all the plugins,
     and executes all the hooks, as and when necessary.
@@ -40,8 +43,7 @@ class PluginManager(RegistryMixin, OpenLPMixin, RegistryProperties):
         """
         super(PluginManager, self).__init__(parent)
         self.log_info('Plugin manager Initialising')
-        self.base_path = os.path.abspath(str(AppLocation.get_directory(AppLocation.PluginsDir)))
-        self.log_debug('Base path {path}'.format(path=self.base_path))
+        self.log_debug('Base path {path}'.format(path=AppLocation.get_directory(AppLocation.PluginsDir)))
         self.plugins = []
         self.log_info('Plugin manager Initialised')
 
@@ -69,7 +71,7 @@ class PluginManager(RegistryMixin, OpenLPMixin, RegistryProperties):
         """
         Scan a directory for objects inheriting from the ``Plugin`` class.
         """
-        glob_pattern = os.path.join('plugins', '*', '*plugin.py')
+        glob_pattern = os.path.join('plugins', '*', '[!.]*plugin.py')
         extension_loader(glob_pattern)
         plugin_classes = Plugin.__subclasses__()
         plugin_objects = []

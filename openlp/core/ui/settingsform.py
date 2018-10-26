@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -26,13 +26,16 @@ import logging
 
 from PyQt5 import QtCore, QtWidgets
 
-from openlp.core.api import ApiTab
-from openlp.core.common import Registry, RegistryProperties
+from openlp.core.api.tab import ApiTab
+from openlp.core.common.mixins import RegistryProperties
+from openlp.core.common.registry import Registry
 from openlp.core.lib import build_icon
-from openlp.core.ui import AdvancedTab, GeneralTab, ThemesTab
+from openlp.core.projectors.tab import ProjectorTab
+from openlp.core.ui.advancedtab import AdvancedTab
+from openlp.core.ui.generaltab import GeneralTab
+from openlp.core.ui.themestab import ThemesTab
 from openlp.core.ui.media import PlayerTab
-from .settingsdialog import Ui_SettingsDialog
-from openlp.core.ui.projector.tab import ProjectorTab
+from openlp.core.ui.settingsdialog import Ui_SettingsDialog
 
 log = logging.getLogger(__name__)
 

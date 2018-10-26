@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -26,10 +26,12 @@ import logging
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from openlp.core.common import Registry, UiStrings, translate, is_macosx
+from openlp.core.common import is_macosx
 from openlp.core.common.actions import ActionList
+from openlp.core.common.i18n import UiStrings, translate
+from openlp.core.common.registry import Registry
 from openlp.core.lib import build_icon
-
+from openlp.core.ui.icons import UiIcons
 
 log = logging.getLogger(__name__)
 
@@ -160,10 +162,10 @@ def create_button(parent, name, **kwargs):
             kwargs.setdefault('text', UiStrings().Delete)
             kwargs.setdefault('tooltip', translate('OpenLP.Ui', 'Delete the selected item.'))
         elif role == 'up':
-            kwargs.setdefault('icon', ':/services/service_up.png')
+            kwargs.setdefault('icon', UiIcons().arrow_up)
             kwargs.setdefault('tooltip', translate('OpenLP.Ui', 'Move selection up one position.'))
         elif role == 'down':
-            kwargs.setdefault('icon', ':/services/service_down.png')
+            kwargs.setdefault('icon', UiIcons().arrow_down)
             kwargs.setdefault('tooltip', translate('OpenLP.Ui', 'Move selection down one position.'))
         else:
             log.warning('The role "{role}" is not defined in create_push_button().'.format(role=role))

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -29,10 +29,11 @@ a OPS Pro database into the OpenLP database.
 
 import logging
 import re
-import pyodbc
 import struct
 
-from openlp.core.common import translate
+import pyodbc
+
+from openlp.core.common.i18n import translate
 from openlp.plugins.songs.lib.importers.songimport import SongImport
 
 log = logging.getLogger(__name__)
@@ -121,7 +122,7 @@ class OPSProImport(SongImport):
         # Try to split lyrics based on various rules
         if lyrics:
             lyrics_text = lyrics.Lyrics
-            verses = re.split('\r\n\s*?\r\n', lyrics_text)
+            verses = re.split(r'\r\n\s*?\r\n', lyrics_text)
             verse_tag_defs = {}
             verse_tag_texts = {}
             for verse_text in verses:
@@ -129,13 +130,13 @@ class OPSProImport(SongImport):
                     continue
                 verse_def = 'v'
                 # Detect verse number
-                verse_number = re.match('^(\d+)\r\n', verse_text)
+                verse_number = re.match(r'^(\d+)\r\n', verse_text)
                 if verse_number:
-                    verse_text = re.sub('^\d+\r\n', '', verse_text)
+                    verse_text = re.sub(r'^\d+\r\n', '', verse_text)
                     verse_def = 'v' + verse_number.group(1)
                 # Detect verse tags
-                elif re.match('^.+?\:\r\n', verse_text):
-                    tag_match = re.match('^(.+?)\:\r\n(.*)', verse_text, flags=re.DOTALL)
+                elif re.match(r'^.+?\:\r\n', verse_text):
+                    tag_match = re.match(r'^(.+?)\:\r\n(.*)', verse_text, flags=re.DOTALL)
                     tag = tag_match.group(1).lower()
                     tag = tag.split(' ')[0]
                     verse_text = tag_match.group(2)
@@ -146,25 +147,25 @@ class OPSProImport(SongImport):
                     verse_tag_defs[tag] = verse_def
                     verse_tag_texts[tag] = verse_text
                 # Detect tag reference
-                elif re.match('^\(.*?\)$', verse_text):
-                    tag_match = re.match('^\((.*?)\)$', verse_text)
+                elif re.match(r'^\(.*?\)$', verse_text):
+                    tag_match = re.match(r'^\((.*?)\)$', verse_text)
                     tag = tag_match.group(1).lower()
                     if tag in verse_tag_defs:
                         verse_text = verse_tag_texts[tag]
                         verse_def = verse_tag_defs[tag]
                 # Detect end tag
-                elif re.match('^\[slot\]\r\n', verse_text, re.IGNORECASE):
+                elif re.match(r'^\[slot\]\r\n', verse_text, re.IGNORECASE):
                     verse_def = 'e'
-                    verse_text = re.sub('^\[slot\]\r\n', '', verse_text, flags=re.IGNORECASE)
+                    verse_text = re.sub(r'^\[slot\]\r\n', '', verse_text, flags=re.IGNORECASE)
                 # Replace the join tag with line breaks
                 verse_text = verse_text.replace('[join]', '')
                 # Replace the split tag with line breaks and an optional split
-                verse_text = re.sub('\[splits?\]', '\r\n[---]', verse_text)
+                verse_text = re.sub(r'\[splits?\]', '\r\n[---]', verse_text)
                 # Handle translations
                 if lyrics.IsDualLanguage:
                     verse_text = self.handle_translation(verse_text)
                 # Remove comments
-                verse_text = re.sub('\(.*?\)\r\n', '', verse_text, flags=re.IGNORECASE)
+                verse_text = re.sub(r'\(.*?\)\r\n', '', verse_text, flags=re.IGNORECASE)
                 self.add_verse(verse_text, verse_def)
         self.finish()
 
@@ -231,16 +232,15 @@ class OPSProImport(SongImport):
         xor_pattern_2k = (0xa1, 0xec, 0x7a, 0x9c, 0xe1, 0x28, 0x34, 0x8a, 0x73, 0x7b, 0xd2, 0xdf, 0x50)
         # Access97 XOR of the source
         xor_pattern_97 = (0x86, 0xfb, 0xec, 0x37, 0x5d, 0x44, 0x9c, 0xfa, 0xc6, 0x5e, 0x28, 0xe6, 0x13)
-        mdb = open(self.import_source, 'rb')
-        mdb.seek(0x14)
-        version = struct.unpack('B', mdb.read(1))[0]
-        # Get encrypted logo
-        mdb.seek(0x62)
-        EncrypFlag = struct.unpack('B', mdb.read(1))[0]
-        # Get encrypted password
-        mdb.seek(0x42)
-        encrypted_password = mdb.read(26)
-        mdb.close()
+        with self.import_source.open('rb') as mdb_file:
+            mdb_file.seek(0x14)
+            version = struct.unpack('B', mdb_file.read(1))[0]
+            # Get encrypted logo
+            mdb_file.seek(0x62)
+            EncrypFlag = struct.unpack('B', mdb_file.read(1))[0]
+            # Get encrypted password
+            mdb_file.seek(0x42)
+            encrypted_password = mdb_file.read(26)
         # "Decrypt" the password based on the version
         decrypted_password = ''
         if version < 0x01:

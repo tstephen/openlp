@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -25,9 +25,9 @@ This module contains tests for the lib submodule of the Presentations plugin.
 from unittest import TestCase
 from unittest.mock import patch, MagicMock, call
 
-from openlp.core.common import Registry
+from openlp.core.common.path import Path
+from openlp.core.common.registry import Registry
 from openlp.plugins.presentations.lib.mediaitem import PresentationMediaItem
-
 from tests.helpers.testmixin import TestMixin
 
 
@@ -80,11 +80,11 @@ class TestMediaItem(TestCase, TestMixin):
             self.media_item.build_file_mask_string()
 
         # THEN: The file mask should be generated correctly
-        self.assertIn('*.odp', self.media_item.on_new_file_masks, 'The file mask should contain the odp extension')
-        self.assertIn('*.ppt', self.media_item.on_new_file_masks, 'The file mask should contain the ppt extension')
-        self.assertIn('*.pdf', self.media_item.on_new_file_masks, 'The file mask should contain the pdf extension')
-        self.assertIn('*.xps', self.media_item.on_new_file_masks, 'The file mask should contain the xps extension')
-        self.assertIn('*.oxps', self.media_item.on_new_file_masks, 'The file mask should contain the oxps extension')
+        assert '*.odp' in self.media_item.on_new_file_masks, 'The file mask should contain the odp extension'
+        assert '*.ppt' in self.media_item.on_new_file_masks, 'The file mask should contain the ppt extension'
+        assert '*.pdf' in self.media_item.on_new_file_masks, 'The file mask should contain the pdf extension'
+        assert '*.xps' in self.media_item.on_new_file_masks, 'The file mask should contain the xps extension'
+        assert '*.oxps' in self.media_item.on_new_file_masks, 'The file mask should contain the oxps extension'
 
     def test_clean_up_thumbnails(self):
         """
@@ -92,17 +92,18 @@ class TestMediaItem(TestCase, TestMixin):
         """
         # GIVEN: A mocked controller, and mocked os.path.getmtime
         mocked_controller = MagicMock()
-        mocked_doc = MagicMock()
+        mocked_doc = MagicMock(**{'get_thumbnail_path.return_value': Path()})
         mocked_controller.add_document.return_value = mocked_doc
         mocked_controller.supports = ['tmp']
         self.media_item.controllers = {
             'Mocked': mocked_controller
         }
-        presentation_file = 'file.tmp'
-        with patch('openlp.plugins.presentations.lib.mediaitem.os.path.getmtime') as mocked_getmtime, \
-                patch('openlp.plugins.presentations.lib.mediaitem.os.path.exists') as mocked_exists:
-            mocked_getmtime.side_effect = [100, 200]
-            mocked_exists.return_value = True
+
+        thmub_path = MagicMock(st_mtime=100)
+        file_path = MagicMock(st_mtime=400)
+        with patch.object(Path, 'stat', side_effect=[thmub_path, file_path]), \
+                patch.object(Path, 'exists', return_value=True):
+            presentation_file = Path('file.tmp')
 
             # WHEN: calling clean_up_thumbnails
             self.media_item.clean_up_thumbnails(presentation_file, True)
@@ -123,12 +124,35 @@ class TestMediaItem(TestCase, TestMixin):
         self.media_item.controllers = {
             'Mocked': mocked_controller
         }
-        presentation_file = 'file.tmp'
-        with patch('openlp.plugins.presentations.lib.mediaitem.os.path.exists') as mocked_exists:
-            mocked_exists.return_value = False
+        presentation_file = Path('file.tmp')
+        with patch.object(Path, 'exists', return_value=False):
 
             # WHEN: calling clean_up_thumbnails
             self.media_item.clean_up_thumbnails(presentation_file, True)
 
         # THEN: doc.presentation_deleted should have been called since the presentation file did not exists.
         mocked_doc.assert_has_calls([call.get_thumbnail_path(1, True), call.presentation_deleted()], True)
+
+    @patch('openlp.plugins.presentations.lib.mediaitem.MediaManagerItem._setup')
+    @patch('openlp.plugins.presentations.lib.mediaitem.PresentationMediaItem.setup_item')
+    @patch('openlp.plugins.presentations.lib.mediaitem.Settings')
+    def test_search(self, mocked_settings, *unreferenced_mocks):
+        """
+        Test that the search method finds the correct results
+        """
+        # GIVEN: A mocked Settings class which returns a list of Path objects,
+        #        and an instance of the PresentationMediaItem
+        path_1 = Path('some_dir', 'Impress_file_1')
+        path_2 = Path('some_other_dir', 'impress_file_2')
+        path_3 = Path('another_dir', 'ppt_file')
+        mocked_returned_settings = MagicMock()
+        mocked_returned_settings.value.return_value = [path_1, path_2, path_3]
+        mocked_settings.return_value = mocked_returned_settings
+        media_item = PresentationMediaItem(None, MagicMock(), None)
+        media_item.settings_section = ''
+
+        # WHEN: Calling search
+        results = media_item.search('IMPRE', False)
+
+        # THEN: The first two results should have been returned
+        assert results == [[str(path_1), 'Impress_file_1'], [str(path_2), 'impress_file_2']]

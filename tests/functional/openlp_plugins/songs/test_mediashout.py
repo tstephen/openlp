@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -26,7 +26,8 @@ from collections import namedtuple
 from unittest import TestCase, skipUnless
 from unittest.mock import MagicMock, patch, call
 
-from openlp.core.common import Registry
+from openlp.core.common.registry import Registry
+
 try:
     from openlp.plugins.songs.lib.importers.mediashout import MediaShoutImport
     CAN_RUN_TESTS = True
@@ -51,10 +52,10 @@ class TestMediaShoutImport(TestCase):
         """
         # GIVEN: A MediaShoutImport class
         # WHEN: It is created
-        importer = MediaShoutImport(MagicMock(), filename='mediashout.db')
+        importer = MediaShoutImport(MagicMock(), file_path='mediashout.db')
 
         # THEN: It should not be None
-        self.assertIsNotNone(importer)
+        assert importer is not None
 
     @patch('openlp.plugins.songs.lib.importers.mediashout.pyodbc')
     def test_do_import_fails_to_connect(self, mocked_pyodbc):
@@ -62,7 +63,7 @@ class TestMediaShoutImport(TestCase):
         Test that do_import exits early when unable to connect to the database
         """
         # GIVEN: A MediaShoutImport instance
-        importer = MediaShoutImport(MagicMock(), filename='mediashout.db')
+        importer = MediaShoutImport(MagicMock(), file_path='mediashout.db')
         mocked_pyodbc.connect.side_effect = Exception('Unable to connect')
 
         # WHEN: do_import is called
@@ -89,7 +90,7 @@ class TestMediaShoutImport(TestCase):
         group = GroupRecord('Hymns')
 
         # GIVEN: A MediaShoutImport instance and a bunch of stuff mocked out
-        importer = MediaShoutImport(MagicMock(), filename='mediashout.db')
+        importer = MediaShoutImport(MagicMock(), file_path='mediashout.db')
         mocked_cursor = MagicMock()
         mocked_cursor.fetchall.side_effect = [[song], [verse], [play_order], [theme], [group]]
         mocked_cursor.tables.fetchone.return_value = True
@@ -112,7 +113,7 @@ class TestMediaShoutImport(TestCase):
             call('SELECT Name FROM Groups INNER JOIN SongGroups ON SongGroups.GroupId = Groups.GroupId '
                  'WHERE SongGroups.Record = ?', 1.0)
         ]
-        self.assertEqual(expected_execute_calls, mocked_cursor.execute.call_args_list)
+        assert expected_execute_calls == mocked_cursor.execute.call_args_list
         mocked_process_song.assert_called_once_with(song, [verse], [play_order], [theme, group])
 
     @patch('openlp.plugins.songs.lib.importers.mediashout.pyodbc')
@@ -124,7 +125,7 @@ class TestMediaShoutImport(TestCase):
         song = SongRecord(1, 'Amazing Grace', 'William Wilberforce', 'Public Domain', 1, '654321', '')
 
         # GIVEN: A MediaShoutImport instance and a bunch of stuff mocked out
-        importer = MediaShoutImport(MagicMock(), filename='mediashout.db')
+        importer = MediaShoutImport(MagicMock(), file_path='mediashout.db')
         mocked_cursor = MagicMock()
         mocked_cursor.fetchall.return_value = [song]
         mocked_connection = MagicMock()
@@ -158,7 +159,7 @@ class TestMediaShoutImport(TestCase):
         play_order = PlayOrderRecord(0, 1, 1)
         theme = ThemeRecord('Grace')
         group = GroupRecord('Hymns')
-        importer = MediaShoutImport(MagicMock(), filename='mediashout.db')
+        importer = MediaShoutImport(MagicMock(), file_path='mediashout.db')
 
         # WHEN: A song is processed
         with patch.object(importer, 'set_defaults') as mocked_set_defaults, \
@@ -172,16 +173,16 @@ class TestMediaShoutImport(TestCase):
 
         # THEN: It should be added to the database
         mocked_set_defaults.assert_called_once_with()
-        self.assertEqual('Amazing Grace', importer.title)
+        assert 'Amazing Grace' == importer.title
         mocked_parse_author.assert_called_once_with('William Wilberforce')
         mocked_add_copyright.assert_called_once_with('Public Domain')
-        self.assertEqual('Great old hymn', importer.comments)
-        self.assertEqual(['Grace', 'Hymns'], importer.topics)
-        self.assertEqual('Hymns', importer.song_book_name)
-        self.assertEqual('', importer.song_number)
+        assert 'Great old hymn' == importer.comments
+        assert ['Grace', 'Hymns'] == importer.topics
+        assert 'Hymns' == importer.song_book_name
+        assert '' == importer.song_number
         mocked_add_verse.assert_called_once_with(
             'Amazing grace, how sweet the sound\nThat saved a wretch like me', 'V1')
-        self.assertEqual(['V1'], importer.verse_order_list)
+        assert ['V1'] == importer.verse_order_list
         mocked_finish.assert_called_once_with()
 
     def test_process_song_with_song_number(self):
@@ -200,7 +201,7 @@ class TestMediaShoutImport(TestCase):
         play_order = PlayOrderRecord(0, 1, 1)
         theme = ThemeRecord('Grace')
         group = GroupRecord('Hymns')
-        importer = MediaShoutImport(MagicMock(), filename='mediashout.db')
+        importer = MediaShoutImport(MagicMock(), file_path='mediashout.db')
 
         # WHEN: A song is processed
         with patch.object(importer, 'set_defaults') as mocked_set_defaults, \
@@ -214,14 +215,14 @@ class TestMediaShoutImport(TestCase):
 
         # THEN: It should be added to the database
         mocked_set_defaults.assert_called_once_with()
-        self.assertEqual('Amazing Grace', importer.title)
+        assert 'Amazing Grace' == importer.title
         mocked_parse_author.assert_called_once_with('William Wilberforce')
         mocked_add_copyright.assert_called_once_with('Public Domain')
-        self.assertEqual('Great old hymn', importer.comments)
-        self.assertEqual(['Grace', 'Hymns'], importer.topics)
-        self.assertEqual('Hymns', importer.song_book_name)
-        self.assertEqual('2', importer.song_number)
+        assert 'Great old hymn' == importer.comments
+        assert ['Grace', 'Hymns'] == importer.topics
+        assert 'Hymns' == importer.song_book_name
+        assert '2' == importer.song_number
         mocked_add_verse.assert_called_once_with(
             'Amazing grace, how sweet the sound\nThat saved a wretch like me', 'V1')
-        self.assertEqual(['V1'], importer.verse_order_list)
+        assert ['V1'], importer.verse_order_list
         mocked_finish.assert_called_once_with()

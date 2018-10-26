@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -24,13 +24,12 @@ The :mod:`formattingtagform` provides an Tag Edit facility. The Base set are pro
 Custom tags can be defined and saved. The Custom Tag arrays are saved in a json string so QSettings works on them.
 Base Tags cannot be changed.
 """
-
 from PyQt5 import QtCore, QtWidgets
 
-from openlp.core.common import translate
-from openlp.core.lib import FormattingTags
-from openlp.core.ui.formattingtagdialog import Ui_FormattingTagDialog
+from openlp.core.common.i18n import translate
+from openlp.core.lib.formattingtags import FormattingTags
 from openlp.core.ui.formattingtagcontroller import FormattingTagController
+from openlp.core.ui.formattingtagdialog import Ui_FormattingTagDialog
 
 
 class EditColumn(object):

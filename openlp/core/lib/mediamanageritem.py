@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,19 +23,24 @@
 Provides the generic functions for interfacing plugins with the Media Manager.
 """
 import logging
-import os
 import re
 
 from PyQt5 import QtCore, QtWidgets
 
-from openlp.core.common import Registry, RegistryProperties, Settings, UiStrings, translate
-from openlp.core.common.path import Path, path_to_str, str_to_path
-from openlp.core.lib import ServiceItem, StringContent, ServiceItemContext
-from openlp.core.lib.searchedit import SearchEdit
+from openlp.core.common.i18n import UiStrings, translate
+from openlp.core.ui.icons import UiIcons
+from openlp.core.common.mixins import RegistryProperties
+from openlp.core.common.path import path_to_str, str_to_path
+from openlp.core.common.registry import Registry
+from openlp.core.common.settings import Settings
+from openlp.core.lib import ServiceItemContext
+from openlp.core.lib.plugin import StringContent
+from openlp.core.lib.serviceitem import ServiceItem
 from openlp.core.lib.ui import create_widget_action, critical_error_message_box
-from openlp.core.ui.lib.filedialog import FileDialog
-from openlp.core.ui.lib.listwidgetwithdnd import ListWidgetWithDnD
-from openlp.core.ui.lib.toolbar import OpenLPToolbar
+from openlp.core.widgets.dialogs import FileDialog
+from openlp.core.widgets.edits import SearchEdit
+from openlp.core.widgets.toolbar import OpenLPToolbar
+from openlp.core.widgets.views import ListWidgetWithDnD
 
 log = logging.getLogger(__name__)
 
@@ -89,7 +94,7 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
         Run some initial setup. This method is separate from __init__ in order to mock it out in tests.
         """
         self.hide()
-        self.whitespace = re.compile(r'[\W_]+', re.UNICODE)
+        self.whitespace = re.compile(r'[\W_]+')
         visible_title = self.plugin.get_string(StringContent.VisibleName)
         self.title = str(visible_title['title'])
         Registry().register(self.plugin.name, self)
@@ -163,28 +168,25 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
         toolbar_actions = []
         # Import Button
         if self.has_import_icon:
-            toolbar_actions.append(['Import', StringContent.Import,
-                                    ':/general/general_import.png', self.on_import_click])
+            toolbar_actions.append(['Import', StringContent.Import, UiIcons().download, self.on_import_click])
         # Load Button
         if self.has_file_icon:
-            toolbar_actions.append(['Load', StringContent.Load, ':/general/general_open.png', self.on_file_click])
+            toolbar_actions.append(['Load', StringContent.Load, UiIcons().open, self.on_file_click])
         # New Button
         if self.has_new_icon:
-            toolbar_actions.append(['New', StringContent.New, ':/general/general_new.png', self.on_new_click])
+            toolbar_actions.append(['New', StringContent.New, UiIcons().new, self.on_new_click])
         # Edit Button
         if self.has_edit_icon:
-            toolbar_actions.append(['Edit', StringContent.Edit, ':/general/general_edit.png', self.on_edit_click])
+            toolbar_actions.append(['Edit', StringContent.Edit, UiIcons().edit, self.on_edit_click])
         # Delete Button
         if self.has_delete_icon:
-            toolbar_actions.append(['Delete', StringContent.Delete,
-                                    ':/general/general_delete.png', self.on_delete_click])
+            toolbar_actions.append(['Delete', StringContent.Delete, UiIcons().delete, self.on_delete_click])
         # Preview
-        toolbar_actions.append(['Preview', StringContent.Preview,
-                                ':/general/general_preview.png', self.on_preview_click])
+        toolbar_actions.append(['Preview', StringContent.Preview, UiIcons().preview, self.on_preview_click])
         # Live Button
-        toolbar_actions.append(['Live', StringContent.Live, ':/general/general_live.png', self.on_live_click])
+        toolbar_actions.append(['Live', StringContent.Live, UiIcons().live, self.on_live_click])
         # Add to service Button
-        toolbar_actions.append(['Service', StringContent.Service, ':/general/general_add.png', self.on_add_click])
+        toolbar_actions.append(['Service', StringContent.Service, UiIcons().add, self.on_add_click])
         for action in toolbar_actions:
             if action[0] == StringContent.Preview:
                 self.toolbar.addSeparator()
@@ -205,21 +207,21 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
         if self.has_edit_icon:
             create_widget_action(self.list_view,
                                  text=self.plugin.get_string(StringContent.Edit)['title'],
-                                 icon=':/general/general_edit.png',
+                                 icon=UiIcons().edit,
                                  triggers=self.on_edit_click)
             create_widget_action(self.list_view, separator=True)
         create_widget_action(self.list_view,
                              'listView{plugin}{preview}Item'.format(plugin=self.plugin.name.title(),
                                                                     preview=StringContent.Preview.title()),
                              text=self.plugin.get_string(StringContent.Preview)['title'],
-                             icon=':/general/general_preview.png',
+                             icon=UiIcons().preview,
                              can_shortcuts=True,
                              triggers=self.on_preview_click)
         create_widget_action(self.list_view,
                              'listView{plugin}{live}Item'.format(plugin=self.plugin.name.title(),
                                                                  live=StringContent.Live.title()),
                              text=self.plugin.get_string(StringContent.Live)['title'],
-                             icon=':/general/general_live.png',
+                             icon=UiIcons().live,
                              can_shortcuts=True,
                              triggers=self.on_live_click)
         create_widget_action(self.list_view,
@@ -227,7 +229,7 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
                                                                     service=StringContent.Service.title()),
                              can_shortcuts=True,
                              text=self.plugin.get_string(StringContent.Service)['title'],
-                             icon=':/general/general_add.png',
+                             icon=UiIcons().add,
                              triggers=self.on_add_click)
         if self.has_delete_icon:
             create_widget_action(self.list_view, separator=True)
@@ -235,13 +237,13 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
                                  'listView{plugin}{delete}Item'.format(plugin=self.plugin.name.title(),
                                                                        delete=StringContent.Delete.title()),
                                  text=self.plugin.get_string(StringContent.Delete)['title'],
-                                 icon=':/general/general_delete.png',
+                                 icon=UiIcons().delete,
                                  can_shortcuts=True, triggers=self.on_delete_click)
         if self.add_to_service_item:
             create_widget_action(self.list_view, separator=True)
             create_widget_action(self.list_view,
                                  text=translate('OpenLP.MediaManagerItem', '&Add to selected Service Item'),
-                                 icon=':/general/general_add.png',
+                                 icon=UiIcons().add,
                                  triggers=self.on_add_edit_click)
         self.add_custom_context_actions()
         # Create the context menu and add all actions from the list_view.
@@ -315,10 +317,10 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
             self, self.on_new_prompt,
             Settings().value(self.settings_section + '/last directory'),
             self.on_new_file_masks)
-        log.info('New files(s) {file_paths}'.format(file_paths=file_paths))
+        log.info('New file(s) {file_paths}'.format(file_paths=file_paths))
         if file_paths:
             self.application.set_busy_cursor()
-            self.validate_and_load([path_to_str(path) for path in file_paths])
+            self.validate_and_load(file_paths)
         self.application.set_normal_cursor()
 
     def load_file(self, data):
@@ -327,21 +329,23 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
 
         :param data: A dictionary containing the list of files to be loaded and the target
         """
-        new_files = []
+        new_file_paths = []
         error_shown = False
-        for file_name in data['files']:
-            file_type = file_name.split('.')[-1]
-            if file_type.lower() not in self.on_new_file_masks:
+        for file_path in data['file_paths']:
+            if file_path.suffix[1:].lower() not in self.on_new_file_masks:
                 if not error_shown:
-                    critical_error_message_box(translate('OpenLP.MediaManagerItem', 'Invalid File Type'),
-                                               translate('OpenLP.MediaManagerItem',
-                                                         'Invalid File {name}.\n'
-                                                         'Suffix not supported').format(name=file_name))
+                    critical_error_message_box(
+                        translate('OpenLP.MediaManagerItem', 'Invalid File Type'),
+                        translate('OpenLP.MediaManagerItem',
+                                  'Invalid File {file_path}.\nFile extension not supported').format(
+                            file_path=file_path))
                     error_shown = True
             else:
-                new_files.append(file_name)
-        if new_files:
-            self.validate_and_load(new_files, data['target'])
+                new_file_paths.append(file_path)
+        if new_file_paths:
+            if 'target' in data:
+                self.validate_and_load(new_file_paths, data['target'])
+            self.validate_and_load(new_file_paths)
 
     def dnd_move_internal(self, target):
         """
@@ -351,33 +355,30 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
         """
         pass
 
-    def validate_and_load(self, files, target_group=None):
+    def validate_and_load(self, file_paths, target_group=None):
         """
         Process a list for files either from the File Dialog or from Drag and
         Drop
 
-        :param files: The files to be loaded.
+        :param list[openlp.core.common.path.Path] file_paths: The files to be loaded.
         :param target_group: The QTreeWidgetItem of the group that will be the parent of the added files
         """
-        names = []
         full_list = []
         for count in range(self.list_view.count()):
-            names.append(self.list_view.item(count).text())
             full_list.append(self.list_view.item(count).data(QtCore.Qt.UserRole))
         duplicates_found = False
         files_added = False
-        for file_path in files:
-            if file_path in full_list:
+        for file_path in file_paths:
+            if path_to_str(file_path) in full_list:
                 duplicates_found = True
             else:
                 files_added = True
-                full_list.append(file_path)
+                full_list.append(path_to_str(file_path))
         if full_list and files_added:
             if target_group is None:
                 self.list_view.clear()
             self.load_list(full_list, target_group)
-            last_dir = os.path.split(files[0])[0]
-            Settings().setValue(self.settings_section + '/last directory', Path(last_dir))
+            Settings().setValue(self.settings_section + '/last directory', file_paths[0].parent)
             Settings().setValue('{section}/{section} files'.format(section=self.settings_section), self.get_file_list())
         if duplicates_found:
             critical_error_message_box(UiStrings().Duplicate,
@@ -620,7 +621,7 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
         :param context: The context on which this is called
         """
         service_item = ServiceItem(self.plugin)
-        service_item.add_icon(self.plugin.icon_path)
+        service_item.add_icon()
         if self.generate_slide_data(service_item, item, xml_version, remote, context):
             return service_item
         else:

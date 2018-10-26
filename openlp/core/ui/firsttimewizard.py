@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -24,10 +24,11 @@ The UI widgets for the first time wizard.
 """
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from openlp.core.common.uistrings import UiStrings
-from openlp.core.common import translate, is_macosx, clean_button_text, Settings
-from openlp.core.lib import build_icon
+from openlp.core.common import is_macosx, clean_button_text
+from openlp.core.common.i18n import translate
+from openlp.core.common.settings import Settings
 from openlp.core.lib.ui import add_welcome_page
+from openlp.core.ui.icons import UiIcons
 
 
 class FirstTimePage(object):
@@ -56,13 +57,13 @@ class UiFirstTimeWizard(object):
         :param first_time_wizard: The wizard form
         """
         first_time_wizard.setObjectName('first_time_wizard')
-        first_time_wizard.setWindowIcon(build_icon(':/icon/openlp-logo.svg'))
+        first_time_wizard.setWindowIcon(UiIcons().main_icon)
         first_time_wizard.resize(550, 386)
         first_time_wizard.setModal(True)
         first_time_wizard.setOptions(QtWidgets.QWizard.IndependentPages | QtWidgets.QWizard.NoBackButtonOnStartPage |
                                      QtWidgets.QWizard.NoBackButtonOnLastPage | QtWidgets.QWizard.HaveCustomButton1 |
                                      QtWidgets.QWizard.HaveCustomButton2)
-        if is_macosx():
+        if is_macosx():                                                                             # pragma: nocover
             first_time_wizard.setPixmap(QtWidgets.QWizard.BackgroundPixmap,
                                         QtGui.QPixmap(':/wizards/openlp-osx-wizard.png'))
             first_time_wizard.resize(634, 386)
@@ -126,9 +127,6 @@ class UiFirstTimeWizard(object):
         self.media_check_box.setChecked(True)
         self.media_check_box.setObjectName('media_check_box')
         self.plugin_layout.addWidget(self.media_check_box)
-        self.remote_check_box = QtWidgets.QCheckBox(self.plugin_page)
-        self.remote_check_box.setObjectName('remote_check_box')
-        self.plugin_layout.addWidget(self.remote_check_box)
         self.song_usage_check_box = QtWidgets.QCheckBox(self.plugin_page)
         self.song_usage_check_box.setChecked(True)
         self.song_usage_check_box.setObjectName('song_usage_check_box')
@@ -137,13 +135,6 @@ class UiFirstTimeWizard(object):
         self.alert_check_box.setChecked(True)
         self.alert_check_box.setObjectName('alert_check_box')
         self.plugin_layout.addWidget(self.alert_check_box)
-        self.projectors_check_box = QtWidgets.QCheckBox(self.plugin_page)
-        # If visibility setting for projector panel is True, check the box.
-        if Settings().value('projector/show after wizard'):
-            self.projectors_check_box.setChecked(True)
-        self.projectors_check_box.setObjectName('projectors_check_box')
-        self.projectors_check_box.clicked.connect(self.on_projectors_check_box_clicked)
-        self.plugin_layout.addWidget(self.projectors_check_box)
         first_time_wizard.setPage(FirstTimePage.Plugins, self.plugin_page)
         # The song samples page
         self.songs_page = QtWidgets.QWizardPage()
@@ -255,13 +246,9 @@ class UiFirstTimeWizard(object):
         self.presentation_check_box.setText(translate('OpenLP.FirstTimeWizard',
                                                       'Presentations – Show .ppt, .odp and .pdf files'))
         self.media_check_box.setText(translate('OpenLP.FirstTimeWizard', 'Media – Playback of Audio and Video files'))
-        self.remote_check_box.setText(str(UiStrings().WebDownloadText))
         self.song_usage_check_box.setText(translate('OpenLP.FirstTimeWizard', 'Song Usage Monitor'))
         self.alert_check_box.setText(translate('OpenLP.FirstTimeWizard',
                                                'Alerts – Display informative messages while showing other slides'))
-        self.projectors_check_box.setText(translate('OpenLP.FirstTimeWizard',
-                                                    'Projectors – Control PJLink compatible projects on your network'
-                                                    ' from OpenLP'))
         self.no_internet_page.setTitle(translate('OpenLP.FirstTimeWizard', 'No Internet Connection'))
         self.no_internet_page.setSubTitle(
             translate('OpenLP.FirstTimeWizard', 'Unable to detect an Internet connection.'))

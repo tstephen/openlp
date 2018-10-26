@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -22,18 +22,19 @@
 """
 This module contains tests for the OpenOffice/LibreOffice importer.
 """
-from unittest import TestCase, SkipTest
+from unittest import TestCase, skipIf
 from unittest.mock import MagicMock, patch
 
-from openlp.core.common import Registry
+from openlp.core.common.registry import Registry
+from tests.helpers.testmixin import TestMixin
+
 try:
     from openlp.plugins.songs.lib.importers.openoffice import OpenOfficeImport
 except ImportError:
-    raise SkipTest('Could not import OpenOfficeImport probably due to unavailability of uno')
-
-from tests.helpers.testmixin import TestMixin
+    OpenOfficeImport = None
 
 
+@skipIf(OpenOfficeImport is None, 'Could not import OpenOfficeImport probably due to unavailability of uno')
 class TestOpenOfficeImport(TestCase, TestMixin):
     """
     Test the :class:`~openlp.plugins.songs.lib.importer.openoffice.OpenOfficeImport` class
@@ -54,10 +55,10 @@ class TestOpenOfficeImport(TestCase, TestMixin):
         mocked_manager = MagicMock()
 
         # WHEN: An importer object is created
-        importer = OpenOfficeImport(mocked_manager, filenames=[])
+        importer = OpenOfficeImport(mocked_manager, file_paths=[])
 
         # THEN: The importer object should not be None
-        self.assertIsNotNone(importer, 'Import should not be none')
+        assert importer is not None, 'Import should not be none'
 
     @patch('openlp.plugins.songs.lib.importers.openoffice.SongImport')
     def test_close_ooo_file(self, mocked_songimport):
@@ -66,7 +67,7 @@ class TestOpenOfficeImport(TestCase, TestMixin):
         """
         # GIVEN: A mocked out SongImport class, a mocked out "manager" and a document that raises an exception
         mocked_manager = MagicMock()
-        importer = OpenOfficeImport(mocked_manager, filenames=[])
+        importer = OpenOfficeImport(mocked_manager, file_paths=[])
         importer.document = MagicMock()
         importer.document.close = MagicMock(side_effect=Exception())
 
@@ -74,4 +75,4 @@ class TestOpenOfficeImport(TestCase, TestMixin):
         importer.close_ooo_file()
 
         # THEN: The document attribute should be None even if an exception is raised')
-        self.assertIsNone(importer.document, 'Document should be None even if an exception is raised')
+        assert importer.document is None, 'Document should be None even if an exception is raised'

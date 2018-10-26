@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,14 +23,12 @@
 The :mod:`db` module provides the database and schema that is the backend for
 the Songs plugin
 """
-
 from sqlalchemy import Column, ForeignKey, Table, types
 from sqlalchemy.orm import mapper, relation, reconstructor
 from sqlalchemy.sql.expression import func, text
 
-from openlp.core.lib.db import BaseModel, init_db
-from openlp.core.common.languagemanager import get_natural_key
-from openlp.core.lib import translate
+from openlp.core.common.i18n import translate, get_natural_key
+from openlp.core.lib.db import BaseModel, PathType, init_db
 
 
 class Author(BaseModel):
@@ -166,7 +164,7 @@ class Song(BaseModel):
         """
         Add a Songbook Entry to the song if it not yet exists
 
-        :param songbook_name: Name of the Songbook.
+        :param songbook: Name of the Songbook.
         :param entry: Entry in the Songbook (usually a number)
         """
         for songbook_entry in self.songbook_entries:
@@ -238,7 +236,7 @@ def init_schema(url):
 
     **media_files Table**
         * id
-        * file_name
+        * _file_path
         * type
 
     **song_books Table**
@@ -305,7 +303,7 @@ def init_schema(url):
         'media_files', metadata,
         Column('id', types.Integer(), primary_key=True),
         Column('song_id', types.Integer(), ForeignKey('songs.id'), default=None),
-        Column('file_name', types.Unicode(255), nullable=False),
+        Column('file_path', PathType, nullable=False),
         Column('type', types.Unicode(64), nullable=False, default='audio'),
         Column('weight', types.Integer(), default=0)
     )

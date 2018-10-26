@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -22,17 +22,15 @@
 """
 This module contains tests for the OpenSong song importer.
 """
-import os
 from unittest import TestCase
 from unittest.mock import patch, MagicMock
 
-from openlp.core.common import Registry
+from openlp.core.common.registry import Registry
 from openlp.plugins.songs.lib.importers.opensong import OpenSongImport
-
 from tests.helpers.songfileimport import SongImportTestHelper
+from tests.utils.constants import RESOURCE_PATH
 
-TEST_PATH = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), '..', '..', '..', 'resources', 'opensongsongs'))
+TEST_PATH = RESOURCE_PATH / 'songs' / 'opensong'
 
 
 class TestOpenSongFileImport(SongImportTestHelper):
@@ -52,16 +50,16 @@ class TestOpenSongFileImport(SongImportTestHelper):
         mocked_returned_settings.value.side_effect = lambda value: True if value == 'songs/enable chords' else False
         mocked_settings.return_value = mocked_returned_settings
         # Do the test import
-        self.file_import([os.path.join(TEST_PATH, 'Amazing Grace')],
-                         self.load_external_result_data(os.path.join(TEST_PATH, 'Amazing Grace.json')))
-        self.file_import([os.path.join(TEST_PATH, 'Beautiful Garden Of Prayer')],
-                         self.load_external_result_data(os.path.join(TEST_PATH, 'Beautiful Garden Of Prayer.json')))
-        self.file_import([os.path.join(TEST_PATH, 'One, Two, Three, Four, Five')],
-                         self.load_external_result_data(os.path.join(TEST_PATH, 'One, Two, Three, Four, Five.json')))
-        self.file_import([os.path.join(TEST_PATH, 'Amazing Grace2')],
-                         self.load_external_result_data(os.path.join(TEST_PATH, 'Amazing Grace.json')))
-        self.file_import([os.path.join(TEST_PATH, 'Amazing Grace with bad CCLI')],
-                         self.load_external_result_data(os.path.join(TEST_PATH, 'Amazing Grace without CCLI.json')))
+        self.file_import([TEST_PATH / 'Amazing Grace'],
+                         self.load_external_result_data(TEST_PATH / 'Amazing Grace.json'))
+        self.file_import([TEST_PATH / 'Beautiful Garden Of Prayer'],
+                         self.load_external_result_data(TEST_PATH / 'Beautiful Garden Of Prayer.json'))
+        self.file_import([TEST_PATH / 'One, Two, Three, Four, Five'],
+                         self.load_external_result_data(TEST_PATH / 'One, Two, Three, Four, Five.json'))
+        self.file_import([TEST_PATH / 'Amazing Grace2'],
+                         self.load_external_result_data(TEST_PATH / 'Amazing Grace.json'))
+        self.file_import([TEST_PATH / 'Amazing Grace with bad CCLI'],
+                         self.load_external_result_data(TEST_PATH / 'Amazing Grace without CCLI.json'))
 
 
 class TestOpenSongImport(TestCase):
@@ -83,10 +81,10 @@ class TestOpenSongImport(TestCase):
             mocked_manager = MagicMock()
 
             # WHEN: An importer object is created
-            importer = OpenSongImport(mocked_manager, filenames=[])
+            importer = OpenSongImport(mocked_manager, file_paths=[])
 
             # THEN: The importer object should not be None
-            self.assertIsNotNone(importer, 'Import should not be none')
+            assert importer is not None, 'Import should not be none'
 
     def test_invalid_import_source(self):
         """
@@ -96,7 +94,7 @@ class TestOpenSongImport(TestCase):
         with patch('openlp.plugins.songs.lib.importers.opensong.SongImport'):
             mocked_manager = MagicMock()
             mocked_import_wizard = MagicMock()
-            importer = OpenSongImport(mocked_manager, filenames=[])
+            importer = OpenSongImport(mocked_manager, file_paths=[])
             importer.import_wizard = mocked_import_wizard
             importer.stop_import_flag = True
 
@@ -105,9 +103,9 @@ class TestOpenSongImport(TestCase):
                 importer.import_source = source
 
                 # THEN: do_import should return none and the progress bar maximum should not be set.
-                self.assertIsNone(importer.do_import(), 'do_import should return None when import_source is not a list')
-                self.assertEqual(mocked_import_wizard.progress_bar.setMaximum.called, False,
-                                 'setMaximum on import_wizard.progress_bar should not have been called')
+                assert importer.do_import() is None, 'do_import should return None when import_source is not a list'
+                assert mocked_import_wizard.progress_bar.setMaximum.called is False, \
+                    'setMaximum on import_wizard.progress_bar should not have been called'
 
     def test_valid_import_source(self):
         """
@@ -117,7 +115,7 @@ class TestOpenSongImport(TestCase):
         with patch('openlp.plugins.songs.lib.importers.opensong.SongImport'):
             mocked_manager = MagicMock()
             mocked_import_wizard = MagicMock()
-            importer = OpenSongImport(mocked_manager, filenames=[])
+            importer = OpenSongImport(mocked_manager, file_paths=[])
             importer.import_wizard = mocked_import_wizard
             importer.stop_import_flag = True
 
@@ -126,6 +124,6 @@ class TestOpenSongImport(TestCase):
 
             # THEN: do_import should return none and the progress bar setMaximum should be called with the length of
             #       import_source.
-            self.assertIsNone(importer.do_import(), 'do_import should return None when import_source is a list '
-                                                    'and stop_import_flag is True')
+            assert importer.do_import() is None, \
+                'do_import should return None when import_source is a list and stop_import_flag is True'
             mocked_import_wizard.progress_bar.setMaximum.assert_called_with(len(importer.import_source))
