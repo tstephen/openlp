@@ -52,7 +52,7 @@ __default_settings__ = {
     'presentations/presentations files': [],
     'presentations/thumbnail_scheme': '',
     'presentations/powerpoint slide click advance': QtCore.Qt.Unchecked,
-    'presentations/powerpoint control window': QtCore.Qt.Unchecked
+    'presentations/powerpoint control window': QtCore.Qt.Unchecked,
     'presentations/last directory': None
 }
 
