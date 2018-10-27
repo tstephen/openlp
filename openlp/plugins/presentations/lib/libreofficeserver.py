@@ -128,7 +128,8 @@ class LibreOfficeServer(object):
             '--minimized',
             '--nodefault',
             '--nofirststartwizard',
-            '--accept=socket,host=localhost,port=2002;urp;StarOffice.ServiceManager'
+            '--accept=pipe,name=openlp_pipe;urp;'
+            # '--accept=socket,host=localhost,port=2002;urp;StarOffice.ServiceManager'
         ]
         self._process = Popen(uno_command)
 

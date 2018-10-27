@@ -21,23 +21,26 @@
 ###############################################################################
 
 import logging
-import os
-import time
-from pathlib import Path
 from subprocess import Popen
 
-from openlp.core.common import AppLocation, Registry, delete_file, is_macosx
+from Pyro4 import Proxy
 
-if is_macosx() and os.path.exists('/Applications/LibreOffice.app'):
+from openlp.core.common import delete_file, is_macosx
+from openlp.core.common.applocation import AppLocation
+from openlp.core.common.path import Path
+from openlp.core.common.registry import Registry
+
+LIBREOFFICE_PATH = Path('/Applications/LibreOffice.app')
+LIBREOFFICE_PYTHON = LIBREOFFICE_PATH / 'Contents' / 'Resources' / 'python'
+
+if is_macosx() and LIBREOFFICE_PATH.exists():
     macuno_available = True
 else:
     macuno_available = False
 
-from PyQt5 import QtCore
-from Pyro4 import Proxy
 
-from openlp.core.lib import ScreenList
-from .presentationcontroller import PresentationController, PresentationDocument, TextType
+from openlp.core.display.screens import ScreenList
+from .presentationcontroller import PresentationController, PresentationDocument
 
 
 log = logging.getLogger(__name__)
