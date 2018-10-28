@@ -351,7 +351,7 @@ class CustomMediaItem(MediaManagerItem):
         else:
             custom.credits = ''
         custom_xml = CustomXMLBuilder()
-        for (idx, slide) in enumerate(item._raw_frames):
+        for (idx, slide) in enumerate(item.slides):
             custom_xml.add_verse_to_lyrics('custom', str(idx + 1), slide['raw_slide'])
         custom.text = str(custom_xml.extract_xml(), 'utf-8')
         self.plugin.db_manager.save_object(custom)

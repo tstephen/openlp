@@ -354,15 +354,15 @@ class ServiceItem(RegistryProperties):
         }
         service_data = []
         if self.service_item_type == ServiceItemType.Text:
-            service_data = [slide for slide in self._raw_frames]
+            service_data = [slide for slide in self.slides]
         elif self.service_item_type == ServiceItemType.Image:
             if lite_save:
-                for slide in self._raw_frames:
+                for slide in self.slides:
                     service_data.append({'title': slide['title'], 'path': slide['path']})
             else:
-                service_data = [slide['title'] for slide in self._raw_frames]
+                service_data = [slide['title'] for slide in self.slides]
         elif self.service_item_type == ServiceItemType.Command:
-            for slide in self._raw_frames:
+            for slide in self.slides:
                 service_data.append({'title': slide['title'], 'image': slide['image'], 'path': slide['path'],
                                      'display_title': slide['display_title'], 'notes': slide['notes']})
         return {'header': service_header, 'data': service_data}
@@ -414,7 +414,7 @@ class ServiceItem(RegistryProperties):
         self.theme_overwritten = header.get('theme_overwritten', False)
         if self.service_item_type == ServiceItemType.Text:
             for slide in service_item['serviceitem']['data']:
-                self._raw_frames.append(slide)
+                self.add_from_text(slide['raw_slide'], slide['verseTag'])
         elif self.service_item_type == ServiceItemType.Image:
             settings_section = service_item['serviceitem']['header']['name']
             background = QtGui.QColor(Settings().value(settings_section + '/background color'))
@@ -538,7 +538,7 @@ class ServiceItem(RegistryProperties):
         Returns the frames for the ServiceItem
         """
         if self.service_item_type == ServiceItemType.Text:
-            return self._display_frames
+            return self._display_slides
         else:
             return self.slides
 
@@ -583,8 +583,8 @@ class ServiceItem(RegistryProperties):
         """
         Remove the specified frame from the item
         """
-        if frame in self._raw_frames:
-            self._raw_frames.remove(frame)
+        if frame in self.slides:
+            self.slides.remove(frame)
 
     def get_media_time(self):
         """
@@ -633,7 +633,7 @@ class ServiceItem(RegistryProperties):
         """
         Returns if there are any frames in the service item
         """
-        return not bool(self._raw_frames)
+        return not bool(self.slides)
 
     def validate_item(self, suffix_list=None):
         """

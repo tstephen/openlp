@@ -226,8 +226,8 @@ class TestServiceManager(TestCase, TestMixin):
             # A service item without capabilities.
             service_item = ServiceItem()
             service_item.add_capability(ItemCapabilities.CanLoop)
-            service_item._raw_frames.append("One")
-            service_item._raw_frames.append("Two")
+            service_item.slides.append("One")
+            service_item.slides.append("Two")
             self.service_manager.service_items = [{'service_item': service_item}]
             q_point = None
             # Mocked actions.
