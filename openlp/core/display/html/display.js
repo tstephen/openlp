@@ -322,6 +322,52 @@ var Display = {
     Display.reinit();
   },
   /**
+   * Set fullscreen image from path
+   * @param {string} bg_color - The background color
+   * @param {string} image - Path to the image
+   */
+  setFullscreenImage: function(bg_color, image) {
+    Display.clearSlides();
+    var globalBackground = $("#global-background")[0];
+    globalBackground.style.cssText = "";
+    globalBackground.style.setProperty("background", bg_color);
+    var slidesDiv = $(".slides")[0];
+    var section = document.createElement("section");
+    section.setAttribute("id", 0);
+    section.setAttribute("data-background", bg_color);
+    section.setAttribute("style", "height: 100%; width: 100%;");
+    var img = document.createElement('img');
+    img.src = image;
+    img.setAttribute("style", "height: 100%; width: 100%");
+    section.appendChild(img);
+    slidesDiv.appendChild(section);
+    Display._slides['0'] = 0;
+    Display.reinit();
+  },
+  /**
+   * Set fullscreen image from base64 data
+   * @param {string} bg_color - The background color
+   * @param {string} image - Path to the image
+   */
+  setFullscreenImageFromData: function(bg_color, image_data) {
+    Display.clearSlides();
+    var globalBackground = $("#global-background")[0];
+    globalBackground.style.cssText = "";
+    globalBackground.style.setProperty("background", bg_color);
+    var slidesDiv = $(".slides")[0];
+    var section = document.createElement("section");
+    section.setAttribute("id", 0);
+    section.setAttribute("data-background", bg_color);
+    section.setAttribute("style", "height: 100%; width: 100%;");
+    var img = document.createElement('img');
+    img.src = 'data:image/png;base64,' + image_data;
+    img.setAttribute("style", "height: 100%; width: 100%");
+    section.appendChild(img);
+    slidesDiv.appendChild(section);
+    Display._slides['0'] = 0;
+    Display.reinit();
+  },
+  /**
    * Add a slides. If the slide exists but the HTML is different, update the slide.
    * @param {string} verse - The verse number, e.g. "v1"
    * @param {string} html - The HTML for the verse, e.g. "line1<br>line2"

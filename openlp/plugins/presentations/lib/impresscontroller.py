@@ -240,7 +240,7 @@ class ImpressDocument(PresentationDocument):
             log.warning('Failed to load presentation {url}'.format(url=url))
             return False
         self.presentation = self.document.getPresentation()
-        self.presentation.Display = ScreenList().current['number'] + 1
+        self.presentation.Display = ScreenList().current.number + 1
         self.control = None
         self.create_thumbnails()
         self.create_titles_and_notes()
@@ -387,7 +387,7 @@ class ImpressDocument(PresentationDocument):
             self.control.activate()
             self.goto_slide(1)
         # Make sure impress doesn't steal focus, unless we're on a single screen setup
-        if len(ScreenList().screen_list) > 1:
+        if len(ScreenList()) > 1:
             Registry().get('main_window').activateWindow()
 
     def get_slide_number(self):

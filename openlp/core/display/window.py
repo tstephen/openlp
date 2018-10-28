@@ -145,6 +145,12 @@ class DisplayWindow(QtWidgets.QWidget):
         self.setGeometry(screen.display_geometry)
         self.screen_number = screen.number
 
+    def set_single_image(self, bg_color, image):
+        self.run_javascript('Display.setFullscreenImage("{bg_color}", "{image}");'.format(bg_color=bg_color, image=image))
+
+    def set_single_image_data(self, bg_color, image_data):
+        self.run_javascript('Display.setFullscreenImageFromData("{bg_color}", "{image_data}");'.format(bg_color=bg_color, image_data=image_data))
+
     def set_startup_screen(self):
         bg_color = Settings().value('core/logo background color')
         image = Settings().value('core/logo file')

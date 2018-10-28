@@ -163,7 +163,6 @@ class ServiceItem(RegistryProperties):
         # Save rendered pages to this dict. In the case that a slide is used twice we can use the pages saved to
         # the dict instead of rendering them again.
         previous_pages = {}
-        #for slide in self._raw_frames:
         for raw_slide in self.slides:
             verse_tag = raw_slide['verse']
             if verse_tag in previous_pages and previous_pages[verse_tag][0] == raw_slide:
@@ -307,17 +306,20 @@ class ServiceItem(RegistryProperties):
         # If the item should have a display title but this frame doesn't have one, we make one up
         if self.is_capable(ItemCapabilities.HasDisplayTitle) and not display_title:
             display_title = translate('OpenLP.ServiceItem',
-                                      '[slide {frame:d}]').format(frame=len(self._raw_frames) + 1)
+                                      '[slide {frame:d}]').format(frame=len(self.slides) + 1)
         # Update image path to match servicemanager location if file was loaded from service
         if image and not self.has_original_files and self.name == 'presentations':
             file_location = os.path.join(path, file_name)
             file_location_hash = md5_hash(file_location.encode('utf-8'))
             image = os.path.join(str(AppLocation.get_section_data_path(self.name)), 'thumbnails',
                                  file_location_hash, ntpath.basename(image))
+        #self.slides.append({'title': file_name, 'image': image, 'path': path,
+        #                    'display_title': display_title, 'notes': notes})
         self.slides.append({'title': file_name, 'image': image, 'path': path,
-                            'display_title': display_title, 'notes': notes})
-        if self.is_capable(ItemCapabilities.HasThumbnails):
-            self.image_manager.add_image(image, ImageSource.CommandPlugins, '#000000')
+                            'display_title': display_title, 'notes': notes,
+                            'thumbnail' : image})
+        #if self.is_capable(ItemCapabilities.HasThumbnails):
+        #    self.image_manager.add_image(image, ImageSource.CommandPlugins, '#000000')
         self._new_item()
 
     def get_service_repr(self, lite_save):
@@ -538,7 +540,7 @@ class ServiceItem(RegistryProperties):
         if self.service_item_type == ServiceItemType.Text:
             return self._display_frames
         else:
-            return self._raw_frames
+            return self.slides
 
     def get_rendered_frame(self, row):
         """
@@ -549,16 +551,16 @@ class ServiceItem(RegistryProperties):
         if self.service_item_type == ServiceItemType.Text:
             return self._display_frames[row]['html'].split('\n')[0]
         elif self.service_item_type == ServiceItemType.Image:
-            return self._raw_frames[row]['path']
+            return self.slides[row]['path']
         else:
-            return self._raw_frames[row]['image']
+            return self.slides[row]['image']
 
     def get_frame_title(self, row=0):
         """
         Returns the title of the raw frame
         """
         try:
-            return self._raw_frames[row]['title']
+            return self.slides[row]['title']
         except IndexError:
             return ''
 
@@ -568,7 +570,7 @@ class ServiceItem(RegistryProperties):
         """
         if not frame:
             try:
-                frame = self._raw_frames[row]
+                frame = self.slides[row]
             except IndexError:
                 return ''
         if self.is_image() or self.is_capable(ItemCapabilities.IsOptical):
