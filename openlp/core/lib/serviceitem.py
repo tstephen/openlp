@@ -354,7 +354,11 @@ class ServiceItem(RegistryProperties):
         }
         service_data = []
         if self.service_item_type == ServiceItemType.Text:
-            service_data = [slide for slide in self.slides]
+            for slide in self.slides:
+                data_slide = deepcopy(slide)
+                data_slide['raw_slide'] = data_slide.pop('text')
+                data_slide['verseTag'] = data_slide.pop('verse')
+                service_data.append(data_slide)
         elif self.service_item_type == ServiceItemType.Image:
             if lite_save:
                 for slide in self.slides:
@@ -574,9 +578,9 @@ class ServiceItem(RegistryProperties):
             except IndexError:
                 return ''
         if self.is_image() or self.is_capable(ItemCapabilities.IsOptical):
-            path_from = frame['path']
+            path_from = frame['filename']
         else:
-            path_from = os.path.join(frame['path'], frame['title'])
+            path_from = os.path.join(frame['filename'], frame['title'])
         return path_from
 
     def remove_frame(self, frame):
