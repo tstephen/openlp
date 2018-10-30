@@ -26,8 +26,36 @@ import logging
 import os
 import platform
 import re
+import bs4
+import sqlalchemy
+from PyQt5 import Qt, QtCore, QtGui, QtWebKit, QtWidgets
+from lxml import etree
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+try:
+    import migrate
+    MIGRATE_VERSION = getattr(migrate, '__version__', '< 0.7')
+except ImportError:
+    MIGRATE_VERSION = '-'
+try:
+    import chardet
+    CHARDET_VERSION = chardet.__version__
+except ImportError:
+    CHARDET_VERSION = '-'
+try:
+    import enchant
+    ENCHANT_VERSION = enchant.__version__
+except ImportError:
+    ENCHANT_VERSION = '-'
+try:
+    import mako
+    MAKO_VERSION = mako.__version__
+except ImportError:
+    MAKO_VERSION = '-'
+try:
+    from openlp.core.ui.media.vlcplayer import VERSION
+    VLC_VERSION = VERSION
+except ImportError:
+    VLC_VERSION = '-'
 
 from openlp.core.common import is_linux
 from openlp.core.common.i18n import UiStrings, translate
@@ -76,9 +104,15 @@ class ExceptionForm(QtWidgets.QDialog, Ui_ExceptionDialog, RegistryProperties):
         description = self.description_text_edit.toPlainText()
         traceback = self.exception_text_edit.toPlainText()
         system = translate('OpenLP.ExceptionForm', 'Platform: {platform}\n').format(platform=platform.platform())
-        library_versions = get_library_versions()
-        library_versions['PyUNO'] = self._get_pyuno_version()
-        libraries = '\n'.join(['{}: {}'.format(library, version) for library, version in library_versions.items()])
+        libraries = ('Python: {python}\nQt5: {qt5}\nPyQt5: {pyqt5}\nSQLAlchemy: {sqalchemy}\n'
+                     'SQLAlchemy Migrate: {migrate}\nBeautifulSoup: {soup}\nlxml: {etree}\nChardet: {chardet}\n'
+                     'PyEnchant: {enchant}\nMako: {mako}\npyUNO bridge: {uno}\n'
+                     'VLC: {vlc}\n').format(python=platform.python_version(), qt5=Qt.qVersion(),
+                                            pyqt5=Qt.PYQT_VERSION_STR,
+                                            sqalchemy=sqlalchemy.__version__, migrate=MIGRATE_VERSION,
+                                            soup=bs4.__version__, etree=etree.__version__, chardet=CHARDET_VERSION,
+                                            enchant=ENCHANT_VERSION, mako=MAKO_VERSION,
+                                            uno=self._pyuno_import(), vlc=VLC_VERSION)
 
         if is_linux():
             if os.environ.get('KDE_FULL_SESSION') == 'true':
@@ -194,5 +228,5 @@ class ExceptionForm(QtWidgets.QDialog, Ui_ExceptionDialog, RegistryProperties):
             return node.getByName('ooSetupVersion')
         except ImportError:
             return '-'
-        except:
+        except Exception:
             return '- (Possible non-standard UNO installation)'

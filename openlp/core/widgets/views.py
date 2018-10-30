@@ -146,7 +146,6 @@ class ListPreviewWidget(QtWidgets.QTableWidget, RegistryProperties):
         try:
             self.cellWidget(row, 0).children()[1].setMaximumWidth(new_height * self.screen_ratio)
         except Exception:
-            # TODO: Figure out what sort of exceptions are thrown
             return
 
     def screen_size_changed(self, screen_ratio):

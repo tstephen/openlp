@@ -38,7 +38,7 @@ class Track(object):
     def __getattribute__(self, name):
         try:
             return object.__getattribute__(self, name)
-        except:
+        except Exception:
             pass
         return None
 
@@ -64,14 +64,14 @@ class Track(object):
             try:
                 primary = o.replace('other_', '')
                 setattr(self, primary, int(getattr(self, primary)))
-            except:
+            except Exception:
                 for v in getattr(self, o):
                     try:
                         current = getattr(self, primary)
                         setattr(self, primary, int(v))
                         getattr(self, o).append(current)
                         break
-                    except:
+                    except Exception:
                         pass
 
     def __repr__(self):

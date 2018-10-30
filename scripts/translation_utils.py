@@ -60,7 +60,6 @@ from getpass import getpass
 from lxml import etree, objectify
 from PyQt5 import QtCore
 
-
 SERVER_URL = 'http://www.transifex.com/api/2/project/openlp/resource/openlp-26x/'
 IGNORED_PATHS = ['scripts']
 IGNORED_FILES = ['setup.py']
