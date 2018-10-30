@@ -15,10 +15,11 @@
 # FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
 # more details.                                                               #
 #                                                                             #
-
-
+# You should have received a copy of the GNU General Public License along     #
+# with this program; if not, write to the Free Software Foundation, Inc., 59  #
 # Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
 ###############################################################################
+import sys
 from unittest import TestCase
 # You should have received a copy of the GNU General Public License along     #
 # with this program; if not, write to the Free Software Foundation, Inc., 59  #
@@ -26,9 +27,12 @@ from unittest.mock import MagicMock
 
 from PyQt5 import QtCore
 
+# Mock QtWebEngineWidgets
+sys.modules['PyQt5.QtWebEngineWidgets'] = MagicMock()
+
 from openlp.core.api.endpoint.controller import controller_direction, controller_text
 from openlp.core.common.registry import Registry
-from openlp.core.display.renderer import Renderer
+from openlp.core.display.render import Renderer
 from openlp.core.display.screens import ScreenList
 from openlp.core.lib.serviceitem import ServiceItem
 from tests.utils import convert_file_service_item

@@ -26,6 +26,7 @@ from unittest import TestCase
 
 from openlp.core.common import is_not_image_file
 from tests.utils.constants import RESOURCE_PATH
+from tests.helpers.testmixin import TestMixin
 
 
 class TestUtils(TestCase, TestMixin):

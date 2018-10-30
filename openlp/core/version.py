@@ -52,7 +52,6 @@ LIBRARIES = OrderedDict([
     ('Chardet', ('chardet',)),
     ('PyEnchant', ('enchant',)),
     ('Mako', ('mako',)),
-    ('pyICU', ('icu', 'VERSION')),
     ('VLC', ('openlp.core.ui.media.vlcplayer', 'VERSION')),
 ])
 

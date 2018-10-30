@@ -25,6 +25,9 @@ from unittest.mock import MagicMock, patch
 
 from PyQt5 import QtCore, QtWidgets
 
+# Mock QtWebEngineWidgets
+sys.modules['PyQt5.QtWebEngineWidgets'] = MagicMock()
+
 from openlp.core.app import OpenLP, parse_options
 from openlp.core.common.settings import Settings
 from tests.utils.constants import RESOURCE_PATH

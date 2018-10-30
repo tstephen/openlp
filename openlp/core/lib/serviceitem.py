@@ -202,60 +202,6 @@ class ServiceItem(RegistryProperties):
             self._create_slides()
         return self._display_slides
 
-    # def render(self, provides_own_theme_data=False):
-    #    """
-    #    The render method is what generates the frames for the screen and obtains the display information from the
-    #    renderer. At this point all slides are built for the given display size.
-    #
-    #    :param provides_own_theme_data: This switch disables the usage of the item's theme. However, this is
-    #        disabled by default. If this is used, it has to be taken care, that
-    #        the renderer knows the correct theme data. However, this is needed
-    #        for the theme manager.
-    #    """
-    #    log.debug('Render called')
-    #    self._display_frames = []
-    #    self.bg_image_bytes = None
-    #    # if not provides_own_theme_data:
-    #    #     self.renderer.set_item_theme(self.theme)
-    #    #     self.theme_data, self.main, self.footer = self.renderer.pre_render()
-    #    if self.service_item_type == ServiceItemType.Text:
-    #        can_render_chords = hasattr(self, 'name') and self.name == 'songs' and Settings().value(
-    #            'songs/enable chords')
-    #        log.debug('Formatting slides: {title}'.format(title=self.title))
-    #        # Save rendered pages to this dict. In the case that a slide is used twice we can use the pages saved to
-    #        # the dict instead of rendering them again.
-    #        previous_pages = {}
-    #        for slide in self._raw_frames:
-    #            verse_tag = slide['verseTag']
-    #            if verse_tag in previous_pages and previous_pages[verse_tag][0] == slide['raw_slide']:
-    #                pages = previous_pages[verse_tag][1]
-    #            else:
-    #                # pages = self.renderer.format_slide(slide['raw_slide'], self)
-    #                previous_pages[verse_tag] = (slide['raw_slide'], pages)
-    #            for page in pages:
-    #                page = page.replace('<br>', '{br}')
-    #                html_data = render_tags(page.rstrip(), can_render_chords)
-    #                new_frame = {
-    #                    'title': remove_tags(page),
-    #                    'text': remove_tags(page.rstrip(), can_render_chords),
-    #                    'chords_text': render_chords(remove_tags(page.rstrip(), False)),
-    #                    'html': html_data.replace('&amp;nbsp;', '&nbsp;'),
-    #                    'printing_html': render_tags(html.escape(page.rstrip()), can_render_chords, is_printing=True),
-    #                    'verseTag': verse_tag,
-    #                }
-    #                self._display_frames.append(new_frame)
-    #    elif self.service_item_type == ServiceItemType.Image or self.service_item_type == ServiceItemType.Command:
-    #        pass
-    #    else:
-    #        log.error('Invalid value renderer: {item}'.format(item=self.service_item_type))
-    #    self.title = remove_tags(self.title)
-    #    # The footer should never be None, but to be compatible with a few
-    #    # nightly builds between 1.9.4 and 1.9.5, we have to correct this to
-    #    # avoid tracebacks.
-    #    if self.raw_footer is None:
-    #        self.raw_footer = []
-    #    self.foot_text = '<br>'.join([_f for _f in self.raw_footer if _f])
-
     def add_from_image(self, filename, title, background=None, thumbnail=None):
         """
         Add an image slide to the service item.
@@ -313,8 +259,6 @@ class ServiceItem(RegistryProperties):
             file_location_hash = md5_hash(file_location.encode('utf-8'))
             image = os.path.join(str(AppLocation.get_section_data_path(self.name)), 'thumbnails',
                                  file_location_hash, ntpath.basename(image))
-        #self.slides.append({'title': file_name, 'image': image, 'path': path,
-        #                    'display_title': display_title, 'notes': notes})
         self.slides.append({'title': file_name, 'image': image, 'path': path,
                             'display_title': display_title, 'notes': notes,
                             'thumbnail' : image})
