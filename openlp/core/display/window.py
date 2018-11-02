@@ -31,7 +31,8 @@ from PyQt5 import QtCore, QtWebChannel, QtWidgets
 
 from openlp.core.common.path import Path, path_to_str
 from openlp.core.common.settings import Settings
-
+from openlp.core.common.registry import Registry
+from openlp.core.ui import HideMode
 
 log = logging.getLogger(__name__)
 DISPLAY_PATH = Path(__file__).parent / 'html' / 'display.html'
@@ -131,9 +132,14 @@ class DisplayWindow(QtWidgets.QWidget):
         self.webview.page().setWebChannel(self.channel)
         self.is_display = False
         self.scale = 1
+        self.hide_mode = None
         if screen and screen.is_display:
+            Registry().register_function('live_display_hide', self.hide_display)
+            Registry().register_function('live_display_show', self.show_display)
             self.update_from_screen(screen)
             self.is_display = True
+            # Only make visible if setting enabled.
+            #if Settings().value('core/display on monitor'):
             self.show()
 
     def update_from_screen(self, screen):
@@ -329,7 +335,48 @@ class DisplayWindow(QtWidgets.QWidget):
         """
         Show the display
         """
+        #if self.is_display:
+        #    # Only make visible if setting enabled.
+        #    if not Settings().value('core/display on monitor'):
+        #        return
         self.run_javascript('Display.show();')
+        # Check if setting for hiding logo on startup is enabled.
+        # If it is, display should remain hidden, otherwise logo is shown. (from def setup)
+        if self.isHidden() and not Settings().value('core/logo hide on startup'):
+            self.setVisible(True)
+        self.hide_mode = None
+        # Trigger actions when display is active again.
+        if self.is_display:
+            Registry().execute('live_display_active')
+
+    def blank_to_theme(self):
+        """
+        Blank to theme
+        """
+        self.run_javascript('Display.blankToTheme();')
+
+    def hide_display(self, mode=HideMode.Screen):
+        """
+        Hide the display by making all layers transparent Store the images so they can be replaced when required
+
+        :param mode: How the screen is to be hidden
+        """
+        log.debug('hide_display mode = {mode:d}'.format(mode=mode))
+        #if self.is_display:
+        #    # Only make visible if setting enabled.
+        #    if not Settings().value('core/display on monitor'):
+        #        return
+        if mode == HideMode.Screen:
+            self.setVisible(False)
+        elif mode == HideMode.Blank:
+            self.run_javascript('Display.blankToBlack();')
+        else:
+            self.run_javascript('Display.blankToTheme();')
+        if mode != HideMode.Screen:
+            if self.isHidden():
+                self.setVisible(True)
+                self.webview.setVisible(True)
+        self.hide_mode = mode
 
     def set_scale(self, scale):
         """

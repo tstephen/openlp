@@ -564,7 +564,7 @@ var Display = {
   /**
    * Blank the screen
   */
-  blank: function () {
+  blankToBlack: function () {
     if (!Reveal.isPaused()) {
       Reveal.togglePause();
     }
@@ -573,7 +573,7 @@ var Display = {
   /**
    * Blank to theme
   */
-  theme: function () {
+  blankToTheme: function () {
     var slidesDiv = $(".slides")[0];
     slidesDiv.style.visibility = "hidden";
     if (Reveal.isPaused()) {
