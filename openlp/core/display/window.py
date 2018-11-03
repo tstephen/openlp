@@ -114,15 +114,15 @@ class DisplayWindow(QtWidgets.QWidget):
         from openlp.core.display.webengine import WebEngineView
         self._is_initialised = False
         self._fbo = None
-        self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.Tool) #| QtCore.Qt.WindowStaysOnTopHint
-        self.setAttribute(QtCore.Qt.WA_TranslucentBackground);
-        self.setAutoFillBackground(True);
+        self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.Tool)  # | QtCore.Qt.WindowStaysOnTopHint
+        self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
+        self.setAutoFillBackground(True)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.layout = QtWidgets.QVBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.webview = WebEngineView(self)
-        self.webview.setAttribute(QtCore.Qt.WA_TranslucentBackground);
-        self.webview.page().setBackgroundColor(QtCore.Qt.transparent);
+        self.webview.setAttribute(QtCore.Qt.WA_TranslucentBackground)
+        self.webview.page().setBackgroundColor(QtCore.Qt.transparent)
         self.layout.addWidget(self.webview)
         self.webview.loadFinished.connect(self.after_loaded)
         self.set_url(QtCore.QUrl.fromLocalFile(path_to_str(DISPLAY_PATH)))
@@ -139,7 +139,7 @@ class DisplayWindow(QtWidgets.QWidget):
             self.update_from_screen(screen)
             self.is_display = True
             # Only make visible if setting enabled.
-            #if Settings().value('core/display on monitor'):
+            # if Settings().value('core/display on monitor'):
             self.show()
 
     def update_from_screen(self, screen):
@@ -152,17 +152,20 @@ class DisplayWindow(QtWidgets.QWidget):
         self.screen_number = screen.number
 
     def set_single_image(self, bg_color, image):
-        self.run_javascript('Display.setFullscreenImage("{bg_color}", "{image}");'.format(bg_color=bg_color, image=image))
+        self.run_javascript('Display.setFullscreenImage("{bg_color}", "{image}");'.format(bg_color=bg_color,
+                                                                                          image=image))
 
     def set_single_image_data(self, bg_color, image_data):
-        self.run_javascript('Display.setFullscreenImageFromData("{bg_color}", "{image_data}");'.format(bg_color=bg_color, image_data=image_data))
+        self.run_javascript('Display.setFullscreenImageFromData("{bg_color}", '
+                            '"{image_data}");'.format(bg_color=bg_color, image_data=image_data))
 
     def set_startup_screen(self):
         bg_color = Settings().value('core/logo background color')
         image = Settings().value('core/logo file')
         if path_to_str(image).startswith(':'):
             image = OPENLP_SPLASH_SCREEN_PATH
-        self.run_javascript('Display.setStartupSplashScreen("{bg_color}", "{image}");'.format(bg_color=bg_color, image=image))
+        self.run_javascript('Display.setStartupSplashScreen("{bg_color}", "{image}");'.format(bg_color=bg_color,
+                                                                                              image=image))
 
     def set_url(self, url):
         """
@@ -335,10 +338,10 @@ class DisplayWindow(QtWidgets.QWidget):
         """
         Show the display
         """
-        #if self.is_display:
-        #    # Only make visible if setting enabled.
-        #    if not Settings().value('core/display on monitor'):
-        #        return
+        # if self.is_display:
+        #     # Only make visible if setting enabled.
+        #     if not Settings().value('core/display on monitor'):
+        #         return
         self.run_javascript('Display.show();')
         # Check if setting for hiding logo on startup is enabled.
         # If it is, display should remain hidden, otherwise logo is shown. (from def setup)
@@ -362,10 +365,10 @@ class DisplayWindow(QtWidgets.QWidget):
         :param mode: How the screen is to be hidden
         """
         log.debug('hide_display mode = {mode:d}'.format(mode=mode))
-        #if self.is_display:
-        #    # Only make visible if setting enabled.
-        #    if not Settings().value('core/display on monitor'):
-        #        return
+        # if self.is_display:
+        #     # Only make visible if setting enabled.
+        #     if not Settings().value('core/display on monitor'):
+        #         return
         if mode == HideMode.Screen:
             self.setVisible(False)
         elif mode == HideMode.Blank:
@@ -383,4 +386,4 @@ class DisplayWindow(QtWidgets.QWidget):
         Set the HTML scale
         """
         self.scale = scale
-        self.run_javascript('Display.setScale({scale});'.format(scale=scale*100))
+        self.run_javascript('Display.setScale({scale});'.format(scale=scale * 100))

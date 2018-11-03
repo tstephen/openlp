@@ -39,7 +39,7 @@ from openlp.core.common.mixins import RegistryProperties
 from openlp.core.common.path import Path
 from openlp.core.common.settings import Settings
 from openlp.core.display.render import remove_tags, render_tags
-from openlp.core.lib import ImageSource, ItemCapabilities, build_icon
+from openlp.core.lib import ItemCapabilities
 from openlp.core.ui.icons import UiIcons
 
 
@@ -163,7 +163,7 @@ class ServiceItem(RegistryProperties):
         # Save rendered pages to this dict. In the case that a slide is used twice we can use the pages saved to
         # the dict instead of rendering them again.
         previous_pages = {}
-        for raw_slide in self.slides:
+        for index, raw_slide in enumerate(self.slides):
             verse_tag = raw_slide['verse']
             if verse_tag in previous_pages and previous_pages[verse_tag][0] == raw_slide:
                 pages = previous_pages[verse_tag][1]
@@ -174,7 +174,7 @@ class ServiceItem(RegistryProperties):
                 rendered_slide = {
                     'title': raw_slide['title'],
                     'text': render_tags(page),
-                    'verse': verse_tag,
+                    'verse': index,
                 }
                 self._rendered_slides.append(rendered_slide)
                 display_slide = {
@@ -259,11 +259,10 @@ class ServiceItem(RegistryProperties):
             file_location_hash = md5_hash(file_location.encode('utf-8'))
             image = os.path.join(str(AppLocation.get_section_data_path(self.name)), 'thumbnails',
                                  file_location_hash, ntpath.basename(image))
-        self.slides.append({'title': file_name, 'image': image, 'path': path,
-                            'display_title': display_title, 'notes': notes,
-                            'thumbnail' : image})
-        #if self.is_capable(ItemCapabilities.HasThumbnails):
-        #    self.image_manager.add_image(image, ImageSource.CommandPlugins, '#000000')
+        self.slides.append({'title': file_name, 'image': image, 'path': path, 'display_title': display_title,
+                            'notes': notes, 'thumbnail': image})
+        # if self.is_capable(ItemCapabilities.HasThumbnails):
+        #     self.image_manager.add_image(image, ImageSource.CommandPlugins, '#000000')
         self._new_item()
 
     def get_service_repr(self, lite_save):
