@@ -151,15 +151,6 @@ class ScreensTab(SettingsTab):
         self.screen_button_group.setExclusive(True)
         self.screen_button_group.setObjectName('screen_button_group')
 
-        # Signals and slots
-        # self.screen_combo_box.currentIndexChanged.connect(self.on_display_changed)
-        # self.override_radio_button.toggled.connect(self.on_override_radio_button_pressed)
-        # self.custom_height_value_edit.valueChanged.connect(self.on_display_changed)
-        # self.custom_width_value_edit.valueChanged.connect(self.on_display_changed)
-        # self.custom_Y_value_edit.valueChanged.connect(self.on_display_changed)
-        # self.custom_X_value_edit.valueChanged.connect(self.on_display_changed)
-        # Reload the tab, as the screen resolution/count may have changed.
-        # Registry().register_function('config_screen_changed', self.load)
         self.identify_button.clicked.connect(self.on_identify_button_clicked)
 
         self._setup_spin_box(self.left_spin_box, 0, 9999, 0)
@@ -223,7 +214,7 @@ class ScreensTab(SettingsTab):
             custom_geometry.setLeft(self.left_spin_box.value())
             custom_geometry.setWidth(self.width_spin_box.value())
             custom_geometry.setHeight(self.height_spin_box.value())
-            screen.display_geometry = custom_geometry
+            screen.custom_geometry = custom_geometry
 
     def load(self):
         """

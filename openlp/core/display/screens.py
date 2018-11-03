@@ -90,11 +90,11 @@ class Screen(object):
         """
         screen_dict['geometry'] = QtCore.QRect(screen_dict['geometry']['x'], screen_dict['geometry']['y'],
                                                screen_dict['geometry']['width'], screen_dict['geometry']['height'])
-        if 'display_geometry' in screen_dict:
-            screen_dict['display_geometry'] = QtCore.QRect(screen_dict['display_geometry']['x'],
-                                                           screen_dict['display_geometry']['y'],
-                                                           screen_dict['display_geometry']['width'],
-                                                           screen_dict['display_geometry']['height'])
+        if 'custom_geometry' in screen_dict:
+            screen_dict['custom_geometry'] = QtCore.QRect(screen_dict['custom_geometry']['x'],
+                                                          screen_dict['custom_geometry']['y'],
+                                                          screen_dict['custom_geometry']['width'],
+                                                          screen_dict['custom_geometry']['height'])
         return cls(**screen_dict)
 
     def to_dict(self):
@@ -115,12 +115,12 @@ class Screen(object):
             'is_primary': self.is_primary,
             'is_display': self.is_display
         }
-        if self.display_geometry != self.geometry:
-            screen_dict['display_geometry'] = {
-                'x': self.display_geometry.x(),
-                'y': self.display_geometry.y(),
-                'width': self.display_geometry.width(),
-                'height': self.display_geometry.height()
+        if self.custom_geometry is not None:
+            screen_dict['custom_geometry'] = {
+                'x': self.custom_geometry.x(),
+                'y': self.custom_geometry.y(),
+                'width': self.custom_geometry.width(),
+                'height': self.custom_geometry.height()
             }
         return screen_dict
 
@@ -135,11 +135,11 @@ class Screen(object):
         self.is_primary = screen_dict['is_primary']
         self.geometry = QtCore.QRect(screen_dict['geometry']['x'], screen_dict['geometry']['y'],
                                      screen_dict['geometry']['width'], screen_dict['geometry']['height'])
-        if 'display_geometry' in screen_dict:
-            self.display_geometry = QtCore.QRect(screen_dict['display_geometry']['x'],
-                                                 screen_dict['display_geometry']['y'],
-                                                 screen_dict['display_geometry']['width'],
-                                                 screen_dict['display_geometry']['height'])
+        if 'custom_geometry' in screen_dict:
+            self.custom_geometry = QtCore.QRect(screen_dict['custom_geometry']['x'],
+                                                screen_dict['custom_geometry']['y'],
+                                                screen_dict['custom_geometry']['width'],
+                                                screen_dict['custom_geometry']['height'])
 
 
 class ScreenList(object):
