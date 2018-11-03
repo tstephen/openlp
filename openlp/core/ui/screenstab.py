@@ -215,6 +215,8 @@ class ScreensTab(SettingsTab):
             custom_geometry.setWidth(self.width_spin_box.value())
             custom_geometry.setHeight(self.height_spin_box.value())
             screen.custom_geometry = custom_geometry
+        else:
+            screen.custom_geometry = None
 
     def load(self):
         """
