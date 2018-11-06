@@ -523,7 +523,7 @@ class ServiceItem(RegistryProperties):
         if self.is_image() or self.is_capable(ItemCapabilities.IsOptical):
             path_from = frame['filename']
         else:
-            path_from = os.path.join(frame['filename'], frame['title'])
+            path_from = os.path.join(frame['path'], frame['title'])
         return path_from
 
     def remove_frame(self, frame):
