@@ -157,7 +157,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         Initialise the UI elements of the controller
         """
         try:
-            self.ratio = self.screens.current.geometry.width() / self.screens.current.geometry.height()
+            self.ratio = self.screens.current.display_geometry.width() / self.screens.current.display_geometry.height()
         except ZeroDivisionError:
             self.ratio = 1
         self.process_queue_lock = Lock()
@@ -940,7 +940,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         display_with = 0
         for screen in self.screens:
             if screen.is_display:
-                display_with = screen.geometry.width()
+                display_with = screen.display_geometry.width()
         if display_with == 0:
             ratio = 0.25
         else:
@@ -1138,7 +1138,6 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
             else:
                 # to_display = self.service_item.get_rendered_frame(row)
                 if self.service_item.is_text():
-                    print('Row: {}'.format(row))
                     for display in self.displays:
                         display.go_to_slide(row)
                     # self.display.text(to_display, row != old_selected_row)
