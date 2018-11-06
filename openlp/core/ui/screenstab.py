@@ -150,13 +150,20 @@ class ScreensTab(SettingsTab):
         self.screen_button_group = QtWidgets.QButtonGroup(self.screen_frame)
         self.screen_button_group.setExclusive(True)
         self.screen_button_group.setObjectName('screen_button_group')
-
         self.identify_button.clicked.connect(self.on_identify_button_clicked)
 
         self._setup_spin_box(self.left_spin_box, 0, 9999, 0)
         self._setup_spin_box(self.top_spin_box, 0, 9999, 0)
         self._setup_spin_box(self.width_spin_box, 0, 9999, 0)
         self._setup_spin_box(self.height_spin_box, 0, 9999, 0)
+
+        self.generic_group_box = QtWidgets.QGroupBox(self)
+        self.generic_group_box.setObjectName('generic_group_box')
+        self.generic_group_layout = QtWidgets.QVBoxLayout(self.generic_group_box)
+        self.display_on_monitor_check = QtWidgets.QCheckBox(self.generic_group_box)
+        self.display_on_monitor_check.setObjectName('monitor_combo_box')
+        self.generic_group_layout.addWidget(self.display_on_monitor_check)
+        self.tab_layout.addWidget(self.generic_group_box)
 
         self.retranslate_ui()
 
@@ -171,6 +178,8 @@ class ScreensTab(SettingsTab):
         self.height_label.setText(translate('OpenLP.ScreensTab', 'Height'))
         self.screen_number_label.setText(translate('OpenLP.ScreensTab', '<strong>Screen 1</strong>'))
         self.identify_button.setText(translate('OpenLP.ScreensTab', 'Identify Screens'))
+        self.generic_group_box.setTitle(translate('OpenLP.ScreensTab', 'Generic screen settings'))
+        self.display_on_monitor_check.setText(translate('OpenLP.ScreensTab', 'Display if a single screen'))
 
     def resizeEvent(self, event=None):
         """
@@ -242,6 +251,8 @@ class ScreensTab(SettingsTab):
             self.screen_frame_layout.addWidget(screen_button)
             self.screen_button_group.addButton(screen_button)
         self.screen_frame_layout.addStretch()
+        # Load generic settings
+        self.display_on_monitor_check.setChecked(Settings().value('core/display on monitor'))
 
     def save(self):
         """
@@ -253,6 +264,7 @@ class ScreensTab(SettingsTab):
         for screen in self.screens:
             screen_settings[screen.number] = screen.to_dict()
         settings.setValue('core/screens', screen_settings)
+        settings.setValue('core/display on monitor', self.display_on_monitor_check.isChecked())
         # On save update the screens as well
         self.settings_form.register_post_process('config_screen_changed')
 

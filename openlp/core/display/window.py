@@ -114,7 +114,7 @@ class DisplayWindow(QtWidgets.QWidget):
         from openlp.core.display.webengine import WebEngineView
         self._is_initialised = False
         self._fbo = None
-        self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.Tool)  # | QtCore.Qt.WindowStaysOnTopHint
+        self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.Tool | QtCore.Qt.WindowStaysOnTopHint)
         self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
         self.setAutoFillBackground(True)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
@@ -139,8 +139,8 @@ class DisplayWindow(QtWidgets.QWidget):
             self.update_from_screen(screen)
             self.is_display = True
             # Only make visible if setting enabled.
-            # if Settings().value('core/display on monitor'):
-            self.show()
+            if Settings().value('core/display on monitor'):
+                self.show()
 
     def update_from_screen(self, screen):
         """
@@ -338,10 +338,10 @@ class DisplayWindow(QtWidgets.QWidget):
         """
         Show the display
         """
-        # if self.is_display:
-        #     # Only make visible if setting enabled.
-        #     if not Settings().value('core/display on monitor'):
-        #         return
+        if self.is_display:
+            # Only make visible if setting enabled.
+            if not Settings().value('core/display on monitor'):
+                return
         self.run_javascript('Display.show();')
         # Check if setting for hiding logo on startup is enabled.
         # If it is, display should remain hidden, otherwise logo is shown. (from def setup)
@@ -365,10 +365,10 @@ class DisplayWindow(QtWidgets.QWidget):
         :param mode: How the screen is to be hidden
         """
         log.debug('hide_display mode = {mode:d}'.format(mode=mode))
-        # if self.is_display:
-        #     # Only make visible if setting enabled.
-        #     if not Settings().value('core/display on monitor'):
-        #         return
+        if self.is_display:
+            # Only make visible if setting enabled.
+            if not Settings().value('core/display on monitor'):
+                return
         if mode == HideMode.Screen:
             self.setVisible(False)
         elif mode == HideMode.Blank:
