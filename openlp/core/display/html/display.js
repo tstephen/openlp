@@ -368,6 +368,20 @@ var Display = {
     Display.reinit();
   },
   /**
+   * Display an alert
+   * @param {string} text - The alert text
+   * @param {int} location - The location of the text (top, middle or bottom)
+  */
+ alert: function (text, location) {
+  console.debug(" alert text: " + text, ", location: " + location);
+  /*
+   * The implementation should show an alert.
+   * It should be able to handle receiving a new alert before a previous one is "finished", basically queueing it.
+   */
+  return;
+},
+
+  /**
    * Add a slides. If the slide exists but the HTML is different, update the slide.
    * @param {string} verse - The verse number, e.g. "v1"
    * @param {string} html - The HTML for the verse, e.g. "line1<br>line2"

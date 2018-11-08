@@ -387,3 +387,9 @@ class DisplayWindow(QtWidgets.QWidget):
         """
         self.scale = scale
         self.run_javascript('Display.setScale({scale});'.format(scale=scale * 100))
+
+    def alert(self, text, location):
+        """
+        Set an alert
+        """
+        self.run_javascript('Display.alert({text}, {location});'.format(text=text, location=location))
