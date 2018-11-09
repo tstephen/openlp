@@ -33,6 +33,7 @@ from openlp.core.common.path import Path, path_to_str
 from openlp.core.common.settings import Settings
 from openlp.core.common.registry import Registry
 from openlp.core.ui import HideMode
+from openlp.core.display.screens import ScreenList
 
 log = logging.getLogger(__name__)
 DISPLAY_PATH = Path(__file__).parent / 'html' / 'display.html'
@@ -138,8 +139,8 @@ class DisplayWindow(QtWidgets.QWidget):
             Registry().register_function('live_display_show', self.show_display)
             self.update_from_screen(screen)
             self.is_display = True
-            # Only make visible if setting enabled.
-            if Settings().value('core/display on monitor'):
+            # Only make visible on single monitor setup if setting enabled.
+            if len(ScreenList()) > 1 or Settings().value('core/display on monitor'):
                 self.show()
 
     def update_from_screen(self, screen):
@@ -152,8 +153,9 @@ class DisplayWindow(QtWidgets.QWidget):
         self.screen_number = screen.number
 
     def set_single_image(self, bg_color, image):
+        image_uri = image.as_uri()
         self.run_javascript('Display.setFullscreenImage("{bg_color}", "{image}");'.format(bg_color=bg_color,
-                                                                                          image=image))
+                                                                                          image=image_uri))
 
     def set_single_image_data(self, bg_color, image_data):
         self.run_javascript('Display.setFullscreenImageFromData("{bg_color}", '
@@ -164,8 +166,9 @@ class DisplayWindow(QtWidgets.QWidget):
         image = Settings().value('core/logo file')
         if path_to_str(image).startswith(':'):
             image = OPENLP_SPLASH_SCREEN_PATH
+        image_uri = image.as_uri()
         self.run_javascript('Display.setStartupSplashScreen("{bg_color}", "{image}");'.format(bg_color=bg_color,
-                                                                                              image=image))
+                                                                                              image=image_uri))
 
     def set_url(self, url):
         """
@@ -339,8 +342,8 @@ class DisplayWindow(QtWidgets.QWidget):
         Show the display
         """
         if self.is_display:
-            # Only make visible if setting enabled.
-            if not Settings().value('core/display on monitor'):
+            # Only make visible on single monitor setup if setting enabled.
+            if len(ScreenList()) == 1 and not Settings().value('core/display on monitor'):
                 return
         self.run_javascript('Display.show();')
         # Check if setting for hiding logo on startup is enabled.
@@ -366,8 +369,8 @@ class DisplayWindow(QtWidgets.QWidget):
         """
         log.debug('hide_display mode = {mode:d}'.format(mode=mode))
         if self.is_display:
-            # Only make visible if setting enabled.
-            if not Settings().value('core/display on monitor'):
+            # Only make visible on single monitor setup if setting enabled.
+            if len(ScreenList()) == 1 and not Settings().value('core/display on monitor'):
                 return
         if mode == HideMode.Screen:
             self.setVisible(False)
