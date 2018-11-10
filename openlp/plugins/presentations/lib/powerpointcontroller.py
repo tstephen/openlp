@@ -196,7 +196,7 @@ class PowerpointDocument(PresentationDocument):
         self.presentation = None
         self.controller.remove_doc(self)
         # Make sure powerpoint doesn't steal focus, unless we're on a single screen setup
-        if len(ScreenList().screen_list) > 1:
+        if len(ScreenList()) > 1:
             Registry().get('main_window').activateWindow()
 
     def is_loaded(self):
@@ -315,7 +315,7 @@ class PowerpointDocument(PresentationDocument):
                     dpi = win32ui.GetForegroundWindow().GetDC().GetDeviceCaps(88)
                 except win32ui.error:
                     dpi = 96
-            size = ScreenList().current['size']
+            size = ScreenList().current.display_geometry
             ppt_window = None
             try:
                 ppt_window = self.presentation.SlideShowSettings.Run()

@@ -51,7 +51,7 @@ from openlp.core.ui.aboutform import AboutForm
 from openlp.core.ui.firsttimeform import FirstTimeForm
 from openlp.core.ui.formattingtagform import FormattingTagForm
 from openlp.core.ui.icons import UiIcons
-from openlp.core.ui.media import MediaController
+from openlp.core.ui.media.mediacontroller import MediaController
 from openlp.core.ui.pluginform import PluginForm
 from openlp.core.ui.printserviceform import PrintServiceForm
 from openlp.core.ui.servicemanager import ServiceManager

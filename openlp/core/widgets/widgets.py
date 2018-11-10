@@ -250,14 +250,6 @@ class ScreenSelectionWidget(QtWidgets.QWidget):
         self.layout.addStretch()
 
         # Signals and slots
-        # self.screen_combo_box.currentIndexChanged.connect(self.on_display_changed)
-        # self.override_radio_button.toggled.connect(self.on_override_radio_button_pressed)
-        # self.custom_height_value_edit.valueChanged.connect(self.on_display_changed)
-        # self.custom_width_value_edit.valueChanged.connect(self.on_display_changed)
-        # self.custom_Y_value_edit.valueChanged.connect(self.on_display_changed)
-        # self.custom_X_value_edit.valueChanged.connect(self.on_display_changed)
-        # Reload the tab, as the screen resolution/count may have changed.
-        # Registry().register_function('config_screen_changed', self.load)
         self.custom_geometry_button.toggled.connect(self.height_spin_box.setEnabled)
         self.custom_geometry_button.toggled.connect(self.left_spin_box.setEnabled)
         self.custom_geometry_button.toggled.connect(self.top_spin_box.setEnabled)

@@ -36,7 +36,7 @@ from openlp.core.common.registry import Registry, RegistryBase
 from openlp.core.common.settings import Settings
 from openlp.core.display.screens import ScreenList
 from openlp.core.display.window import DisplayWindow
-from openlp.core.lib import ImageSource, ServiceItemAction
+from openlp.core.lib import ServiceItemAction, image_to_byte
 from openlp.core.lib.serviceitem import ItemCapabilities
 from openlp.core.lib.ui import create_action
 from openlp.core.ui import DisplayControllerType, HideMode
@@ -157,7 +157,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         Initialise the UI elements of the controller
         """
         try:
-            self.ratio = self.screens.current.geometry.width() / self.screens.current.geometry.height()
+            self.ratio = self.screens.current.display_geometry.width() / self.screens.current.display_geometry.height()
         except ZeroDivisionError:
             self.ratio = 1
         self.process_queue_lock = Lock()
@@ -940,7 +940,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         display_with = 0
         for screen in self.screens:
             if screen.is_display:
-                display_with = screen.geometry.width()
+                display_with = screen.display_geometry.width()
         if display_with == 0:
             ratio = 0.25
         else:
@@ -1183,13 +1183,14 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
             else:
                 # If not live, use the slide's thumbnail/icon instead
                 image_path = self.service_item.get_rendered_frame(self.selected_row)
-                if self.service_item.is_capable(ItemCapabilities.HasThumbnails):
-                    image = self.image_manager.get_image(image_path, ImageSource.CommandPlugins)
-                    self.slide_image = QtGui.QPixmap.fromImage(image)
-                else:
-                    self.slide_image = QtGui.QPixmap(image_path)
-                self.slide_image.setDevicePixelRatio(self.main_window.devicePixelRatio())
-                self.slide_preview.setPixmap(self.slide_image)
+                # if self.service_item.is_capable(ItemCapabilities.HasThumbnails):
+                #     image = self.image_manager.get_image(image_path, ImageSource.CommandPlugins)
+                #     self.slide_image = QtGui.QPixmap.fromImage(image)
+                # else:
+                # self.slide_image = QtGui.QPixmap(image_path)
+                # self.slide_image.setDevicePixelRatio(self.main_window.devicePixelRatio())
+                # self.slide_preview.setPixmap(self.slide_image)
+                self.preview_display.set_single_image('#000', image_path)
         else:
             self.preview_display.go_to_slide(self.selected_row)
         self.slide_count += 1
@@ -1200,11 +1201,13 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         """
         win_id = QtWidgets.QApplication.desktop().winId()
         screen = QtWidgets.QApplication.primaryScreen()
-        rect = self.screens.current['size']
+        rect = ScreenList().current.display_geometry
         win_image = screen.grabWindow(win_id, rect.x(), rect.y(), rect.width(), rect.height())
-        win_image.setDevicePixelRatio(self.slide_preview.devicePixelRatio())
-        self.slide_preview.setPixmap(win_image)
+        win_image.setDevicePixelRatio(self.preview_display.devicePixelRatio())
+        # self.slide_preview.setPixmap(win_image)
         self.slide_image = win_image
+        base64_image = image_to_byte(win_image, True)
+        self.preview_display.set_single_image_data('#000', base64_image)
 
     def on_slide_selected_next_action(self, checked):
         """

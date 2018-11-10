@@ -28,6 +28,12 @@ import urllib.error
 from lxml import etree
 from PyQt5 import QtWidgets
 
+try:
+    from pysword import modules
+    PYSWORD_AVAILABLE = True
+except ImportError:
+    PYSWORD_AVAILABLE = False
+
 from openlp.core.common import trace_error_handler
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.i18n import UiStrings, get_locale_key, translate
@@ -40,13 +46,6 @@ from openlp.core.widgets.wizard import OpenLPWizard, WizardStrings
 from openlp.plugins.bibles.lib.db import clean_filename
 from openlp.plugins.bibles.lib.importers.http import BGExtract, BSExtract, CWExtract
 from openlp.plugins.bibles.lib.manager import BibleFormat
-
-
-try:
-    from pysword import modules
-    PYSWORD_AVAILABLE = True
-except:
-    PYSWORD_AVAILABLE = False
 
 
 log = logging.getLogger(__name__)
@@ -585,7 +584,7 @@ class BibleImportForm(OpenLPWizard):
                                            (WebDownload.Bibleserver, BSExtract())):
             try:
                 bibles = extractor.get_bibles_from_http()
-            except (urllib.error.URLError, ConnectionError) as err:
+            except (urllib.error.URLError, ConnectionError):
                 critical_error_message_box(translate('BiblesPlugin.ImportWizardForm', 'Error during download'),
                                            translate('BiblesPlugin.ImportWizardForm',
                                                      'An error occurred while downloading the list of bibles from %s.'))
@@ -615,7 +614,7 @@ class BibleImportForm(OpenLPWizard):
                 self.sword_bible_combo_box.clear()
                 for key in bible_keys:
                     self.sword_bible_combo_box.addItem(self.pysword_folder_modules_json[key]['description'], key)
-            except:
+            except Exception:
                 self.sword_bible_combo_box.clear()
 
     def on_sword_zipfile_path_edit_path_changed(self, new_path):
@@ -630,7 +629,7 @@ class BibleImportForm(OpenLPWizard):
                 self.sword_zipbible_combo_box.clear()
                 for key in bible_keys:
                     self.sword_zipbible_combo_box.addItem(self.pysword_zip_modules_json[key]['description'], key)
-            except:
+            except Exception:
                 self.sword_zipbible_combo_box.clear()
 
     def register_fields(self):

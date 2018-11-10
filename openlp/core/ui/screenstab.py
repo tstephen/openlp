@@ -56,19 +56,22 @@ class ScreensTab(SettingsTab):
 
         self.screen_selection_widget = ScreenSelectionWidget(self, ScreenList())
         self.tab_layout.addWidget(self.screen_selection_widget)
+        self.generic_group_box = QtWidgets.QGroupBox(self)
+        self.generic_group_box.setObjectName('generic_group_box')
+        self.generic_group_layout = QtWidgets.QVBoxLayout(self.generic_group_box)
+        self.display_on_monitor_check = QtWidgets.QCheckBox(self.generic_group_box)
+        self.display_on_monitor_check.setObjectName('monitor_combo_box')
+        self.generic_group_layout.addWidget(self.display_on_monitor_check)
+        self.tab_layout.addWidget(self.generic_group_box)
 
         Registry().register_function('config_screen_changed', self.screen_selection_widget.load)
 
+        self.retranslate_ui()
+
     def retranslate_ui(self):
         self.setWindowTitle(translate('self', 'self'))  # TODO: ???
-
-    def load(self):
-        """
-        Load the settings to populate the tab
-        """
-        settings = Settings()
-        settings.beginGroup(self.settings_section)
-        self.screen_selection_widget.load()
+        self.generic_group_box.setTitle(translate('OpenLP.ScreensTab', 'Generic screen settings'))
+        self.display_on_monitor_check.setText(translate('OpenLP.ScreensTab', 'Display if a single screen'))
 
     def resizeEvent(self, event=None):
         """
@@ -78,6 +81,18 @@ class ScreensTab(SettingsTab):
         """
         QtWidgets.QWidget.resizeEvent(self, event)
 
+    def load(self):
+        """
+        Load the settings to populate the tab
+        """
+        settings = Settings()
+        settings.beginGroup(self.settings_section)
+        self.screen_selection_widget.load()
+        # Load generic settings
+        self.display_on_monitor_check.setChecked(Settings().value('core/display on monitor'))
+
     def save(self):
         self.screen_selection_widget.save()
+        settings.setValue('core/display on monitor', self.display_on_monitor_check.isChecked())
+        # On save update the screens as well
         self.settings_form.register_post_process('config_screen_changed')

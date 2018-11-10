@@ -25,11 +25,9 @@ The :mod:`openlp.core.version` module downloads the version details for OpenLP.
 import logging
 import platform
 import sys
-import time
 from collections import OrderedDict
 from datetime import date
 from distutils.version import LooseVersion
-from subprocess import PIPE, Popen
 
 import requests
 from PyQt5 import QtCore
@@ -54,7 +52,6 @@ LIBRARIES = OrderedDict([
     ('Chardet', ('chardet',)),
     ('PyEnchant', ('enchant',)),
     ('Mako', ('mako',)),
-    ('pyICU', ('icu', 'VERSION')),
     ('VLC', ('openlp.core.ui.media.vlcplayer', 'VERSION')),
 ])
 

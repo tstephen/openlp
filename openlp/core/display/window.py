@@ -31,7 +31,9 @@ from PyQt5 import QtCore, QtWebChannel, QtWidgets
 
 from openlp.core.common.path import Path, path_to_str
 from openlp.core.common.settings import Settings
-
+from openlp.core.common.registry import Registry
+from openlp.core.ui import HideMode
+from openlp.core.display.screens import ScreenList
 
 log = logging.getLogger(__name__)
 DISPLAY_PATH = Path(__file__).parent / 'html' / 'display.html'
@@ -113,15 +115,15 @@ class DisplayWindow(QtWidgets.QWidget):
         from openlp.core.display.webengine import WebEngineView
         self._is_initialised = False
         self._fbo = None
-        self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.Tool) #| QtCore.Qt.WindowStaysOnTopHint
-        self.setAttribute(QtCore.Qt.WA_TranslucentBackground);
-        self.setAutoFillBackground(True);
+        self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.Tool | QtCore.Qt.WindowStaysOnTopHint)
+        self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
+        self.setAutoFillBackground(True)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.layout = QtWidgets.QVBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.webview = WebEngineView(self)
-        self.webview.setAttribute(QtCore.Qt.WA_TranslucentBackground);
-        self.webview.page().setBackgroundColor(QtCore.Qt.transparent);
+        self.webview.setAttribute(QtCore.Qt.WA_TranslucentBackground)
+        self.webview.page().setBackgroundColor(QtCore.Qt.transparent)
         self.layout.addWidget(self.webview)
         self.webview.loadFinished.connect(self.after_loaded)
         self.set_url(QtCore.QUrl.fromLocalFile(path_to_str(DISPLAY_PATH)))
@@ -131,10 +133,15 @@ class DisplayWindow(QtWidgets.QWidget):
         self.webview.page().setWebChannel(self.channel)
         self.is_display = False
         self.scale = 1
+        self.hide_mode = None
         if screen and screen.is_display:
+            Registry().register_function('live_display_hide', self.hide_display)
+            Registry().register_function('live_display_show', self.show_display)
             self.update_from_screen(screen)
             self.is_display = True
-            self.show()
+            # Only make visible on single monitor setup if setting enabled.
+            if len(ScreenList()) > 1 or Settings().value('core/display on monitor'):
+                self.show()
 
     def update_from_screen(self, screen):
         """
@@ -145,12 +152,23 @@ class DisplayWindow(QtWidgets.QWidget):
         self.setGeometry(screen.display_geometry)
         self.screen_number = screen.number
 
+    def set_single_image(self, bg_color, image):
+        image_uri = image.as_uri()
+        self.run_javascript('Display.setFullscreenImage("{bg_color}", "{image}");'.format(bg_color=bg_color,
+                                                                                          image=image_uri))
+
+    def set_single_image_data(self, bg_color, image_data):
+        self.run_javascript('Display.setFullscreenImageFromData("{bg_color}", '
+                            '"{image_data}");'.format(bg_color=bg_color, image_data=image_data))
+
     def set_startup_screen(self):
         bg_color = Settings().value('core/logo background color')
         image = Settings().value('core/logo file')
         if path_to_str(image).startswith(':'):
             image = OPENLP_SPLASH_SCREEN_PATH
-        self.run_javascript('Display.setStartupSplashScreen("{bg_color}", "{image}");'.format(bg_color=bg_color, image=image))
+        image_uri = image.as_uri()
+        self.run_javascript('Display.setStartupSplashScreen("{bg_color}", "{image}");'.format(bg_color=bg_color,
+                                                                                              image=image_uri))
 
     def set_url(self, url):
         """
@@ -323,11 +341,58 @@ class DisplayWindow(QtWidgets.QWidget):
         """
         Show the display
         """
+        if self.is_display:
+            # Only make visible on single monitor setup if setting enabled.
+            if len(ScreenList()) == 1 and not Settings().value('core/display on monitor'):
+                return
         self.run_javascript('Display.show();')
+        # Check if setting for hiding logo on startup is enabled.
+        # If it is, display should remain hidden, otherwise logo is shown. (from def setup)
+        if self.isHidden() and not Settings().value('core/logo hide on startup'):
+            self.setVisible(True)
+        self.hide_mode = None
+        # Trigger actions when display is active again.
+        if self.is_display:
+            Registry().execute('live_display_active')
+
+    def blank_to_theme(self):
+        """
+        Blank to theme
+        """
+        self.run_javascript('Display.blankToTheme();')
+
+    def hide_display(self, mode=HideMode.Screen):
+        """
+        Hide the display by making all layers transparent Store the images so they can be replaced when required
+
+        :param mode: How the screen is to be hidden
+        """
+        log.debug('hide_display mode = {mode:d}'.format(mode=mode))
+        if self.is_display:
+            # Only make visible on single monitor setup if setting enabled.
+            if len(ScreenList()) == 1 and not Settings().value('core/display on monitor'):
+                return
+        if mode == HideMode.Screen:
+            self.setVisible(False)
+        elif mode == HideMode.Blank:
+            self.run_javascript('Display.blankToBlack();')
+        else:
+            self.run_javascript('Display.blankToTheme();')
+        if mode != HideMode.Screen:
+            if self.isHidden():
+                self.setVisible(True)
+                self.webview.setVisible(True)
+        self.hide_mode = mode
 
     def set_scale(self, scale):
         """
         Set the HTML scale
         """
         self.scale = scale
-        self.run_javascript('Display.setScale({scale});'.format(scale=scale*100))
+        self.run_javascript('Display.setScale({scale});'.format(scale=scale * 100))
+
+    def alert(self, text, location):
+        """
+        Set an alert
+        """
+        self.run_javascript('Display.alert({text}, {location});'.format(text=text, location=location))

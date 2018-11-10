@@ -32,7 +32,9 @@ from openlp.core.lib.db import Manager
 from openlp.core.lib.plugin import Plugin, StringContent
 from openlp.core.ui.icons import UiIcons
 from openlp.plugins.images.endpoint import api_images_endpoint, images_endpoint
-from openlp.plugins.images.lib import ImageMediaItem, ImageTab, upgrade
+from openlp.plugins.images.lib import upgrade
+from openlp.plugins.images.lib.mediaitem import ImageMediaItem
+from openlp.plugins.images.lib.imagetab import ImageTab
 from openlp.plugins.images.lib.db import init_schema
 
 

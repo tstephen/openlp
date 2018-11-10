@@ -53,9 +53,10 @@ class WebEnginePage(QtWebEngineWidgets.QWebEnginePage):
 
 class WebEngineView(QtWebEngineWidgets.QWebEngineView):
     """
-    A sub-classed QWebEngineView to handle paint events of OpenGL
+    A sub-classed QWebEngineView to handle paint events of OpenGL (does not seem to work)
+    and set some attributtes.
     """
-    _child = None  # QtWidgets.QOpenGLWidget
+    _child = None  # QtWidgets.QOpenGLWidget or QWidget?
     delegatePaint = QtCore.pyqtSignal()
 
     def __init__(self, parent=None):
@@ -84,9 +85,9 @@ class WebEngineView(QtWebEngineWidgets.QWebEngineView):
         Handle events
         """
         if ev.type() == QtCore.QEvent.ChildAdded:
-            # Only use QOpenGLWidget child
+            # Only use QWidget child (used to be QOpenGLWidget)
             w = ev.child()
-            if w and isinstance(w, QtWidgets.QOpenGLWidget):
+            if w and isinstance(w, QtWidgets.QWidget):
                 self._child = w
                 w.installEventFilter(self)
         return super(WebEngineView, self).event(ev)

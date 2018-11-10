@@ -34,42 +34,30 @@ from openlp.core.ui import exceptionform
 from tests.helpers.testmixin import TestMixin
 
 
-exceptionform.WEBKIT_VERSION = 'Webkit Test'
 exceptionform.MIGRATE_VERSION = 'Migrate Test'
 exceptionform.CHARDET_VERSION = 'CHARDET Test'
 exceptionform.ENCHANT_VERSION = 'Enchant Test'
 exceptionform.MAKO_VERSION = 'Mako Test'
-exceptionform.ICU_VERSION = 'ICU Test'
 exceptionform.VLC_VERSION = 'VLC Test'
 
 MAIL_ITEM_TEXT = ('**OpenLP Bug Report**\nVersion: Trunk Test\n\n--- Details of the Exception. ---\n\n'
                   'Description Test\n\n --- Exception Traceback ---\nopenlp: Traceback Test\n'
                   '--- System information ---\nPlatform: Nose Test\n\n--- Library Versions ---\n'
-                  'Python: Python Test\nQt5: Qt5 Test\nPyQt5: PyQt5 Test\n'
-                  'SQLAlchemy: SQLAlchemy Test\nAlembic: Alembic Test\nBeautifulSoup: BeautifulSoup Test\n'
-                  'lxml: ETree Test\nChardet: Chardet Test\nPyEnchant: PyEnchant Test\nMako: Mako Test\n'
-                  'pyICU: pyICU Test\nVLC: VLC Test\nPyUNO: UNO Bridge Test\n')
-LIBRARY_VERSIONS = OrderedDict([
-    ('Python', 'Python Test'),
-    ('Qt5', 'Qt5 Test'),
-    ('PyQt5', 'PyQt5 Test'),
-    ('SQLAlchemy', 'SQLAlchemy Test'),
-    ('Alembic', 'Alembic Test'),
-    ('BeautifulSoup', 'BeautifulSoup Test'),
-    ('lxml', 'ETree Test'),
-    ('Chardet', 'Chardet Test'),
-    ('PyEnchant', 'PyEnchant Test'),
-    ('Mako', 'Mako Test'),
-    ('pyICU', 'pyICU Test'),
-    ('VLC', 'VLC Test')
-])
+                  'Python: Python Test\nQt5: Qt5 test\nPyQt5: PyQt5 Test\n'
+                  'SQLAlchemy: SqlAlchemy Test\nSQLAlchemy Migrate: Migrate Test\nBeautifulSoup: BeautifulSoup Test\n'
+                  'lxml: ETree Test\nChardet: CHARDET Test\nPyEnchant: Enchant Test\nMako: Mako Test\n'
+                  'pyUNO bridge: UNO Bridge Test\nVLC: VLC Test\n\n')
 
 
-@patch('openlp.core.ui.exceptionform.QtGui.QDesktopServices.openUrl')
-@patch('openlp.core.ui.exceptionform.get_version')
-@patch('openlp.core.ui.exceptionform.get_library_versions')
-@patch('openlp.core.ui.exceptionform.is_linux')
-@patch('openlp.core.ui.exceptionform.platform.platform')
+@patch("openlp.core.ui.exceptionform.Qt.qVersion")
+@patch("openlp.core.ui.exceptionform.QtGui.QDesktopServices.openUrl")
+@patch("openlp.core.ui.exceptionform.get_version")
+@patch("openlp.core.ui.exceptionform.sqlalchemy")
+@patch("openlp.core.ui.exceptionform.bs4")
+@patch("openlp.core.ui.exceptionform.etree")
+@patch("openlp.core.ui.exceptionform.is_linux")
+@patch("openlp.core.ui.exceptionform.platform.platform")
+@patch("openlp.core.ui.exceptionform.platform.python_version")
 class TestExceptionForm(TestMixin, TestCase):
     """
     Test functionality of exception form functions

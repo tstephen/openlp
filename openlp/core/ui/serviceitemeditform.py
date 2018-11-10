@@ -51,7 +51,7 @@ class ServiceItemEditForm(QtWidgets.QDialog, Ui_ServiceItemEditDialog, RegistryP
         self.item_list = []
         if self.item.is_image():
             self.data = True
-            self.item_list.extend(self.item._raw_frames)
+            self.item_list.extend(self.item.slides)
         self.load_data()
         self.list_widget.setCurrentItem(self.list_widget.currentItem())
 
@@ -60,7 +60,7 @@ class ServiceItemEditForm(QtWidgets.QDialog, Ui_ServiceItemEditDialog, RegistryP
         Get the modified service item.
         """
         if self.data:
-            self.item._raw_frames = []
+            self.item.slides = []
             if self.item.is_image():
                 for item in self.item_list:
                     self.item.add_from_image(item['path'], item['title'])

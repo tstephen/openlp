@@ -28,7 +28,7 @@ import math
 import re
 import time
 
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtGui
 
 from openlp.core.lib.formattingtags import FormattingTags
 from openlp.core.common.registry import Registry, RegistryBase
@@ -469,24 +469,13 @@ class Renderer(RegistryBase, LogMixin, RegistryProperties, DisplayWindow):
             self.set_theme(theme_data)
             self.theme_height = theme_data.font_main_height
             slides = self.format_slide(render_tags(VERSE), None)
-            print(slides)
             verses = dict()
             verses['title'] = TITLE
             verses['text'] = slides[0]
             verses['verse'] = 'V1'
             self.load_verses([verses])
             self.force_page = False
-            QtWidgets.QApplication.instance().processEvents()
-            pixmap = self.webview.grab()
-            QtWidgets.QApplication.instance().processEvents()
-            pixmap = self.webview.grab()
-            time.sleep(0.5)
-            self.show()
-            QtWidgets.QApplication.instance().processEvents()
-            pixmap = self.grab()
-            self.hide()
-            #pixmap.save('/tmp/screen-grab.png', 'png')
-            return pixmap
+            return self.save_screenshot()
         self.force_page = False
         return None
 
@@ -724,3 +713,23 @@ class Renderer(RegistryBase, LogMixin, RegistryProperties, DisplayWindow):
         self.run_javascript('Display.addTextSlide("v1", "{text}");'.format(text=text), is_sync=True)
         does_text_fits = self.run_javascript('Display.doesContentFit();', is_sync=True)
         return does_text_fits
+
+    def save_screenshot(self, fname=None):
+        """
+        Save a screenshot, either returning it or saving it to file. Do some extra work to actually get a picture.
+        """
+        self.setVisible(True)
+        pixmap = self.grab()
+        for i in range(0, 4):
+            QtWidgets.QApplication.instance().processEvents()
+            time.sleep(0.05)
+            QtWidgets.QApplication.instance().processEvents()
+            pixmap = self.grab()
+        self.setVisible(False)
+        pixmap = QtGui.QPixmap(self.webview.size())
+        self.webview.render(pixmap)
+        if fname:
+            ext = os.path.splitext(fname)[-1][1:]
+            pixmap.save(fname, ext)
+        else:
+            return pixmap
