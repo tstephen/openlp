@@ -84,7 +84,7 @@ def upgrade_screens(number, x_position, y_position, height, width, can_override,
     """
     geometry_key = 'geometry'
     if can_override:
-        geometry_key = 'display_geometry'
+        geometry_key = 'custom_geometry'
     return {
         number: {
             'number': number,

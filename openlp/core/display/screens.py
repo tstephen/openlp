@@ -90,7 +90,7 @@ class Screen(object):
         """
         screen_dict['geometry'] = QtCore.QRect(screen_dict['geometry']['x'], screen_dict['geometry']['y'],
                                                screen_dict['geometry']['width'], screen_dict['geometry']['height'])
-        if 'display_geometry' in screen_dict:
+        if 'custom_geometry' in screen_dict:
             screen_dict['display_geometry'] = QtCore.QRect(screen_dict['display_geometry']['x'],
                                                            screen_dict['display_geometry']['y'],
                                                            screen_dict['display_geometry']['width'],
