@@ -150,7 +150,7 @@ class PowerpointDocument(PresentationDocument):
             self.create_thumbnails()
             self.create_titles_and_notes()
             # Make sure powerpoint doesn't steal focus, unless we're on a single screen setup
-            if len(ScreenList().screen_list) > 1:
+            if len(ScreenList()) > 1:
                 Registry().get('main_window').activateWindow()
             return True
         except (AttributeError, pywintypes.com_error):
@@ -186,7 +186,7 @@ class PowerpointDocument(PresentationDocument):
         Close presentation and clean up objects. This is triggered by a new object being added to SlideController or
         OpenLP being shut down.
         """
-        log.debug('ClosePresentation')
+        log.debug('close_presentation')
         if self.presentation:
             try:
                 self.presentation.Close()
@@ -252,7 +252,7 @@ class PowerpointDocument(PresentationDocument):
         if self.presentation_hwnd:
             win32gui.FlashWindowEx(self.presentation_hwnd, win32con.FLASHW_STOP, 0, 0)
         # Make sure powerpoint doesn't steal focus, unless we're on a single screen setup
-        if len(ScreenList().screen_list) > 1:
+        if len(ScreenList()) > 1:
             Registry().get('main_window').activateWindow()
 
     def blank_screen(self):
@@ -339,7 +339,7 @@ class PowerpointDocument(PresentationDocument):
                                                             x=size.x(), width=size.width()))
                 win32gui.EnumWindows(self._window_enum_callback, size)
             # Make sure powerpoint doesn't steal focus, unless we're on a single screen setup
-            if len(ScreenList().screen_list) > 1:
+            if len(ScreenList()) > 1:
                 Registry().get('main_window').activateWindow()
 
     def _window_enum_callback(self, hwnd, size):
@@ -379,7 +379,7 @@ class PowerpointDocument(PresentationDocument):
         try:
             # We need 2 approaches to getting the current slide number, because
             # SlideShowWindow.View.Slide.SlideIndex wont work on the end-slide where Slide isn't available, and
-            # SlideShowWindow.View.CurrentShowPosition returns 0 when called when a transistion is executing (in 2013)
+            # SlideShowWindow.View.CurrentShowPosition returns 0 when called when a transition is executing (in 2013)
             # So we use SlideShowWindow.View.Slide.SlideIndex unless the state is done (ppSlideShowDone = 5)
             if self.presentation.SlideShowWindow.View.State != 5:
                 ret = self.presentation.SlideShowWindow.View.Slide.SlideNumber
@@ -443,7 +443,7 @@ class PowerpointDocument(PresentationDocument):
         if self.presentation_hwnd:
             win32gui.FlashWindowEx(self.presentation_hwnd, win32con.FLASHW_STOP, 0, 0)
         # Make sure powerpoint doesn't steal focus, unless we're on a single screen setup
-        if len(ScreenList().screen_list) > 1:
+        if len(ScreenList()) > 1:
             Registry().get('main_window').activateWindow()
 
     def previous_step(self):
@@ -490,7 +490,8 @@ class PowerpointDocument(PresentationDocument):
             except Exception:
                 log.exception('Exception raised when getting title text')
                 text = ''
-            titles.append(text.replace('\n', ' ').replace('\x0b', ' ') + '\n')
+            slide_title = text.replace('\r\n', ' ').replace('\n', ' ').replace('\x0b', ' ').strip()
+            titles.append(slide_title)
             note = _get_text_from_shapes(slide.NotesPage.Shapes)
             if len(note) == 0:
                 note = ' '
