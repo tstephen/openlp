@@ -165,24 +165,23 @@ class ServiceItem(RegistryProperties):
         previous_pages = {}
         for index, raw_slide in enumerate(self.slides):
             verse_tag = raw_slide['verse']
-            if verse_tag in previous_pages and previous_pages[verse_tag][0] == raw_slide:
-                pages = previous_pages[verse_tag][1]
+            if verse_tag in previous_pages and previous_pages[verse_tag][1] == raw_slide:
+                page = previous_pages[verse_tag][1]
             else:
-                pages = self.renderer.format_slide(raw_slide['text'], self)
-                previous_pages[verse_tag] = (raw_slide, pages)
-            for page in pages:
-                rendered_slide = {
-                    'title': raw_slide['title'],
-                    'text': render_tags(page),
-                    'verse': index,
-                }
-                self._rendered_slides.append(rendered_slide)
-                display_slide = {
-                    'title': raw_slide['title'],
-                    'text': remove_tags(page),
-                    'verse': verse_tag,
-                }
-                self._display_slides.append(display_slide)
+                page = render_tags(raw_slide['text'], self)
+                previous_pages[verse_tag] = (raw_slide, page)
+            rendered_slide = {
+                'title': raw_slide['title'],
+                'text': page,
+                'verse': index,
+            }
+            self._rendered_slides.append(rendered_slide)
+            display_slide = {
+                'title': raw_slide['title'],
+                'text': remove_tags(page),
+                'verse': verse_tag,
+            }
+            self._display_slides.append(display_slide)
 
     @property
     def rendered_slides(self):
@@ -362,6 +361,7 @@ class ServiceItem(RegistryProperties):
         if self.service_item_type == ServiceItemType.Text:
             for slide in service_item['serviceitem']['data']:
                 self.add_from_text(slide['raw_slide'], slide['verseTag'])
+            self._create_slides()
         elif self.service_item_type == ServiceItemType.Image:
             settings_section = service_item['serviceitem']['header']['name']
             background = QtGui.QColor(Settings().value(settings_section + '/background color'))
@@ -485,7 +485,7 @@ class ServiceItem(RegistryProperties):
         Returns the frames for the ServiceItem
         """
         if self.service_item_type == ServiceItemType.Text:
-            return self._display_slides
+            return self.display_slides
         else:
             return self.slides
 
@@ -496,7 +496,8 @@ class ServiceItem(RegistryProperties):
         :param row: The service item slide to be returned
         """
         if self.service_item_type == ServiceItemType.Text:
-            return self._display_frames[row]['html'].split('\n')[0]
+            # return self.display_frames[row]['html'].split('\n')[0]
+            return self.rendered_slides[row]['text']
         elif self.service_item_type == ServiceItemType.Image:
             return self.slides[row]['path']
         else:

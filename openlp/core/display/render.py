@@ -25,6 +25,7 @@ The :mod:`~openlp.display.render` module contains functions for rendering.
 import html
 import logging
 import math
+import os
 import re
 import time
 
@@ -33,15 +34,15 @@ from PyQt5 import QtWidgets, QtGui
 from openlp.core.lib.formattingtags import FormattingTags
 from openlp.core.common.registry import Registry, RegistryBase
 from openlp.core.common.mixins import LogMixin, RegistryProperties
-from openlp.core.display.window import DisplayWindow
 from openlp.core.display.screens import ScreenList
+from openlp.core.display.window import DisplayWindow
 from openlp.core.lib import ItemCapabilities
 
 
 log = logging.getLogger(__name__)
 
 SLIM_CHARS = 'fiíIÍjlĺľrtť.,;/ ()|"\'!:\\'
-CHORD_LINE_MATCH = re.compile(r'\[(.*?)\]([\u0080-\uFFFF,\w]*)'
+CHORD_LINE_MATCH = re.compile(r'\[(.*?)\]([\u0080-\uFFFF,\w]*)'     # noqa
                               '([\u0080-\uFFFF,\w,\s,\.,\,,\!,\?,\;,\:,\|,\",\',\-,\_]*)(\Z)?')
 CHORD_TEMPLATE = '<span class="chordline">{chord}</span>'
 FIRST_CHORD_TEMPLATE = '<span class="chordline firstchordline">{chord}</span>'
@@ -438,11 +439,11 @@ class Renderer(RegistryBase, LogMixin, RegistryProperties, DisplayWindow):
                 self.setGeometry(screen.geometry.x(), screen.geometry.y(),
                                  screen.geometry.width(), screen.geometry.height())
                 break
-        # If the display is not show'ed and hidden like this webegine will not render 
+        # If the display is not show'ed and hidden like this webegine will not render
         self.show()
         self.hide()
         self.theme_height = 0
-    
+
     def calculate_line_count(self):
         """
         Calculate the number of lines that fits on one slide
@@ -524,11 +525,11 @@ class Renderer(RegistryBase, LogMixin, RegistryProperties, DisplayWindow):
                     # If there are (at least) two occurrences of [---] we use the first two slides (and neglect the last
                     # for now).
                     if len(slides) == 3:
-                        html_text = expand_tags('\n'.join(slides[:2]))
+                        html_text = render_tags('\n'.join(slides[:2]))
                     # We check both slides to determine if the optional split is needed (there is only one optional
                     # split).
                     else:
-                        html_text = expand_tags('\n'.join(slides))
+                        html_text = render_tags('\n'.join(slides))
                     html_text = html_text.replace('\n', '<br>')
                     if self._text_fits_on_slide(html_text):
                         # The first two optional slides fit (as a whole) on one slide. Replace the first occurrence
@@ -617,7 +618,7 @@ class Renderer(RegistryBase, LogMixin, RegistryProperties, DisplayWindow):
         previous_raw = ''
         for line in lines:
             line = line.strip()
-            html_line = expand_tags(line)
+            html_line = render_tags(line)
             # Text too long so go to next page.
             if not self._text_fits_on_slide(previous_html + html_line):
                 # Check if there was a verse before the current one and append it, when it fits on the page.
@@ -634,7 +635,7 @@ class Renderer(RegistryBase, LogMixin, RegistryProperties, DisplayWindow):
                             continue
                 # Figure out how many words of the line will fit on screen as the line will not fit as a whole.
                 raw_words = words_split(line)
-                html_words = list(map(expand_tags, raw_words))
+                html_words = list(map(render_tags, raw_words))
                 previous_html, previous_raw = \
                     self._binary_chop(formatted, previous_html, previous_raw, html_words, raw_words, ' ', line_end)
             else:
