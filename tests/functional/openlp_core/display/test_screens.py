@@ -23,7 +23,7 @@
 Package to test the openlp.core.lib.screenlist package.
 """
 from unittest import TestCase
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 from PyQt5 import QtCore, QtWidgets
 
@@ -102,18 +102,19 @@ class TestScreenList(TestCase):
         assert screen.is_primary is True
         assert screen.is_display is False
 
-    def test_create_screen_list(self):
+    @patch('openlp.core.display.screens.QtWidgets.QApplication.screens')
+    def test_create_screen_list(self, mocked_screens):
         """
         Create the screen list
         """
         # GIVEN: Mocked desktop
         mocked_desktop = MagicMock()
         mocked_desktop.screenCount.return_value = 2
-        mocked_desktop.screenGeometry.side_effect = [
-            QtCore.QRect(0, 0, 1024, 768),
-            QtCore.QRect(1024, 0, 1024, 768)
-        ]
         mocked_desktop.primaryScreen.return_value = 0
+        mocked_screens.return_value = [
+            MagicMock(**{'geometry.return_value': QtCore.QRect(0, 0, 1024, 768)}),
+            MagicMock(**{'geometry.return_value': QtCore.QRect(1024, 0, 1024, 768)})
+        ]
 
         # WHEN: create() is called
         screen_list = ScreenList.create(mocked_desktop)

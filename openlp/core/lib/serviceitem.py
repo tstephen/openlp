@@ -508,7 +508,7 @@ class ServiceItem(RegistryProperties):
         Returns the title of the raw frame
         """
         try:
-            return self.slides[row]['title']
+            return self.get_frames()[row]['title']
         except IndexError:
             return ''
 

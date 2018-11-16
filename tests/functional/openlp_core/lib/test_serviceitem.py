@@ -33,7 +33,7 @@ from openlp.core.common.settings import Settings
 from openlp.core.lib.formattingtags import FormattingTags
 from openlp.core.lib.serviceitem import ItemCapabilities, ServiceItem, ServiceItemType
 from tests.helpers.testmixin import TestMixin
-from tests.utils import assert_length, convert_file_service_item
+from tests.utils import convert_file_service_item
 from tests.utils.constants import RESOURCE_PATH
 
 
@@ -117,21 +117,16 @@ class TestServiceItem(TestCase, TestMixin):
 
         # THEN: We should get back a valid service item
         assert service_item.is_valid is True, 'The new service item should be valid'
-        assert_length(0, service_item._display_frames, 'The service item should have no display frames')
-        assert_length(5, service_item.capabilities, 'There should be 5 default custom item capabilities')
-
-        # WHEN: We render the frames of the service item
-        service_item.render(True)
+        assert len(service_item.get_frames()) == 2, 'The service item should have 2 display frames'
+        assert len(service_item.capabilities) == 5, 'There should be 5 default custom item capabilities'
 
         # THEN: The frames should also be valid
         assert 'Test Custom' == service_item.get_display_title(), 'The title should be "Test Custom"'
-        assert CLEANED_VERSE[:-1] == service_item.get_frames()[0]['text'], \
-            'The returned text matches the input, except the last line feed'
-        assert RENDERED_VERSE.split('\n', 1)[0] == service_item.get_rendered_frame(1), \
-            'The first line has been returned'
-        assert 'Slide 1' == service_item.get_frame_title(0), '"Slide 1" has been returned as the title'
-        assert 'Slide 2' == service_item.get_frame_title(1), '"Slide 2" has been returned as the title'
-        assert '' == service_item.get_frame_title(2), 'Blank has been returned as the title of slide 3'
+        assert service_item.get_frames()[0]['text'] == 'Slide 1'
+        assert service_item.get_frames()[1]['text'] == 'Slide 2'
+        assert service_item.get_frame_title(0) == 'Slide 1', '"Slide 1" has been returned as the title'
+        assert service_item.get_frame_title(1) == 'Slide 2', '"Slide 2" has been returned as the title'
+        assert service_item.get_frame_title(2) == '', 'Blank has been returned as the title of slide 3'
 
     def test_service_item_load_image_from_service(self):
         """
@@ -245,7 +240,7 @@ class TestServiceItem(TestCase, TestMixin):
         display_title = 'DisplayTitle'
         notes = 'Note1\nNote2\n'
         frame = {'title': presentation_name, 'image': image, 'path': TEST_PATH,
-                 'display_title': display_title, 'notes': notes}
+                 'display_title': display_title, 'notes': notes, 'thumbnail': image}
 
         # WHEN: adding presentation to service_item
         service_item.add_from_command(TEST_PATH, presentation_name, image, display_title, notes)
@@ -254,7 +249,7 @@ class TestServiceItem(TestCase, TestMixin):
         assert service_item.service_item_type == ServiceItemType.Command, 'It should be a Command'
         assert service_item.get_frames()[0] == frame, 'Frames should match'
 
-    def test_add_from_comamnd_without_display_title_and_notes(self):
+    def test_add_from_command_without_display_title_and_notes(self):
         """
         Test the Service Item - add from command, but not presentation
         """
@@ -263,7 +258,7 @@ class TestServiceItem(TestCase, TestMixin):
         image_name = 'test.img'
         image = MagicMock()
         frame = {'title': image_name, 'image': image, 'path': TEST_PATH,
-                 'display_title': None, 'notes': None}
+                 'display_title': None, 'notes': None, 'thumbnail': image}
 
         # WHEN: adding image to service_item
         service_item.add_from_command(TEST_PATH, image_name, image)
@@ -292,7 +287,7 @@ class TestServiceItem(TestCase, TestMixin):
                                            md5_hash(os.path.join(TEST_PATH, presentation_name).encode('utf-8')),
                                            'thumb.png')
         frame = {'title': presentation_name, 'image': expected_thumb_path, 'path': TEST_PATH,
-                 'display_title': display_title, 'notes': notes}
+                 'display_title': display_title, 'notes': notes, 'thumbnail': expected_thumb_path}
 
         # WHEN: adding presentation to service_item
         service_item.add_from_command(TEST_PATH, presentation_name, thumb, display_title, notes)
@@ -300,7 +295,7 @@ class TestServiceItem(TestCase, TestMixin):
         # THEN: verify that it is setup as a Command and that the frame data matches
         assert service_item.service_item_type == ServiceItemType.Command, 'It should be a Command'
         assert service_item.get_frames()[0] == frame, 'Frames should match'
-        assert 1 == mocked_image_manager.add_image.call_count, 'image_manager should be used'
+        # assert 1 == mocked_image_manager.add_image.call_count, 'image_manager should be used'
 
     def test_service_item_load_optical_media_from_service(self):
         """
