@@ -337,7 +337,12 @@ class PowerpointDocument(PresentationDocument):
                 log.debug('main display size:  y={y:d}, height={height:d}, '
                           'x={x:d}, width={width:d}'.format(y=size.y(), height=size.height(),
                                                             x=size.x(), width=size.width()))
-                win32gui.EnumWindows(self._window_enum_callback, size)
+                try:
+                    win32gui.EnumWindows(self._window_enum_callback, size)
+                except pywintypes.error:
+                    # When _window_enum_callback returns False to stop the enumeration (looping over open windows)
+                    # it causes an exception that is ignored here
+                    pass
             # Make sure powerpoint doesn't steal focus, unless we're on a single screen setup
             if len(ScreenList()) > 1:
                 Registry().get('main_window').activateWindow()
@@ -369,6 +374,10 @@ class PowerpointDocument(PresentationDocument):
             self.presentation_hwnd = hwnd
             # Stop powerpoint from flashing in the taskbar
             win32gui.FlashWindowEx(self.presentation_hwnd, win32con.FLASHW_STOP, 0, 0)
+            # Returning false stops the enumeration (looping over open windows)
+            return False
+        else:
+            return True
 
     def get_slide_number(self):
         """

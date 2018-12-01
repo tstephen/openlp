@@ -152,8 +152,14 @@ class DisplayWindow(QtWidgets.QWidget):
         self.setGeometry(screen.display_geometry)
         self.screen_number = screen.number
 
-    def set_single_image(self, bg_color, image):
-        image_uri = image.as_uri()
+    def set_single_image(self, bg_color, image_path):
+        """
+        
+        :param str bg_color: 
+        :param Path image_path: 
+        :return: 
+        """
+        image_uri = image_path.as_uri()
         self.run_javascript('Display.setFullscreenImage("{bg_color}", "{image}");'.format(bg_color=bg_color,
                                                                                           image=image_uri))
 

@@ -32,6 +32,7 @@ from openlp.core.common import SlideLimits
 from openlp.core.common.actions import ActionList, CategoryOrder
 from openlp.core.common.i18n import UiStrings, translate
 from openlp.core.common.mixins import LogMixin, RegistryProperties
+from openlp.core.common.path import Path
 from openlp.core.common.registry import Registry, RegistryBase
 from openlp.core.common.settings import Settings
 from openlp.core.display.screens import ScreenList
@@ -1182,7 +1183,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
                 QtCore.QTimer.singleShot(2500, self.grab_maindisplay)
             else:
                 # If not live, use the slide's thumbnail/icon instead
-                image_path = self.service_item.get_rendered_frame(self.selected_row)
+                image_path = Path(self.service_item.get_rendered_frame(self.selected_row))
                 # if self.service_item.is_capable(ItemCapabilities.HasThumbnails):
                 #     image = self.image_manager.get_image(image_path, ImageSource.CommandPlugins)
                 #     self.slide_image = QtGui.QPixmap.fromImage(image)
