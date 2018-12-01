@@ -201,11 +201,11 @@ class ServiceItem(RegistryProperties):
             self._create_slides()
         return self._display_slides
 
-    def add_from_image(self, filename, title, background=None, thumbnail=None):
+    def add_from_image(self, path, title, background=None, thumbnail=None):
         """
         Add an image slide to the service item.
 
-        :param filename: The directory in which the image file is located.
+        :param path: The directory in which the image file is located.
         :param title: A title for the slide in the service item.
         :param background: The background colour
         :param thumbnail: Optional alternative thumbnail, used for remote thumbnails.
@@ -213,7 +213,7 @@ class ServiceItem(RegistryProperties):
         if background:
             self.image_border = background
         self.service_item_type = ServiceItemType.Image
-        slide = {'title': title, 'filename': filename}
+        slide = {'title': title, 'path': path}
         if thumbnail:
             slide['thumbnail'] = thumbnail
         self.slides.append(slide)
@@ -385,7 +385,7 @@ class ServiceItem(RegistryProperties):
                     self.add_from_command(path, text_image['title'], text_image['image'],
                                           text_image.get('display_title', ''), text_image.get('notes', ''))
                 else:
-                    self.add_from_command(text_image['path'], text_image['title'], text_image['image'])
+                    self.add_from_command(Path(text_image['path']), text_image['title'], text_image['image'])
         self._new_item()
 
     def get_display_title(self):
@@ -522,7 +522,7 @@ class ServiceItem(RegistryProperties):
             except IndexError:
                 return ''
         if self.is_image() or self.is_capable(ItemCapabilities.IsOptical):
-            path_from = frame['filename']
+            path_from = frame['path']
         else:
             path_from = os.path.join(frame['path'], frame['title'])
         return path_from
@@ -589,7 +589,7 @@ class ServiceItem(RegistryProperties):
         """
         self.is_valid = True
         for slide in self.slides:
-            if self.is_image() and not os.path.exists(slide['filename']):
+            if self.is_image() and not os.path.exists(slide['path']):
                 self.is_valid = False
                 break
             elif self.is_command():

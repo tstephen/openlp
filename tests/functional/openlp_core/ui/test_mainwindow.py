@@ -68,6 +68,8 @@ class TestMainWindow(TestCase, TestMixin):
         self.add_toolbar_action_patcher = patch('openlp.core.ui.mainwindow.create_action')
         self.mocked_add_toolbar_action = self.add_toolbar_action_patcher.start()
         self.mocked_add_toolbar_action.side_effect = self._create_mock_action
+        self.renderer_patcher = patch('openlp.core.ui.mainwindow.Renderer')
+        self.mocked_renderer = self.renderer_patcher.start()
         mocked_desktop = MagicMock()
         mocked_desktop.screenCount.return_value = 1
         mocked_desktop.screenGeometry.return_value = QtCore.QRect(0, 0, 1024, 768)
@@ -80,6 +82,7 @@ class TestMainWindow(TestCase, TestMixin):
         Delete all the C++ objects and stop all the patchers
         """
         del self.main_window
+        self.renderer_patcher.stop()
         self.add_toolbar_action_patcher.stop()
 
     def test_cmd_line_file(self):
@@ -102,8 +105,8 @@ class TestMainWindow(TestCase, TestMixin):
         Test that passing a non service file does nothing.
         """
         # GIVEN a non service file as an argument to openlp
-        service = os.path.join('openlp.py')
-        self.main_window.arguments = [service]
+        service = 'run_openlp.py'
+        self.main_window.arguments = service
 
         # WHEN the argument is processed
         self.main_window.open_cmd_line_files(service)

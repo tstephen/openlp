@@ -745,9 +745,9 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         :param item: The current service item
         """
         slide_no = 0
-        # if self.song_edit:
-        #     slide_no = self.selected_row
-        # self.song_edit = False
+        if self.song_edit:
+            slide_no = self.selected_row
+        self.song_edit = False
         self._process_item(item, slide_no)
 
     def replace_service_manager_item(self, item):

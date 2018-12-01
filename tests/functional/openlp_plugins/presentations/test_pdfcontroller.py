@@ -134,8 +134,8 @@ class TestPdfController(TestCase, TestMixin):
         image = QtGui.QImage(os.path.join(str(self.temp_folder_path), 'pdf_test1.pdf', 'mainslide001.png'))
         # Based on the converter used the resolution will differ a bit
         if controller.gsbin:
-            assert 760 == image.height(), 'The height should be 760'
-            assert 537 == image.width(), 'The width should be 537'
+            assert 1076 == image.height(), 'The height should be 1076'
+            assert 760 == image.width(), 'The width should be 760'
         else:
             assert 768 == image.height(), 'The height should be 768'
             assert 543 == image.width(), 'The width should be 543'

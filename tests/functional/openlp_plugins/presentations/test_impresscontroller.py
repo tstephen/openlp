@@ -162,7 +162,8 @@ class TestImpressDocument(TestCase):
 
         # THEN: save_titles_and_notes should have been called once with
         # two arrays of two elements
-        self.doc.save_titles_and_notes.assert_called_once_with(['\n', '\n'], [' ', ' '])
+        # self.doc.save_titles_and_notes.assert_called_once_with(['\n', '\n'], [' ', ' '])
+        self.doc.save_titles_and_notes.assert_called_once_with(['', ''], [' ', ' '])
 
     def test_get_text_from_page_out_of_bound(self):
         """

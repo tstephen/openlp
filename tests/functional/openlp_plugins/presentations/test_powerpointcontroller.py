@@ -181,7 +181,7 @@ class TestPowerpointDocument(TestCase, TestMixin):
         self.doc.create_titles_and_notes()
 
         # THEN the save should have been called exactly once with 2 titles and 2 notes
-        self.doc.save_titles_and_notes.assert_called_once_with(['SlideText\n', 'SlideText\n'], [' ', ' '])
+        self.doc.save_titles_and_notes.assert_called_once_with(['SlideText', 'SlideText'], [' ', ' '])
 
     def test_create_titles_and_notes_with_no_slides(self):
         """

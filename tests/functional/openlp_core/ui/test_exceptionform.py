@@ -43,28 +43,38 @@ exceptionform.VLC_VERSION = 'VLC Test'
 MAIL_ITEM_TEXT = ('**OpenLP Bug Report**\nVersion: Trunk Test\n\n--- Details of the Exception. ---\n\n'
                   'Description Test\n\n --- Exception Traceback ---\nopenlp: Traceback Test\n'
                   '--- System information ---\nPlatform: Nose Test\n\n--- Library Versions ---\n'
-                  'Python: Python Test\nQt5: Qt5 test\nPyQt5: PyQt5 Test\n'
-                  'SQLAlchemy: SqlAlchemy Test\nSQLAlchemy Migrate: Migrate Test\nBeautifulSoup: BeautifulSoup Test\n'
-                  'lxml: ETree Test\nChardet: CHARDET Test\nPyEnchant: Enchant Test\nMako: Mako Test\n'
-                  'pyUNO bridge: UNO Bridge Test\nVLC: VLC Test\n\n')
+                  'Python: Python Test\nQt5: Qt5 Test\nPyQt5: PyQt5 Test\n'
+                  'SQLAlchemy: SQLAlchemy Test\nAlembic: Alembic Test\nBeautifulSoup: BeautifulSoup Test\n'
+                  'lxml: ETree Test\nChardet: Chardet Test\nPyEnchant: PyEnchant Test\nMako: Mako Test\n'
+                  'pyICU: pyICU Test\nVLC: VLC Test\nPyUNO: UNO Bridge Test\n')
+LIBRARY_VERSIONS = OrderedDict([
+    ('Python', 'Python Test'),
+    ('Qt5', 'Qt5 Test'),
+    ('PyQt5', 'PyQt5 Test'),
+    ('SQLAlchemy', 'SQLAlchemy Test'),
+    ('Alembic', 'Alembic Test'),
+    ('BeautifulSoup', 'BeautifulSoup Test'),
+    ('lxml', 'ETree Test'),
+    ('Chardet', 'Chardet Test'),
+    ('PyEnchant', 'PyEnchant Test'),
+    ('Mako', 'Mako Test'),
+    ('pyICU', 'pyICU Test'),
+    ('VLC', 'VLC Test')
+])
 
 
-@patch("openlp.core.ui.exceptionform.Qt.qVersion")
-@patch("openlp.core.ui.exceptionform.QtGui.QDesktopServices.openUrl")
-@patch("openlp.core.ui.exceptionform.get_version")
-@patch("openlp.core.ui.exceptionform.sqlalchemy")
-@patch("openlp.core.ui.exceptionform.bs4")
-@patch("openlp.core.ui.exceptionform.etree")
-@patch("openlp.core.ui.exceptionform.is_linux")
-@patch("openlp.core.ui.exceptionform.platform.platform")
-@patch("openlp.core.ui.exceptionform.platform.python_version")
+@patch('openlp.core.ui.exceptionform.QtGui.QDesktopServices.openUrl')
+@patch('openlp.core.ui.exceptionform.get_version')
+@patch('openlp.core.ui.exceptionform.get_library_versions')
+@patch('openlp.core.ui.exceptionform.is_linux')
+@patch('openlp.core.ui.exceptionform.platform.platform')
 class TestExceptionForm(TestMixin, TestCase):
     """
     Test functionality of exception form functions
     """
     def __method_template_for_class_patches(self, __PLACEHOLDER_FOR_LOCAL_METHOD_PATCH_DECORATORS_GO_HERE__,
                                             mocked_platform, mocked_is_linux, mocked_get_library_versions,
-                                            mocked_get_version, mocked_openlurl):
+                                            mocked_get_version, mocked_openurl):
         """
         Template so you don't have to remember the layout of class mock options for methods
         """
@@ -92,7 +102,7 @@ class TestExceptionForm(TestMixin, TestCase):
     @patch("openlp.core.ui.exceptionform.QtCore.QUrlQuery.addQueryItem")
     def test_on_send_report_button_clicked(self, mocked_add_query_item, mocked_qurl, mocked_file_dialog,
                                            mocked_ui_exception_dialog, mocked_platform, mocked_is_linux,
-                                           mocked_get_library_versions, mocked_get_version, mocked_openlurl):
+                                           mocked_get_library_versions, mocked_get_version, mocked_openurl):
         """
         Test send report  creates the proper system information text
         """
@@ -111,7 +121,7 @@ class TestExceptionForm(TestMixin, TestCase):
             mock_traceback.return_value = 'openlp: Traceback Test'
             mock_description.return_value = 'Description Test'
 
-            # WHEN: on_save_report_button_clicked called
+            # WHEN: on_send_report_button_clicked called
             test_form.on_send_report_button_clicked()
 
         # THEN: Verify strings were formatted properly
@@ -119,7 +129,7 @@ class TestExceptionForm(TestMixin, TestCase):
 
     @patch("openlp.core.ui.exceptionform.FileDialog.getSaveFileName")
     def test_on_save_report_button_clicked(self, mocked_save_filename, mocked_platform, mocked_is_linux,
-                                           mocked_get_library_versions, mocked_get_version, mocked_openlurl):
+                                           mocked_get_library_versions, mocked_get_version, mocked_openurl):
         """
         Test save report saves the correct information to a file
         """

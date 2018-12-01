@@ -36,7 +36,7 @@ from tests.utils import convert_file_service_item
 from tests.utils.constants import RESOURCE_PATH
 
 
-TEST_PATH = str(RESOURCE_PATH / 'service')
+TEST_PATH = RESOURCE_PATH / 'service'
 
 SCREEN = {
     'primary': False,

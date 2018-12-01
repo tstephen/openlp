@@ -205,7 +205,7 @@ class ListPreviewWidget(QtWidgets.QTableWidget, RegistryProperties):
                     else:
                         pixmap = QtGui.QPixmap(remove_url_prefix(slide['image']))
                 else:
-                    pixmap = QtGui.QPixmap(remove_url_prefix(slide['filename']))
+                    pixmap = QtGui.QPixmap(remove_url_prefix(slide['path']))
                 label.setPixmap(pixmap)
                 container = QtWidgets.QWidget()
                 layout = AspectRatioLayout(container, self.screen_ratio)
