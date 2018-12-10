@@ -32,6 +32,7 @@ import time
 from PyQt5 import QtWidgets, QtGui
 
 from openlp.core.lib.formattingtags import FormattingTags
+from openlp.core.common import ThemeLevel
 from openlp.core.common.registry import Registry, RegistryBase
 from openlp.core.common.mixins import LogMixin, RegistryProperties
 from openlp.core.display.screens import ScreenList
@@ -443,6 +444,7 @@ class Renderer(RegistryBase, LogMixin, RegistryProperties, DisplayWindow):
         self.show()
         self.hide()
         self.theme_height = 0
+        self.theme_level = ThemeLevel.Global
 
     def calculate_line_count(self):
         """
