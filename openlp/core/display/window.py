@@ -250,8 +250,8 @@ class DisplayWindow(QtWidgets.QWidget):
         Set images in the display
         """
         for image in images:
-            if not image['filename'].startswith('file://'):
-                image['filename'] = 'file://' + image['filename']
+            if not image['path'].startswith('file://'):
+                image['path'] = 'file://' + image['path']
         json_images = json.dumps(images)
         self.run_javascript('Display.setImageSlides({images});'.format(images=json_images))
 
@@ -259,8 +259,8 @@ class DisplayWindow(QtWidgets.QWidget):
         """
         Load video in the display
         """
-        if not video['filename'].startswith('file://'):
-            video['filename'] = 'file://' + video['filename']
+        if not video['path'].startswith('file://'):
+            video['path'] = 'file://' + video['path']
         json_video = json.dumps(video)
         self.run_javascript('Display.setVideo({video});'.format(video=json_video))
 

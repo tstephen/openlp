@@ -213,11 +213,15 @@ class ListPreviewWidget(QtWidgets.QTableWidget, RegistryProperties):
                 layout.addWidget(label)
                 container.setLayout(layout)
                 slide_height = width // self.screen_ratio
-                max_slide_height = Settings().value('advanced/slide max height')
-                if slide_height < 0:
-                    slide_height = max_slide_height
-                else:
-                    slide_height = min(slide_height, max_slide_height)
+                max_img_row_height = Settings().value('advanced/slide max height')
+                if isinstance(max_img_row_height, int):
+                    if max_img_row_height > 0 and slide_height > max_img_row_height:
+                        slide_height = max_img_row_height
+                    elif max_img_row_height < 0:
+                        # If auto setting, show that number of slides, or if the resulting slides too small, 100px.
+                        # E.g. If setting is -4, 4 slides will be visible, unless those slides are < 100px high.
+                        self.auto_row_height = max(self.viewport().height() / (-1 * max_img_row_height), 100)
+                        slide_height = min(slide_height, self.auto_row_height)
                 self.setCellWidget(slide_index, 0, container)
                 row += 1
             text.append(str(row))
