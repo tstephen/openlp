@@ -78,8 +78,8 @@ describe("The Display object", function () {
       overview: false,
       center: false,
       help: false,
-      transition: "slide",
-      backgroundTransition: "fade",
+      transition: "none",
+      backgroundTransition: "none",
       viewDistance: 9999,
       width: "100%",
       height: "100%"
@@ -274,10 +274,9 @@ describe("Display.setImageSlides", function () {
   });
 
   it("should add a list of images", function () {
-    var slides = [{"file": "file://openlp1.jpg"}, {"file": "file://openlp2.jpg"}];
+    var slides = [{"path": "file:///openlp1.jpg"}, {"path": "file:///openlp2.jpg"}];
     spyOn(Display, "clearSlides");
     spyOn(Display, "reinit");
-    spyOn(Reveal, "slide");
 
     Display.setImageSlides(slides);
 
@@ -286,10 +285,9 @@ describe("Display.setImageSlides", function () {
     expect(Display._slides["1"]).toEqual(1);
     expect($(".slides > section").length).toEqual(2);
     expect($(".slides > section > img").length).toEqual(2);
-    expect($(".slides > section > img")[0].getAttribute("src")).toEqual("file://openlp1.jpg")
-    expect($(".slides > section > img")[1].getAttribute("src")).toEqual("file://openlp2.jpg")
+    expect($(".slides > section > img")[0].getAttribute("src")).toEqual("file:///openlp1.jpg")
+    expect($(".slides > section > img")[1].getAttribute("src")).toEqual("file:///openlp2.jpg")
     expect(Display.reinit).toHaveBeenCalledTimes(1);
-    expect(Reveal.slide).toHaveBeenCalledWith(0);
   });
 });
 
@@ -306,7 +304,7 @@ describe("Display.setVideo", function () {
   });
 
   it("should add a video to the page", function () {
-    var video = {"file": "file://video.mp4"};
+    var video = {"path": "file:///video.mp4"};
     spyOn(Display, "clearSlides");
     spyOn(Display, "reinit");
 
@@ -315,7 +313,7 @@ describe("Display.setVideo", function () {
     expect(Display.clearSlides).toHaveBeenCalledTimes(1);
     expect($(".slides > section").length).toEqual(1);
     expect($(".slides > section > video").length).toEqual(1);
-    expect($(".slides > section > video")[0].src).toEqual("file://video.mp4")
+    expect($(".slides > section > video")[0].src).toEqual("file:///video.mp4")
     expect(Display.reinit).toHaveBeenCalledTimes(1);
   });
 });
