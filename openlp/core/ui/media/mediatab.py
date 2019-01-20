@@ -60,17 +60,28 @@ class MediaTab(SettingsTab):
         super(MediaTab, self).setupUi()
         self.live_media_group_box = QtWidgets.QGroupBox(self.left_column)
         self.live_media_group_box.setObjectName('live_media_group_box')
+
         self.media_layout = QtWidgets.QVBoxLayout(self.live_media_group_box)
         self.media_layout.setObjectName('live_media_layout')
+
         self.auto_start_check_box = QtWidgets.QCheckBox(self.live_media_group_box)
         self.auto_start_check_box.setObjectName('auto_start_check_box')
         self.media_layout.addWidget(self.auto_start_check_box)
+
         self.left_layout.addWidget(self.live_media_group_box)
+
         self.stream_media_group_box = QtWidgets.QGroupBox(self.left_column)
         self.stream_media_group_box.setObjectName('stream_media_group_box')
+
+        self.stream_edit_field = QtWidgets.QLineEdit(self.stream_media_group_box)
+        self.stream_edit_field.setObjectName('stream_edit_field')
+        self.media_layout.addWidget(self.stream_edit_field)
+
+        self.media_layout.addWidget(self.stream_media_group_box)
         self.media_layout = QtWidgets.QVBoxLayout(self.stream_media_group_box)
         self.media_layout.setObjectName('media_layout')
         self.left_layout.addWidget(self.stream_media_group_box)
+
         self.left_layout.addStretch()
         self.right_layout.addStretch()
         # self.background_color_group_box = QtWidgets.QGroupBox(self.left_column)
