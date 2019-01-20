@@ -42,9 +42,9 @@ class MediaTab(SettingsTab):
         self.advanced_group_box.setObjectName('advanced_group_box')
         self.advanced_layout = QtWidgets.QVBoxLayout(self.advanced_group_box)
         self.advanced_layout.setObjectName('advanced_layout')
-        self.override_player_check_box = QtWidgets.QCheckBox(self.advanced_group_box)
-        self.override_player_check_box.setObjectName('override_player_check_box')
-        self.advanced_layout.addWidget(self.override_player_check_box)
+        # self.override_player_check_box = QtWidgets.QCheckBox(self.advanced_group_box)
+        # self.override_player_check_box.setObjectName('override_player_check_box')
+        # self.advanced_layout.addWidget(self.override_player_check_box)
         self.auto_start_check_box = QtWidgets.QCheckBox(self.advanced_group_box)
         self.auto_start_check_box.setObjectName('auto_start_check_box')
         self.advanced_layout.addWidget(self.auto_start_check_box)
@@ -54,20 +54,20 @@ class MediaTab(SettingsTab):
 
     def retranslateUi(self):
         self.advanced_group_box.setTitle(UiStrings().Advanced)
-        self.override_player_check_box.setText(translate('MediaPlugin.MediaTab', 'Allow media player to be overridden'))
+        # self.override_player_check_box.setText(translate('MediaPlugin.MediaTab', 'Allow media player to be overridden'))
         self.auto_start_check_box.setText(translate('MediaPlugin.MediaTab', 'Start new Live media automatically'))
 
     def load(self):
-        self.override_player_check_box.setChecked(Settings().value(self.settings_section + '/override player'))
+        # self.override_player_check_box.setChecked(Settings().value(self.settings_section + '/override player'))
         self.auto_start_check_box.setChecked(Settings().value(self.settings_section + '/media auto start'))
 
     def save(self):
-        setting_key = self.settings_section + '/override player'
-        if Settings().value(setting_key) != self.override_player_check_box.checkState():
-            Settings().setValue(setting_key, self.override_player_check_box.checkState())
-            self.settings_form.register_post_process('mediaitem_suffix_reset')
-            self.settings_form.register_post_process('mediaitem_media_rebuild')
-            self.settings_form.register_post_process('mediaitem_suffixes')
+        # setting_key = self.settings_section + '/override player'
+        # if Settings().value(setting_key) != self.override_player_check_box.checkState():
+        #     Settings().setValue(setting_key, self.override_player_check_box.checkState())
+        #     self.settings_form.register_post_process('mediaitem_suffix_reset')
+        #     self.settings_form.register_post_process('mediaitem_media_rebuild')
+        #     self.settings_form.register_post_process('mediaitem_suffixes')
         setting_key = self.settings_section + '/media auto start'
         if Settings().value(setting_key) != self.auto_start_check_box.checkState():
             Settings().setValue(setting_key, self.auto_start_check_box.checkState())

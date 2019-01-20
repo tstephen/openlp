@@ -54,8 +54,8 @@ class PlayerTab(SettingsTab):
         """
         Constructor
         """
-        self.media_players = Registry().get('media_controller').media_players
-        self.saved_used_players = None
+        # self.media_players = Registry().get('media_controller').media_players
+        # self.saved_used_players = None
         self.icon_path = UiIcons().player
         player_translated = translate('OpenLP.PlayerTab', 'Players')
         super(PlayerTab, self).__init__(parent, 'Players', player_translated)
@@ -66,72 +66,72 @@ class PlayerTab(SettingsTab):
         """
         self.setObjectName('MediaTab')
         super(PlayerTab, self).setupUi()
-        self.background_color_group_box = QtWidgets.QGroupBox(self.left_column)
-        self.background_color_group_box.setObjectName('background_color_group_box')
-        self.form_layout = QtWidgets.QFormLayout(self.background_color_group_box)
-        self.form_layout.setObjectName('form_layout')
-        self.color_layout = QtWidgets.QHBoxLayout()
-        self.background_color_label = QtWidgets.QLabel(self.background_color_group_box)
-        self.background_color_label.setObjectName('background_color_label')
-        self.color_layout.addWidget(self.background_color_label)
-        self.background_color_button = ColorButton(self.background_color_group_box)
-        self.background_color_button.setObjectName('background_color_button')
-        self.color_layout.addWidget(self.background_color_button)
-        self.form_layout.addRow(self.color_layout)
-        self.information_label = QtWidgets.QLabel(self.background_color_group_box)
-        self.information_label.setObjectName('information_label')
-        self.information_label.setWordWrap(True)
-        self.form_layout.addRow(self.information_label)
-        self.left_layout.addWidget(self.background_color_group_box)
-        self.right_column.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
-        self.media_player_group_box = QtWidgets.QGroupBox(self.left_column)
-        self.media_player_group_box.setObjectName('media_player_group_box')
-        self.media_player_layout = QtWidgets.QVBoxLayout(self.media_player_group_box)
-        self.media_player_layout.setObjectName('media_player_layout')
-        self.player_check_boxes = {}
-        self.left_layout.addWidget(self.media_player_group_box)
-        self.player_order_group_box = QtWidgets.QGroupBox(self.left_column)
-        self.player_order_group_box.setObjectName('player_order_group_box')
-        self.player_order_layout = QtWidgets.QHBoxLayout(self.player_order_group_box)
-        self.player_order_layout.setObjectName('player_order_layout')
-        self.player_order_list_widget = QtWidgets.QListWidget(self.player_order_group_box)
-        size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        size_policy.setHorizontalStretch(0)
-        size_policy.setVerticalStretch(0)
-        size_policy.setHeightForWidth(self.player_order_list_widget.sizePolicy().hasHeightForWidth())
-        self.player_order_list_widget.setSizePolicy(size_policy)
-        self.player_order_list_widget.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
-        self.player_order_list_widget.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        self.player_order_list_widget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
-        self.player_order_list_widget.setObjectName('player_order_list_widget')
-        self.player_order_layout.addWidget(self.player_order_list_widget)
-        self.ordering_button_layout = QtWidgets.QVBoxLayout()
-        self.ordering_button_layout.setObjectName('ordering_button_layout')
-        self.ordering_button_layout.addStretch(1)
-        self.ordering_up_button = create_button(self, 'ordering_up_button', role='up',
-                                                click=self.on_up_button_clicked)
-        self.ordering_down_button = create_button(self, 'ordering_down_button', role='down',
-                                                  click=self.on_down_button_clicked)
-        self.ordering_button_layout.addWidget(self.ordering_up_button)
-        self.ordering_button_layout.addWidget(self.ordering_down_button)
-        self.ordering_button_layout.addStretch(1)
-        self.player_order_layout.addLayout(self.ordering_button_layout)
-        self.left_layout.addWidget(self.player_order_group_box)
-        self.left_layout.addStretch()
-        self.right_layout.addStretch()
-        # Signals and slots
-        self.background_color_button.colorChanged.connect(self.on_background_color_changed)
+        # self.background_color_group_box = QtWidgets.QGroupBox(self.left_column)
+        # self.background_color_group_box.setObjectName('background_color_group_box')
+        # self.form_layout = QtWidgets.QFormLayout(self.background_color_group_box)
+        # self.form_layout.setObjectName('form_layout')
+        # self.color_layout = QtWidgets.QHBoxLayout()
+        # self.background_color_label = QtWidgets.QLabel(self.background_color_group_box)
+        # self.background_color_label.setObjectName('background_color_label')
+        # self.color_layout.addWidget(self.background_color_label)
+        # self.background_color_button = ColorButton(self.background_color_group_box)
+        # self.background_color_button.setObjectName('background_color_button')
+        # self.color_layout.addWidget(self.background_color_button)
+        # self.form_layout.addRow(self.color_layout)
+        # self.information_label = QtWidgets.QLabel(self.background_color_group_box)
+        # self.information_label.setObjectName('information_label')
+        # self.information_label.setWordWrap(True)
+        # self.form_layout.addRow(self.information_label)
+        # self.left_layout.addWidget(self.background_color_group_box)
+        # self.right_column.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
+        # self.media_player_group_box = QtWidgets.QGroupBox(self.left_column)
+        # self.media_player_group_box.setObjectName('media_player_group_box')
+        # self.media_player_layout = QtWidgets.QVBoxLayout(self.media_player_group_box)
+        # self.media_player_layout.setObjectName('media_player_layout')
+        # self.player_check_boxes = {}
+        # self.left_layout.addWidget(self.media_player_group_box)
+        # self.player_order_group_box = QtWidgets.QGroupBox(self.left_column)
+        # self.player_order_group_box.setObjectName('player_order_group_box')
+        # self.player_order_layout = QtWidgets.QHBoxLayout(self.player_order_group_box)
+        # self.player_order_layout.setObjectName('player_order_layout')
+        # self.player_order_list_widget = QtWidgets.QListWidget(self.player_order_group_box)
+        # size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        # size_policy.setHorizontalStretch(0)
+        # size_policy.setVerticalStretch(0)
+        # size_policy.setHeightForWidth(self.player_order_list_widget.sizePolicy().hasHeightForWidth())
+        # self.player_order_list_widget.setSizePolicy(size_policy)
+        # self.player_order_list_widget.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAsNeeded)
+        # self.player_order_list_widget.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        # self.player_order_list_widget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        # self.player_order_list_widget.setObjectName('player_order_list_widget')
+        # self.player_order_layout.addWidget(self.player_order_list_widget)
+        # self.ordering_button_layout = QtWidgets.QVBoxLayout()
+        # self.ordering_button_layout.setObjectName('ordering_button_layout')
+        # self.ordering_button_layout.addStretch(1)
+        # self.ordering_up_button = create_button(self, 'ordering_up_button', role='up',
+        #                                         click=self.on_up_button_clicked)
+        # self.ordering_down_button = create_button(self, 'ordering_down_button', role='down',
+        #                                           click=self.on_down_button_clicked)
+        # self.ordering_button_layout.addWidget(self.ordering_up_button)
+        # self.ordering_button_layout.addWidget(self.ordering_down_button)
+        # self.ordering_button_layout.addStretch(1)
+        # self.player_order_layout.addLayout(self.ordering_button_layout)
+        # self.left_layout.addWidget(self.player_order_group_box)
+        # self.left_layout.addStretch()
+        # self.right_layout.addStretch()
+        # # Signals and slots
+        # self.background_color_button.colorChanged.connect(self.on_background_color_changed)
 
     def retranslateUi(self):
         """
         Translate the UI on the fly
         """
-        self.media_player_group_box.setTitle(translate('OpenLP.PlayerTab', 'Available Media Players'))
-        self.player_order_group_box.setTitle(translate('OpenLP.PlayerTab', 'Player Search Order'))
-        self.background_color_group_box.setTitle(UiStrings().BackgroundColor)
-        self.background_color_label.setText(UiStrings().BackgroundColorColon)
-        self.information_label.setText(translate('OpenLP.PlayerTab',
-                                       'Visible background for videos with aspect ratio different to screen.'))
+        # self.media_player_group_box.setTitle(translate('OpenLP.PlayerTab', 'Available Media Players'))
+        # self.player_order_group_box.setTitle(translate('OpenLP.PlayerTab', 'Player Search Order'))
+        # self.background_color_group_box.setTitle(UiStrings().BackgroundColor)
+        # self.background_color_label.setText(UiStrings().BackgroundColorColon)
+        # self.information_label.setText(translate('OpenLP.PlayerTab',
+        #                                'Visible background for videos with aspect ratio different to screen.'))
         self.retranslate_players()
 
     def on_background_color_changed(self, color):
@@ -199,26 +199,28 @@ class PlayerTab(SettingsTab):
         """
         Load the settings
         """
-        if self.saved_used_players:
-            self.used_players = self.saved_used_players
-        # self.used_players = get_media_players()[0]
-        self.saved_used_players = self.used_players
-        settings = Settings()
-        settings.beginGroup(self.settings_section)
-        self.update_player_list()
-        self.background_color = settings.value('background color')
-        self.initial_color = self.background_color
-        settings.endGroup()
-        self.background_color_button.color = self.background_color
+        pass
+        # if self.saved_used_players:
+        #     self.used_players = self.saved_used_players
+        # # self.used_players = get_media_players()[0]
+        # self.saved_used_players = self.used_players
+        # settings = Settings()
+        # settings.beginGroup(self.settings_section)
+        # self.update_player_list()
+        # self.background_color = settings.value('background color')
+        # self.initial_color = self.background_color
+        # settings.endGroup()
+        # self.background_color_button.color = self.background_color
 
     def save(self):
         """
         Save the settings
         """
-        settings = Settings()
-        settings.beginGroup(self.settings_section)
-        settings.setValue('background color', self.background_color)
-        settings.endGroup()
+        pass
+        # settings = Settings()
+        # settings.beginGroup(self.settings_section)
+        # settings.setValue('background color', self.background_color)
+        # settings.endGroup()
         # old_players, override_player = get_media_players()
         # if self.used_players != old_players:
         #     # clean old Media stuff
@@ -233,37 +235,39 @@ class PlayerTab(SettingsTab):
 
         :param post_update: Indicates if called before or after updates.
         """
-        for key, player in self.media_players.items():
-            player = self.media_players[key]
-            checkbox = MediaQCheckBox(self.media_player_group_box)
-            checkbox.setEnabled(player.available)
-            checkbox.setObjectName(player.name + '_check_box')
-            checkbox.setToolTip(player.get_info())
-            checkbox.set_player_name(player.name)
-            self.player_check_boxes[player.name] = checkbox
-            checkbox.stateChanged.connect(self.on_player_check_box_changed)
-            self.media_player_layout.addWidget(checkbox)
-            if player.available and player.name in self.used_players:
-                checkbox.setChecked(True)
-            else:
-                checkbox.setChecked(False)
-        self.update_player_list()
-        self.retranslate_players()
+        pass
+        # for key, player in self.media_players.items():
+        #     player = self.media_players[key]
+        #     checkbox = MediaQCheckBox(self.media_player_group_box)
+        #     checkbox.setEnabled(player.available)
+        #     checkbox.setObjectName(player.name + '_check_box')
+        #     checkbox.setToolTip(player.get_info())
+        #     checkbox.set_player_name(player.name)
+        #     self.player_check_boxes[player.name] = checkbox
+        #     checkbox.stateChanged.connect(self.on_player_check_box_changed)
+        #     self.media_player_layout.addWidget(checkbox)
+        #     if player.available and player.name in self.used_players:
+        #         checkbox.setChecked(True)
+        #     else:
+        #         checkbox.setChecked(False)
+        # self.update_player_list()
+        # self.retranslate_players()
 
     def retranslate_players(self):
         """
         Translations for players is dependent on  their setup as well
          """
-        for key in self.media_players and self.player_check_boxes:
-            player = self.media_players[key]
-            checkbox = self.player_check_boxes[player.name]
-            checkbox.set_player_name(player.name)
-            if player.available:
-                checkbox.setText(player.display_name)
-            else:
-                checkbox_text = translate('OpenLP.PlayerTab', '%s (unavailable)') % player.display_name
-                if player.name == 'vlc':
-                    checkbox_text += ' ' + translate('OpenLP.PlayerTab',
-                                                     'NOTE: To use VLC you must install the %s version',
-                                                     'Will insert "32bit" or "64bit"') % platform.architecture()[0]
-                checkbox.setText(checkbox_text)
+        pass
+        # for key in self.media_players and self.player_check_boxes:
+        #     player = self.media_players[key]
+        #     checkbox = self.player_check_boxes[player.name]
+        #     checkbox.set_player_name(player.name)
+        #     if player.available:
+        #         checkbox.setText(player.display_name)
+        #     else:
+        #         checkbox_text = translate('OpenLP.PlayerTab', '%s (unavailable)') % player.display_name
+        #         if player.name == 'vlc':
+        #             checkbox_text += ' ' + translate('OpenLP.PlayerTab',
+        #                                              'NOTE: To use VLC you must install the %s version',
+        #                                              'Will insert "32bit" or "64bit"') % platform.architecture()[0]
+        #         checkbox.setText(checkbox_text)
