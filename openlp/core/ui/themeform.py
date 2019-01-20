@@ -33,7 +33,6 @@ from openlp.core.common.registry import Registry
 from openlp.core.lib.theme import BackgroundType, BackgroundGradientType
 from openlp.core.lib.ui import critical_error_message_box
 from openlp.core.ui.themelayoutform import ThemeLayoutForm
-from openlp.core.ui.media.webkitplayer import VIDEO_EXT
 from .themewizard import Ui_ThemeWizard
 
 log = logging.getLogger(__name__)

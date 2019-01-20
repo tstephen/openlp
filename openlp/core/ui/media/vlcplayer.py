@@ -223,6 +223,8 @@ class VlcPlayer(MediaPlayer):
             if not audio_cd_tracks or audio_cd_tracks.count() < 1:
                 return False
             display.vlc_media = audio_cd_tracks.item_at_index(controller.media_info.title_track)
+        elif controller.media_info.media_type == MediaType.Stream:
+            display.vlc_media = display.vlc_instance.media_new_location("XXXXXXXXXXXXX")
         else:
             display.vlc_media = display.vlc_instance.media_new_path(path)
         # put the media in the media player
