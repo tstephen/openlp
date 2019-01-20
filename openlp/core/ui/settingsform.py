@@ -35,7 +35,7 @@ from openlp.core.projectors.tab import ProjectorTab
 from openlp.core.ui.advancedtab import AdvancedTab
 from openlp.core.ui.generaltab import GeneralTab
 from openlp.core.ui.themestab import ThemesTab
-from openlp.core.ui.media.playertab import PlayerTab
+from openlp.core.ui.media.mediatab import MediaTab
 from openlp.core.ui.settingsdialog import Ui_SettingsDialog
 
 log = logging.getLogger(__name__)
@@ -161,7 +161,7 @@ class SettingsForm(QtWidgets.QDialog, Ui_SettingsDialog, RegistryProperties):
         # Advanced tab
         self.advanced_tab = AdvancedTab(self)
         # Advanced tab
-        self.player_tab = PlayerTab(self)
+        self.player_tab = MediaTab(self)
         # Api tab
         self.api_tab = ApiTab(self)
         self.general_tab.post_set_up()

@@ -177,8 +177,7 @@ class Settings(QtCore.QSettings):
         'core/override position': False,
         'core/application version': '0.0',
         'images/background color': '#000000',
-        'media/players': 'system,webkit',
-        'media/override player': QtCore.Qt.Unchecked,
+        'media/media auto start': QtCore.Qt.Unchecked,
         'remotes/download version': '0.0',
         'players/background color': '#000000',
         'servicemanager/last directory': None,
@@ -279,7 +278,9 @@ class Settings(QtCore.QSettings):
         ('bibles/proxy name', '', []),  # Just remove these bible proxy settings. They weren't used in 2.4!
         ('bibles/proxy address', '', []),
         ('bibles/proxy username', '', []),
-        ('bibles/proxy password', '', [])
+        ('bibles/proxy password', '', []),
+        ('media/players', '', []),
+        ('media/override player', '', [])
     ]
 
     @staticmethod

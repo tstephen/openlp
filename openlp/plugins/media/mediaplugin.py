@@ -34,14 +34,12 @@ from openlp.core.lib import build_icon
 from openlp.core.lib.plugin import Plugin, StringContent
 from openlp.plugins.media.endpoint import api_media_endpoint, media_endpoint
 from openlp.plugins.media.lib.mediaitem import MediaMediaItem
-from openlp.plugins.media.lib.mediatab import MediaTab
 
 log = logging.getLogger(__name__)
 
 
 # Some settings starting with "media" are in core, because they are needed for core functionality.
 __default_settings__ = {
-    'media/media auto start': QtCore.Qt.Unchecked,
     'media/media files': [],
     'media/last directory': None
 }
@@ -76,15 +74,6 @@ class MediaPlugin(Plugin):
         Override app_startup() in order to do nothing
         """
         pass
-
-    def create_settings_tab(self, parent):
-        """
-        Create the settings Tab
-
-        :param parent:
-        """
-        visible_name = self.get_string(StringContent.VisibleName)
-        self.settings_tab = MediaTab(parent, self.name, visible_name['title'], self.icon_path)
 
     @staticmethod
     def about():
