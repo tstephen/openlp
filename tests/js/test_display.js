@@ -18,6 +18,14 @@ describe("The enumeration object", function () {
   it("AudioState should exist", function () {
     expect(AudioState).toBeDefined();
   });
+
+  it("TransitionState should exist", function(){
+    expect(TransitionState).toBeDefined();
+  });
+
+  it("AnimationState should exist", function(){
+    expect(AnimationState).toBeDefined();
+  });
 });
 
 describe("The function", function () {
@@ -138,7 +146,46 @@ describe("The Display object", function () {
     Display.goToSlide("v1");
     expect(Reveal.slide).toHaveBeenCalledWith(0);
   });
+
+  it("should have an alert() method", function () {
+    expect(Display.alert).toBeDefined();
+  });
+
+  it("should have a correctly functioning alert() method", function (){
+    spyOn(Display,"alert");
+    Display.alert("OPEN-LP-3.0 Alert Test", "2");
+    expect(Display.alert).toHaveBeenCalledWith("OPEN-LP-3.0 Alert Test", "2");
+  });
+
 });
+
+describe("Display.alert",function(){
+    beforeEach(function(){
+      var alertBackground = document.getElementById("alert-background");
+      var alertText = document.getElementById("alert");
+    });
+
+   it("should return if called without any text", function(){
+    spyOn(Display, "alert");
+    Display.alert("", "2");
+    expect(Display.alert).toHaveBeenCalled();
+   });
+
+   it("should call alertEntranceTransition", function(){
+    spyOn(Display,"alertEntranceTransition");
+    Display.alertEntranceTransition("2");
+    expect(Display.alertEntranceTransition).toHaveBeenCalledWith("2");
+   });
+
+   it("should call alertExitTransition", function(){
+    spyOn(Display,"alertExitTransition");
+    Display.alertExitTransition("2");
+    expect(Display.alertExitTransition).toHaveBeenCalledWith("2");
+   });
+});
+
+
+
 
 describe("Display.addTextSlide", function () {
   beforeEach(function() {

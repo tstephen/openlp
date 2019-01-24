@@ -401,4 +401,4 @@ class DisplayWindow(QtWidgets.QWidget):
         """
         Set an alert
         """
-        self.run_javascript('Display.alert({text}, {location});'.format(text=text, location=location))
+        self.run_javascript('Display.alert("{text}", "{location}");'.format(text=text, location=location))
