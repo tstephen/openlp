@@ -85,14 +85,13 @@ class ScreensTab(SettingsTab):
         """
         Load the settings to populate the tab
         """
-        settings = Settings()
-        settings.beginGroup(self.settings_section)
+        Settings().beginGroup(self.settings_section)
         self.screen_selection_widget.load()
         # Load generic settings
         self.display_on_monitor_check.setChecked(Settings().value('core/display on monitor'))
 
     def save(self):
         self.screen_selection_widget.save()
-        settings.setValue('core/display on monitor', self.display_on_monitor_check.isChecked())
+        Settings().setValue('core/display on monitor', self.display_on_monitor_check.isChecked())
         # On save update the screens as well
         self.settings_form.register_post_process('config_screen_changed')
