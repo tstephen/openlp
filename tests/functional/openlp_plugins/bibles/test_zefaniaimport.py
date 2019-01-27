@@ -30,6 +30,7 @@ from openlp.plugins.bibles.lib.importers.zefania import ZefaniaBible
 from tests.utils import load_external_result_data
 from tests.utils.constants import RESOURCE_PATH
 
+
 TEST_PATH = RESOURCE_PATH / 'bibles'
 
 

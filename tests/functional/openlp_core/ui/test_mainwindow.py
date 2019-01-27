@@ -70,20 +70,21 @@ class TestMainWindow(TestCase, TestMixin):
         self.add_toolbar_action_patcher = patch('openlp.core.ui.mainwindow.create_action')
         self.mocked_add_toolbar_action = self.add_toolbar_action_patcher.start()
         self.mocked_add_toolbar_action.side_effect = self._create_mock_action
-        mocked_plugin = MagicMock()
-        mocked_plugin.status = PluginStatus.Active
-        mocked_plugin.icon = QtGui.QIcon()
-        Registry().register('mock_plugin', mocked_plugin)
-        State().add_service("mock", 1, is_plugin=True, status=PluginStatus.Active)
-        with patch('openlp.core.display.screens.ScreenList.__instance__', spec=ScreenList) as mocked_screen_list:
-            mocked_screen_list.current = {'number': 0, 'size': QtCore.QSize(600, 800), 'primary': True}
-            self.main_window = MainWindow()
+        self.renderer_patcher = patch('openlp.core.ui.mainwindow.Renderer')
+        self.mocked_renderer = self.renderer_patcher.start()
+        mocked_desktop = MagicMock()
+        mocked_desktop.screenCount.return_value = 1
+        mocked_desktop.screenGeometry.return_value = QtCore.QRect(0, 0, 1024, 768)
+        mocked_desktop.primaryScreen.return_value = 1
+        ScreenList.create(mocked_desktop)
+        self.main_window = MainWindow()
 
     def tearDown(self):
         """
         Delete all the C++ objects and stop all the patchers
         """
         del self.main_window
+        self.renderer_patcher.stop()
         self.add_toolbar_action_patcher.stop()
 
     def test_cmd_line_file(self):
@@ -106,8 +107,8 @@ class TestMainWindow(TestCase, TestMixin):
         Test that passing a non service file does nothing.
         """
         # GIVEN a non service file as an argument to openlp
-        service = os.path.join('openlp.py')
-        self.main_window.arguments = [service]
+        service = 'run_openlp.py'
+        self.main_window.arguments = service
 
         # WHEN the argument is processed
         self.main_window.open_cmd_line_files(service)
@@ -162,10 +163,16 @@ class TestMainWindow(TestCase, TestMixin):
         # WHEN: you check the started functions
 
         # THEN: the following registry functions should have been registered
-        assert len(self.registry.service_list) == 8, \
-            'The registry should have 8 services, got {}'.format(self.registry.service_list.keys())
-        assert len(self.registry.functions_list) == 5, \
-            'The registry should have 5 functions, got {}'.format(self.registry.functions_list.keys())
+        expected_service_list = ['application', 'main_window', 'http_server', 'settings_form']
+        expected_functions_list = ['bootstrap_initialise', 'bootstrap_post_set_up', 'playbackPlay', 'playbackPause',
+                                   'playbackStop', 'playbackLoop', 'seek_slider', 'volume_slider', 'media_hide',
+                                   'media_blank', 'media_unblank', 'songs_hide', 'songs_blank', 'songs_unblank',
+                                   'mediaitem_media_rebuild', 'mediaitem_suffixes', 'images_regenerate',
+                                   'theme_update_global', 'config_screen_changed']
+        assert list(self.registry.service_list.keys()) == expected_service_list, \
+            'The service list should have been {}'.format(self.registry.service_list.keys())
+        assert list(self.registry.functions_list.keys()) == expected_functions_list, \
+            'The function list should have been {}'.format(self.registry.functions_list.keys())
         assert 'application' in self.registry.service_list, 'The application should have been registered.'
         assert 'main_window' in self.registry.service_list, 'The main_window should have been registered.'
 

@@ -32,6 +32,7 @@ from openlp.core.common.i18n import translate
 from openlp.core.common.settings import ProxyMode, Settings
 from openlp.core.lib.db import get_upgrade_op
 
+
 log = logging.getLogger(__name__)
 __version__ = 2
 

@@ -25,7 +25,7 @@ song databases into the current installation database.
 """
 import logging
 
-from sqlalchemy import create_engine, MetaData, Table
+from sqlalchemy import MetaData, Table, create_engine
 from sqlalchemy.orm import class_mapper, mapper, relation, scoped_session, sessionmaker
 from sqlalchemy.orm.exc import UnmappedClassError
 
@@ -33,8 +33,10 @@ from openlp.core.common.i18n import translate
 from openlp.core.lib.db import BaseModel
 from openlp.core.widgets.wizard import WizardStrings
 from openlp.plugins.songs.lib import clean_song
-from openlp.plugins.songs.lib.db import Author, Book, Song, Topic, MediaFile
+from openlp.plugins.songs.lib.db import Author, Book, MediaFile, Song, Topic
+
 from .songimport import SongImport
+
 
 log = logging.getLogger(__name__)
 

@@ -39,6 +39,7 @@ from openlp.plugins.bibles.lib import SearchResults
 from openlp.plugins.bibles.lib.bibleimport import BibleImport
 from openlp.plugins.bibles.lib.db import BibleDB, BiblesResourcesDB, Book
 
+
 CLEANER_REGEX = re.compile(r'&nbsp;|<br />|\'\+\'')
 FIX_PUNKCTUATION_REGEX = re.compile(r'[ ]+([.,;])')
 REDUCE_SPACES_REGEX = re.compile(r'[ ]{2,}')

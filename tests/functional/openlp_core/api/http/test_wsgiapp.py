@@ -30,6 +30,7 @@ from openlp.core.api.http import register_endpoint, application
 from openlp.core.api.http.endpoint import Endpoint
 from openlp.core.api.http.errors import NotFound
 
+
 ROOT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 test_endpoint = Endpoint('test', template_dir=ROOT_DIR, static_dir=ROOT_DIR)

@@ -23,8 +23,9 @@
 Package to test for proper bzr tags.
 """
 import os
-from subprocess import Popen, PIPE
+from subprocess import PIPE, Popen
 from unittest import TestCase
+
 
 TAGS1 = {'1.9.0', '1.9.1', '1.9.2', '1.9.3', '1.9.4', '1.9.5', '1.9.6', '1.9.7', '1.9.8', '1.9.9', '1.9.10',
          '1.9.11', '1.9.12', '2.0', '2.1.0', '2.1.1', '2.1.2', '2.1.3', '2.1.4', '2.1.5', '2.1.6', '2.2',

@@ -33,6 +33,7 @@ from openlp.core.common.mixins import RegistryProperties
 from openlp.core.common.path import create_paths
 from openlp.plugins.songs.lib.openlyricsxml import OpenLyrics
 
+
 log = logging.getLogger(__name__)
 
 

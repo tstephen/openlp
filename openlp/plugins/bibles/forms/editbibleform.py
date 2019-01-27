@@ -30,7 +30,9 @@ from openlp.core.common.mixins import RegistryProperties
 from openlp.core.lib.ui import critical_error_message_box
 from openlp.plugins.bibles.lib import BibleStrings
 from openlp.plugins.bibles.lib.db import BiblesResourcesDB
+
 from .editbibledialog import Ui_EditBibleDialog
+
 
 log = logging.getLogger(__name__)
 
@@ -49,7 +51,7 @@ class EditBibleForm(QtWidgets.QDialog, Ui_EditBibleDialog, RegistryProperties):
                                             QtCore.Qt.WindowCloseButtonHint)
         self.media_item = media_item
         self.book_names = BibleStrings().BookNames
-        self.setupUi(self)
+        self.setup_ui(self)
         self.manager = manager
 
     def load_bible(self, bible):

@@ -30,8 +30,10 @@ from lxml import etree, objectify
 from openlp.core.common import de_hump
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.json import OpenLPJsonDecoder, OpenLPJsonEncoder
+from openlp.core.common.path import Path, str_to_path
 from openlp.core.display.screens import ScreenList
-from openlp.core.lib import str_to_bool, get_text_file_string
+from openlp.core.lib import get_text_file_string, str_to_bool
+
 
 log = logging.getLogger(__name__)
 
@@ -197,13 +199,13 @@ class Theme(object):
         Set the header and footer size into the current primary screen.
         10 px on each side is removed to allow for a border.
         """
-        current_screen = ScreenList().current
+        current_screen_geometry = ScreenList().current.display_geometry
         self.font_main_y = 0
-        self.font_main_width = current_screen['size'].width() - 20
-        self.font_main_height = current_screen['size'].height() * 9 / 10
-        self.font_footer_width = current_screen['size'].width() - 20
-        self.font_footer_y = current_screen['size'].height() * 9 / 10
-        self.font_footer_height = current_screen['size'].height() / 10
+        self.font_main_width = current_screen_geometry.width() - 20
+        self.font_main_height = current_screen_geometry.height() * 9 / 10
+        self.font_footer_width = current_screen_geometry.width() - 20
+        self.font_footer_y = current_screen_geometry.height() * 9 / 10
+        self.font_footer_height = current_screen_geometry.height() / 10
 
     def load_theme(self, theme, theme_path=None):
         """

@@ -32,6 +32,7 @@ from openlp.core.common.registry import Registry
 from openlp.core.ui.firsttimeform import FirstTimeForm
 from tests.helpers.testmixin import TestMixin
 
+
 FAKE_CONFIG = """
 [general]
 base url = http://example.com/frw/
@@ -138,7 +139,7 @@ class TestFirstTimeForm(TestCase, TestMixin):
         # GIVEN: A mocked Screen() object and an initialised First Run Wizard and a mocked display_combo_box
         expected_screen_list = ['Screen 1', 'Screen 2']
         mocked_screens = MagicMock()
-        mocked_screens.get_screen_list.return_value = expected_screen_list
+        mocked_screens.get_display_screen_list.return_value = expected_screen_list
         frw = FirstTimeForm(None)
         frw.initialize(mocked_screens)
         with patch.object(frw, 'display_combo_box') as mocked_display_combo_box:
@@ -149,7 +150,7 @@ class TestFirstTimeForm(TestCase, TestMixin):
 
             # THEN: The combobox should have been updated
             mocked_display_combo_box.clear.assert_called_with()
-            mocked_screens.get_screen_list.assert_called_with()
+            mocked_screens.get_display_screen_list.assert_called_with()
             mocked_display_combo_box.addItems.assert_called_with(expected_screen_list)
             mocked_display_combo_box.count.assert_called_with()
             mocked_display_combo_box.setCurrentIndex.assert_called_with(1)

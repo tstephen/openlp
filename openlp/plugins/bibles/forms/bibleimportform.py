@@ -25,8 +25,8 @@ The bible import functions for OpenLP
 import logging
 import urllib.error
 
-from PyQt5 import QtWidgets
 from lxml import etree
+from PyQt5 import QtWidgets
 
 try:
     from pysword import modules
@@ -36,7 +36,7 @@ except ImportError:
 
 from openlp.core.common import trace_error_handler
 from openlp.core.common.applocation import AppLocation
-from openlp.core.common.i18n import UiStrings, translate, get_locale_key
+from openlp.core.common.i18n import UiStrings, get_locale_key, translate
 from openlp.core.common.settings import Settings
 from openlp.core.lib.db import delete_database
 from openlp.core.lib.exceptions import ValidationError
@@ -44,8 +44,9 @@ from openlp.core.lib.ui import critical_error_message_box
 from openlp.core.widgets.edits import PathEdit
 from openlp.core.widgets.wizard import OpenLPWizard, WizardStrings
 from openlp.plugins.bibles.lib.db import clean_filename
-from openlp.plugins.bibles.lib.importers.http import CWExtract, BGExtract, BSExtract
+from openlp.plugins.bibles.lib.importers.http import BGExtract, BSExtract, CWExtract
 from openlp.plugins.bibles.lib.manager import BibleFormat
+
 
 log = logging.getLogger(__name__)
 
@@ -82,11 +83,11 @@ class BibleImportForm(OpenLPWizard):
         super(BibleImportForm, self).__init__(parent, bible_plugin,
                                               'bibleImportWizard', ':/wizards/wizard_importbible.bmp')
 
-    def setupUi(self, image):
+    def setup_ui(self, image):
         """
         Set up the UI for the bible wizard.
         """
-        super(BibleImportForm, self).setupUi(image)
+        super(BibleImportForm, self).setup_ui(image)
         self.format_combo_box.currentIndexChanged.connect(self.on_current_index_changed)
 
     def on_current_index_changed(self, index):
@@ -364,7 +365,7 @@ class BibleImportForm(OpenLPWizard):
         self.license_details_layout.setWidget(3, QtWidgets.QFormLayout.FieldRole, self.full_license_edit)
         self.addPage(self.license_details_page)
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         """
         Allow for localisation of the bible import wizard.
         """

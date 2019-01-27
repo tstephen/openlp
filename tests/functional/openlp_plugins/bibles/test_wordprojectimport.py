@@ -23,11 +23,12 @@
 This module contains tests for the WordProject Bible importer.
 """
 from unittest import TestCase
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock, call, patch
 
 from openlp.core.common.path import Path
 from openlp.plugins.bibles.lib.importers.wordproject import WordProjectBible
 from tests.utils.constants import RESOURCE_PATH
+
 
 TEST_PATH = RESOURCE_PATH / 'bibles'
 INDEX_PAGE = (TEST_PATH / 'wordproject_index.htm').read_bytes().decode()

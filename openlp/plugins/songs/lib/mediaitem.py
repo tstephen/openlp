@@ -27,8 +27,7 @@ from sqlalchemy.sql import and_, or_
 
 from openlp.core.state import State
 from openlp.core.common.applocation import AppLocation
-from openlp.core.common.i18n import UiStrings, translate, get_natural_key
-from openlp.core.ui.icons import UiIcons
+from openlp.core.common.i18n import UiStrings, get_natural_key, translate
 from openlp.core.common.path import copyfile, create_paths
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
@@ -37,14 +36,16 @@ from openlp.core.lib.mediamanageritem import MediaManagerItem
 from openlp.core.lib.plugin import PluginStatus
 from openlp.core.lib.serviceitem import ItemCapabilities
 from openlp.core.lib.ui import create_widget_action
+from openlp.core.ui.icons import UiIcons
 from openlp.plugins.songs.forms.editsongform import EditSongForm
 from openlp.plugins.songs.forms.songexportform import SongExportForm
 from openlp.plugins.songs.forms.songimportform import SongImportForm
 from openlp.plugins.songs.forms.songmaintenanceform import SongMaintenanceForm
 from openlp.plugins.songs.lib import VerseType, clean_string, delete_song
-from openlp.plugins.songs.lib.db import Author, AuthorType, Song, Book, MediaFile, SongBookEntry, Topic
+from openlp.plugins.songs.lib.db import Author, AuthorType, Book, MediaFile, Song, SongBookEntry, Topic
 from openlp.plugins.songs.lib.openlyricsxml import OpenLyrics, SongXML
 from openlp.plugins.songs.lib.ui import SongStrings
+
 
 log = logging.getLogger(__name__)
 
@@ -134,7 +135,7 @@ class SongMediaItem(MediaManagerItem):
         self.display_written_by_text = Settings().value(self.settings_section + '/display written by')
         self.display_copyright_symbol = Settings().value(self.settings_section + '/display copyright symbol')
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         self.search_text_label.setText('{text}:'.format(text=UiStrings().Search))
         self.search_text_button.setText(UiStrings().Search)
         self.maintenance_action.setText(SongStrings.SongMaintenance)

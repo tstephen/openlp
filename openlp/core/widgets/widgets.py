@@ -22,10 +22,28 @@
 """
 The :mod:`~openlp.core.widgets.widgets` module contains custom widgets used in OpenLP
 """
-from PyQt5 import QtWidgets
+from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.common.i18n import translate
 from openlp.core.common.settings import ProxyMode, Settings
+
+
+SCREENS_LAYOUT_STYLE = """
+#screen_frame {
+  background-color: palette(base);
+}
+#screen_frame QPushButton  {
+  background-color: palette(window);
+  border: 3px solid palette(text);
+  border-radius: 3px;
+  height: 100px;
+  outline: 0;
+  width: 150px;
+}
+#screen_frame QPushButton:checked  {
+    border-color: palette(highlight);
+}
+"""
 
 
 class ProxyWidget(QtWidgets.QGroupBox):
@@ -130,3 +148,235 @@ class ProxyWidget(QtWidgets.QGroupBox):
         settings.setValue('advanced/proxy https', self.https_edit.text())
         settings.setValue('advanced/proxy username', self.username_edit.text())
         settings.setValue('advanced/proxy password', self.password_edit.text())
+
+
+class ScreenButton(QtWidgets.QPushButton):
+    """
+    A special button class that holds the screen information about it
+    """
+    def __init__(self, parent, screen):
+        """
+        Initialise this button
+        """
+        super().__init__(parent)
+        self.setObjectName('screen_{number}_button'.format(number=screen.number))
+        self.setCheckable(True)
+        self.setText(str(screen))
+        self.screen = screen
+
+
+class ScreenSelectionWidget(QtWidgets.QWidget):
+    def __init__(self, parent=None, screens=[]):
+        super().__init__(parent)
+        self.current_screen = None
+        self.identify_labels = []
+        self.screens = screens
+        self.timer = QtCore.QTimer()
+        self.timer.setSingleShot(True)
+        self.timer.setInterval(3000)
+        self.timer.timeout.connect(self._on_identify_timer_shot)
+        self.setup_ui()
+
+    def setup_ui(self):
+        self.setStyleSheet(SCREENS_LAYOUT_STYLE)
+        self.layout = QtWidgets.QVBoxLayout(self)
+        self.screen_frame = QtWidgets.QFrame(self)
+        self.screen_frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        self.screen_frame.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.screen_frame.setObjectName('screen_frame')
+        self.screen_frame_layout = QtWidgets.QHBoxLayout(self.screen_frame)
+        self.screen_frame_layout.setContentsMargins(16, 16, 16, 16)
+        self.screen_frame_layout.setSpacing(8)
+        self.screen_frame_layout.setObjectName('screen_frame_layout')
+        self.layout.addWidget(self.screen_frame)
+        self.identify_layout = QtWidgets.QHBoxLayout(self)
+        self.screen_details_layout = QtWidgets.QVBoxLayout(self)
+        self.screen_details_layout.setObjectName('screen_details_layout')
+        self.screen_number_label = QtWidgets.QLabel(self)
+        self.screen_number_label.setObjectName('screen_number_label')
+        self.screen_details_layout.addWidget(self.screen_number_label)
+        self.display_group_box = QtWidgets.QGroupBox(self)
+        self.display_group_box.setObjectName('display_group_box')
+        self.display_group_box.setCheckable(True)
+        self.display_group_box_layout = QtWidgets.QGridLayout(self.display_group_box)
+        self.display_group_box_layout.setSpacing(8)
+        self.display_group_box_layout.setObjectName('display_group_box_layout')
+        self.full_screen_radio_button = QtWidgets.QRadioButton(self.display_group_box)
+        self.full_screen_radio_button.setObjectName('full_screen_radio_button')
+        self.display_group_box_layout.addWidget(self.full_screen_radio_button, 0, 0, 1, 4)
+        self.custom_geometry_button = QtWidgets.QRadioButton(self.display_group_box)
+        self.custom_geometry_button.setObjectName('custom_geometry_button')
+        self.display_group_box_layout.addWidget(self.custom_geometry_button, 1, 0, 1, 4)
+        self.left_label = QtWidgets.QLabel(self.display_group_box)
+        self.left_label.setObjectName('left_label')
+        self.display_group_box_layout.addWidget(self.left_label, 2, 1, 1, 1)
+        self.top_label = QtWidgets.QLabel(self.display_group_box)
+        self.top_label.setObjectName('top_label')
+        self.display_group_box_layout.addWidget(self.top_label, 2, 2, 1, 1)
+        self.width_label = QtWidgets.QLabel(self.display_group_box)
+        self.width_label.setObjectName('width_label')
+        self.display_group_box_layout.addWidget(self.width_label, 2, 3, 1, 1)
+        self.height_label = QtWidgets.QLabel(self.display_group_box)
+        self.height_label.setObjectName('height_label')
+        self.display_group_box_layout.addWidget(self.height_label, 2, 4, 1, 1)
+        self.left_spin_box = QtWidgets.QSpinBox(self.display_group_box)
+        self.left_spin_box.setObjectName('left_spin_box')
+        self.left_spin_box.setEnabled(False)
+        self.display_group_box_layout.addWidget(self.left_spin_box, 3, 1, 1, 1)
+        self.top_spin_box = QtWidgets.QSpinBox(self.display_group_box)
+        self.top_spin_box.setObjectName('top_spin_box')
+        self.top_spin_box.setEnabled(False)
+        self.display_group_box_layout.addWidget(self.top_spin_box, 3, 2, 1, 1)
+        self.width_spin_box = QtWidgets.QSpinBox(self.display_group_box)
+        self.width_spin_box.setObjectName('width_spin_box')
+        self.width_spin_box.setEnabled(False)
+        self.display_group_box_layout.addWidget(self.width_spin_box, 3, 3, 1, 1)
+        self.height_spin_box = QtWidgets.QSpinBox(self.display_group_box)
+        self.height_spin_box.setObjectName('height_spin_box')
+        self.height_spin_box.setEnabled(False)
+        self.display_group_box_layout.addWidget(self.height_spin_box, 3, 4, 1, 1)
+        self.display_group_box_layout.setColumnStretch(3, 1)
+        self.display_group_box.setLayout(self.display_group_box_layout)
+        self.screen_details_layout.addWidget(self.display_group_box)
+        self.identify_layout.addLayout(self.screen_details_layout)
+        self.identify_button = QtWidgets.QPushButton(self)
+        self.identify_button.setObjectName('identify_button')
+        self.identify_layout.addWidget(
+            self.identify_button, stretch=1, alignment=QtCore.Qt.AlignRight | QtCore.Qt.AlignTop)
+        self.screen_button_group = QtWidgets.QButtonGroup(self.screen_frame)
+        self.screen_button_group.setExclusive(True)
+        self.screen_button_group.setObjectName('screen_button_group')
+        self.layout.addLayout(self.identify_layout)
+        self.layout.addStretch()
+
+        # Signals and slots
+        self.custom_geometry_button.toggled.connect(self.height_spin_box.setEnabled)
+        self.custom_geometry_button.toggled.connect(self.left_spin_box.setEnabled)
+        self.custom_geometry_button.toggled.connect(self.top_spin_box.setEnabled)
+        self.custom_geometry_button.toggled.connect(self.width_spin_box.setEnabled)
+        self.identify_button.clicked.connect(self.on_identify_button_clicked)
+
+        self._setup_spin_box(self.left_spin_box, 0, 9999, 0)
+        self._setup_spin_box(self.top_spin_box, 0, 9999, 0)
+        self._setup_spin_box(self.width_spin_box, 0, 9999, 0)
+        self._setup_spin_box(self.height_spin_box, 0, 9999, 0)
+        self.retranslate_ui()
+
+    def retranslate_ui(self):
+        self.full_screen_radio_button.setText(translate('OpenLP.ScreensTab', 'F&ull screen'))
+        self.width_label.setText(translate('OpenLP.ScreensTab', 'Width:'))
+        self.display_group_box.setTitle(translate('OpenLP.ScreensTab', 'Use this screen as a display'))
+        self.left_label.setText(translate('OpenLP.ScreensTab', 'Left:'))
+        self.custom_geometry_button.setText(translate('OpenLP.ScreensTab', 'Custom &geometry'))
+        self.top_label.setText(translate('OpenLP.ScreensTab', 'Top:'))
+        self.height_label.setText(translate('OpenLP.ScreensTab', 'Height:'))
+        self.identify_button.setText(translate('OpenLP.ScreensTab', 'Identify Screens'))
+
+    def _save_screen(self, screen):
+        """
+        Save the details in the UI to the screen
+
+        :param openlp.core.display.screens.Screen screen:
+        :return: None
+        """
+        if not screen:
+            return
+        screen.is_display = self.display_group_box.isChecked()
+        if self.custom_geometry_button.isChecked():
+            screen.custom_geometry = QtCore.QRect(self.left_spin_box.value(), self.top_spin_box.value(),
+                                                   self.width_spin_box.value(), self.height_spin_box.value())
+        else:
+            screen.custom_geometry = None
+
+    def _setup_spin_box(self, spin_box, mininum, maximum, value):
+        """
+        Set up the spin box
+
+        :param QtWidgets.QSpinBox spin_box:
+        :param int minimun:
+        :param int maximum:
+        :param int value:
+        :return: None
+        """
+        spin_box.setMinimum(mininum)
+        spin_box.setMaximum(maximum)
+        spin_box.setValue(value)
+
+    def load(self):
+        # Remove all the existing items in the layout
+        while self.screen_frame_layout.count() > 0:
+            item = self.screen_frame_layout.takeAt(0)
+            if item.widget() is not None:
+                widget = item.widget()
+                if widget in self.screen_button_group.buttons():
+                    self.screen_button_group.removeButton(widget)
+                widget.setParent(None)
+                widget.deleteLater()
+            del item
+        # Add the existing screens into the frame
+        self.screen_frame_layout.addStretch()
+        for screen in self.screens:
+            screen_button = ScreenButton(self.screen_frame, screen)
+            screen_button.clicked.connect(self.on_screen_button_clicked)
+            if not self.current_screen or screen.is_display:
+                screen_button.click()
+            self.screen_frame_layout.addWidget(screen_button)
+            self.screen_button_group.addButton(screen_button)
+        self.screen_frame_layout.addStretch()
+
+    def save(self):
+        """
+        Save the screen settings
+        """
+        self._save_screen(self.current_screen)
+        settings = Settings()
+        screen_settings = {}
+        for screen in self.screens:
+            screen_settings[screen.number] = screen.to_dict()
+        settings.setValue('core/screens', screen_settings)
+        # On save update the screens as well
+
+    @QtCore.pyqtSlot()
+    def _on_identify_timer_shot(self):
+        for label in self.identify_labels:
+            label.hide()
+            label.setParent(None)
+            label.deleteLater()
+        self.identify_labels = []
+
+    def on_identify_button_clicked(self):
+        """
+        Display a widget on every screen for 5 seconds
+        """
+        for screen in self.screens:
+            label = QtWidgets.QLabel(None)
+            label.setAlignment(QtCore.Qt.AlignCenter)
+            label.setText(str(screen))
+            label.setStyleSheet('font-size: 24pt; font-weight: bold;'
+                                'background-color: #0C0; color: #000; border: 5px solid #000;')
+            label.setGeometry(QtCore.QRect(screen.geometry.x(), screen.geometry.y(), screen.geometry.width(), 100))
+            label.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.Tool | QtCore.Qt.WindowStaysOnTopHint |
+                                 QtCore.Qt.WindowDoesNotAcceptFocus)
+            label.show()
+            self.identify_labels.append(label)
+        self.timer.start()
+
+    def on_screen_button_clicked(self):
+        """
+        Respond to a screen button being clicked
+        """
+        screen = self.sender().screen
+        if self.current_screen is not screen:
+            self._save_screen(self.current_screen)
+        self.screen_number_label.setText(str(screen))
+        self.display_group_box.setChecked(screen.is_display)
+        self.full_screen_radio_button.setChecked(screen.custom_geometry is None)
+        self.custom_geometry_button.setChecked(screen.custom_geometry is not None)
+        self._setup_spin_box(self.left_spin_box, screen.display_geometry.y(), screen.display_geometry.right(),
+                             screen.display_geometry.x())
+        self._setup_spin_box(self.top_spin_box, screen.display_geometry.y(), screen.display_geometry.bottom(),
+                             screen.display_geometry.y())
+        self._setup_spin_box(self.width_spin_box, 0, screen.display_geometry.width(), screen.display_geometry.width())
+        self._setup_spin_box(self.height_spin_box, 0, screen.display_geometry.height(),
+                             screen.display_geometry.height())
+        self.current_screen = screen

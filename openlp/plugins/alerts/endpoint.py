@@ -28,6 +28,7 @@ from openlp.core.api.http.endpoint import Endpoint
 from openlp.core.common.registry import Registry
 from openlp.core.lib.plugin import PluginStatus
 
+
 log = logging.getLogger(__name__)
 
 alerts_endpoint = Endpoint('alert')

@@ -37,6 +37,7 @@ from openlp.plugins.songs.lib import VerseType, clean_song
 from openlp.plugins.songs.lib.db import Song, Author, Topic
 from openlp.plugins.songs.lib.openlyricsxml import SongXML
 
+
 USER_AGENTS = [
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) '
     'Chrome/52.0.2743.116 Safari/537.36',

@@ -31,7 +31,7 @@ class Ui_MediaFilesDialog(object):
     """
     The user interface for the media files dialog.
     """
-    def setupUi(self, media_files_dialog):
+    def setup_ui(self, media_files_dialog):
         """
         Set up the user interface.
         """
@@ -55,9 +55,9 @@ class Ui_MediaFilesDialog(object):
         self.files_vertical_layout.addWidget(self.file_list_widget)
         self.button_box = create_button_box(media_files_dialog, 'button_box', ['cancel', 'ok'])
         self.files_vertical_layout.addWidget(self.button_box)
-        self.retranslateUi(media_files_dialog)
+        self.retranslate_ui(media_files_dialog)
 
-    def retranslateUi(self, media_files_dialog):
+    def retranslate_ui(self, media_files_dialog):
         """
         Translate the UI on the fly.
 

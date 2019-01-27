@@ -32,6 +32,7 @@ from openlp.core.common.settings import Settings
 from openlp.plugins.images.lib.imagetab import ImageTab
 from tests.helpers.testmixin import TestMixin
 
+
 __default_settings__ = {
     'images/db type': 'sqlite',
     'images/background color': '#000000',

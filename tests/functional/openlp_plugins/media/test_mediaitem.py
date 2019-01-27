@@ -32,6 +32,7 @@ from openlp.core.common.settings import Settings
 from openlp.plugins.media.lib.mediaitem import MediaMediaItem
 from tests.helpers.testmixin import TestMixin
 
+
 __default_settings__ = {
     'media/media auto start': QtCore.Qt.Unchecked,
     'media/media files': []

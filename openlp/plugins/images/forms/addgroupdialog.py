@@ -27,7 +27,7 @@ from openlp.core.lib.ui import create_button_box
 
 
 class Ui_AddGroupDialog(object):
-    def setupUi(self, add_group_dialog):
+    def setup_ui(self, add_group_dialog):
         add_group_dialog.setObjectName('add_group_dialog')
         add_group_dialog.resize(300, 10)
         self.dialog_layout = QtWidgets.QVBoxLayout(add_group_dialog)
@@ -48,10 +48,10 @@ class Ui_AddGroupDialog(object):
         self.dialog_layout.addLayout(self.name_layout)
         self.button_box = create_button_box(add_group_dialog, 'button_box', ['cancel', 'save'])
         self.dialog_layout.addWidget(self.button_box)
-        self.retranslateUi(add_group_dialog)
+        self.retranslate_ui(add_group_dialog)
         add_group_dialog.setMaximumHeight(add_group_dialog.sizeHint().height())
 
-    def retranslateUi(self, add_group_dialog):
+    def retranslate_ui(self, add_group_dialog):
         add_group_dialog.setWindowTitle(translate('ImagePlugin.AddGroupForm', 'Add group'))
         self.parent_group_label.setText(translate('ImagePlugin.AddGroupForm', 'Parent group:'))
         self.name_label.setText(translate('ImagePlugin.AddGroupForm', 'Group name:'))

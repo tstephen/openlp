@@ -1,9 +1,11 @@
 #!/usr/bin/env python2
-import sys
 import os
+import sys
 from argparse import ArgumentParser
+
 from launchpadlib.credentials import UnencryptedFileCredentialStore
 from launchpadlib.launchpad import Launchpad
+
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 

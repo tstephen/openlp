@@ -19,22 +19,25 @@
 # with this program; if not, write to the Free Software Foundation, Inc., 59  #
 # Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
 ###############################################################################
+# import sys
 from unittest import TestCase
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 from PyQt5 import QtCore
 
 from openlp.core.state import State
+# Mock QtWebEngineWidgets
+# sys.modules['PyQt5.QtWebEngineWidgets'] = MagicMock()
+
+from openlp.core.api.endpoint.controller import controller_direction, controller_text
 from openlp.core.common.registry import Registry
-from openlp.core.api.endpoint.controller import controller_text, controller_direction
-from openlp.core.display.renderer import Renderer
 from openlp.core.display.screens import ScreenList
 from openlp.core.lib.serviceitem import ServiceItem
-
 from tests.utils import convert_file_service_item
 from tests.utils.constants import RESOURCE_PATH
 
-TEST_PATH = str(RESOURCE_PATH / 'service')
+
+TEST_PATH = RESOURCE_PATH / 'service'
 
 SCREEN = {
     'primary': False,
@@ -59,9 +62,11 @@ class TestController(TestCase):
         self.desktop.primaryScreen.return_value = SCREEN['primary']
         self.desktop.screenCount.return_value = SCREEN['number']
         self.desktop.screenGeometry.return_value = SCREEN['size']
-        self.screens = ScreenList.create(self.desktop)
-        renderer = Renderer()
-        renderer.empty_height = 1000
+        with patch('openlp.core.display.screens.QtWidgets.QApplication.screens') as mocked_screens:
+            mocked_screens.return_value = [
+                MagicMock(**{'geometry.return_value': SCREEN['size']})
+            ]
+            self.screens = ScreenList.create(self.desktop)
         Registry().register('live_controller', self.mocked_live_controller)
 
     def test_controller_text_empty(self):
@@ -69,13 +74,17 @@ class TestController(TestCase):
         Remote API Tests : test the controller text method can be called with empty service item
         """
         # GIVEN: A mocked service with a dummy service item
-        self.mocked_live_controller.service_item = MagicMock()
+        mocked_service_item = MagicMock()
+        mocked_service_item.get_frames.return_value = []
+        mocked_service_item.unique_identifier = 'mock-service-item'
+        self.mocked_live_controller.service_item = mocked_service_item
+
         # WHEN: I trigger the method
-        ret = controller_text("SomeText")
+        ret = controller_text(MagicMock())
+
         # THEN: I get a basic set of results
-        results = ret['results']
-        assert isinstance(results['item'], MagicMock)
-        assert len(results['slides']) == 0
+        assert ret['results']['item'] == 'mock-service-item'
+        assert len(ret['results']['slides']) == 0
 
     def test_controller_text(self):
         """
@@ -88,9 +97,10 @@ class TestController(TestCase):
         State().update_pre_conditions("media", True)
         State().flush_preconditions()
         self.mocked_live_controller.service_item.set_from_service(line)
-        self.mocked_live_controller.service_item.render(True)
+
         # WHEN: I trigger the method
-        ret = controller_text("SomeText")
+        ret = controller_text(MagicMock())
+
         # THEN: I get a basic set of results
         results = ret['results']
         assert isinstance(ret, dict)
@@ -101,19 +111,27 @@ class TestController(TestCase):
         Text the live next method is triggered
         """
         # GIVEN: A mocked service with a dummy service item
+        mocked_emit = MagicMock()
+        self.mocked_live_controller.slidecontroller_live_next.emit = mocked_emit
         self.mocked_live_controller.service_item = MagicMock()
+
         # WHEN: I trigger the method
         controller_direction(None, 'live', 'next')
+
         # THEN: The correct method is called
-        self.mocked_live_controller.slidecontroller_live_next.emit.assert_called_once_with()
+        mocked_emit.assert_called_once_with()
 
     def test_controller_direction_previous(self):
         """
         Text the live next method is triggered
         """
         # GIVEN: A mocked service with a dummy service item
+        mocked_emit = MagicMock()
+        self.mocked_live_controller.slidecontroller_live_previous.emit = mocked_emit
         self.mocked_live_controller.service_item = MagicMock()
+
         # WHEN: I trigger the method
         controller_direction(None, 'live', 'previous')
+
         # THEN: The correct method is called
-        self.mocked_live_controller.slidecontroller_live_previous.emit.assert_called_once_with()
+        mocked_emit.assert_called_once_with()

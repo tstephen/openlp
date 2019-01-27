@@ -22,12 +22,12 @@
 from PyQt5 import QtWidgets
 
 from openlp.core.common.i18n import UiStrings, translate
-from openlp.core.lib.ui import create_button_box, create_button
+from openlp.core.lib.ui import create_button, create_button_box
 from openlp.core.ui.icons import UiIcons
 
 
 class Ui_CustomEditDialog(object):
-    def setupUi(self, custom_edit_dialog):
+    def setup_ui(self, custom_edit_dialog):
         """
         Build the Edit Dialog UI
         :param custom_edit_dialog: The Dialog
@@ -98,9 +98,9 @@ class Ui_CustomEditDialog(object):
         self.button_box = create_button_box(custom_edit_dialog, 'button_box', ['cancel', 'save'],
                                             [self.preview_button])
         self.dialog_layout.addWidget(self.button_box)
-        self.retranslateUi(custom_edit_dialog)
+        self.retranslate_ui(custom_edit_dialog)
 
-    def retranslateUi(self, custom_edit_dialog):
+    def retranslate_ui(self, custom_edit_dialog):
         custom_edit_dialog.setWindowTitle(translate('CustomPlugin.EditCustomForm', 'Edit Custom Slides'))
         self.title_label.setText(translate('CustomPlugin.EditCustomForm', '&Title:'))
         self.add_button.setText(UiStrings().Add)

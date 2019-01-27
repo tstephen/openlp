@@ -34,7 +34,7 @@ from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.common import clean_button_text, trace_error_handler
 from openlp.core.common.applocation import AppLocation
-from openlp.core.common.httputils import get_web_page, get_url_file_size, download_file
+from openlp.core.common.httputils import download_file, get_url_file_size, get_web_page
 from openlp.core.common.i18n import translate
 from openlp.core.common.mixins import RegistryProperties
 from openlp.core.common.path import Path, create_paths
@@ -43,8 +43,9 @@ from openlp.core.common.settings import Settings
 from openlp.core.lib import build_icon
 from openlp.core.lib.plugin import PluginStatus
 from openlp.core.lib.ui import critical_error_message_box
-from openlp.core.threading import ThreadWorker, run_thread, get_thread_worker, is_thread_finished
-from openlp.core.ui.firsttimewizard import UiFirstTimeWizard, FirstTimePage
+from openlp.core.threading import ThreadWorker, get_thread_worker, is_thread_finished, run_thread
+from openlp.core.ui.firsttimewizard import FirstTimePage, UiFirstTimeWizard
+
 
 log = logging.getLogger(__name__)
 
@@ -285,7 +286,7 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
         we need to update the combo box.
         """
         self.display_combo_box.clear()
-        self.display_combo_box.addItems(self.screens.get_screen_list())
+        self.display_combo_box.addItems(self.screens.get_display_screen_list())
         self.display_combo_box.setCurrentIndex(self.display_combo_box.count() - 1)
 
     def on_current_id_changed(self, page_id):
@@ -537,8 +538,9 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
                                                      'the First Time Wizard later.'))
         # Set Default Display
         if self.display_combo_box.currentIndex() != -1:
-            Settings().setValue('core/monitor', self.display_combo_box.currentIndex())
-            self.screens.set_current_display(self.display_combo_box.currentIndex())
+            # No longer need to set this setting directly, the ScreenList object will do it
+            # Settings().setValue('core/monitor', self.display_combo_box.currentIndex())
+            self.screens.set_display_screen(self.display_combo_box.currentIndex(), can_save=True)
         # Set Global Theme
         if self.theme_combo_box.currentIndex() != -1:
             Settings().setValue('themes/global theme', self.theme_combo_box.currentText())

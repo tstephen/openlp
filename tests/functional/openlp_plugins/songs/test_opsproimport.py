@@ -23,7 +23,11 @@
 This module contains tests for the WorshipCenter Pro song importer.
 """
 from unittest import TestCase, skipUnless
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
+from tests.utils import load_external_result_data
+from tests.utils.constants import RESOURCE_PATH
+
 
 try:
     from openlp.core.common.registry import Registry
@@ -32,8 +36,6 @@ try:
 except ImportError:
     CAN_RUN_TESTS = False
 
-from tests.utils import load_external_result_data
-from tests.utils.constants import RESOURCE_PATH
 
 TEST_PATH = RESOURCE_PATH / 'songs' / 'opspro'
 

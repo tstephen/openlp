@@ -32,6 +32,7 @@ from openlp.core.common.i18n import LANGUAGES, translate
 from openlp.core.lib.ui import critical_error_message_box
 from openlp.plugins.bibles.forms.languagedialog import Ui_LanguageDialog
 
+
 log = logging.getLogger(__name__)
 
 
@@ -47,7 +48,7 @@ class LanguageForm(QDialog, Ui_LanguageDialog):
         """
         super(LanguageForm, self).__init__(parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint |
                                            QtCore.Qt.WindowCloseButtonHint)
-        self.setupUi(self)
+        self.setup_ui(self)
 
     def exec(self, bible_name):
         if bible_name:

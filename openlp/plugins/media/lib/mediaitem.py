@@ -27,9 +27,9 @@ from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.state import State
 from openlp.core.common.applocation import AppLocation
-from openlp.core.common.i18n import UiStrings, translate, get_natural_key
+from openlp.core.common.i18n import UiStrings, get_natural_key, translate
 from openlp.core.common.mixins import RegistryProperties
-from openlp.core.common.path import Path, path_to_str, create_paths
+from openlp.core.common.path import Path, create_paths, path_to_str
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.lib import MediaType, ServiceItemContext, check_item_selected
@@ -39,6 +39,7 @@ from openlp.core.lib.ui import critical_error_message_box
 from openlp.core.ui.icons import UiIcons
 from openlp.core.ui.media import parse_optical_path, format_milliseconds
 from openlp.core.ui.media.vlcplayer import get_vlc
+
 
 if get_vlc() is not None:
     from openlp.plugins.media.forms.mediaclipselectorform import MediaClipSelectorForm
@@ -86,7 +87,7 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
         # Allow DnD from the desktop
         self.list_view.activateDnD()
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         """
         This method is called automatically to provide OpenLP with the opportunity to translate the ``MediaManagerItem``
         to another language.

@@ -24,24 +24,24 @@ The Theme Manager manages adding, deleteing and modifying of themes.
 """
 import os
 import zipfile
-from xml.etree.ElementTree import ElementTree, XML
+from xml.etree.ElementTree import XML, ElementTree
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from openlp.core.common import delete_file
 from openlp.core.common.applocation import AppLocation
-from openlp.core.common.i18n import UiStrings, translate, get_locale_key
-from openlp.core.ui.icons import UiIcons
+from openlp.core.common.i18n import UiStrings, get_locale_key, translate
 from openlp.core.common.mixins import LogMixin, RegistryProperties
 from openlp.core.common.path import Path, copyfile, create_paths, path_to_str
 from openlp.core.common.registry import Registry, RegistryBase
 from openlp.core.common.settings import Settings
-from openlp.core.lib import ImageSource, get_text_file_string, build_icon, \
-    check_item_selected, create_thumb, validate_thumb
+from openlp.core.lib import ImageSource, build_icon, check_item_selected, create_thumb, get_text_file_string, \
+    validate_thumb
 from openlp.core.lib.exceptions import ValidationError
-from openlp.core.lib.theme import Theme, BackgroundType
-from openlp.core.lib.ui import critical_error_message_box, create_widget_action
+from openlp.core.lib.theme import BackgroundType, Theme
+from openlp.core.lib.ui import create_widget_action, critical_error_message_box
 from openlp.core.ui.filerenameform import FileRenameForm
+from openlp.core.ui.icons import UiIcons
 from openlp.core.ui.themeform import ThemeForm
 from openlp.core.widgets.dialogs import FileDialog
 from openlp.core.widgets.toolbar import OpenLPToolbar
@@ -295,7 +295,7 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
                     for plugin in self.plugin_manager.plugins:
                         if plugin.uses_theme(old_theme_name):
                             plugin.rename_theme(old_theme_name, new_theme_name)
-                    self.renderer.update_theme(new_theme_name, old_theme_name)
+                    #self.renderer.update_theme(new_theme_name, old_theme_name)
                     self.load_themes()
 
     def on_copy_theme(self, field=None):
@@ -347,7 +347,7 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
             self.theme_form.theme = theme
             self.theme_form.exec(True)
             self.old_background_image_path = None
-            self.renderer.update_theme(theme.theme_name)
+            #self.renderer.update_theme(theme.theme_name)
             self.load_themes()
 
     def on_delete_theme(self, field=None):
@@ -363,7 +363,7 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
             row = self.theme_list_widget.row(item)
             self.theme_list_widget.takeItem(row)
             self.delete_theme(theme)
-            self.renderer.update_theme(theme, only_delete=True)
+            #self.renderer.update_theme(theme, only_delete=True)
             # As we do not reload the themes, push out the change. Reload the
             # list as the internal lists and events need to be triggered.
             self._push_themes()

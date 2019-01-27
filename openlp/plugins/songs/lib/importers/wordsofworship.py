@@ -29,6 +29,7 @@ import os
 from openlp.core.common.i18n import translate
 from openlp.plugins.songs.lib.importers.songimport import SongImport
 
+
 BLOCK_TYPES = ('V', 'C', 'B')
 
 log = logging.getLogger(__name__)

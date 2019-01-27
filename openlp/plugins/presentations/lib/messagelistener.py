@@ -31,6 +31,7 @@ from openlp.core.lib import ServiceItemContext
 from openlp.core.ui import HideMode
 from openlp.plugins.presentations.lib.pdfcontroller import PDF_CONTROLLER_FILETYPES
 
+
 log = logging.getLogger(__name__)
 
 

@@ -33,7 +33,7 @@ class Ui_FileRenameDialog(object):
     """
     The UI widgets for the rename dialog
     """
-    def setupUi(self, file_rename_dialog):
+    def setup_ui(self, file_rename_dialog):
         """
         Set up the UI
         """
@@ -51,10 +51,10 @@ class Ui_FileRenameDialog(object):
         self.dialog_layout.addWidget(self.file_name_edit, 0, 1)
         self.button_box = create_button_box(file_rename_dialog, 'button_box', ['cancel', 'ok'])
         self.dialog_layout.addWidget(self.button_box, 1, 0, 1, 2)
-        self.retranslateUi(file_rename_dialog)
+        self.retranslate_ui(file_rename_dialog)
         self.setMaximumHeight(self.sizeHint().height())
 
-    def retranslateUi(self, file_rename_dialog):
+    def retranslate_ui(self, file_rename_dialog):
         """
         Translate the UI on the fly.
         """

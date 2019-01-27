@@ -29,7 +29,7 @@ import PyQt5
 
 from openlp.core.common import ThemeLevel
 from openlp.core.common.registry import Registry
-from openlp.core.lib.serviceitem import ServiceItem, ServiceItemType, ItemCapabilities
+from openlp.core.lib.serviceitem import ItemCapabilities, ServiceItem, ServiceItemType
 from openlp.core.ui.servicemanager import ServiceManager
 from openlp.core.widgets.toolbar import OpenLPToolbar
 
@@ -150,7 +150,8 @@ class TestServiceManager(TestCase):
             service_item.add_capability(capability)
         service_item.service_item_type = ServiceItemType.Text
         service_item.edit_id = 1
-        service_item._display_frames.append(MagicMock())
+        service_item._display_slides = []
+        service_item._display_slides.append(MagicMock())
         service_manager.service_items.insert(1, {'service_item': service_item})
         service_manager.edit_action = MagicMock()
         service_manager.rename_action = MagicMock()
@@ -183,7 +184,7 @@ class TestServiceManager(TestCase):
         assert service_manager.theme_menu.menuAction().setVisible.call_count == 2, \
             'Should have be called twice'
         # THEN we add a 2nd display frame
-        service_item._display_frames.append(MagicMock())
+        service_item._display_slides.append(MagicMock())
         service_manager.context_menu(1)
         # THEN the following additional calls should have occurred.
         assert service_manager.auto_play_slides_menu.menuAction().setVisible.call_count == 2, \
@@ -214,7 +215,8 @@ class TestServiceManager(TestCase):
             service_item.add_capability(capability)
         service_item.service_item_type = ServiceItemType.Text
         service_item.edit_id = 1
-        service_item._display_frames.append(MagicMock())
+        service_item._display_slides = []
+        service_item._display_slides.append(MagicMock())
         service_manager.service_items.insert(1, {'service_item': service_item})
         service_manager.edit_action = MagicMock()
         service_manager.rename_action = MagicMock()
@@ -247,7 +249,7 @@ class TestServiceManager(TestCase):
         assert service_manager.theme_menu.menuAction().setVisible.call_count == 2, \
             'Should have be called twice'
         # THEN we add a 2nd display frame
-        service_item._display_frames.append(MagicMock())
+        service_item._display_slides.append(MagicMock())
         service_manager.context_menu(1)
         # THEN the following additional calls should have occurred.
         assert service_manager.auto_play_slides_menu.menuAction().setVisible.call_count == 2, \
@@ -279,7 +281,8 @@ class TestServiceManager(TestCase):
         service_item.add_capability(ItemCapabilities.OnLoadUpdate)
         service_item.service_item_type = ServiceItemType.Text
         service_item.edit_id = 1
-        service_item._display_frames.append(MagicMock())
+        service_item._display_slides = []
+        service_item._display_slides.append(MagicMock())
         service_manager.service_items.insert(1, {'service_item': service_item})
         service_manager.edit_action = MagicMock()
         service_manager.rename_action = MagicMock()
@@ -312,7 +315,7 @@ class TestServiceManager(TestCase):
         assert service_manager.theme_menu.menuAction().setVisible.call_count == 2, \
             'Should have be called twice'
         # THEN we add a 2nd display frame
-        service_item._display_frames.append(MagicMock())
+        service_item._display_slides.append(MagicMock())
         service_manager.context_menu(1)
         # THEN the following additional calls should have occurred.
         assert service_manager.auto_play_slides_menu.menuAction().setVisible.call_count == 2, \
@@ -342,7 +345,7 @@ class TestServiceManager(TestCase):
         service_item.add_capability(ItemCapabilities.CanEditTitle)
         service_item.service_item_type = ServiceItemType.Image
         service_item.edit_id = 1
-        service_item._raw_frames.append(MagicMock())
+        service_item.slides.append(MagicMock())
         service_manager.service_items.insert(1, {'service_item': service_item})
         service_manager.edit_action = MagicMock()
         service_manager.rename_action = MagicMock()
@@ -375,7 +378,7 @@ class TestServiceManager(TestCase):
         assert service_manager.theme_menu.menuAction().setVisible.call_count == 1, \
             'Should have be called once'
         # THEN we add a 2nd display frame and regenerate the menu.
-        service_item._raw_frames.append(MagicMock())
+        service_item.slides.append(MagicMock())
         service_manager.context_menu(1)
         # THEN the following additional calls should have occurred.
         assert service_manager.auto_play_slides_menu.menuAction().setVisible.call_count == 2, \
@@ -403,7 +406,7 @@ class TestServiceManager(TestCase):
         service_item.add_capability(ItemCapabilities.RequiresMedia)
         service_item.service_item_type = ServiceItemType.Command
         service_item.edit_id = 1
-        service_item._raw_frames.append(MagicMock())
+        service_item.slides.append(MagicMock())
         service_manager.service_items.insert(1, {'service_item': service_item})
         service_manager.edit_action = MagicMock()
         service_manager.rename_action = MagicMock()
@@ -461,7 +464,7 @@ class TestServiceManager(TestCase):
         service_item.add_capability(ItemCapabilities.CanAppend)
         service_item.service_item_type = ServiceItemType.Command
         service_item.edit_id = 1
-        service_item._raw_frames.append(MagicMock())
+        service_item.slides.append(MagicMock())
         service_manager.service_items.insert(1, {'service_item': service_item})
         service_manager.edit_action = MagicMock()
         service_manager.rename_action = MagicMock()
@@ -511,7 +514,7 @@ class TestServiceManager(TestCase):
         service_item.add_capability(ItemCapabilities.ProvidesOwnDisplay)
         service_item.service_item_type = ServiceItemType.Command
         service_item.edit_id = 1
-        service_item._raw_frames.append(MagicMock())
+        service_item.slides.append(MagicMock())
         service_manager.service_items.insert(1, {'service_item': service_item})
         service_manager.edit_action = MagicMock()
         service_manager.rename_action = MagicMock()

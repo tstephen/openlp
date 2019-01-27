@@ -28,6 +28,7 @@ from openlp.core.api.http import requires_auth
 from openlp.core.api.http.endpoint import Endpoint
 from openlp.core.common.registry import Registry
 
+
 log = logging.getLogger(__name__)
 media_endpoint = Endpoint('media')
 

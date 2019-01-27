@@ -26,7 +26,7 @@ import os
 import sys
 from datetime import timedelta
 from unittest import TestCase, skip
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock, call, patch
 
 from openlp.core.common.registry import Registry
 from openlp.core.ui.media import MediaState, MediaType

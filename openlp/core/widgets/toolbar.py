@@ -28,6 +28,7 @@ from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.lib.ui import create_widget_action
 
+
 log = logging.getLogger(__name__)
 
 

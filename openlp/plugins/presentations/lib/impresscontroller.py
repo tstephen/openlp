@@ -42,6 +42,7 @@ from openlp.core.display.screens import ScreenList
 from openlp.plugins.presentations.lib.presentationcontroller import PresentationController, PresentationDocument, \
     TextType
 
+
 if is_win():
     from win32com.client import Dispatch
     import pywintypes
@@ -239,7 +240,7 @@ class ImpressDocument(PresentationDocument):
             log.warning('Failed to load presentation {url}'.format(url=url))
             return False
         self.presentation = self.document.getPresentation()
-        self.presentation.Display = ScreenList().current['number'] + 1
+        self.presentation.Display = ScreenList().current.number + 1
         self.control = None
         self.create_thumbnails()
         self.create_titles_and_notes()
@@ -386,7 +387,7 @@ class ImpressDocument(PresentationDocument):
             self.control.activate()
             self.goto_slide(1)
         # Make sure impress doesn't steal focus, unless we're on a single screen setup
-        if len(ScreenList().screen_list) > 1:
+        if len(ScreenList()) > 1:
             Registry().get('main_window').activateWindow()
 
     def get_slide_number(self):
@@ -474,7 +475,7 @@ class ImpressDocument(PresentationDocument):
         notes = []
         pages = self.document.getDrawPages()
         for slide_no in range(1, pages.getCount() + 1):
-            titles.append(self.__get_text_from_page(slide_no, TextType.Title).replace('\n', ' ') + '\n')
+            titles.append(self.__get_text_from_page(slide_no, TextType.Title).replace('\r\n', ' ').replace('\n', ' ').strip())
             note = self.__get_text_from_page(slide_no, TextType.Notes)
             if len(note) == 0:
                 note = ' '

@@ -26,7 +26,9 @@ from PyQt5 import QtCore
 
 from openlp.core.common import get_uno_command, get_uno_instance, is_win, normalize_str
 from openlp.core.common.i18n import translate
+
 from .songimport import SongImport
+
 
 log = logging.getLogger(__name__)
 

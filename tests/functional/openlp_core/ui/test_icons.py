@@ -28,7 +28,6 @@ from unittest.mock import patch
 from PyQt5 import QtGui
 
 from openlp.core.ui.icons import UiIcons
-
 from tests.helpers.testmixin import TestMixin
 
 

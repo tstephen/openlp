@@ -37,6 +37,7 @@ from openlp.plugins.images.lib.db import ImageFilenames, init_schema
 from tests.helpers.testmixin import TestMixin
 from tests.utils.constants import TEST_RESOURCES_PATH
 
+
 __default_settings__ = {
     'images/db type': 'sqlite',
     'images/background color': '#000000',

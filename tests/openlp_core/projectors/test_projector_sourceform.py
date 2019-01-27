@@ -33,10 +33,10 @@ from PyQt5.QtWidgets import QDialog
 
 from openlp.core.common.registry import Registry
 from openlp.core.projectors.constants import PJLINK_DEFAULT_CODES, PJLINK_DEFAULT_SOURCES
-from openlp.core.projectors.db import ProjectorDB, Projector
-from openlp.core.projectors.sourceselectform import source_group, SourceSelectSingle
+from openlp.core.projectors.db import Projector, ProjectorDB
+from openlp.core.projectors.sourceselectform import SourceSelectSingle, source_group
 from tests.helpers.testmixin import TestMixin
-from tests.resources.projector.data import TEST_DB, TEST1_DATA
+from tests.resources.projector.data import TEST1_DATA, TEST_DB
 
 
 def build_source_dict():

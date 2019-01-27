@@ -25,6 +25,7 @@ from contextlib import suppress
 
 from openlp.core.common import is_win
 
+
 if is_win():
     from pathlib import WindowsPath as PathVariant          # pragma: nocover
 else:

@@ -40,7 +40,7 @@ class TopicsForm(QtWidgets.QDialog, Ui_TopicsDialog):
         """
         super(TopicsForm, self).__init__(parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint |
                                          QtCore.Qt.WindowCloseButtonHint)
-        self.setupUi(self)
+        self.setup_ui(self)
 
     def exec(self, clear=True):
         """

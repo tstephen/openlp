@@ -30,21 +30,22 @@ import logging
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from openlp.core.common.i18n import translate
-from openlp.core.ui.icons import UiIcons
 from openlp.core.common.mixins import LogMixin, RegistryProperties
 from openlp.core.common.registry import Registry, RegistryBase
 from openlp.core.common.settings import Settings
 from openlp.core.lib.ui import create_widget_action
 from openlp.core.projectors import DialogSourceStyle
-from openlp.core.projectors.constants import E_AUTHENTICATION, E_ERROR, E_NETWORK, E_NOT_CONNECTED, \
-    E_SOCKET_TIMEOUT, E_UNKNOWN_SOCKET_ERROR, S_CONNECTED, S_CONNECTING, S_COOLDOWN, S_INITIALIZE, \
-    S_NOT_CONNECTED, S_OFF, S_ON, S_STANDBY, S_WARMUP, STATUS_CODE, STATUS_MSG, QSOCKET_STATE
+from openlp.core.projectors.constants import E_AUTHENTICATION, E_ERROR, E_NETWORK, E_NOT_CONNECTED, E_SOCKET_TIMEOUT,\
+    E_UNKNOWN_SOCKET_ERROR, QSOCKET_STATE, S_CONNECTED, S_CONNECTING, S_COOLDOWN, S_INITIALIZE, S_NOT_CONNECTED, S_OFF,\
+    S_ON, S_STANDBY, S_WARMUP, STATUS_CODE, STATUS_MSG
 
 from openlp.core.projectors.db import ProjectorDB
 from openlp.core.projectors.editform import ProjectorEditForm
 from openlp.core.projectors.pjlink import PJLink, PJLinkUDP
-from openlp.core.projectors.sourceselectform import SourceSelectTabs, SourceSelectSingle
+from openlp.core.projectors.sourceselectform import SourceSelectSingle, SourceSelectTabs
+from openlp.core.ui.icons import UiIcons
 from openlp.core.widgets.toolbar import OpenLPToolbar
+
 
 log = logging.getLogger(__name__)
 log.debug('projectormanager loaded')

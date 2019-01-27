@@ -27,7 +27,7 @@ from time import sleep
 
 from PyQt5 import QtCore, QtWidgets
 
-from openlp.core.common import is_win, is_linux, is_macosx
+from openlp.core.common import is_linux, is_macosx, is_win
 from openlp.core.common.i18n import translate
 from openlp.core.common.mixins import RegistryProperties
 from openlp.core.common.path import Path
@@ -35,6 +35,7 @@ from openlp.core.lib.ui import critical_error_message_box
 from openlp.core.ui.icons import UiIcons
 from openlp.core.ui.media.vlcplayer import get_vlc
 from openlp.plugins.media.forms.mediaclipselectordialog import Ui_MediaClipSelector
+
 
 if is_win():
     from win32com.client import Dispatch
@@ -65,7 +66,7 @@ class MediaClipSelectorForm(QtWidgets.QDialog, Ui_MediaClipSelector, RegistryPro
         self.audio_cd = False
         self.playback_length = 0
         self.media_item = media_item
-        self.setupUi(self)
+        self.setup_ui(self)
         # setup play/pause icon
         self.play_icon = UiIcons().play
         self.pause_icon = UiIcons().pause
