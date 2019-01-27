@@ -160,7 +160,7 @@ class SettingsForm(QtWidgets.QDialog, Ui_SettingsDialog, RegistryProperties):
             self.themes_tab = ThemesTab(self)
             self.projector_tab = ProjectorTab(self)
             self.advanced_tab = AdvancedTab(self)
-            self.player_tab = PlayerTab(self)
+            # self.player_tab = PlayerTab(self)
             self.api_tab = ApiTab(self)
             self.screens_tab = ScreensTab(self)
         except Exception as e:

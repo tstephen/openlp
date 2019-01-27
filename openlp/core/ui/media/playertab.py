@@ -54,7 +54,7 @@ class PlayerTab(SettingsTab):
         """
         Constructor
         """
-        self.media_players = Registry().get('media_controller').media_players
+        # self.media_players = Registry().get('media_controller').media_players
         self.saved_used_players = None
         self.icon_path = UiIcons().player
         player_translated = translate('OpenLP.PlayerTab', 'Players')
