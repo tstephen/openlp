@@ -38,7 +38,6 @@ from openlp.core.ui.screenstab import ScreensTab
 from openlp.core.ui.themestab import ThemesTab
 from openlp.core.ui.media.playertab import PlayerTab
 from openlp.core.ui.settingsdialog import Ui_SettingsDialog
-from openlp.core.ui.themestab import ThemesTab
 
 
 log = logging.getLogger(__name__)
