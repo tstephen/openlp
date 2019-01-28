@@ -178,6 +178,7 @@ class Settings(QtCore.QSettings):
         'core/application version': '0.0',
         'images/background color': '#000000',
         'media/media auto start': QtCore.Qt.Unchecked,
+        'media/stream command': '',
         'remotes/download version': '0.0',
         'players/background color': '#000000',
         'servicemanager/last directory': None,
