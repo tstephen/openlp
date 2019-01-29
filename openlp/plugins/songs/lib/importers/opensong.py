@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -19,14 +19,15 @@
 # with this program; if not, write to the Free Software Foundation, Inc., 59  #
 # Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
 ###############################################################################
-
 import logging
 import re
 
 from lxml import objectify
 from lxml.etree import Error, LxmlError
 
-from openlp.core.common import translate, Settings
+from openlp.core.common import normalize_str
+from openlp.core.common.i18n import translate
+from openlp.core.common.settings import Settings
 from openlp.plugins.songs.lib import VerseType
 from openlp.plugins.songs.lib.importers.songimport import SongImport
 from openlp.plugins.songs.lib.ui import SongStrings
@@ -116,12 +117,11 @@ class OpenSongImport(SongImport):
         if not isinstance(self.import_source, list):
             return
         self.import_wizard.progress_bar.setMaximum(len(self.import_source))
-        for filename in self.import_source:
+        for file_path in self.import_source:
             if self.stop_import_flag:
                 return
-            song_file = open(filename, 'rb')
-            self.do_import_file(song_file)
-            song_file.close()
+            with file_path.open('rb') as song_file:
+                self.do_import_file(song_file)
 
     def do_import_file(self, file):
         """
@@ -156,7 +156,7 @@ class OpenSongImport(SongImport):
                 ustring = str(root.__getattr__(attr))
                 if isinstance(fn_or_string, str):
                     if attr in ['ccli']:
-                        ustring = ''.join(re.findall('\d+', ustring))
+                        ustring = ''.join(re.findall(r'\d+', ustring))
                         if ustring:
                             setattr(self, fn_or_string, int(ustring))
                         else:
@@ -231,7 +231,7 @@ class OpenSongImport(SongImport):
                 content = this_line[1:right_bracket].lower()
                 # have we got any digits? If so, verse number is everything from the digits to the end (openlp does not
                 # have concept of part verses, so just ignore any non integers on the end (including floats))
-                match = re.match('(\D*)(\d+)', content)
+                match = re.match(r'(\D*)(\d+)', content)
                 if match is not None:
                     verse_tag = match.group(1)
                     verse_num = match.group(2)
@@ -263,7 +263,7 @@ class OpenSongImport(SongImport):
                                                               post=this_line[offset + column:])
                     offset += len(chord) + 2
             # Tidy text and remove the ____s from extended words
-            this_line = self.tidy_text(this_line)
+            this_line = normalize_str(this_line)
             this_line = this_line.replace('_', '')
             this_line = this_line.replace('||', '\n[---]\n')
             this_line = this_line.strip()
@@ -303,7 +303,7 @@ class OpenSongImport(SongImport):
             # whitespace.
             order = order.lower().split()
             for verse_def in order:
-                match = re.match('(\D*)(\d+.*)', verse_def)
+                match = re.match(r'(\D*)(\d+.*)', verse_def)
                 if match is not None:
                     verse_tag = match.group(1)
                     verse_num = match.group(2)

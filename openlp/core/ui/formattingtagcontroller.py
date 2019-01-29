@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -24,10 +24,10 @@ The :mod:`formattingtagform` provides an Tag Edit facility. The Base set are pro
 Custom tags can be defined and saved. The Custom Tag arrays are saved in a pickle so QSettings works on them. Base Tags
 cannot be changed.
 """
-
 import re
-from openlp.core.common import translate
-from openlp.core.lib import FormattingTags
+
+from openlp.core.common.i18n import translate
+from openlp.core.lib.formattingtags import FormattingTags
 
 
 class FormattingTagController(object):
@@ -43,7 +43,7 @@ class FormattingTagController(object):
             r'(?P<tag>[^\s/!\?>]+)(?:\s+[^\s=]+="[^"]*")*\s*(?P<empty>/)?'
             r'|(?P<cdata>!\[CDATA\[(?:(?!\]\]>).)*\]\])'
             r'|(?P<procinst>\?(?:(?!\?>).)*\?)'
-            r'|(?P<comment>!--(?:(?!-->).)*--))>', re.UNICODE)
+            r'|(?P<comment>!--(?:(?!-->).)*--))>')
         self.html_regex = re.compile(r'^(?:[^<>]*%s)*[^<>]*$' % self.html_tag_regex.pattern)
 
     def pre_save(self):

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -25,31 +25,33 @@ from datetime import datetime
 
 from PyQt5 import QtCore, QtWidgets
 
-from openlp.core.common import Registry, Settings, translate
+from openlp.core.state import State
 from openlp.core.common.actions import ActionList
-from openlp.core.lib import Plugin, StringContent, build_icon
+from openlp.core.common.i18n import translate
+from openlp.core.common.registry import Registry
+from openlp.core.common.settings import Settings
+from openlp.core.lib.plugin import Plugin, StringContent
 from openlp.core.lib.db import Manager
 from openlp.core.lib.ui import create_action
-from openlp.plugins.songusage.forms import SongUsageDetailForm, SongUsageDeleteForm
+from openlp.core.ui.icons import UiIcons
+from openlp.plugins.songusage.forms.songusagedetailform import SongUsageDetailForm
+from openlp.plugins.songusage.forms.songusagedeleteform import SongUsageDeleteForm
 from openlp.plugins.songusage.lib import upgrade
 from openlp.plugins.songusage.lib.db import init_schema, SongUsageItem
 
 log = logging.getLogger(__name__)
 
-YEAR = QtCore.QDate().currentDate().year()
-if QtCore.QDate().currentDate().month() < 9:
-    YEAR -= 1
-
+TODAY = QtCore.QDate.currentDate()
 
 __default_settings__ = {
     'songusage/db type': 'sqlite',
     'songusage/db username': '',
-    'songuasge/db password': '',
-    'songuasge/db hostname': '',
-    'songuasge/db database': '',
+    'songusage/db password': '',
+    'songusage/db hostname': '',
+    'songusage/db database': '',
     'songusage/active': False,
-    'songusage/to date': QtCore.QDate(YEAR, 8, 31),
-    'songusage/from date': QtCore.QDate(YEAR - 1, 9, 1),
+    'songusage/to date': TODAY,
+    'songusage/from date': TODAY.addYears(-1),
     'songusage/last directory export': None
 }
 
@@ -64,10 +66,10 @@ class SongUsagePlugin(Plugin):
         super(SongUsagePlugin, self).__init__('songusage', __default_settings__)
         self.manager = Manager('songusage', init_schema, upgrade_mod=upgrade)
         self.weight = -4
-        self.icon = build_icon(':/plugins/plugin_songusage.png')
-        self.active_icon = build_icon(':/songusage/song_usage_active.png')
-        self.inactive_icon = build_icon(':/songusage/song_usage_inactive.png')
+        self.icon = UiIcons().song_usage
         self.song_usage_active = False
+        State().add_service('song_usage', self.weight, is_plugin=True)
+        State().update_pre_conditions('song_usage', self.check_pre_conditions())
 
     def check_pre_conditions(self):
         """
@@ -170,12 +172,12 @@ class SongUsagePlugin(Plugin):
         self.song_usage_active_button.blockSignals(True)
         self.song_usage_status.blockSignals(True)
         if self.song_usage_active:
-            self.song_usage_active_button.setIcon(self.active_icon)
+            self.song_usage_active_button.setIcon(UiIcons().song_usage_active)
             self.song_usage_status.setChecked(True)
             self.song_usage_active_button.setChecked(True)
             self.song_usage_active_button.setToolTip(translate('SongUsagePlugin', 'Song usage tracking is active.'))
         else:
-            self.song_usage_active_button.setIcon(self.inactive_icon)
+            self.song_usage_active_button.setIcon(UiIcons().song_usage_inactive)
             self.song_usage_status.setChecked(False)
             self.song_usage_active_button.setChecked(False)
             self.song_usage_active_button.setToolTip(translate('SongUsagePlugin', 'Song usage tracking is inactive.'))

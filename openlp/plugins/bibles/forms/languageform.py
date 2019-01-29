@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -25,14 +25,12 @@ Module implementing LanguageForm.
 """
 import logging
 
-from PyQt5.QtWidgets import QDialog
 from PyQt5 import QtCore
+from PyQt5.QtWidgets import QDialog
 
-from openlp.core.common import translate
-from openlp.core.common.languages import languages
+from openlp.core.common.i18n import LANGUAGES, translate
 from openlp.core.lib.ui import critical_error_message_box
 from openlp.plugins.bibles.forms.languagedialog import Ui_LanguageDialog
-
 
 log = logging.getLogger(__name__)
 
@@ -55,7 +53,7 @@ class LanguageForm(QDialog, Ui_LanguageDialog):
         if bible_name:
             self.bible_label.setText(bible_name)
         self.language_combo_box.addItem('')
-        for language in languages:
+        for language in LANGUAGES:
             self.language_combo_box.addItem(language.name, language.id)
         return QDialog.exec(self)
 

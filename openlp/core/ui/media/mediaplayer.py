@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -22,7 +22,7 @@
 """
 The :mod:`~openlp.core.ui.media.mediaplayer` module contains the MediaPlayer class.
 """
-from openlp.core.common import RegistryProperties
+from openlp.core.common.mixins import RegistryProperties
 from openlp.core.ui.media import MediaState
 
 
@@ -60,11 +60,12 @@ class MediaPlayer(RegistryProperties):
         """
         pass
 
-    def load(self, display):
+    def load(self, display, file):
         """
         Load a new media file and check if it is valid
 
         :param display: The display to be updated.
+        :param file: The file to be loaded
         """
         return True
 

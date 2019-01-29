@@ -5,7 +5,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -25,15 +25,13 @@ App stuff
 """
 import json
 import logging
-import os
 import re
 
 from webob import Request, Response
 from webob.static import DirectoryApp
 
-from openlp.core.common import AppLocation
 from openlp.core.api.http.errors import HttpError, NotFound, ServerError
-
+from openlp.core.common.applocation import AppLocation
 
 ARGS_REGEX = re.compile(r'''\{(\w+)(?::([^}]+))?\}''', re.VERBOSE)
 
@@ -41,7 +39,7 @@ log = logging.getLogger(__name__)
 
 
 def _route_to_regex(route):
-    """
+    r"""
     Convert a route to a regular expression
 
     For example:
@@ -71,6 +69,7 @@ def _make_response(view_result):
     """
     Create a Response object from response
     """
+    log.debug("in Make response")
     if isinstance(view_result, Response):
         return view_result
     elif isinstance(view_result, tuple):
@@ -90,6 +89,9 @@ def _make_response(view_result):
     elif isinstance(view_result, str):
         return Response(body=view_result, status=200,
                         content_type='text/html', charset='utf8')
+    else:
+        return Response(body=view_result, status=200,
+                        content_type='text/plain', charset='utf8')
 
 
 def _handle_exception(error):
@@ -138,12 +140,11 @@ class WSGIApplication(object):
         Add a static directory as a route
         """
         if route not in self.static_routes:
-            root = str(AppLocation.get_section_data_path('remotes'))
-            static_path = os.path.abspath(os.path.join(root, static_dir))
-            if not os.path.exists(static_path):
+            static_path = AppLocation.get_section_data_path('remotes') / static_dir
+            if not static_path.exists():
                 log.error('Static path "%s" does not exist. Skipping creating static route/', static_path)
                 return
-            self.static_routes[route] = DirectoryApp(static_path)
+            self.static_routes[route] = DirectoryApp(str(static_path.resolve()))
 
     def dispatch(self, request):
         """

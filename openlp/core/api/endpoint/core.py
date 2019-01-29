@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -19,14 +19,19 @@
 # with this program; if not, write to the Free Software Foundation, Inc., 59  #
 # Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
 ###############################################################################
+"""
+The :mod:`~openlp.core.api.endpoint.core` module contains the core API endpoints
+"""
 import logging
 import os
 
-from openlp.core.api.http.endpoint import Endpoint
 from openlp.core.api.http import requires_auth
-from openlp.core.common import Registry, UiStrings, translate
-from openlp.core.lib import image_to_byte, PluginStatus, StringContent
-
+from openlp.core.api.http.endpoint import Endpoint
+from openlp.core.common.i18n import UiStrings, translate
+from openlp.core.common.registry import Registry
+from openlp.core.lib import image_to_byte
+from openlp.core.lib.plugin import StringContent
+from openlp.core.lib.plugin import PluginStatus
 
 template_dir = 'templates'
 static_dir = 'static'
@@ -168,15 +173,3 @@ def main_image(request):
         'slide_image': 'data:image/png;base64,' + str(image_to_byte(live_controller.slide_image))
     }
     return {'results': result}
-
-
-def get_content_type(file_name):
-    """
-    Examines the extension of the file and determines what the content_type should be, defaults to text/plain
-    Returns the extension and the content_type
-
-    :param file_name: name of file
-    """
-    ext = os.path.splitext(file_name)[1]
-    content_type = FILE_TYPES.get(ext, 'text/plain')
-    return ext, content_type

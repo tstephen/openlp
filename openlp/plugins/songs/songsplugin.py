@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -25,19 +25,22 @@ for the Songs plugin.
 """
 
 import logging
-import os
 import sqlite3
+from pathlib import Path
 from tempfile import gettempdir
 
 from PyQt5 import QtCore, QtWidgets
 
+from openlp.core.state import State
 from openlp.core.api.http import register_endpoint
-from openlp.core.common import UiStrings, Registry, translate
 from openlp.core.common.actions import ActionList
-from openlp.core.lib import Plugin, StringContent, build_icon
+from openlp.core.common.i18n import UiStrings, translate
+from openlp.core.ui.icons import UiIcons
+from openlp.core.common.registry import Registry
+from openlp.core.lib import build_icon
+from openlp.core.lib.plugin import Plugin, StringContent
 from openlp.core.lib.db import Manager
 from openlp.core.lib.ui import create_action
-
 from openlp.plugins.songs import reporting
 from openlp.plugins.songs.endpoint import api_songs_endpoint, songs_endpoint
 from openlp.plugins.songs.forms.duplicatesongremovalform import DuplicateSongRemovalForm
@@ -50,7 +53,6 @@ from openlp.plugins.songs.lib.mediaitem import SongMediaItem
 from openlp.plugins.songs.lib.mediaitem import SongSearch
 from openlp.plugins.songs.lib.songstab import SongsTab
 
-
 log = logging.getLogger(__name__)
 __default_settings__ = {
     'songs/db type': 'sqlite',
@@ -62,6 +64,7 @@ __default_settings__ = {
     'songs/last import type': SongFormat.OpenLyrics,
     'songs/update service on edit': False,
     'songs/add song from service': True,
+    'songs/add songbook slide': False,
     'songs/display songbar': True,
     'songs/display songbook': False,
     'songs/display written by': True,
@@ -92,11 +95,13 @@ class SongsPlugin(Plugin):
         super(SongsPlugin, self).__init__('songs', __default_settings__, SongMediaItem, SongsTab)
         self.manager = Manager('songs', init_schema, upgrade_mod=upgrade)
         self.weight = -10
-        self.icon_path = ':/plugins/plugin_songs.png'
+        self.icon_path = UiIcons().music
         self.icon = build_icon(self.icon_path)
         self.songselect_form = None
         register_endpoint(songs_endpoint)
         register_endpoint(api_songs_endpoint)
+        State().add_service(self.name, self.weight, is_plugin=True)
+        State().update_pre_conditions(self.name, self.check_pre_conditions())
 
     def check_pre_conditions(self):
         """
@@ -170,7 +175,7 @@ class SongsPlugin(Plugin):
         self.tools_reindex_item = create_action(
             tools_menu, 'toolsReindexItem',
             text=translate('SongsPlugin', '&Re-index Songs'),
-            icon=':/plugins/plugin_songs.png',
+            icon=UiIcons().music,
             statustip=translate('SongsPlugin', 'Re-index the songs database to improve searching and ordering.'),
             triggers=self.on_tools_reindex_item_triggered)
         self.tools_find_duplicates = create_action(
@@ -317,17 +322,16 @@ class SongsPlugin(Plugin):
         self.application.process_events()
         self.on_tools_reindex_item_triggered()
         self.application.process_events()
-        db_dir = os.path.join(gettempdir(), 'openlp')
-        if not os.path.exists(db_dir):
+        db_dir_path = Path(gettempdir(), 'openlp')
+        if not db_dir_path.exists():
             return
-        song_dbs = []
+        song_db_paths = []
         song_count = 0
-        for sfile in os.listdir(db_dir):
-            if sfile.startswith('songs_') and sfile.endswith('.sqlite'):
-                self.application.process_events()
-                song_dbs.append(os.path.join(db_dir, sfile))
-                song_count += SongsPlugin._count_songs(os.path.join(db_dir, sfile))
-        if not song_dbs:
+        for db_file_path in db_dir_path.glob('songs_*.sqlite'):
+            self.application.process_events()
+            song_db_paths.append(db_file_path)
+            song_count += SongsPlugin._count_songs(db_file_path)
+        if not song_db_paths:
             return
         self.application.process_events()
         progress = QtWidgets.QProgressDialog(self.main_window)
@@ -339,8 +343,8 @@ class SongsPlugin(Plugin):
         progress.setMinimumDuration(0)
         progress.forceShow()
         self.application.process_events()
-        for db in song_dbs:
-            importer = OpenLPSongImport(self.manager, filename=db)
+        for db_path in song_db_paths:
+            importer = OpenLPSongImport(self.manager, file_path=db_path)
             importer.do_import(progress)
             self.application.process_events()
         progress.setValue(song_count)
@@ -374,13 +378,15 @@ class SongsPlugin(Plugin):
             self.manager.delete_object(Song, song.id)
 
     @staticmethod
-    def _count_songs(db_file):
+    def _count_songs(db_path):
         """
         Provide a count of the songs in the database
 
-        :param db_file: the database name to count
+        :param openlp.core.common.path.Path db_path: The database to use
+        :return: The number of songs in the db.
+        :rtype: int
         """
-        connection = sqlite3.connect(db_file)
+        connection = sqlite3.connect(str(db_path))
         cursor = connection.cursor()
         cursor.execute('SELECT COUNT(id) AS song_count FROM songs')
         song_count = cursor.fetchone()[0]

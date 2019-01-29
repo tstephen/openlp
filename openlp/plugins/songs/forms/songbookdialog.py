@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -22,8 +22,9 @@
 
 from PyQt5 import QtWidgets
 
-from openlp.core.lib import translate, build_icon
+from openlp.core.common.i18n import translate
 from openlp.core.lib.ui import create_button_box
+from openlp.core.ui.icons import UiIcons
 
 
 class Ui_SongBookDialog(object):
@@ -35,7 +36,7 @@ class Ui_SongBookDialog(object):
         Set up the user interface.
         """
         song_book_dialog.setObjectName('song_book_dialog')
-        song_book_dialog.setWindowIcon(build_icon(':/icon/openlp-logo.svg'))
+        song_book_dialog.setWindowIcon(UiIcons().main_icon)
         song_book_dialog.resize(300, 10)
         self.dialog_layout = QtWidgets.QVBoxLayout(song_book_dialog)
         self.dialog_layout.setObjectName('dialog_layout')

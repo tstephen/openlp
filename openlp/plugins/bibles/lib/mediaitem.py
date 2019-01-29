@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -26,21 +26,26 @@ from enum import IntEnum, unique
 
 from PyQt5 import QtCore, QtWidgets
 
-from openlp.core.common import Registry, Settings, UiStrings, translate
-from openlp.core.lib import MediaManagerItem, ItemCapabilities, ServiceItemContext
-from openlp.core.lib.searchedit import SearchEdit
+from openlp.core.common.i18n import UiStrings, translate, get_locale_key
+from openlp.core.common.registry import Registry
+from openlp.core.common.settings import Settings
+from openlp.core.lib import ServiceItemContext
+from openlp.core.lib.mediamanageritem import MediaManagerItem
+from openlp.core.lib.serviceitem import ItemCapabilities
 from openlp.core.lib.ui import set_case_insensitive_completer, create_horizontal_adjusting_combo_box, \
-    critical_error_message_box, find_and_set_in_combo_box, build_icon
-from openlp.core.common.languagemanager import get_locale_key
+    critical_error_message_box, find_and_set_in_combo_box
+from openlp.core.ui.icons import UiIcons
+from openlp.core.widgets.edits import SearchEdit
 from openlp.plugins.bibles.forms.bibleimportform import BibleImportForm
 from openlp.plugins.bibles.forms.editbibleform import EditBibleForm
-from openlp.plugins.bibles.lib import DisplayStyle, LayoutStyle, VerseReferenceList, \
-    get_reference_match, get_reference_separator
+from openlp.plugins.bibles.lib import DisplayStyle, LayoutStyle, get_reference_match, \
+    get_reference_separator
+from openlp.plugins.bibles.lib.versereferencelist import VerseReferenceList
 
 log = logging.getLogger(__name__)
 
 
-VALID_TEXT_SEARCH = re.compile('\w\w\w')
+VALID_TEXT_SEARCH = re.compile(r'\w\w\w')
 
 
 def get_reference_separators():
@@ -103,9 +108,9 @@ class BibleMediaItem(MediaManagerItem):
         :param args: Positional arguments to pass to the super method. (tuple)
         :param kwargs: Keyword arguments to pass to the super method. (dict)
         """
-        self.clear_icon = build_icon(':/bibles/bibles_search_clear.png')
-        self.save_results_icon = build_icon(':/bibles/bibles_save_results.png')
-        self.sort_icon = build_icon(':/bibles/bibles_book_sort.png')
+        self.clear_icon = UiIcons().square
+        self.save_results_icon = UiIcons.save
+        self.sort_icon = UiIcons().sort
         self.bible = None
         self.second_bible = None
         self.saved_results = []
@@ -313,13 +318,13 @@ class BibleMediaItem(MediaManagerItem):
         self.plugin.manager.media = self
         self.populate_bible_combo_boxes()
         self.search_edit.set_search_types([
-            (BibleSearch.Combined, ':/bibles/bibles_search_combined.png',
+            (BibleSearch.Combined, UiIcons().search_comb,
                 translate('BiblesPlugin.MediaItem', 'Text or Reference'),
                 translate('BiblesPlugin.MediaItem', 'Text or Reference...')),
-            (BibleSearch.Reference, ':/bibles/bibles_search_reference.png',
+            (BibleSearch.Reference, UiIcons().search_ref,
                 translate('BiblesPlugin.MediaItem', 'Scripture Reference'),
                 translate('BiblesPlugin.MediaItem', 'Search Scripture Reference...')),
-            (BibleSearch.Text, ':/bibles/bibles_search_text.png',
+            (BibleSearch.Text, UiIcons().text,
                 translate('BiblesPlugin.MediaItem', 'Text Search'),
                 translate('BiblesPlugin.MediaItem', 'Search Text...'))
         ])
@@ -383,7 +388,7 @@ class BibleMediaItem(MediaManagerItem):
         This initialises the given bible, which means that its book names and their chapter numbers is added to the
         combo boxes on the 'Select' Tab. This is not of any importance of the 'Search' Tab.
 
-        :param last_book_id: The "book reference id" of the book which is chosen at the moment. (int)
+        :param last_book: The "book reference id" of the book which is chosen at the moment. (int)
         :return: None
         """
         log.debug('initialise_advanced_bible {bible}, {ref}'.format(bible=self.bible, ref=last_book))
@@ -573,6 +578,7 @@ class BibleMediaItem(MediaManagerItem):
         Update the second bible. If changing from single to dual bible modes as if the user wants to clear the search
         results, if not revert to the previously selected bible
 
+        :param: selection not required by part of the signature
         :return: None
         """
         new_selection = self.second_combo_box.currentData()
@@ -1004,14 +1010,17 @@ class BibleMediaItem(MediaManagerItem):
         }[self.settings.display_style]
         return '{{su}}{bracket[0]}{verse_text}{bracket[1]}{{/su}}&nbsp;'.format(verse_text=verse_text, bracket=bracket)
 
-    def search(self, string, showError):
+    def search(self, string, show_error=True):
         """
         Search for some Bible verses (by reference).
+        :param string: search string
+        :param show_error: do we show the error
+        :return: the results of the search
         """
         if self.bible is None:
             return []
         reference = self.plugin.manager.parse_ref(self.bible.name, string)
-        search_results = self.plugin.manager.get_verses(self.bible.name, reference, showError)
+        search_results = self.plugin.manager.get_verses(self.bible.name, reference, show_error)
         if search_results:
             verse_text = ' '.join([verse.text for verse in search_results])
             return [[string, verse_text]]

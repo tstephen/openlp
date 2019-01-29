@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -24,10 +24,11 @@ Provide the generic plugin functionality for OpenLP plugins.
 """
 import logging
 
-from PyQt5 import QtCore
-
-from openlp.core.common import Registry, RegistryProperties, Settings, UiStrings
-from openlp.core.common.versionchecker import get_application_version
+from openlp.core.common.i18n import UiStrings
+from openlp.core.common.mixins import RegistryProperties
+from openlp.core.common.registry import Registry, RegistryBase
+from openlp.core.common.settings import Settings
+from openlp.core.version import get_version
 
 log = logging.getLogger(__name__)
 
@@ -57,7 +58,7 @@ class StringContent(object):
     VisibleName = 'visible_name'
 
 
-class Plugin(QtCore.QObject, RegistryProperties):
+class Plugin(RegistryBase, RegistryProperties):
     """
     Base class for openlp plugins to inherit from.
 
@@ -136,10 +137,6 @@ class Plugin(QtCore.QObject, RegistryProperties):
         self.text_strings = {}
         self.set_plugin_text_strings()
         self.name_strings = self.text_strings[StringContent.Name]
-        if version:
-            self.version = version
-        else:
-            self.version = get_application_version()['version']
         self.settings_section = self.name
         self.icon = None
         self.media_item_class = media_item_class
@@ -159,6 +156,19 @@ class Plugin(QtCore.QObject, RegistryProperties):
         Settings.extend_default_settings(default_settings)
         Registry().register_function('{name}_add_service_item'.format(name=self.name), self.process_add_service_event)
         Registry().register_function('{name}_config_updated'.format(name=self.name), self.config_update)
+        self._setup(version)
+
+    def _setup(self, version):
+        """
+        Run some initial setup. This method is separate from __init__ in order to mock it out in tests.
+
+        :param version: Defaults to *None*, which means that the same version number is used as OpenLP's version number.
+        :rtype: None
+        """
+        if version:
+            self.version = version
+        else:
+            self.version = get_version()['version']
 
     def check_pre_conditions(self):
         """
@@ -312,6 +322,9 @@ class Plugin(QtCore.QObject, RegistryProperties):
         Encapsulate access of plugins translated text strings
         """
         return self.text_strings[name]
+
+    def set_plugin_text_strings(self):
+        pass
 
     def set_plugin_ui_text_strings(self, tooltips):
         """

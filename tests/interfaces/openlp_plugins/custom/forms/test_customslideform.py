@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -27,9 +27,8 @@ from unittest.mock import MagicMock, patch
 
 from PyQt5 import QtWidgets
 
-from openlp.core.common import Registry
+from openlp.core.common.registry import Registry
 from openlp.plugins.custom.forms.editcustomslideform import EditCustomSlideForm
-
 from tests.helpers.testmixin import TestMixin
 
 
@@ -59,7 +58,7 @@ class TestEditCustomSlideForm(TestCase, TestMixin):
         Test if the dialog is correctly set up.
         """
         # GIVEN: A mocked QDialog.exec() method
-        with patch('PyQt5.QtWidgets.QDialog.exec') as mocked_exec:
+        with patch('PyQt5.QtWidgets.QDialog.exec'):
             # WHEN: Show the dialog.
             self.form.exec()
 
@@ -71,7 +70,7 @@ class TestEditCustomSlideForm(TestCase, TestMixin):
         Test the set_text() method.
         """
         # GIVEN: A mocked QDialog.exec() method
-        with patch('PyQt5.QtWidgets.QDialog.exec') as mocked_exec:
+        with patch('PyQt5.QtWidgets.QDialog.exec'):
             mocked_set_focus = MagicMock()
             self.form.slide_text_edit.setFocus = mocked_set_focus
             wanted_text = 'THIS TEXT SHOULD BE SHOWN.'

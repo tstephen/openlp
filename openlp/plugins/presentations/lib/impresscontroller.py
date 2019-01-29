@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -32,11 +32,15 @@
 # http://nxsy.org/comparing-documents-with-openoffice-and-python
 
 import logging
-import os
 import time
 
-from openlp.core.common import is_win, Registry, delete_file
-from openlp.core.common.path import Path
+from PyQt5 import QtCore
+
+from openlp.core.common import delete_file, get_uno_command, get_uno_instance, is_win
+from openlp.core.common.registry import Registry
+from openlp.core.display.screens import ScreenList
+from openlp.plugins.presentations.lib.presentationcontroller import PresentationController, PresentationDocument, \
+    TextType
 
 if is_win():
     from win32com.client import Dispatch
@@ -54,14 +58,6 @@ else:
         uno_available = True
     except ImportError:
         uno_available = False
-
-from PyQt5 import QtCore
-
-from openlp.core.lib import ScreenList
-from openlp.core.common import get_uno_command, get_uno_instance
-from openlp.plugins.presentations.lib.presentationcontroller import PresentationController, PresentationDocument, \
-    TextType
-
 
 log = logging.getLogger(__name__)
 
@@ -125,7 +121,7 @@ class ImpressController(PresentationController):
         while uno_instance is None and loop < 3:
             try:
                 uno_instance = get_uno_instance(resolver)
-            except:
+            except Exception:
                 log.warning('Unable to find running instance ')
                 self.start_process()
                 loop += 1
@@ -134,7 +130,7 @@ class ImpressController(PresentationController):
             log.debug('get UNO Desktop Openoffice - createInstanceWithContext - Desktop')
             desktop = self.manager.createInstanceWithContext("com.sun.star.frame.Desktop", uno_instance)
             return desktop
-        except:
+        except Exception:
             log.warning('Failed to get UNO desktop')
             return None
 
@@ -176,7 +172,7 @@ class ImpressController(PresentationController):
                 desktop = self.get_uno_desktop()
             else:
                 desktop = self.get_com_desktop()
-        except:
+        except Exception:
             log.warning('Failed to find an OpenOffice desktop to terminate')
         if not desktop:
             return
@@ -194,7 +190,7 @@ class ImpressController(PresentationController):
             try:
                 desktop.terminate()
                 log.debug('OpenOffice killed')
-            except:
+            except Exception:
                 log.warning('Failed to terminate OpenOffice')
 
 
@@ -203,12 +199,15 @@ class ImpressDocument(PresentationDocument):
     Class which holds information and controls a single presentation.
     """
 
-    def __init__(self, controller, presentation):
+    def __init__(self, controller, document_path):
         """
         Constructor, store information about the file and initialise.
+
+        :param openlp.core.common.path.Path document_path: File path for the document to load
+        :rtype: None
         """
         log.debug('Init Presentation OpenOffice')
-        super(ImpressDocument, self).__init__(controller, presentation)
+        super().__init__(controller, document_path)
         self.document = None
         self.presentation = None
         self.control = None
@@ -225,10 +224,9 @@ class ImpressDocument(PresentationDocument):
             if desktop is None:
                 self.controller.start_process()
                 desktop = self.controller.get_com_desktop()
-            url = 'file:///' + self.file_path.replace('\\', '/').replace(':', '|').replace(' ', '%20')
         else:
             desktop = self.controller.get_uno_desktop()
-            url = uno.systemPathToFileUrl(self.file_path)
+        url = self.file_path.as_uri()
         if desktop is None:
             return False
         self.desktop = desktop
@@ -237,7 +235,7 @@ class ImpressDocument(PresentationDocument):
         properties = tuple(properties)
         try:
             self.document = desktop.loadComponentFromURL(url, '_blank', 0, properties)
-        except:
+        except Exception:
             log.warning('Failed to load presentation {url}'.format(url=url))
             return False
         self.presentation = self.document.getPresentation()
@@ -254,11 +252,8 @@ class ImpressDocument(PresentationDocument):
         log.debug('create thumbnails OpenOffice')
         if self.check_thumbnails():
             return
-        if is_win():
-            thumb_dir_url = 'file:///' + self.get_temp_folder().replace('\\', '/') \
-                .replace(':', '|').replace(' ', '%20')
-        else:
-            thumb_dir_url = uno.systemPathToFileUrl(self.get_temp_folder())
+        temp_folder_path = self.get_temp_folder()
+        thumb_dir_url = temp_folder_path.as_uri()
         properties = []
         properties.append(self.create_property('FilterName', 'impress_png_Export'))
         properties = tuple(properties)
@@ -266,20 +261,20 @@ class ImpressDocument(PresentationDocument):
         pages = doc.getDrawPages()
         if not pages:
             return
-        if not os.path.isdir(self.get_temp_folder()):
-            os.makedirs(self.get_temp_folder())
+        if not temp_folder_path.is_dir():
+            temp_folder_path.mkdir(parents=True)
         for index in range(pages.getCount()):
             page = pages.getByIndex(index)
             doc.getCurrentController().setCurrentPage(page)
-            url_path = '{path}/{name}.png'.format(path=thumb_dir_url, name=str(index + 1))
-            path = os.path.join(self.get_temp_folder(), str(index + 1) + '.png')
+            url_path = '{path}/{name:d}.png'.format(path=thumb_dir_url, name=index + 1)
+            path = temp_folder_path / '{number:d}.png'.format(number=index + 1)
             try:
                 doc.storeToURL(url_path, properties)
                 self.convert_thumbnail(path, index + 1)
-                delete_file(Path(path))
+                delete_file(path)
             except ErrorCodeIOException as exception:
                 log.exception('ERROR! ErrorCodeIOException {error:d}'.format(error=exception.ErrCode))
-            except:
+            except Exception:
                 log.exception('{path} - Unable to store openoffice preview'.format(path=path))
 
     def create_property(self, name, value):
@@ -307,7 +302,7 @@ class ImpressDocument(PresentationDocument):
                     self.presentation.end()
                     self.presentation = None
                     self.document.dispose()
-                except:
+                except Exception:
                     log.warning("Closing presentation failed")
             self.document = None
         self.controller.remove_doc(self)
@@ -324,7 +319,7 @@ class ImpressDocument(PresentationDocument):
             if self.document.getPresentation() is None:
                 log.debug("getPresentation failed to find a presentation")
                 return False
-        except:
+        except Exception:
             log.warning("getPresentation failed to find a presentation")
             return False
         return True

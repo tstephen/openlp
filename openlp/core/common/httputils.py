@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -20,23 +20,19 @@
 # Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
 ###############################################################################
 """
-The :mod:`openlp.core.utils` module provides the utility libraries for OpenLP.
+The :mod:`openlp.core.common.httputils` module provides the utility methods for downloading stuff.
 """
 import hashlib
 import logging
-import os
-import platform
-import socket
 import sys
-import subprocess
 import time
-import urllib.error
-import urllib.parse
-import urllib.request
-from http.client import HTTPException
 from random import randint
 
-from openlp.core.common import Registry, trace_error_handler
+import requests
+
+from openlp.core.common import trace_error_handler
+from openlp.core.common.registry import Registry
+from openlp.core.common.settings import ProxyMode, Settings
 
 log = logging.getLogger(__name__ + '.__init__')
 
@@ -69,31 +65,37 @@ CONNECTION_TIMEOUT = 30
 CONNECTION_RETRIES = 2
 
 
-class HTTPRedirectHandlerFixed(urllib.request.HTTPRedirectHandler):
+def get_proxy_settings(mode=None):
     """
-    Special HTTPRedirectHandler used to work around http://bugs.python.org/issue22248
-    (Redirecting to urls with special chars)
-    """
-    def redirect_request(self, req, fp, code, msg, headers, new_url):
-        #
-        """
-        Test if the new_url can be decoded to ascii
+    Create a dictionary containing the proxy settings.
 
-        :param req:
-        :param fp:
-        :param code:
-        :param msg:
-        :param headers:
-        :param new_url:
-        :return:
-        """
-        try:
-            new_url.encode('latin1').decode('ascii')
-            fixed_url = new_url
-        except Exception:
-            # The url could not be decoded to ascii, so we do some url encoding
-            fixed_url = urllib.parse.quote(new_url.encode('latin1').decode('utf-8', 'replace'), safe='/:')
-        return super(HTTPRedirectHandlerFixed, self).redirect_request(req, fp, code, msg, headers, fixed_url)
+    :param ProxyMode | None mode: Specify the source of the proxy settings
+    :return: A dict using the format expected by the requests library.
+    :rtype: dict | None
+    """
+    settings = Settings()
+    if mode is None:
+        mode = settings.value('advanced/proxy mode')
+    if mode == ProxyMode.NO_PROXY:
+        return {'http': None, 'https': None}
+    elif mode == ProxyMode.SYSTEM_PROXY:
+        # The requests library defaults to using the proxy settings in the environment variables
+        return
+    elif mode == ProxyMode.MANUAL_PROXY:
+        http_addr = settings.value('advanced/proxy http')
+        https_addr = settings.value('advanced/proxy https')
+        username = settings.value('advanced/proxy username')
+        password = settings.value('advanced/proxy password')
+        basic_auth = ''
+        if username:
+            basic_auth = '{username}:{password}@'.format(username=username, password=password)
+        http_value = None
+        https_value = None
+        if http_addr:
+            http_value = 'http://{basic_auth}{http_addr}'.format(basic_auth=basic_auth, http_addr=http_addr)
+        if https_addr:
+            https_value = 'https://{basic_auth}{https_addr}'.format(basic_auth=basic_auth, https_addr=https_addr)
+        return {'http': http_value, 'https': https_value}
 
 
 def get_user_agent():
@@ -107,80 +109,48 @@ def get_user_agent():
     return browser_list[random_index]
 
 
-def get_web_page(url, header=None, update_openlp=False):
+def get_web_page(url, headers=None, update_openlp=False, proxy=None):
     """
     Attempts to download the webpage at url and returns that page or None.
 
     :param url: The URL to be downloaded.
-    :param header:  An optional HTTP header to pass in the request to the web server.
-    :param update_openlp: Tells OpenLP to update itself if the page is successfully downloaded.
-        Defaults to False.
+    :param dict | None headers:  An optional HTTP header to pass in the request to the web server.
+    :param update_openlp: Tells OpenLP to update itself if the page is successfully downloaded. Defaults to False.
+    :param dict | ProxyMode | None proxy: ProxyMode enum or a dictionary containing the proxy servers, with their types
+        as the key e.g. {'http': 'http://proxyserver:port', 'https': 'https://proxyserver:port'}
     """
-    # TODO: Add proxy usage. Get proxy info from OpenLP settings, add to a
-    # proxy_handler, build into an opener and install the opener into urllib2.
-    # http://docs.python.org/library/urllib2.html
     if not url:
         return None
-    # This is needed to work around http://bugs.python.org/issue22248 and https://bugs.launchpad.net/openlp/+bug/1251437
-    opener = urllib.request.build_opener(HTTPRedirectHandlerFixed())
-    urllib.request.install_opener(opener)
-    req = urllib.request.Request(url)
-    if not header or header[0].lower() != 'user-agent':
-        user_agent = get_user_agent()
-        req.add_header('User-Agent', user_agent)
-    if header:
-        req.add_header(header[0], header[1])
+    if not headers:
+        headers = {}
+    if 'user-agent' not in [key.lower() for key in headers.keys()]:
+        headers['User-Agent'] = get_user_agent()
+    if not isinstance(proxy, dict):
+        proxy = get_proxy_settings(mode=proxy)
     log.debug('Downloading URL = %s' % url)
     retries = 0
-    while retries <= CONNECTION_RETRIES:
-        retries += 1
-        time.sleep(0.1)
+    while retries < CONNECTION_RETRIES:
         try:
-            page = urllib.request.urlopen(req, timeout=CONNECTION_TIMEOUT)
-            log.debug('Downloaded page {text}'.format(text=page.geturl()))
+            response = requests.get(url, headers=headers, proxies=proxy, timeout=float(CONNECTION_TIMEOUT))
+            log.debug('Downloaded page {url}'.format(url=response.url))
             break
-        except urllib.error.URLError as err:
-            log.exception('URLError on {text}'.format(text=url))
-            log.exception('URLError: {text}'.format(text=err.reason))
-            page = None
-            if retries > CONNECTION_RETRIES:
-                raise
-        except socket.timeout:
-            log.exception('Socket timeout: {text}'.format(text=url))
-            page = None
-            if retries > CONNECTION_RETRIES:
-                raise
-        except socket.gaierror:
-            log.exception('Socket gaierror: {text}'.format(text=url))
-            page = None
-            if retries > CONNECTION_RETRIES:
-                raise
-        except ConnectionRefusedError:
-            log.exception('ConnectionRefused: {text}'.format(text=url))
-            page = None
-            if retries > CONNECTION_RETRIES:
-                raise
-            break
-        except ConnectionError:
-            log.exception('Connection error: {text}'.format(text=url))
-            page = None
-            if retries > CONNECTION_RETRIES:
-                raise
-        except HTTPException:
-            log.exception('HTTPException error: {text}'.format(text=url))
-            page = None
-            if retries > CONNECTION_RETRIES:
-                raise
-        except:
+        except OSError:
+            # For now, catch OSError. All requests errors inherit from OSError
+            log.exception('Unable to connect to {url}'.format(url=url))
+            response = None
+            if retries >= CONNECTION_RETRIES:
+                raise ConnectionError('Unable to connect to {url}, see log for details'.format(url=url))
+            retries += 1
+        except:                                                                # noqa
             # Don't know what's happening, so reraise the original
+            log.exception('Unknown error when trying to connect to {url}'.format(url=url))
             raise
     if update_openlp:
         Registry().get('application').process_events()
-    if not page:
-        log.exception('{text} could not be downloaded'.format(text=url))
+    if not response or not response.text:
+        log.error('{url} could not be downloaded'.format(url=url))
         return None
-    log.debug(page)
-    return page
+    return response.text
 
 
 def get_url_file_size(url):
@@ -192,81 +162,68 @@ def get_url_file_size(url):
     retries = 0
     while True:
         try:
-            site = urllib.request.urlopen(url, timeout=CONNECTION_TIMEOUT)
-            meta = site.info()
-            return int(meta.get("Content-Length"))
-        except urllib.error.URLError:
+            response = requests.head(url, timeout=float(CONNECTION_TIMEOUT), allow_redirects=True)
+            return int(response.headers['Content-Length'])
+        except OSError:
             if retries > CONNECTION_RETRIES:
-                raise
+                raise ConnectionError('Unable to download {url}'.format(url=url))
             else:
                 retries += 1
                 time.sleep(0.1)
                 continue
 
 
-def url_get_file(callback, url, f_path, sha256=None):
+def download_file(update_object, url, file_path, sha256=None):
     """"
     Download a file given a URL.  The file is retrieved in chunks, giving the ability to cancel the download at any
     point. Returns False on download error.
 
-    :param callback: the class which needs to be updated
+    :param update_object: the object which needs to be updated
     :param url: URL to download
-    :param f_path: Destination file
+    :param file_path: Destination file
     :param sha256: The check sum value to be checked against the download value
     """
     block_count = 0
     block_size = 4096
     retries = 0
-    log.debug("url_get_file: " + url)
-    while True:
+    log.debug('url_get_file: %s', url)
+    while retries < CONNECTION_RETRIES:
         try:
-            filename = open(f_path, "wb")
-            url_file = urllib.request.urlopen(url, timeout=CONNECTION_TIMEOUT)
-            if sha256:
-                hasher = hashlib.sha256()
-            # Download until finished or canceled.
-            while not callback.was_cancelled:
-                data = url_file.read(block_size)
-                if not data:
-                    break
-                filename.write(data)
+            with file_path.open('wb') as saved_file:
+                response = requests.get(url, timeout=float(CONNECTION_TIMEOUT), stream=True)
                 if sha256:
-                    hasher.update(data)
-                block_count += 1
-                callback._download_progress(block_count, block_size)
-            filename.close()
+                    hasher = hashlib.sha256()
+                # Download until finished or canceled.
+                for chunk in response.iter_content(chunk_size=block_size):
+                    if hasattr(update_object, 'was_cancelled') and update_object.was_cancelled:
+                        break
+                    saved_file.write(chunk)
+                    if sha256:
+                        hasher.update(chunk)
+                    block_count += 1
+                    if hasattr(update_object, 'update_progress'):
+                        update_object.update_progress(block_count, block_size)
+                response.close()
             if sha256 and hasher.hexdigest() != sha256:
-                log.error('sha256 sums did not match for file: {file}'.format(file=f_path))
-                os.remove(f_path)
+                log.error('sha256 sums did not match for file %s, got %s, expected %s', file_path, hasher.hexdigest(),
+                          sha256)
+                if file_path.exists():
+                    file_path.unlink()
                 return False
-        except (urllib.error.URLError, socket.timeout) as err:
+            break
+        except OSError:
             trace_error_handler(log)
-            filename.close()
-            os.remove(f_path)
             if retries > CONNECTION_RETRIES:
+                if file_path.exists():
+                    file_path.unlink()
                 return False
             else:
                 retries += 1
                 time.sleep(0.1)
                 continue
-        break
-    # Delete file if cancelled, it may be a partial file.
-    if callback.was_cancelled:
-        os.remove(f_path)
+    if hasattr(update_object, 'was_cancelled') and update_object.was_cancelled and file_path.exists():
+        file_path.unlink()
     return True
-
-
-def ping(host):
-    """
-    Returns True if host responds to a ping request
-    """
-    # Ping parameters as function of OS
-    ping_str = "-n 1" if platform.system().lower() == "windows" else "-c 1"
-    args = "ping " + " " + ping_str + " " + host
-    need_sh = False if platform.system().lower() == "windows" else True
-
-    # Ping
-    return subprocess.call(args, shell=need_sh) == 0
 
 
 __all__ = ['get_web_page']

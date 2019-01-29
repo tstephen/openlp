@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,16 +23,23 @@
 The :mod:`openlp.plugins.presentations.presentationplugin` module provides the ability for OpenLP to display
 presentations from a variety of document formats.
 """
-import os
 import logging
+import os
 
 from PyQt5 import QtCore
 
+from openlp.core.state import State
 from openlp.core.api.http import register_endpoint
-from openlp.core.common import extension_loader, translate
-from openlp.core.lib import Plugin, StringContent, build_icon
+from openlp.core.common import extension_loader
+from openlp.core.common.i18n import translate
+from openlp.core.ui.icons import UiIcons
+from openlp.core.common.settings import Settings
+from openlp.core.lib import build_icon
+from openlp.core.lib.plugin import Plugin, StringContent
 from openlp.plugins.presentations.endpoint import api_presentations_endpoint, presentations_endpoint
-from openlp.plugins.presentations.lib import PresentationController, PresentationMediaItem, PresentationTab
+from openlp.plugins.presentations.lib.presentationcontroller import PresentationController
+from openlp.plugins.presentations.lib.mediaitem import PresentationMediaItem
+from openlp.plugins.presentations.lib.presentationtab import PresentationTab
 
 log = logging.getLogger(__name__)
 
@@ -44,19 +51,19 @@ __default_settings__ = {
     'presentations/maclo': QtCore.Qt.Checked,
     'presentations/Impress': QtCore.Qt.Checked,
     'presentations/Powerpoint': QtCore.Qt.Checked,
-    'presentations/Powerpoint Viewer': QtCore.Qt.Checked,
     'presentations/Pdf': QtCore.Qt.Checked,
     'presentations/presentations files': [],
     'presentations/thumbnail_scheme': '',
     'presentations/powerpoint slide click advance': QtCore.Qt.Unchecked,
-    'presentations/powerpoint control window': QtCore.Qt.Unchecked
+    'presentations/powerpoint control window': QtCore.Qt.Unchecked,
+    'presentations/last directory': None
 }
 
 
 class PresentationPlugin(Plugin):
     """
     This plugin allowed a Presentation to be opened, controlled and displayed on the output display. The plugin controls
-    third party applications such as OpenOffice.org Impress, Microsoft PowerPoint and the PowerPoint viewer.
+    third party applications such as OpenOffice.org Impress, and Microsoft PowerPoint.
     """
     log = logging.getLogger('PresentationPlugin')
 
@@ -68,10 +75,12 @@ class PresentationPlugin(Plugin):
         self.controllers = {}
         Plugin.__init__(self, 'presentations', __default_settings__, __default_settings__)
         self.weight = -8
-        self.icon_path = ':/plugins/plugin_presentations.png'
+        self.icon_path = UiIcons().presentation
         self.icon = build_icon(self.icon_path)
         register_endpoint(presentations_endpoint)
         register_endpoint(api_presentations_endpoint)
+        State().add_service('presentation', self.weight, is_plugin=True)
+        State().update_pre_conditions('presentation', self.check_pre_conditions())
 
     def create_settings_tab(self, parent):
         """
@@ -128,13 +137,28 @@ class PresentationPlugin(Plugin):
         """
         log.debug('check_pre_conditions')
         controller_dir = os.path.join('plugins', 'presentations', 'lib')
-        glob_pattern = os.path.join(controller_dir, '*controller.py')
+        # Find all files that do not begin with '.' (lp:#1738047) and end with controller.py
+        glob_pattern = os.path.join(controller_dir, '[!.]*controller.py')
         extension_loader(glob_pattern, ['presentationcontroller.py'])
         controller_classes = PresentationController.__subclasses__()
         for controller_class in controller_classes:
             controller = controller_class(self)
             self.register_controllers(controller)
         return bool(self.controllers)
+
+    def app_startup(self):
+        """
+        Perform tasks on application startup.
+        """
+        # TODO: Can be removed when the upgrade path to OpenLP 3.0 is no longer needed, also ensure code in
+        #       PresentationDocument.get_thumbnail_folder and PresentationDocument.get_temp_folder is removed
+        super().app_startup()
+        presentation_paths = Settings().value('presentations/presentations files')
+        for path in presentation_paths:
+            self.media_item.clean_up_thumbnails(path, clean_for_update=True)
+        self.media_item.list_view.clear()
+        Settings().setValue('presentations/thumbnail_scheme', 'md5')
+        self.media_item.validate_and_load(presentation_paths)
 
     @staticmethod
     def about():

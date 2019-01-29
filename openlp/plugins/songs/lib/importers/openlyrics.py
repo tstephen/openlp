@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,16 +23,14 @@
 The :mod:`openlyrics` module provides the functionality for importing
 songs which are saved as OpenLyrics files.
 """
-
 import logging
-import os
 
 from lxml import etree
 
-from openlp.core.ui.lib.wizard import WizardStrings
+from openlp.core.widgets.wizard import WizardStrings
 from openlp.plugins.songs.lib.importers.songimport import SongImport
-from openlp.plugins.songs.lib.ui import SongStrings
 from openlp.plugins.songs.lib.openlyricsxml import OpenLyrics, OpenLyricsError
+from openlp.plugins.songs.lib.ui import SongStrings
 
 log = logging.getLogger(__name__)
 
@@ -58,12 +56,11 @@ class OpenLyricsImport(SongImport):
         for file_path in self.import_source:
             if self.stop_import_flag:
                 return
-            self.import_wizard.increment_progress_bar(
-                WizardStrings.ImportingType.format(source=os.path.basename(file_path)))
+            self.import_wizard.increment_progress_bar(WizardStrings.ImportingType.format(source=file_path.name))
             try:
                 # Pass a file object, because lxml does not cope with some
                 # special characters in the path (see lp:757673 and lp:744337).
-                parsed_file = etree.parse(open(file_path, 'rb'), parser)
+                parsed_file = etree.parse(file_path.open('rb'), parser)
                 xml = etree.tostring(parsed_file).decode()
                 self.open_lyrics.xml_to_song(xml)
             except etree.XMLSyntaxError:

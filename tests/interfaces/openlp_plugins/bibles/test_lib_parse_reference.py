@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -25,11 +25,12 @@ This module contains tests for the lib submodule of the Bibles plugin.
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
-from openlp.core.common import Registry, Settings
-from openlp.plugins.bibles.lib import BibleManager, parse_reference, LanguageSelection
-
-from tests.utils.constants import TEST_RESOURCES_PATH
+from openlp.core.common.registry import Registry
+from openlp.core.common.settings import Settings
+from openlp.plugins.bibles.lib import LanguageSelection, parse_reference
+from openlp.plugins.bibles.lib.manager import BibleManager
 from tests.helpers.testmixin import TestMixin
+from tests.utils.constants import TEST_RESOURCES_PATH
 
 
 class TestBibleManager(TestCase, TestMixin):
@@ -54,13 +55,13 @@ class TestBibleManager(TestCase, TestMixin):
         }
         Settings().extend_default_settings(bible_settings)
         with patch('openlp.core.common.applocation.Settings') as mocked_class, \
-                patch('openlp.core.common.AppLocation.get_section_data_path') as mocked_get_section_data_path, \
-                patch('openlp.core.common.AppLocation.get_files') as mocked_get_files:
+                patch('openlp.core.common.applocation.AppLocation.get_section_data_path') as mocked_get_data_path, \
+                patch('openlp.core.common.applocation.AppLocation.get_files') as mocked_get_files:
             # GIVEN: A mocked out Settings class and a mocked out AppLocation.get_files()
             mocked_settings = mocked_class.return_value
             mocked_settings.contains.return_value = False
             mocked_get_files.return_value = ["tests.sqlite"]
-            mocked_get_section_data_path.return_value = TEST_RESOURCES_PATH + "/bibles"
+            mocked_get_data_path.return_value = TEST_RESOURCES_PATH + "/bibles"
             self.manager = BibleManager(MagicMock())
 
     def tearDown(self):
@@ -78,7 +79,7 @@ class TestBibleManager(TestCase, TestMixin):
         # WHEN asking to parse the bible reference
         results = parse_reference('1 Timothy 1', self.manager.db_cache['tests'], MagicMock(), 54)
         # THEN a verse array should be returned
-        self.assertEqual([(54, 1, 1, -1)], results, "The bible verses should matches the expected results")
+        assert [(54, 1, 1, -1)] == results, "The bible verses should matches the expected results"
 
     def test_parse_reference_two(self):
         """
@@ -88,7 +89,7 @@ class TestBibleManager(TestCase, TestMixin):
         # WHEN asking to parse the bible reference
         results = parse_reference('1 Timothy 1:1-2', self.manager.db_cache['tests'], MagicMock(), 54)
         # THEN a verse array should be returned
-        self.assertEqual([(54, 1, 1, 2)], results, "The bible verses should matches the expected results")
+        assert [(54, 1, 1, 2)] == results, "The bible verses should matches the expected results"
 
     def test_parse_reference_three(self):
         """
@@ -98,8 +99,8 @@ class TestBibleManager(TestCase, TestMixin):
         # WHEN asking to parse the bible reference
         results = parse_reference('1 Timothy 1:1-2:1', self.manager.db_cache['tests'], MagicMock(), 54)
         # THEN a verse array should be returned
-        self.assertEqual([(54, 1, 1, -1), (54, 2, 1, 1)], results,
-                         "The bible verses should match the expected results")
+        assert [(54, 1, 1, -1), (54, 2, 1, 1)] == results, \
+            "The bible verses should match the expected results"
 
     def test_parse_reference_four(self):
         """
@@ -109,7 +110,7 @@ class TestBibleManager(TestCase, TestMixin):
         # WHEN asking to parse the bible reference
         results = parse_reference('Raoul 1', self.manager.db_cache['tests'], MagicMock())
         # THEN a verse array should be returned
-        self.assertEqual([], results, "The bible Search should return an empty list")
+        assert [] == results, "The bible Search should return an empty list"
 
     def test_parse_reference_five(self):
         """
@@ -119,4 +120,4 @@ class TestBibleManager(TestCase, TestMixin):
         # WHEN asking to parse the bible reference
         results = parse_reference('1 Timothy 1:3-end', self.manager.db_cache['tests'], MagicMock(), 54)
         # THEN a verse array should be returned
-        self.assertEqual([(54, 1, 3, -1)], results, "The bible verses should matches the expected results")
+        assert [(54, 1, 3, -1)] == results, "The bible verses should matches the expected results"

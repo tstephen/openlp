@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -26,20 +26,12 @@ import logging
 import os
 import sys
 
-from openlp.core.common import Settings, is_win, is_macosx
-from openlp.core.common.path import Path
-
-
-if not is_win() and not is_macosx():
-    try:
-        from xdg import BaseDirectory
-        XDG_BASE_AVAILABLE = True
-    except ImportError:
-        XDG_BASE_AVAILABLE = False
+import appdirs
 
 import openlp
-from openlp.core.common import check_directory_exists, get_frozen_path
-
+from openlp.core.common import get_frozen_path, is_win, is_macosx
+from openlp.core.common.path import Path, create_paths
+from openlp.core.common.settings import Settings
 
 log = logging.getLogger(__name__)
 
@@ -86,10 +78,10 @@ class AppLocation(object):
         """
         # Check if we have a different data location.
         if Settings().contains('advanced/data path'):
-            path = Settings().value('advanced/data path')
+            path = Path(Settings().value('advanced/data path'))
         else:
             path = AppLocation.get_directory(AppLocation.DataDir)
-            check_directory_exists(path)
+            create_paths(path)
         return path
 
     @staticmethod
@@ -122,7 +114,7 @@ class AppLocation(object):
         :rtype: openlp.core.common.path.Path
         """
         path = AppLocation.get_data_path() / section
-        check_directory_exists(path)
+        create_paths(path)
         return path
 
 
@@ -146,8 +138,10 @@ def _get_os_dir_path(dir_type):
         elif dir_type == AppLocation.LanguageDir:
             return Path(openlp.__file__).parent
         return openlp_folder_path
-    elif is_macosx():
-        openlp_folder_path = Path(os.getenv('HOME'), 'Library', 'Application Support', 'openlp')
+
+    dirs = appdirs.AppDirs('openlp', multipath=True)
+    if is_macosx():
+        openlp_folder_path = Path(dirs.user_data_dir)
         if dir_type == AppLocation.DataDir:
             return openlp_folder_path / 'Data'
         elif dir_type == AppLocation.LanguageDir:
@@ -155,15 +149,15 @@ def _get_os_dir_path(dir_type):
         return openlp_folder_path
     else:
         if dir_type == AppLocation.LanguageDir:
-            directory = Path('/usr', 'local', 'share', 'openlp')
+            site_dirs = dirs.site_data_dir.split(os.pathsep)
+            directory = Path(site_dirs[0])
             if directory.exists():
                 return directory
-            return Path('/usr', 'share', 'openlp')
-        if XDG_BASE_AVAILABLE:
-            if dir_type == AppLocation.DataDir or dir_type == AppLocation.CacheDir:
-                return Path(BaseDirectory.xdg_data_home, 'openlp')
-            elif dir_type == AppLocation.CacheDir:
-                return Path(BaseDirectory.xdg_cache_home, 'openlp')
+            return Path(site_dirs[1])
+        if dir_type == AppLocation.DataDir:
+            return Path(dirs.user_data_dir)
+        elif dir_type == AppLocation.CacheDir:
+            return Path(dirs.user_cache_dir)
         if dir_type == AppLocation.DataDir:
             return Path(os.getenv('HOME'), '.openlp', 'data')
         return Path(os.getenv('HOME'), '.openlp')

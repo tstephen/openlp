@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -19,16 +19,20 @@
 # with this program; if not, write to the Free Software Foundation, Inc., 59  #
 # Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
 ###############################################################################
+import json
 import logging
 import os
-import urllib.request
 import urllib.error
-import json
+import urllib.request
 
-from openlp.core.api.http.endpoint import Endpoint
 from openlp.core.api.http import requires_auth
-from openlp.core.common import Registry, AppLocation, Settings
-from openlp.core.lib import ItemCapabilities, create_thumb
+from openlp.core.api.http.endpoint import Endpoint
+from openlp.core.common.applocation import AppLocation
+from openlp.core.common.path import Path
+from openlp.core.common.registry import Registry
+from openlp.core.common.settings import Settings
+from openlp.core.lib import create_thumb
+from openlp.core.lib.serviceitem import ItemCapabilities
 
 log = logging.getLogger(__name__)
 
@@ -64,12 +68,12 @@ def controller_text(request):
             elif current_item.is_image() and not frame.get('image', '') and Settings().value('api/thumbnails'):
                 item['tag'] = str(index + 1)
                 thumbnail_path = os.path.join('images', 'thumbnails', frame['title'])
-                full_thumbnail_path = str(AppLocation.get_data_path() / thumbnail_path)
+                full_thumbnail_path = AppLocation.get_data_path() / thumbnail_path
                 # Create thumbnail if it doesn't exists
-                if not os.path.exists(full_thumbnail_path):
-                    create_thumb(current_item.get_frame_path(index), full_thumbnail_path, False)
-                Registry().get('image_manager').add_image(full_thumbnail_path, frame['title'], None, 88, 88)
-                item['img'] = urllib.request.pathname2url(os.path.sep + thumbnail_path)
+                if not full_thumbnail_path.exists():
+                    create_thumb(Path(current_item.get_frame_path(index)), full_thumbnail_path, False)
+                Registry().get('image_manager').add_image(str(full_thumbnail_path), frame['title'], None, 88, 88)
+                item['img'] = urllib.request.pathname2url(os.path.sep + str(thumbnail_path))
                 item['text'] = str(frame['title'])
                 item['html'] = str(frame['title'])
             else:
@@ -88,6 +92,7 @@ def controller_text(request):
                 item['text'] = str(frame['title'])
                 item['html'] = str(frame['title'])
             item['selected'] = (live_controller.selected_row == index)
+            item['title'] = current_item.title
             data.append(item)
     json_data = {'results': {'slides': data}}
     if current_item:
@@ -114,12 +119,11 @@ def controller_set(request):
     return {'results': {'success': True}}
 
 
-@controller_endpoint.route('{action:next|previous}')
+@controller_endpoint.route('{controller}/{action:next|previous}')
 @requires_auth
 def controller_direction(request, controller, action):
     """
     Handles requests for setting service items in the slide controller
-11
     :param request: The http request object.
     :param controller: the controller slides forward or backward.
     :param action: the controller slides forward or backward.
@@ -134,7 +138,7 @@ def controller_direction(request, controller, action):
 def controller_direction_api(request, controller, action):
     """
     Handles requests for setting service items in the slide controller
-11
+
     :param request: The http request object.
     :param controller: the controller slides forward or backward.
     :param action: the controller slides forward or backward.

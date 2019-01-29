@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -25,14 +25,16 @@ The :mod:`http` module enables OpenLP to retrieve scripture from bible websites.
 import logging
 import re
 import socket
-import urllib.parse
 import urllib.error
+import urllib.parse
 
 from bs4 import BeautifulSoup, NavigableString, Tag
 
-from openlp.core.common import Registry, RegistryProperties, translate
-from openlp.core.lib.ui import critical_error_message_box
 from openlp.core.common.httputils import get_web_page
+from openlp.core.common.i18n import translate
+from openlp.core.common.mixins import RegistryProperties
+from openlp.core.common.registry import Registry
+from openlp.core.lib.ui import critical_error_message_box
 from openlp.plugins.bibles.lib import SearchResults
 from openlp.plugins.bibles.lib.bibleimport import BibleImport
 from openlp.plugins.bibles.lib.db import BibleDB, BiblesResourcesDB, Book
@@ -92,9 +94,8 @@ class BGExtract(RegistryProperties):
     """
     NAME = 'BibleGateway'
 
-    def __init__(self, proxy_url=None):
-        log.debug('BGExtract.init("{url}")'.format(url=proxy_url))
-        self.proxy_url = proxy_url
+    def __init__(self):
+        log.debug('BGExtract.__init__()')
         socket.setdefaulttimeout(30)
 
     def _remove_elements(self, parent, tag, class_=None):
@@ -285,15 +286,10 @@ class BGExtract(RegistryProperties):
         log.debug('BGExtract.get_books_from_http("{version}")'.format(version=version))
         url_params = urllib.parse.urlencode({'action': 'getVersionInfo', 'vid': '{version}'.format(version=version)})
         reference_url = 'http://www.biblegateway.com/versions/?{url}#books'.format(url=url_params)
-        page = get_web_page(reference_url)
-        if not page:
+        page_source = get_web_page(reference_url)
+        if not page_source:
             send_error_message('download')
             return None
-        page_source = page.read()
-        try:
-            page_source = str(page_source, 'utf8')
-        except UnicodeDecodeError:
-            page_source = str(page_source, 'cp1251')
         try:
             soup = BeautifulSoup(page_source, 'lxml')
         except Exception:
@@ -361,9 +357,8 @@ class BSExtract(RegistryProperties):
     """
     NAME = 'BibleServer'
 
-    def __init__(self, proxy_url=None):
-        log.debug('BSExtract.init("{url}")'.format(url=proxy_url))
-        self.proxy_url = proxy_url
+    def __init__(self):
+        log.debug('BSExtract.__init__()')
         socket.setdefaulttimeout(30)
 
     def get_bible_chapter(self, version, book_name, chapter):
@@ -464,9 +459,8 @@ class CWExtract(RegistryProperties):
     """
     NAME = 'Crosswalk'
 
-    def __init__(self, proxy_url=None):
-        log.debug('CWExtract.init("{url}")'.format(url=proxy_url))
-        self.proxy_url = proxy_url
+    def __init__(self):
+        log.debug('CWExtract.__init__()')
         socket.setdefaulttimeout(30)
 
     def get_bible_chapter(self, version, book_name, chapter):
@@ -598,19 +592,9 @@ class HTTPBible(BibleImport, RegistryProperties):
         super().__init__(*args, **kwargs)
         self.download_source = kwargs['download_source']
         self.download_name = kwargs['download_name']
-        # TODO: Clean up proxy stuff. We probably want one global proxy per connection type (HTTP and HTTPS) at most.
-        self.proxy_server = None
-        self.proxy_username = None
-        self.proxy_password = None
         self.language_id = None
         if 'path' in kwargs:
             self.path = kwargs['path']
-        if 'proxy_server' in kwargs:
-            self.proxy_server = kwargs['proxy_server']
-        if 'proxy_username' in kwargs:
-            self.proxy_username = kwargs['proxy_username']
-        if 'proxy_password' in kwargs:
-            self.proxy_password = kwargs['proxy_password']
         if 'language_id' in kwargs:
             self.language_id = kwargs['language_id']
 
@@ -624,20 +608,12 @@ class HTTPBible(BibleImport, RegistryProperties):
                                                      'Registering Bible and loading books...'))
         self.save_meta('download_source', self.download_source)
         self.save_meta('download_name', self.download_name)
-        if self.proxy_server:
-            self.save_meta('proxy_server', self.proxy_server)
-        if self.proxy_username:
-            # Store the proxy userid.
-            self.save_meta('proxy_username', self.proxy_username)
-        if self.proxy_password:
-            # Store the proxy password.
-            self.save_meta('proxy_password', self.proxy_password)
         if self.download_source.lower() == 'crosswalk':
-            handler = CWExtract(self.proxy_server)
+            handler = CWExtract()
         elif self.download_source.lower() == 'biblegateway':
-            handler = BGExtract(self.proxy_server)
+            handler = BGExtract()
         elif self.download_source.lower() == 'bibleserver':
-            handler = BSExtract(self.proxy_server)
+            handler = BSExtract()
         books = handler.get_books_from_http(self.download_name)
         if not books:
             log.error('Importing books from {source} - download name: "{name}" '
@@ -725,11 +701,11 @@ class HTTPBible(BibleImport, RegistryProperties):
         log.debug('HTTPBible.get_chapter("{book}", "{chapter}")'.format(book=book, chapter=chapter))
         log.debug('source = {source}'.format(source=self.download_source))
         if self.download_source.lower() == 'crosswalk':
-            handler = CWExtract(self.proxy_server)
+            handler = CWExtract()
         elif self.download_source.lower() == 'biblegateway':
-            handler = BGExtract(self.proxy_server)
+            handler = BGExtract()
         elif self.download_source.lower() == 'bibleserver':
-            handler = BSExtract(self.proxy_server)
+            handler = BSExtract()
         return handler.get_bible_chapter(self.download_name, book, chapter)
 
     def get_books(self):
@@ -759,7 +735,7 @@ class HTTPBible(BibleImport, RegistryProperties):
         return BiblesResourcesDB.get_verse_count(book_id, chapter)
 
 
-def get_soup_for_bible_ref(reference_url, header=None, pre_parse_regex=None, pre_parse_substitute=None):
+def get_soup_for_bible_ref(reference_url, headers=None, pre_parse_regex=None, pre_parse_substitute=None):
     """
     Gets a webpage and returns a parsed and optionally cleaned soup or None.
 
@@ -772,15 +748,15 @@ def get_soup_for_bible_ref(reference_url, header=None, pre_parse_regex=None, pre
     if not reference_url:
         return None
     try:
-        page = get_web_page(reference_url, header, True)
-    except Exception as e:
-        page = None
-    if not page:
+        page_source = get_web_page(reference_url, headers, update_openlp=True)
+    except Exception:
+        log.exception('Unable to download Bible %s, unknown exception occurred', reference_url)
+        page_source = None
+    if not page_source:
         send_error_message('download')
         return None
-    page_source = page.read()
     if pre_parse_regex and pre_parse_substitute is not None:
-        page_source = re.sub(pre_parse_regex, pre_parse_substitute, page_source.decode())
+        page_source = re.sub(pre_parse_regex, pre_parse_substitute, page_source)
     soup = None
     try:
         soup = BeautifulSoup(page_source, 'lxml')

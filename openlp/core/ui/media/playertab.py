@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,13 +23,16 @@
 The :mod:`~openlp.core.ui.media.playertab` module holds the configuration tab for the media stuff.
 """
 import platform
+
 from PyQt5 import QtCore, QtWidgets
 
-from openlp.core.common import Registry, Settings, UiStrings, translate
-from openlp.core.lib import SettingsTab
+from openlp.core.common.i18n import UiStrings, translate
+from openlp.core.common.registry import Registry
+from openlp.core.common.settings import Settings
+from openlp.core.lib.settingstab import SettingsTab
 from openlp.core.lib.ui import create_button
-from openlp.core.ui.media import get_media_players, set_media_players
-from openlp.core.ui.lib.colorbutton import ColorButton
+from openlp.core.ui.icons import UiIcons
+from openlp.core.widgets.buttons import ColorButton
 
 
 class MediaQCheckBox(QtWidgets.QCheckBox):
@@ -53,7 +56,7 @@ class PlayerTab(SettingsTab):
         """
         self.media_players = Registry().get('media_controller').media_players
         self.saved_used_players = None
-        self.icon_path = ':/media/multimedia-player.png'
+        self.icon_path = UiIcons().player
         player_translated = translate('OpenLP.PlayerTab', 'Players')
         super(PlayerTab, self).__init__(parent, 'Players', player_translated)
 
@@ -198,7 +201,7 @@ class PlayerTab(SettingsTab):
         """
         if self.saved_used_players:
             self.used_players = self.saved_used_players
-        self.used_players = get_media_players()[0]
+        # self.used_players = get_media_players()[0]
         self.saved_used_players = self.used_players
         settings = Settings()
         settings.beginGroup(self.settings_section)
@@ -216,13 +219,13 @@ class PlayerTab(SettingsTab):
         settings.beginGroup(self.settings_section)
         settings.setValue('background color', self.background_color)
         settings.endGroup()
-        old_players, override_player = get_media_players()
-        if self.used_players != old_players:
-            # clean old Media stuff
-            set_media_players(self.used_players, override_player)
-            self.settings_form.register_post_process('mediaitem_suffix_reset')
-            self.settings_form.register_post_process('mediaitem_media_rebuild')
-            self.settings_form.register_post_process('config_screen_changed')
+        # old_players, override_player = get_media_players()
+        # if self.used_players != old_players:
+        #     # clean old Media stuff
+        #     set_media_players(self.used_players, override_player)
+        #     self.settings_form.register_post_process('mediaitem_suffix_reset')
+        #     self.settings_form.register_post_process('mediaitem_media_rebuild')
+        #     self.settings_form.register_post_process('config_screen_changed')
 
     def post_set_up(self, post_update=False):
         """

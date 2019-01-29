@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -22,13 +22,15 @@
 """
 The Themes configuration tab
 """
-
-
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from openlp.core.common import Registry, Settings, ThemeLevel, UiStrings, translate
-from openlp.core.lib import SettingsTab
+from openlp.core.common import ThemeLevel
+from openlp.core.common.i18n import UiStrings, translate
+from openlp.core.common.registry import Registry
+from openlp.core.common.settings import Settings
+from openlp.core.lib.settingstab import SettingsTab
 from openlp.core.lib.ui import find_and_set_in_combo_box
+from openlp.core.ui.icons import UiIcons
 
 
 class ThemesTab(SettingsTab):
@@ -39,7 +41,7 @@ class ThemesTab(SettingsTab):
         """
         Constructor
         """
-        self.icon_path = ':/themes/theme_new.png'
+        self.icon_path = UiIcons().theme
         theme_translated = translate('OpenLP.ThemesTab', 'Themes')
         super(ThemesTab, self).__init__(parent, 'Themes', theme_translated)
 
@@ -211,8 +213,8 @@ class ThemesTab(SettingsTab):
         """
         Utility method to update the global theme preview image.
         """
-        image = self.theme_manager.get_preview_image(self.global_theme)
-        preview = QtGui.QPixmap(str(image))
+        image_path = self.theme_manager.theme_path / '{file_name}.png'.format(file_name=self.global_theme)
+        preview = QtGui.QPixmap(str(image_path))
         if not preview.isNull():
             preview = preview.scaled(300, 255, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
         self.default_list_view.setPixmap(preview)

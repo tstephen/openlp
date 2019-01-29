@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,20 +23,17 @@
 The :mod:`~openlp.plugins.custom.lib.customtab` module contains the settings tab
 for the Custom Slides plugin, which is inserted into the configuration dialog.
 """
-
 from PyQt5 import QtCore, QtWidgets
 
-from openlp.core.common import Settings, translate
-from openlp.core.lib import SettingsTab
+from openlp.core.common.i18n import translate
+from openlp.core.common.settings import Settings
+from openlp.core.lib.settingstab import SettingsTab
 
 
 class CustomTab(SettingsTab):
     """
     CustomTab is the Custom settings tab in the settings dialog.
     """
-    def __init__(self, parent, title, visible_title, icon_path):
-        super(CustomTab, self).__init__(parent, title, visible_title, icon_path)
-
     def setupUi(self):
         self.setObjectName('CustomTab')
         super(CustomTab, self).setupUi()

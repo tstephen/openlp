@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -27,14 +27,14 @@ from unittest.mock import patch, MagicMock
 
 try:
     import pyodbc
-    from openlp.core.common import Registry
+    from openlp.core.common.registry import Registry
     from openlp.plugins.songs.lib.importers.worshipcenterpro import WorshipCenterProImport
     CAN_RUN_TESTS = True
 except ImportError:
     CAN_RUN_TESTS = False
 
 
-class TestRecord(object):
+class DBTestRecord(object):
     """
     Microsoft Access Driver is not available on non Microsoft Systems for this reason the :class:`TestRecord` is used
     to simulate a recordset that would be returned by pyobdc.
@@ -55,7 +55,7 @@ if CAN_RUN_TESTS:
         _title_assignment_list = []
 
         def __init__(self, manager):
-            WorshipCenterProImport.__init__(self, manager, filenames=[])
+            WorshipCenterProImport.__init__(self, manager, file_paths=[])
 
         @property
         def title(self):
@@ -66,12 +66,12 @@ if CAN_RUN_TESTS:
             self._title_assignment_list.append(title)
 
 
-RECORDSET_TEST_DATA = [TestRecord(1, 'TITLE', 'Amazing Grace'),
-                       TestRecord(1, 'AUTHOR', 'John Newton'),
-                       TestRecord(1, 'CCLISONGID', '12345'),
-                       TestRecord(1, 'COMMENTS', 'The original version'),
-                       TestRecord(1, 'COPY', 'Public Domain'),
-                       TestRecord(
+RECORDSET_TEST_DATA = [DBTestRecord(1, 'TITLE', 'Amazing Grace'),
+                       DBTestRecord(1, 'AUTHOR', 'John Newton'),
+                       DBTestRecord(1, 'CCLISONGID', '12345'),
+                       DBTestRecord(1, 'COMMENTS', 'The original version'),
+                       DBTestRecord(1, 'COPY', 'Public Domain'),
+                       DBTestRecord(
                            1, 'LYRICS',
                            'Amazing grace! How&crlf;sweet the sound&crlf;That saved a wretch like me!&crlf;'
                            'I once was lost,&crlf;but now am found;&crlf;Was blind, but now I see.&crlf;&crlf;'
@@ -88,8 +88,8 @@ RECORDSET_TEST_DATA = [TestRecord(1, 'TITLE', 'Amazing Grace'),
                            'Shall be forever mine.&crlf;&crlf;When we\'ve been there&crlf;ten thousand years,&crlf;'
                            'Bright shining as the sun,&crlf;We\'ve no less days to&crlf;sing God\'s praise&crlf;'
                            'Than when we\'d first begun.&crlf;&crlf;'),
-                       TestRecord(2, 'TITLE', 'Beautiful Garden Of Prayer, The'),
-                       TestRecord(
+                       DBTestRecord(2, 'TITLE', 'Beautiful Garden Of Prayer, The'),
+                       DBTestRecord(
                            2, 'LYRICS',
                            'There\'s a garden where&crlf;Jesus is waiting,&crlf;'
                            'There\'s a place that&crlf;is wondrously fair,&crlf;For it glows with the&crlf;'
@@ -153,10 +153,10 @@ class TestWorshipCenterProSongImport(TestCase):
             mocked_manager = MagicMock()
 
             # WHEN: An importer object is created
-            importer = WorshipCenterProImport(mocked_manager, filenames=[])
+            importer = WorshipCenterProImport(mocked_manager, file_paths=[])
 
             # THEN: The importer object should not be None
-            self.assertIsNotNone(importer, 'Import should not be none')
+            assert importer is not None, 'Import should not be none'
 
     def test_pyodbc_exception(self):
         """
@@ -170,7 +170,7 @@ class TestWorshipCenterProSongImport(TestCase):
             mocked_manager = MagicMock()
             mocked_log_error = MagicMock()
             mocked_translate.return_value = 'Translated Text'
-            importer = WorshipCenterProImport(mocked_manager, filenames=[])
+            importer = WorshipCenterProImport(mocked_manager, file_paths=[])
             importer.log_error = mocked_log_error
             importer.import_source = 'import_source'
             pyodbc_errors = [pyodbc.DatabaseError, pyodbc.IntegrityError, pyodbc.InternalError, pyodbc.OperationalError]
@@ -181,7 +181,7 @@ class TestWorshipCenterProSongImport(TestCase):
                 return_value = importer.do_import()
 
                 # THEN: do_import should return None, and pyodbc, translate & log_error are called with known calls
-                self.assertIsNone(return_value, 'do_import should return None when pyodbc raises an exception.')
+                assert return_value is None, 'do_import should return None when pyodbc raises an exception.'
                 mocked_pyodbc_connect.assert_called_with('DRIVER={Microsoft Access Driver (*.mdb)};DBQ=import_source')
                 mocked_translate.assert_called_with('SongsPlugin.WorshipCenterProImport',
                                                     'Unable to connect the WorshipCenter Pro database.')
@@ -220,7 +220,7 @@ class TestWorshipCenterProSongImport(TestCase):
 
             # THEN: do_import should return None, and pyodbc, import_wizard, importer.title and add_verse are called
             # with known calls
-            self.assertIsNone(return_value, 'do_import should return None when pyodbc raises an exception.')
+            assert return_value is None, 'do_import should return None when pyodbc raises an exception.'
             mocked_pyodbc.connect.assert_called_with('DRIVER={Microsoft Access Driver (*.mdb)};DBQ=import_source')
             mocked_pyodbc.connect().cursor.assert_any_call()
             mocked_pyodbc.connect().cursor().execute.assert_called_with('SELECT ID, Field, Value FROM __SONGDATA')
@@ -229,8 +229,7 @@ class TestWorshipCenterProSongImport(TestCase):
             add_verse_call_count = 0
             for song_data in SONG_TEST_DATA:
                 title_value = song_data['title']
-                self.assertIn(title_value, importer._title_assignment_list,
-                              'title should have been set to %s' % title_value)
+                assert title_value in importer._title_assignment_list, 'title should have been set to %s' % title_value
                 verse_calls = song_data['verses']
                 add_verse_call_count += len(verse_calls)
                 for call in verse_calls:
@@ -241,5 +240,4 @@ class TestWorshipCenterProSongImport(TestCase):
                     mocked_add_comment.assert_any_call(song_data['comments'])
                 if 'copyright' in song_data:
                     mocked_add_copyright.assert_any_call(song_data['copyright'])
-            self.assertEqual(mocked_add_verse.call_count, add_verse_call_count,
-                             'Incorrect number of calls made to add_verse')
+            assert mocked_add_verse.call_count == add_verse_call_count, 'Incorrect number of calls made to add_verse'

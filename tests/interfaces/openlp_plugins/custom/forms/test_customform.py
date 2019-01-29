@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -27,10 +27,8 @@ from unittest.mock import MagicMock, patch
 
 from PyQt5 import QtTest, QtCore, QtWidgets
 
-from openlp.core.common import Registry
-from openlp.plugins.custom.lib.mediaitem import CustomMediaItem
+from openlp.core.common.registry import Registry
 from openlp.plugins.custom.forms.editcustomform import EditCustomForm
-
 from tests.helpers.testmixin import TestMixin
 
 
@@ -78,15 +76,15 @@ class TestEditCustomForm(TestCase, TestMixin):
         self.form.load_custom(0)
 
         # THEN: The line edits should not contain any text.
-        self.assertEqual(self.form.title_edit.text(), '', 'The title edit should be empty')
-        self.assertEqual(self.form.credit_edit.text(), '', 'The credit edit should be empty')
+        assert self.form.title_edit.text() == '', 'The title edit should be empty'
+        assert self.form.credit_edit.text() == '', 'The credit edit should be empty'
 
     def test_on_add_button_clicked(self):
         """
         Test the on_add_button_clicked_test method / add_button button.
         """
         # GIVEN: A mocked QDialog.exec() method
-        with patch('PyQt5.QtWidgets.QDialog.exec') as mocked_exec:
+        with patch('PyQt5.QtWidgets.QDialog.exec'):
             # WHEN: Add a new slide.
             QtTest.QTest.mouseClick(self.form.add_button, QtCore.Qt.LeftButton)
 

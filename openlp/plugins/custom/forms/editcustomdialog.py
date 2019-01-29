@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -19,12 +19,11 @@
 # with this program; if not, write to the Free Software Foundation, Inc., 59  #
 # Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
 ###############################################################################
-
 from PyQt5 import QtWidgets
 
-from openlp.core.common import UiStrings, translate
-from openlp.core.lib import build_icon
+from openlp.core.common.i18n import UiStrings, translate
 from openlp.core.lib.ui import create_button_box, create_button
+from openlp.core.ui.icons import UiIcons
 
 
 class Ui_CustomEditDialog(object):
@@ -34,7 +33,7 @@ class Ui_CustomEditDialog(object):
         :param custom_edit_dialog: The Dialog
         """
         custom_edit_dialog.setObjectName('custom_edit_dialog')
-        custom_edit_dialog.setWindowIcon(build_icon(':/icon/openlp-logo.svg'))
+        custom_edit_dialog.setWindowIcon(UiIcons().main_icon)
         custom_edit_dialog.resize(450, 350)
         self.dialog_layout = QtWidgets.QVBoxLayout(custom_edit_dialog)
         self.dialog_layout.setObjectName('dialog_layout')
