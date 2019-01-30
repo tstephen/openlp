@@ -227,6 +227,9 @@ class ListPreviewWidget(QtWidgets.QTableWidget, RegistryProperties):
             text.append(str(row))
             self.setItem(slide_index, 0, item)
             if slide_height:
+                # First set the height to 1 and then to the right height. This makes the item display correctly.
+                # If this is not done, sometimes the image item is displayed as blank.
+                self.setRowHeight(slide_index, 1)
                 self.setRowHeight(slide_index, slide_height)
         self.setVerticalHeaderLabels(text)
         if self.service_item.is_text():
