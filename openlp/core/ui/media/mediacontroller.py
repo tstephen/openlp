@@ -170,6 +170,8 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         if get_vlc() and pymediainfo_available:
             State().update_pre_conditions("mediacontroller", True)
         else:
+            if hasattr(self.main_window, 'splash') and self.main_window.splash.isVisible():
+                self.main_window.splash.hide()
             State().missing_text("mediacontroller", translate('OpenLP.SlideController',
                                  "VLC or pymediainfo are missing, so you are unable to play any media"))
         self._generate_extensions_lists()

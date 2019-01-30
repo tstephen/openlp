@@ -28,9 +28,19 @@ import os
 import logging
 import time
 
+
+if sys.platform.startswith('darwin'):
+    print('Setting up log file')
+    # Only make the log file on OS X when running as a server
+    logfile = os.path.join(str(os.getenv('HOME')), 'Library', 'Application Support', 'openlp', 'libreofficeserver.log')
+    logging.basicConfig(filename=logfile, level=logging.INFO)
+
+
 # Add the vendor directory to sys.path so that we can load Pyro4
+sys.path.append(os.path.join(os.path.dirname(__file__)))
 sys.path.append(os.path.join(os.path.dirname(__file__), 'vendor'))
 
+from serializers import register_classes
 from Pyro4 import Daemon, expose
 
 try:
@@ -38,18 +48,15 @@ try:
     import uno
     from com.sun.star.beans import PropertyValue
     from com.sun.star.task import ErrorCodeIOException
-except:
+except ImportError as e:
     # But they need to be defined for mocking
+    print(e)
     uno = None
     PropertyValue = None
     ErrorCodeIOException = Exception
 
-if sys.platform.startswith('darwin') and uno is not None:
-    # Only make the log file on OS X when running as a server
-    logfile = os.path.join(str(os.getenv('HOME')), 'Library', 'Application Support', 'openlp', 'libreofficeserver.log')
-    logging.basicConfig(filename=logfile, level=logging.INFO)
-
 log = logging.getLogger(__name__)
+register_classes()
 
 
 class TextType(object):
@@ -77,6 +84,7 @@ class LibreOfficeServer(object):
         """
         Set up the server
         """
+        self._desktop = None
         self._control = None
         self._document = None
         self._presentation = None
@@ -128,7 +136,7 @@ class LibreOfficeServer(object):
             '--minimized',
             '--nodefault',
             '--nofirststartwizard',
-            '--accept=socket,host=localhost,port=2002;urp;StarOffice.ServiceManager'
+            '--accept=pipe,name=openlp_maclo;urp;StarOffice.ServiceManager'
         ]
         self._process = Popen(uno_command)
 
@@ -137,15 +145,17 @@ class LibreOfficeServer(object):
         """
         Set up an UNO desktop instance
         """
+        if self._desktop is not None:
+            return self._desktop
         uno_instance = None
         context = uno.getComponentContext()
         resolver = context.ServiceManager.createInstanceWithContext('com.sun.star.bridge.UnoUrlResolver', context)
         loop = 0
         while uno_instance is None and loop < 3:
             try:
-                uno_instance = resolver.resolve('uno:socket,host=localhost,port=2002;urp;StarOffice.ComponentContext')
-            except Exception as e:
-                log.warning('Unable to find running instance ')
+                uno_instance = resolver.resolve('uno:pipe,name=openlp_maclo;urp;StarOffice.ComponentContext')
+            except Exception:
+                log.exception('Unable to find running instance, retrying...')
                 loop += 1
         try:
             manager = uno_instance.ServiceManager
@@ -153,9 +163,11 @@ class LibreOfficeServer(object):
             desktop = manager.createInstanceWithContext('com.sun.star.frame.Desktop', uno_instance)
             if not desktop:
                 raise Exception('Failed to get UNO desktop')
+            self._desktop = desktop
             return desktop
-        except Exception as e:
-            log.warning('Failed to get UNO desktop')
+        except Exception:
+            log.exception('Failed to get UNO desktop')
+        return None
 
     def shutdown(self):
         """
@@ -180,8 +192,8 @@ class LibreOfficeServer(object):
             try:
                 self.desktop.terminate()
                 log.debug('LibreOffice killed')
-            except:
-                log.warning('Failed to terminate LibreOffice')
+            except Exception:
+                log.exception('Failed to terminate LibreOffice')
         if getattr(self, '_process') and can_kill:
             self._process.kill()
 
@@ -189,15 +201,21 @@ class LibreOfficeServer(object):
         """
         Load a presentation
         """
-        self._file_path = file_path
         url = uno.systemPathToFileUrl(file_path)
-        properties = (self._create_property('Hidden', True),)
-        retries = 0
+        properties = [self._create_property('Hidden', True)]
         self._document = None
-        try:
-            self._document = self.desktop.loadComponentFromURL(url, '_blank', 0, properties)
-        except:
-            log.warning('Failed to load presentation {url}'.format(url=url))
+        loop_count = 0
+        while loop_count < 3:
+            try:
+                self._document = self.desktop.loadComponentFromURL(url, '_blank', 0, properties)
+            except Exception:
+                log.exception('Failed to load presentation {url}'.format(url=url))
+            if self._document:
+                break
+            time.sleep(0.5)
+            loop_count += 1
+        if loop_count == 3:
+            log.error('Looped too many times')
             return False
         self._presentation = self._document.getPresentation()
         self._presentation.Display = screen_number
@@ -226,7 +244,7 @@ class LibreOfficeServer(object):
                 thumbnails.append(path)
             except ErrorCodeIOException as exception:
                 log.exception('ERROR! ErrorCodeIOException {error:d}'.format(error=exception.ErrCode))
-            except:
+            except Exception:
                 log.exception('{path} - Unable to store openoffice preview'.format(path=path))
         return thumbnails
 
@@ -256,8 +274,8 @@ class LibreOfficeServer(object):
                     self._presentation.end()
                     self._presentation = None
                     self._document.dispose()
-                except:
-                    log.warning("Closing presentation failed")
+                except Exception:
+                    log.exception("Closing presentation failed")
             self._document = None
 
     def is_loaded(self):
@@ -272,8 +290,8 @@ class LibreOfficeServer(object):
             if self._document.getPresentation() is None:
                 log.debug("getPresentation failed to find a presentation")
                 return False
-        except:
-            log.warning("getPresentation failed to find a presentation")
+        except Exception:
+            log.exception("getPresentation failed to find a presentation")
             return False
         return True
 

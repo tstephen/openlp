@@ -22,25 +22,26 @@
 
 import logging
 import os
-import time
-from pathlib import Path
 from subprocess import Popen
 
-from openlp.core.common import AppLocation, Registry, delete_file, is_macosx
+from Pyro4 import Proxy
+
+from openlp.core.common import is_macosx, delete_file
+from openlp.core.common.applocation import AppLocation
+from openlp.core.common.path import Path
+from openlp.core.common.registry import Registry
+from openlp.core.display.screens import ScreenList
+from openlp.plugins.presentations.lib.serializers import register_classes
+from openlp.plugins.presentations.lib.presentationcontroller import PresentationController, PresentationDocument
 
 if is_macosx() and os.path.exists('/Applications/LibreOffice.app'):
     macuno_available = True
 else:
     macuno_available = False
 
-from PyQt5 import QtCore
-from Pyro4 import Proxy
-
-from openlp.core.lib import ScreenList
-from .presentationcontroller import PresentationController, PresentationDocument, TextType
-
 
 log = logging.getLogger(__name__)
+register_classes()
 
 
 class MacLOController(PresentationController):
@@ -125,7 +126,7 @@ class MacLODocument(PresentationDocument):
         Tell the LibreOfficeServer to start the presentation.
         """
         log.debug('Load Presentation LibreOffice')
-        if not self.client.load_presentation(self.file_path, ScreenList().current['number'] + 1):
+        if not self.client.load_presentation(str(self.file_path), ScreenList().current['number'] + 1):
             return False
         self.create_thumbnails()
         self.create_titles_and_notes()
@@ -138,8 +139,9 @@ class MacLODocument(PresentationDocument):
         log.debug('create thumbnails LibreOffice')
         if self.check_thumbnails():
             return
-        temp_thumbnails = self.client.extract_thumbnails(self.get_temp_folder())
+        temp_thumbnails = self.client.extract_thumbnails(str(self.get_temp_folder()))
         for index, temp_thumb in enumerate(temp_thumbnails):
+            temp_thumb = Path(temp_thumb)
             self.convert_thumbnail(temp_thumb, index + 1)
             delete_file(temp_thumb)
 

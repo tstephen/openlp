@@ -159,6 +159,8 @@ class VlcPlayer(MediaPlayer):
         :return:
         """
         vlc = get_vlc()
+        if not vlc:
+            return
         display.vlc_widget = QtWidgets.QFrame(display)
         display.vlc_widget.setFrameStyle(QtWidgets.QFrame.NoFrame)
         # creating a basic vlc instance
