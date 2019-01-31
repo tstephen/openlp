@@ -25,6 +25,7 @@ from unittest.mock import MagicMock, patch
 
 from PyQt5 import QtCore
 
+from openlp.core.state import State
 # Mock QtWebEngineWidgets
 # sys.modules['PyQt5.QtWebEngineWidgets'] = MagicMock()
 
@@ -92,6 +93,9 @@ class TestController(TestCase):
         # GIVEN: A mocked service with a dummy service item
         line = convert_file_service_item(TEST_PATH, 'serviceitem_custom_1.osj')
         self.mocked_live_controller.service_item = ServiceItem(None)
+        State().add_service("media", 0)
+        State().update_pre_conditions("media", True)
+        State().flush_preconditions()
         self.mocked_live_controller.service_item.set_from_service(line)
 
         # WHEN: I trigger the method

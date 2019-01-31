@@ -27,11 +27,13 @@ from pathlib import Path
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtGui, QtCore, QtWidgets
 
+from openlp.core.state import State
 from openlp.core.common.i18n import UiStrings
 from openlp.core.common.registry import Registry
 from openlp.core.display.screens import ScreenList
+from openlp.core.lib.plugin import PluginStatus
 from openlp.core.ui.mainwindow import MainWindow
 from tests.helpers.testmixin import TestMixin
 from tests.utils.constants import TEST_RESOURCES_PATH
@@ -161,9 +163,7 @@ class TestMainWindow(TestCase, TestMixin):
         # WHEN: you check the started functions
 
         # THEN: the following registry functions should have been registered
-        expected_service_list = ['application', 'main_window', 'media_controller', 'http_server', 'settings_form',
-                                 'plugin_manager', 'image_manager', 'preview_controller', 'live_controller',
-                                 'service_manager', 'theme_manager', 'projector_manager']
+        expected_service_list = ['application', 'main_window', 'http_server', 'settings_form']
         expected_functions_list = ['bootstrap_initialise', 'bootstrap_post_set_up', 'playbackPlay', 'playbackPause',
                                    'playbackStop', 'playbackLoop', 'seek_slider', 'volume_slider', 'media_hide',
                                    'media_blank', 'media_unblank', 'songs_hide', 'songs_blank', 'songs_unblank',
@@ -175,8 +175,6 @@ class TestMainWindow(TestCase, TestMixin):
             'The function list should have been {}'.format(self.registry.functions_list.keys())
         assert 'application' in self.registry.service_list, 'The application should have been registered.'
         assert 'main_window' in self.registry.service_list, 'The main_window should have been registered.'
-        assert 'media_controller' in self.registry.service_list, 'The media_controller should have been registered.'
-        assert 'plugin_manager' in self.registry.service_list, 'The plugin_manager should have been registered.'
 
     def test_projector_manager_hidden_on_startup(self):
         """

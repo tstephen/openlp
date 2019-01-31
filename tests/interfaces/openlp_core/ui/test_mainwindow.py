@@ -25,7 +25,11 @@ Package to test the openlp.core.ui.mainwindow package.
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
+from PyQt5 import QtGui
+
+from openlp.core.state import State
 from openlp.core.common.registry import Registry
+from openlp.core.lib.plugin import PluginStatus
 from openlp.core.ui.mainwindow import MainWindow
 from tests.helpers.testmixin import TestMixin
 
@@ -45,11 +49,13 @@ class TestMainWindow(TestCase, TestMixin):
         self.app.args = []
         Registry().register('application', self.app)
         Registry().set_flag('no_web_server', True)
+        mocked_plugin = MagicMock()
+        mocked_plugin.status = PluginStatus.Active
+        mocked_plugin.icon = QtGui.QIcon()
+        Registry().register('mock_plugin', mocked_plugin)
+        State().add_service("mock", 1, is_plugin=True, status=PluginStatus.Active)
         # Mock classes and methods used by mainwindow.
         with patch('openlp.core.ui.mainwindow.SettingsForm'), \
-                patch('openlp.core.ui.mainwindow.ImageManager'), \
-                patch('openlp.core.ui.mainwindow.LiveController'), \
-                patch('openlp.core.ui.mainwindow.PreviewController'), \
                 patch('openlp.core.ui.mainwindow.OpenLPDockWidget'), \
                 patch('openlp.core.ui.mainwindow.QtWidgets.QToolBox'), \
                 patch('openlp.core.ui.mainwindow.QtWidgets.QMainWindow.addDockWidget'), \
@@ -57,8 +63,13 @@ class TestMainWindow(TestCase, TestMixin):
                 patch('openlp.core.ui.mainwindow.ThemeManager'), \
                 patch('openlp.core.ui.mainwindow.ProjectorManager'), \
                 patch('openlp.core.ui.mainwindow.websockets.WebSocketServer'), \
+<<<<<<< TREE
+                patch('openlp.core.ui.mainwindow.PluginForm'), \
+                patch('openlp.core.ui.mainwindow.server.HttpServer'):
+=======
                 patch('openlp.core.ui.mainwindow.server.HttpServer'), \
                 patch('openlp.core.ui.mainwindow.Renderer'):
+>>>>>>> MERGE-SOURCE
             self.main_window = MainWindow()
 
     def tearDown(self):

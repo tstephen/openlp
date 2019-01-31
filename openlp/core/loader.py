@@ -19,3 +19,30 @@
 # with this program; if not, write to the Free Software Foundation, Inc., 59  #
 # Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
 ###############################################################################
+"""
+The :mod:`~openlp.core.loader` module provides a bootstrap for the singleton classes
+"""
+
+from openlp.core.state import State
+from openlp.core.ui.media.mediacontroller import MediaController
+from openlp.core.lib.pluginmanager import PluginManager
+from openlp.core.display.render import Renderer
+from openlp.core.lib.imagemanager import ImageManager
+from openlp.core.ui.slidecontroller import LiveController, PreviewController
+
+
+def loader():
+    """
+    God class to load all the components which are registered with the Registry
+
+    :return: None
+    """
+    State().load_settings()
+    MediaController()
+    PluginManager()
+    # Set up the path with plugins
+    ImageManager()
+    Renderer()
+    # Create slide controllers
+    PreviewController()
+    LiveController()
