@@ -164,25 +164,28 @@ class ServiceItem(RegistryProperties):
         # Save rendered pages to this dict. In the case that a slide is used twice we can use the pages saved to
         # the dict instead of rendering them again.
         previous_pages = {}
-        for index, raw_slide in enumerate(self.slides):
+        index = 0
+        for raw_slide in self.slides:
             verse_tag = raw_slide['verse']
-            if verse_tag in previous_pages and previous_pages[verse_tag][1] == raw_slide:
-                page = previous_pages[verse_tag][1]
+            if verse_tag in previous_pages and previous_pages[verse_tag][0] == raw_slide:
+                pages = previous_pages[verse_tag][1]
             else:
-                page = render_tags(raw_slide['text'], self)
-                previous_pages[verse_tag] = (raw_slide, page)
-            rendered_slide = {
-                'title': raw_slide['title'],
-                'text': page,
-                'verse': index,
-            }
-            self._rendered_slides.append(rendered_slide)
-            display_slide = {
-                'title': raw_slide['title'],
-                'text': remove_tags(page),
-                'verse': verse_tag,
-            }
-            self._display_slides.append(display_slide)
+                pages = self.renderer.format_slide(raw_slide['text'], self)
+                previous_pages[verse_tag] = (raw_slide, pages)
+            for page in pages:
+                rendered_slide = {
+                    'title': raw_slide['title'],
+                    'text': render_tags(page),
+                    'verse': index,
+                }
+                self._rendered_slides.append(rendered_slide)
+                display_slide = {
+                    'title': raw_slide['title'],
+                    'text': remove_tags(page),
+                    'verse': verse_tag,
+                }
+                self._display_slides.append(display_slide)
+                index += 1
 
     @property
     def rendered_slides(self):

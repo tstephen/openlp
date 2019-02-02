@@ -79,7 +79,7 @@ class SettingsForm(QtWidgets.QDialog, Ui_SettingsDialog, RegistryProperties):
         self.insert_tab(self.screens_tab)
         self.insert_tab(self.themes_tab)
         self.insert_tab(self.advanced_tab)
-        self.insert_tab(self.player_tab)
+        #self.insert_tab(self.player_tab)
         self.insert_tab(self.projector_tab)
         self.insert_tab(self.api_tab)
         for plugin in State().list_plugins():

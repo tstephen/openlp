@@ -437,8 +437,8 @@ class Renderer(RegistryBase, LogMixin, RegistryProperties, DisplayWindow):
         self.force_page = False
         for screen in ScreenList():
             if screen.is_display:
-                self.setGeometry(screen.geometry.x(), screen.geometry.y(),
-                                 screen.geometry.width(), screen.geometry.height())
+                self.setGeometry(screen.display_geometry.x(), screen.display_geometry.y(),
+                                 screen.display_geometry.width(), screen.display_geometry.height())
                 break
         # If the display is not show'ed and hidden like this webegine will not render
         self.show()

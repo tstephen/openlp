@@ -295,7 +295,7 @@ var Display = {
    * Checks if the present slide content fits within the slide
   */
   doesContentFit: function () {
-    console.debug("scrollHeight: " + $(".slides")[0].scrollHeight);
+    console.debug("scrollHeight: " + $(".slides")[0].scrollHeight + ", clientHeight: " + $(".slides")[0].clientHeight);
     return $(".slides")[0].clientHeight >= $(".slides")[0].scrollHeight;
   },
   /**
