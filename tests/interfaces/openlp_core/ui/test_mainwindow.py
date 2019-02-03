@@ -63,13 +63,8 @@ class TestMainWindow(TestCase, TestMixin):
                 patch('openlp.core.ui.mainwindow.ThemeManager'), \
                 patch('openlp.core.ui.mainwindow.ProjectorManager'), \
                 patch('openlp.core.ui.mainwindow.websockets.WebSocketServer'), \
-<<<<<<< TREE
                 patch('openlp.core.ui.mainwindow.PluginForm'), \
-                patch('openlp.core.ui.mainwindow.server.HttpServer'):
-=======
-                patch('openlp.core.ui.mainwindow.server.HttpServer'), \
-                patch('openlp.core.ui.mainwindow.Renderer'):
->>>>>>> MERGE-SOURCE
+                patch('openlp.core.ui.render.Renderer'):
             self.main_window = MainWindow()
 
     def tearDown(self):
