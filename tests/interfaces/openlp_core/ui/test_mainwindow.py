@@ -64,7 +64,7 @@ class TestMainWindow(TestCase, TestMixin):
                 patch('openlp.core.ui.mainwindow.ProjectorManager'), \
                 patch('openlp.core.ui.mainwindow.websockets.WebSocketServer'), \
                 patch('openlp.core.ui.mainwindow.PluginForm'), \
-                patch('openlp.core.ui.render.Renderer'):
+                patch('openlp.core.display.render.Renderer'):
             self.main_window = MainWindow()
 
     def tearDown(self):
