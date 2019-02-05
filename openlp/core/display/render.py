@@ -713,7 +713,7 @@ class Renderer(RegistryBase, LogMixin, RegistryProperties, DisplayWindow):
         :param text:  The text to check. It may contain HTML tags.
         """
         self.clear_slides()
-        self.run_javascript('Display.addTextSlide("v1", "{text}");'.format(text=text), is_sync=True)
+        self.run_javascript('Display.addTextSlide("v1", "{text}", "Dummy Footer");'.format(text=text), is_sync=True)
         does_text_fits = self.run_javascript('Display.doesContentFit();', is_sync=True)
         return does_text_fits
 

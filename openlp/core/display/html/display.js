@@ -384,10 +384,11 @@ var Display = {
   /**
    * Add a slides. If the slide exists but the HTML is different, update the slide.
    * @param {string} verse - The verse number, e.g. "v1"
-   * @param {string} html - The HTML for the verse, e.g. "line1<br>line2"
+   * @param {string} text - The HTML for the verse, e.g. "line1<br>line2"
+   * @param {string} footer_text - The HTML for the footer"
    * @param {bool} [reinit=true] - Re-initialize Reveal. Defaults to true.
    */
-  addTextSlide: function (verse, text) {
+  addTextSlide: function (verse, text, footer_text) {
     var html = _prepareText(text);
     if (this._slides.hasOwnProperty(verse)) {
       var slide = $("#" + verse)[0];
@@ -403,11 +404,16 @@ var Display = {
       slidesDiv.appendChild(slide);
       var slides = $(".slides > section");
       this._slides[verse] = slides.length - 1;
+
+      console.debug(" footer_text: " + footer_text);
+
+      var footerDiv = $(".footer")[0];
+      footerDiv.innerHTML = footer_text;
     }
-    if ((arguments.length > 2) && (arguments[2] === true)) {
+    if ((arguments.length > 3) && (arguments[3] === true)) {
       this.reinit();
     }
-    else if (arguments.length == 2) {
+    else if (arguments.length == 3) {
       this.reinit();
     }
   },
@@ -418,7 +424,7 @@ var Display = {
   setTextSlides: function (slides) {
     Display.clearSlides();
     slides.forEach(function (slide) {
-      Display.addTextSlide(slide.verse, slide.text, false);
+      Display.addTextSlide(slide.verse, slide.text, slide.footer, false);
     });
     Display.reinit();
     Display.goToSlide(0);
@@ -590,6 +596,8 @@ var Display = {
   blankToTheme: function () {
     var slidesDiv = $(".slides")[0];
     slidesDiv.style.visibility = "hidden";
+    var footerDiv = $(".footer")[0];
+    footerDiv.style.visibility = "hidden";
     if (Reveal.isPaused()) {
       Reveal.togglePause();
     }
@@ -600,6 +608,8 @@ var Display = {
   show: function () {
     var slidesDiv = $(".slides")[0];
     slidesDiv.style.visibility = "visible";
+    var footerDiv = $(".footer")[0];
+    footerDiv.style.visibility = "visible";
     if (Reveal.isPaused()) {
       Reveal.togglePause();
     }
@@ -733,6 +743,7 @@ var Display = {
     };
     footerStyle["position"] = "absolute";
     footerStyle["left"] = "" + theme.font_footer_x + "px";
+    footerStyle["top"] = "" + theme.font_footer_y + "px";
     footerStyle["bottom"] = "" + (window.innerHeight - theme.font_footer_y - theme.font_footer_height) + "px";
     footerStyle["width"] = "" + theme.font_footer_width + "px";
     footerStyle["font-family"] = theme.font_footer_name;
