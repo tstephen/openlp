@@ -151,40 +151,144 @@ describe("The Display object", function () {
     expect(Display.alert).toBeDefined();
   });
 
-  it("should have a correctly functioning alert() method", function (){
-    spyOn(Display,"alert");
-    Display.alert("OPEN-LP-3.0 Alert Test", "2");
-    expect(Display.alert).toHaveBeenCalledWith("OPEN-LP-3.0 Alert Test", "2");
-  });
-
 });
 
 describe("Display.alert",function(){
+    var alertBackground,alert;
+
     beforeEach(function(){
-      var alertBackground = document.getElementById("alert-background");
-      var alertText = document.getElementById("alert");
+        document.body.innerHTML = "";
+        alertBackground = document.createElement("div");
+        alertBackground.setAttribute("id", "alert-background");
+        document.body.appendChild(alertBackground);
+        alert = document.createElement("p");
+        alert.setAttribute("id","alert");
+        alertBackground.appendChild(alert);
     });
 
-   it("should return if called without any text", function(){
-    spyOn(Display, "alert");
-    Display.alert("", "2");
-    expect(Display.alert).toHaveBeenCalled();
+   it("should return null if called without any text", function(){
+    expect(Display.alert("","2")).toBeNull();
    });
 
-   it("should call alertEntranceTransition", function(){
-    spyOn(Display,"alertEntranceTransition");
-    Display.alertEntranceTransition("2");
-    expect(Display.alertEntranceTransition).toHaveBeenCalledWith("2");
+   it("should set correct alert text", function(){
+    Display.alert("OPEN-LP-3.0 Alert Test", "2");
+    expect(alert.innerHTML).toEqual("OPEN-LP-3.0 Alert Test");
    });
 
-   it("should call alertExitTransition", function(){
-    spyOn(Display,"alertExitTransition");
-    Display.alertExitTransition("2");
-    expect(Display.alertExitTransition).toHaveBeenCalledWith("2");
+   it("should set the correct alert position", function(){
+    expect(Display.alert("Alert Location Test","2")).toEqual("2");
    });
+
 });
 
+describe("The doEntranceTransition", function(){
 
+    var alertBackground;
+
+    beforeEach(function(){
+        document.body.innerHTML = "";
+        alertBackground = document.createElement("div");
+        alertBackground.setAttribute("id", "alert-background");
+        document.body.appendChild(alertBackground);
+        alertBackground.style.top = '0px';
+        alertBackground.style.height = "0%";
+    });
+
+    it("should move the alert background to the top of the page", function(){
+        Display.doEntranceTransition("0");
+        expect(alertBackground.style.top).toEqual('0px');
+    });
+
+    it("should move the alert background to the middle of the page", function(){
+        Display.doEntranceTransition("1");
+        var middlePosition = ((window.innerHeight - alertBackground.clientHeight) / 2) + 'px';
+        expect(alertBackground.style.top).toEqual(middlePosition);
+    });
+
+    it("should move the alert background to the bottom of the page", function(){
+        Display.doEntranceTransition("2");
+        expect(alertBackground.style.bottom).toEqual('0px');
+    });
+
+    it("should have a transition set when position is set to top", function(){
+        Display.doEntranceTransition("0");
+        expect(alertBackground.style.transition).toEqual("2s linear");
+    });
+
+    it("should have a transition set when position is set to bottom", function(){
+        Display.doEntranceTransition("2");
+        expect(alertBackground.style.transition).toEqual("2s linear");
+    });
+
+    it("should have an animation class when position is set to middle", function(){
+        Display.doEntranceTransition("1");
+        expect(alertBackground.classList.contains("middle-entrance-animation"));
+    });
+
+    it("should have the height set to 25% when the position is top", function(){
+        Display.doEntranceTransition("0");
+        expect(alertBackground.style.height).toEqual("25%");
+    });
+
+    it("should have the height set to 25% when the position is middle", function(){
+        Display.doEntranceTransition("1");
+        expect(alertBackground.style.height).toEqual("25%");
+    });
+
+    it("should have the height set to 25% when the position is bottom", function(){
+        Display.doEntranceTransition("2");
+        expect(alertBackground.style.height).toEqual("25%");
+    });
+
+    it("should make the alert background visible", function(){
+        Display.doEntranceTransition();
+        expect(alertBackground.style.visibility).toEqual("visible");
+    });
+});
+
+describe("The startExitTransition", function(){
+    var alertBackground;
+
+    beforeEach(function(){
+        document.body.innerHTML = "";
+        alertBackground = document.createElement("div");
+        alertBackground.setAttribute("id", "alert-background");
+        document.body.appendChild(alertBackground);
+
+    });
+
+    it("should make the height of the alert zero when position is top", function(){
+        Display.doExitTransition("0");
+        expect(alertBackground.style.height).toEqual('0%');
+    });
+
+    it("should make the height of the alert zero when position is bottom", function(){
+        Display.doExitTransition("2");
+        expect(alertBackground.style.height).toEqual('0%');
+    });
+
+    it("should make the height of the alert zero when position is middle", function(){
+        Display.doExitTransition("2");
+        expect(alertBackground.style.height).toEqual('0%');
+    });
+
+    it("should have a transition set when position is set to top", function(){
+        Display.doExitTransition("0");
+        expect(alertBackground.style.transition).toEqual("2s linear");
+    });
+
+    it("should have a transition set when position is set to bottom", function(){
+        Display.doExitTransition("2");
+        expect(alertBackground.style.transition).toEqual("2s linear");
+    });
+
+    it("should have an animation class when position is set to middle", function(){
+        Display.doExitTransition("1");
+        expect(alertBackground.classList.contains("middle-exit-animation"));
+    });
+
+
+});
 
 
 describe("Display.addTextSlide", function () {

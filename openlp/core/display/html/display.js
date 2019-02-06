@@ -416,17 +416,14 @@ var Display = {
     alertText.innerHTML = text;
 
     /* Bring in the transition background */
-    Display._transitionState = Display.alertEntranceTransition(location);
+    Display._transitionState = Display.doEntranceTransition(location);
 
     alertBackground.addEventListener('transitionend', function(e){
       e.stopPropagation();
-      console.debug("Transition end event captured");
       if(Display._transitionState == TransitionState.EntranceTransition){
-        console.debug("Entrance Transition Condition");
         alertText.style.visibility = "visible";
         alertText.classList.add("horizontal-scroll-animation");
       }else if(Display._transitionState == TransitionState.ExitTransition){
-        console.debug("Exit Transition Condition");
         Display._transitionState = TransitionState.NoTransition;
         alertBackground.style.visibility = "hidden";
         alertBackground.classList.remove("middle-exit-animation");
@@ -437,21 +434,18 @@ var Display = {
 
       console.debug("Noticed an animation has ended. The animation state is: ", Display._animationState);
       if(Display._animationState == AnimationState.FadeInAnimation){
-        console.debug("Entrance Animation Condition");
         alertText.style.visibility = "visible";
         alertText.classList.add("horizontal-scroll-animation");
         alertText.classList.remove("middle-entrance-animation");
         Display._animationState = AnimationState.ScrollingAnimation;
       }else if(Display._animationState == AnimationState.FadeOutAnimation){
-        console.debug("Exit Animation Condition");
         alertBackground.style.visibility = "hidden";
         alertBackground.classList.remove("middle-exit-animation");
         Display._animationState = AnimationState.NoAnimation;
       }else if(alertText.classList.contains("horizontal-scroll-animation")){
-        console.debug("Scrolling Animation Ended");
         alertText.classList.remove("horizontal-scroll-animation");
         Display._animationState = AnimationState.NoAnimation;
-        Display._transitionState = Display.alertExitTransition(location);
+        Display._transitionState = Display.doExitTransition(location);
       }
 
     });
@@ -460,35 +454,31 @@ var Display = {
    * The implementation should show an alert.
    * It should be able to handle receiving a new alert before a previous one is "finished", basically queueing it.
    */
-  //return;
+    return location;
   },
 
   /**
    * Start background entrance transition for display of alert
    * @param {string} location - String showing the location of the alert on screen
    */
-  alertEntranceTransition: function (location){
-    console.debug("Alert Entrance Transition Method. The value of animation state is: " + Display._animationState);
+  doEntranceTransition: function (location){
     var alertBackground = $("#alert-background")[0];
 
     switch(location){
       case "0":
-        console.debug("Top Location Entrance Transition");
         alertBackground.style.top = '0';
         alertBackground.style.transition = "2s linear";
         alertBackground.style.height = "25%";
         break;
       case "1":
-        console.debug("Middle Location Entrance Animation");
-        console.debug("The value of animation state is: " + Display._animationState);
         alertBackground.style.top = ((window.innerHeight - alertBackground.clientHeight) / 2)
             + 'px';
+        alertBackground.style.height = "25%";
         alertBackground.classList.add("middle-entrance-animation");
         Display._animationState = AnimationState.FadeInAnimation;
         break;
       case "2":
       default:
-        console.debug("Bottom Location Entrance Transition");
         alertBackground.style.bottom = '0';
         alertBackground.style.transition= "2s linear";
         alertBackground.style.height = "25%";
@@ -503,25 +493,21 @@ var Display = {
    * Start background exit transition once alert has been displayed
    * @param {string} location - Integer showing the location of the alert on screen
    */
-  alertExitTransition: function(location){
+  doExitTransition: function(location){
 
-    console.debug("Alert Exit Transition");
     var alertBackground = $("#alert-background")[0];
 
     if(location == "0" || location == "2"){
-      console.debug("Exit Transition for top or bottom");
       alertBackground.style.height = "0%";
       alertBackground.style.transition = '2s linear';
     }else if(location == "1"){
-      // alertBackground.style.opacity = 0;
-      console.debug("Fade out Animation");
       alertBackground.classList.add("middle-exit-animation");
+      alertBackground.style.height = "0%";
       Display._animationState = AnimationState.FadeOutAnimation;
     }
 
     return TransitionState.ExitTransition;
   },
-
   /**
    * Add a slides. If the slide exists but the HTML is different, update the slide.
    * @param {string} verse - The verse number, e.g. "v1"
