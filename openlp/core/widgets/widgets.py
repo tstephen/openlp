@@ -189,12 +189,15 @@ class ScreenSelectionWidget(QtWidgets.QWidget):
         self.screen_frame_layout.setSpacing(8)
         self.screen_frame_layout.setObjectName('screen_frame_layout')
         self.layout.addWidget(self.screen_frame)
-        self.identify_layout = QtWidgets.QHBoxLayout(self)
-        self.screen_details_layout = QtWidgets.QVBoxLayout(self)
+        self.identify_layout = QtWidgets.QHBoxLayout()
+        self.screen_details_layout = QtWidgets.QVBoxLayout()
         self.screen_details_layout.setObjectName('screen_details_layout')
         self.screen_number_label = QtWidgets.QLabel(self)
         self.screen_number_label.setObjectName('screen_number_label')
         self.screen_details_layout.addWidget(self.screen_number_label)
+        self.use_screen_check_box = QtWidgets.QCheckBox(self)
+        self.use_screen_check_box.setVisible(False)
+        self.screen_details_layout.addWidget(self.use_screen_check_box)
         self.display_group_box = QtWidgets.QGroupBox(self)
         self.display_group_box.setObjectName('display_group_box')
         self.display_group_box.setCheckable(True)
@@ -250,6 +253,7 @@ class ScreenSelectionWidget(QtWidgets.QWidget):
         self.layout.addStretch()
 
         # Signals and slots
+        self.use_screen_check_box.toggled.connect(self.display_group_box.setChecked)
         self.custom_geometry_button.toggled.connect(self.height_spin_box.setEnabled)
         self.custom_geometry_button.toggled.connect(self.left_spin_box.setEnabled)
         self.custom_geometry_button.toggled.connect(self.top_spin_box.setEnabled)
@@ -265,7 +269,9 @@ class ScreenSelectionWidget(QtWidgets.QWidget):
     def retranslate_ui(self):
         self.full_screen_radio_button.setText(translate('OpenLP.ScreensTab', 'F&ull screen'))
         self.width_label.setText(translate('OpenLP.ScreensTab', 'Width:'))
-        self.display_group_box.setTitle(translate('OpenLP.ScreensTab', 'Use this screen as a display'))
+        use_screen_str = translate('OpenLP.ScreensTab', 'Use this screen as a display')
+        self.use_screen_check_box.setText(use_screen_str)
+        self.display_group_box.setTitle(use_screen_str)
         self.left_label.setText(translate('OpenLP.ScreensTab', 'Left:'))
         self.custom_geometry_button.setText(translate('OpenLP.ScreensTab', 'Custom &geometry'))
         self.top_label.setText(translate('OpenLP.ScreensTab', 'Top:'))
@@ -336,6 +342,15 @@ class ScreenSelectionWidget(QtWidgets.QWidget):
         settings.setValue('core/screens', screen_settings)
         # On save update the screens as well
 
+    def use_simple_view(self):
+        """
+        Hide advanced options. Added for use in the FTW
+
+        :rtype: None
+        """
+        self.use_screen_check_box.setVisible(True)
+        self.display_group_box.setVisible(False)
+
     @QtCore.pyqtSlot()
     def _on_identify_timer_shot(self):
         for label in self.identify_labels:
@@ -369,6 +384,7 @@ class ScreenSelectionWidget(QtWidgets.QWidget):
         if self.current_screen is not screen:
             self._save_screen(self.current_screen)
         self.screen_number_label.setText(str(screen))
+        self.use_screen_check_box.setChecked(screen.is_display)
         self.display_group_box.setChecked(screen.is_display)
         self.full_screen_radio_button.setChecked(screen.custom_geometry is None)
         self.custom_geometry_button.setChecked(screen.custom_geometry is not None)

@@ -115,13 +115,13 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
         """
         Returns the id of the next FirstTimePage to go to based on enabled plugins
         """
-        if FirstTimePage.Welcome < self.currentId() < FirstTimePage.Songs and self.songs_check_box.isChecked():
+        if FirstTimePage.ScreenConfig < self.currentId() < FirstTimePage.Songs and self.songs_check_box.isChecked():
             # If the songs plugin is enabled then go to the songs page
             return FirstTimePage.Songs
-        elif FirstTimePage.Welcome < self.currentId() < FirstTimePage.Bibles and self.bible_check_box.isChecked():
+        elif FirstTimePage.ScreenConfig < self.currentId() < FirstTimePage.Bibles and self.bible_check_box.isChecked():
             # Otherwise, if the Bibles plugin is enabled then go to the Bibles page
             return FirstTimePage.Bibles
-        elif FirstTimePage.Welcome < self.currentId() < FirstTimePage.Themes:
+        elif FirstTimePage.ScreenConfig < self.currentId() < FirstTimePage.Themes:
             # Otherwise, if the current page is somewhere between the Welcome and the Themes pages, go to the themes
             return FirstTimePage.Themes
         else:
@@ -153,7 +153,7 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
             self._build_theme_screenshots()
             self.application.set_normal_cursor()
             self.theme_screenshot_threads = []
-            return FirstTimePage.Defaults
+            return self.get_next_page_id()
         else:
             return self.get_next_page_id()
 
@@ -174,6 +174,8 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
         self.was_cancelled = False
         self.theme_screenshot_threads = []
         self.has_run_wizard = False
+
+        self.themes_list_widget.itemChanged.connect(self.on_theme_selected)
 
     def _download_index(self):
         """
@@ -204,7 +206,6 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
             except (NoSectionError, NoOptionError, MissingSectionHeaderError):
                 log.debug('A problem occurred while parsing the downloaded config file')
                 trace_error_handler(log)
-        self.update_screen_list_combo()
         self.application.process_events()
         self.downloading = translate('OpenLP.FirstTimeWizard', 'Downloading {name}...')
         if self.has_run_wizard:
@@ -273,21 +274,21 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
         self.no_internet_finish_button.clicked.connect(self.on_no_internet_finish_button_clicked)
         self.no_internet_cancel_button.clicked.connect(self.on_no_internet_cancel_button_clicked)
         self.currentIdChanged.connect(self.on_current_id_changed)
-        Registry().register_function('config_screen_changed', self.update_screen_list_combo)
+        Registry().register_function('config_screen_changed', self.screen_selection_widget.load)
         self.no_internet_finish_button.setVisible(False)
         self.no_internet_cancel_button.setVisible(False)
         # Check if this is a re-run of the wizard.
         self.has_run_wizard = Settings().value('core/has run wizard')
         create_paths(Path(gettempdir(), 'openlp'))
-
-    def update_screen_list_combo(self):
-        """
-        The user changed screen resolution or enabled/disabled more screens, so
-        we need to update the combo box.
-        """
-        self.display_combo_box.clear()
-        self.display_combo_box.addItems(self.screens.get_display_screen_list())
-        self.display_combo_box.setCurrentIndex(self.display_combo_box.count() - 1)
+        self.theme_combo_box.clear()
+        if self.has_run_wizard:
+            # Add any existing themes to list.
+            for theme in self.theme_manager.get_themes():
+                self.theme_combo_box.addItem(theme)
+            default_theme = Settings().value('themes/global theme')
+            # Pre-select the current default theme.
+            index = self.theme_combo_box.findText(default_theme)
+            self.theme_combo_box.setCurrentIndex(index)
 
     def on_current_id_changed(self, page_id):
         """
@@ -311,22 +312,6 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
             self.back_button.setVisible(False)
             self.next_button.setVisible(True)
             self.next()
-        elif page_id == FirstTimePage.Defaults:
-            self.theme_combo_box.clear()
-            for index in range(self.themes_list_widget.count()):
-                item = self.themes_list_widget.item(index)
-                if item.checkState() == QtCore.Qt.Checked:
-                    self.theme_combo_box.addItem(item.text())
-            if self.has_run_wizard:
-                # Add any existing themes to list.
-                for theme in self.theme_manager.get_themes():
-                    index = self.theme_combo_box.findText(theme)
-                    if index == -1:
-                        self.theme_combo_box.addItem(theme)
-                default_theme = Settings().value('themes/global theme')
-                # Pre-select the current default theme.
-                index = self.theme_combo_box.findText(default_theme)
-                self.theme_combo_box.setCurrentIndex(index)
         elif page_id == FirstTimePage.NoInternet:
             self.back_button.setVisible(False)
             self.next_button.setVisible(False)
@@ -368,10 +353,31 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
         :param title: The title of the theme
         :param filename: The filename of the theme
         """
+        self.themes_list_widget.blockSignals(True)
         item = QtWidgets.QListWidgetItem(title, self.themes_list_widget)
         item.setData(QtCore.Qt.UserRole, (filename, sha256))
         item.setCheckState(QtCore.Qt.Unchecked)
         item.setFlags(item.flags() | QtCore.Qt.ItemIsUserCheckable)
+        self.themes_list_widget.blockSignals(False)
+
+    def on_theme_selected(self, item):
+        """
+        Add or remove a de/selected sample theme from the theme_combo_box
+
+        :param QtWidgets.QListWidgetItem item: The item that has been de/selected
+        :rtype: None
+        """
+        theme_name = item.text()
+        if self.theme_manager and theme_name in self.theme_manager.get_themes():
+            return True
+        if item.checkState() == QtCore.Qt.Checked:
+            self.theme_combo_box.addItem(theme_name)
+            return True
+        else:
+            index = self.theme_combo_box.findText(theme_name)
+            if index != -1:
+                self.theme_combo_box.removeItem(index)
+            return True
 
     def on_no_internet_finish_button_clicked(self):
         """
@@ -536,12 +542,7 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
                                            translate('OpenLP.FirstTimeWizard', 'There was a connection problem while '
                                                      'downloading, so further downloads will be skipped. Try to re-run '
                                                      'the First Time Wizard later.'))
-        # Set Default Display
-        if self.display_combo_box.currentIndex() != -1:
-            # No longer need to set this setting directly, the ScreenList object will do it
-            # Settings().setValue('core/monitor', self.display_combo_box.currentIndex())
-            self.screens.set_display_screen(self.display_combo_box.currentIndex(), can_save=True)
-        # Set Global Theme
+        self.screen_selection_widget.save()
         if self.theme_combo_box.currentIndex() != -1:
             Settings().setValue('themes/global theme', self.theme_combo_box.currentText())
 
