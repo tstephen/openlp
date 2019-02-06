@@ -246,7 +246,7 @@ describe("The doEntranceTransition", function(){
     });
 });
 
-describe("The startExitTransition", function(){
+describe("The doExitTransition", function(){
     var alertBackground;
 
     beforeEach(function(){
