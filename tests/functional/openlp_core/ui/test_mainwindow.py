@@ -70,13 +70,14 @@ class TestMainWindow(TestCase, TestMixin):
         self.add_toolbar_action_patcher = patch('openlp.core.ui.mainwindow.create_action')
         self.mocked_add_toolbar_action = self.add_toolbar_action_patcher.start()
         self.mocked_add_toolbar_action.side_effect = self._create_mock_action
-        self.renderer_patcher = patch('openlp.core.ui.mainwindow.Renderer')
+        self.renderer_patcher = patch('openlp.core.display.render.Renderer')
         self.mocked_renderer = self.renderer_patcher.start()
         mocked_desktop = MagicMock()
         mocked_desktop.screenCount.return_value = 1
         mocked_desktop.screenGeometry.return_value = QtCore.QRect(0, 0, 1024, 768)
         mocked_desktop.primaryScreen.return_value = 1
         ScreenList.create(mocked_desktop)
+        State().load_settings()
         self.main_window = MainWindow()
 
     def tearDown(self):

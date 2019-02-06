@@ -1405,7 +1405,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
             self.media_controller.video(self.controller_type, item, self.hide_mode())
         if not self.is_live:
             self.preview_display.show()
-            self.slide_preview.hide()
+            #self.slide_preview.hide()
 
     def on_media_close(self):
         """
@@ -1413,7 +1413,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         """
         self.media_controller.media_reset(self)
         self.preview_display.hide()
-        self.slide_preview.show()
+        #self.slide_preview.show()
 
     def _reset_blank(self, no_theme):
         """
