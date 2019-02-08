@@ -84,7 +84,6 @@ class SongsTab(SettingsTab):
         self.neolatin_notation_radio_button.setObjectName('neolatin_notation_radio_button')
         self.chords_layout.addWidget(self.neolatin_notation_radio_button)
         self.left_layout.addWidget(self.chords_group_box)
-
         # Footer group box
         self.footer_group_box = QtWidgets.QGroupBox(self.left_column)
         self.footer_group_box.setObjectName('footer_group_box')
@@ -101,7 +100,6 @@ class SongsTab(SettingsTab):
         self.footer_reset_button = QtWidgets.QPushButton(self.footer_group_box)
         self.footer_layout.addWidget(self.footer_reset_button, alignment=QtCore.Qt.AlignRight)
         self.right_layout.addWidget(self.footer_group_box)
-
         self.left_layout.addStretch()
         self.right_layout.addStretch()
         self.tool_bar_active_check_box.stateChanged.connect(self.on_tool_bar_active_check_box_changed)

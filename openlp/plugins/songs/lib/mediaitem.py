@@ -697,7 +697,6 @@ class SongMediaItem(MediaManagerItem):
         if Settings().value('core/ccli number'):
             item.raw_footer.append(translate('SongsPlugin.MediaItem', 'CCLI License: ') +
                                    Settings().value('core/ccli number'))
-
         footer_template = Settings().value('songs/footer template')
         # Keep this in sync with the list in songstab.py
         vars = {
@@ -722,14 +721,12 @@ class SongMediaItem(MediaManagerItem):
             'ccli_number': song.ccli_number,
             'topics': [topic.name for topic in song.topics]
         }
-
         try:
             item.footer_html = mako.template.Template(footer_template).render_unicode(**vars).replace('\n', '')
         except mako.exceptions.SyntaxException:
             log.error('Failed to render Song footer html:\n' + mako.exceptions.text_error_template().render())
             critical_error_message_box(message=translate('SongsPlugin.MediaItem',
                                                          'Failed to render Song footer html.\nSee log for details'))
-
         return authors_all
 
     def service_load(self, item):
