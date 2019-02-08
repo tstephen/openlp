@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -22,15 +22,13 @@
 """
 This module contains tests for the OpenLyrics song importer.
 """
-import os
-import shutil
 from tempfile import mkdtemp
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
+from openlp.core.common.path import Path
+from openlp.core.common.registry import Registry
 from openlp.plugins.songs.lib.openlyricsexport import OpenLyricsExport
-from openlp.core.common import Registry
-
 from tests.helpers.testmixin import TestMixin
 
 
@@ -43,13 +41,13 @@ class TestOpenLyricsExport(TestCase, TestMixin):
         Create the registry
         """
         Registry.create()
-        self.temp_folder = mkdtemp()
+        self.temp_folder = Path(mkdtemp())
 
     def tearDown(self):
         """
         Cleanup
         """
-        shutil.rmtree(self.temp_folder)
+        self.temp_folder.rmtree()
 
     def test_export_same_filename(self):
         """
@@ -73,7 +71,7 @@ class TestOpenLyricsExport(TestCase, TestMixin):
             ol_export.do_export()
 
             # THEN: The exporter should have created 2 files
-            self.assertTrue(os.path.exists(os.path.join(self.temp_folder,
-                                                        '%s (%s).xml' % (song.title, author.display_name))))
-            self.assertTrue(os.path.exists(os.path.join(self.temp_folder,
-                                                        '%s (%s)-1.xml' % (song.title, author.display_name))))
+            assert (self.temp_folder / '{title} ({display_name}).xml'.format(
+                title=song.title, display_name=author.display_name)).exists() is True
+            assert (self.temp_folder / '{title} ({display_name})-1.xml'.format(
+                title=song.title, display_name=author.display_name)).exists() is True

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -22,9 +22,9 @@
 
 from PyQt5 import QtCore, QtWidgets
 
-from openlp.core.common import Registry, translate
+from openlp.core.common.i18n import translate
+from openlp.core.common.registry import Registry
 from openlp.plugins.alerts.lib.db import AlertItem
-
 from .alertdialog import Ui_AlertDialog
 
 
@@ -70,7 +70,7 @@ class AlertForm(QtWidgets.QDialog, Ui_AlertDialog):
             item_name = QtWidgets.QListWidgetItem(alert.text)
             item_name.setData(QtCore.Qt.UserRole, alert.id)
             self.alert_list_widget.addItem(item_name)
-            if alert.text == str(self.alert_text_edit.text()):
+            if alert.text == self.alert_text_edit.text():
                 self.item_id = alert.id
                 self.alert_list_widget.setCurrentRow(self.alert_list_widget.row(item_name))
 

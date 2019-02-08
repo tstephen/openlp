@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -25,6 +25,7 @@ This module contains tests for the manager submodule of the Bibles plugin.
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
+from openlp.core.common.path import Path
 from openlp.plugins.bibles.lib.manager import BibleManager
 
 
@@ -50,7 +51,6 @@ class TestManager(TestCase):
         """
         # GIVEN: An instance of BibleManager and a mocked bible
         with patch.object(BibleManager, 'reload_bibles'), \
-                patch('openlp.plugins.bibles.lib.manager.os.path.join', side_effect=lambda x, y: '{}/{}'.format(x, y)),\
                 patch('openlp.plugins.bibles.lib.manager.delete_file', return_value=True) as mocked_delete_file:
             instance = BibleManager(MagicMock())
             # We need to keep a reference to the mock for close_all as it gets set to None later on!
@@ -63,7 +63,7 @@ class TestManager(TestCase):
 
             # THEN: The session should have been closed and set to None, the bible should be deleted, and the result of
             #       the deletion returned.
-            self.assertTrue(result)
+            assert result is True
             mocked_close_all.assert_called_once_with()
-            self.assertIsNone(mocked_bible.session)
-            mocked_delete_file.assert_called_once_with('bibles/KJV.sqlite')
+            assert mocked_bible.session is None
+            mocked_delete_file.assert_called_once_with(Path('bibles', 'KJV.sqlite'))

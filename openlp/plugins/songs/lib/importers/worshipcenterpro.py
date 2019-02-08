@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -25,9 +25,10 @@ a WorshipCenter Pro database into the OpenLP database.
 """
 import logging
 import re
+
 import pyodbc
 
-from openlp.core.common import translate
+from openlp.core.common.i18n import translate
 from openlp.plugins.songs.lib.importers.songimport import SongImport
 
 log = logging.getLogger(__name__)

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -26,20 +26,26 @@ Some of the code for this form is based on the examples at:
 
 * `http://www.steveheffernan.com/html5-video-player/demo-video-player.html`_
 * `http://html5demos.com/two-videos`_
-
 """
-
 import html
 import logging
-import os
 
-from PyQt5 import QtCore, QtWidgets, QtWebKit, QtWebKitWidgets, QtGui, QtMultimedia
+from PyQt5 import QtCore, QtWidgets, QtWebKit, QtWebKitWidgets, QtGui
 
-from openlp.core.common import AppLocation, Registry, RegistryProperties, OpenLPMixin, Settings, translate,\
-    is_macosx, is_win
-from openlp.core.lib import ServiceItem, ImageSource, ScreenList, build_html, expand_tags, image_to_byte
+from openlp.core.common import is_macosx, is_win
+from openlp.core.common.applocation import AppLocation
+from openlp.core.common.i18n import translate
+from openlp.core.common.mixins import LogMixin, RegistryProperties
+from openlp.core.common.path import path_to_str
+from openlp.core.common.registry import Registry
+from openlp.core.common.settings import Settings
+from openlp.core.display.screens import ScreenList
+from openlp.core.lib import ImageSource, expand_tags, image_to_byte
+from openlp.core.lib.htmlbuilder import build_html
+from openlp.core.lib.serviceitem import ServiceItem
 from openlp.core.lib.theme import BackgroundType
 from openlp.core.ui import HideMode, AlertLocation, DisplayControllerType
+from openlp.core.ui.icons import UiIcons
 
 if is_macosx():
     from ctypes import pythonapi, c_void_p, c_char_p, py_object
@@ -127,7 +133,7 @@ class Display(QtWidgets.QGraphicsView):
         self.web_loaded = True
 
 
-class MainDisplay(OpenLPMixin, Display, RegistryProperties):
+class MainDisplay(Display, LogMixin, RegistryProperties):
     """
     This is the display screen as a specialized class from the Display class
     """
@@ -142,10 +148,6 @@ class MainDisplay(OpenLPMixin, Display, RegistryProperties):
         self.override = {}
         self.retranslateUi()
         self.media_object = None
-        if self.is_live:
-            self.audio_player = AudioPlayer(self)
-        else:
-            self.audio_player = None
         self.first_time = True
         self.web_loaded = True
         self.setStyleSheet(OPAQUE_STYLESHEET)
@@ -157,7 +159,7 @@ class MainDisplay(OpenLPMixin, Display, RegistryProperties):
         # platforms. For OpenLP 2.0 keep it only for OS X to not cause any
         # regressions on other platforms.
         if is_macosx():
-            window_flags = QtCore.Qt.FramelessWindowHint | QtCore.Qt.Window
+            window_flags = QtCore.Qt.FramelessWindowHint | QtCore.Qt.Window | QtCore.Qt.NoDropShadowWindowHint
         self.setWindowFlags(window_flags)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.set_transparency(False)
@@ -166,7 +168,7 @@ class MainDisplay(OpenLPMixin, Display, RegistryProperties):
                 # Get a pointer to the underlying NSView
                 try:
                     nsview_pointer = self.winId().ascapsule()
-                except:
+                except Exception:
                     nsview_pointer = voidptr(self.winId()).ascapsule()
                 # Set PyCapsule name so pyobjc will accept it
                 pythonapi.PyCapsule_SetName.restype = c_void_p
@@ -259,7 +261,7 @@ class MainDisplay(OpenLPMixin, Display, RegistryProperties):
             background_color.setNamedColor(Settings().value('core/logo background color'))
             if not background_color.isValid():
                 background_color = QtCore.Qt.white
-            image_file = Settings().value('core/logo file')
+            image_file = path_to_str(Settings().value('core/logo file'))
             splash_image = QtGui.QImage(image_file)
             self.initial_fame = QtGui.QImage(
                 self.screen['size'].width(),
@@ -345,7 +347,7 @@ class MainDisplay(OpenLPMixin, Display, RegistryProperties):
         if not hasattr(self, 'service_item'):
             return False
         self.override['image'] = path
-        self.override['theme'] = self.service_item.theme_data.background_filename
+        self.override['theme'] = path_to_str(self.service_item.theme_data.background_filename)
         self.image(path)
         # Update the preview frame.
         if self.is_live:
@@ -394,6 +396,8 @@ class MainDisplay(OpenLPMixin, Display, RegistryProperties):
     def preview(self):
         """
         Generates a preview of the image displayed.
+
+        :rtype: QtGui.QPixmap
         """
         was_visible = self.isVisible()
         self.application.process_events()
@@ -453,7 +457,7 @@ class MainDisplay(OpenLPMixin, Display, RegistryProperties):
                 Registry().execute('video_background_replaced')
                 self.override = {}
             # We have a different theme.
-            elif self.override['theme'] != service_item.theme_data.background_filename:
+            elif self.override['theme'] != path_to_str(service_item.theme_data.background_filename):
                 Registry().execute('live_theme_changed')
                 self.override = {}
             else:
@@ -465,7 +469,7 @@ class MainDisplay(OpenLPMixin, Display, RegistryProperties):
         if self.service_item.theme_data.background_type == 'image':
             if self.service_item.theme_data.background_filename:
                 self.service_item.bg_image_bytes = self.image_manager.get_image_bytes(
-                    self.service_item.theme_data.background_filename, ImageSource.Theme)
+                    path_to_str(self.service_item.theme_data.background_filename), ImageSource.Theme)
             if image_path:
                 image_bytes = self.image_manager.get_image_bytes(image_path, ImageSource.ImagePlugin)
         created_html = build_html(self.service_item, self.screen, self.is_live, background, image_bytes,
@@ -484,11 +488,10 @@ class MainDisplay(OpenLPMixin, Display, RegistryProperties):
                 service_item = ServiceItem()
                 service_item.title = 'webkit'
                 service_item.processor = 'webkit'
-                path = os.path.join(AppLocation.get_section_data_path('themes'),
-                                    self.service_item.theme_data.theme_name)
+                path = str(AppLocation.get_section_data_path('themes') / self.service_item.theme_data.theme_name)
                 service_item.add_from_command(path,
-                                              self.service_item.theme_data.background_filename,
-                                              ':/media/slidecontroller_multimedia.png')
+                                              path_to_str(self.service_item.theme_data.background_filename),
+                                              UiIcons().media)
                 self.media_controller.video(DisplayControllerType.Live, service_item, video_behind_text=True)
         self._hide_mouse()
 
@@ -575,7 +578,7 @@ class MainDisplay(OpenLPMixin, Display, RegistryProperties):
                     window_id = window.winId().__int__()
                     main_window_id = self.main_window.winId().__int__()
                     self_id = self.winId().__int__()
-                except:
+                except Exception:
                     return
                 # If the passed window has the same id as our window make sure the display has the proper level and
                 # collection behavior.
@@ -597,106 +600,3 @@ class MainDisplay(OpenLPMixin, Display, RegistryProperties):
         """
         self.web_view.setGeometry(0, 0, self.width(), self.height() - 1)
         self.web_view.setGeometry(0, 0, self.width(), self.height())
-
-
-class AudioPlayer(OpenLPMixin, QtCore.QObject):
-    """
-    This Class will play audio only allowing components to work with a soundtrack independent of the user interface.
-    """
-    position_changed = QtCore.pyqtSignal(int)
-
-    def __init__(self, parent):
-        """
-        The constructor for the display form.
-
-        :param parent:  The parent widget.
-        """
-        super(AudioPlayer, self).__init__(parent)
-        self.player = QtMultimedia.QMediaPlayer()
-        self.playlist = QtMultimedia.QMediaPlaylist(self.player)
-        self.volume_slider = None
-        self.player.setPlaylist(self.playlist)
-        self.player.positionChanged.connect(self._on_position_changed)
-
-    def __del__(self):
-        """
-        Shutting down so clean up connections
-        """
-        self.stop()
-
-    def _on_position_changed(self, position):
-        """
-        Emit a signal when the position of the media player updates
-        """
-        self.position_changed.emit(position)
-
-    def set_volume_slider(self, slider):
-        """
-        Connect the volume slider to the media player
-        :param slider:
-        """
-        self.volume_slider = slider
-        self.volume_slider.setMinimum(0)
-        self.volume_slider.setMaximum(100)
-        self.volume_slider.setValue(self.player.volume())
-        self.volume_slider.valueChanged.connect(self.set_volume)
-
-    def set_volume(self, volume):
-        """
-        Set the volume of the media player
-
-        :param volume:
-        """
-        self.player.setVolume(volume)
-
-    def reset(self):
-        """
-        Reset the audio player, clearing the playlist and the queue.
-        """
-        self.stop()
-        self.playlist.clear()
-
-    def play(self):
-        """
-        We want to play the file so start it
-        """
-        self.player.play()
-
-    def pause(self):
-        """
-        Pause the Audio
-        """
-        self.player.pause()
-
-    def stop(self):
-        """
-        Stop the Audio and clean up
-        """
-        self.player.stop()
-
-    def add_to_playlist(self, file_names):
-        """
-        Add another file to the playlist.
-
-        :param file_names:  A list with files to be added to the playlist.
-        """
-        if not isinstance(file_names, list):
-            file_names = [file_names]
-        for file_name in file_names:
-            self.playlist.addMedia(QtMultimedia.QMediaContent(QtCore.QUrl.fromLocalFile(file_name)))
-
-    def next(self):
-        """
-        Skip forward to the next track in the list
-        """
-        self.playlist.next()
-
-    def go_to(self, index):
-        """
-        Go to a particular track in the list
-
-        :param index: The track to go to
-        """
-        self.playlist.setCurrentIndex(index)
-        if self.player.state() == QtMultimedia.QMediaPlayer.PlayingState:
-            self.player.play()

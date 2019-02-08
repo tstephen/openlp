@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -19,28 +19,33 @@
 # with this program; if not, write to the Free Software Foundation, Inc., 59  #
 # Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
 ###############################################################################
-
 import logging
 import os
-import shutil
 import mako
 
 from PyQt5 import QtCore, QtWidgets
 from sqlalchemy.sql import and_, or_
 
-from openlp.core.common import Registry, AppLocation, Settings, check_directory_exists, UiStrings, translate
-from openlp.core.lib import MediaManagerItem, ItemCapabilities, PluginStatus, ServiceItemContext, \
-    check_item_selected, create_separated_list
+from openlp.core.state import State
+from openlp.core.common.applocation import AppLocation
+from openlp.core.common.i18n import UiStrings, translate, get_natural_key
+from openlp.core.ui.icons import UiIcons
+from openlp.core.common.path import copyfile, create_paths
+from openlp.core.common.registry import Registry
+from openlp.core.common.settings import Settings
+from openlp.core.lib import ServiceItemContext, check_item_selected, create_separated_list
+from openlp.core.lib.mediamanageritem import MediaManagerItem
+from openlp.core.lib.plugin import PluginStatus
+from openlp.core.lib.serviceitem import ItemCapabilities
 from openlp.core.lib.ui import create_widget_action, critical_error_message_box
-from openlp.core.common.languagemanager import get_natural_key
 from openlp.plugins.songs.forms.editsongform import EditSongForm
-from openlp.plugins.songs.forms.songmaintenanceform import SongMaintenanceForm
-from openlp.plugins.songs.forms.songimportform import SongImportForm
 from openlp.plugins.songs.forms.songexportform import SongExportForm
+from openlp.plugins.songs.forms.songimportform import SongImportForm
+from openlp.plugins.songs.forms.songmaintenanceform import SongMaintenanceForm
 from openlp.plugins.songs.lib import VerseType, clean_string, delete_song
 from openlp.plugins.songs.lib.db import Author, AuthorType, Song, Book, MediaFile, SongBookEntry, Topic
-from openlp.plugins.songs.lib.ui import SongStrings
 from openlp.plugins.songs.lib.openlyricsxml import OpenLyrics, SongXML
+from openlp.plugins.songs.lib.ui import SongStrings
 
 log = logging.getLogger(__name__)
 
@@ -88,18 +93,18 @@ class SongMediaItem(MediaManagerItem):
     def _update_background_audio(self, song, item):
         song.media_files = []
         for i, bga in enumerate(item.background_audio):
-            dest_file = os.path.join(
-                AppLocation.get_section_data_path(self.plugin.name), 'audio', str(song.id), os.path.split(bga)[1])
-            check_directory_exists(os.path.split(dest_file)[0])
-            shutil.copyfile(os.path.join(AppLocation.get_section_data_path('servicemanager'), bga), dest_file)
-            song.media_files.append(MediaFile.populate(weight=i, file_name=dest_file))
+            dest_path =\
+                AppLocation.get_section_data_path(self.plugin.name) / 'audio' / str(song.id) / os.path.split(bga)[1]
+            create_paths(dest_path.parent)
+            copyfile(AppLocation.get_section_data_path('servicemanager') / bga, dest_path)
+            song.media_files.append(MediaFile.populate(weight=i, file_path=dest_path))
         self.plugin.manager.save_object(song, True)
 
     def add_end_header_bar(self):
         self.toolbar.addSeparator()
         # Song Maintenance Button
         self.maintenance_action = self.toolbar.add_toolbar_action('maintenance_action',
-                                                                  icon=':/songs/song_maintenance.png',
+                                                                  icon=UiIcons().database,
                                                                   triggers=self.on_song_maintenance_click)
         self.add_search_to_toolbar()
         # Signals and slots
@@ -111,7 +116,7 @@ class SongMediaItem(MediaManagerItem):
     def add_custom_context_actions(self):
         create_widget_action(self.list_view, separator=True)
         create_widget_action(
-            self.list_view, text=translate('OpenLP.MediaManagerItem', '&Clone'), icon=':/general/general_clone.png',
+            self.list_view, text=translate('OpenLP.MediaManagerItem', '&Clone'), icon=UiIcons().clone,
             triggers=self.on_clone_click)
 
     def on_focus(self):
@@ -142,26 +147,26 @@ class SongMediaItem(MediaManagerItem):
         self.edit_song_form = EditSongForm(self, self.main_window, self.plugin.manager)
         self.open_lyrics = OpenLyrics(self.plugin.manager)
         self.search_text_edit.set_search_types([
-            (SongSearch.Entire, ':/songs/song_search_all.png',
+            (SongSearch.Entire, UiIcons().music,
                 translate('SongsPlugin.MediaItem', 'Entire Song'),
                 translate('SongsPlugin.MediaItem', 'Search Entire Song...')),
-            (SongSearch.Titles, ':/songs/song_search_title.png',
+            (SongSearch.Titles, UiIcons().search_text,
                 translate('SongsPlugin.MediaItem', 'Titles'),
                 translate('SongsPlugin.MediaItem', 'Search Titles...')),
-            (SongSearch.Lyrics, ':/songs/song_search_lyrics.png',
+            (SongSearch.Lyrics, UiIcons().search_lyrcs,
                 translate('SongsPlugin.MediaItem', 'Lyrics'),
                 translate('SongsPlugin.MediaItem', 'Search Lyrics...')),
-            (SongSearch.Authors, ':/songs/song_search_author.png', SongStrings.Authors,
+            (SongSearch.Authors, UiIcons().user, SongStrings.Authors,
                 translate('SongsPlugin.MediaItem', 'Search Authors...')),
-            (SongSearch.Topics, ':/songs/song_search_topic.png', SongStrings.Topics,
+            (SongSearch.Topics, UiIcons().theme, SongStrings.Topics,
                 translate('SongsPlugin.MediaItem', 'Search Topics...')),
-            (SongSearch.Books, ':/songs/song_book_edit.png', SongStrings.SongBooks,
+            (SongSearch.Books, UiIcons().address, SongStrings.SongBooks,
                 translate('SongsPlugin.MediaItem', 'Search Songbooks...')),
-            (SongSearch.Themes, ':/slides/slide_theme.png', UiStrings().Themes, UiStrings().SearchThemes),
-            (SongSearch.Copyright, ':/songs/song_search_copy.png',
+            (SongSearch.Themes, UiIcons().theme, UiStrings().Themes, UiStrings().SearchThemes),
+            (SongSearch.Copyright, UiIcons().copyright,
                 translate('SongsPlugin.MediaItem', 'Copyright'),
                 translate('SongsPlugin.MediaItem', 'Search Copyright...')),
-            (SongSearch.CCLInumber, ':/songs/song_search_ccli.png',
+            (SongSearch.CCLInumber, UiIcons().search_ccli,
                 translate('SongsPlugin.MediaItem', 'CCLI number'),
                 translate('SongsPlugin.MediaItem', 'Search CCLI number...'))
         ])
@@ -318,9 +323,12 @@ class SongMediaItem(MediaManagerItem):
         :param search_results: A tuple containing (songbook entry, book name, song title, song id)
         :return: None
         """
-        def get_songbook_key(result):
-            """Get the key to sort by"""
-            return (get_natural_key(result[1]), get_natural_key(result[0]), get_natural_key(result[2]))
+        def get_songbook_key(text):
+            """
+            Get the key to sort by
+            :param text: the text tuple to be processed.
+            """
+            return get_natural_key('{0} {1} {2}'.format(text[1], text[0], text[2]))
 
         log.debug('display results Book')
         self.list_view.clear()
@@ -370,7 +378,7 @@ class SongMediaItem(MediaManagerItem):
         """
         def get_theme_key(song):
             """Get the key to sort by"""
-            return (get_natural_key(song.theme_name), song.sort_key)
+            return get_natural_key(song.theme_name), song.sort_key
 
         log.debug('display results Themes')
         self.list_view.clear()
@@ -393,7 +401,7 @@ class SongMediaItem(MediaManagerItem):
         """
         def get_cclinumber_key(song):
             """Get the key to sort by"""
-            return (get_natural_key(song.ccli_number), song.sort_key)
+            return get_natural_key(song.ccli_number), song.sort_key
 
         log.debug('display results CCLI number')
         self.list_view.clear()
@@ -457,6 +465,8 @@ class SongMediaItem(MediaManagerItem):
         """
         Called by ServiceManager or SlideController by event passing the Song Id in the payload along with an indicator
         to say which type of display is required.
+        :param song_id: the id of the song
+        :param preview: show we preview after the update
         """
         log.debug('on_remote_edit for song {song}'.format(song=song_id))
         song_id = int(song_id)
@@ -531,13 +541,13 @@ class SongMediaItem(MediaManagerItem):
                                                                       'copy', 'For song cloning'))
             # Copy audio files from the old to the new song
             if len(old_song.media_files) > 0:
-                save_path = os.path.join(AppLocation.get_section_data_path(self.plugin.name), 'audio', str(new_song.id))
-                check_directory_exists(save_path)
+                save_path = AppLocation.get_section_data_path(self.plugin.name) / 'audio' / str(new_song.id)
+                create_paths(save_path)
                 for media_file in old_song.media_files:
-                    new_media_file_name = os.path.join(save_path, os.path.basename(media_file.file_name))
-                    shutil.copyfile(media_file.file_name, new_media_file_name)
+                    new_media_file_path = save_path / media_file.file_path.name
+                    copyfile(media_file.file_path, new_media_file_path)
                     new_media_file = MediaFile()
-                    new_media_file.file_name = new_media_file_name
+                    new_media_file.file_path = new_media_file_path
                     new_media_file.type = media_file.type
                     new_media_file.weight = media_file.weight
                     new_song.media_files.append(new_media_file)
@@ -564,10 +574,19 @@ class SongMediaItem(MediaManagerItem):
         service_item.add_capability(ItemCapabilities.OnLoadUpdate)
         service_item.add_capability(ItemCapabilities.AddIfNewItem)
         service_item.add_capability(ItemCapabilities.CanSoftBreak)
+        service_item.add_capability(ItemCapabilities.HasMetaData)
         song = self.plugin.manager.get_object(Song, item_id)
         service_item.theme = song.theme_name
         service_item.edit_id = item_id
         verse_list = SongXML().get_verses(song.lyrics)
+        if Settings().value('songs/add songbook slide') and song.songbook_entries:
+            first_slide = '\n'
+            for songbook_entry in song.songbook_entries:
+                first_slide = first_slide + '{book}/{num}/{pub}\n\n'.format(book=songbook_entry.songbook.name,
+                                                                            num=songbook_entry.entry,
+                                                                            pub=songbook_entry.songbook.publisher)
+
+            service_item.add_from_text(first_slide, 'O1')
         # no verse list or only 1 space (in error)
         verse_tags_translated = False
         if VerseType.from_translated_string(str(verse_list[0][0]['type'])) is not None:
@@ -575,7 +594,7 @@ class SongMediaItem(MediaManagerItem):
         if not song.verse_order.strip():
             for verse in verse_list:
                 # We cannot use from_loose_input() here, because database is supposed to contain English lowercase
-                # singlechar tags.
+                # single char tags.
                 verse_tag = verse[0]['type']
                 verse_index = None
                 if len(verse_tag) > 1:
@@ -586,7 +605,9 @@ class SongMediaItem(MediaManagerItem):
                     verse_index = VerseType.from_tag(verse_tag)
                 verse_tag = VerseType.translated_tags[verse_index].upper()
                 verse_def = '{tag}{label}'.format(tag=verse_tag, label=verse[0]['label'])
-                service_item.add_from_text(str(verse[1]), verse_def)
+                force_verse = verse[1].split('[--}{--]\n')
+                for split_verse in force_verse:
+                    service_item.add_from_text(split_verse, verse_def)
         else:
             # Loop through the verse list and expand the song accordingly.
             for order in song.verse_order.lower().split():
@@ -600,16 +621,26 @@ class SongMediaItem(MediaManagerItem):
                         else:
                             verse_index = VerseType.from_tag(verse[0]['type'])
                         verse_tag = VerseType.translated_tags[verse_index]
-                        verse_def = '{tag}{text}'.format(tag=verse_tag, text=verse[0]['label'])
-                        service_item.add_from_text(verse[1], verse_def)
+                        verse_def = '{tag}{label}'.format(tag=verse_tag, label=verse[0]['label'])
+                        force_verse = verse[1].split('[--}{--]\n')
+                        for split_verse in force_verse:
+                            service_item.add_from_text(split_verse, verse_def)
         service_item.title = song.title
         author_list = self.generate_footer(service_item, song)
         service_item.data_string = {'title': song.search_title, 'authors': ', '.join(author_list)}
         service_item.xml_version = self.open_lyrics.song_to_xml(song)
         # Add the audio file to the service item.
         if song.media_files:
-            service_item.add_capability(ItemCapabilities.HasBackgroundAudio)
-            service_item.background_audio = [m.file_name for m in song.media_files]
+            if State().check_preconditions('media'):
+                service_item.add_capability(ItemCapabilities.HasBackgroundAudio)
+                total_length = 0
+                for m in song.media_files:
+                    total_length += self.media_controller.media_length(m.file_path)
+                service_item.background_audio = [m.file_path for m in song.media_files]
+                service_item.set_media_length(total_length)
+                service_item.metadata.append('<em>{label}:</em> {media}'.
+                                             format(label=translate('SongsPlugin.MediaItem', 'Media'),
+                                                    media=service_item.background_audio))
         return True
 
     def generate_footer(self, item, song):
@@ -740,7 +771,8 @@ class SongMediaItem(MediaManagerItem):
         self.generate_footer(item, song)
         return item
 
-    def _authors_match(self, song, authors):
+    @staticmethod
+    def _authors_match(song, authors):
         """
         Checks whether authors from a song in the database match the authors of the song to be imported.
 
@@ -757,11 +789,12 @@ class SongMediaItem(MediaManagerItem):
         # List must be empty at the end
         return not author_list
 
-    def search(self, string, show_error):
+    def search(self, string, show_error=True):
         """
         Search for some songs
         :param string: The string to show
         :param show_error: Is this an error?
+        :return: the results of the search
         """
         search_results = self.search_entire(string)
         return [[song.id, song.title, song.alternate_title] for song in search_results]

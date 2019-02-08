@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -25,13 +25,14 @@ OpenLP work.
 """
 import html
 import logging
-import os
-import re
 import math
+import re
 
-from PyQt5 import QtCore, QtGui, Qt, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets
 
-from openlp.core.common import translate
+from openlp.core.common.i18n import translate
+from openlp.core.common.path import Path
+from openlp.core.lib.formattingtags import FormattingTags
 
 log = logging.getLogger(__name__ + '.__init__')
 
@@ -83,30 +84,28 @@ class ServiceItemAction(object):
     Next = 3
 
 
-def get_text_file_string(text_file):
+def get_text_file_string(text_file_path):
     """
-    Open a file and return its content as unicode string. If the supplied file name is not a file then the function
+    Open a file and return its content as a string. If the supplied file path is not a file then the function
     returns False. If there is an error loading the file or the content can't be decoded then the function will return
     None.
 
-    :param text_file: The name of the file.
-    :return: The file as a single string
+    :param openlp.core.common.path.Path text_file_path: The path to the file.
+    :return: The contents of the file, False if the file does not exist, or None if there is an Error reading or
+    decoding the file.
+    :rtype: str | False | None
     """
-    if not os.path.isfile(text_file):
+    if not text_file_path.is_file():
         return False
-    file_handle = None
     content = None
     try:
-        file_handle = open(text_file, 'r', encoding='utf-8')
-        if file_handle.read(3) != '\xEF\xBB\xBF':
-            # no BOM was found
-            file_handle.seek(0)
-        content = file_handle.read()
-    except (IOError, UnicodeError):
-        log.exception('Failed to open text file {text}'.format(text=text_file))
-    finally:
-        if file_handle:
-            file_handle.close()
+        with text_file_path.open('r', encoding='utf-8') as file_handle:
+            if file_handle.read(3) != '\xEF\xBB\xBF':
+                # no BOM was found
+                file_handle.seek(0)
+            content = file_handle.read()
+    except (OSError, UnicodeError):
+        log.exception('Failed to open text file {text}'.format(text=text_file_path))
     return content
 
 
@@ -127,10 +126,11 @@ def build_icon(icon):
     Build a QIcon instance from an existing QIcon, a resource location, or a physical file location. If the icon is a
     QIcon instance, that icon is simply returned. If not, it builds a QIcon instance from the resource or file name.
 
-    :param icon:
-        The icon to build. This can be a QIcon, a resource string in the form ``:/resource/file.png``, or a file
-        location like ``/path/to/file.png``. However, the **recommended** way is to specify a resource string.
+    :param QtGui.QIcon | Path | QtGui.QIcon | str icon:
+        The icon to build. This can be a QIcon, a resource string in the form ``:/resource/file.png``, or a file path
+        location like ``Path(/path/to/file.png)``. However, the **recommended** way is to specify a resource string.
     :return: The build icon.
+    :rtype: QtGui.QIcon
     """
     if isinstance(icon, QtGui.QIcon):
         return icon
@@ -138,6 +138,8 @@ def build_icon(icon):
     button_icon = QtGui.QIcon()
     if isinstance(icon, str):
         pix_map = QtGui.QPixmap(icon)
+    elif isinstance(icon, Path):
+        pix_map = QtGui.QPixmap(str(icon))
     elif isinstance(icon, QtGui.QImage):
         pix_map = QtGui.QPixmap.fromImage(icon)
     if pix_map:
@@ -177,8 +179,9 @@ def create_thumb(image_path, thumb_path, return_icon=True, size=None):
      height of 88 is used.
     :return: The final icon.
     """
-    ext = os.path.splitext(thumb_path)[1].lower()
-    reader = QtGui.QImageReader(image_path)
+    # TODO: To path object
+    thumb_path = Path(thumb_path)
+    reader = QtGui.QImageReader(str(image_path))
     if size is None:
         # No size given; use default height of 88
         if reader.size().isEmpty():
@@ -205,10 +208,10 @@ def create_thumb(image_path, thumb_path, return_icon=True, size=None):
             # Invalid; use default height of 88
             reader.setScaledSize(QtCore.QSize(int(ratio * 88), 88))
     thumb = reader.read()
-    thumb.save(thumb_path, ext[1:])
+    thumb.save(str(thumb_path), thumb_path.suffix[1:].lower())
     if not return_icon:
         return
-    if os.path.exists(thumb_path):
+    if thumb_path.exists():
         return build_icon(thumb_path)
     # Fallback for files with animation support.
     return build_icon(image_path)
@@ -219,18 +222,19 @@ def validate_thumb(file_path, thumb_path):
     Validates whether an file's thumb still exists and if is up to date. **Note**, you must **not** call this function,
     before checking the existence of the file.
 
-    :param file_path: The path to the file. The file **must** exist!
-    :param thumb_path: The path to the thumb.
-    :return: True, False if the image has changed since the thumb was created.
+    :param openlp.core.common.path.Path file_path: The path to the file. The file **must** exist!
+    :param openlp.core.common.path.Path thumb_path: The path to the thumb.
+    :return: Has the image changed since the thumb was created?
+    :rtype: bool
     """
-    if not os.path.exists(thumb_path):
+    if not thumb_path.exists():
         return False
-    image_date = os.stat(file_path).st_mtime
-    thumb_date = os.stat(thumb_path).st_mtime
+    image_date = file_path.stat().st_mtime
+    thumb_date = thumb_path.stat().st_mtime
     return image_date <= thumb_date
 
 
-def resize_image(image_path, width, height, background='#000000'):
+def resize_image(image_path, width, height, background='#000000', ignore_aspect_ratio=False):
     """
     Resize an image to fit on the current screen.
 
@@ -247,7 +251,7 @@ def resize_image(image_path, width, height, background='#000000'):
     image_ratio = reader.size().width() / reader.size().height()
     resize_ratio = width / height
     # Figure out the size we want to resize the image to (keep aspect ratio).
-    if image_ratio == resize_ratio:
+    if image_ratio == resize_ratio or ignore_aspect_ratio:
         size = QtCore.QSize(width, height)
     elif image_ratio < resize_ratio:
         # Use the image's height as reference for the new size.
@@ -412,7 +416,7 @@ def expand_chords(text):
                 chords_on_prev_line = True
             # Matches a chord, a tail, a remainder and a line end. See expand_and_align_chords_in_line() for more info.
             new_line += re.sub(r'\[(.*?)\]([\u0080-\uFFFF,\w]*)'
-                               '([\u0080-\uFFFF,\w,\s,\.,\,,\!,\?,\;,\:,\|,\",\',\-,\_]*)(\Z)?',
+                               r'([\u0080-\uFFFF,\w,\s,\.,\,,\!,\?,\;,\:,\|,\",\',\-,\_]*)(\Z)?',
                                expand_and_align_chords_in_line, line)
             new_line += '</span>'
             expanded_text_lines.append(new_line)
@@ -606,20 +610,3 @@ def create_separated_list(string_list):
     else:
         list_to_string = ''
     return list_to_string
-
-
-from .exceptions import ValidationError
-from .filedialog import FileDialog
-from .screen import ScreenList
-from .formattingtags import FormattingTags
-from .plugin import PluginStatus, StringContent, Plugin
-from .pluginmanager import PluginManager
-from .settingstab import SettingsTab
-from .serviceitem import ServiceItem, ServiceItemType, ItemCapabilities
-from .htmlbuilder import build_html, build_lyrics_format_css, build_lyrics_outline_css, build_chords_css
-from .imagemanager import ImageManager
-from .renderer import Renderer
-from .mediamanageritem import MediaManagerItem
-from .projector.db import ProjectorDB, Projector
-from .projector.pjlink1 import PJLink
-from .projector.constants import PJLINK_PORT, ERROR_MSG, ERROR_STRING

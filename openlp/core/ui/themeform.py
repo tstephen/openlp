@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,14 +23,16 @@
 The Theme wizard
 """
 import logging
-import os
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from openlp.core.common import Registry, RegistryProperties, UiStrings, translate, get_images_filter, is_not_image_file
+from openlp.core.common import get_images_filter, is_not_image_file
+from openlp.core.common.i18n import UiStrings, translate
+from openlp.core.common.mixins import RegistryProperties
+from openlp.core.common.registry import Registry
 from openlp.core.lib.theme import BackgroundType, BackgroundGradientType
 from openlp.core.lib.ui import critical_error_message_box
-from openlp.core.ui import ThemeLayoutForm
+from openlp.core.ui.themelayoutform import ThemeLayoutForm
 from openlp.core.ui.media.webkitplayer import VIDEO_EXT
 from .themewizard import Ui_ThemeWizard
 
@@ -60,7 +62,7 @@ class ThemeForm(QtWidgets.QWizard, Ui_ThemeWizard, RegistryProperties):
         self.setupUi(self)
         self.registerFields()
         self.update_theme_allowed = True
-        self.temp_background_filename = ''
+        self.temp_background_filename = None
         self.theme_layout_form = ThemeLayoutForm(self)
         self.background_combo_box.currentIndexChanged.connect(self.on_background_combo_box_current_index_changed)
         self.gradient_combo_box.currentIndexChanged.connect(self.on_gradient_combo_box_current_index_changed)
@@ -151,7 +153,7 @@ class ThemeForm(QtWidgets.QWizard, Ui_ThemeWizard, RegistryProperties):
         Calculate the number of lines on a page by rendering text
         """
         # Do not trigger on start up
-        if self.currentPage != self.welcome_page:
+        if self.currentPage() != self.welcome_page:
             self.update_theme()
             self.theme_manager.generate_image(self.theme, True)
 
@@ -271,7 +273,7 @@ class ThemeForm(QtWidgets.QWizard, Ui_ThemeWizard, RegistryProperties):
         Run the wizard.
         """
         log.debug('Editing theme {name}'.format(name=self.theme.theme_name))
-        self.temp_background_filename = ''
+        self.temp_background_filename = None
         self.update_theme_allowed = False
         self.set_defaults()
         self.update_theme_allowed = True
@@ -400,14 +402,14 @@ class ThemeForm(QtWidgets.QWizard, Ui_ThemeWizard, RegistryProperties):
             self.theme.background_type = BackgroundType.to_string(index)
             if self.theme.background_type != BackgroundType.to_string(BackgroundType.Image) and \
                     self.theme.background_type != BackgroundType.to_string(BackgroundType.Video) and \
-                    self.temp_background_filename == '':
+                    self.temp_background_filename is None:
                 self.temp_background_filename = self.theme.background_filename
-                self.theme.background_filename = ''
+                self.theme.background_filename = None
             if (self.theme.background_type == BackgroundType.to_string(BackgroundType.Image) or
                     self.theme.background_type != BackgroundType.to_string(BackgroundType.Video)) and \
-                    self.temp_background_filename != '':
+                    self.temp_background_filename is not None:
                 self.theme.background_filename = self.temp_background_filename
-                self.temp_background_filename = ''
+                self.temp_background_filename = None
             self.set_background_page_values()
 
     def on_gradient_combo_box_current_index_changed(self, index):
@@ -448,18 +450,24 @@ class ThemeForm(QtWidgets.QWizard, Ui_ThemeWizard, RegistryProperties):
         """
         self.theme.background_end_color = color
 
-    def on_image_path_edit_path_changed(self, filename):
+    def on_image_path_edit_path_changed(self, new_path):
         """
-        Background Image button pushed.
+        Handle the `pathEditChanged` signal from image_path_edit
+
+        :param openlp.core.common.path.Path new_path: Path to the new image
+        :rtype: None
         """
-        self.theme.background_filename = filename
+        self.theme.background_filename = new_path
         self.set_background_page_values()
 
-    def on_video_path_edit_path_changed(self, filename):
+    def on_video_path_edit_path_changed(self, new_path):
         """
-        Background video button pushed.
+        Handle the `pathEditChanged` signal from video_path_edit
+
+        :param openlp.core.common.path.Path new_path: Path to the new video
+        :rtype: None
         """
-        self.theme.background_filename = filename
+        self.theme.background_filename = new_path
         self.set_background_page_values()
 
     def on_main_color_changed(self, color):
@@ -535,14 +543,14 @@ class ThemeForm(QtWidgets.QWizard, Ui_ThemeWizard, RegistryProperties):
                 translate('OpenLP.ThemeWizard', 'Theme Name Invalid'),
                 translate('OpenLP.ThemeWizard', 'Invalid theme name. Please enter one.'))
             return
-        save_from = None
-        save_to = None
+        source_path = None
+        destination_path = None
         if self.theme.background_type == BackgroundType.to_string(BackgroundType.Image) or \
            self.theme.background_type == BackgroundType.to_string(BackgroundType.Video):
-            filename = os.path.split(str(self.theme.background_filename))[1]
-            save_to = os.path.join(self.path, self.theme.theme_name, filename)
-            save_from = self.theme.background_filename
+            file_name = self.theme.background_filename.name
+            destination_path = self.path / self.theme.theme_name / file_name
+            source_path = self.theme.background_filename
         if not self.edit_mode and not self.theme_manager.check_if_theme_exists(self.theme.theme_name):
             return
-        self.theme_manager.save_theme(self.theme, save_from, save_to)
+        self.theme_manager.save_theme(self.theme, source_path, destination_path)
         return QtWidgets.QDialog.accept(self)

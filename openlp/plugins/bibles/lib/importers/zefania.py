@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -22,11 +22,10 @@
 
 import logging
 
-from openlp.core.common import translate
+from openlp.core.common.i18n import translate
 from openlp.core.lib.ui import critical_error_message_box
 from openlp.plugins.bibles.lib.bibleimport import BibleImport
 from openlp.plugins.bibles.lib.db import BiblesResourcesDB
-
 
 log = logging.getLogger(__name__)
 
@@ -45,13 +44,13 @@ class ZefaniaBible(BibleImport):
         """
         Loads a Bible from file.
         """
-        log.debug('Starting Zefania import from "{name}"'.format(name=self.filename))
+        log.debug('Starting Zefania import from "{name}"'.format(name=self.file_path))
         success = True
         try:
-            xmlbible = self.parse_xml(self.filename, elements=REMOVABLE_ELEMENTS, tags=REMOVABLE_TAGS)
+            xmlbible = self.parse_xml(self.file_path, elements=REMOVABLE_ELEMENTS, tags=REMOVABLE_TAGS)
             # Find bible language
             language = xmlbible.xpath("/XMLBIBLE/INFORMATION/language/text()")
-            language_id = self.get_language_id(language[0] if language else None, bible_name=self.filename)
+            language_id = self.get_language_id(language[0] if language else None, bible_name=str(self.file_path))
             if not language_id:
                 return False
             no_of_books = int(xmlbible.xpath('count(//BIBLEBOOK)'))
@@ -69,7 +68,7 @@ class ZefaniaBible(BibleImport):
                     log.debug('Could not find a name, will use number, basically a guess.')
                     book_ref_id = int(bnumber)
                 if not book_ref_id:
-                    log.error('Importing books from "{name}" failed'.format(name=self.filename))
+                    log.error('Importing books from "{name}" failed'.format(name=self.file_path))
                     return False
                 book_details = BiblesResourcesDB.get_book_by_id(book_ref_id)
                 db_book = self.create_book(book_details['name'], book_ref_id, book_details['testament_id'])

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -19,13 +19,13 @@
 # with this program; if not, write to the Free Software Foundation, Inc., 59  #
 # Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
 ###############################################################################
-
 from PyQt5 import QtCore, QtWidgets
 
-from openlp.core.common import translate
-from openlp.core.lib import build_icon
+from openlp.core.common.i18n import translate
 from openlp.core.lib.ui import create_button_box
-from openlp.core.ui.lib import PathEdit, PathType
+from openlp.core.ui.icons import UiIcons
+from openlp.core.widgets.edits import PathEdit
+from openlp.core.widgets.enums import PathEditType
 
 
 class Ui_SongUsageDetailDialog(object):
@@ -39,7 +39,7 @@ class Ui_SongUsageDetailDialog(object):
         :param song_usage_detail_dialog:
         """
         song_usage_detail_dialog.setObjectName('song_usage_detail_dialog')
-        song_usage_detail_dialog.setWindowIcon(build_icon(':/icon/openlp-logo.svg'))
+        song_usage_detail_dialog.setWindowIcon(UiIcons().main_icon)
         song_usage_detail_dialog.resize(609, 413)
         self.vertical_layout = QtWidgets.QVBoxLayout(song_usage_detail_dialog)
         self.vertical_layout.setSpacing(8)
@@ -69,7 +69,7 @@ class Ui_SongUsageDetailDialog(object):
         self.file_horizontal_layout.setSpacing(8)
         self.file_horizontal_layout.setContentsMargins(8, 8, 8, 8)
         self.file_horizontal_layout.setObjectName('file_horizontal_layout')
-        self.report_path_edit = PathEdit(self.file_group_box, path_type=PathType.Directories, show_revert=False)
+        self.report_path_edit = PathEdit(self.file_group_box, path_type=PathEditType.Directories, show_revert=False)
         self.file_horizontal_layout.addWidget(self.report_path_edit)
         self.vertical_layout.addWidget(self.file_group_box)
         self.button_box = create_button_box(song_usage_detail_dialog, 'button_box', ['cancel', 'ok'])

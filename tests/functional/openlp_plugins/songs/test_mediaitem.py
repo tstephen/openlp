@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,15 +23,15 @@
 This module contains tests for the lib submodule of the Songs plugin.
 """
 from unittest import TestCase
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock, patch
 
 from PyQt5 import QtCore
 
-from openlp.core.common import Registry, Settings
-from openlp.core.lib import ServiceItem
+from openlp.core.common.registry import Registry
+from openlp.core.common.settings import Settings
+from openlp.core.lib.serviceitem import ServiceItem
 from openlp.plugins.songs.lib.db import AuthorType, Song
 from openlp.plugins.songs.lib.mediaitem import SongMediaItem
-
 from tests.helpers.testmixin import TestMixin
 
 __default_settings__ = {
@@ -227,27 +227,23 @@ class TestMediaItem(TestCase, TestMixin):
         """
         Test that songbooks are sorted naturally
         """
-        # GIVEN: Search results grouped by book and entry, plus a mocked QtListWidgetItem
-        with patch('openlp.core.lib.QtWidgets.QListWidgetItem') as MockedQListWidgetItem:
-            mock_search_results = [('2', 'Thy Book', 'Thy Song', 50),
-                                   ('2', 'My Book', 'Your Song', 7),
-                                   ('10', 'My Book', 'Our Song', 12),
-                                   ('1', 'My Book', 'My Song', 1),
-                                   ('2', 'Thy Book', 'A Song', 8)]
-            mock_qlist_widget = MagicMock()
-            MockedQListWidgetItem.return_value = mock_qlist_widget
+        # GIVEN: Search results grouped by book and entry
+        search_results = [('2', 'Thy Book', 'Thy Song', 50),
+                          ('2', 'My Book', 'Your Song', 7),
+                          ('10', 'My Book', 'Our Song', 12),
+                          ('1', 'My Book', 'My Song', 1),
+                          ('2', 'Thy Book', 'A Song', 8)]
 
-            # WHEN: I display song search results grouped by book
-            self.media_item.display_results_book(mock_search_results)
+        # WHEN: I display song search results grouped by book
+        self.media_item.display_results_book(search_results)
 
-            # THEN: The songbooks are inserted in the right (natural) order,
-            #       grouped first by book, then by number, then by song title
-            calls = [call('My Book #1: My Song'), call().setData(QtCore.Qt.UserRole, 1),
-                     call('My Book #2: Your Song'), call().setData(QtCore.Qt.UserRole, 7),
-                     call('My Book #10: Our Song'), call().setData(QtCore.Qt.UserRole, 12),
-                     call('Thy Book #2: A Song'), call().setData(QtCore.Qt.UserRole, 8),
-                     call('Thy Book #2: Thy Song'), call().setData(QtCore.Qt.UserRole, 50)]
-            MockedQListWidgetItem.assert_has_calls(calls)
+        # THEN: The songbooks are sorted inplace in the right (natural) order,
+        #       grouped first by book, then by number, then by song title
+        assert search_results == [('1', 'My Book', 'My Song', 1),
+                                  ('2', 'My Book', 'Your Song', 7),
+                                  ('10', 'My Book', 'Our Song', 12),
+                                  ('2', 'Thy Book', 'A Song', 8),
+                                  ('2', 'Thy Book', 'Thy Song', 50)]
 
     def test_display_results_topic(self):
         """
@@ -432,11 +428,11 @@ class TestMediaItem(TestCase, TestMixin):
         author_list = self.media_item.generate_footer(service_item, mock_song)
 
         # THEN: I get the following Array returned
-        self.assertEqual(service_item.raw_footer, ['My Song', 'Words: another author', 'Music: my author',
-                                                   'Translation: translator', '© My copyright'],
-                         'The array should be returned correctly with a song, two authors and copyright')
-        self.assertEqual(author_list, ['another author', 'my author', 'translator'],
-                         'The author list should be returned correctly with two authors')
+        assert service_item.raw_footer == ['My Song', 'Words: another author', 'Music: my author',
+                                           'Translation: translator', '© My copyright'], \
+            'The array should be returned correctly with a song, two authors and copyright'
+        assert author_list == ['another author', 'my author', 'translator'], \
+            'The author list should be returned correctly with two authors'
 
     def test_build_song_footer_base_ccli(self):
         """
@@ -454,16 +450,16 @@ class TestMediaItem(TestCase, TestMixin):
         self.media_item.generate_footer(service_item, mock_song)
 
         # THEN: I get the following Array returned
-        self.assertEqual(service_item.raw_footer, ['My Song', '© My copyright', 'CCLI License: 1234'],
-                         'The array should be returned correctly with a song, an author, copyright and ccli')
+        assert service_item.raw_footer == ['My Song', '© My copyright', 'CCLI License: 1234'], \
+            'The array should be returned correctly with a song, an author, copyright and ccli'
 
         # WHEN: I amend the CCLI value
         Settings().setValue('core/ccli number', '4321')
         self.media_item.generate_footer(service_item, mock_song)
 
         # THEN: I would get an amended footer string
-        self.assertEqual(service_item.raw_footer, ['My Song', '© My copyright', 'CCLI License: 4321'],
-                         'The array should be returned correctly with a song, an author, copyright and amended ccli')
+        assert service_item.raw_footer == ['My Song', '© My copyright', 'CCLI License: 4321'], \
+            'The array should be returned correctly with a song, an author, copyright and amended ccli'
 
     def test_build_song_footer_base_songbook(self):
         """
@@ -472,6 +468,7 @@ class TestMediaItem(TestCase, TestMixin):
         # GIVEN: A Song and a Service Item
         song = Song()
         song.title = 'My Song'
+        song.alternate_title = ''
         song.copyright = 'My copyright'
         song.authors_songs = []
         song.songbook_entries = []
@@ -479,9 +476,9 @@ class TestMediaItem(TestCase, TestMixin):
         song.topics = []
         song.ccli_number = ''
         book1 = MagicMock()
-        book1.name = "My songbook"
+        book1.name = 'My songbook'
         book2 = MagicMock()
-        book2.name = "Thy songbook"
+        book2.name = 'Thy songbook'
         song.songbookentries = []
         song.add_songbook_entry(book1, '12')
         song.add_songbook_entry(book2, '502A')
@@ -491,7 +488,7 @@ class TestMediaItem(TestCase, TestMixin):
         self.media_item.generate_footer(service_item, song)
 
         # THEN: The songbook should be in the footer
-        self.assertEqual(service_item.raw_footer, ['My Song', '© My copyright', 'My songbook #12, Thy songbook #502A'])
+        assert service_item.raw_footer == ['My Song', '© My copyright', 'My songbook #12, Thy songbook #502A']
 
     def test_build_song_footer_copyright_enabled(self):
         """
@@ -509,7 +506,7 @@ class TestMediaItem(TestCase, TestMixin):
         self.media_item.generate_footer(service_item, mock_song)
 
         # THEN: The copyright symbol should be in the footer
-        self.assertEqual(service_item.raw_footer, ['My Song', '© My copyright'])
+        assert service_item.raw_footer == ['My Song', '© My copyright']
 
     def test_build_song_footer_copyright_disabled(self):
         """
@@ -526,7 +523,7 @@ class TestMediaItem(TestCase, TestMixin):
         self.media_item.generate_footer(service_item, mock_song)
 
         # THEN: The copyright symbol should not be in the footer
-        self.assertEqual(service_item.raw_footer, ['My Song', '© My copyright'])
+        assert service_item.raw_footer == ['My Song', '© My copyright']
 
     def test_authors_match(self):
         """
@@ -552,7 +549,7 @@ class TestMediaItem(TestCase, TestMixin):
         result = self.media_item._authors_match(song, authors_str)
 
         # THEN: They should match
-        self.assertTrue(result, "Authors should match")
+        assert result is True, "Authors should match"
 
     def test_authors_dont_match(self):
         # GIVEN: A song and a string with authors
@@ -575,7 +572,7 @@ class TestMediaItem(TestCase, TestMixin):
         result = self.media_item._authors_match(song, authors_str)
 
         # THEN: They should not match
-        self.assertFalse(result, "Authors should not match")
+        assert result is False, "Authors should not match"
 
     def test_build_remote_search(self):
         """
@@ -594,7 +591,7 @@ class TestMediaItem(TestCase, TestMixin):
         search_results = self.media_item.search('My Song', False)
 
         # THEN: The correct formatted results are returned
-        self.assertEqual(search_results, [[123, 'My Song', 'My alternative']])
+        assert search_results == [[123, 'My Song', 'My alternative']]
 
     @patch('openlp.plugins.songs.lib.mediaitem.Book')
     @patch('openlp.plugins.songs.lib.mediaitem.SongBookEntry')
@@ -606,7 +603,6 @@ class TestMediaItem(TestCase, TestMixin):
         """
         # GIVEN: A song media item, a keyword and some mocks
         keyword = 'Jesus'
-        mocked_song = MagicMock()
         mocked_or.side_effect = lambda a, b, c, d, e: ' '.join([a, b, c, d, e])
         MockedSong.search_title.like.side_effect = lambda a: a
         MockedSong.search_lyrics.like.side_effect = lambda a: a
@@ -626,4 +622,4 @@ class TestMediaItem(TestCase, TestMixin):
         mocked_or.assert_called_once_with('%jesus%', '%jesus%', '%jesus%', '%jesus%', '%jesus%')
         self.mocked_plugin.manager.session.query.assert_called_once_with(MockedSong)
 
-        self.assertEqual(self.mocked_plugin.manager.session.query.mock_calls[4][0], '().join().join().filter().all')
+        assert self.mocked_plugin.manager.session.query.mock_calls[4][0] == '().join().join().filter().all'

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,18 +23,24 @@
 The :mod:`serviceitem` provides the service item functionality including the
 type and capability of an item.
 """
-
 import datetime
 import html
 import logging
+import ntpath
 import os
 import uuid
-import ntpath
 
 from PyQt5 import QtGui
 
-from openlp.core.common import RegistryProperties, Settings, translate, AppLocation, md5_hash
-from openlp.core.lib import ImageSource, build_icon, clean_tags, expand_tags, expand_chords, create_thumb
+from openlp.core.state import State
+from openlp.core.common import md5_hash
+from openlp.core.common.applocation import AppLocation
+from openlp.core.common.i18n import translate
+from openlp.core.ui.icons import UiIcons
+from openlp.core.common.mixins import RegistryProperties
+from openlp.core.common.path import Path
+from openlp.core.common.settings import Settings
+from openlp.core.lib import ImageSource, clean_tags, expand_tags, expand_chords
 
 log = logging.getLogger(__name__)
 
@@ -117,6 +123,9 @@ class ItemCapabilities(object):
 
     ``HasThumbnails``
             The item has related thumbnails available
+
+    ``HasMetaData``
+            The item has Meta Data about item
     """
     CanPreview = 1
     CanEdit = 2
@@ -139,6 +148,7 @@ class ItemCapabilities(object):
     HasDisplayTitle = 19
     HasNotes = 20
     HasThumbnails = 21
+    HasMetaData = 22
 
 
 class ServiceItem(RegistryProperties):
@@ -161,7 +171,7 @@ class ServiceItem(RegistryProperties):
         self.processor = None
         self.audit = ''
         self.items = []
-        self.iconic_representation = None
+        self.icon = UiIcons().default
         self.raw_footer = []
         # Plugins can set footer_html themselves. If they don't, it will be generated from raw_footer.
         self.footer_html = ''
@@ -197,6 +207,7 @@ class ServiceItem(RegistryProperties):
         self.will_auto_start = False
         self.has_original_files = True
         self._new_item()
+        self.metadata = []
 
     def _new_item(self):
         """
@@ -221,14 +232,22 @@ class ServiceItem(RegistryProperties):
         """
         return capability in self.capabilities
 
-    def add_icon(self, icon):
+    def add_icon(self):
         """
         Add an icon to the service item. This is used when displaying the service item in the service manager.
-
-        :param icon: A string to an icon in the resources or on disk.
         """
-        self.icon = icon
-        self.iconic_representation = build_icon(icon)
+        if self.name == 'songs':
+            self.icon = UiIcons().music
+        elif self.name == 'bibles':
+            self.icon = UiIcons().bible
+        elif self.name == 'presentations':
+            self.icon = UiIcons().presentation
+        elif self.name == 'images':
+            self.icon = UiIcons().picture
+        elif self.name == 'media':
+            self.icon = UiIcons().video
+        else:
+            self.icon = UiIcons().clone
 
     def render(self, provides_own_theme_data=False):
         """
@@ -332,7 +351,7 @@ class ServiceItem(RegistryProperties):
         if image and not self.has_original_files and self.name == 'presentations':
             file_location = os.path.join(path, file_name)
             file_location_hash = md5_hash(file_location.encode('utf-8'))
-            image = os.path.join(AppLocation.get_section_data_path(self.name), 'thumbnails',
+            image = os.path.join(str(AppLocation.get_section_data_path(self.name)), 'thumbnails',
                                  file_location_hash, ntpath.basename(image))
         self._raw_frames.append({'title': file_name, 'image': image, 'path': path,
                                  'display_title': display_title, 'notes': notes})
@@ -349,7 +368,6 @@ class ServiceItem(RegistryProperties):
             'plugin': self.name,
             'theme': self.theme,
             'title': self.title,
-            'icon': self.icon,
             'footer': self.raw_footer,
             'type': self.service_item_type,
             'audit': self.audit,
@@ -368,7 +386,8 @@ class ServiceItem(RegistryProperties):
             'background_audio': self.background_audio,
             'theme_overwritten': self.theme_overwritten,
             'will_auto_start': self.will_auto_start,
-            'processor': self.processor
+            'processor': self.processor,
+            'metadata': self.metadata
         }
         service_data = []
         if self.service_item_type == ServiceItemType.Text:
@@ -400,7 +419,7 @@ class ServiceItem(RegistryProperties):
         self.name = header['name']
         self.service_item_type = header['type']
         self.theme = header['theme']
-        self.add_icon(header['icon'])
+        self.add_icon()
         self.raw_footer = header['footer']
         self.audit = header['audit']
         self.notes = header['notes']
@@ -419,15 +438,16 @@ class ServiceItem(RegistryProperties):
         self.will_auto_start = header.get('will_auto_start', False)
         self.processor = header.get('processor', None)
         self.has_original_files = True
-        if 'background_audio' in header:
+        self.metadata = header.get('item_meta_data', [])
+        if 'background_audio' in header and State().check_preconditions('media'):
             self.background_audio = []
-            for filename in header['background_audio']:
-                # Give them real file paths.
-                filepath = filename
-                if path:
+            for file_path in header['background_audio']:
+                # In OpenLP 3.0 we switched to storing Path objects in JSON files
+                if isinstance(file_path, str):
+                    # Handle service files prior to OpenLP 3.0
                     # Windows can handle both forward and backward slashes, so we use ntpath to get the basename
-                    filepath = os.path.join(path, ntpath.basename(filename))
-                self.background_audio.append(filepath)
+                    file_path = Path(path, ntpath.basename(file_path))
+                self.background_audio.append(file_path)
         self.theme_overwritten = header.get('theme_overwritten', False)
         if self.service_item_type == ServiceItemType.Text:
             for slide in service_item['serviceitem']['data']:
@@ -438,8 +458,8 @@ class ServiceItem(RegistryProperties):
             if path:
                 self.has_original_files = False
                 for text_image in service_item['serviceitem']['data']:
-                    filename = os.path.join(path, text_image)
-                    self.add_from_image(filename, text_image, background)
+                    file_path = os.path.join(path, text_image)
+                    self.add_from_image(file_path, text_image, background)
             else:
                 for text_image in service_item['serviceitem']['data']:
                     self.add_from_image(text_image['path'], text_image['title'], background)
@@ -594,6 +614,10 @@ class ServiceItem(RegistryProperties):
             path_from = frame['path']
         else:
             path_from = os.path.join(frame['path'], frame['title'])
+        if isinstance(path_from, str):
+            # Handle service files prior to OpenLP 3.0
+            # Windows can handle both forward and backward slashes, so we use ntpath to get the basename
+            path_from = Path(path_from)
         return path_from
 
     def remove_frame(self, frame):
@@ -662,7 +686,7 @@ class ServiceItem(RegistryProperties):
                 self.is_valid = False
                 break
             elif self.is_command():
-                if self.is_capable(ItemCapabilities.IsOptical):
+                if self.is_capable(ItemCapabilities.IsOptical) and State().check_preconditions('media'):
                     if not os.path.exists(frame['title']):
                         self.is_valid = False
                         break

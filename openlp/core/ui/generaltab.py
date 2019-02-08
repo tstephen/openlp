@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -26,9 +26,15 @@ import logging
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from openlp.core.common import Registry, Settings, UiStrings, translate, get_images_filter
-from openlp.core.lib import SettingsTab, ScreenList
-from openlp.core.ui.lib import ColorButton, PathEdit
+from openlp.core.common import get_images_filter
+from openlp.core.common.i18n import UiStrings, translate
+from openlp.core.common.path import Path
+from openlp.core.common.registry import Registry
+from openlp.core.common.settings import Settings
+from openlp.core.display.screens import ScreenList
+from openlp.core.lib.settingstab import SettingsTab
+from openlp.core.widgets.buttons import ColorButton
+from openlp.core.widgets.edits import PathEdit
 
 log = logging.getLogger(__name__)
 
@@ -162,7 +168,6 @@ class GeneralTab(SettingsTab):
         self.startup_layout.addWidget(self.show_splash_check_box)
         self.check_for_updates_check_box = QtWidgets.QCheckBox(self.startup_group_box)
         self.check_for_updates_check_box.setObjectName('check_for_updates_check_box')
-        self.check_for_updates_check_box.setVisible(False)
         self.startup_layout.addWidget(self.check_for_updates_check_box)
         self.right_layout.addWidget(self.startup_group_box)
         # Logo
@@ -172,7 +177,8 @@ class GeneralTab(SettingsTab):
         self.logo_layout.setObjectName('logo_layout')
         self.logo_file_label = QtWidgets.QLabel(self.logo_group_box)
         self.logo_file_label.setObjectName('logo_file_label')
-        self.logo_file_path_edit = PathEdit(self.logo_group_box, default_path=':/graphics/openlp-splash-screen.png')
+        self.logo_file_path_edit = PathEdit(self.logo_group_box,
+                                            default_path=Path(':/graphics/openlp-splash-screen.png'))
         self.logo_layout.addRow(self.logo_file_label, self.logo_file_path_edit)
         self.logo_color_label = QtWidgets.QLabel(self.logo_group_box)
         self.logo_color_label.setObjectName('logo_color_label')
@@ -266,7 +272,7 @@ class GeneralTab(SettingsTab):
         self.audio_group_box.setTitle(translate('OpenLP.GeneralTab', 'Background Audio'))
         self.start_paused_check_box.setText(translate('OpenLP.GeneralTab', 'Start background audio paused'))
         self.repeat_list_check_box.setText(translate('OpenLP.GeneralTab', 'Repeat track list'))
-        self.logo_file_path_edit.dialog_caption = dialog_caption = translate('OpenLP.AdvancedTab', 'Select Logo File')
+        self.logo_file_path_edit.dialog_caption = translate('OpenLP.AdvancedTab', 'Select Logo File')
         self.logo_file_path_edit.filters = '{text};;{names} (*)'.format(
             text=get_images_filter(), names=UiStrings().AllFiles)
 

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -22,7 +22,6 @@
 
 import chardet
 import logging
-import os
 import re
 import sqlite3
 import time
@@ -33,7 +32,10 @@ from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import class_mapper, mapper, relation
 from sqlalchemy.orm.exc import UnmappedClassError
 
-from openlp.core.common import AppLocation, translate, clean_filename
+from openlp.core.common import clean_filename
+from openlp.core.common.applocation import AppLocation
+from openlp.core.common.i18n import translate
+from openlp.core.common.path import Path
 from openlp.core.lib.db import BaseModel, init_db, Manager
 from openlp.core.lib.ui import critical_error_message_box
 from openlp.plugins.bibles.lib import BibleStrings, LanguageSelection, upgrade
@@ -80,20 +82,19 @@ def init_schema(url):
 
     meta_table = Table('metadata', metadata,
                        Column('key', types.Unicode(255), primary_key=True, index=True),
-                       Column('value', types.Unicode(255)),)
+                       Column('value', types.Unicode(255)))
 
     book_table = Table('book', metadata,
                        Column('id', types.Integer, primary_key=True),
                        Column('book_reference_id', types.Integer, index=True),
                        Column('testament_reference_id', types.Integer),
-                       Column('name', types.Unicode(50), index=True),)
+                       Column('name', types.Unicode(50), index=True))
     verse_table = Table('verse', metadata,
                         Column('id', types.Integer, primary_key=True, index=True),
-                        Column('book_id', types.Integer, ForeignKey(
-                            'book.id'), index=True),
+                        Column('book_id', types.Integer, ForeignKey('book.id'), index=True),
                         Column('chapter', types.Integer, index=True),
                         Column('verse', types.Integer, index=True),
-                        Column('text', types.UnicodeText, index=True),)
+                        Column('text', types.UnicodeText, index=True))
 
     try:
         class_mapper(BibleMeta)
@@ -128,10 +129,15 @@ class BibleDB(Manager):
         :param parent:
         :param kwargs:
             ``path``
-                The path to the bible database file.
+                The path to the bible database file. Type: openlp.core.common.path.Path
 
             ``name``
                 The name of the database. This is also used as the file name for SQLite databases.
+
+            ``file``
+                Type: openlp.core.common.path.Path
+
+        :rtype: None
         """
         log.info('BibleDB loaded')
         self._setup(parent, **kwargs)
@@ -144,20 +150,20 @@ class BibleDB(Manager):
         self.session = None
         if 'path' not in kwargs:
             raise KeyError('Missing keyword argument "path".')
+        self.path = kwargs['path']
         if 'name' not in kwargs and 'file' not in kwargs:
             raise KeyError('Missing keyword argument "name" or "file".')
         if 'name' in kwargs:
             self.name = kwargs['name']
             if not isinstance(self.name, str):
                 self.name = str(self.name, 'utf-8')
-            self.file = clean_filename(self.name) + '.sqlite'
+            # TODO: To path object
+            file_path = Path(clean_filename(self.name) + '.sqlite')
         if 'file' in kwargs:
-            self.file = kwargs['file']
-        Manager.__init__(self, 'bibles', init_schema, self.file, upgrade)
+            file_path = kwargs['file']
+        Manager.__init__(self, 'bibles', init_schema, file_path, upgrade)
         if self.session and 'file' in kwargs:
                 self.get_name()
-        if 'path' in kwargs:
-            self.path = kwargs['path']
         self._is_web_bible = None
 
     def get_name(self):
@@ -306,8 +312,7 @@ class BibleDB(Manager):
         book_escaped = book
         for character in RESERVED_CHARACTERS:
             book_escaped = book_escaped.replace(character, '\\' + character)
-        regex_book = re.compile('\\s*{book}\\s*'.format(book='\\s*'.join(book_escaped.split())),
-                                re.UNICODE | re.IGNORECASE)
+        regex_book = re.compile('\\s*{book}\\s*'.format(book='\\s*'.join(book_escaped.split())), re.IGNORECASE)
         if language_selection == LanguageSelection.Bible:
             db_book = self.get_book(book)
             if db_book:
@@ -470,9 +475,9 @@ class BiblesResourcesDB(QtCore.QObject, Manager):
         Return the cursor object. Instantiate one if it doesn't exist yet.
         """
         if BiblesResourcesDB.cursor is None:
-            file_path = os.path.join(AppLocation.get_directory(AppLocation.PluginsDir),
-                                     'bibles', 'resources', 'bibles_resources.sqlite')
-            conn = sqlite3.connect(file_path)
+            file_path = \
+                AppLocation.get_directory(AppLocation.PluginsDir) / 'bibles' / 'resources' / 'bibles_resources.sqlite'
+            conn = sqlite3.connect(str(file_path))
             BiblesResourcesDB.cursor = conn.cursor()
         return BiblesResourcesDB.cursor
 
@@ -546,7 +551,7 @@ class BiblesResourcesDB(QtCore.QObject, Manager):
         """
         log.debug('BiblesResourcesDB.get_book_like("{text}")'.format(text=string))
         if not isinstance(string, str):
-            name = str(string)
+            string = str(string)
         books = BiblesResourcesDB.run_sql(
             'SELECT id, testament_id, name, abbreviation, chapters FROM book_reference WHERE '
             'LOWER(name) LIKE ? OR LOWER(abbreviation) LIKE ?',
@@ -758,17 +763,13 @@ class AlternativeBookNamesDB(QtCore.QObject, Manager):
         If necessary loads up the database and creates the tables if the database doesn't exist.
         """
         if AlternativeBookNamesDB.cursor is None:
-            file_path = os.path.join(
-                AppLocation.get_directory(AppLocation.DataDir), 'bibles', 'alternative_book_names.sqlite')
-            if not os.path.exists(file_path):
+            file_path = AppLocation.get_directory(AppLocation.DataDir) / 'bibles' / 'alternative_book_names.sqlite'
+            AlternativeBookNamesDB.conn = sqlite3.connect(str(file_path))
+            if not file_path.exists():
                 # create new DB, create table alternative_book_names
-                AlternativeBookNamesDB.conn = sqlite3.connect(file_path)
                 AlternativeBookNamesDB.conn.execute(
                     'CREATE TABLE alternative_book_names(id INTEGER NOT NULL, '
                     'book_reference_id INTEGER, language_id INTEGER, name VARCHAR(50), PRIMARY KEY (id))')
-            else:
-                # use existing DB
-                AlternativeBookNamesDB.conn = sqlite3.connect(file_path)
             AlternativeBookNamesDB.cursor = AlternativeBookNamesDB.conn.cursor()
         return AlternativeBookNamesDB.cursor
 

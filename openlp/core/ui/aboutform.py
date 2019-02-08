@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -26,8 +26,8 @@ import webbrowser
 
 from PyQt5 import QtCore, QtWidgets
 
-from openlp.core.common.versionchecker import get_application_version
-from openlp.core.lib import translate
+from openlp.core.common.i18n import translate
+from openlp.core.version import get_version
 from .aboutdialog import UiAboutDialog
 
 
@@ -49,7 +49,7 @@ class AboutForm(QtWidgets.QDialog, UiAboutDialog):
         Set up the dialog. This method is mocked out in tests.
         """
         self.setup_ui(self)
-        application_version = get_application_version()
+        application_version = get_version()
         about_text = self.about_text_edit.toPlainText()
         about_text = about_text.replace('<version>', application_version['version'])
         if application_version['build']:

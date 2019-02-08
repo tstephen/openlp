@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -22,14 +22,16 @@
 """
 Provide the theme XML and handling functions for OpenLP v2 themes.
 """
-import os
-import logging
 import json
+import logging
 
 from lxml import etree, objectify
-from openlp.core.common import AppLocation, de_hump
 
-from openlp.core.lib import str_to_bool, ScreenList, get_text_file_string
+from openlp.core.common import de_hump
+from openlp.core.common.applocation import AppLocation
+from openlp.core.common.json import OpenLPJsonDecoder, OpenLPJsonEncoder
+from openlp.core.display.screens import ScreenList
+from openlp.core.lib import str_to_bool, get_text_file_string
 
 log = logging.getLogger(__name__)
 
@@ -158,12 +160,10 @@ class Theme(object):
         Initialise the theme object.
         """
         # basic theme object with defaults
-        json_dir = os.path.join(AppLocation.get_directory(AppLocation.AppDir), 'core', 'lib', 'json')
-        json_file = os.path.join(json_dir, 'theme.json')
-        jsn = get_text_file_string(json_file)
-        jsn = json.loads(jsn)
-        self.expand_json(jsn)
-        self.background_filename = ''
+        json_path = AppLocation.get_directory(AppLocation.AppDir) / 'core' / 'lib' / 'json' / 'theme.json'
+        jsn = get_text_file_string(json_path)
+        self.load_theme(jsn)
+        self.background_filename = None
 
     def expand_json(self, var, prev=None):
         """
@@ -175,8 +175,6 @@ class Theme(object):
         for key, value in var.items():
             if prev:
                 key = prev + "_" + key
-            else:
-                key = key
             if isinstance(value, dict):
                 self.expand_json(value, key)
             else:
@@ -186,13 +184,13 @@ class Theme(object):
         """
         Add the path name to the image name so the background can be rendered.
 
-        :param path: The path name to be added.
+        :param openlp.core.common.path.Path path: The path name to be added.
+        :rtype: None
         """
         if self.background_type == 'image' or self.background_type == 'video':
             if self.background_filename and path:
                 self.theme_name = self.theme_name.strip()
-                self.background_filename = self.background_filename.strip()
-                self.background_filename = os.path.join(path, self.theme_name, self.background_filename)
+                self.background_filename = path / self.theme_name / self.background_filename
 
     def set_default_header_footer(self):
         """
@@ -207,16 +205,21 @@ class Theme(object):
         self.font_footer_y = current_screen['size'].height() * 9 / 10
         self.font_footer_height = current_screen['size'].height() / 10
 
-    def load_theme(self, theme):
+    def load_theme(self, theme, theme_path=None):
         """
         Convert the JSON file and expand it.
 
         :param theme: the theme string
+        :param openlp.core.common.path.Path theme_path: The path to the theme
+        :rtype: None
         """
-        jsn = json.loads(theme)
+        if theme_path:
+            jsn = json.loads(theme, cls=OpenLPJsonDecoder, base_path=theme_path)
+        else:
+            jsn = json.loads(theme, cls=OpenLPJsonDecoder)
         self.expand_json(jsn)
 
-    def export_theme(self):
+    def export_theme(self, theme_path=None):
         """
         Loop through the fields and build a dictionary of them
 
@@ -224,7 +227,9 @@ class Theme(object):
         theme_data = {}
         for attr, value in self.__dict__.items():
             theme_data["{attr}".format(attr=attr)] = value
-        return json.dumps(theme_data)
+        if theme_path:
+            return json.dumps(theme_data, cls=OpenLPJsonEncoder, base_path=theme_path)
+        return json.dumps(theme_data, cls=OpenLPJsonEncoder)
 
     def parse(self, xml):
         """

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -25,7 +25,7 @@ This module contains tests for the OpenLP song importer.
 from unittest import TestCase
 from unittest.mock import patch, MagicMock
 
-from openlp.core.common import Registry
+from openlp.core.common.registry import Registry
 from openlp.plugins.songs.lib.importers.openlp import OpenLPSongImport
 
 
@@ -48,10 +48,10 @@ class TestOpenLPImport(TestCase):
             mocked_manager = MagicMock()
 
             # WHEN: An importer object is created
-            importer = OpenLPSongImport(mocked_manager, filenames=[])
+            importer = OpenLPSongImport(mocked_manager, file_paths=[])
 
             # THEN: The importer object should not be None
-            self.assertIsNotNone(importer, 'Import should not be none')
+            assert importer is not None, 'Import should not be none'
 
     def test_invalid_import_source(self):
         """
@@ -61,7 +61,7 @@ class TestOpenLPImport(TestCase):
         with patch('openlp.plugins.songs.lib.importers.openlp.SongImport'):
             mocked_manager = MagicMock()
             mocked_import_wizard = MagicMock()
-            importer = OpenLPSongImport(mocked_manager, filenames=[])
+            importer = OpenLPSongImport(mocked_manager, file_paths=[])
             importer.import_wizard = mocked_import_wizard
             importer.stop_import_flag = True
 
@@ -70,6 +70,6 @@ class TestOpenLPImport(TestCase):
                 importer.import_source = source
 
                 # THEN: do_import should return none and the progress bar maximum should not be set.
-                self.assertIsNone(importer.do_import(), 'do_import should return None when import_source is not a list')
-                self.assertEqual(mocked_import_wizard.progress_bar.setMaximum.called, False,
-                                 'setMaximum on import_wizard.progress_bar should not have been called')
+                assert importer.do_import() is None, 'do_import should return None when import_source is not a list'
+                assert mocked_import_wizard.progress_bar.setMaximum.called is False, \
+                    'setMaximum on import_wizard.progress_bar should not have been called'

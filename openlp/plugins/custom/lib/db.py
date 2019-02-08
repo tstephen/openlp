@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,12 +23,11 @@
 The :mod:`db` module provides the database and schema that is the backend for
 the Custom plugin
 """
-
 from sqlalchemy import Column, Table, types
 from sqlalchemy.orm import mapper
 
+from openlp.core.common.i18n import get_natural_key
 from openlp.core.lib.db import BaseModel, init_db
-from openlp.core.common.languagemanager import get_locale_key
 
 
 class CustomSlide(BaseModel):
@@ -37,10 +36,10 @@ class CustomSlide(BaseModel):
     """
     # By default sort the customs by its title considering language specific characters.
     def __lt__(self, other):
-        return get_locale_key(self.title) < get_locale_key(other.title)
+        return get_natural_key(self.title) < get_natural_key(other.title)
 
     def __eq__(self, other):
-        return get_locale_key(self.title) == get_locale_key(other.title)
+        return get_natural_key(self.title) == get_natural_key(other.title)
 
     def __hash__(self):
         """

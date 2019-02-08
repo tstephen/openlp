@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -24,10 +24,11 @@ The actual start time form.
 """
 from PyQt5 import QtCore, QtWidgets
 
-from .starttimedialog import Ui_StartTimeDialog
-
-from openlp.core.common import Registry, RegistryProperties, UiStrings, translate
+from openlp.core.common.i18n import UiStrings, translate
+from openlp.core.common.mixins import RegistryProperties
+from openlp.core.common.registry import Registry
 from openlp.core.lib.ui import critical_error_message_box
+from openlp.core.ui.starttimedialog import Ui_StartTimeDialog
 
 
 class StartTimeForm(QtWidgets.QDialog, Ui_StartTimeDialog, RegistryProperties):

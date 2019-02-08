@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -26,12 +26,15 @@ import logging
 
 from PyQt5 import QtCore, QtWidgets
 
-from openlp.core.common import Registry, RegistryProperties
+from openlp.core.api.tab import ApiTab
+from openlp.core.common.mixins import RegistryProperties
+from openlp.core.common.registry import Registry
 from openlp.core.lib import build_icon
-from openlp.core.ui import AdvancedTab, GeneralTab, ThemesTab
-from openlp.core.ui.media import PlayerTab
-from .settingsdialog import Ui_SettingsDialog
-from openlp.core.ui.projector.tab import ProjectorTab
+from openlp.core.projectors.tab import ProjectorTab
+from openlp.core.ui.advancedtab import AdvancedTab
+from openlp.core.ui.generaltab import GeneralTab
+from openlp.core.ui.themestab import ThemesTab
+from openlp.core.ui.settingsdialog import Ui_SettingsDialog
 
 log = logging.getLogger(__name__)
 
@@ -55,13 +58,13 @@ class SettingsForm(QtWidgets.QDialog, Ui_SettingsDialog, RegistryProperties):
         self.themes_tab = None
         self.projector_tab = None
         self.advanced_tab = None
-        self.player_tab = None
+        self.api_tab = None
 
     def exec(self):
         """
         Execute the form
         """
-        # load all the
+        # load all the widgets
         self.setting_list_widget.blockSignals(True)
         self.setting_list_widget.clear()
         while self.stacked_layout.count():
@@ -70,8 +73,8 @@ class SettingsForm(QtWidgets.QDialog, Ui_SettingsDialog, RegistryProperties):
         self.insert_tab(self.general_tab)
         self.insert_tab(self.themes_tab)
         self.insert_tab(self.advanced_tab)
-        self.insert_tab(self.player_tab)
         self.insert_tab(self.projector_tab)
+        self.insert_tab(self.api_tab)
         for plugin in self.plugin_manager.plugins:
             if plugin.settings_tab:
                 self.insert_tab(plugin.settings_tab, plugin.is_active())
@@ -93,6 +96,7 @@ class SettingsForm(QtWidgets.QDialog, Ui_SettingsDialog, RegistryProperties):
             list_item = QtWidgets.QListWidgetItem(build_icon(tab_widget.icon_path), tab_widget.tab_title_visible)
             list_item.setData(QtCore.Qt.UserRole, tab_widget.tab_title)
             self.setting_list_widget.addItem(list_item)
+            tab_widget.load()
 
     def accept(self):
         """
@@ -152,12 +156,12 @@ class SettingsForm(QtWidgets.QDialog, Ui_SettingsDialog, RegistryProperties):
         self.projector_tab = ProjectorTab(self)
         # Advanced tab
         self.advanced_tab = AdvancedTab(self)
-        # Advanced tab
-        self.player_tab = PlayerTab(self)
+        # Api tab
+        self.api_tab = ApiTab(self)
         self.general_tab.post_set_up()
         self.themes_tab.post_set_up()
         self.advanced_tab.post_set_up()
-        self.player_tab.post_set_up()
+        self.api_tab.post_set_up()
         for plugin in self.plugin_manager.plugins:
             if plugin.settings_tab:
                 plugin.settings_tab.post_set_up()

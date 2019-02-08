@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -24,9 +24,9 @@ The UI widgets for the service item edit dialog
 """
 from PyQt5 import QtWidgets
 
-from openlp.core.common import translate
-from openlp.core.lib import build_icon
+from openlp.core.common.i18n import translate
 from openlp.core.lib.ui import create_button_box, create_button
+from openlp.core.ui.icons import UiIcons
 
 
 class Ui_ServiceItemEditDialog(object):
@@ -38,7 +38,7 @@ class Ui_ServiceItemEditDialog(object):
         Set up the UI
         """
         serviceItemEditDialog.setObjectName('serviceItemEditDialog')
-        serviceItemEditDialog.setWindowIcon(build_icon(':/icon/openlp-logo.svg'))
+        serviceItemEditDialog.setWindowIcon(UiIcons().main_icon)
         self.dialog_layout = QtWidgets.QGridLayout(serviceItemEditDialog)
         self.dialog_layout.setContentsMargins(8, 8, 8, 8)
         self.dialog_layout.setSpacing(8)

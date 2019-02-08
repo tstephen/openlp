@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -25,25 +25,23 @@ This module is for controlling powerpoint. PPT API documentation:
 2010: https://msdn.microsoft.com/en-us/library/office/ff743835%28v=office.14%29.aspx
 2013: https://msdn.microsoft.com/en-us/library/office/ff743835.aspx
 """
-import os
 import logging
-import time
 
-from openlp.core.common import is_win, Settings
+from openlp.core.common import is_win, trace_error_handler
+from openlp.core.common.i18n import UiStrings
+from openlp.core.common.registry import Registry
+from openlp.core.common.settings import Settings
+from openlp.core.display.screens import ScreenList
+from openlp.core.lib.ui import critical_error_message_box, translate
+from openlp.plugins.presentations.lib.presentationcontroller import PresentationController, PresentationDocument
 
 if is_win():
     from win32com.client import Dispatch
     import win32con
-    import winreg
-    import win32ui
     import win32gui
+    import win32ui
+    import winreg
     import pywintypes
-
-
-from openlp.core.lib import ScreenList
-from openlp.core.lib.ui import UiStrings, critical_error_message_box, translate
-from openlp.core.common import trace_error_handler, Registry
-from openlp.plugins.presentations.lib.presentationcontroller import PresentationController, PresentationDocument
 
 log = logging.getLogger(__name__)
 
@@ -120,15 +118,16 @@ class PowerpointDocument(PresentationDocument):
     Class which holds information and controls a single presentation.
     """
 
-    def __init__(self, controller, presentation):
+    def __init__(self, controller, document_path):
         """
         Constructor, store information about the file and initialise.
 
         :param controller:
-        :param presentation:
+        :param openlp.core.common.path.Path document_path: Path to the document to load
+        :rtype: None
         """
         log.debug('Init Presentation Powerpoint')
-        super(PowerpointDocument, self).__init__(controller, presentation)
+        super().__init__(controller, document_path)
         self.presentation = None
         self.index_map = {}
         self.slide_count = 0
@@ -145,7 +144,7 @@ class PowerpointDocument(PresentationDocument):
         try:
             if not self.controller.process:
                 self.controller.start_process()
-            self.controller.process.Presentations.Open(os.path.normpath(self.file_path), False, False, False)
+            self.controller.process.Presentations.Open(str(self.file_path), False, False, False)
             self.presentation = self.controller.process.Presentations(self.controller.process.Presentations.Count)
             self.create_thumbnails()
             self.create_titles_and_notes()
@@ -177,7 +176,7 @@ class PowerpointDocument(PresentationDocument):
             if not self.presentation.Slides(num + 1).SlideShowTransition.Hidden:
                 self.index_map[key] = num + 1
                 self.presentation.Slides(num + 1).Export(
-                    os.path.join(self.get_thumbnail_folder(), 'slide{key:d}.png'.format(key=key)), 'png', 320, 240)
+                    str(self.get_thumbnail_folder() / 'slide{key:d}.png'.format(key=key)), 'png', 320, 240)
                 key += 1
         self.slide_count = key - 1
 
@@ -363,9 +362,8 @@ class PowerpointDocument(PresentationDocument):
                                                                           width=size.width(),
                                                                           horizontal=(right - left)))
         log.debug('window title: {title}'.format(title=window_title))
-        filename_root, filename_ext = os.path.splitext(os.path.basename(self.file_path))
         if size.y() == top and size.height() == (bottom - top) and size.x() == left and \
-                size.width() == (right - left) and filename_root in window_title:
+                size.width() == (right - left) and self.file_path.stem in window_title:
             log.debug('Found a match and will save the handle')
             self.presentation_hwnd = hwnd
             # Stop powerpoint from flashing in the taskbar

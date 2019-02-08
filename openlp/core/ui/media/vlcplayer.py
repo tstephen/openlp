@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -22,17 +22,19 @@
 """
 The :mod:`~openlp.core.ui.media.vlcplayer` module contains our VLC component wrapper
 """
-from datetime import datetime
-from distutils.version import LooseVersion
+import ctypes
 import logging
 import os
-import threading
 import sys
-import ctypes
+import threading
+from datetime import datetime
+from distutils.version import LooseVersion
+
 from PyQt5 import QtWidgets
 
-from openlp.core.common import Settings, is_win, is_macosx, is_linux
-from openlp.core.lib import translate
+from openlp.core.common import is_win, is_macosx, is_linux
+from openlp.core.common.i18n import translate
+from openlp.core.common.settings import Settings
 from openlp.core.ui.media import MediaState, MediaType
 from openlp.core.ui.media.mediaplayer import MediaPlayer
 
@@ -64,14 +66,22 @@ def get_vlc():
     """
     if 'openlp.core.ui.media.vendor.vlc' in sys.modules:
         # If VLC has already been imported, no need to do all the stuff below again
-        return sys.modules['openlp.core.ui.media.vendor.vlc']
+        is_vlc_available = False
+        try:
+            is_vlc_available = bool(sys.modules['openlp.core.ui.media.vendor.vlc'].get_default_instance())
+        except Exception:
+            pass
+        if is_vlc_available:
+            return sys.modules['openlp.core.ui.media.vendor.vlc']
+        else:
+            return None
     is_vlc_available = False
     try:
         if is_macosx():
             # Newer versions of VLC on OS X need this. See https://forum.videolan.org/viewtopic.php?t=124521
             os.environ['VLC_PLUGIN_PATH'] = '/Applications/VLC.app/Contents/MacOS/plugins'
         # On Windows when frozen in PyInstaller, we need to blank SetDllDirectoryW to allow loading of the VLC dll.
-        # This is due to limitations (by desgin) in PyInstaller. SetDllDirectoryW original value is restored once
+        # This is due to limitations (by design) in PyInstaller. SetDllDirectoryW original value is restored once
         # VLC has been imported.
         if is_win():
             buffer_size = 1024
@@ -87,6 +97,7 @@ def get_vlc():
     except (ImportError, NameError, NotImplementedError):
         pass
     except OSError as e:
+        # this will get raised the first time
         if is_win():
             if not isinstance(e, WindowsError) and e.winerror != 126:
                 raise
@@ -95,7 +106,7 @@ def get_vlc():
     if is_vlc_available:
         try:
             VERSION = vlc.libvlc_get_version().decode('UTF-8')
-        except:
+        except Exception:
             VERSION = '0.0.0'
         # LooseVersion does not work when a string contains letter and digits (e. g. 2.0.5 Twoflower).
         # http://bugs.python.org/issue14894
@@ -119,7 +130,7 @@ if is_linux() and 'nose' not in sys.argv[0] and get_vlc():
             # If libx11.so.6 was not found, fallback to more generic libx11.so
             x11 = ctypes.cdll.LoadLibrary('libX11.so')
         x11.XInitThreads()
-    except:
+    except Exception:
         log.exception('Failed to run XInitThreads(), VLC might not work properly!')
 
 
@@ -185,19 +196,19 @@ class VlcPlayer(MediaPlayer):
         """
         return get_vlc() is not None
 
-    def load(self, display):
+    def load(self, display, file):
         """
         Load a video into VLC
 
         :param display: The display where the media is
+        :param file: file to be played
         :return:
         """
         vlc = get_vlc()
         log.debug('load vid in Vlc Controller')
         controller = display.controller
         volume = controller.media_info.volume
-        file_path = str(controller.media_info.file_info.absoluteFilePath())
-        path = os.path.normcase(file_path)
+        path = os.path.normcase(file)
         # create the media
         if controller.media_info.media_type == MediaType.CD:
             if is_win():
@@ -279,7 +290,8 @@ class VlcPlayer(MediaPlayer):
                 start_time = controller.media_info.start_time
         log.debug('mediatype: ' + str(controller.media_info.media_type))
         # Set tracks for the optical device
-        if controller.media_info.media_type == MediaType.DVD:
+        if controller.media_info.media_type == MediaType.DVD and \
+                self.get_live_state() != MediaState.Paused and self.get_preview_state() != MediaState.Paused:
             log.debug('vlc play, playing started')
             if controller.media_info.title_track > 0:
                 log.debug('vlc play, title_track set: ' + str(controller.media_info.title_track))
@@ -349,7 +361,7 @@ class VlcPlayer(MediaPlayer):
         """
         if display.controller.media_info.media_type == MediaType.CD \
                 or display.controller.media_info.media_type == MediaType.DVD:
-            seek_value += int(display.controller.media_info.start_time * 1000)
+            seek_value += int(display.controller.media_info.start_time)
         if display.vlc_media_player.is_seekable():
             display.vlc_media_player.set_time(seek_value)
 
@@ -385,15 +397,15 @@ class VlcPlayer(MediaPlayer):
             self.stop(display)
         controller = display.controller
         if controller.media_info.end_time > 0:
-            if display.vlc_media_player.get_time() > controller.media_info.end_time * 1000:
+            if display.vlc_media_player.get_time() > controller.media_info.end_time:
                 self.stop(display)
                 self.set_visible(display, False)
         if not controller.seek_slider.isSliderDown():
             controller.seek_slider.blockSignals(True)
             if display.controller.media_info.media_type == MediaType.CD \
                     or display.controller.media_info.media_type == MediaType.DVD:
-                controller.seek_slider.setSliderPosition(display.vlc_media_player.get_time() -
-                                                         int(display.controller.media_info.start_time * 1000))
+                controller.seek_slider.setSliderPosition(
+                    display.vlc_media_player.get_time() - int(display.controller.media_info.start_time))
             else:
                 controller.seek_slider.setSliderPosition(display.vlc_media_player.get_time())
             controller.seek_slider.blockSignals(False)

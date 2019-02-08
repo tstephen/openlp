@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -22,8 +22,9 @@
 
 from PyQt5 import QtCore, QtWidgets
 
-from openlp.core.common import Settings, translate
-from openlp.core.lib import SettingsTab
+from openlp.core.common.i18n import translate
+from openlp.core.common.settings import Settings
+from openlp.core.lib.settingstab import SettingsTab
 from openlp.plugins.songs.lib.db import AuthorType
 
 
@@ -50,6 +51,9 @@ class SongsTab(SettingsTab):
         self.add_from_service_check_box = QtWidgets.QCheckBox(self.mode_group_box)
         self.add_from_service_check_box.setObjectName('add_from_service_check_box')
         self.mode_layout.addWidget(self.add_from_service_check_box)
+        self.songbook_slide_check_box = QtWidgets.QCheckBox(self.mode_group_box)
+        self.songbook_slide_check_box.setObjectName('songbook_slide_check_box')
+        self.mode_layout.addWidget(self.songbook_slide_check_box)
         self.left_layout.addWidget(self.mode_group_box)
         # Chords group box
         self.chords_group_box = QtWidgets.QGroupBox(self.left_column)
@@ -103,6 +107,7 @@ class SongsTab(SettingsTab):
         self.tool_bar_active_check_box.stateChanged.connect(self.on_tool_bar_active_check_box_changed)
         self.update_on_edit_check_box.stateChanged.connect(self.on_update_on_edit_check_box_changed)
         self.add_from_service_check_box.stateChanged.connect(self.on_add_from_service_check_box_changed)
+        self.songbook_slide_check_box.stateChanged.connect(self.on_songbook_slide_check_box_changed)
         self.mainview_chords_check_box.stateChanged.connect(self.on_mainview_chords_check_box_changed)
         self.disable_chords_import_check_box.stateChanged.connect(self.on_disable_chords_import_check_box_changed)
         self.english_notation_radio_button.clicked.connect(self.on_english_notation_button_clicked)
@@ -117,6 +122,8 @@ class SongsTab(SettingsTab):
         self.update_on_edit_check_box.setText(translate('SongsPlugin.SongsTab', 'Update service from song edit'))
         self.add_from_service_check_box.setText(translate('SongsPlugin.SongsTab',
                                                           'Import missing songs from Service files'))
+        self.songbook_slide_check_box.setText(translate('SongsPlugin.SongsTab',
+                                                        'Add Songbooks as first side'))
         self.chords_info_label.setText(translate('SongsPlugin.SongsTab', 'If enabled all text between "[" and "]" will '
                                                                          'be regarded as chords.'))
         self.chords_group_box.setTitle(translate('SongsPlugin.SongsTab', 'Chords'))
@@ -188,6 +195,9 @@ class SongsTab(SettingsTab):
     def on_add_from_service_check_box_changed(self, check_state):
         self.update_load = (check_state == QtCore.Qt.Checked)
 
+    def on_songbook_slide_check_box_changed(self, check_state):
+        self.songbook_slide = (check_state == QtCore.Qt.Checked)
+
     def on_mainview_chords_check_box_changed(self, check_state):
         self.mainview_chords = (check_state == QtCore.Qt.Checked)
 
@@ -212,6 +222,7 @@ class SongsTab(SettingsTab):
         self.tool_bar = settings.value('display songbar')
         self.update_edit = settings.value('update service on edit')
         self.update_load = settings.value('add song from service')
+        self.songbook_slide = settings.value('add songbook slide')
         self.enable_chords = settings.value('enable chords')
         self.chord_notation = settings.value('chord notation')
         self.mainview_chords = settings.value('mainview chords')
@@ -244,6 +255,7 @@ class SongsTab(SettingsTab):
         # Only save footer template if it has been changed. This allows future updates
         if self.footer_edit_box.toPlainText() != Settings().get_default_value('songs/footer template'):
             settings.setValue('footer template', self.footer_edit_box.toPlainText())
+        settings.setValue('add songbook slide', self.songbook_slide)
         settings.endGroup()
         if self.tab_visited:
             self.settings_form.register_post_process('songs_config_updated')

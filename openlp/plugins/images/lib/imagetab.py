@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -22,18 +22,16 @@
 
 from PyQt5 import QtWidgets
 
-from openlp.core.common import Settings, UiStrings, translate
-from openlp.core.lib import SettingsTab
-from openlp.core.ui.lib.colorbutton import ColorButton
+from openlp.core.common.i18n import UiStrings, translate
+from openlp.core.common.settings import Settings
+from openlp.core.lib.settingstab import SettingsTab
+from openlp.core.widgets.buttons import ColorButton
 
 
 class ImageTab(SettingsTab):
     """
     ImageTab is the images settings tab in the settings dialog.
     """
-    def __init__(self, parent, name, visible_title, icon_path):
-        super(ImageTab, self).__init__(parent, name, visible_title, icon_path)
-
     def setupUi(self):
         self.setObjectName('ImagesTab')
         super(ImageTab, self).setupUi()

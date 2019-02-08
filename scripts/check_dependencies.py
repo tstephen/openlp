@@ -5,7 +5,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -26,18 +26,12 @@ This script is used to check dependencies of OpenLP. It checks availability
 of required python modules and their version. To verify availability of Python
 modules, simply run this script::
 
-    @:~$ ./check_dependencies.py
+    $ ./check_dependencies.py
 
 """
 import os
 import sys
 from distutils.version import LooseVersion
-
-# If we try to import uno before nose this will create a warning. Just try to import nose first to suppress the warning.
-try:
-    import nose
-except ImportError:
-    nose = None
 
 IS_WIN = sys.platform.startswith('win')
 IS_LIN = sys.platform.startswith('lin')
@@ -45,12 +39,12 @@ IS_MAC = sys.platform.startswith('dar')
 
 
 VERS = {
-    'Python': '3.0',
-    'PyQt5': '5.0',
-    'Qt5': '5.0',
+    'Python': '3.6',
+    'PyQt5': '5.5',
+    'Qt5': '5.5',
+    'pymediainfo': '2.2',
     'sqlalchemy': '0.5',
-    # pyenchant 1.6 required on Windows
-    'enchant': '1.6' if IS_WIN else '1.3'
+    'enchant': '1.6'
 }
 
 # pywin32
@@ -58,8 +52,6 @@ WIN32_MODULES = [
     'win32com',
     'win32ui',
     'pywintypes',
-    'pyodbc',
-    'icu',
 ]
 
 LINUX_MODULES = [
@@ -84,26 +76,35 @@ MODULES = [
     'PyQt5.QtTest',
     'PyQt5.QtWebKit',
     'PyQt5.QtMultimedia',
+    'pymediainfo',
+    'appdirs',
     'sqlalchemy',
     'alembic',
-    'sqlite3',
     'lxml',
     'chardet',
-    'enchant',
     'bs4',
     'mako',
-    'uno',
-    'six'
+    'websockets',
+    'waitress',
+    'webob',
+    'requests',
+    'qtawesome',
+    'pymediainfo'
 ]
 
 
 OPTIONAL_MODULES = [
-    ('mysql.connector', '(MySQL support)', True),
-    ('psycopg2', '(PostgreSQL support)', True),
-    ('nose', '(testing framework)', True),
-    ('mock', '(testing module)', sys.version_info[1] < 3),
-    ('jenkins', '(access jenkins api - package name: jenkins-webapi)', True),
-    ('pysword', '(import SWORD bibles)', True),
+    ('mysql.connector', '(MySQL support)'),
+    ('pyodbc', '(ODBC support)'),
+    ('psycopg2', '(PostgreSQL support)'),
+    ('enchant', '(spell checker)'),
+    ('pysword', '(import SWORD bibles)'),
+    ('uno', '(LibreOffice/OpenOffice support)'),
+    # development/testing modules
+    ('jenkins', '(access jenkins api)'),
+    ('launchpadlib', '(launchpad script support)'),
+    ('nose2', '(testing framework)'),
+    ('pylint', '(linter)')
 ]
 
 w = sys.stdout.write
@@ -232,8 +233,7 @@ def main():
         check_module(m)
     print('Checking for optional modules...')
     for m in OPTIONAL_MODULES:
-        if m[2]:
-            check_module(m[0], text=m[1])
+        check_module(m[0], text=m[1])
     if IS_WIN:
         print('Checking for Windows specific modules...')
         for m in WIN32_MODULES:

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,9 +23,9 @@ import datetime
 
 from PyQt5 import QtGui, QtWidgets
 
-from openlp.core.common import UiStrings, translate
-from openlp.core.lib import build_icon
+from openlp.core.common.i18n import UiStrings, translate
 from openlp.core.lib.ui import create_button, create_button_box
+from openlp.core.ui.icons import UiIcons
 
 
 class UiAboutDialog(object):
@@ -40,7 +40,7 @@ class UiAboutDialog(object):
         :param about_dialog: The QDialog object to set up.
         """
         about_dialog.setObjectName('about_dialog')
-        about_dialog.setWindowIcon(build_icon(':/icon/openlp-logo.svg'))
+        about_dialog.setWindowIcon(UiIcons().main_icon)
         self.about_dialog_layout = QtWidgets.QVBoxLayout(about_dialog)
         self.about_dialog_layout.setContentsMargins(8, 8, 8, 8)
         self.about_dialog_layout.setObjectName('about_dialog_layout')
@@ -78,7 +78,7 @@ class UiAboutDialog(object):
         self.license_tab_layout.addWidget(self.license_text_edit)
         self.about_notebook.addTab(self.license_tab, '')
         self.about_dialog_layout.addWidget(self.about_notebook)
-        self.volunteer_button = create_button(None, 'volunteer_button', icon=':/system/system_volunteer.png')
+        self.volunteer_button = create_button(None, 'volunteer_button', icon=UiIcons().volunteer)
         self.button_box = create_button_box(about_dialog, 'button_box', ['close'], [self.volunteer_button])
         self.about_dialog_layout.addWidget(self.button_box)
         self.retranslate_ui(about_dialog)
@@ -98,7 +98,7 @@ class UiAboutDialog(object):
                       'OpenLP is free church presentation software, or lyrics '
                       'projection software, used to display slides of songs, Bible '
                       'verses, videos, images, and even presentations (if '
-                      'Impress, PowerPoint or PowerPoint Viewer is installed) '
+                      'Impress or PowerPoint is installed) '
                       'for church worship using a computer and a data projector.\n'
                       '\n'
                       'Find out more about OpenLP: http://openlp.org/\n'
@@ -112,8 +112,8 @@ class UiAboutDialog(object):
                       'Andreas "googol" Preikschat', 'Ken "alisonken1" Roberts', 'Raoul "superfly" Snyman',
                       'Jonathan "springermac" Springer', 'Philip "Phill" Ridout']
         contributors = ['Stuart "sibecker" Becker', 'Gerald "jerryb" Britton', 'Jonathan "gushie" Corwin',
-                        'Samuel "MrGamgee" Findlay', 'Michael "cocooncrash" Gorven', 'Scott "sguerrieri" Guerrieri',
-                        'Simon Hanna', 'Chris Hill',
+                        'Samuel "MrGamgee" Findlay', 'Bastian Germann', 'Michael "cocooncrash" Gorven',
+                        'Scott "sguerrieri" Guerrieri', 'Simon Hanna', 'Chris Hill',
                         'Matthias "matthub" Hub', 'Meinert "m2j" Jordan', 'Ian Knightly'
                         'Armin "orangeshirt" K\xf6hler',
                         'Rafael "rafaellerm" Lerm', 'Gabriel loo', 'Erik "luen" Lundin', 'Edwin "edwinlunando" Lunando',

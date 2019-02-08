@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -20,14 +20,22 @@
 # Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
 ###############################################################################
 
-from PyQt5 import QtGui
-
 import logging
 
-from openlp.core.common import Settings, translate
-from openlp.core.lib import Plugin, StringContent, ImageSource, build_icon
+from PyQt5 import QtGui
+
+from openlp.core.state import State
+from openlp.core.api.http import register_endpoint
+from openlp.core.common.i18n import translate
+from openlp.core.ui.icons import UiIcons
+from openlp.core.common.settings import Settings
+from openlp.core.lib import ImageSource, build_icon
+from openlp.core.lib.plugin import Plugin, StringContent
 from openlp.core.lib.db import Manager
-from openlp.plugins.images.lib import ImageMediaItem, ImageTab
+from openlp.plugins.images.endpoint import api_images_endpoint, images_endpoint
+from openlp.plugins.images.lib import upgrade
+from openlp.plugins.images.lib.mediaitem import ImageMediaItem
+from openlp.plugins.images.lib.imagetab import ImageTab
 from openlp.plugins.images.lib.db import init_schema
 
 log = logging.getLogger(__name__)
@@ -39,6 +47,7 @@ __default_settings__ = {
     'images/db hostname': '',
     'images/db database': '',
     'images/background color': '#000000',
+    'images/last directory': None
 }
 
 
@@ -47,10 +56,14 @@ class ImagePlugin(Plugin):
 
     def __init__(self):
         super(ImagePlugin, self).__init__('images', __default_settings__, ImageMediaItem, ImageTab)
-        self.manager = Manager('images', init_schema)
+        self.manager = Manager('images', init_schema, upgrade_mod=upgrade)
         self.weight = -7
-        self.icon_path = ':/plugins/plugin_images.png'
+        self.icon_path = UiIcons().picture
         self.icon = build_icon(self.icon_path)
+        register_endpoint(images_endpoint)
+        register_endpoint(api_images_endpoint)
+        State().add_service('image', self.weight, is_plugin=True)
+        State().update_pre_conditions('image', self.check_pre_conditions())
 
     @staticmethod
     def about():
@@ -66,14 +79,6 @@ class ImagePlugin(Plugin):
                                'selected image as a background instead of the background '
                                'provided by the theme.')
         return about_text
-
-    def upgrade_settings(self, settings):
-        """
-        Upgrade the settings of this plugin.
-
-        :param settings: The Settings object containing the old settings.
-        """
-        pass
 
     def set_plugin_text_strings(self):
         """

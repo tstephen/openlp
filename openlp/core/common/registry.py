@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -25,7 +25,7 @@ Provide Registry Services
 import logging
 import sys
 
-from openlp.core.common import trace_error_handler
+from openlp.core.common import de_hump, trace_error_handler
 
 log = logging.getLogger(__name__)
 
@@ -57,9 +57,18 @@ class Registry(object):
         registry.functions_list = {}
         registry.working_flags = {}
         # Allow the tests to remove Registry entries but not the live system
-        registry.running_under_test = 'nose' in sys.argv[0]
+        registry.running_under_test = 'nose' in sys.argv[0] or 'pytest' in sys.argv[0]
         registry.initialising = True
         return registry
+
+    @classmethod
+    def destroy(cls):
+        """
+        Destroy the Registry.
+        """
+        if cls.__instance__.running_under_test:
+            del cls.__instance__
+            cls.__instance__ = None
 
     def get(self, key):
         """
@@ -119,7 +128,7 @@ class Registry(object):
         :param event: The function description..
         :param function: The function to be called when the event happens.
         """
-        if event in self.functions_list:
+        if event in self.functions_list and function in self.functions_list[event]:
             self.functions_list[event].remove(function)
 
     def execute(self, event, *args, **kwargs):
@@ -142,8 +151,9 @@ class Registry(object):
                     trace_error_handler(log)
                     log.exception('Exception for function {function}'.format(function=function))
         else:
-            trace_error_handler(log)
-            log.error("Event {event} called but not registered".format(event=event))
+            if log.getEffectiveLevel() == logging.DEBUG:
+                trace_error_handler(log)
+                log.exception('Event {event} called but not registered'.format(event=event))
         return results
 
     def get_flag(self, key):
@@ -176,3 +186,39 @@ class Registry(object):
         """
         if key in self.working_flags:
             del self.working_flags[key]
+
+
+class RegistryBase(object):
+    """
+    This adds registry components to classes to use at run time.
+    """
+    def __init__(self, *args, **kwargs):
+        """
+        Register the class and bootstrap hooks.
+        """
+        try:
+            super().__init__(*args, **kwargs)
+        except TypeError:
+            super().__init__()
+        Registry().register(de_hump(self.__class__.__name__), self)
+        Registry().register_function('bootstrap_initialise', self.bootstrap_initialise)
+        Registry().register_function('bootstrap_post_set_up', self.bootstrap_post_set_up)
+        Registry().register_function('bootstrap_completion', self.bootstrap_completion)
+
+    def bootstrap_initialise(self):
+        """
+        Dummy method to be overridden
+        """
+        pass
+
+    def bootstrap_post_set_up(self):
+        """
+        Dummy method to be overridden
+        """
+        pass
+
+    def bootstrap_completion(self):
+        """
+        Dummy method to be overridden
+        """
+        pass

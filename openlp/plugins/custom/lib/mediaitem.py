@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -25,11 +25,17 @@ import logging
 from PyQt5 import QtCore, QtWidgets
 from sqlalchemy.sql import or_, func, and_
 
-from openlp.core.common import Registry, Settings, UiStrings, translate
-from openlp.core.lib import MediaManagerItem, ItemCapabilities, ServiceItemContext, PluginStatus, \
-    check_item_selected
+from openlp.core.common.i18n import UiStrings, translate
+from openlp.core.common.registry import Registry
+from openlp.core.common.settings import Settings
+from openlp.core.lib import ServiceItemContext, check_item_selected
+from openlp.core.lib.mediamanageritem import MediaManagerItem
+from openlp.core.lib.serviceitem import ItemCapabilities
+from openlp.core.lib.plugin import PluginStatus
+from openlp.core.lib.ui import create_widget_action
+from openlp.core.ui.icons import UiIcons
 from openlp.plugins.custom.forms.editcustomform import EditCustomForm
-from openlp.plugins.custom.lib import CustomXMLParser, CustomXMLBuilder
+from openlp.plugins.custom.lib.customxmlhandler import CustomXMLBuilder, CustomXMLParser
 from openlp.plugins.custom.lib.db import CustomSlide
 
 log = logging.getLogger(__name__)
@@ -82,6 +88,12 @@ class CustomMediaItem(MediaManagerItem):
         Registry().register_function('custom_preview', self.on_preview_click)
         Registry().register_function('custom_create_from_service', self.create_from_service_item)
 
+    def add_custom_context_actions(self):
+        create_widget_action(self.list_view, separator=True)
+        create_widget_action(
+            self.list_view, text=translate('OpenLP.MediaManagerItem', '&Clone'), icon=UiIcons().clone,
+            triggers=self.on_clone_click)
+
     def config_update(self):
         """
         Config has been updated so reload values
@@ -102,9 +114,9 @@ class CustomMediaItem(MediaManagerItem):
         Initialise the UI so it can provide Searches
         """
         self.search_text_edit.set_search_types(
-            [(CustomSearch.Titles, ':/songs/song_search_title.png', translate('SongsPlugin.MediaItem', 'Titles'),
+            [(CustomSearch.Titles, UiIcons().search, translate('SongsPlugin.MediaItem', 'Titles'),
               translate('SongsPlugin.MediaItem', 'Search Titles...')),
-             (CustomSearch.Themes, ':/slides/slide_theme.png', UiStrings().Themes, UiStrings().SearchThemes)])
+             (CustomSearch.Themes, UiIcons().theme, UiStrings().Themes, UiStrings().SearchThemes)])
         self.load_list(self.plugin.db_manager.get_all_objects(CustomSlide, order_by_ref=CustomSlide.title))
         self.config_update()
 
@@ -240,6 +252,23 @@ class CustomMediaItem(MediaManagerItem):
         else:
             service_item.raw_footer.append('')
         return True
+
+    def on_clone_click(self):
+        """
+        Clone the selected Custom item
+        """
+        item = self.list_view.currentItem()
+        item_id = item.data(QtCore.Qt.UserRole)
+        old_custom_slide = self.plugin.db_manager.get_object(CustomSlide, item_id)
+        new_custom_slide = CustomSlide()
+        new_custom_slide.title = '{title} <{text}>'.format(title=old_custom_slide.title,
+                                                           text=translate('CustomPlugin.MediaItem',
+                                                                          'copy', 'For item cloning'))
+        new_custom_slide.text = old_custom_slide.text
+        new_custom_slide.credits = old_custom_slide.credits
+        new_custom_slide.theme_name = old_custom_slide.theme_name
+        self.plugin.db_manager.save_object(new_custom_slide)
+        self.on_search_text_button_clicked()
 
     def on_search_text_button_clicked(self):
         """

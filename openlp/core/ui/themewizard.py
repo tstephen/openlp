@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -24,11 +24,13 @@ The Create/Edit theme wizard
 """
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from openlp.core.common import UiStrings, translate, is_macosx
-from openlp.core.lib import build_icon
+from openlp.core.common import is_macosx
+from openlp.core.common.i18n import UiStrings, translate
 from openlp.core.lib.theme import HorizontalType, BackgroundType, BackgroundGradientType
 from openlp.core.lib.ui import add_welcome_page, create_valign_selection_widgets
-from openlp.core.ui.lib import ColorButton, PathEdit
+from openlp.core.ui.icons import UiIcons
+from openlp.core.widgets.buttons import ColorButton
+from openlp.core.widgets.edits import PathEdit
 
 
 class Ui_ThemeWizard(object):
@@ -40,7 +42,7 @@ class Ui_ThemeWizard(object):
         Set up the UI
         """
         theme_wizard.setObjectName('OpenLP.ThemeWizard')
-        theme_wizard.setWindowIcon(build_icon(':/icon/openlp-logo.svg'))
+        theme_wizard.setWindowIcon(UiIcons().main_icon)
         theme_wizard.setModal(True)
         theme_wizard.setOptions(QtWidgets.QWizard.IndependentPages |
                                 QtWidgets.QWizard.NoBackButtonOnStartPage | QtWidgets.QWizard.HaveCustomButton1)

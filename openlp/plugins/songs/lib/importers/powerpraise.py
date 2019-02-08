@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,12 +23,10 @@
 The :mod:`powerpraiseimport` module provides the functionality for importing
 Powerpraise song files into the current database.
 """
-
-import os
 from lxml import objectify
 
-from openlp.core.ui.lib.wizard import WizardStrings
-from .songimport import SongImport
+from openlp.core.widgets.wizard import WizardStrings
+from openlp.plugins.songs.lib.importers.songimport import SongImport
 
 
 class PowerPraiseImport(SongImport):
@@ -41,10 +39,10 @@ class PowerPraiseImport(SongImport):
         for file_path in self.import_source:
             if self.stop_import_flag:
                 return
-            self.import_wizard.increment_progress_bar(
-                WizardStrings.ImportingType.format(source=os.path.basename(file_path)))
-            root = objectify.parse(open(file_path, 'rb')).getroot()
-            self.process_song(root)
+            self.import_wizard.increment_progress_bar(WizardStrings.ImportingType.format(source=file_path.name))
+            with file_path.open('rb') as xml_file:
+                root = objectify.parse(xml_file).getroot()
+                self.process_song(root)
 
     def process_song(self, root):
         self.set_defaults()

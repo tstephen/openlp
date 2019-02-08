@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -30,23 +30,74 @@ import os
 import re
 import sys
 import traceback
-from chardet.universaldetector import UniversalDetector
 from ipaddress import IPv4Address, IPv6Address, AddressValueError
-from pathlib import Path
 from shutil import which
 from subprocess import check_output, CalledProcessError, STDOUT
 
-from PyQt5 import QtCore, QtGui
+from PyQt5 import QtGui
 from PyQt5.QtCore import QCryptographicHash as QHash
+from PyQt5.QtNetwork import QAbstractSocket, QHostAddress, QNetworkInterface
+from chardet.universaldetector import UniversalDetector
 
 log = logging.getLogger(__name__ + '.__init__')
 
 
 FIRST_CAMEL_REGEX = re.compile('(.)([A-Z][a-z]+)')
 SECOND_CAMEL_REGEX = re.compile('([a-z0-9])([A-Z])')
-CONTROL_CHARS = re.compile(r'[\x00-\x1F\x7F-\x9F]', re.UNICODE)
-INVALID_FILE_CHARS = re.compile(r'[\\/:\*\?"<>\|\+\[\]%]', re.UNICODE)
+CONTROL_CHARS = re.compile(r'[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]')
+INVALID_FILE_CHARS = re.compile(r'[\\/:\*\?"<>\|\+\[\]%]')
 IMAGES_FILTER = None
+REPLACMENT_CHARS_MAP = str.maketrans({'\u2018': '\'', '\u2019': '\'', '\u201c': '"', '\u201d': '"', '\u2026': '...',
+                                      '\u2013': '-', '\u2014': '-', '\v': '\n\n', '\f': '\n\n'})
+NEW_LINE_REGEX = re.compile(r' ?(\r\n?|\n) ?')
+WHITESPACE_REGEX = re.compile(r'[ \t]+')
+
+
+def get_local_ip4():
+    """
+    Creates a dictionary of local IPv4 interfaces on local machine.
+    If no active interfaces available, returns a dict of localhost IPv4 information
+
+    :returns: Dict of interfaces
+    """
+    log.debug('Getting local IPv4 interface(es) information')
+    my_ip4 = {}
+    for iface in QNetworkInterface.allInterfaces():
+        log.debug('Checking for isValid and flags == IsUP | IsRunning')
+        if not iface.isValid() or not (iface.flags() & (QNetworkInterface.IsUp | QNetworkInterface.IsRunning)):
+            continue
+        log.debug('Checking address(es) protocol')
+        for address in iface.addressEntries():
+            ip = address.ip()
+            log.debug('Checking for protocol == IPv4Protocol')
+            if ip.protocol() == QAbstractSocket.IPv4Protocol:
+                log.debug('Getting interface information')
+                my_ip4[iface.name()] = {'ip': ip.toString(),
+                                        'broadcast': address.broadcast().toString(),
+                                        'netmask': address.netmask().toString(),
+                                        'prefix': address.prefixLength(),
+                                        'localnet': QHostAddress(address.netmask().toIPv4Address() &
+                                                                 ip.toIPv4Address()).toString()
+                                        }
+                log.debug('Adding {iface} to active list'.format(iface=iface.name()))
+    if len(my_ip4) == 0:
+        log.warning('No active IPv4 network interfaces detected')
+        return my_ip4
+    if 'localhost' in my_ip4:
+        log.debug('Renaming windows localhost to lo')
+        my_ip4['lo'] = my_ip4['localhost']
+        my_ip4.pop('localhost')
+    if len(my_ip4) == 1:
+        if 'lo' in my_ip4:
+            # No active interfaces - so leave localhost in there
+            log.warning('No active IPv4 interfaces found except localhost')
+    else:
+        # Since we have a valid IP4 interface, remove localhost
+        if 'lo' in my_ip4:
+            log.debug('Found at least one IPv4 interface, removing localhost')
+            my_ip4.pop('lo')
+
+    return my_ip4
 
 
 def trace_error_handler(logger):
@@ -57,27 +108,8 @@ def trace_error_handler(logger):
     """
     log_string = "OpenLP Error trace"
     for tb in traceback.extract_stack():
-        log_string += '\n   File {file} at line {line} \n\t called {data}'.format(file=tb[0],
-                                                                                  line=tb[1],
-                                                                                  data=tb[3])
+        log_string += '\n   File {file} at line {line} \n\t called {data}'.format(file=tb[0], line=tb[1], data=tb[3])
     logger.error(log_string)
-
-
-def check_directory_exists(directory, do_not_log=False):
-    """
-    Check a theme directory exists and if not create it
-
-    :param directory: The directory to make sure exists
-    :param do_not_log: To not log anything. This is need for the start up, when the log isn't ready.
-    """
-    if not do_not_log:
-        log.debug('check_directory_exists {text}'.format(text=directory))
-    try:
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-    except IOError as e:
-        if not do_not_log:
-            log.exception('failed to check if directory exists or create directory')
 
 
 def extension_loader(glob_pattern, excluded_files=[]):
@@ -85,42 +117,37 @@ def extension_loader(glob_pattern, excluded_files=[]):
     A utility function to find and load OpenLP extensions, such as plugins, presentation and media controllers and
     importers.
 
-    :param glob_pattern: A glob pattern used to find the extension(s) to be imported. Should be relative to the
-        application directory. i.e. openlp/plugins/*/*plugin.py
-    :type glob_pattern: str
-
-    :param excluded_files: A list of file names to exclude that the glob pattern may find.
-    :type excluded_files: list of strings
-
-    :return: None
+    :param str glob_pattern: A glob pattern used to find the extension(s) to be imported. Should be relative to the
+        application directory. i.e. plugins/*/*plugin.py
+    :param list[str] excluded_files: A list of file names to exclude that the glob pattern may find.
     :rtype: None
     """
-    app_dir = Path(AppLocation.get_directory(AppLocation.AppDir)).parent
+    from openlp.core.common.applocation import AppLocation
+    app_dir = AppLocation.get_directory(AppLocation.AppDir)
     for extension_path in app_dir.glob(glob_pattern):
         extension_path = extension_path.relative_to(app_dir)
         if extension_path.name in excluded_files:
             continue
+        log.debug('Attempting to import %s', extension_path)
         module_name = path_to_module(extension_path)
         try:
             importlib.import_module(module_name)
         except (ImportError, OSError):
             # On some platforms importing vlc.py might cause OSError exceptions. (e.g. Mac OS X)
             log.warning('Failed to import {module_name} on path {extension_path}'
-                        .format(module_name=module_name, extension_path=str(extension_path)))
+                        .format(module_name=module_name, extension_path=extension_path))
 
 
 def path_to_module(path):
     """
     Convert a path to a module name (i.e openlp.core.common)
 
-    :param path: The path to convert to a module name.
-    :type path: Path
-
+    :param openlp.core.common.path.Path path: The path to convert to a module name.
     :return: The module name.
     :rtype: str
     """
     module_path = path.with_suffix('')
-    return '.'.join(module_path.parts)
+    return 'openlp.' + '.'.join(module_path.parts)
 
 
 def get_frozen_path(frozen_option, non_frozen_option):
@@ -142,19 +169,6 @@ class ThemeLevel(object):
     Global = 1
     Service = 2
     Song = 3
-
-
-def translate(context, text, comment=None, qt_translate=QtCore.QCoreApplication.translate):
-    """
-    A special shortcut method to wrap around the Qt5 translation functions. This abstracts the translation procedure so
-    that we can change it if at a later date if necessary, without having to redo the whole of OpenLP.
-
-    :param context: The translation context, used to give each string a context or a namespace.
-    :param text: The text to put into the translation tables for translation.
-    :param comment: An identifying string for when the same text is used in different roles within the same context.
-    :param qt_translate:
-    """
-    return qt_translate(context, text, comment)
 
 
 class SlideLimits(object):
@@ -210,7 +224,7 @@ def verify_ipv4(addr):
     :returns: bool
     """
     try:
-        valid = IPv4Address(addr)
+        IPv4Address(addr)
         return True
     except AddressValueError:
         return False
@@ -224,7 +238,7 @@ def verify_ipv6(addr):
     :returns: bool
     """
     try:
-        valid = IPv6Address(addr)
+        IPv6Address(addr)
         return True
     except AddressValueError:
         return False
@@ -297,20 +311,6 @@ def clean_button_text(button_text):
     return button_text.replace('&', '').replace('< ', '').replace(' >', '')
 
 
-from .openlpmixin import OpenLPMixin
-from .registry import Registry
-from .registrymixin import RegistryMixin
-from .registryproperties import RegistryProperties
-from .uistrings import UiStrings
-from .settings import Settings
-from .applocation import AppLocation
-from .actions import ActionList
-from .languagemanager import LanguageManager
-
-if is_win():
-    from subprocess import STARTUPINFO, STARTF_USESHOWWINDOW
-
-
 def add_actions(target, actions):
     """
     Adds multiple actions to a menu or toolbar in one command.
@@ -367,31 +367,22 @@ def get_filesystem_encoding():
     return encoding
 
 
-def split_filename(path):
-    """
-    Return a list of the parts in a given path.
-    """
-    path = os.path.abspath(path)
-    if not os.path.isfile(path):
-        return path, ''
-    else:
-        return os.path.split(path)
-
-
-def delete_file(file_path_name):
+def delete_file(file_path):
     """
     Deletes a file from the system.
 
-    :param file_path_name: The file, including path, to delete.
+    :param openlp.core.common.path.Path file_path: The file, including path, to delete.
+    :return: True if the deletion was successful, or the file never existed. False otherwise.
+    :rtype: bool
     """
-    if not file_path_name:
+    if not file_path:
         return False
     try:
-        if os.path.exists(file_path_name):
-            os.remove(file_path_name)
+        if file_path.exists():
+            file_path.unlink()
         return True
-    except (IOError, OSError):
-        log.exception("Unable to delete file {text}".format(text=file_path_name))
+    except OSError:
+        log.exception('Unable to delete file {file_path}'.format(file_path=file_path))
         return False
 
 
@@ -399,6 +390,7 @@ def get_images_filter():
     """
     Returns a filter string for a file dialog containing all the supported image formats.
     """
+    from openlp.core.common.i18n import translate
     global IMAGES_FILTER
     if not IMAGES_FILTER:
         log.debug('Generating images filter.')
@@ -411,18 +403,19 @@ def get_images_filter():
     return IMAGES_FILTER
 
 
-def is_not_image_file(file_name):
+def is_not_image_file(file_path):
     """
     Validate that the file is not an image file.
 
-    :param file_name: File name to be checked.
+    :param openlp.core.common.path.Path file_path: The file to be checked.
+    :return: If the file is not an image
+    :rtype: bool
     """
-    if not file_name:
+    if not (file_path and file_path.exists()):
         return True
     else:
         formats = [bytes(fmt).decode().lower() for fmt in QtGui.QImageReader.supportedImageFormats()]
-        file_part, file_extension = os.path.splitext(str(file_name))
-        if file_extension[1:].lower() in formats and os.path.exists(file_name):
+        if file_path.suffix[1:].lower() in formats:
             return False
         return True
 
@@ -431,10 +424,10 @@ def clean_filename(filename):
     """
     Removes invalid characters from the given ``filename``.
 
-    :param filename:  The "dirty" file name to clean.
+    :param str filename:  The "dirty" file name to clean.
+    :return: The cleaned string
+    :rtype: str
     """
-    if not isinstance(filename, str):
-        filename = str(filename, 'utf-8')
     return INVALID_FILE_CHARS.sub('_', CONTROL_CHARS.sub('', filename))
 
 
@@ -442,37 +435,40 @@ def check_binary_exists(program_path):
     """
     Function that checks whether a binary exists.
 
-    :param program_path: The full path to the binary to check.
+    :param openlp.core.common.path.Path program_path: The full path to the binary to check.
     :return: program output to be parsed
+    :rtype: bytes
     """
     log.debug('testing program_path: {text}'.format(text=program_path))
     try:
         # Setup startupinfo options for check_output to avoid console popping up on windows
         if is_win():
+            from subprocess import STARTUPINFO, STARTF_USESHOWWINDOW
             startupinfo = STARTUPINFO()
             startupinfo.dwFlags |= STARTF_USESHOWWINDOW
         else:
             startupinfo = None
-        runlog = check_output([program_path, '--help'], stderr=STDOUT, startupinfo=startupinfo)
+        run_log = check_output([str(program_path), '--help'], stderr=STDOUT, startupinfo=startupinfo)
     except CalledProcessError as e:
-        runlog = e.output
+        run_log = e.output
     except Exception:
         trace_error_handler(log)
-        runlog = ''
-    log.debug('check_output returned: {text}'.format(text=runlog))
-    return runlog
+        run_log = ''
+    log.debug('check_output returned: {text}'.format(text=run_log))
+    return run_log
 
 
-def get_file_encoding(filename):
+def get_file_encoding(file_path):
     """
     Utility function to incrementally detect the file encoding.
 
-    :param filename: Filename for the file to determine the encoding for. Str
+    :param openlp.core.common.path.Path file_path: Filename for the file to determine the encoding for.
     :return: A dict with the keys 'encoding' and 'confidence'
+    :rtype: dict[str, float]
     """
     detector = UniversalDetector()
     try:
-        with open(filename, 'rb') as detect_file:
+        with file_path.open('rb') as detect_file:
             while not detector.done:
                 chunk = detect_file.read(1024)
                 if not chunk:
@@ -482,3 +478,17 @@ def get_file_encoding(filename):
         return detector.result
     except OSError:
         log.exception('Error detecting file encoding')
+
+
+def normalize_str(irregular_string):
+    """
+    Normalize the supplied string. Remove unicode control chars and tidy up white space.
+
+    :param str irregular_string: The string to normalize.
+    :return: The normalized string
+    :rtype: str
+    """
+    irregular_string = irregular_string.translate(REPLACMENT_CHARS_MAP)
+    irregular_string = CONTROL_CHARS.sub('', irregular_string)
+    irregular_string = NEW_LINE_REGEX.sub('\n', irregular_string)
+    return WHITESPACE_REGEX.sub(' ', irregular_string)

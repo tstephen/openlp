@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2018 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,20 +23,22 @@
 The :mod:`~openlp.plugins.alerts.lib.alertsmanager` module contains the part of the plugin which manages storing and
 displaying of alerts.
 """
-
 from PyQt5 import QtCore
 
-from openlp.core.common import OpenLPMixin, RegistryMixin, Registry, RegistryProperties, Settings, translate
+from openlp.core.common.i18n import translate
+from openlp.core.common.mixins import LogMixin, RegistryProperties
+from openlp.core.common.registry import Registry, RegistryBase
+from openlp.core.common.settings import Settings
 
 
-class AlertsManager(OpenLPMixin, RegistryMixin, QtCore.QObject, RegistryProperties):
+class AlertsManager(QtCore.QObject, RegistryBase, LogMixin, RegistryProperties):
     """
     AlertsManager manages the settings of Alerts.
     """
     alerts_text = QtCore.pyqtSignal(list)
 
     def __init__(self, parent):
-        super(AlertsManager, self).__init__(parent)
+        super(AlertsManager, self).__init__()
         self.timer_id = 0
         self.alert_list = []
         Registry().register_function('live_display_active', self.generate_alert)
