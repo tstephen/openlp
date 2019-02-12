@@ -38,9 +38,9 @@ var HorizontalAlign = {
  * Vertical alignment enumeration
  */
 var VerticalAlign = {
-  Top: "top",
-  Middle: "middle",
-  Bottom: "bottom"
+  Top: "0",
+  Middle: "1",
+  Bottom: "2"
 };
 
 /**
@@ -70,6 +70,14 @@ var AnimationState = {
   ScrollingAnimation: "scrollingAnimation",
   FadeInAnimation: "fadeInAnimation",
   FadeOutAnimation: "fadeOutAnimation"
+};
+/**
+ * Alert location enumeration
+ */
+var AlertLocation = {
+  Top: "0",
+  Middle: "1",
+  Bottom: "2"
 };
 
 /**
@@ -406,7 +414,7 @@ var Display = {
   alert: function (text, location) {
     console.debug(" alert text: " + text + ", location: " + location);
 
-    if(text == ""){
+    if (text == "") {
       return null;
     }
 
@@ -418,32 +426,40 @@ var Display = {
     /* Bring in the transition background */
     Display._transitionState = Display.doEntranceTransition(location);
 
-    alertBackground.addEventListener('transitionend', function(e){
+    alertBackground.addEventListener('transitionend', function (e) {
       e.stopPropagation();
-      if(Display._transitionState == TransitionState.EntranceTransition){
+      if (Display._transitionState == TransitionState.EntranceTransition) {
         alertText.style.visibility = "visible";
         alertText.classList.add("horizontal-scroll-animation");
-      }else if(Display._transitionState == TransitionState.ExitTransition){
+      }
+      else if (Display._transitionState == TransitionState.ExitTransition) {
         Display._transitionState = TransitionState.NoTransition;
         alertBackground.style.visibility = "hidden";
+        alertText.style.visibility = "hidden";
+        alertBackground.style.top = "";
+        alertBackground.style.bottom = "";
+        alertBackground.style.height = "";
+        alertBackground.style.transition = "";
         alertBackground.classList.remove("middle-exit-animation");
       }
     });
 
-    alertBackground.addEventListener('animationend',function(){
+    alertBackground.addEventListener('animationend', function () {
 
-      console.debug("Noticed an animation has ended. The animation state is: ", Display._animationState);
-      if(Display._animationState == AnimationState.FadeInAnimation){
+      if (Display._animationState == AnimationState.FadeInAnimation) {
         alertText.style.visibility = "visible";
         alertText.classList.add("horizontal-scroll-animation");
         alertText.classList.remove("middle-entrance-animation");
         Display._animationState = AnimationState.ScrollingAnimation;
-      }else if(Display._animationState == AnimationState.FadeOutAnimation){
+      }
+      else if (Display._animationState == AnimationState.FadeOutAnimation) {
         alertBackground.style.visibility = "hidden";
         alertBackground.classList.remove("middle-exit-animation");
         Display._animationState = AnimationState.NoAnimation;
-      }else if(alertText.classList.contains("horizontal-scroll-animation")){
+      }
+      else if (alertText.classList.contains("horizontal-scroll-animation")) {
         alertText.classList.remove("horizontal-scroll-animation");
+        alertText.style.visibility = "hidden";
         Display._animationState = AnimationState.NoAnimation;
         Display._transitionState = Display.doExitTransition(location);
       }
@@ -461,27 +477,28 @@ var Display = {
    * Start background entrance transition for display of alert
    * @param {string} location - String showing the location of the alert on screen
    */
-  doEntranceTransition: function (location){
+  doEntranceTransition: function (location) {
     var alertBackground = $("#alert-background")[0];
 
-    switch(location){
-      case "0":
-        alertBackground.style.top = '0';
-        alertBackground.style.transition = "2s linear";
+    switch (location) {
+      case VerticalAlign.Top:
+        alertBackground.style.bottom = '';
+        alertBackground.style.top = '0px';        
         alertBackground.style.height = "25%";
+        alertBackground.style.transition = "2s linear";
         break;
-      case "1":
-        alertBackground.style.top = ((window.innerHeight - alertBackground.clientHeight) / 2)
-            + 'px';
+      case VerticalAlign.Middle:
+        alertBackground.style.top = ((window.innerHeight - alertBackground.clientHeight) / 2) + 'px';
         alertBackground.style.height = "25%";
         alertBackground.classList.add("middle-entrance-animation");
         Display._animationState = AnimationState.FadeInAnimation;
         break;
-      case "2":
+      case VerticalAlign.Bottom:
       default:
-        alertBackground.style.bottom = '0';
-        alertBackground.style.transition= "2s linear";
+        alertBackground.style.top = '';
+        alertBackground.style.bottom = '0px';        
         alertBackground.style.height = "25%";
+        alertBackground.style.transition= "2s linear";
         break;
     }
     alertBackground.style.visibility = "visible";
@@ -493,16 +510,17 @@ var Display = {
    * Start background exit transition once alert has been displayed
    * @param {string} location - Integer showing the location of the alert on screen
    */
-  doExitTransition: function(location){
+  doExitTransition: function (location) {
 
     var alertBackground = $("#alert-background")[0];
 
-    if(location == "0" || location == "2"){
+    if (location == VerticalAlign.Top || location == VerticalAlign.Bottom) {
       alertBackground.style.height = "0%";
-      alertBackground.style.transition = '2s linear';
-    }else if(location == "1"){
+      alertBackground.style.transition = '2s linear';      
+    }
+    else if (location == VerticalAlign.Middle) {
       alertBackground.classList.add("middle-exit-animation");
-      alertBackground.style.height = "0%";
+      alertBackground.style.height = "0%";      
       Display._animationState = AnimationState.FadeOutAnimation;
     }
 
