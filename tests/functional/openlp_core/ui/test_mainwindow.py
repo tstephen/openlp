@@ -164,7 +164,8 @@ class TestMainWindow(TestCase, TestMixin):
         # WHEN: you check the started functions
 
         # THEN: the following registry functions should have been registered
-        expected_service_list = ['application', 'main_window', 'http_server', 'settings_form']
+        expected_service_list = ['application', 'main_window', 'http_server', 'settings_form', 'service_manager',
+                                 'theme_manager', 'projection_manager']
         expected_functions_list = ['bootstrap_initialise', 'bootstrap_post_set_up', 'playbackPlay', 'playbackPause',
                                    'playbackStop', 'playbackLoop', 'seek_slider', 'volume_slider', 'media_hide',
                                    'media_blank', 'media_unblank', 'songs_hide', 'songs_blank', 'songs_unblank',

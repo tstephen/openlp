@@ -124,11 +124,13 @@ class TestServiceItem(TestCase, TestMixin):
 
         # THEN: The frames should also be valid
         assert 'Test Custom' == service_item.get_display_title(), 'The title should be "Test Custom"'
-        assert service_item.get_frames()[0]['text'] == 'Slide 1'
-        assert service_item.get_frames()[1]['text'] == 'Slide 2'
-        assert service_item.get_frame_title(0) == 'Slide 1', '"Slide 1" has been returned as the title'
-        assert service_item.get_frame_title(1) == 'Slide 2', '"Slide 2" has been returned as the title'
-        assert service_item.get_frame_title(2) == '', 'Blank has been returned as the title of slide 3'
+        assert CLEANED_VERSE[:-1] == service_item.get_frames()[0]['text'], \
+            'The returned text matches the input, except the last line feed'
+        assert RENDERED_VERSE.split('\n', 1)[0] == service_item.get_rendered_frame(1), \
+            'The first line has been returned'
+        assert 'Slide 1' == service_item.get_frame_title(0), '"Slide 1" has been returned as the title'
+        assert 'Slide 2' == service_item.get_frame_title(1), '"Slide 2" has been returned as the title'
+        assert '' == service_item.get_frame_title(2), 'Blank has been returned as the title of slide 3'
 
     def test_service_item_load_image_from_service(self):
         """

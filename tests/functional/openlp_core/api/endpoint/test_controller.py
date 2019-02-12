@@ -30,6 +30,7 @@ from openlp.core.state import State
 # sys.modules['PyQt5.QtWebEngineWidgets'] = MagicMock()
 
 from openlp.core.api.endpoint.controller import controller_direction, controller_text
+from openlp.core.display.render import Renderer
 from openlp.core.common.registry import Registry
 from openlp.core.display.screens import ScreenList
 from openlp.core.lib.serviceitem import ServiceItem
@@ -67,6 +68,8 @@ class TestController(TestCase):
                 MagicMock(**{'geometry.return_value': SCREEN['size']})
             ]
             self.screens = ScreenList.create(self.desktop)
+        renderer = Renderer()
+        renderer.empty_height = 1000
         Registry().register('live_controller', self.mocked_live_controller)
 
     def test_controller_text_empty(self):
@@ -98,9 +101,9 @@ class TestController(TestCase):
         State().update_pre_conditions("media", True)
         State().flush_preconditions()
         self.mocked_live_controller.service_item.set_from_service(line)
-
+        self.mocked_live_controller.service_item.render(True)
         # WHEN: I trigger the method
-        ret = controller_text(MagicMock())
+        ret = controller_text("SomeText")
 
         # THEN: I get a basic set of results
         results = ret['results']
