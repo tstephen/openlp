@@ -38,9 +38,9 @@ var HorizontalAlign = {
  * Vertical alignment enumeration
  */
 var VerticalAlign = {
-  Top: "0",
-  Middle: "1",
-  Bottom: "2"
+  Top: "top",
+  Middle: "middle",
+  Bottom: "bottom"
 };
 
 /**
@@ -481,19 +481,19 @@ var Display = {
     var alertBackground = $("#alert-background")[0];
 
     switch (location) {
-      case VerticalAlign.Top:
+      case AlertLocation.Top:
         alertBackground.style.bottom = '';
         alertBackground.style.top = '0px';        
         alertBackground.style.height = "25%";
         alertBackground.style.transition = "2s linear";
         break;
-      case VerticalAlign.Middle:
+      case AlertLocation.Middle:
         alertBackground.style.top = ((window.innerHeight - alertBackground.clientHeight) / 2) + 'px';
         alertBackground.style.height = "25%";
         alertBackground.classList.add("middle-entrance-animation");
         Display._animationState = AnimationState.FadeInAnimation;
         break;
-      case VerticalAlign.Bottom:
+      case AlertLocation.Bottom:
       default:
         alertBackground.style.top = '';
         alertBackground.style.bottom = '0px';        
@@ -514,11 +514,11 @@ var Display = {
 
     var alertBackground = $("#alert-background")[0];
 
-    if (location == VerticalAlign.Top || location == VerticalAlign.Bottom) {
+    if (location == AlertLocation.Top || location == AlertLocation.Bottom) {
       alertBackground.style.height = "0%";
       alertBackground.style.transition = '2s linear';      
     }
-    else if (location == VerticalAlign.Middle) {
+    else if (location == AlertLocation.Middle) {
       alertBackground.classList.add("middle-exit-animation");
       alertBackground.style.height = "0%";      
       Display._animationState = AnimationState.FadeOutAnimation;
