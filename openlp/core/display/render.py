@@ -31,13 +31,13 @@ import time
 
 from PyQt5 import QtWidgets, QtGui
 
-from openlp.core.lib.formattingtags import FormattingTags
 from openlp.core.common import ThemeLevel
-from openlp.core.common.registry import Registry, RegistryBase
 from openlp.core.common.mixins import LogMixin, RegistryProperties
+from openlp.core.common.registry import Registry, RegistryBase
 from openlp.core.display.screens import ScreenList
 from openlp.core.display.window import DisplayWindow
 from openlp.core.lib import ItemCapabilities
+from openlp.core.lib.formattingtags import FormattingTags
 
 
 log = logging.getLogger(__name__)

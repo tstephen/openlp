@@ -29,7 +29,6 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 from openlp.core.common.i18n import translate
 from openlp.core.common.path import Path
-from openlp.core.lib.formattingtags import FormattingTags
 
 log = logging.getLogger(__name__ + '.__init__')
 

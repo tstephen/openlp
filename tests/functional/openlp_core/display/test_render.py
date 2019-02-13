@@ -29,7 +29,7 @@ from openlp.core.display.render import compare_chord_lyric_width, find_formattin
 from openlp.core.lib.formattingtags import FormattingTags
 
 
-@patch('openlp.core.lib.FormattingTags.get_html_tags')
+@patch('openlp.core.display.render.FormattingTags.get_html_tags')
 def test_remove_tags(mocked_get_tags):
     """
     Test remove_tags() method.
@@ -52,7 +52,7 @@ def test_remove_tags(mocked_get_tags):
     assert result_string == expected_string, 'The strings should be identical'
 
 
-@patch('openlp.core.lib.FormattingTags.get_html_tags')
+@patch('openlp.core.display.render.FormattingTags.get_html_tags')
 def test_render_tags(mocked_get_tags):
     """
     Test the render_tags() method.
