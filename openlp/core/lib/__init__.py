@@ -24,7 +24,6 @@ The :mod:`lib` module contains most of the components and libraries that make
 OpenLP work.
 """
 import logging
-import re
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 

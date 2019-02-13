@@ -30,7 +30,6 @@ from openlp.core.state import State
 # sys.modules['PyQt5.QtWebEngineWidgets'] = MagicMock()
 
 from openlp.core.api.endpoint.controller import controller_direction, controller_text
-from openlp.core.display.render import Renderer
 from openlp.core.common.registry import Registry
 from openlp.core.display.screens import ScreenList
 from openlp.core.lib.serviceitem import ServiceItem

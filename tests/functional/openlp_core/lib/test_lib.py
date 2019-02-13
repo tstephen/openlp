@@ -30,7 +30,6 @@ from PyQt5 import QtCore, QtGui
 from openlp.core.common.path import Path
 from openlp.core.lib import build_icon, check_item_selected, create_separated_list, create_thumb, \
     get_text_file_string, image_to_byte, resize_image, str_to_bool, validate_thumb
-from openlp.core.lib.formattingtags import FormattingTags
 from tests.utils.constants import RESOURCE_PATH
 
 

@@ -36,7 +36,7 @@ from openlp.core.ui.advancedtab import AdvancedTab
 from openlp.core.ui.generaltab import GeneralTab
 from openlp.core.ui.screenstab import ScreensTab
 from openlp.core.ui.themestab import ThemesTab
-from openlp.core.ui.media.playertab import PlayerTab
+# from openlp.core.ui.media.playertab import PlayerTab
 from openlp.core.ui.settingsdialog import Ui_SettingsDialog
 
 

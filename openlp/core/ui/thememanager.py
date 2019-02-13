@@ -295,7 +295,7 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
                     for plugin in self.plugin_manager.plugins:
                         if plugin.uses_theme(old_theme_name):
                             plugin.rename_theme(old_theme_name, new_theme_name)
-                    self.renderer.set_theme(self.get_theme_data(new_theme_data))
+                    self.renderer.set_theme(self.get_theme_data(new_theme_name))
                     self.load_themes()
 
     def on_copy_theme(self, field=None):

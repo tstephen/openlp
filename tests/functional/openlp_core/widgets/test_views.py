@@ -30,7 +30,7 @@ from unittest.mock import MagicMock, call, patch
 from PyQt5 import QtGui
 
 from openlp.core.common.i18n import UiStrings
-from openlp.core.lib import ImageSource
+# from openlp.core.lib import ImageSource
 from openlp.core.widgets.views import ListPreviewWidget, ListWidgetWithDnD, TreeWidgetWithDnD, handle_mime_data_urls
 from openlp.core.ui.icons import UiIcons
 

@@ -57,7 +57,7 @@ import webbrowser
 from argparse import ArgumentParser
 from getpass import getpass
 
-from lxml import etree, objectify
+from lxml import objectify
 from PyQt5 import QtCore
 
 SERVER_URL = 'http://www.transifex.com/api/2/project/openlp/resource/openlp-26x/'

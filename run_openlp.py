@@ -27,7 +27,7 @@ import faulthandler
 import multiprocessing
 import sys
 
-from OpenGL import GL
+# from OpenGL import GL
 
 from openlp.core.app import main
 from openlp.core.common import is_macosx, is_win
