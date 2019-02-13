@@ -30,7 +30,6 @@ from lxml import etree, objectify
 from openlp.core.common import de_hump
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.json import OpenLPJsonDecoder, OpenLPJsonEncoder
-from openlp.core.common.path import Path
 from openlp.core.display.screens import ScreenList
 from openlp.core.lib import get_text_file_string, str_to_bool
 
