@@ -165,11 +165,8 @@ class TestMainWindow(TestCase, TestMixin):
 
         # THEN: the following registry functions should have been registered
         expected_service_list = ['application', 'main_window', 'http_server', 'settings_form', 'service_manager',
-                                 'theme_manager', 'projection_manager']
-        expected_functions_list = ['bootstrap_initialise', 'bootstrap_post_set_up', 'playbackPlay', 'playbackPause',
-                                   'playbackStop', 'playbackLoop', 'seek_slider', 'volume_slider', 'media_hide',
-                                   'media_blank', 'media_unblank', 'songs_hide', 'songs_blank', 'songs_unblank',
-                                   'mediaitem_media_rebuild', 'mediaitem_suffixes', 'images_regenerate',
+                                 'theme_manager', 'projector_manager']
+        expected_functions_list = ['bootstrap_initialise', 'bootstrap_post_set_up', 'bootstrap_completion',
                                    'theme_update_global', 'config_screen_changed']
         assert list(self.registry.service_list.keys()) == expected_service_list, \
             'The service list should have been {}'.format(self.registry.service_list.keys())

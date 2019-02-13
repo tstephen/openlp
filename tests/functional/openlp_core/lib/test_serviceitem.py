@@ -77,10 +77,15 @@ class TestServiceItem(TestCase, TestMixin):
         self.build_settings()
         Settings().extend_default_settings(__default_settings__)
         Registry.create()
+        # Mock the renderer and its format_slide method
         mocked_renderer = MagicMock()
-        mocked_renderer.format_slide.return_value = [VERSE]
+        def side_effect_return_arg(arg1, arg2):
+            return [arg1]
+        mocked_slide_formater = MagicMock(side_effect=side_effect_return_arg)
+        mocked_renderer.format_slide = mocked_slide_formater
         Registry().register('renderer', mocked_renderer)
         Registry().register('image_manager', MagicMock())
+
 
     def tearDown(self):
         """
@@ -124,10 +129,8 @@ class TestServiceItem(TestCase, TestMixin):
 
         # THEN: The frames should also be valid
         assert 'Test Custom' == service_item.get_display_title(), 'The title should be "Test Custom"'
-        assert CLEANED_VERSE[:-1] == service_item.get_frames()[0]['text'], \
-            'The returned text matches the input, except the last line feed'
-        assert RENDERED_VERSE.split('\n', 1)[0] == service_item.get_rendered_frame(1), \
-            'The first line has been returned'
+        assert 'Slide 1' == service_item.get_frames()[0]['text']
+        assert 'Slide 2' == service_item.get_rendered_frame(1)
         assert 'Slide 1' == service_item.get_frame_title(0), '"Slide 1" has been returned as the title'
         assert 'Slide 2' == service_item.get_frame_title(1), '"Slide 2" has been returned as the title'
         assert '' == service_item.get_frame_title(2), 'Blank has been returned as the title of slide 3'

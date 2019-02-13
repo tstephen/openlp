@@ -68,9 +68,14 @@ class TestController(TestCase):
                 MagicMock(**{'geometry.return_value': SCREEN['size']})
             ]
             self.screens = ScreenList.create(self.desktop)
-        renderer = Renderer()
-        renderer.empty_height = 1000
+        # Mock the renderer and its format_slide method
+        self.mocked_renderer = MagicMock()
+        def side_effect_return_arg(arg1, arg2):
+            return [arg1]
+        self.mocked_slide_formater = MagicMock(side_effect=side_effect_return_arg)
+        self.mocked_renderer.format_slide = self.mocked_slide_formater
         Registry().register('live_controller', self.mocked_live_controller)
+        Registry().register('renderer', self.mocked_renderer)
 
     def test_controller_text_empty(self):
         """
@@ -101,7 +106,7 @@ class TestController(TestCase):
         State().update_pre_conditions("media", True)
         State().flush_preconditions()
         self.mocked_live_controller.service_item.set_from_service(line)
-        self.mocked_live_controller.service_item.render(True)
+        self.mocked_live_controller.service_item._create_slides()
         # WHEN: I trigger the method
         ret = controller_text("SomeText")
 

@@ -446,6 +446,14 @@ class Renderer(RegistryBase, LogMixin, RegistryProperties, DisplayWindow):
         self.theme_height = 0
         self.theme_level = ThemeLevel.Global
 
+    def set_theme_level(self, theme_level):
+        """
+        Sets the theme level.
+
+        :param theme_level: The theme level to be used.
+        """
+        self.theme_level = theme_level
+
     def calculate_line_count(self):
         """
         Calculate the number of lines that fits on one slide
