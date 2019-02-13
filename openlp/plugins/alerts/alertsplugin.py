@@ -259,8 +259,8 @@ class AlertsPlugin(Plugin):
         """
         align = VerticalType.Names[self.settings_tab.location]
         frame.runJavaScript('update_css("{align}", "{face}", "{size}", "{color}", '
-                                 '"{background}")'.format(align=align,
-                                                          face=self.settings_tab.font_face,
-                                                          size=self.settings_tab.font_size,
-                                                          color=self.settings_tab.font_color,
-                                                          background=self.settings_tab.background_color))
+                            '"{background}")'.format(align=align,
+                                                     face=self.settings_tab.font_face,
+                                                     size=self.settings_tab.font_size,
+                                                     color=self.settings_tab.font_color,
+                                                     background=self.settings_tab.background_color))

@@ -558,7 +558,6 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
 
         # TODO: Need to basically update everything
 
-
     def __add_actions_to_widget(self, widget):
         """
         Add actions to the widget specified by `widget`

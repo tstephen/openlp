@@ -164,7 +164,7 @@ class BibleDB(Manager):
             file_path = kwargs['file']
         Manager.__init__(self, 'bibles', init_schema, file_path, upgrade)
         if self.session and 'file' in kwargs:
-                self.get_name()
+            self.get_name()
         self._is_web_bible = None
 
     def get_name(self):

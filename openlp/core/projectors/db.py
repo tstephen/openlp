@@ -49,7 +49,6 @@ log = logging.getLogger(__name__)
 log.debug('projector.lib.db module loaded')
 
 
-
 Base = declarative_base(MetaData())
 
 

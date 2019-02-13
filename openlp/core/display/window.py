@@ -154,10 +154,8 @@ class DisplayWindow(QtWidgets.QWidget):
 
     def set_single_image(self, bg_color, image_path):
         """
-        
-        :param str bg_color: 
-        :param Path image_path: 
-        :return: 
+        :param str bg_color: Background color
+        :param Path image_path: Path to the image
         """
         image_uri = image_path.as_uri()
         self.run_javascript('Display.setFullscreenImage("{bg_color}", "{image}");'.format(bg_color=bg_color,
@@ -291,7 +289,7 @@ class DisplayWindow(QtWidgets.QWidget):
 
         :param rate: A float indicating the playback rate.
         """
-        self.run_javascript('Display.setPlaybackRate({rate});'.format(rate))
+        self.run_javascript('Display.setPlaybackRate({rate});'.format(rate=rate))
 
     def set_video_volume(self, level):
         """
@@ -304,7 +302,7 @@ class DisplayWindow(QtWidgets.QWidget):
         """
         if level < 0 or level > 100:
             raise ValueError('Volume should be from 0 to 100, was "{}"'.format(level))
-        self.run_javascript('Display.setVideoVolume({level});'.format(level))
+        self.run_javascript('Display.setVideoVolume({level});'.format(level=level))
 
     def toggle_video_mute(self):
         """

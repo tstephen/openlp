@@ -290,7 +290,7 @@ class ScreenSelectionWidget(QtWidgets.QWidget):
         screen.is_display = self.display_group_box.isChecked()
         if self.custom_geometry_button.isChecked():
             screen.custom_geometry = QtCore.QRect(self.left_spin_box.value(), self.top_spin_box.value(),
-                                                   self.width_spin_box.value(), self.height_spin_box.value())
+                                                  self.width_spin_box.value(), self.height_spin_box.value())
         else:
             screen.custom_geometry = None
 

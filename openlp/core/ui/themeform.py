@@ -226,7 +226,7 @@ class ThemeForm(QtWidgets.QWizard, Ui_ThemeWizard, RegistryProperties):
         paint = QtGui.QPainter(pixmap)
         paint.setPen(QtGui.QPen(QtCore.Qt.blue, 2))
         main_rect = QtCore.QRect(self.theme.font_main_x, self.theme.font_main_y,
-                                self.theme.font_main_width - 1, self.theme.font_main_height - 1)
+                                 self.theme.font_main_width - 1, self.theme.font_main_height - 1)
         paint.drawRect(main_rect)
         paint.setPen(QtGui.QPen(QtCore.Qt.red, 2))
         footer_rect = QtCore.QRect(self.theme.font_footer_x, self.theme.font_footer_y,

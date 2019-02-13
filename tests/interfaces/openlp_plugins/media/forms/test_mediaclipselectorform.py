@@ -38,9 +38,6 @@ if os.name == 'nt' and not get_vlc():
     raise SkipTest('Windows without VLC, skipping this test since it cannot run without vlc')
 
 
-
-
-
 class TestMediaClipSelectorForm(TestCase, TestMixin):
     """
     Test the EditCustomSlideForm.

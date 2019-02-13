@@ -79,13 +79,13 @@ class TestServiceItem(TestCase, TestMixin):
         Registry.create()
         # Mock the renderer and its format_slide method
         mocked_renderer = MagicMock()
+
         def side_effect_return_arg(arg1, arg2):
             return [arg1]
         mocked_slide_formater = MagicMock(side_effect=side_effect_return_arg)
         mocked_renderer.format_slide = mocked_slide_formater
         Registry().register('renderer', mocked_renderer)
         Registry().register('image_manager', MagicMock())
-
 
     def tearDown(self):
         """

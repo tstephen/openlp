@@ -70,6 +70,7 @@ class TestController(TestCase):
             self.screens = ScreenList.create(self.desktop)
         # Mock the renderer and its format_slide method
         self.mocked_renderer = MagicMock()
+
         def side_effect_return_arg(arg1, arg2):
             return [arg1]
         self.mocked_slide_formater = MagicMock(side_effect=side_effect_return_arg)

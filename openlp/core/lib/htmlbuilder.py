@@ -685,19 +685,6 @@ def build_html(item, screen, is_live, background, image=None, plugins=None):
                                chords_css=build_chords_css())
 
 
-def webkit_version():
-    """
-    Return the Webkit version in use. Note method added relatively recently, so return 0 if prior to this
-    """
-    #try:
-    #    webkit_ver = float(QtWebKit.qWebKitVersion())
-    #    log.debug('Webkit version = {version}'.format(version=webkit_ver))
-    #except AttributeError:
-    #    webkit_ver = 0.0
-    webkit_ver = 0.0
-    return webkit_ver
-
-
 def build_background_css(item, width):
     """
     Build the background css

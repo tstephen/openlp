@@ -33,6 +33,7 @@ from openlp.core.ui.icons import UiIcons
 from openlp.core.display.screens import ScreenList
 from openlp.core.widgets.widgets import ScreenSelectionWidget
 
+
 class FirstTimePage(object):
     """
     An enumeration class with each of the pages of the wizard.

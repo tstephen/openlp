@@ -178,7 +178,7 @@ class ServiceItem(RegistryProperties):
                     'title': raw_slide['title'],
                     'text': render_tags(page),
                     'verse': index,
-                    'footer' : self.foot_text,
+                    'footer': self.foot_text,
                 }
                 self._rendered_slides.append(rendered_slide)
                 display_slide = {

@@ -37,7 +37,6 @@ except ImportError:
     HAS_PYSWORD = False
 
 
-
 TEST_PATH = RESOURCE_PATH / 'bibles'
 
 

@@ -470,7 +470,7 @@ class TestOsisImportFileImports(TestCase):
             # THEN: The create_verse() method should have been called with each verse in the file.
             assert importer.create_verse.called is True
             for verse_tag, verse_text in test_data['verses']:
-                    importer.create_verse.assert_any_call(importer.create_book().id, 1, verse_tag, verse_text)
+                importer.create_verse.assert_any_call(importer.create_book().id, 1, verse_tag, verse_text)
 
     def test_file_import_milestone_tags(self):
         """

@@ -797,8 +797,8 @@ class BibleMediaItem(MediaManagerItem):
                               'Please make sure that your reference follows one of these patterns:</strong><br><br>%s')
                     % UiStrings().BibleScriptureError % get_reference_separators())
         elif self.search_edit.current_search_type() == BibleSearch.Combined and get_reference_match('full').match(text):
-                # Valid reference found. Do reference search.
-                self.text_reference_search(text)
+            # Valid reference found. Do reference search.
+            self.text_reference_search(text)
         else:
             # It can only be a 'Combined' search without a valid reference, or a 'Text' search
             if self.search_status == SearchStatus.SearchAsYouType:
