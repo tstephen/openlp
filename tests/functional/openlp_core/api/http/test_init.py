@@ -25,10 +25,9 @@ Functional tests to test the Http init.
 from unittest import TestCase
 from unittest.mock import MagicMock
 
-from openlp.core.api.http import check_auth, requires_auth, authenticate
+from openlp.core.api.http import authenticate, check_auth, requires_auth
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
-
 from tests.helpers.testmixin import TestMixin
 
 

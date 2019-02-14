@@ -45,8 +45,6 @@ This is done easily via the ``-d``, ``-p`` and ``-u`` options::
     @:~$ ./translation_utils.py -dpu
 
 """
-from argparse import ArgumentParser
-from getpass import getpass
 import base64
 import glob
 import json
@@ -56,9 +54,11 @@ import urllib.error
 import urllib.parse
 import urllib.request
 import webbrowser
+from argparse import ArgumentParser
+from getpass import getpass
 
-from PyQt5 import QtCore
 from lxml import objectify
+from PyQt5 import QtCore
 
 SERVER_URL = 'http://www.transifex.com/api/2/project/openlp/resource/openlp-26x/'
 IGNORED_PATHS = ['scripts']

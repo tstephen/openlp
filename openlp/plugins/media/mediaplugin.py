@@ -36,6 +36,7 @@ from openlp.plugins.media.endpoint import api_media_endpoint, media_endpoint
 from openlp.plugins.media.lib.mediaitem import MediaMediaItem
 from openlp.plugins.media.lib.mediatab import MediaTab
 
+
 log = logging.getLogger(__name__)
 
 

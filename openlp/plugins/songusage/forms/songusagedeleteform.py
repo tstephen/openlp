@@ -39,7 +39,7 @@ class SongUsageDeleteForm(QtWidgets.QDialog, Ui_SongUsageDeleteDialog, RegistryP
         self.manager = manager
         super(SongUsageDeleteForm, self).__init__(parent, QtCore.Qt.WindowSystemMenuHint |
                                                   QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowCloseButtonHint)
-        self.setupUi(self)
+        self.setup_ui(self)
         self.button_box.clicked.connect(self.on_button_box_clicked)
 
     def on_button_box_clicked(self, button):

@@ -26,6 +26,7 @@ import logging
 
 from openlp.core.common.i18n import translate
 
+
 log = logging.getLogger(__name__)
 log.debug('projector_constants loaded')
 

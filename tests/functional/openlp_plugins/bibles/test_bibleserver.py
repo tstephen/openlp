@@ -23,7 +23,7 @@
 This module contains tests for the http module of the Bibles plugin.
 """
 from unittest import TestCase
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 from bs4 import BeautifulSoup
 

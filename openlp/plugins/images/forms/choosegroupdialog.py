@@ -30,7 +30,7 @@ class Ui_ChooseGroupDialog(object):
     """
     The UI for the "Choose Image Group" form.
     """
-    def setupUi(self, choose_group_dialog):
+    def setup_ui(self, choose_group_dialog):
         """
         Set up the UI.
 
@@ -71,10 +71,10 @@ class Ui_ChooseGroupDialog(object):
         self.group_button_box = create_button_box(choose_group_dialog, 'buttonBox', ['ok'])
         self.choose_group_layout.setWidget(5, QtWidgets.QFormLayout.FieldRole, self.group_button_box)
 
-        self.retranslateUi(choose_group_dialog)
+        self.retranslate_ui(choose_group_dialog)
         QtCore.QMetaObject.connectSlotsByName(choose_group_dialog)
 
-    def retranslateUi(self, choose_group_dialog):
+    def retranslate_ui(self, choose_group_dialog):
         """
         Translate the UI on the fly.
 

@@ -68,6 +68,7 @@ from openlp.core.version import get_version
 from openlp.plugins.songs.lib import VerseType, clean_song
 from openlp.plugins.songs.lib.db import Author, AuthorType, Book, Song, Topic
 
+
 log = logging.getLogger(__name__)
 
 NAMESPACE = 'http://openlyrics.info/namespace/2009/song'

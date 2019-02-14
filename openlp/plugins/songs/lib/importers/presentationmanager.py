@@ -25,7 +25,7 @@ Presentationmanager song files into the current database.
 """
 import re
 
-from lxml import objectify, etree
+from lxml import etree, objectify
 
 from openlp.core.common import get_file_encoding
 from openlp.core.common.i18n import translate

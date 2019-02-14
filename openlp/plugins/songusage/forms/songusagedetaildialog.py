@@ -32,7 +32,7 @@ class Ui_SongUsageDetailDialog(object):
     """
     The Song Usage report details
     """
-    def setupUi(self, song_usage_detail_dialog):
+    def setup_ui(self, song_usage_detail_dialog):
         """
         Set up the UI
 
@@ -74,10 +74,10 @@ class Ui_SongUsageDetailDialog(object):
         self.vertical_layout.addWidget(self.file_group_box)
         self.button_box = create_button_box(song_usage_detail_dialog, 'button_box', ['cancel', 'ok'])
         self.vertical_layout.addWidget(self.button_box)
-        self.retranslateUi(song_usage_detail_dialog)
+        self.retranslate_ui(song_usage_detail_dialog)
         self.report_path_edit.pathChanged.connect(song_usage_detail_dialog.on_report_path_edit_path_changed)
 
-    def retranslateUi(self, song_usage_detail_dialog):
+    def retranslate_ui(self, song_usage_detail_dialog):
         """
         Retranslate the UI
 

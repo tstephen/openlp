@@ -30,9 +30,8 @@ from unittest.mock import MagicMock, patch
 from openlp.core.common.settings import Settings
 from openlp.plugins.presentations.lib.impresscontroller import ImpressController, ImpressDocument, TextType
 from openlp.plugins.presentations.presentationplugin import __default_settings__
-
-from tests.utils.constants import RESOURCE_PATH
 from tests.helpers.testmixin import TestMixin
+from tests.utils.constants import RESOURCE_PATH
 
 
 class TestImpressController(TestCase, TestMixin):
@@ -163,7 +162,8 @@ class TestImpressDocument(TestCase):
 
         # THEN: save_titles_and_notes should have been called once with
         # two arrays of two elements
-        self.doc.save_titles_and_notes.assert_called_once_with(['\n', '\n'], [' ', ' '])
+        # self.doc.save_titles_and_notes.assert_called_once_with(['\n', '\n'], [' ', ' '])
+        self.doc.save_titles_and_notes.assert_called_once_with(['', ''], [' ', ' '])
 
     def test_get_text_from_page_out_of_bound(self):
         """

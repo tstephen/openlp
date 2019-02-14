@@ -21,10 +21,11 @@
 ###############################################################################
 import logging
 
-from openlp.core.api.endpoint.pluginhelpers import search, live, service
+from openlp.core.api.endpoint.pluginhelpers import live, search, service
 from openlp.core.api.http import requires_auth
 from openlp.core.api.http.endpoint import Endpoint
 from openlp.core.api.http.errors import NotFound
+
 
 log = logging.getLogger(__name__)
 

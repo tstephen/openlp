@@ -29,8 +29,8 @@ from PyQt5 import QtCore, QtGui
 
 from openlp.core.common.registry import Registry
 from openlp.core.lib import ServiceItemAction
-from openlp.core.ui.slidecontroller import InfoLabel, SlideController, LiveController, PreviewController, \
-    NON_TEXT_MENU, WIDE_MENU
+from openlp.core.ui.slidecontroller import NON_TEXT_MENU, WIDE_MENU, InfoLabel, LiveController, PreviewController, \
+    SlideController
 
 
 class TestSlideController(TestCase):
@@ -233,7 +233,7 @@ class TestSlideController(TestCase):
         slide_controller = SlideController(None)
         slide_controller.service_item = mocked_service_item
         slide_controller.preview_widget = mocked_preview_widget
-        slide_controller.display = mocked_display
+        slide_controller.displays = [mocked_display]
 
         # WHEN: on_go_live() is called
         slide_controller.on_go_preview()
@@ -260,7 +260,7 @@ class TestSlideController(TestCase):
         slide_controller = SlideController(None)
         slide_controller.service_item = mocked_service_item
         slide_controller.preview_widget = mocked_preview_widget
-        slide_controller.display = mocked_display
+        slide_controller.displays = [mocked_display]
 
         # WHEN: on_go_live() is called
         slide_controller.on_go_live()
@@ -291,7 +291,7 @@ class TestSlideController(TestCase):
         slide_controller = SlideController(None)
         slide_controller.service_item = mocked_service_item
         slide_controller.preview_widget = mocked_preview_widget
-        slide_controller.display = mocked_display
+        slide_controller.displays = [mocked_display]
 
         # WHEN: on_go_live() is called
         slide_controller.on_go_live()
@@ -481,7 +481,6 @@ class TestSlideController(TestCase):
         slide_controller.add_service_item(mocked_item)
 
         # THEN: The item is processed, the slide number is correct, and the song is not editable (or something)
-        mocked_item.render.assert_called_once_with()
         assert slide_controller.song_edit is False, 'song_edit should be False'
         mocked_process_item.assert_called_once_with(mocked_item, 2)
 
@@ -501,7 +500,6 @@ class TestSlideController(TestCase):
         slide_controller.add_service_item(mocked_item)
 
         # THEN: The item is processed, the slide number is correct, and the song is not editable (or something)
-        mocked_item.render.assert_called_once_with()
         assert slide_controller.song_edit is False, 'song_edit should be False'
         mocked_process_item.assert_called_once_with(mocked_item, 0)
 
@@ -679,13 +677,12 @@ class TestSlideController(TestCase):
         slide_controller.is_live = False
         slide_controller.preview_widget = MagicMock()
         slide_controller.preview_display = MagicMock()
-        slide_controller.slide_preview = MagicMock()
         slide_controller.enable_tool_bar = MagicMock()
         slide_controller.on_media_start = MagicMock()
         slide_controller.slide_selected = MagicMock()
         slide_controller.on_stop_loop = MagicMock()
         slide_controller.info_label = MagicMock()
-        slide_controller.display = MagicMock()
+        slide_controller.displays = [MagicMock()]
         slide_controller.split = 0
         slide_controller.type_prefix = 'test'
 
@@ -798,7 +795,7 @@ class TestSlideController(TestCase):
         slide_controller.selected_row = MagicMock()
         slide_controller.screens = MagicMock()
         slide_controller.screens.current = {'primary': ''}
-        slide_controller.display = MagicMock()
+        slide_controller.displays = [MagicMock()]
         slide_controller.display.preview.return_value = QtGui.QImage()
         slide_controller.grab_maindisplay = MagicMock()
         slide_controller.slide_preview = MagicMock()
@@ -840,20 +837,20 @@ class TestSlideController(TestCase):
         slide_controller.selected_row = MagicMock()
         slide_controller.screens = MagicMock()
         slide_controller.screens.current = {'primary': ''}
-        slide_controller.display = MagicMock()
+        slide_controller.displays = [MagicMock()]
         slide_controller.display.preview.return_value = QtGui.QImage()
         slide_controller.grab_maindisplay = MagicMock()
         slide_controller.slide_preview = MagicMock()
         slide_controller.slide_count = 0
+        slide_controller.preview_display = MagicMock()
 
         # WHEN: update_preview is called
         slide_controller.update_preview()
 
         # THEN: setPixmap and the image_manager should have been called
-        assert 1 == slide_controller.slide_preview.setPixmap.call_count, 'setPixmap should be called'
-        assert 0 == slide_controller.display.preview.call_count, 'display.preview() should not be called'
+        assert 1 == slide_controller.preview_display.set_single_image.call_count, 'set_single_image should be called'
         assert 0 == mocked_singleShot.call_count, 'Timer to grab_maindisplay should not be called'
-        assert 1 == mocked_image_manager.get_image.call_count, 'image_manager should be called'
+        # assert 1 == mocked_image_manager.get_image.call_count, 'image_manager should be called'
 
     @patch(u'openlp.core.ui.slidecontroller.SlideController.image_manager')
     @patch(u'PyQt5.QtCore.QTimer.singleShot')
@@ -882,18 +879,18 @@ class TestSlideController(TestCase):
         slide_controller.selected_row = MagicMock()
         slide_controller.screens = MagicMock()
         slide_controller.screens.current = {'primary': ''}
-        slide_controller.display = MagicMock()
+        slide_controller.displays = [MagicMock()]
         slide_controller.display.preview.return_value = QtGui.QImage()
         slide_controller.grab_maindisplay = MagicMock()
         slide_controller.slide_preview = MagicMock()
         slide_controller.slide_count = 0
+        slide_controller.preview_display = MagicMock()
 
         # WHEN: update_preview is called
         slide_controller.update_preview()
 
         # THEN: setPixmap should have been called
-        assert 1 == slide_controller.slide_preview.setPixmap.call_count, 'setPixmap should be called'
-        assert 0 == slide_controller.display.preview.call_count, 'display.preview() should not be called'
+        assert 1 == slide_controller.preview_display.set_single_image.call_count, 'set_single_image should be called'
         assert 0 == mocked_singleShot.call_count, 'Timer to grab_maindisplay should not be called'
         assert 0 == mocked_image_manager.get_image.call_count, 'image_manager should not be called'
 
@@ -924,18 +921,17 @@ class TestSlideController(TestCase):
         slide_controller.selected_row = MagicMock()
         slide_controller.screens = MagicMock()
         slide_controller.screens.current = {'primary': ''}
-        slide_controller.display = MagicMock()
-        slide_controller.display.preview.return_value = QtGui.QImage()
+        slide_controller.displays = [MagicMock()]
         slide_controller.grab_maindisplay = MagicMock()
         slide_controller.slide_preview = MagicMock()
         slide_controller.slide_count = 0
+        slide_controller.preview_display = MagicMock()
 
         # WHEN: update_preview is called
         slide_controller.update_preview()
 
         # THEN: setPixmap and display.preview should have been called
-        assert 1 == slide_controller.slide_preview.setPixmap.call_count, 'setPixmap should be called'
-        assert 1 == slide_controller.display.preview.call_count, 'display.preview() should be called'
+        assert 1 == slide_controller.preview_display.go_to_slide.call_count, 'go_to_slide should be called'
         assert 0 == mocked_singleShot.call_count, 'Timer to grab_maindisplay should not be called'
         assert 0 == mocked_image_manager.get_image.call_count, 'image_manager should not be called'
 

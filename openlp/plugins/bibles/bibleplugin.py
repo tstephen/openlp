@@ -35,6 +35,7 @@ from openlp.plugins.bibles.lib.biblestab import BiblesTab
 from openlp.plugins.bibles.lib.manager import BibleManager
 from openlp.plugins.bibles.lib.mediaitem import BibleMediaItem, BibleSearch
 
+
 log = logging.getLogger(__name__)
 
 

@@ -49,12 +49,13 @@ wish to change it, you can chose to run 'qcommit', an bzr GUI. Note that you'll
 have to install qbzr for this to work. If you choose to run qcommit the script
 will print the detected bugs + author for easy copying into the GUI.
 """
-import subprocess
-import re
 import os
-from urllib.request import urlopen
-from urllib.error import HTTPError
+import re
+import subprocess
 from argparse import ArgumentParser
+from urllib.error import HTTPError
+from urllib.request import urlopen
+
 from bs4 import BeautifulSoup
 
 

@@ -24,11 +24,14 @@ The UI widgets for the first time wizard.
 """
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from openlp.core.common import is_macosx, clean_button_text
+from openlp.core.common import clean_button_text, is_macosx
 from openlp.core.common.i18n import translate
 from openlp.core.common.settings import Settings
 from openlp.core.lib.ui import add_welcome_page
 from openlp.core.ui.icons import UiIcons
+
+from openlp.core.display.screens import ScreenList
+from openlp.core.widgets.widgets import ScreenSelectionWidget
 
 
 class FirstTimePage(object):
@@ -36,13 +39,13 @@ class FirstTimePage(object):
     An enumeration class with each of the pages of the wizard.
     """
     Welcome = 0
-    Download = 1
-    NoInternet = 2
-    Plugins = 3
-    Songs = 4
-    Bibles = 5
-    Themes = 6
-    Defaults = 7
+    ScreenConfig = 1
+    Download = 2
+    NoInternet = 3
+    Plugins = 4
+    Songs = 5
+    Bibles = 6
+    Themes = 7
     Progress = 8
 
 
@@ -76,6 +79,15 @@ class UiFirstTimeWizard(object):
         self.next_button = self.button(QtWidgets.QWizard.NextButton)
         self.back_button = self.button(QtWidgets.QWizard.BackButton)
         add_welcome_page(first_time_wizard, ':/wizards/wizard_firsttime.bmp')
+        # The screen config page
+        self.screen_page = QtWidgets.QWizardPage()
+        self.screen_page.setObjectName('defaults_page')
+        self.screen_page_layout = QtWidgets.QFormLayout(self.screen_page)
+        self.screen_selection_widget = ScreenSelectionWidget(self, ScreenList())
+        self.screen_selection_widget.use_simple_view()
+        self.screen_selection_widget.load()
+        self.screen_page_layout.addRow(self.screen_selection_widget)
+        first_time_wizard.setPage(FirstTimePage.ScreenConfig, self.screen_page)
         # The download page
         self.download_page = QtWidgets.QWizardPage()
         self.download_page.setObjectName('download_page')
@@ -175,29 +187,16 @@ class UiFirstTimeWizard(object):
         self.themes_list_widget.setWrapping(False)
         self.themes_list_widget.setObjectName('themes_list_widget')
         self.themes_layout.addWidget(self.themes_list_widget)
-        first_time_wizard.setPage(FirstTimePage.Themes, self.themes_page)
-        # the default settings page
-        self.defaults_page = QtWidgets.QWizardPage()
-        self.defaults_page.setObjectName('defaults_page')
-        self.defaults_layout = QtWidgets.QFormLayout(self.defaults_page)
-        self.defaults_layout.setContentsMargins(50, 20, 50, 20)
-        self.defaults_layout.setObjectName('defaults_layout')
-        self.display_label = QtWidgets.QLabel(self.defaults_page)
-        self.display_label.setObjectName('display_label')
-        self.display_combo_box = QtWidgets.QComboBox(self.defaults_page)
-        self.display_combo_box.setEditable(False)
-        self.display_combo_box.setInsertPolicy(QtWidgets.QComboBox.NoInsert)
-        self.display_combo_box.setObjectName('display_combo_box')
-        self.defaults_layout.addRow(self.display_label, self.display_combo_box)
-        self.theme_label = QtWidgets.QLabel(self.defaults_page)
-        self.theme_label.setObjectName('theme_label')
-        self.theme_combo_box = QtWidgets.QComboBox(self.defaults_page)
+        self.default_theme_layout = QtWidgets.QHBoxLayout()
+        self.theme_label = QtWidgets.QLabel(self.themes_page)
+        self.default_theme_layout.addWidget(self.theme_label)
+        self.theme_combo_box = QtWidgets.QComboBox(self.themes_page)
         self.theme_combo_box.setEditable(False)
         self.theme_combo_box.setInsertPolicy(QtWidgets.QComboBox.NoInsert)
         self.theme_combo_box.setSizeAdjustPolicy(QtWidgets.QComboBox.AdjustToContents)
-        self.theme_combo_box.setObjectName('theme_combo_box')
-        self.defaults_layout.addRow(self.theme_label, self.theme_combo_box)
-        first_time_wizard.setPage(FirstTimePage.Defaults, self.defaults_page)
+        self.default_theme_layout.addWidget(self.theme_combo_box)
+        self.themes_layout.addLayout(self.default_theme_layout)
+        first_time_wizard.setPage(FirstTimePage.Themes, self.themes_page)
         # Progress page
         self.progress_page = QtWidgets.QWizardPage()
         self.progress_page.setObjectName('progress_page')
@@ -235,6 +234,9 @@ class UiFirstTimeWizard(object):
         self.plugin_page.setTitle(translate('OpenLP.FirstTimeWizard', 'Select parts of the program you wish to use'))
         self.plugin_page.setSubTitle(translate('OpenLP.FirstTimeWizard',
                                                'You can also change these settings after the Wizard.'))
+        self.screen_page.setTitle(translate('OpenLP.FirstTimeWizard', 'Displays'))
+        self.screen_page.setSubTitle(translate('OpenLP.FirstTimeWizard',
+                                               'Choose the main display screen for OpenLP.'))
         self.songs_check_box.setText(translate('OpenLP.FirstTimeWizard', 'Songs'))
         self.custom_check_box.setText(translate('OpenLP.FirstTimeWizard',
                                                 'Custom Slides – Easier to manage than songs and they have their own'
@@ -271,10 +273,6 @@ class UiFirstTimeWizard(object):
         self.bibles_page.setSubTitle(translate('OpenLP.FirstTimeWizard', 'Select and download free Bibles.'))
         self.themes_page.setTitle(translate('OpenLP.FirstTimeWizard', 'Sample Themes'))
         self.themes_page.setSubTitle(translate('OpenLP.FirstTimeWizard', 'Select and download sample themes.'))
-        self.defaults_page.setTitle(translate('OpenLP.FirstTimeWizard', 'Default Settings'))
-        self.defaults_page.setSubTitle(translate('OpenLP.FirstTimeWizard',
-                                                 'Set up default settings to be used by OpenLP.'))
-        self.display_label.setText(translate('OpenLP.FirstTimeWizard', 'Default output display:'))
         self.theme_label.setText(translate('OpenLP.FirstTimeWizard', 'Select default theme:'))
         self.progress_page.setTitle(translate('OpenLP.FirstTimeWizard', 'Downloading and Configuring'))
         self.progress_page.setSubTitle(translate('OpenLP.FirstTimeWizard', 'Please wait while resources are downloaded '

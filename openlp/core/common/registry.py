@@ -27,6 +27,7 @@ import sys
 
 from openlp.core.common import de_hump, trace_error_handler
 
+
 log = logging.getLogger(__name__)
 
 
@@ -143,6 +144,7 @@ class Registry(object):
         if event in self.functions_list:
             for function in self.functions_list[event]:
                 try:
+                    log.debug('Running function {} for {}'.format(function, event))
                     result = function(*args, **kwargs)
                     if result:
                         results.append(result)

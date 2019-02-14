@@ -33,6 +33,7 @@ from openlp.core.common.registry import Registry
 from openlp.core.lib import build_icon
 from openlp.core.ui.icons import UiIcons
 
+
 log = logging.getLogger(__name__)
 
 

@@ -29,6 +29,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 from openlp.core.common.settings import Settings
 
+
 log = logging.getLogger(__name__)
 
 
@@ -113,7 +114,6 @@ class CategoryActionList(object):
             if item[1] == action:
                 self.actions.remove(item)
                 return
-        log.warning('Action "{action}" does not exist.'.format(action=action))
 
 
 class CategoryList(object):

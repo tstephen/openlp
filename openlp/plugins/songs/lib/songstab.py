@@ -32,12 +32,12 @@ class SongsTab(SettingsTab):
     """
     SongsTab is the Songs settings tab in the settings dialog.
     """
-    def setupUi(self):
+    def setup_ui(self):
         """
         Set up the configuration tab UI.
         """
         self.setObjectName('SongsTab')
-        super(SongsTab, self).setupUi()
+        super(SongsTab, self).setup_ui()
         self.mode_group_box = QtWidgets.QGroupBox(self.left_column)
         self.mode_group_box.setObjectName('mode_group_box')
         self.mode_layout = QtWidgets.QVBoxLayout(self.mode_group_box)
@@ -108,7 +108,7 @@ class SongsTab(SettingsTab):
         self.german_notation_radio_button.clicked.connect(self.on_german_notation_button_clicked)
         self.neolatin_notation_radio_button.clicked.connect(self.on_neolatin_notation_button_clicked)
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         self.mode_group_box.setTitle(translate('SongsPlugin.SongsTab', 'Song related settings'))
         self.tool_bar_active_check_box.setText(translate('SongsPlugin.SongsTab',
                                                          'Enable "Go to verse" button in Live panel'))

@@ -24,6 +24,7 @@ from lxml import etree
 
 from openlp.plugins.bibles.lib.bibleimport import BibleImport
 
+
 NS = {'ns': 'http://www.bibletechnologies.net/2003/OSIS/namespace'}
 # Tags we don't use and can remove the content
 REMOVABLE_ELEMENTS = (

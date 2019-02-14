@@ -31,6 +31,7 @@ from openlp.core.lib.ui import critical_error_message_box
 from openlp.plugins.songs.forms.editversedialog import Ui_EditVerseDialog
 from openlp.plugins.songs.lib import VerseType, transpose_lyrics
 
+
 log = logging.getLogger(__name__)
 
 VERSE_REGEX = re.compile(r'---\[(.+):\D*(\d*)\D*.*\]---')
@@ -46,7 +47,7 @@ class EditVerseForm(QtWidgets.QDialog, Ui_EditVerseDialog):
         """
         super(EditVerseForm, self).__init__(parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint |
                                             QtCore.Qt.WindowCloseButtonHint)
-        self.setupUi(self)
+        self.setup_ui(self)
         self.has_single_verse = False
         self.insert_button.clicked.connect(self.on_insert_button_clicked)
         self.overflow_split_button.clicked.connect(self.on_overflow_split_button_clicked)

@@ -32,7 +32,7 @@ from openlp.core.common import CONTROL_CHARS
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.i18n import translate
 from openlp.core.common.settings import Settings
-from openlp.core.lib import clean_tags
+from openlp.core.display.render import remove_tags
 from openlp.plugins.songs.lib.db import Author, MediaFile, Song
 from openlp.plugins.songs.lib.ui import SongStrings
 
@@ -382,7 +382,7 @@ def clean_song(manager, song):
     if isinstance(song.lyrics, bytes):
         song.lyrics = str(song.lyrics, encoding='utf8')
     verses = SongXML().get_verses(song.lyrics)
-    song.search_lyrics = ' '.join([clean_string(clean_tags(verse[1], True)) for verse in verses])
+    song.search_lyrics = ' '.join([clean_string(remove_tags(verse[1], True)) for verse in verses])
     # The song does not have any author, add one.
     if not song.authors_songs:
         name = SongStrings.AuthorUnknown

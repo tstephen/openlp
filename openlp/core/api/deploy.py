@@ -25,7 +25,7 @@ Download and "install" the remote web client
 from zipfile import ZipFile
 
 from openlp.core.common.applocation import AppLocation
-from openlp.core.common.httputils import download_file, get_web_page, get_url_file_size
+from openlp.core.common.httputils import download_file, get_url_file_size, get_web_page
 from openlp.core.common.registry import Registry
 
 

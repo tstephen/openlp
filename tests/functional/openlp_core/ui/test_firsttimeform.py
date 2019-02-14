@@ -25,12 +25,13 @@ Package to test the openlp.core.ui.firsttimeform package.
 import os
 import tempfile
 from unittest import TestCase
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, call, patch
 
 from openlp.core.common.path import Path
 from openlp.core.common.registry import Registry
 from openlp.core.ui.firsttimeform import FirstTimeForm
 from tests.helpers.testmixin import TestMixin
+
 
 FAKE_CONFIG = """
 [general]
@@ -101,58 +102,82 @@ class TestFirstTimeForm(TestCase, TestMixin):
         # GIVEN: An initialised FRW and a whole lot of stuff mocked out
         frw = FirstTimeForm(None)
         frw.initialize(MagicMock())
+        mocked_settings = MagicMock()
+        mocked_settings.value.side_effect = lambda key: {'core/has run wizard': False}[key]
         with patch.object(frw, 'restart') as mocked_restart, \
                 patch.object(frw, 'cancel_button') as mocked_cancel_button, \
                 patch.object(frw, 'no_internet_finish_button') as mocked_no_internet_finish_btn, \
                 patch.object(frw, 'currentIdChanged') as mocked_currentIdChanged, \
+                patch.object(frw, 'theme_combo_box') as mocked_theme_combo_box, \
                 patch.object(Registry, 'register_function') as mocked_register_function, \
-                patch('openlp.core.ui.firsttimeform.Settings') as MockedSettings, \
-                patch('openlp.core.ui.firsttimeform.gettempdir') as mocked_gettempdir, \
+                patch('openlp.core.ui.firsttimeform.Settings', return_value=mocked_settings), \
+                patch('openlp.core.ui.firsttimeform.gettempdir', return_value='temp') as mocked_gettempdir, \
                 patch('openlp.core.ui.firsttimeform.create_paths') as mocked_create_paths, \
                 patch.object(frw.application, 'set_normal_cursor'):
-            mocked_settings = MagicMock()
-            mocked_settings.value.return_value = True
-            MockedSettings.return_value = mocked_settings
-            mocked_gettempdir.return_value = 'temp'
-            expected_temp_path = Path('temp', 'openlp')
+            mocked_theme_manager = MagicMock()
+            Registry().register('theme_manager', mocked_theme_manager)
 
             # WHEN: The set_defaults() method is run
             frw.set_defaults()
 
             # THEN: The default values should have been set
-            mocked_restart.assert_called_with()
+            mocked_restart.assert_called_once()
             assert 'http://openlp.org/files/frw/' == frw.web, 'The default URL should be set'
-            mocked_cancel_button.clicked.connect.assert_called_with(frw.on_cancel_button_clicked)
-            mocked_no_internet_finish_btn.clicked.connect.assert_called_with(frw.on_no_internet_finish_button_clicked)
-            mocked_currentIdChanged.connect.assert_called_with(frw.on_current_id_changed)
-            mocked_register_function.assert_called_with('config_screen_changed', frw.update_screen_list_combo)
-            mocked_no_internet_finish_btn.setVisible.assert_called_with(False)
-            mocked_settings.value.assert_called_with('core/has run wizard')
-            mocked_gettempdir.assert_called_with()
-            mocked_create_paths.assert_called_with(expected_temp_path)
+            mocked_cancel_button.clicked.connect.assert_called_once_with(frw.on_cancel_button_clicked)
+            mocked_no_internet_finish_btn.clicked.connect.assert_called_once_with(
+                frw.on_no_internet_finish_button_clicked)
+            mocked_currentIdChanged.connect.assert_called_once_with(frw.on_current_id_changed)
+            mocked_register_function.assert_called_once_with('config_screen_changed', frw.screen_selection_widget.load)
+            mocked_no_internet_finish_btn.setVisible.assert_called_once_with(False)
+            mocked_settings.value.assert_has_calls([call('core/has run wizard')])
+            mocked_gettempdir.assert_called_once()
+            mocked_create_paths.assert_called_once_with(Path('temp', 'openlp'))
+            mocked_theme_combo_box.clear.assert_called_once()
+            mocked_theme_manager.assert_not_called()
 
-    def test_update_screen_list_combo(self):
+    def test_set_defaults_rerun(self):
         """
-        Test that the update_screen_list_combo() method works correctly
+        Test that the default values are set when set_defaults() is run
         """
-        # GIVEN: A mocked Screen() object and an initialised First Run Wizard and a mocked display_combo_box
-        expected_screen_list = ['Screen 1', 'Screen 2']
-        mocked_screens = MagicMock()
-        mocked_screens.get_screen_list.return_value = expected_screen_list
+        # GIVEN: An initialised FRW and a whole lot of stuff mocked out
         frw = FirstTimeForm(None)
-        frw.initialize(mocked_screens)
-        with patch.object(frw, 'display_combo_box') as mocked_display_combo_box:
-            mocked_display_combo_box.count.return_value = 2
+        frw.initialize(MagicMock())
+        mocked_settings = MagicMock()
+        mocked_settings.value.side_effect = \
+            lambda key: {'core/has run wizard': True, 'themes/global theme': 'Default Theme'}[key]
+        with patch.object(frw, 'restart') as mocked_restart, \
+                patch.object(frw, 'cancel_button') as mocked_cancel_button, \
+                patch.object(frw, 'no_internet_finish_button') as mocked_no_internet_finish_btn, \
+                patch.object(frw, 'currentIdChanged') as mocked_currentIdChanged, \
+                patch.object(frw, 'theme_combo_box', **{'findText.return_value': 3}) as mocked_theme_combo_box, \
+                patch.object(Registry, 'register_function') as mocked_register_function, \
+                patch('openlp.core.ui.firsttimeform.Settings', return_value=mocked_settings), \
+                patch('openlp.core.ui.firsttimeform.gettempdir', return_value='temp') as mocked_gettempdir, \
+                patch('openlp.core.ui.firsttimeform.create_paths') as mocked_create_paths, \
+                patch.object(frw.application, 'set_normal_cursor'):
+            mocked_theme_manager = MagicMock(**{'get_themes.return_value': ['a', 'b', 'c']})
+            Registry().register('theme_manager', mocked_theme_manager)
 
-            # WHEN: update_screen_list_combo() is called
-            frw.update_screen_list_combo()
+            # WHEN: The set_defaults() method is run
+            frw.set_defaults()
 
-            # THEN: The combobox should have been updated
-            mocked_display_combo_box.clear.assert_called_with()
-            mocked_screens.get_screen_list.assert_called_with()
-            mocked_display_combo_box.addItems.assert_called_with(expected_screen_list)
-            mocked_display_combo_box.count.assert_called_with()
-            mocked_display_combo_box.setCurrentIndex.assert_called_with(1)
+            # THEN: The default values should have been set
+            mocked_restart.assert_called_once()
+            assert 'http://openlp.org/files/frw/' == frw.web, 'The default URL should be set'
+            mocked_cancel_button.clicked.connect.assert_called_once_with(frw.on_cancel_button_clicked)
+            mocked_no_internet_finish_btn.clicked.connect.assert_called_once_with(
+                frw.on_no_internet_finish_button_clicked)
+            mocked_currentIdChanged.connect.assert_called_once_with(frw.on_current_id_changed)
+            mocked_register_function.assert_called_once_with('config_screen_changed', frw.screen_selection_widget.load)
+            mocked_no_internet_finish_btn.setVisible.assert_called_once_with(False)
+            mocked_settings.value.assert_has_calls([call('core/has run wizard'), call('themes/global theme')])
+            mocked_gettempdir.assert_called_once()
+            mocked_create_paths.assert_called_once_with(Path('temp', 'openlp'))
+            mocked_theme_manager.assert_not_called()
+            mocked_theme_combo_box.clear.assert_called_once()
+            mocked_theme_combo_box.addItem.assert_has_calls([call('a'), call('b'), call('c')])
+            mocked_theme_combo_box.findText.assert_called_once_with('Default Theme')
+            mocked_theme_combo_box.setCurrentIndex(3)
 
     @patch('openlp.core.ui.firsttimeform.time')
     @patch('openlp.core.ui.firsttimeform.get_thread_worker')

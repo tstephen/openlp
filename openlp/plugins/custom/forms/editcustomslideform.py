@@ -26,6 +26,7 @@ from PyQt5 import QtCore, QtWidgets
 
 from .editcustomslidedialog import Ui_CustomSlideEditDialog
 
+
 log = logging.getLogger(__name__)
 
 
@@ -41,7 +42,7 @@ class EditCustomSlideForm(QtWidgets.QDialog, Ui_CustomSlideEditDialog):
         """
         super(EditCustomSlideForm, self).__init__(parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint |
                                                   QtCore.Qt.WindowCloseButtonHint)
-        self.setupUi(self)
+        self.setup_ui(self)
         # Connecting signals and slots
         self.insert_button.clicked.connect(self.on_insert_button_clicked)
         self.split_button.clicked.connect(self.on_split_button_clicked)

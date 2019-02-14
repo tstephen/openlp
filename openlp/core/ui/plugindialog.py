@@ -33,7 +33,7 @@ class Ui_PluginViewDialog(object):
     """
     The UI of the plugin view dialog
     """
-    def setupUi(self, plugin_view_dialog):
+    def setup_ui(self, plugin_view_dialog):
         """
         Set up the UI
         """
@@ -66,9 +66,9 @@ class Ui_PluginViewDialog(object):
         self.plugin_layout.addLayout(self.list_layout)
         self.button_box = create_button_box(plugin_view_dialog, 'button_box', ['ok'])
         self.plugin_layout.addWidget(self.button_box)
-        self.retranslateUi(plugin_view_dialog)
+        self.retranslate_ui(plugin_view_dialog)
 
-    def retranslateUi(self, plugin_view_dialog):
+    def retranslate_ui(self, plugin_view_dialog):
         """
         Translate the UI on the fly
         """

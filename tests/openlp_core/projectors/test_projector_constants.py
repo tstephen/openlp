@@ -23,6 +23,7 @@
 Package to test the openlp.core.projectors.constants module.
 """
 from unittest import TestCase
+
 from openlp.core.projectors import constants
 from openlp.core.projectors.constants import STATUS_CODE, STATUS_MSG
 

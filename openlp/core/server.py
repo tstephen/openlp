@@ -21,8 +21,8 @@
 ###############################################################################
 from PyQt5 import QtCore, QtNetwork
 
-from openlp.core.common.registry import Registry
 from openlp.core.common.mixins import LogMixin
+from openlp.core.common.registry import Registry
 
 
 class Server(QtCore.QObject, LogMixin):

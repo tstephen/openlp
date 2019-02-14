@@ -28,10 +28,8 @@ from unittest.mock import MagicMock, patch
 from PyQt5 import QtCore, QtGui
 
 from openlp.core.common.path import Path
-from openlp.core.lib import build_icon, check_item_selected, clean_tags, compare_chord_lyric, \
-    create_separated_list, create_thumb, expand_chords, expand_chords_for_printing, expand_tags, find_formatting_tags, \
+from openlp.core.lib import build_icon, check_item_selected, create_separated_list, create_thumb, \
     get_text_file_string, image_to_byte, resize_image, str_to_bool, validate_thumb
-from openlp.core.lib.formattingtags import FormattingTags
 from tests.utils.constants import RESOURCE_PATH
 
 
@@ -488,12 +486,12 @@ class TestLib(TestCase):
         except Exception:
             pass
 
+    @patch('openlp.core.lib.QtWidgets', MagicMock())
     def test_check_item_selected_true(self):
         """
         Test that the check_item_selected() function returns True when there are selected indexes
         """
         # GIVEN: A mocked out QtWidgets module and a list widget with selected indexes
-        # mocked_QtWidgets = patch('openlp.core.lib.QtWidgets')
         mocked_list_widget = MagicMock()
         mocked_list_widget.selectedIndexes.return_value = True
         message = 'message'
@@ -525,67 +523,6 @@ class TestLib(TestCase):
             mocked_list_widget.selectedIndexes.assert_called_with()
             MockedQtWidgets.QMessageBox.information.assert_called_with('parent', 'mocked translate', 'message')
             assert result is False, 'The result should be False'
-
-    def test_clean_tags(self):
-        """
-        Test clean_tags() method.
-        """
-        with patch('openlp.core.lib.FormattingTags.get_html_tags') as mocked_get_tags:
-            # GIVEN: Mocked get_html_tags() method.
-            mocked_get_tags.return_value = [{
-                'desc': 'Black',
-                'start tag': '{b}',
-                'start html': '<span style="-webkit-text-fill-color:black">',
-                'end tag': '{/b}', 'end html': '</span>', 'protected': True,
-                'temporary': False
-            }]
-            string_to_pass = 'ASDF<br>foo{br}bar&nbsp;{b}black{/b}'
-            wanted_string = 'ASDF\nfoo\nbar black'
-
-            # WHEN: Clean the string.
-            result_string = clean_tags(string_to_pass)
-
-            # THEN: The strings should be identical.
-            assert wanted_string == result_string, 'The strings should be identical'
-
-    def test_expand_tags(self):
-        """
-        Test the expand_tags() method.
-        """
-        with patch('openlp.core.lib.FormattingTags.get_html_tags') as mocked_get_tags:
-            # GIVEN: Mocked get_html_tags() method.
-            mocked_get_tags.return_value = [
-                {
-                    'desc': 'Black',
-                    'start tag': '{b}',
-                    'start html': '<span style="-webkit-text-fill-color:black">',
-                    'end tag': '{/b}', 'end html': '</span>', 'protected': True,
-                    'temporary': False
-                },
-                {
-                    'desc': 'Yellow',
-                    'start tag': '{y}',
-                    'start html': '<span style="-webkit-text-fill-color:yellow">',
-                    'end tag': '{/y}', 'end html': '</span>', 'protected': True,
-                    'temporary': False
-                },
-                {
-                    'desc': 'Green',
-                    'start tag': '{g}',
-                    'start html': '<span style="-webkit-text-fill-color:green">',
-                    'end tag': '{/g}', 'end html': '</span>', 'protected': True,
-                    'temporary': False
-                }
-            ]
-            string_to_pass = '{b}black{/b}{y}yellow{/y}'
-            wanted_string = '<span style="-webkit-text-fill-color:black">black</span>' + \
-                '<span style="-webkit-text-fill-color:yellow">yellow</span>'
-
-            # WHEN: Replace the tags.
-            result_string = expand_tags(string_to_pass)
-
-            # THEN: The strings should be identical.
-            assert wanted_string == result_string, 'The strings should be identical.'
 
     def test_validate_thumb_file_does_not_exist(self):
         """
@@ -695,7 +632,7 @@ class TestLib(TestCase):
         """
         Test the create_separated_list function with an empty list
         """
-        # GIVEN: An empty list and the mocked Qt module.
+        # GIVEN: An empty list
         string_list = []
 
         # WHEN: We get a string build from the entries it the list and a separator.
@@ -743,115 +680,3 @@ class TestLib(TestCase):
         # THEN: We should have "Author 1, Author 2 and Author 3"
         assert string_result == 'Author 1, Author 2 and Author 3', \
             'The string should be "Author 1, Author 2, and Author 3".'
-
-    def test_expand_chords(self):
-        """
-        Test that the expanding of chords works as expected.
-        """
-        # GIVEN: A lyrics-line with chords
-        text_with_chords = 'H[C]alleluya.[F] [G]'
-
-        # WHEN: Expanding the chords
-        text_with_expanded_chords = expand_chords(text_with_chords)
-
-        # THEN: We should get html that looks like below
-        expected_html = '<span class="chordline firstchordline">H<span class="chord"><span><strong>C</strong></span>' \
-                        '</span>alleluya.<span class="chord"><span><strong>F</strong></span></span><span class="ws">' \
-                        '&nbsp;&nbsp;</span> <span class="chord"><span><strong>G</strong></span></span></span>'
-        assert expected_html == text_with_expanded_chords, 'The expanded chords should look as expected!'
-
-    def test_expand_chords2(self):
-        """
-        Test that the expanding of chords works as expected when special chars are involved.
-        """
-        # GIVEN: A lyrics-line with chords
-        text_with_chords = "I[D]'M NOT MOVED BY WHAT I SEE HALLE[F]LUJA[C]H"
-
-        # WHEN: Expanding the chords
-        text_with_expanded_chords = expand_tags(text_with_chords, True)
-
-        # THEN: We should get html that looks like below
-        expected_html = '<span class="chordline firstchordline">I<span class="chord"><span><strong>D</strong></span>' \
-                        '</span>&#x27;M NOT MOVED BY WHAT I SEE HALLE<span class="chord"><span><strong>F</strong>' \
-                        '</span></span>LUJA<span class="chord"><span><strong>C</strong></span></span>H</span>'
-        assert expected_html == text_with_expanded_chords, 'The expanded chords should look as expected!'
-
-    def test_compare_chord_lyric_short_chord(self):
-        """
-        Test that the chord/lyric comparing works.
-        """
-        # GIVEN: A chord and some lyric
-        chord = 'C'
-        lyrics = 'alleluya'
-
-        # WHEN: Comparing the chord and lyrics
-        ret = compare_chord_lyric(chord, lyrics)
-
-        # THEN: The returned value should 0 because the lyric is longer than the chord
-        assert 0 == ret, 'The returned value should 0 because the lyric is longer than the chord'
-
-    def test_compare_chord_lyric_long_chord(self):
-        """
-        Test that the chord/lyric comparing works.
-        """
-        # GIVEN: A chord and some lyric
-        chord = 'Gsus'
-        lyrics = 'me'
-
-        # WHEN: Comparing the chord and lyrics
-        ret = compare_chord_lyric(chord, lyrics)
-
-        # THEN: The returned value should 4 because the chord is longer than the lyric
-        assert 4 == ret, 'The returned value should 4 because the chord is longer than the lyric'
-
-    def test_find_formatting_tags(self):
-        """
-        Test that find_formatting_tags works as expected
-        """
-        # GIVEN: Lyrics with formatting tags and a empty list of formatting tags
-        lyrics = '{st}Amazing {r}grace{/r} how sweet the sound'
-        tags = []
-        FormattingTags.load_tags()
-
-        # WHEN: Detecting active formatting tags
-        active_tags = find_formatting_tags(lyrics, tags)
-
-        # THEN: The list of active tags should contain only 'st'
-        assert ['st'] == active_tags, 'The list of active tags should contain only "st"'
-
-    def test_expand_chords_for_printing(self):
-        """
-        Test that the expanding of chords for printing works as expected.
-        """
-        # GIVEN: A lyrics-line with chords
-        text_with_chords = '{st}[D]Amazing {r}gr[D7]ace{/r}  how [G]sweet the [D]sound  [F]{/st}'
-        FormattingTags.load_tags()
-
-        # WHEN: Expanding the chords
-        text_with_expanded_chords = expand_chords_for_printing(text_with_chords, '{br}')
-
-        # THEN: We should get html that looks like below
-        expected_html = '<table class="line" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td><table ' \
-                        'class="segment" cellpadding="0" cellspacing="0" border="0" align="left"><tr class="chordrow">'\
-                        '<td class="chord">&nbsp;</td><td class="chord">D</td></tr><tr><td class="lyrics">{st}{/st}' \
-                        '</td><td class="lyrics">{st}Amazing&nbsp;{/st}</td></tr></table><table class="segment" ' \
-                        'cellpadding="0" cellspacing="0" border="0" align="left"><tr class="chordrow">' \
-                        '<td class="chord">&nbsp;</td><td class="chord">D7</td></tr><tr><td class="lyrics">{st}{r}gr' \
-                        '{/r}{/st}</td><td class="lyrics">{r}{st}ace{/r}&nbsp;{/st}</td></tr></table><table ' \
-                        'class="segment" cellpadding="0" cellspacing="0" border="0" align="left"><tr class="chordrow">'\
-                        '<td class="chord">&nbsp;</td></tr><tr><td class="lyrics">{st}&nbsp;{/st}</td></tr></table>' \
-                        '<table class="segment" cellpadding="0" cellspacing="0" border="0" align="left"><tr ' \
-                        'class="chordrow"><td class="chord">&nbsp;</td></tr><tr><td class="lyrics">{st}how&nbsp;{/st}' \
-                        '</td></tr></table><table class="segment" cellpadding="0" cellspacing="0" border="0" ' \
-                        'align="left"><tr class="chordrow"><td class="chord">G</td></tr><tr><td class="lyrics">{st}' \
-                        'sweet&nbsp;{/st}</td></tr></table><table class="segment" cellpadding="0" cellspacing="0" ' \
-                        'border="0" align="left"><tr class="chordrow"><td class="chord">&nbsp;</td></tr><tr><td ' \
-                        'class="lyrics">{st}the&nbsp;{/st}</td></tr></table><table class="segment" cellpadding="0" ' \
-                        'cellspacing="0" border="0" align="left"><tr class="chordrow"><td class="chord">D</td></tr>' \
-                        '<tr><td class="lyrics">{st}sound&nbsp;{/st}</td></tr></table><table class="segment" ' \
-                        'cellpadding="0" cellspacing="0" border="0" align="left"><tr class="chordrow"><td ' \
-                        'class="chord">&nbsp;</td></tr><tr><td class="lyrics">{st}&nbsp;{/st}</td></tr></table>' \
-                        '<table class="segment" cellpadding="0" cellspacing="0" border="0" align="left"><tr ' \
-                        'class="chordrow"><td class="chord">F</td></tr><tr><td class="lyrics">{st}{/st}&nbsp;</td>' \
-                        '</tr></table></td></tr></table>'
-        assert expected_html == text_with_expanded_chords, 'The expanded chords should look as expected!'
