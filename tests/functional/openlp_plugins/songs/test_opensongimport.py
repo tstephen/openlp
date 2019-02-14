@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,12 +23,13 @@
 This module contains tests for the OpenSong song importer.
 """
 from unittest import TestCase
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 from openlp.core.common.registry import Registry
 from openlp.plugins.songs.lib.importers.opensong import OpenSongImport
 from tests.helpers.songfileimport import SongImportTestHelper
 from tests.utils.constants import RESOURCE_PATH
+
 
 TEST_PATH = RESOURCE_PATH / 'songs' / 'opensong'
 

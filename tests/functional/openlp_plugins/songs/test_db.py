@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -29,7 +29,7 @@ from unittest import TestCase
 
 from openlp.core.lib.db import upgrade_db
 from openlp.plugins.songs.lib import upgrade
-from openlp.plugins.songs.lib.db import Song, Author, AuthorType, Book
+from openlp.plugins.songs.lib.db import Author, AuthorType, Book, Song
 from tests.utils.constants import TEST_RESOURCES_PATH
 
 

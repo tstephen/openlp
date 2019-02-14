@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,7 +23,6 @@
 The :mod:`slidecontroller` module contains the most important part of OpenLP - the slide controller
 """
 import copy
-import os
 from collections import deque
 from threading import Lock
 
@@ -33,25 +32,23 @@ from openlp.core.common import SlideLimits
 from openlp.core.common.actions import ActionList, CategoryOrder
 from openlp.core.common.i18n import UiStrings, translate
 from openlp.core.common.mixins import LogMixin, RegistryProperties
+from openlp.core.common.path import Path
 from openlp.core.common.registry import Registry, RegistryBase
 from openlp.core.common.settings import Settings
 from openlp.core.display.screens import ScreenList
-from openlp.core.lib import ItemCapabilities, ServiceItem, ImageSource, ServiceItemAction, build_icon, build_html
+from openlp.core.display.window import DisplayWindow
+from openlp.core.lib import ServiceItemAction, image_to_byte
+from openlp.core.lib.serviceitem import ItemCapabilities
 from openlp.core.lib.ui import create_action
-from openlp.core.ui import HideMode, MainDisplay, Display, DisplayControllerType
+from openlp.core.ui import DisplayControllerType, HideMode
 from openlp.core.ui.icons import UiIcons
+from openlp.core.widgets.layouts import AspectRatioLayout
 from openlp.core.widgets.toolbar import OpenLPToolbar
 from openlp.core.widgets.views import ListPreviewWidget
 
+
 # Threshold which has to be trespassed to toggle.
 HIDE_MENU_THRESHOLD = 27
-AUDIO_TIME_LABEL_STYLESHEET = 'background-color: palette(background); ' \
-    'border-top-color: palette(shadow); ' \
-    'border-left-color: palette(shadow); ' \
-    'border-bottom-color: palette(light); ' \
-    'border-right-color: palette(light); ' \
-    'border-radius: 3px; border-style: inset; ' \
-    'border-width: 1; font-family: monospace; margin: 2px;'
 
 NARROW_MENU = [
     'hide_menu'
@@ -60,10 +57,6 @@ LOOP_LIST = [
     'play_slides_menu',
     'loop_separator',
     'delay_spin_box'
-]
-AUDIO_LIST = [
-    'audioPauseItem',
-    'audio_time_label'
 ]
 WIDE_MENU = [
     'blank_screen_button',
@@ -75,33 +68,6 @@ NON_TEXT_MENU = [
     'blank_screen_button',
     'desktop_screen_button'
 ]
-
-
-class DisplayController(QtWidgets.QWidget):
-    """
-    Controller is a general display controller widget.
-    """
-    def __init__(self, *args, **kwargs):
-        """
-        Set up the general Controller.
-        """
-        super().__init__(*args, **kwargs)
-        self.is_live = False
-        self.display = None
-        self.controller_type = None
-        Registry().set_flag('has doubleclick added item to service', True)
-        Registry().set_flag('replace service manager item', False)
-
-    def send_to_plugins(self, *args):
-        """
-        This is the generic function to send signal for control widgets, created from within other plugins
-        This function is needed to catch the current controller
-
-        :param args: Arguments to send to the plugins
-        """
-        sender = self.sender().objectName() if self.sender().objectName() else self.sender().text()
-        controller = self
-        Registry().execute('{text}'.format(text=sender), [controller, args])
 
 
 class InfoLabel(QtWidgets.QLabel):
@@ -132,31 +98,57 @@ class InfoLabel(QtWidgets.QLabel):
         super().setText(text)
 
 
-class SlideController(DisplayController, LogMixin, RegistryProperties):
+class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
     """
     SlideController is the slide controller widget. This widget is what the
     user uses to control the displaying of verses/slides/etc on the screen.
     """
+
     def __init__(self, *args, **kwargs):
         """
         Set up the Slide Controller.
         """
         super().__init__(*args, **kwargs)
+        self.is_live = False
+        self.controller_type = None
+        self.displays = []
+        self.screens = ScreenList()
+        Registry().set_flag('has doubleclick added item to service', True)
+        Registry().set_flag('replace service manager item', False)
 
     def post_set_up(self):
         """
         Call by bootstrap functions
         """
         self.initialise()
+        self.setup_displays()
         self.screen_size_changed()
+
+    def setup_displays(self):
+        """
+        Set up the display
+        """
+        if not self.is_live:
+            return
+        if self.displays:
+            # Delete any existing displays
+            del self.displays[:]
+        for screen in self.screens:
+            if screen.is_display:
+                display = DisplayWindow(self, screen)
+                self.displays.append(display)
+        #    display.media_watcher.progress.connect(self.on_audio_time_remaining)
+
+    @property
+    def display(self):
+        return self.displays[0] if self.displays else None
 
     def initialise(self):
         """
         Initialise the UI elements of the controller
         """
-        self.screens = ScreenList()
         try:
-            self.ratio = self.screens.current['size'].width() / self.screens.current['size'].height()
+            self.ratio = self.screens.current.display_geometry.width() / self.screens.current.display_geometry.height()
         except ZeroDivisionError:
             self.ratio = 1
         self.process_queue_lock = Lock()
@@ -334,33 +326,6 @@ class SlideController(DisplayController, LogMixin, RegistryProperties):
             self.song_menu.setPopupMode(QtWidgets.QToolButton.InstantPopup)
             self.song_menu.setMenu(QtWidgets.QMenu(translate('OpenLP.SlideController', 'Go To'), self.toolbar))
             self.toolbar.add_toolbar_widget(self.song_menu)
-            # Stuff for items with background audio.
-            # FIXME: object name should be changed. But this requires that we migrate the shortcut.
-            self.audio_pause_item = self.toolbar.add_toolbar_action(
-                'audioPauseItem',
-                icon=UiIcons().pause, text=translate('OpenLP.SlideController', 'Pause Audio'),
-                tooltip=translate('OpenLP.SlideController', 'Pause audio.'),
-                checked=False, visible=False, category=self.category, context=QtCore.Qt.WindowShortcut,
-                can_shortcuts=True, triggers=self.set_audio_pause_clicked)
-            self.audio_menu = QtWidgets.QMenu(translate('OpenLP.SlideController', 'Background Audio'), self.toolbar)
-            self.audio_pause_item.setMenu(self.audio_menu)
-            self.audio_pause_item.setParent(self.toolbar)
-            self.toolbar.widgetForAction(self.audio_pause_item).setPopupMode(QtWidgets.QToolButton.MenuButtonPopup)
-            self.next_track_item = create_action(self, 'nextTrackItem', text=UiStrings().NextTrack,
-                                                 icon=UiIcons().arrow_right,
-                                                 tooltip=translate('OpenLP.SlideController',
-                                                                   'Go to next audio track.'),
-                                                 category=self.category,
-                                                 can_shortcuts=True,
-                                                 triggers=self.on_next_track_clicked)
-            self.audio_menu.addAction(self.next_track_item)
-            self.track_menu = self.audio_menu.addMenu(translate('OpenLP.SlideController', 'Tracks'))
-            self.audio_time_label = QtWidgets.QLabel(' 00:00 ', self.toolbar)
-            self.audio_time_label.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignHCenter)
-            self.audio_time_label.setStyleSheet(AUDIO_TIME_LABEL_STYLESHEET)
-            self.audio_time_label.setObjectName('audio_time_label')
-            self.toolbar.add_toolbar_widget(self.audio_time_label)
-            self.toolbar.set_widget_visible(AUDIO_LIST, False)
             self.toolbar.set_widget_visible('song_menu', False)
         # Screen preview area
         self.preview_frame = QtWidgets.QFrame(self.splitter)
@@ -368,34 +333,19 @@ class SlideController(DisplayController, LogMixin, RegistryProperties):
         self.preview_frame.setMinimumHeight(100)
         self.preview_frame.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored,
                                                                QtWidgets.QSizePolicy.Ignored,
-                                         QtWidgets.QSizePolicy.Label))
+                                                               QtWidgets.QSizePolicy.Label))
         self.preview_frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.preview_frame.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.preview_frame.setObjectName('preview_frame')
-        self.grid = QtWidgets.QGridLayout(self.preview_frame)
-        self.grid.setContentsMargins(8, 8, 8, 8)
-        self.grid.setObjectName('grid')
-        self.slide_layout = QtWidgets.QVBoxLayout()
+        self.slide_layout = AspectRatioLayout(self.preview_frame, self.ratio)
+        self.slide_layout.margin = 8
         self.slide_layout.setSpacing(0)
-        self.slide_layout.setContentsMargins(0, 0, 0, 0)
         self.slide_layout.setObjectName('SlideLayout')
-        self.preview_display = Display(self)
-        self.slide_layout.insertWidget(0, self.preview_display)
-        self.preview_display.hide()
+        # Set up the preview display
+        self.preview_display = DisplayWindow(self)
+        self.slide_layout.addWidget(self.preview_display)
+        self.slide_layout.resize.connect(self.on_preview_resize)
         # Actual preview screen
-        self.slide_preview = QtWidgets.QLabel(self)
-        size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-        size_policy.setHorizontalStretch(0)
-        size_policy.setVerticalStretch(0)
-        size_policy.setHeightForWidth(self.slide_preview.sizePolicy().hasHeightForWidth())
-        self.slide_preview.setSizePolicy(size_policy)
-        self.slide_preview.setFrameShape(QtWidgets.QFrame.Box)
-        self.slide_preview.setFrameShadow(QtWidgets.QFrame.Plain)
-        self.slide_preview.setLineWidth(1)
-        self.slide_preview.setScaledContents(True)
-        self.slide_preview.setObjectName('slide_preview')
-        self.slide_layout.insertWidget(0, self.slide_preview)
-        self.grid.addLayout(self.slide_layout, 0, 0, 1, 1)
         if self.is_live:
             self.current_shortcut = ''
             self.shortcut_timer = QtCore.QTimer()
@@ -406,7 +356,7 @@ class SlideController(DisplayController, LogMixin, RegistryProperties):
                 {'key': 'C', 'configurable': True, 'text': translate('OpenLP.SlideController', 'Go to "Chorus"')},
                 {'key': 'B', 'configurable': True, 'text': translate('OpenLP.SlideController', 'Go to "Bridge"')},
                 {'key': 'P', 'configurable': True,
-                    'text': translate('OpenLP.SlideController', 'Go to "Pre-Chorus"')},
+                 'text': translate('OpenLP.SlideController', 'Go to "Pre-Chorus"')},
                 {'key': 'I', 'configurable': True, 'text': translate('OpenLP.SlideController', 'Go to "Intro"')},
                 {'key': 'E', 'configurable': True, 'text': translate('OpenLP.SlideController', 'Go to "Ending"')},
                 {'key': 'O', 'configurable': True, 'text': translate('OpenLP.SlideController', 'Go to "Other"')}
@@ -446,13 +396,13 @@ class SlideController(DisplayController, LogMixin, RegistryProperties):
         Registry().register_function('slidecontroller_update_slide_limits', self.update_slide_limits)
         getattr(self, 'slidecontroller_{text}_set'.format(text=self.type_prefix)).connect(self.on_slide_selected_index)
         getattr(self, 'slidecontroller_{text}_next'.format(text=self.type_prefix)).connect(self.on_slide_selected_next)
-        # NOTE: {t} used to keep line length < maxline
+        # NOTE: {} used to keep line length < maxline
         getattr(self,
-                'slidecontroller_{t}_previous'.format(t=self.type_prefix)).connect(self.on_slide_selected_previous)
+                'slidecontroller_{}_previous'.format(self.type_prefix)).connect(self.on_slide_selected_previous)
         if self.is_live:
-            getattr(self, 'mediacontroller_live_play').connect(self.media_controller.on_media_play)
-            getattr(self, 'mediacontroller_live_pause').connect(self.media_controller.on_media_pause)
-            getattr(self, 'mediacontroller_live_stop').connect(self.media_controller.on_media_stop)
+            self.mediacontroller_live_play.connect(self.media_controller.on_media_play)
+            self.mediacontroller_live_pause.connect(self.media_controller.on_media_pause)
+            self.mediacontroller_live_stop.connect(self.media_controller.on_media_stop)
 
     def _slide_shortcut_activated(self):
         """
@@ -472,6 +422,7 @@ class SlideController(DisplayController, LogMixin, RegistryProperties):
                 This empty class is mostly just to satisfy Python, PEP8 and PyCharm
                 """
                 pass
+
             is_songs_plugin_available = False
         sender_name = self.sender().objectName()
         verse_type = sender_name[15:] if sender_name[:15] == 'shortcutAction_' else ''
@@ -516,6 +467,17 @@ class SlideController(DisplayController, LogMixin, RegistryProperties):
                 self.slide_selected()
             # Reset the shortcut.
             self.current_shortcut = ''
+
+    def send_to_plugins(self, *args):
+        """
+        This is the generic function to send signal for control widgets, created from within other plugins
+        This function is needed to catch the current controller
+
+        :param args: Arguments to send to the plugins
+        """
+        sender = self.sender().objectName() if self.sender().objectName() else self.sender().text()
+        controller = self
+        Registry().execute('{text}'.format(text=sender), [controller, args])
 
     def set_live_hot_keys(self, parent=None):
         """
@@ -587,30 +549,14 @@ class SlideController(DisplayController, LogMixin, RegistryProperties):
         """
         Settings dialog has changed the screen size of adjust output and screen previews.
         """
-        # rebuild display as screen size changed
-        if self.display:
-            self.display.close()
-        self.display = MainDisplay(self)
-        self.display.setup()
-        if self.is_live:
-            self.__add_actions_to_widget(self.display)
-        if self.display.audio_player:
-            self.display.audio_player.position_changed.connect(self.on_audio_time_remaining)
+        if self.is_live and self.displays:
+            for display in self.displays:
+                display.resize(self.screens.current.display_geometry.size())
+        # if self.is_live:
+        #     self.__add_actions_to_widget(self.display)
         # The SlidePreview's ratio.
-        try:
-            self.ratio = self.screens.current['size'].width() / self.screens.current['size'].height()
-        except ZeroDivisionError:
-            self.ratio = 1
-        self.media_controller.setup_display(self.display, False)
-        self.preview_size_changed()
-        self.preview_widget.screen_size_changed(self.ratio)
-        self.preview_display.setup()
-        service_item = ServiceItem()
-        self.preview_display.web_view.setHtml(build_html(service_item, self.preview_display.screen, None, self.is_live,
-                                              plugins=self.plugin_manager.plugins))
-        self.media_controller.setup_display(self.preview_display, True)
-        if self.service_item:
-            self.refresh_service_item()
+
+        # TODO: Need to basically update everything
 
     def __add_actions_to_widget(self, widget):
         """
@@ -630,28 +576,6 @@ class SlideController(DisplayController, LogMixin, RegistryProperties):
             self.desktop_screen,
             self.theme_screen,
             self.blank_screen])
-
-    def preview_size_changed(self):
-        """
-        Takes care of the SlidePreview's size. Is called when one of the the splitters is moved or when the screen
-        size is changed. Note, that this method is (also) called frequently from the mainwindow *paintEvent*.
-        """
-        if self.ratio < self.preview_frame.width() / self.preview_frame.height():
-            # We have to take the height as limit.
-            max_height = self.preview_frame.height() - self.grid.contentsMargins().top() * 2
-            self.slide_preview.setFixedSize(QtCore.QSize(max_height * self.ratio, max_height))
-            self.preview_display.setFixedSize(QtCore.QSize(max_height * self.ratio, max_height))
-            self.preview_display.screen = {'size': self.preview_display.geometry()}
-        else:
-            # We have to take the width as limit.
-            max_width = self.preview_frame.width() - self.grid.contentsMargins().top() * 2
-            self.slide_preview.setFixedSize(QtCore.QSize(max_width, max_width / self.ratio))
-            self.preview_display.setFixedSize(QtCore.QSize(max_width, max_width / self.ratio))
-            self.preview_display.screen = {'size': self.preview_display.geometry()}
-        # Only update controller layout if width has actually changed
-        if self.controller_width != self.controller.width():
-            self.controller_width = self.controller.width()
-            self.on_controller_size_changed(self.controller_width)
 
     def on_controller_size_changed(self, width):
         """
@@ -686,16 +610,6 @@ class SlideController(DisplayController, LogMixin, RegistryProperties):
             self.toolbar.set_widget_visible(WIDE_MENU, visible)
         else:
             self.toolbar.set_widget_visible(NON_TEXT_MENU, visible)
-
-    def on_song_bar_handler(self):
-        """
-        Some song handler
-        """
-        request = self.sender().text()
-        slide_no = self.slide_list[request]
-        width = self.main_window.control_splitter.sizes()[self.split]
-        self.preview_widget.replace_service_item(self.service_item, width, slide_no)
-        self.slide_selected()
 
     def receive_spin_delay(self):
         """
@@ -744,9 +658,9 @@ class SlideController(DisplayController, LogMixin, RegistryProperties):
             if (Settings().value(self.main_window.songs_settings_section + '/display songbar') and
                     not self.song_menu.menu().isEmpty()):
                 self.toolbar.set_widget_visible('song_menu', True)
-        if item.is_capable(ItemCapabilities.CanLoop) and len(item.get_frames()) > 1:
+        if item.is_capable(ItemCapabilities.CanLoop) and len(item.slides) > 1:
             self.toolbar.set_widget_visible(LOOP_LIST)
-        if item.is_media():
+        if item.is_media() or item.is_capable(ItemCapabilities.HasBackgroundAudio):
             self.mediabar.show()
         self.previous_item.setVisible(not item.is_media())
         self.next_item.setVisible(not item.is_media())
@@ -796,7 +710,6 @@ class SlideController(DisplayController, LogMixin, RegistryProperties):
 
         :param item: The current service item
         """
-        item.render()
         slide_no = 0
         if self.song_edit:
             slide_no = self.selected_row
@@ -818,7 +731,7 @@ class SlideController(DisplayController, LogMixin, RegistryProperties):
     def add_service_manager_item(self, item, slide_no):
         """
         Method to install the service item into the controller and request the correct toolbar for the plugin. Called by
-        :class:`~openlp.core.ui.ServiceManager`
+        :class:`~openlp.core.ui.servicemanager.ServiceManager`
 
         :param item: The current service item
         :param slide_no: The slide number to select
@@ -854,73 +767,74 @@ class SlideController(DisplayController, LogMixin, RegistryProperties):
         old_item = self.service_item
         # rest to allow the remote pick up verse 1 if large imaged
         self.selected_row = 0
+        self.preview_display.go_to_slide(0)
         # take a copy not a link to the servicemanager copy.
         self.service_item = copy.copy(service_item)
         if self.service_item.is_command():
             Registry().execute(
                 '{text}_start'.format(text=service_item.name.lower()),
                 [self.service_item, self.is_live, self.hide_mode(), slide_no])
+        else:
+            # Get theme
+            theme_name = service_item.theme if service_item.theme else Registry().get('theme_manager').global_theme
+            theme_data = Registry().get('theme_manager').get_theme_data(theme_name)
+            # Set theme for preview
+            self.preview_display.set_theme(theme_data)
+            # Set theme for displays
+            for display in self.displays:
+                display.set_theme(theme_data)
+
         # Reset blanking if needed
         if old_item and self.is_live and (old_item.is_capable(ItemCapabilities.ProvidesOwnDisplay) or
                                           self.service_item.is_capable(ItemCapabilities.ProvidesOwnDisplay)):
             self._reset_blank(self.service_item.is_capable(ItemCapabilities.ProvidesOwnDisplay))
         self.info_label.setText(self.service_item.title)
         self.slide_list = {}
+        if old_item and old_item.is_capable(ItemCapabilities.HasBackgroundAudio):
+            self.on_media_close()
         if self.is_live:
             self.song_menu.menu().clear()
-            if self.display.audio_player:
-                self.display.audio_player.reset()
-                self.set_audio_items_visibility(False)
-                self.audio_pause_item.setChecked(False)
-                # If the current item has background audio
-                if self.service_item.is_capable(ItemCapabilities.HasBackgroundAudio):
-                    self.log_debug('Starting to play...')
-                    self.display.audio_player.add_to_playlist(self.service_item.background_audio)
-                    self.track_menu.clear()
-                    for counter in range(len(self.service_item.background_audio)):
-                        action = self.track_menu.addAction(
-                            os.path.basename(str(self.service_item.background_audio[counter])))
-                        action.setData(counter)
-                        action.triggered.connect(self.on_track_triggered)
-                    self.display.audio_player.repeat = \
-                        Settings().value(self.main_window.general_settings_section + '/audio repeat list')
-                    if Settings().value(self.main_window.general_settings_section + '/audio start paused'):
-                        self.audio_pause_item.setChecked(True)
-                        self.display.audio_player.pause()
-                    else:
-                        self.display.audio_player.play()
-                    self.set_audio_items_visibility(True)
+            if self.service_item.is_capable(ItemCapabilities.HasBackgroundAudio):
+                self.on_media_start(service_item)
         row = 0
         width = self.main_window.control_splitter.sizes()[self.split]
-        for frame_number, frame in enumerate(self.service_item.get_frames()):
-            if self.service_item.is_text():
-                if frame['verseTag']:
+        if self.service_item.is_text():
+            self.preview_display.load_verses(service_item.rendered_slides)
+            for display in self.displays:
+                display.load_verses(service_item.rendered_slides)
+            for slide_index, slide in enumerate(self.service_item.display_slides):
+                if not slide['verse'].isdigit():
                     # These tags are already translated.
-                    verse_def = frame['verseTag']
+                    verse_def = slide['verse']
                     verse_def = '{def1}{def2}'.format(def1=verse_def[0], def2=verse_def[1:])
                     two_line_def = '{def1}\n{def2}'.format(def1=verse_def[0], def2=verse_def[1:])
                     row = two_line_def
                     if verse_def not in self.slide_list:
-                        self.slide_list[verse_def] = frame_number
+                        self.slide_list[verse_def] = slide_index
                         if self.is_live:
                             self.song_menu.menu().addAction(verse_def, self.on_song_bar_handler)
                 else:
                     row += 1
                     self.slide_list[str(row)] = row - 1
-            else:
+        else:
+            if service_item.is_image():
+                self.preview_display.load_images(service_item.slides)
+                for display in self.displays:
+                    display.load_images(service_item.slides)
+            for slide_index, slide in enumerate(self.service_item.slides):
                 row += 1
                 self.slide_list[str(row)] = row - 1
                 # If current slide set background to image
-                if not self.service_item.is_command() and frame_number == slide_no:
-                    self.service_item.bg_image_bytes = \
-                        self.image_manager.get_image_bytes(frame['path'], ImageSource.ImagePlugin)
+                # if not self.service_item.is_command() and slide_index == slide_no:
+                #     self.service_item.bg_image_bytes = \
+                #         self.image_manager.get_image_bytes(slide['filename'], ImageSource.ImagePlugin)
         self.preview_widget.replace_service_item(self.service_item, width, slide_no)
         self.enable_tool_bar(self.service_item)
         # Pass to display for viewing.
         # Postpone image build, we need to do this later to avoid the theme
         # flashing on the screen
-        if not self.service_item.is_image():
-            self.display.build_html(self.service_item)
+        # if not self.service_item.is_image():
+        #     self.display.build_html(self.service_item)
         if self.service_item.is_media():
             self.on_media_start(self.service_item)
         self.slide_selected(True)
@@ -957,23 +871,47 @@ class SlideController(DisplayController, LogMixin, RegistryProperties):
             self.preview_widget.change_slide(index)
             self.slide_selected()
 
+    def on_song_bar_handler(self):
+        """
+        Some song handler
+        """
+        request = self.sender().text()
+        slide_no = self.slide_list[request]
+        width = self.main_window.control_splitter.sizes()[self.split]
+        self.preview_widget.replace_service_item(self.service_item, width, slide_no)
+        self.slide_selected()
+
+    def on_preview_resize(self, size):
+        """
+        Set the preview display's zoom factor based on the size relative to the display size
+        """
+        display_with = 0
+        for screen in self.screens:
+            if screen.is_display:
+                display_with = screen.display_geometry.width()
+        if display_with == 0:
+            ratio = 0.25
+        else:
+            ratio = float(size.width()) / display_with
+        self.preview_display.set_scale(ratio)
+
     def main_display_set_background(self):
         """
         Allow the main display to blank the main display at startup time
         """
-        display_type = Settings().value(self.main_window.general_settings_section + '/screen blank')
-        if self.screens.which_screen(self.window()) != self.screens.which_screen(self.display):
-            # Order done to handle initial conversion
-            if display_type == 'themed':
-                self.on_theme_display(True)
-            elif display_type == 'hidden':
-                self.on_hide_display(True)
-            elif display_type == 'blanked':
-                self.on_blank_display(True)
-            else:
-                Registry().execute('live_display_show')
-        else:
-            self.on_hide_display_enable()
+        # display_type = Settings().value(self.main_window.general_settings_section + '/screen blank')
+        # if self.screens.which_screen(self.window()) != self.screens.which_screen(self.display):
+        #     # Order done to handle initial conversion
+        #     if display_type == 'themed':
+        #         self.on_theme_display(True)
+        #     elif display_type == 'hidden':
+        #         self.on_hide_display(True)
+        #     elif display_type == 'blanked':
+        #         self.on_blank_display(True)
+        #     else:
+        #         Registry().execute('live_display_show')
+        # else:
+        #     self.on_hide_display_enable()
 
     def on_slide_blank(self):
         """
@@ -1138,7 +1076,7 @@ class SlideController(DisplayController, LogMixin, RegistryProperties):
             if not start:
                 Registry().execute('slidecontroller_live_unblank')
         row = self.preview_widget.current_slide_number()
-        old_selected_row = self.selected_row
+        # old_selected_row = self.selected_row
         self.selected_row = 0
         if -1 < row < self.preview_widget.slide_count():
             if self.service_item.is_command():
@@ -1146,20 +1084,26 @@ class SlideController(DisplayController, LogMixin, RegistryProperties):
                     Registry().execute('{text}_slide'.format(text=self.service_item.name.lower()),
                                        [self.service_item, self.is_live, row])
             else:
-                to_display = self.service_item.get_rendered_frame(row)
+                # to_display = self.service_item.get_rendered_frame(row)
                 if self.service_item.is_text():
-                    self.display.text(to_display, row != old_selected_row)
+                    for display in self.displays:
+                        display.go_to_slide(row)
+                    # self.display.text(to_display, row != old_selected_row)
                 else:
                     if start:
-                        self.display.build_html(self.service_item, to_display)
+                        for display in self.displays:
+                            display.load_images(self.service_item.slides)
+                        # self.display.build_html(self.service_item, to_display)
                     else:
-                        self.display.image(to_display)
+                        for display in self.displays:
+                            display.go_to_slide(row)
+                        # self.display.image(to_display)
                     # reset the store used to display first image
                     self.service_item.bg_image_bytes = None
             self.selected_row = row
             self.update_preview()
             self.preview_widget.change_slide(row)
-        self.display.setFocus()
+        # TODO: self.display.setFocus()
         # Release lock
         self.slide_selected_lock.release()
 
@@ -1177,7 +1121,7 @@ class SlideController(DisplayController, LogMixin, RegistryProperties):
         """
         This updates the preview frame, for example after changing a slide or using *Blank to Theme*.
         """
-        self.log_debug('update_preview {text} '.format(text=self.screens.current['primary']))
+        self.log_debug('update_preview {text} '.format(text=self.screens.current))
         if self.service_item and self.service_item.is_capable(ItemCapabilities.ProvidesOwnDisplay):
             if self.is_live:
                 # If live, grab screen-cap of main display now
@@ -1186,18 +1130,17 @@ class SlideController(DisplayController, LogMixin, RegistryProperties):
                 QtCore.QTimer.singleShot(2500, self.grab_maindisplay)
             else:
                 # If not live, use the slide's thumbnail/icon instead
-                image_path = self.service_item.get_rendered_frame(self.selected_row)
-                if self.service_item.is_capable(ItemCapabilities.HasThumbnails):
-                    image = self.image_manager.get_image(image_path, ImageSource.CommandPlugins)
-                    self.slide_image = QtGui.QPixmap.fromImage(image)
-                else:
-                    self.slide_image = QtGui.QPixmap(image_path)
-                self.slide_image.setDevicePixelRatio(self.main_window.devicePixelRatio())
-                self.slide_preview.setPixmap(self.slide_image)
+                image_path = Path(self.service_item.get_rendered_frame(self.selected_row))
+                # if self.service_item.is_capable(ItemCapabilities.HasThumbnails):
+                #     image = self.image_manager.get_image(image_path, ImageSource.CommandPlugins)
+                #     self.slide_image = QtGui.QPixmap.fromImage(image)
+                # else:
+                # self.slide_image = QtGui.QPixmap(image_path)
+                # self.slide_image.setDevicePixelRatio(self.main_window.devicePixelRatio())
+                # self.slide_preview.setPixmap(self.slide_image)
+                self.preview_display.set_single_image('#000', image_path)
         else:
-            self.slide_image = self.display.preview()
-            self.slide_image.setDevicePixelRatio(self.main_window.devicePixelRatio())
-            self.slide_preview.setPixmap(self.slide_image)
+            self.preview_display.go_to_slide(self.selected_row)
         self.slide_count += 1
 
     def grab_maindisplay(self):
@@ -1206,11 +1149,13 @@ class SlideController(DisplayController, LogMixin, RegistryProperties):
         """
         win_id = QtWidgets.QApplication.desktop().winId()
         screen = QtWidgets.QApplication.primaryScreen()
-        rect = self.screens.current['size']
+        rect = ScreenList().current.display_geometry
         win_image = screen.grabWindow(win_id, rect.x(), rect.y(), rect.width(), rect.height())
-        win_image.setDevicePixelRatio(self.slide_preview.devicePixelRatio())
-        self.slide_preview.setPixmap(win_image)
+        win_image.setDevicePixelRatio(self.preview_display.devicePixelRatio())
+        # self.slide_preview.setPixmap(win_image)
         self.slide_image = win_image
+        base64_image = image_to_byte(win_image, True)
+        self.preview_display.set_single_image_data('#000', base64_image)
 
     def on_slide_selected_next_action(self, checked):
         """
@@ -1359,24 +1304,24 @@ class SlideController(DisplayController, LogMixin, RegistryProperties):
             self.play_slides_once.setText(UiStrings().PlaySlidesToEnd)
         self.on_toggle_loop()
 
-    def set_audio_items_visibility(self, visible):
-        """
-        Set the visibility of the audio stuff
-        """
-        self.toolbar.set_widget_visible(AUDIO_LIST, visible)
+    # def set_audio_items_visibility(self, visible):
+    #    """
+    #    Set the visibility of the audio stuff
+    #    """
+    #    self.toolbar.set_widget_visible(AUDIO_LIST, visible)
 
-    def set_audio_pause_clicked(self, checked):
-        """
-        Pause the audio player
+    # def set_audio_pause_clicked(self, checked):
+    #    """
+    #   Pause the audio player
 
-        :param checked: is the check box checked.
-        """
-        if not self.audio_pause_item.isVisible():
-            return
-        if checked:
-            self.display.audio_player.pause()
-        else:
-            self.display.audio_player.play()
+    #   :param checked: is the check box checked.
+    #   """
+    #   if not self.audio_pause_item.isVisible():
+    #       return
+    #   if checked:
+    #       self.display.audio_player.pause()
+    #   else:
+    #       self.display.audio_player.play()
 
     def timerEvent(self, event):
         """
@@ -1467,7 +1412,6 @@ class SlideController(DisplayController, LogMixin, RegistryProperties):
             self.media_controller.video(self.controller_type, item, self.hide_mode())
         if not self.is_live:
             self.preview_display.show()
-            self.slide_preview.hide()
 
     def on_media_close(self):
         """
@@ -1475,7 +1419,6 @@ class SlideController(DisplayController, LogMixin, RegistryProperties):
         """
         self.media_controller.media_reset(self)
         self.preview_display.hide()
-        self.slide_preview.show()
 
     def _reset_blank(self, no_theme):
         """
@@ -1513,29 +1456,29 @@ class SlideController(DisplayController, LogMixin, RegistryProperties):
         else:
             return None
 
-    def on_next_track_clicked(self):
-        """
-        Go to the next track when next is clicked
-        """
-        self.display.audio_player.next()
-
-    def on_audio_time_remaining(self, time):
-        """
-        Update how much time is remaining
-
-        :param time: the time remaining
-        """
-        seconds = (self.display.audio_player.player.duration() - self.display.audio_player.player.position()) // 1000
-        minutes = seconds // 60
-        seconds %= 60
-        self.audio_time_label.setText(' %02d:%02d ' % (minutes, seconds))
-
-    def on_track_triggered(self, field=None):
-        """
-        Start playing a track
-        """
-        action = self.sender()
-        self.display.audio_player.go_to(action.data())
+    # def on_next_track_clicked(self):
+    #     """
+    #     Go to the next track when next is clicked
+    #     """
+    #     self.display.audio_player.next()
+    #
+    # def on_audio_time_remaining(self, time):
+    #     """
+    #     Update how much time is remaining
+    #
+    #     :param time: the time remaining
+    #     """
+    #     seconds = (self.display.audio_player.player.duration() - self.display.audio_player.player.position()) // 1000
+    #     minutes = seconds // 60
+    #     seconds %= 60
+    #     self.audio_time_label.setText(' %02d:%02d ' % (minutes, seconds))
+    #
+    # def on_track_triggered(self, field=None):
+    #     """
+    #     Start playing a track
+    #     """
+    #     action = self.sender()
+    #     self.display.audio_player.go_to(action.data())
 
 
 class PreviewController(RegistryBase, SlideController):
@@ -1550,7 +1493,7 @@ class PreviewController(RegistryBase, SlideController):
         """
         Set up the base Controller as a preview.
         """
-        self.__registry_name = 'preview_slidecontroller'
+        self.__registry_name = 'preview_controller'
         super().__init__(*args, **kwargs)
         self.split = 0
         self.type_prefix = 'preview'
@@ -1579,6 +1522,7 @@ class LiveController(RegistryBase, SlideController):
         """
         Set up the base Controller as a live.
         """
+        self.__registry_name = 'live_controller'
         super().__init__(*args, **kwargs)
         self.is_live = True
         self.split = 1

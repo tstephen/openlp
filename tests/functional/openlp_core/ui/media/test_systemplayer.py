@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -29,7 +29,7 @@ from PyQt5 import QtCore, QtMultimedia
 
 from openlp.core.common.registry import Registry
 from openlp.core.ui.media import MediaState
-from openlp.core.ui.media.systemplayer import SystemPlayer, CheckMediaWorker, ADDITIONAL_EXT
+from openlp.core.ui.media.systemplayer import ADDITIONAL_EXT, CheckMediaWorker, SystemPlayer
 
 
 class TestSystemPlayer(TestCase):
@@ -507,6 +507,30 @@ class TestCheckMediaWorker(TestCase):
 
         # THEN: The correct values should be set up
         assert worker is not None
+
+    @patch('openlp.core.ui.media.systemplayer.functools.partial')
+    @patch('openlp.core.ui.media.systemplayer.QtMultimedia.QMediaContent')
+    def test_start(self, MockQMediaContent, mocked_partial):
+        """
+        Test the start method
+        """
+        # GIVEN: A CheckMediaWorker instance
+        worker = CheckMediaWorker('file.ogv')
+        MockQMediaContent.side_effect = lambda x: x
+        mocked_partial.side_effect = lambda x, y: y
+
+        # WHEN: start() is called
+        with patch.object(worker, 'error') as mocked_error, \
+                patch.object(worker, 'mediaStatusChanged') as mocked_status_change, \
+                patch.object(worker, 'setMedia') as mocked_set_media, \
+                patch.object(worker, 'play') as mocked_play:
+            worker.start()
+
+        # THEN: The correct methods should be called
+        mocked_error.connect.assert_called_once_with('error')
+        mocked_status_change.connect.assert_called_once_with('media')
+        mocked_set_media.assert_called_once_with(QtCore.QUrl('file:file.ogv'))
+        mocked_play.assert_called_once_with()
 
     def test_signals_media(self):
         """

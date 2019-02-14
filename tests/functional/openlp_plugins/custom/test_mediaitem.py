@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,14 +23,16 @@
 This module contains tests for the lib submodule of the Songs plugin.
 """
 from unittest import TestCase
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 from PyQt5 import QtCore
 
 from openlp.core.common.registry import Registry
-from openlp.core.lib import ServiceItem, PluginStatus
-from openlp.plugins.custom.lib import CustomMediaItem
+from openlp.core.lib.plugin import PluginStatus
+from openlp.core.lib.serviceitem import ServiceItem
+from openlp.plugins.custom.lib.mediaitem import CustomMediaItem
 from tests.helpers.testmixin import TestMixin
+
 
 FOOTER = ['Arky Arky (Unknown)', 'Public Domain', 'CCLI 123456']
 

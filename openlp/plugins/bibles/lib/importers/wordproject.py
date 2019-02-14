@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -24,10 +24,11 @@ import re
 from tempfile import TemporaryDirectory
 from zipfile import ZipFile
 
-from bs4 import BeautifulSoup, Tag, NavigableString
+from bs4 import BeautifulSoup, NavigableString, Tag
 
 from openlp.core.common.path import Path
 from openlp.plugins.bibles.lib.bibleimport import BibleImport
+
 
 BOOK_NUMBER_PATTERN = re.compile(r'\[(\d+)\]')
 REPLACE_SPACES = re.compile(r'\s{2,}')

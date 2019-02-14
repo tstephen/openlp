@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -24,9 +24,10 @@ Test the MediaShout importer
 """
 from collections import namedtuple
 from unittest import TestCase, skipUnless
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock, call, patch
 
 from openlp.core.common.registry import Registry
+
 
 try:
     from openlp.plugins.songs.lib.importers.mediashout import MediaShoutImport
@@ -99,7 +100,7 @@ class TestMediaShoutImport(TestCase):
         mocked_pyodbc.connect.return_value = mocked_connection
 
         # WHEN: do_import is called
-        with patch.object(importer, 'import_wizard') as mocked_import_wizard, \
+        with patch.object(importer, 'import_wizard'), \
                 patch.object(importer, 'process_song') as mocked_process_song:
             importer.do_import()
 
@@ -133,7 +134,7 @@ class TestMediaShoutImport(TestCase):
         mocked_pyodbc.connect.return_value = mocked_connection
 
         # WHEN: do_import is called, but cancelled
-        with patch.object(importer, 'import_wizard') as mocked_import_wizard, \
+        with patch.object(importer, 'import_wizard'), \
                 patch.object(importer, 'process_song') as mocked_process_song:
             importer.stop_import_flag = True
             importer.do_import()

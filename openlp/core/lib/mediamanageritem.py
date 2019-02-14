@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -28,17 +28,20 @@ import re
 from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.common.i18n import UiStrings, translate
-from openlp.core.ui.icons import UiIcons
 from openlp.core.common.mixins import RegistryProperties
 from openlp.core.common.path import path_to_str, str_to_path
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
-from openlp.core.lib import ServiceItem, StringContent, ServiceItemContext
+from openlp.core.lib import ServiceItemContext
+from openlp.core.lib.plugin import StringContent
+from openlp.core.lib.serviceitem import ServiceItem
 from openlp.core.lib.ui import create_widget_action, critical_error_message_box
+from openlp.core.ui.icons import UiIcons
 from openlp.core.widgets.dialogs import FileDialog
 from openlp.core.widgets.edits import SearchEdit
 from openlp.core.widgets.toolbar import OpenLPToolbar
 from openlp.core.widgets.views import ListWidgetWithDnD
+
 
 log = logging.getLogger(__name__)
 
@@ -106,8 +109,8 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
         self.page_layout.setSpacing(0)
         self.page_layout.setContentsMargins(0, 0, 0, 0)
         self.required_icons()
-        self.setupUi()
-        self.retranslateUi()
+        self.setup_ui()
+        self.retranslate_ui()
         self.auto_select_id = -1
 
     def setup_item(self):
@@ -127,8 +130,11 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
         self.has_file_icon = False
         self.has_delete_icon = True
         self.add_to_service_item = False
+        self.can_preview = True
+        self.can_make_live = True
+        self.can_add_to_service = True
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         """
         This method is called automatically to provide OpenLP with the opportunity to translate the ``MediaManagerItem``
         to another language.
@@ -143,7 +149,7 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
             self.toolbar = OpenLPToolbar(self)
             self.page_layout.addWidget(self.toolbar)
 
-    def setupUi(self):
+    def setup_ui(self):
         """
         This method sets up the interface on the button. Plugin developers use this to add and create toolbars, and the
         rest of the interface of the media manager item.
@@ -180,11 +186,14 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
         if self.has_delete_icon:
             toolbar_actions.append(['Delete', StringContent.Delete, UiIcons().delete, self.on_delete_click])
         # Preview
-        toolbar_actions.append(['Preview', StringContent.Preview, UiIcons().preview, self.on_preview_click])
+        if self.can_preview:
+            toolbar_actions.append(['Preview', StringContent.Preview, UiIcons().preview, self.on_preview_click])
         # Live Button
-        toolbar_actions.append(['Live', StringContent.Live, UiIcons().live, self.on_live_click])
+        if self.can_make_live:
+            toolbar_actions.append(['Live', StringContent.Live, UiIcons().live, self.on_live_click])
         # Add to service Button
-        toolbar_actions.append(['Service', StringContent.Service, UiIcons().add, self.on_add_click])
+        if self.can_add_to_service:
+            toolbar_actions.append(['Service', StringContent.Service, UiIcons().add, self.on_add_click])
         for action in toolbar_actions:
             if action[0] == StringContent.Preview:
                 self.toolbar.addSeparator()
@@ -208,27 +217,30 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
                                  icon=UiIcons().edit,
                                  triggers=self.on_edit_click)
             create_widget_action(self.list_view, separator=True)
-        create_widget_action(self.list_view,
-                             'listView{plugin}{preview}Item'.format(plugin=self.plugin.name.title(),
-                                                                    preview=StringContent.Preview.title()),
-                             text=self.plugin.get_string(StringContent.Preview)['title'],
-                             icon=UiIcons().preview,
-                             can_shortcuts=True,
-                             triggers=self.on_preview_click)
-        create_widget_action(self.list_view,
-                             'listView{plugin}{live}Item'.format(plugin=self.plugin.name.title(),
-                                                                 live=StringContent.Live.title()),
-                             text=self.plugin.get_string(StringContent.Live)['title'],
-                             icon=UiIcons().live,
-                             can_shortcuts=True,
-                             triggers=self.on_live_click)
-        create_widget_action(self.list_view,
-                             'listView{plugin}{service}Item'.format(plugin=self.plugin.name.title(),
-                                                                    service=StringContent.Service.title()),
-                             can_shortcuts=True,
-                             text=self.plugin.get_string(StringContent.Service)['title'],
-                             icon=UiIcons().add,
-                             triggers=self.on_add_click)
+        if self.can_preview:
+            create_widget_action(self.list_view,
+                                 'listView{plugin}{preview}Item'.format(plugin=self.plugin.name.title(),
+                                                                        preview=StringContent.Preview.title()),
+                                 text=self.plugin.get_string(StringContent.Preview)['title'],
+                                 icon=UiIcons().preview,
+                                 can_shortcuts=True,
+                                 triggers=self.on_preview_click)
+        if self.can_make_live:
+            create_widget_action(self.list_view,
+                                 'listView{plugin}{live}Item'.format(plugin=self.plugin.name.title(),
+                                                                     live=StringContent.Live.title()),
+                                 text=self.plugin.get_string(StringContent.Live)['title'],
+                                 icon=UiIcons().live,
+                                 can_shortcuts=True,
+                                 triggers=self.on_live_click)
+        if self.can_add_to_service:
+            create_widget_action(self.list_view,
+                                 'listView{plugin}{service}Item'.format(plugin=self.plugin.name.title(),
+                                                                        service=StringContent.Service.title()),
+                                 can_shortcuts=True,
+                                 text=self.plugin.get_string(StringContent.Service)['title'],
+                                 icon=UiIcons().add,
+                                 triggers=self.on_add_click)
         if self.has_delete_icon:
             create_widget_action(self.list_view, separator=True)
             create_widget_action(self.list_view,
@@ -459,10 +471,12 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
         Allows the list click action to be determined dynamically
         """
         if Settings().value('advanced/double click live'):
-            self.on_live_click()
+            if self.can_make_live:
+                self.on_live_click()
         elif not Settings().value('advanced/single click preview'):
             # NOTE: The above check is necessary to prevent bug #1419300
-            self.on_preview_click()
+            if self.can_preview:
+                self.on_preview_click()
 
     def on_selection_change(self):
         """

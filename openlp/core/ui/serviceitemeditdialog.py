@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -25,7 +25,7 @@ The UI widgets for the service item edit dialog
 from PyQt5 import QtWidgets
 
 from openlp.core.common.i18n import translate
-from openlp.core.lib.ui import create_button_box, create_button
+from openlp.core.lib.ui import create_button, create_button_box
 from openlp.core.ui.icons import UiIcons
 
 
@@ -33,7 +33,7 @@ class Ui_ServiceItemEditDialog(object):
     """
     The UI widgets for the service item edit dialog
     """
-    def setupUi(self, serviceItemEditDialog):
+    def setup_ui(self, serviceItemEditDialog):
         """
         Set up the UI
         """
@@ -62,9 +62,9 @@ class Ui_ServiceItemEditDialog(object):
         self.dialog_layout.addLayout(self.button_layout, 0, 1)
         self.button_box = create_button_box(serviceItemEditDialog, 'button_box', ['cancel', 'save'])
         self.dialog_layout.addWidget(self.button_box, 1, 0, 1, 2)
-        self.retranslateUi(serviceItemEditDialog)
+        self.retranslate_ui(serviceItemEditDialog)
 
-    def retranslateUi(self, serviceItemEditDialog):
+    def retranslate_ui(self, serviceItemEditDialog):
         """
         Translate the UI on the fly
         """

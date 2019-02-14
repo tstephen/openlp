@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -35,6 +35,7 @@ from openlp.plugins.bibles.forms.booknamedialog import Ui_BookNameDialog
 from openlp.plugins.bibles.lib import BibleStrings
 from openlp.plugins.bibles.lib.db import BiblesResourcesDB
 
+
 log = logging.getLogger(__name__)
 
 
@@ -51,7 +52,7 @@ class BookNameForm(QDialog, Ui_BookNameDialog):
         """
         super(BookNameForm, self).__init__(parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint |
                                            QtCore.Qt.WindowCloseButtonHint)
-        self.setupUi(self)
+        self.setup_ui(self)
         self.custom_signals()
         self.book_names = BibleStrings().BookNames
         self.book_id = False

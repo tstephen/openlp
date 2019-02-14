@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -31,10 +31,10 @@ from urllib.parse import quote_plus as urlquote
 
 from alembic.migration import MigrationContext
 from alembic.operations import Operations
-from sqlalchemy import Table, MetaData, Column, UnicodeText, types, create_engine
+from sqlalchemy import Column, MetaData, Table, UnicodeText, create_engine, types
 from sqlalchemy.engine.url import make_url
-from sqlalchemy.exc import SQLAlchemyError, InvalidRequestError, DBAPIError, OperationalError, ProgrammingError
-from sqlalchemy.orm import scoped_session, sessionmaker, mapper
+from sqlalchemy.exc import DBAPIError, InvalidRequestError, OperationalError, ProgrammingError, SQLAlchemyError
+from sqlalchemy.orm import mapper, scoped_session, sessionmaker
 from sqlalchemy.pool import NullPool
 
 from openlp.core.common import delete_file
@@ -43,6 +43,7 @@ from openlp.core.common.i18n import translate
 from openlp.core.common.json import OpenLPJsonDecoder, OpenLPJsonEncoder
 from openlp.core.common.settings import Settings
 from openlp.core.lib.ui import critical_error_message_box
+
 
 log = logging.getLogger(__name__)
 
@@ -408,7 +409,7 @@ class Manager(object):
                 self.session.rollback()
                 log.exception('Object list save failed')
                 return False
-            except:
+            except Exception:
                 self.session.rollback()
                 raise
 
@@ -438,7 +439,7 @@ class Manager(object):
                 self.session.rollback()
                 log.exception('Object list save failed')
                 return False
-            except:
+            except Exception:
                 self.session.rollback()
                 raise
 
@@ -555,7 +556,7 @@ class Manager(object):
                     self.session.rollback()
                     log.exception('Failed to delete object')
                     return False
-                except:
+                except Exception:
                     self.session.rollback()
                     raise
         else:
@@ -590,7 +591,7 @@ class Manager(object):
                 self.session.rollback()
                 log.exception('Failed to delete {name} records'.format(name=object_class.__name__))
                 return False
-            except:
+            except Exception:
                 self.session.rollback()
                 raise
 

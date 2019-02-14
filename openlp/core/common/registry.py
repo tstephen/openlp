@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -26,6 +26,7 @@ import logging
 import sys
 
 from openlp.core.common import de_hump, trace_error_handler
+
 
 log = logging.getLogger(__name__)
 
@@ -57,8 +58,7 @@ class Registry(object):
         registry.functions_list = {}
         registry.working_flags = {}
         # Allow the tests to remove Registry entries but not the live system
-        registry.running_under_test = 'nose' in sys.argv[0]
-        registry.running_under_test = 'pytest' in sys.argv[0]
+        registry.running_under_test = 'nose' in sys.argv[0] or 'pytest' in sys.argv[0]
         registry.initialising = True
         return registry
 
@@ -144,6 +144,7 @@ class Registry(object):
         if event in self.functions_list:
             for function in self.functions_list[event]:
                 try:
+                    log.debug('Running function {} for {}'.format(function, event))
                     result = function(*args, **kwargs)
                     if result is not None:
                         results.append(result)
@@ -204,6 +205,7 @@ class RegistryBase(object):
         Registry().register(de_hump(self.__class__.__name__), self)
         Registry().register_function('bootstrap_initialise', self.bootstrap_initialise)
         Registry().register_function('bootstrap_post_set_up', self.bootstrap_post_set_up)
+        Registry().register_function('bootstrap_completion', self.bootstrap_completion)
 
     def bootstrap_initialise(self):
         """
@@ -212,6 +214,12 @@ class RegistryBase(object):
         pass
 
     def bootstrap_post_set_up(self):
+        """
+        Dummy method to be overridden
+        """
+        pass
+
+    def bootstrap_completion(self):
         """
         Dummy method to be overridden
         """

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -32,7 +32,7 @@ class Ui_SongMaintenanceDialog(object):
     """
     The user interface for the song maintenance dialog
     """
-    def setupUi(self, song_maintenance_dialog):
+    def setup_ui(self, song_maintenance_dialog):
         """
         Set up the user interface for the song maintenance dialog
         """
@@ -134,11 +134,11 @@ class Ui_SongMaintenanceDialog(object):
         self.dialog_layout.addLayout(self.stacked_layout, 0, 1)
         self.button_box = create_button_box(song_maintenance_dialog, 'button_box', ['close'])
         self.dialog_layout.addWidget(self.button_box, 1, 0, 1, 2)
-        self.retranslateUi(song_maintenance_dialog)
+        self.retranslate_ui(song_maintenance_dialog)
         self.stacked_layout.setCurrentIndex(0)
         self.type_list_widget.currentRowChanged.connect(self.stacked_layout.setCurrentIndex)
 
-    def retranslateUi(self, song_maintenance_dialog):
+    def retranslate_ui(self, song_maintenance_dialog):
         """
         Translate the UI on the fly.
         """

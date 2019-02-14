@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -28,7 +28,7 @@ from openlp.core.ui.icons import UiIcons
 
 
 class Ui_LanguageDialog(object):
-    def setupUi(self, language_dialog):
+    def setup_ui(self, language_dialog):
         language_dialog.setObjectName('language_dialog')
         language_dialog.setWindowIcon(UiIcons().main_icon)
         language_dialog.resize(400, 165)
@@ -61,9 +61,9 @@ class Ui_LanguageDialog(object):
         self.button_box = create_button_box(language_dialog, 'button_box', ['cancel', 'ok'])
         self.language_layout.addWidget(self.button_box)
 
-        self.retranslateUi(language_dialog)
+        self.retranslate_ui(language_dialog)
 
-    def retranslateUi(self, language_dialog):
+    def retranslate_ui(self, language_dialog):
         language_dialog.setWindowTitle(translate('BiblesPlugin.LanguageDialog', 'Select Language'))
         self.bible_label.setText(translate('BiblesPlugin.LanguageDialog', ''))
         self.info_label.setText(

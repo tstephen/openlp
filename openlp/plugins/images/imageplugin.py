@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -24,15 +24,20 @@ import logging
 
 from PyQt5 import QtGui
 
+from openlp.core.state import State
 from openlp.core.api.http import register_endpoint
 from openlp.core.common.i18n import translate
-from openlp.core.ui.icons import UiIcons
 from openlp.core.common.settings import Settings
-from openlp.core.lib import Plugin, StringContent, ImageSource, build_icon
+from openlp.core.lib import ImageSource, build_icon
 from openlp.core.lib.db import Manager
+from openlp.core.lib.plugin import Plugin, StringContent
+from openlp.core.ui.icons import UiIcons
 from openlp.plugins.images.endpoint import api_images_endpoint, images_endpoint
-from openlp.plugins.images.lib import ImageMediaItem, ImageTab, upgrade
+from openlp.plugins.images.lib import upgrade
+from openlp.plugins.images.lib.mediaitem import ImageMediaItem
+from openlp.plugins.images.lib.imagetab import ImageTab
 from openlp.plugins.images.lib.db import init_schema
+
 
 log = logging.getLogger(__name__)
 
@@ -58,6 +63,8 @@ class ImagePlugin(Plugin):
         self.icon = build_icon(self.icon_path)
         register_endpoint(images_endpoint)
         register_endpoint(api_images_endpoint)
+        State().add_service('image', self.weight, is_plugin=True)
+        State().update_pre_conditions('image', self.check_pre_conditions())
 
     @staticmethod
     def about():

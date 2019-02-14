@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -33,10 +33,10 @@ from PyQt5.QtWidgets import QDialog
 
 from openlp.core.common.registry import Registry
 from openlp.core.projectors.constants import PJLINK_DEFAULT_CODES, PJLINK_DEFAULT_SOURCES
-from openlp.core.projectors.db import ProjectorDB, Projector
-from openlp.core.projectors.sourceselectform import source_group, SourceSelectSingle
+from openlp.core.projectors.db import Projector, ProjectorDB
+from openlp.core.projectors.sourceselectform import SourceSelectSingle, source_group
 from tests.helpers.testmixin import TestMixin
-from tests.resources.projector.data import TEST_DB, TEST1_DATA
+from tests.resources.projector.data import TEST1_DATA, TEST_DB
 
 
 def build_source_dict():
@@ -91,7 +91,7 @@ class ProjectorSourceFormTest(TestCase, TestMixin):
                 if os.path.exists(TEST_DB):
                     os.unlink(TEST_DB)
                 break
-            except:
+            except Exception:
                 time.sleep(1)
                 retries += 1
         self.destroy_settings()

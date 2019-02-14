@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -33,8 +33,10 @@ from urllib.request import HTTPCookieProcessor, URLError, build_opener
 
 from bs4 import BeautifulSoup, NavigableString
 
-from openlp.plugins.songs.lib import Song, Author, Topic, VerseType, clean_song
+from openlp.plugins.songs.lib import VerseType, clean_song
+from openlp.plugins.songs.lib.db import Song, Author, Topic
 from openlp.plugins.songs.lib.openlyricsxml import SongXML
+
 
 USER_AGENTS = [
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) '
@@ -170,6 +172,7 @@ class SongSelectImport(object):
                     callback(song)
                 songs.append(song)
                 if len(songs) >= max_results:
+                    self.run_search = False
                     break
             current_page += 1
         return songs

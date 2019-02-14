@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -41,6 +41,7 @@ from openlp.core.common.registry import Registry
 from openlp.core.display.screens import ScreenList
 from openlp.plugins.presentations.lib.presentationcontroller import PresentationController, PresentationDocument, \
     TextType
+
 
 if is_win():
     from win32com.client import Dispatch
@@ -123,7 +124,7 @@ class ImpressController(PresentationController):
         while uno_instance is None and loop < 3:
             try:
                 uno_instance = get_uno_instance(resolver)
-            except:
+            except Exception:
                 log.warning('Unable to find running instance ')
                 self.start_process()
                 loop += 1
@@ -132,7 +133,7 @@ class ImpressController(PresentationController):
             log.debug('get UNO Desktop Openoffice - createInstanceWithContext - Desktop')
             desktop = self.manager.createInstanceWithContext("com.sun.star.frame.Desktop", uno_instance)
             return desktop
-        except:
+        except Exception:
             log.warning('Failed to get UNO desktop')
             return None
 
@@ -174,7 +175,7 @@ class ImpressController(PresentationController):
                 desktop = self.get_uno_desktop()
             else:
                 desktop = self.get_com_desktop()
-        except:
+        except Exception:
             log.warning('Failed to find an OpenOffice desktop to terminate')
         if not desktop:
             return
@@ -192,7 +193,7 @@ class ImpressController(PresentationController):
             try:
                 desktop.terminate()
                 log.debug('OpenOffice killed')
-            except:
+            except Exception:
                 log.warning('Failed to terminate OpenOffice')
 
 
@@ -239,14 +240,14 @@ class ImpressDocument(PresentationDocument):
         properties = tuple(properties)
         try:
             self.document = desktop.loadComponentFromURL(url, '_blank', 0, properties)
-        except:
+        except Exception:
             log.warning('Failed to load presentation {url}'.format(url=url))
             return False
         if self.document is None:
             log.warning('Presentation {url} could not be loaded'.format(url=url))
             return False
         self.presentation = self.document.getPresentation()
-        self.presentation.Display = ScreenList().current['number'] + 1
+        self.presentation.Display = ScreenList().current.number + 1
         self.control = None
         self.create_thumbnails()
         self.create_titles_and_notes()
@@ -281,7 +282,7 @@ class ImpressDocument(PresentationDocument):
                 delete_file(path)
             except ErrorCodeIOException as exception:
                 log.exception('ERROR! ErrorCodeIOException {error:d}'.format(error=exception.ErrCode))
-            except:
+            except Exception:
                 log.exception('{path} - Unable to store openoffice preview'.format(path=path))
 
     def create_property(self, name, value):
@@ -309,7 +310,7 @@ class ImpressDocument(PresentationDocument):
                     self.presentation.end()
                     self.presentation = None
                     self.document.dispose()
-                except:
+                except Exception:
                     log.warning("Closing presentation failed")
             self.document = None
         self.controller.remove_doc(self)
@@ -326,7 +327,7 @@ class ImpressDocument(PresentationDocument):
             if self.document.getPresentation() is None:
                 log.debug("getPresentation failed to find a presentation")
                 return False
-        except:
+        except Exception:
             log.warning("getPresentation failed to find a presentation")
             return False
         return True
@@ -395,7 +396,7 @@ class ImpressDocument(PresentationDocument):
             self.control.activate()
             self.goto_slide(1)
         # Make sure impress doesn't steal focus, unless we're on a single screen setup
-        if len(ScreenList().screen_list) > 1:
+        if len(ScreenList()) > 1:
             Registry().get('main_window').activateWindow()
 
     def get_slide_number(self):
@@ -495,7 +496,8 @@ class ImpressDocument(PresentationDocument):
         notes = []
         pages = self.document.getDrawPages()
         for slide_no in range(1, pages.getCount() + 1):
-            titles.append(self.__get_text_from_page(slide_no, TextType.Title).replace('\n', ' ') + '\n')
+            titles.append(self.__get_text_from_page(slide_no, TextType.Title).replace('\r\n', ' ')
+                                                                             .replace('\n', ' ').strip())
             note = self.__get_text_from_page(slide_no, TextType.Notes)
             if len(note) == 0:
                 note = ' '

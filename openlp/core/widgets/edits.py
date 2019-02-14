@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -31,11 +31,12 @@ from openlp.core.common import CONTROL_CHARS
 from openlp.core.common.i18n import UiStrings, translate
 from openlp.core.common.path import Path, path_to_str, str_to_path
 from openlp.core.common.settings import Settings
-from openlp.core.lib import FormattingTags, build_icon
-from openlp.core.lib.ui import create_widget_action, create_action
+from openlp.core.lib.formattingtags import FormattingTags
+from openlp.core.lib.ui import create_action, create_widget_action
 from openlp.core.ui.icons import UiIcons
 from openlp.core.widgets.dialogs import FileDialog
 from openlp.core.widgets.enums import PathEditType
+
 
 try:
     import enchant

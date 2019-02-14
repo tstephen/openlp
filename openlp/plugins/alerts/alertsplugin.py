@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -24,20 +24,23 @@ import logging
 
 from PyQt5 import QtGui
 
+from openlp.core.state import State
 from openlp.core.api.http import register_endpoint
 from openlp.core.common.actions import ActionList
 from openlp.core.common.i18n import UiStrings, translate
 from openlp.core.common.settings import Settings
-from openlp.core.lib import Plugin, StringContent
 from openlp.core.lib.db import Manager
+from openlp.core.lib.plugin import Plugin, StringContent
 from openlp.core.lib.theme import VerticalType
 from openlp.core.lib.ui import create_action
 from openlp.core.ui import AlertLocation
 from openlp.core.ui.icons import UiIcons
 from openlp.plugins.alerts.endpoint import api_alerts_endpoint, alerts_endpoint
-from openlp.plugins.alerts.forms import AlertForm
-from openlp.plugins.alerts.lib import AlertsManager, AlertsTab
+from openlp.plugins.alerts.forms.alertform import AlertForm
+from openlp.plugins.alerts.lib.alertsmanager import AlertsManager
+from openlp.plugins.alerts.lib.alertstab import AlertsTab
 from openlp.plugins.alerts.lib.db import init_schema
+
 
 log = logging.getLogger(__name__)
 
@@ -146,6 +149,8 @@ class AlertsPlugin(Plugin):
         self.alert_form = AlertForm(self)
         register_endpoint(alerts_endpoint)
         register_endpoint(api_alerts_endpoint)
+        State().add_service(self.name, self.weight, is_plugin=True)
+        State().update_pre_conditions(self.name, self.check_pre_conditions())
 
     def add_tools_menu_item(self, tools_menu):
         """
@@ -253,9 +258,9 @@ class AlertsPlugin(Plugin):
         :param frame: The Web frame holding the page.
         """
         align = VerticalType.Names[self.settings_tab.location]
-        frame.evaluateJavaScript('update_css("{align}", "{face}", "{size}", "{color}", '
-                                 '"{background}")'.format(align=align,
-                                                          face=self.settings_tab.font_face,
-                                                          size=self.settings_tab.font_size,
-                                                          color=self.settings_tab.font_color,
-                                                          background=self.settings_tab.background_color))
+        frame.runJavaScript('update_css("{align}", "{face}", "{size}", "{color}", '
+                            '"{background}")'.format(align=align,
+                                                     face=self.settings_tab.font_face,
+                                                     size=self.settings_tab.font_size,
+                                                     color=self.settings_tab.font_color,
+                                                     background=self.settings_tab.background_color))

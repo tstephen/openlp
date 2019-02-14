@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -33,7 +33,7 @@ class Ui_StartTimeDialog(object):
     """
     The UI widgets for the time dialog
     """
-    def setupUi(self, StartTimeDialog):
+    def setup_ui(self, StartTimeDialog):
         """
         Set up the UI
         """
@@ -107,10 +107,10 @@ class Ui_StartTimeDialog(object):
         self.dialog_layout.addWidget(self.second_spin_box, 3, 1, 1, 1)
         self.button_box = create_button_box(StartTimeDialog, 'button_box', ['cancel', 'ok'])
         self.dialog_layout.addWidget(self.button_box, 5, 2, 1, 2)
-        self.retranslateUi(StartTimeDialog)
+        self.retranslate_ui(StartTimeDialog)
         self.setMaximumHeight(self.sizeHint().height())
 
-    def retranslateUi(self, StartTimeDialog):
+    def retranslate_ui(self, StartTimeDialog):
         """
         Update the translations on the fly
         """

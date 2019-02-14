@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -25,18 +25,18 @@ The bible import functions for OpenLP
 import logging
 import urllib.error
 
-from PyQt5 import QtWidgets
 from lxml import etree
+from PyQt5 import QtWidgets
 
 try:
     from pysword import modules
     PYSWORD_AVAILABLE = True
-except:
+except ImportError:
     PYSWORD_AVAILABLE = False
 
 from openlp.core.common import trace_error_handler
 from openlp.core.common.applocation import AppLocation
-from openlp.core.common.i18n import UiStrings, translate, get_locale_key
+from openlp.core.common.i18n import UiStrings, get_locale_key, translate
 from openlp.core.common.settings import Settings
 from openlp.core.lib.db import delete_database
 from openlp.core.lib.exceptions import ValidationError
@@ -44,8 +44,9 @@ from openlp.core.lib.ui import critical_error_message_box
 from openlp.core.widgets.edits import PathEdit
 from openlp.core.widgets.wizard import OpenLPWizard, WizardStrings
 from openlp.plugins.bibles.lib.db import clean_filename
-from openlp.plugins.bibles.lib.importers.http import CWExtract, BGExtract, BSExtract
+from openlp.plugins.bibles.lib.importers.http import BGExtract, BSExtract, CWExtract
 from openlp.plugins.bibles.lib.manager import BibleFormat
+
 
 log = logging.getLogger(__name__)
 
@@ -82,11 +83,11 @@ class BibleImportForm(OpenLPWizard):
         super(BibleImportForm, self).__init__(parent, bible_plugin,
                                               'bibleImportWizard', ':/wizards/wizard_importbible.bmp')
 
-    def setupUi(self, image):
+    def setup_ui(self, image):
         """
         Set up the UI for the bible wizard.
         """
-        super(BibleImportForm, self).setupUi(image)
+        super(BibleImportForm, self).setup_ui(image)
         self.format_combo_box.currentIndexChanged.connect(self.on_current_index_changed)
 
     def on_current_index_changed(self, index):
@@ -210,22 +211,22 @@ class BibleImportForm(OpenLPWizard):
         self.open_song_layout.addRow(self.open_song_file_label, self.open_song_path_edit)
         self.open_song_layout.setItem(1, QtWidgets.QFormLayout.LabelRole, self.spacer)
         self.select_stack.addWidget(self.open_song_widget)
-        self.web_tab_widget = QtWidgets.QTabWidget(self.select_page)
-        self.web_tab_widget.setObjectName('WebTabWidget')
+        self.web_widget = QtWidgets.QWidget(self.select_page)
+        self.web_widget.setObjectName('WebWidget')
         self.web_bible_tab = QtWidgets.QWidget()
         self.web_bible_tab.setObjectName('WebBibleTab')
-        self.web_bible_layout = QtWidgets.QFormLayout(self.web_bible_tab)
+        self.web_bible_layout = QtWidgets.QFormLayout(self.web_widget)
         self.web_bible_layout.setObjectName('WebBibleLayout')
-        self.web_update_label = QtWidgets.QLabel(self.web_bible_tab)
+        self.web_update_label = QtWidgets.QLabel(self.web_widget)
         self.web_update_label.setObjectName('WebUpdateLabel')
         self.web_bible_layout.setWidget(0, QtWidgets.QFormLayout.LabelRole, self.web_update_label)
-        self.web_update_button = QtWidgets.QPushButton(self.web_bible_tab)
+        self.web_update_button = QtWidgets.QPushButton(self.web_widget)
         self.web_update_button.setObjectName('WebUpdateButton')
         self.web_bible_layout.setWidget(0, QtWidgets.QFormLayout.FieldRole, self.web_update_button)
-        self.web_source_label = QtWidgets.QLabel(self.web_bible_tab)
+        self.web_source_label = QtWidgets.QLabel(self.web_widget)
         self.web_source_label.setObjectName('WebSourceLabel')
         self.web_bible_layout.setWidget(1, QtWidgets.QFormLayout.LabelRole, self.web_source_label)
-        self.web_source_combo_box = QtWidgets.QComboBox(self.web_bible_tab)
+        self.web_source_combo_box = QtWidgets.QComboBox(self.web_widget)
         self.web_source_combo_box.setObjectName('WebSourceComboBox')
         self.web_source_combo_box.addItems(['', '', ''])
         self.web_source_combo_box.setEnabled(False)
@@ -243,31 +244,7 @@ class BibleImportForm(OpenLPWizard):
         self.web_progress_bar.setObjectName('WebTranslationProgressBar')
         self.web_progress_bar.setVisible(False)
         self.web_bible_layout.setWidget(3, QtWidgets.QFormLayout.SpanningRole, self.web_progress_bar)
-        self.web_tab_widget.addTab(self.web_bible_tab, '')
-        self.web_proxy_tab = QtWidgets.QWidget()
-        self.web_proxy_tab.setObjectName('WebProxyTab')
-        self.web_proxy_layout = QtWidgets.QFormLayout(self.web_proxy_tab)
-        self.web_proxy_layout.setObjectName('WebProxyLayout')
-        self.web_server_label = QtWidgets.QLabel(self.web_proxy_tab)
-        self.web_server_label.setObjectName('WebServerLabel')
-        self.web_proxy_layout.setWidget(0, QtWidgets.QFormLayout.LabelRole, self.web_server_label)
-        self.web_server_edit = QtWidgets.QLineEdit(self.web_proxy_tab)
-        self.web_server_edit.setObjectName('WebServerEdit')
-        self.web_proxy_layout.setWidget(0, QtWidgets.QFormLayout.FieldRole, self.web_server_edit)
-        self.web_user_label = QtWidgets.QLabel(self.web_proxy_tab)
-        self.web_user_label.setObjectName('WebUserLabel')
-        self.web_proxy_layout.setWidget(1, QtWidgets.QFormLayout.LabelRole, self.web_user_label)
-        self.web_user_edit = QtWidgets.QLineEdit(self.web_proxy_tab)
-        self.web_user_edit.setObjectName('WebUserEdit')
-        self.web_proxy_layout.setWidget(1, QtWidgets.QFormLayout.FieldRole, self.web_user_edit)
-        self.web_password_label = QtWidgets.QLabel(self.web_proxy_tab)
-        self.web_password_label.setObjectName('WebPasswordLabel')
-        self.web_proxy_layout.setWidget(2, QtWidgets.QFormLayout.LabelRole, self.web_password_label)
-        self.web_password_edit = QtWidgets.QLineEdit(self.web_proxy_tab)
-        self.web_password_edit.setObjectName('WebPasswordEdit')
-        self.web_proxy_layout.setWidget(2, QtWidgets.QFormLayout.FieldRole, self.web_password_edit)
-        self.web_tab_widget.addTab(self.web_proxy_tab, '')
-        self.select_stack.addWidget(self.web_tab_widget)
+        self.select_stack.addWidget(self.web_widget)
         self.zefania_widget = QtWidgets.QWidget(self.select_page)
         self.zefania_widget.setObjectName('ZefaniaWidget')
         self.zefania_layout = QtWidgets.QFormLayout(self.zefania_widget)
@@ -388,7 +365,7 @@ class BibleImportForm(OpenLPWizard):
         self.license_details_layout.setWidget(3, QtWidgets.QFormLayout.FieldRole, self.full_license_edit)
         self.addPage(self.license_details_page)
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         """
         Allow for localisation of the bible import wizard.
         """
@@ -427,14 +404,6 @@ class BibleImportForm(OpenLPWizard):
         self.web_source_combo_box.setItemText(WebDownload.Bibleserver, translate('BiblesPlugin.ImportWizardForm',
                                                                                  'Bibleserver'))
         self.web_translation_label.setText(translate('BiblesPlugin.ImportWizardForm', 'Bible:'))
-        self.web_tab_widget.setTabText(self.web_tab_widget.indexOf(self.web_bible_tab),
-                                       translate('BiblesPlugin.ImportWizardForm', 'Download Options'))
-        self.web_server_label.setText(translate('BiblesPlugin.ImportWizardForm', 'Server:'))
-        self.web_user_label.setText(translate('BiblesPlugin.ImportWizardForm', 'Username:'))
-        self.web_password_label.setText(translate('BiblesPlugin.ImportWizardForm', 'Password:'))
-        self.web_tab_widget.setTabText(
-            self.web_tab_widget.indexOf(self.web_proxy_tab), translate('BiblesPlugin.ImportWizardForm',
-                                                                       'Proxy Server (Optional)'))
         self.sword_bible_label.setText(translate('BiblesPlugin.ImportWizardForm', 'Bibles:'))
         self.sword_folder_label.setText(translate('BiblesPlugin.ImportWizardForm', 'SWORD data folder:'))
         self.sword_zipfile_label.setText(translate('BiblesPlugin.ImportWizardForm', 'SWORD zip-file:'))
@@ -609,14 +578,13 @@ class BibleImportForm(OpenLPWizard):
         self.web_update_button.setEnabled(False)
         self.web_progress_bar.setVisible(True)
         self.web_progress_bar.setValue(0)
-        proxy_server = self.field('proxy_server')
         # TODO: Where does critical_error_message_box get %s string from?
-        for (download_type, extractor) in ((WebDownload.Crosswalk, CWExtract(proxy_server)),
-                                           (WebDownload.BibleGateway, BGExtract(proxy_server)),
-                                           (WebDownload.Bibleserver, BSExtract(proxy_server))):
+        for (download_type, extractor) in ((WebDownload.Crosswalk, CWExtract()),
+                                           (WebDownload.BibleGateway, BGExtract()),
+                                           (WebDownload.Bibleserver, BSExtract())):
             try:
                 bibles = extractor.get_bibles_from_http()
-            except (urllib.error.URLError, ConnectionError) as err:
+            except (urllib.error.URLError, ConnectionError):
                 critical_error_message_box(translate('BiblesPlugin.ImportWizardForm', 'Error during download'),
                                            translate('BiblesPlugin.ImportWizardForm',
                                                      'An error occurred while downloading the list of bibles from %s.'))
@@ -646,7 +614,7 @@ class BibleImportForm(OpenLPWizard):
                 self.sword_bible_combo_box.clear()
                 for key in bible_keys:
                     self.sword_bible_combo_box.addItem(self.pysword_folder_modules_json[key]['description'], key)
-            except:
+            except Exception:
                 self.sword_bible_combo_box.clear()
 
     def on_sword_zipfile_path_edit_path_changed(self, new_path):
@@ -661,7 +629,7 @@ class BibleImportForm(OpenLPWizard):
                 self.sword_zipbible_combo_box.clear()
                 for key in bible_keys:
                     self.sword_zipbible_combo_box.addItem(self.pysword_zip_modules_json[key]['description'], key)
-            except:
+            except Exception:
                 self.sword_zipbible_combo_box.clear()
 
     def register_fields(self):
@@ -679,9 +647,6 @@ class BibleImportForm(OpenLPWizard):
         self.select_page.registerField('web_biblename', self.web_translation_combo_box)
         self.select_page.registerField('sword_folder_path', self.sword_folder_path_edit, 'path', PathEdit.pathChanged)
         self.select_page.registerField('sword_zip_path', self.sword_zipfile_path_edit, 'path', PathEdit.pathChanged)
-        self.select_page.registerField('proxy_server', self.web_server_edit)
-        self.select_page.registerField('proxy_username', self.web_user_edit)
-        self.select_page.registerField('proxy_password', self.web_password_edit)
         self.license_details_page.registerField('license_version', self.version_name_edit)
         self.license_details_page.registerField('license_copyright', self.copyright_edit)
         self.license_details_page.registerField('license_permissions', self.permissions_edit)
@@ -706,9 +671,6 @@ class BibleImportForm(OpenLPWizard):
         self.setField('sword_zip_path', None)
         self.setField('web_location', WebDownload.Crosswalk)
         self.setField('web_biblename', self.web_translation_combo_box.currentIndex())
-        self.setField('proxy_server', settings.value('proxy address'))
-        self.setField('proxy_username', settings.value('proxy username'))
-        self.setField('proxy_password', settings.value('proxy password'))
         self.setField('license_version', self.version_name_edit.text())
         self.version_name_edit.setPlaceholderText(UiStrings().RequiredShowInFooter)
         self.setField('license_copyright', self.copyright_edit.text())
@@ -765,9 +727,6 @@ class BibleImportForm(OpenLPWizard):
                 BibleFormat.WebDownload, name=license_version,
                 download_source=WebDownload.Names[download_location],
                 download_name=bible,
-                proxy_server=self.field('proxy_server'),
-                proxy_username=self.field('proxy_username'),
-                proxy_password=self.field('proxy_password'),
                 language_id=language_id
             )
         elif bible_type == BibleFormat.Zefania:

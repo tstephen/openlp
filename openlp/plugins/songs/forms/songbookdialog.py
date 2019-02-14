@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -31,7 +31,7 @@ class Ui_SongBookDialog(object):
     """
     The user interface for the Songbook dialog.
     """
-    def setupUi(self, song_book_dialog):
+    def setup_ui(self, song_book_dialog):
         """
         Set up the user interface.
         """
@@ -57,10 +57,10 @@ class Ui_SongBookDialog(object):
         self.dialog_layout.addLayout(self.book_layout)
         self.button_box = create_button_box(song_book_dialog, 'button_box', ['cancel', 'save'])
         self.dialog_layout.addWidget(self.button_box)
-        self.retranslateUi(song_book_dialog)
+        self.retranslate_ui(song_book_dialog)
         song_book_dialog.setMaximumHeight(song_book_dialog.sizeHint().height())
 
-    def retranslateUi(self, song_book_dialog):
+    def retranslate_ui(self, song_book_dialog):
         """
         Translate the UI on the fly.
         """

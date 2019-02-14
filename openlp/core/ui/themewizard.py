@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -26,7 +26,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 from openlp.core.common import is_macosx
 from openlp.core.common.i18n import UiStrings, translate
-from openlp.core.lib.theme import HorizontalType, BackgroundType, BackgroundGradientType
+from openlp.core.lib.theme import BackgroundGradientType, BackgroundType, HorizontalType
 from openlp.core.lib.ui import add_welcome_page, create_valign_selection_widgets
 from openlp.core.ui.icons import UiIcons
 from openlp.core.widgets.buttons import ColorButton
@@ -37,7 +37,7 @@ class Ui_ThemeWizard(object):
     """
     The Create/Edit theme wizard
     """
-    def setupUi(self, theme_wizard):
+    def setup_ui(self, theme_wizard):
         """
         Set up the UI
         """
@@ -375,7 +375,7 @@ class Ui_ThemeWizard(object):
         self.preview_area_layout.addWidget(self.preview_box_label)
         self.preview_layout.addWidget(self.preview_area)
         theme_wizard.addPage(self.preview_page)
-        self.retranslateUi(theme_wizard)
+        self.retranslate_ui(theme_wizard)
         self.background_combo_box.currentIndexChanged.connect(self.background_stack.setCurrentIndex)
         self.outline_check_box.toggled.connect(self.outline_color_button.setEnabled)
         self.outline_check_box.toggled.connect(self.outline_size_spin_box.setEnabled)
@@ -390,7 +390,7 @@ class Ui_ThemeWizard(object):
         self.footer_position_check_box.toggled.connect(self.footer_width_spin_box.setDisabled)
         self.footer_position_check_box.toggled.connect(self.footer_height_spin_box.setDisabled)
 
-    def retranslateUi(self, theme_wizard):
+    def retranslate_ui(self, theme_wizard):
         """
         Translate the UI on the fly
         """

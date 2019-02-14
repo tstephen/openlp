@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -26,7 +26,7 @@ import os
 import shutil
 from tempfile import mkdtemp
 from unittest import TestCase
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 from openlp.core.common import is_win
 from openlp.core.common.settings import Settings
@@ -34,6 +34,7 @@ from openlp.plugins.presentations.lib.powerpointcontroller import PowerpointCont
     _get_text_from_shapes
 from tests.helpers.testmixin import TestMixin
 from tests.utils.constants import TEST_RESOURCES_PATH
+
 
 if is_win():
     import pywintypes
@@ -180,7 +181,7 @@ class TestPowerpointDocument(TestCase, TestMixin):
         self.doc.create_titles_and_notes()
 
         # THEN the save should have been called exactly once with 2 titles and 2 notes
-        self.doc.save_titles_and_notes.assert_called_once_with(['SlideText\n', 'SlideText\n'], [' ', ' '])
+        self.doc.save_titles_and_notes.assert_called_once_with(['SlideText', 'SlideText'], [' ', ' '])
 
     def test_create_titles_and_notes_with_no_slides(self):
         """

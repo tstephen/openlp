@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,138 +23,133 @@
 Package to test the openlp.core.common.actions package.
 """
 from unittest import TestCase
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import MagicMock
 
-from PyQt5 import QtGui, QtCore, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets
 
-import openlp.core.common.actions
-from openlp.core.common.actions import CategoryActionList, ActionList
+from openlp.core.common.actions import ActionList, CategoryActionList
 from openlp.core.common.settings import Settings
 from tests.helpers.testmixin import TestMixin
 
 
-class TestCategoryActionList(TestCase):
-    def setUp(self):
-        """
-        Create an instance and a few example actions.
-        """
-        self.action1 = MagicMock()
-        self.action1.text.return_value = 'first'
-        self.action2 = MagicMock()
-        self.action2.text.return_value = 'second'
-        self.list = CategoryActionList()
+MOCK_ACTION1 = MagicMock(**{'text.return_value': 'first'})
+MOCK_ACTION2 = MagicMock(**{'text.return_value': 'second'})
 
-    def tearDown(self):
-        """
-        Clean up
-        """
-        del self.list
 
-    def test_contains(self):
-        """
-        Test the __contains__() method
-        """
-        # GIVEN: The list.
-        # WHEN: Add an action
-        self.list.append(self.action1)
+def test_action_list_contains():
+    """
+    Test the __contains__() method
+    """
+    # GIVEN: The list and 2 actions
+    category_list = CategoryActionList()
 
-        # THEN: The actions should (not) be in the list.
-        assert self.action1 in self.list
-        assert self.action2 not in self.list
+    # WHEN: Add an action
+    category_list.append(MOCK_ACTION1)
 
-    def test_len(self):
-        """
-        Test the __len__ method
-        """
-        # GIVEN: The list.
-        # WHEN: Do nothing.
-        # THEN: Check the length.
-        assert len(self.list) == 0, "The length should be 0."
+    # THEN: The actions should (not) be in the list.
+    assert MOCK_ACTION1 in category_list
+    assert MOCK_ACTION2 not in category_list
 
-        # GIVEN: The list.
-        # WHEN: Append an action.
-        self.list.append(self.action1)
 
-        # THEN: Check the length.
-        assert len(self.list) == 1, "The length should be 1."
+def test_action_list_empty_len():
+    """
+    Test the __len__ method when the list is empty
+    """
+    # GIVEN: The list without any actions
+    category_list = CategoryActionList()
 
-    def test_append(self):
-        """
-        Test the append() method
-        """
-        # GIVEN: The list.
-        # WHEN: Append an action.
-        self.list.append(self.action1)
-        self.list.append(self.action2)
+    # WHEN: Do nothing.
+    list_len = len(category_list)
 
-        # THEN: Check if the actions are in the list and check if they have the correct weights.
-        assert self.action1 in self.list
-        assert self.action2 in self.list
-        assert self.list.actions[0] == (0, self.action1)
-        assert self.list.actions[1] == (1, self.action2)
+    # THEN: Check the length.
+    assert list_len == 0, 'The length should be 0.'
 
-    def test_add(self):
-        """
-        Test the add() method
-        """
-        # GIVEN: The list and weights.
-        action1_weight = 42
-        action2_weight = 41
 
-        # WHEN: Add actions and their weights.
-        self.list.add(self.action1, action1_weight)
-        self.list.add(self.action2, action2_weight)
+def test_action_list_len():
+    """
+    Test the __len__ method when the list is not empty
+    """
+    # GIVEN: The list with 2 items in it
+    category_list = CategoryActionList()
+    category_list.append(MOCK_ACTION1)
+    category_list.append(MOCK_ACTION2)
 
-        # THEN: Check if they were added and have the specified weights.
-        assert self.action1 in self.list
-        assert self.action2 in self.list
-        # Now check if action1 is second and action2 is first (due to their weights).
-        assert self.list.actions[0] == (41, self.action2)
-        assert self.list.actions[1] == (42, self.action1)
+    # WHEN: The length of the list is calculated
+    list_len = len(category_list)
 
-    def test_iterator(self):
-        """
-        Test the __iter__ and __next__ methods
-        """
-        # GIVEN: The list including two actions
-        self.list.add(self.action1)
-        self.list.add(self.action2)
+    # THEN: It should have 2 items
+    assert list_len == 2, 'The list should have 2 items in it'
 
-        # WHEN: Iterating over the list
-        local_list = [a for a in self.list]
-        # THEN: Make sure they are returned in correct order
-        assert len(self.list) == 2
-        assert local_list[0] is self.action1
-        assert local_list[1] is self.action2
 
-    def test_remove(self):
-        """
-        Test the remove() method
-        """
-        # GIVEN: The list
-        self.list.append(self.action1)
+def test_action_list_append():
+    """
+    Test the append() method
+    """
+    # GIVEN: The list.
+    category_list = CategoryActionList()
 
-        # WHEN: Delete an item from the list.
-        self.list.remove(self.action1)
+    # WHEN: Append an action.
+    category_list.append(MOCK_ACTION1)
+    category_list.append(MOCK_ACTION2)
 
-        # THEN: Now the element should not be in the list anymore.
-        assert self.action1 not in self.list
+    # THEN: Check if the actions are in the list and check if they have the correct weights.
+    assert MOCK_ACTION1 in category_list
+    assert MOCK_ACTION2 in category_list
+    assert category_list.actions[0] == (0, MOCK_ACTION1)
+    assert category_list.actions[1] == (1, MOCK_ACTION2)
 
-    def test_remove_not_in_list(self):
-        """
-        Test the remove() method when action not in list
-        """
-        with patch.object(openlp.core.common.actions, 'log') as mock_log:
-            log_warn_calls = [call('Action "" does not exist.')]
 
-            # GIVEN: The list
-            self.list.append(self.action1)
+def test_action_list_add():
+    """
+    Test the add() method
+    """
+    # GIVEN: The list and weights.
+    action1_weight = 42
+    action2_weight = 41
+    category_list = CategoryActionList()
 
-            # WHEN: Delete an item not in the list.
-            self.list.remove('')
+    # WHEN: Add actions and their weights.
+    category_list.add(MOCK_ACTION1, action1_weight)
+    category_list.add(MOCK_ACTION2, action2_weight)
 
-            # THEN: Warning should be logged
-            mock_log.warning.assert_has_calls(log_warn_calls)
+    # THEN: Check if they were added and have the specified weights.
+    assert MOCK_ACTION1 in category_list
+    assert MOCK_ACTION2 in category_list
+    assert category_list.actions[0] == (41, MOCK_ACTION2)
+    assert category_list.actions[1] == (42, MOCK_ACTION1)
+
+
+def test_action_list_iterator():
+    """
+    Test the __iter__ and __next__ methods
+    """
+    # GIVEN: The list including two actions
+    category_list = CategoryActionList()
+    category_list.append(MOCK_ACTION1)
+    category_list.append(MOCK_ACTION2)
+
+    # WHEN: Iterating over the list
+    local_list = [a for a in category_list]
+
+    # THEN: Make sure they are returned in correct order
+    assert len(category_list) == 2
+    assert local_list[0] is MOCK_ACTION1
+    assert local_list[1] is MOCK_ACTION2
+
+
+def test_action_list_remove():
+    """
+    Test the remove() method
+    """
+    # GIVEN: The list
+    category_list = CategoryActionList()
+    category_list.append(MOCK_ACTION1)
+
+    # WHEN: Delete an item from the list.
+    category_list.remove(MOCK_ACTION1)
+
+    # THEN: Now the element should not be in the list anymore.
+    assert MOCK_ACTION1 not in category_list
 
 
 class TestActionList(TestCase, TestMixin):

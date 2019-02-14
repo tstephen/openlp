@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -39,7 +39,7 @@ class SongUsageDeleteForm(QtWidgets.QDialog, Ui_SongUsageDeleteDialog, RegistryP
         self.manager = manager
         super(SongUsageDeleteForm, self).__init__(parent, QtCore.Qt.WindowSystemMenuHint |
                                                   QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowCloseButtonHint)
-        self.setupUi(self)
+        self.setup_ui(self)
         self.button_box.clicked.connect(self.on_button_box_clicked)
 
     def on_button_box_clicked(self, button):

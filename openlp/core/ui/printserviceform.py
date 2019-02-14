@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -26,7 +26,7 @@ import datetime
 import html
 
 import lxml.html
-from PyQt5 import QtCore, QtGui, QtWidgets, QtPrintSupport
+from PyQt5 import QtCore, QtGui, QtPrintSupport, QtWidgets
 
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.i18n import UiStrings, translate
@@ -35,6 +35,7 @@ from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.lib import get_text_file_string, image_to_byte
 from openlp.core.ui.printservicedialog import Ui_PrintServiceDialog, ZoomSize
+
 
 DEFAULT_CSS = """/*
 Edit this file to customize the service order print. Note, that not all CSS
@@ -133,7 +134,7 @@ class PrintServiceForm(QtWidgets.QDialog, Ui_PrintServiceDialog, RegistryPropert
         self.print_dialog = QtPrintSupport.QPrintDialog(self.printer, self)
         self.document = QtGui.QTextDocument()
         self.zoom = 0
-        self.setupUi(self)
+        self.setup_ui(self)
         # Load the settings for the dialog.
         settings = Settings()
         settings.beginGroup('advanced')

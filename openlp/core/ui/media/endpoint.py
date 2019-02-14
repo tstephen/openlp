@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -27,6 +27,7 @@ import logging
 from openlp.core.api.http import requires_auth
 from openlp.core.api.http.endpoint import Endpoint
 from openlp.core.common.registry import Registry
+
 
 log = logging.getLogger(__name__)
 media_endpoint = Endpoint('media')

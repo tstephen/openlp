@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -30,6 +30,7 @@ from openlp.plugins.bibles.lib.db import BibleDB
 from openlp.plugins.bibles.lib.importers.osis import OSISBible
 from tests.utils import load_external_result_data
 from tests.utils.constants import RESOURCE_PATH
+
 
 TEST_PATH = RESOURCE_PATH / 'bibles'
 
@@ -469,7 +470,7 @@ class TestOsisImportFileImports(TestCase):
             # THEN: The create_verse() method should have been called with each verse in the file.
             assert importer.create_verse.called is True
             for verse_tag, verse_text in test_data['verses']:
-                    importer.create_verse.assert_any_call(importer.create_book().id, 1, verse_tag, verse_text)
+                importer.create_verse.assert_any_call(importer.create_book().id, 1, verse_tag, verse_text)
 
     def test_file_import_milestone_tags(self):
         """

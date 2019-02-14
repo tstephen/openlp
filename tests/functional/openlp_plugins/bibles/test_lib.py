@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -55,7 +55,7 @@ class TestLib(TestCase, TestMixin):
 
         # WHEN: Calling get_reference_separator
         for key, value in separators.items():
-            _ = lib.get_reference_separator(key)
+            lib.get_reference_separator(key)
 
             # THEN: get_reference_separator should return the correct separator
             assert separators[key] == value

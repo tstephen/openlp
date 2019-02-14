@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -67,7 +67,7 @@ class Ui_ShortcutListDialog(object):
     """
     The UI widgets for the shortcut dialog.
     """
-    def setupUi(self, shortcutListDialog):
+    def setup_ui(self, shortcutListDialog):
         """
         Set up the UI
         """
@@ -130,9 +130,9 @@ class Ui_ShortcutListDialog(object):
         self.button_box = create_button_box(shortcutListDialog, 'button_box', ['cancel', 'ok', 'defaults'])
         self.button_box.setOrientation(QtCore.Qt.Horizontal)
         self.shortcut_list_layout.addWidget(self.button_box)
-        self.retranslateUi(shortcutListDialog)
+        self.retranslate_ui(shortcutListDialog)
 
-    def retranslateUi(self, shortcutListDialog):
+    def retranslate_ui(self, shortcutListDialog):
         """
         Translate the UI on the fly
         """

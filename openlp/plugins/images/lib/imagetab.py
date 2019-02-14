@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -24,7 +24,7 @@ from PyQt5 import QtWidgets
 
 from openlp.core.common.i18n import UiStrings, translate
 from openlp.core.common.settings import Settings
-from openlp.core.lib import SettingsTab
+from openlp.core.lib.settingstab import SettingsTab
 from openlp.core.widgets.buttons import ColorButton
 
 
@@ -32,9 +32,9 @@ class ImageTab(SettingsTab):
     """
     ImageTab is the images settings tab in the settings dialog.
     """
-    def setupUi(self):
+    def setup_ui(self):
         self.setObjectName('ImagesTab')
-        super(ImageTab, self).setupUi()
+        super(ImageTab, self).setup_ui()
         self.background_color_group_box = QtWidgets.QGroupBox(self.left_column)
         self.background_color_group_box.setObjectName('background_color_group_box')
         self.form_layout = QtWidgets.QFormLayout(self.background_color_group_box)
@@ -58,7 +58,7 @@ class ImageTab(SettingsTab):
         # Signals and slots
         self.background_color_button.colorChanged.connect(self.on_background_color_changed)
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         self.background_color_group_box.setTitle(UiStrings().BackgroundColor)
         self.background_color_label.setText(UiStrings().BackgroundColorColon)
         self.information_label.setText(

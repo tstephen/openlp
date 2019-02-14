@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -28,6 +28,7 @@ import logging
 from openlp.core.common import is_win, trace_error_handler
 from openlp.core.common.registry import Registry
 
+
 DO_NOT_TRACE_EVENTS = ['timerEvent', 'paintEvent', 'drag_enter_event', 'drop_event', 'on_controller_size_changed',
                        'preview_size_changed', 'resizeEvent']
 
@@ -49,7 +50,8 @@ class LogMixin(object):
                             setattr(self, name, self.logging_wrapper(m, self))
             return self._logger
 
-    def logging_wrapper(self, func, parent):
+    @staticmethod
+    def logging_wrapper(func, parent):
         """
         Code to added debug wrapper to work on called functions within a decorated class.
         """

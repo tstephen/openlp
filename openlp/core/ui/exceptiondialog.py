@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,18 +23,18 @@
 The GUI widgets of the exception dialog.
 """
 
-from PyQt5 import QtGui, QtWidgets
+from PyQt5 import QtWidgets
 
 from openlp.core.common.i18n import translate
-from openlp.core.ui.icons import UiIcons
 from openlp.core.lib.ui import create_button, create_button_box
+from openlp.core.ui.icons import UiIcons
 
 
 class Ui_ExceptionDialog(object):
     """
     The GUI widgets of the exception dialog.
     """
-    def setupUi(self, exception_dialog):
+    def setup_ui(self, exception_dialog):
         """
         Set up the UI.
         """
@@ -84,10 +84,10 @@ class Ui_ExceptionDialog(object):
                                             [self.send_report_button, self.save_report_button, self.attach_tile_button])
         self.exception_layout.addWidget(self.button_box)
 
-        self.retranslateUi(exception_dialog)
+        self.retranslate_ui(exception_dialog)
         self.description_text_edit.textChanged.connect(self.on_description_updated)
 
-    def retranslateUi(self, exception_dialog):
+    def retranslate_ui(self, exception_dialog):
         """
         Translate the widgets on the fly.
         """

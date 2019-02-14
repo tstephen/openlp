@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,7 +23,11 @@
 This module contains tests for the WorshipCenter Pro song importer.
 """
 from unittest import TestCase, skipUnless
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
+from tests.utils import load_external_result_data
+from tests.utils.constants import RESOURCE_PATH
+
 
 try:
     from openlp.core.common.registry import Registry
@@ -32,8 +36,6 @@ try:
 except ImportError:
     CAN_RUN_TESTS = False
 
-from tests.utils import load_external_result_data
-from tests.utils.constants import RESOURCE_PATH
 
 TEST_PATH = RESOURCE_PATH / 'songs' / 'opspro'
 

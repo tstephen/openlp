@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,12 +23,13 @@
 The :mod:`languages` module provides a list of icons.
 """
 import logging
-import qtawesome as qta
 
+import qtawesome as qta
 from PyQt5 import QtGui, QtWidgets
 
 from openlp.core.common.applocation import AppLocation
 from openlp.core.lib import build_icon
+
 
 log = logging.getLogger(__name__)
 
@@ -78,7 +79,7 @@ class UiIcons(object):
             'book': {'icon': 'fa.book'},
             'bottom': {'icon': 'fa.angle-double-down'},
             'box': {'icon': 'fa.briefcase'},
-            'clapperboard': {'icon': 'fa.chess-board'},
+            'clapperboard': {'icon': 'fa.film'},
             'clock': {'icon': 'fa.clock-o'},
             'clone': {'icon': 'fa.clone'},
             'close': {'icon': 'fa.times-circle-o'},
@@ -173,9 +174,9 @@ class UiIcons(object):
                     setattr(self, key, qta.icon(icon))
                 except Exception:
                     import sys
-                    log.error("Unexpected error: %s" % sys.exc_info())
+                    log.error('Unexpected error: %s' % sys.exc_info())
                     setattr(self, key, qta.icon('fa.plus-circle', color='red'))
-            except:
+            except Exception:
                 setattr(self, key, qta.icon('fa.plus-circle', color='red'))
         self.main_icon = build_icon(':/icon/openlp-logo.svg')
 

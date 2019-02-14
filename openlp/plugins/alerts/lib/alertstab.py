@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -24,7 +24,7 @@ from PyQt5 import QtGui, QtWidgets
 
 from openlp.core.common.i18n import UiStrings, translate
 from openlp.core.common.settings import Settings
-from openlp.core.lib import SettingsTab
+from openlp.core.lib.settingstab import SettingsTab
 from openlp.core.lib.ui import create_valign_selection_widgets
 from openlp.core.widgets.buttons import ColorButton
 
@@ -33,9 +33,9 @@ class AlertsTab(SettingsTab):
     """
     AlertsTab is the alerts settings tab in the settings dialog.
     """
-    def setupUi(self):
+    def setup_ui(self):
         self.setObjectName('AlertsTab')
-        super(AlertsTab, self).setupUi()
+        super(AlertsTab, self).setup_ui()
         self.font_group_box = QtWidgets.QGroupBox(self.left_column)
         self.font_group_box.setObjectName('font_group_box')
         self.font_layout = QtWidgets.QFormLayout(self.font_group_box)
@@ -93,7 +93,7 @@ class AlertsTab(SettingsTab):
         self.timeout_spin_box.valueChanged.connect(self.on_timeout_spin_box_changed)
         self.font_size_spin_box.valueChanged.connect(self.on_font_size_spin_box_changed)
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         self.font_group_box.setTitle(translate('AlertsPlugin.AlertsTab', 'Font'))
         self.font_label.setText(translate('AlertsPlugin.AlertsTab', 'Font name:'))
         self.font_color_label.setText(translate('AlertsPlugin.AlertsTab', 'Font color:'))

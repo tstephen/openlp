@@ -7,7 +7,7 @@ import logging
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -26,7 +26,9 @@ import chardet
 
 from openlp.core.common.i18n import translate
 from openlp.plugins.songs.lib import VerseType
+
 from .songimport import SongImport
+
 
 log = logging.getLogger(__name__)
 
@@ -289,10 +291,8 @@ class CCLIFileImport(SongImport):
                                 # verse type, so set flag
                                 verse_type = VerseType.tags[VerseType.Other]
                                 check_first_verse_line = True
-                            verse_number = verse_desc_parts[1]
                         else:
                             verse_type = VerseType.tags[VerseType.Other]
-                            verse_number = 1
                         verse_start = True
                     else:
                         # check first line for verse type

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -46,7 +46,6 @@ class TestBibleImportForm(TestCase, TestMixin):
         self.setup_application()
         self.main_window = QtWidgets.QMainWindow()
         Registry().register('main_window', self.main_window)
-        PYSWORD_AVAILABLE = False
         self.mocked_manager = MagicMock()
         self.form = BibleImportForm(self.main_window, self.mocked_manager, MagicMock())
 

@@ -5,7 +5,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -45,8 +45,6 @@ This is done easily via the ``-d``, ``-p`` and ``-u`` options::
     @:~$ ./translation_utils.py -dpu
 
 """
-from argparse import ArgumentParser
-from getpass import getpass
 import base64
 import glob
 import json
@@ -56,9 +54,11 @@ import urllib.error
 import urllib.parse
 import urllib.request
 import webbrowser
+from argparse import ArgumentParser
+from getpass import getpass
 
+from lxml import objectify
 from PyQt5 import QtCore
-from lxml import etree, objectify
 
 SERVER_URL = 'http://www.transifex.com/api/2/project/openlp/resource/openlp-26x/'
 IGNORED_PATHS = ['scripts']

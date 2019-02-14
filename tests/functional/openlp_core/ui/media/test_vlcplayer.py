@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -26,7 +26,7 @@ import os
 import sys
 from datetime import timedelta
 from unittest import TestCase, skip
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock, call, patch
 
 from openlp.core.common.registry import Registry
 from openlp.core.ui.media import MediaState, MediaType
@@ -368,7 +368,7 @@ class TestVLCPlayer(TestCase, TestMixin):
 
         # WHEN: A video is loaded into VLC
         with patch.object(vlc_player, 'volume') as mocked_volume:
-            result = vlc_player.load(mocked_display)
+            result = vlc_player.load(mocked_display, media_path)
 
         # THEN: The video should be loaded
         mocked_normcase.assert_called_with(media_path)
@@ -412,8 +412,8 @@ class TestVLCPlayer(TestCase, TestMixin):
 
         # WHEN: An audio CD is loaded into VLC
         with patch.object(vlc_player, 'volume') as mocked_volume, \
-                patch.object(vlc_player, 'media_state_wait') as mocked_media_state_wait:
-            result = vlc_player.load(mocked_display)
+                patch.object(vlc_player, 'media_state_wait'):
+            result = vlc_player.load(mocked_display, media_path)
 
         # THEN: The video should be loaded
         mocked_normcase.assert_called_with(media_path)
@@ -457,8 +457,8 @@ class TestVLCPlayer(TestCase, TestMixin):
 
         # WHEN: An audio CD is loaded into VLC
         with patch.object(vlc_player, 'volume') as mocked_volume, \
-                patch.object(vlc_player, 'media_state_wait') as mocked_media_state_wait:
-            result = vlc_player.load(mocked_display)
+                patch.object(vlc_player, 'media_state_wait'):
+            result = vlc_player.load(mocked_display, media_path)
 
         # THEN: The video should be loaded
         mocked_normcase.assert_called_with(media_path)
@@ -501,9 +501,8 @@ class TestVLCPlayer(TestCase, TestMixin):
         vlc_player = VlcPlayer(None)
 
         # WHEN: An audio CD is loaded into VLC
-        with patch.object(vlc_player, 'volume') as mocked_volume, \
-                patch.object(vlc_player, 'media_state_wait') as mocked_media_state_wait:
-            result = vlc_player.load(mocked_display)
+        with patch.object(vlc_player, 'volume'), patch.object(vlc_player, 'media_state_wait'):
+            result = vlc_player.load(mocked_display, media_path)
 
         # THEN: The video should be loaded
         mocked_normcase.assert_called_with(media_path)
@@ -657,7 +656,7 @@ class TestVLCPlayer(TestCase, TestMixin):
 
         # WHEN: play() is called
         with patch.object(vlc_player, 'media_state_wait') as mocked_media_state_wait, \
-                patch.object(vlc_player, 'volume') as mocked_volume:
+                patch.object(vlc_player, 'volume'):
             mocked_media_state_wait.return_value = False
             result = vlc_player.play(mocked_display)
 
@@ -690,7 +689,7 @@ class TestVLCPlayer(TestCase, TestMixin):
         vlc_player.set_state(MediaState.Paused, mocked_display)
 
         # WHEN: play() is called
-        with patch.object(vlc_player, 'media_state_wait', return_value=True) as mocked_media_state_wait, \
+        with patch.object(vlc_player, 'media_state_wait', return_value=True), \
                 patch.object(vlc_player, 'volume') as mocked_volume, \
                 patch.object(vlc_player, 'get_live_state', return_value=MediaState.Loaded):
             result = vlc_player.play(mocked_display)

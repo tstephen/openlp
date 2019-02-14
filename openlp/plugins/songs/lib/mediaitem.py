@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -25,23 +25,27 @@ import os
 from PyQt5 import QtCore, QtWidgets
 from sqlalchemy.sql import and_, or_
 
+from openlp.core.state import State
 from openlp.core.common.applocation import AppLocation
-from openlp.core.common.i18n import UiStrings, translate, get_natural_key
-from openlp.core.ui.icons import UiIcons
+from openlp.core.common.i18n import UiStrings, get_natural_key, translate
 from openlp.core.common.path import copyfile, create_paths
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
-from openlp.core.lib import MediaManagerItem, ItemCapabilities, PluginStatus, ServiceItemContext, \
-    check_item_selected, create_separated_list
+from openlp.core.lib import ServiceItemContext, check_item_selected, create_separated_list
+from openlp.core.lib.mediamanageritem import MediaManagerItem
+from openlp.core.lib.plugin import PluginStatus
+from openlp.core.lib.serviceitem import ItemCapabilities
 from openlp.core.lib.ui import create_widget_action
+from openlp.core.ui.icons import UiIcons
 from openlp.plugins.songs.forms.editsongform import EditSongForm
 from openlp.plugins.songs.forms.songexportform import SongExportForm
 from openlp.plugins.songs.forms.songimportform import SongImportForm
 from openlp.plugins.songs.forms.songmaintenanceform import SongMaintenanceForm
 from openlp.plugins.songs.lib import VerseType, clean_string, delete_song
-from openlp.plugins.songs.lib.db import Author, AuthorType, Song, Book, MediaFile, SongBookEntry, Topic
+from openlp.plugins.songs.lib.db import Author, AuthorType, Book, MediaFile, Song, SongBookEntry, Topic
 from openlp.plugins.songs.lib.openlyricsxml import OpenLyrics, SongXML
 from openlp.plugins.songs.lib.ui import SongStrings
+
 
 log = logging.getLogger(__name__)
 
@@ -131,7 +135,7 @@ class SongMediaItem(MediaManagerItem):
         self.display_written_by_text = Settings().value(self.settings_section + '/display written by')
         self.display_copyright_symbol = Settings().value(self.settings_section + '/display copyright symbol')
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         self.search_text_label.setText('{text}:'.format(text=UiStrings().Search))
         self.search_text_button.setText(UiStrings().Search)
         self.maintenance_action.setText(SongStrings.SongMaintenance)
@@ -322,12 +326,12 @@ class SongMediaItem(MediaManagerItem):
         :param search_results: A tuple containing (songbook entry, book name, song title, song id)
         :return: None
         """
-        def get_songbook_key(text_array):
+        def get_songbook_key(text):
             """
             Get the key to sort by
-            :param text_array: the result text to be processed.
+            :param text: the text tuple to be processed.
             """
-            return get_natural_key(text_array[1]), get_natural_key(text_array[0]), get_natural_key(text_array[2])
+            return get_natural_key('{0} {1} {2}'.format(text[1], text[0], text[2]))
 
         log.debug('display results Book')
         self.list_view.clear()
@@ -630,11 +634,16 @@ class SongMediaItem(MediaManagerItem):
         service_item.xml_version = self.open_lyrics.song_to_xml(song)
         # Add the audio file to the service item.
         if song.media_files:
-            service_item.add_capability(ItemCapabilities.HasBackgroundAudio)
-            service_item.background_audio = [m.file_path for m in song.media_files]
-            item.metadata.append('<em>{label}:</em> {media}'.
-                                 format(label=translate('SongsPlugin.MediaItem', 'Media'),
-                                        media=service_item.background_audio))
+            if State().check_preconditions('media'):
+                service_item.add_capability(ItemCapabilities.HasBackgroundAudio)
+                total_length = 0
+                for m in song.media_files:
+                    total_length += self.media_controller.media_length(m.file_path)
+                service_item.background_audio = [m.file_path for m in song.media_files]
+                service_item.set_media_length(total_length)
+                service_item.metadata.append('<em>{label}:</em> {media}'.
+                                             format(label=translate('SongsPlugin.MediaItem', 'Media'),
+                                                    media=service_item.background_audio))
         return True
 
     def generate_footer(self, item, song):

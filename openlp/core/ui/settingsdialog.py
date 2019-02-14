@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -33,7 +33,7 @@ class Ui_SettingsDialog(object):
     """
     The UI widgets of the settings dialog.
     """
-    def setupUi(self, settings_dialog):
+    def setup_ui(self, settings_dialog):
         """
         Set up the UI
         """
@@ -54,9 +54,9 @@ class Ui_SettingsDialog(object):
         self.dialog_layout.addLayout(self.stacked_layout, 0, 1, 1, 1)
         self.button_box = create_button_box(settings_dialog, 'button_box', ['cancel', 'ok'])
         self.dialog_layout.addWidget(self.button_box, 1, 1, 1, 1)
-        self.retranslateUi(settings_dialog)
+        self.retranslate_ui(settings_dialog)
 
-    def retranslateUi(self, settings_dialog):
+    def retranslate_ui(self, settings_dialog):
         """
         Translate the UI on the fly
         """

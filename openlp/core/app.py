@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -33,24 +33,27 @@ import time
 from datetime import datetime
 from traceback import format_exception
 
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtWebEngineWidgets, QtWidgets  # noqa
 
+from openlp.core.state import State
 from openlp.core.common import is_macosx, is_win
 from openlp.core.common.applocation import AppLocation
+from openlp.core.loader import loader
 from openlp.core.common.i18n import LanguageManager, UiStrings, translate
-from openlp.core.common.path import create_paths, copytree
+from openlp.core.common.path import copytree, create_paths
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.display.screens import ScreenList
 from openlp.core.resources import qInitResources
-from openlp.core.ui import SplashScreen
+from openlp.core.server import Server
 from openlp.core.ui.exceptionform import ExceptionForm
 from openlp.core.ui.firsttimeform import FirstTimeForm
 from openlp.core.ui.firsttimelanguageform import FirstTimeLanguageForm
 from openlp.core.ui.mainwindow import MainWindow
+from openlp.core.ui.splashscreen import SplashScreen
 from openlp.core.ui.style import get_application_stylesheet
-from openlp.core.server import Server
 from openlp.core.version import check_for_update, get_version
+
 
 __all__ = ['OpenLP', 'main']
 
@@ -72,7 +75,8 @@ class OpenLP(QtWidgets.QApplication):
         """
         self.is_event_loop_active = True
         result = QtWidgets.QApplication.exec()
-        self.server.close_server()
+        if hasattr(self, 'server'):
+            self.server.close_server()
         return result
 
     def run(self, args):
@@ -113,8 +117,10 @@ class OpenLP(QtWidgets.QApplication):
         # Check if OpenLP has been upgrade and if a backup of data should be created
         self.backup_on_upgrade(has_run_wizard, can_show_splash)
         # start the main app window
+        loader()
         self.main_window = MainWindow()
         Registry().execute('bootstrap_initialise')
+        State().flush_preconditions()
         Registry().execute('bootstrap_post_set_up')
         Registry().initialise = False
         self.main_window.show()
@@ -132,7 +138,7 @@ class OpenLP(QtWidgets.QApplication):
         if Settings().value('core/update check'):
             check_for_update(self.main_window)
         self.main_window.is_display_blank()
-        self.main_window.app_startup()
+        Registry().execute('bootstrap_completion')
         return self.exec()
 
     @staticmethod
@@ -288,7 +294,7 @@ def parse_options(args=None):
     :return: a tuple of parsed options of type optparse.Value and a list of remaining argsZ
     """
     # Set up command line options.
-    parser = argparse.ArgumentParser(prog='openlp.py')
+    parser = argparse.ArgumentParser(prog='openlp')
     parser.add_argument('-e', '--no-error-form', dest='no_error_form', action='store_true',
                         help='Disable the error notification form.')
     parser.add_argument('-l', '--log-level', dest='loglevel', default='warning', metavar='LEVEL',
@@ -313,7 +319,7 @@ def set_up_logging(log_path):
     file_path = log_path / 'openlp.log'
     # TODO: FileHandler accepts a Path object in Py3.6
     logfile = logging.FileHandler(str(file_path), 'w', encoding='UTF-8')
-    logfile.setFormatter(logging.Formatter('%(asctime)s %(name)-55s %(levelname)-8s %(message)s'))
+    logfile.setFormatter(logging.Formatter('%(asctime)s %(threadName)s %(name)-55s %(levelname)-8s %(message)s'))
     log.addHandler(logfile)
     if log.isEnabledFor(logging.DEBUG):
         print('Logging to: {name}'.format(name=file_path))
@@ -326,7 +332,8 @@ def main(args=None):
     :param args: Some args
     """
     args = parse_options(args)
-    qt_args = []
+    qt_args = ['--disable-web-security']
+    # qt_args = []
     if args and args.loglevel.lower() in ['d', 'debug']:
         log.setLevel(logging.DEBUG)
     elif args and args.loglevel.lower() in ['w', 'warning']:

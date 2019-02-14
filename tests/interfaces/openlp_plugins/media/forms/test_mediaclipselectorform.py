@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,20 +23,19 @@
 Module to test the MediaClipSelectorForm.
 """
 import os
-from unittest import TestCase, SkipTest
+from unittest import SkipTest, TestCase
 from unittest.mock import MagicMock, patch
 
+from PyQt5 import QtCore, QtTest, QtWidgets
+
+from openlp.core.common.registry import Registry
 from openlp.core.ui.media.vlcplayer import get_vlc
+from openlp.plugins.media.forms.mediaclipselectorform import MediaClipSelectorForm
+from tests.helpers.testmixin import TestMixin
+
 
 if os.name == 'nt' and not get_vlc():
     raise SkipTest('Windows without VLC, skipping this test since it cannot run without vlc')
-
-from PyQt5 import QtTest, QtCore, QtWidgets
-
-from openlp.core.common.registry import Registry
-from openlp.plugins.media.forms.mediaclipselectorform import MediaClipSelectorForm
-
-from tests.helpers.testmixin import TestMixin
 
 
 class TestMediaClipSelectorForm(TestCase, TestMixin):
@@ -79,7 +78,7 @@ class TestMediaClipSelectorForm(TestCase, TestMixin):
         Test if the dialog is correctly set up.
         """
         # GIVEN: A mocked QDialog.exec() method
-        with patch('PyQt5.QtWidgets.QDialog.exec') as mocked_exec:
+        with patch('PyQt5.QtWidgets.QDialog.exec'):
             # WHEN: Show the dialog.
             self.form.exec()
 
@@ -94,7 +93,7 @@ class TestMediaClipSelectorForm(TestCase, TestMixin):
         with patch('openlp.plugins.media.forms.mediaclipselectorform.critical_error_message_box') as \
                 mocked_critical_error_message_box,\
                 patch('openlp.plugins.media.forms.mediaclipselectorform.os.path.exists') as mocked_os_path_exists,\
-                patch('PyQt5.QtWidgets.QDialog.exec') as mocked_exec:
+                patch('PyQt5.QtWidgets.QDialog.exec'):
             self.form.exec()
 
             # WHEN: The load button is clicked with no path set
@@ -132,7 +131,7 @@ class TestMediaClipSelectorForm(TestCase, TestMixin):
         Test the behavior when the title combobox is updated
         """
         # GIVEN: Mocked methods and some entries in the title combobox.
-        with patch('PyQt5.QtWidgets.QDialog.exec') as mocked_exec:
+        with patch('PyQt5.QtWidgets.QDialog.exec'):
             self.form.exec()
             self.form.vlc_media_player.get_length.return_value = 1000
             self.form.audio_tracks_combobox.itemData = MagicMock()
@@ -161,7 +160,7 @@ class TestMediaClipSelectorForm(TestCase, TestMixin):
         # GIVEN: Mocked methods.
         with patch('openlp.plugins.media.forms.mediaclipselectorform.critical_error_message_box') as \
                 mocked_critical_error_message_box,\
-                patch('PyQt5.QtWidgets.QDialog.exec') as mocked_exec:
+                patch('PyQt5.QtWidgets.QDialog.exec'):
             self.form.exec()
 
             # WHEN: The save button is clicked with a NoneType in start_time_ms or end_time_ms

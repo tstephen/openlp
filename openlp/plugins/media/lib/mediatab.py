@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -24,7 +24,7 @@ from PyQt5 import QtWidgets
 
 from openlp.core.common.i18n import UiStrings, translate
 from openlp.core.common.settings import Settings
-from openlp.core.lib import SettingsTab
+from openlp.core.lib.settingstab import SettingsTab
 
 
 class MediaTab(SettingsTab):
@@ -35,9 +35,9 @@ class MediaTab(SettingsTab):
         self.parent = parent
         super(MediaTab, self).__init__(parent, title, visible_title, icon_path)
 
-    def setupUi(self):
+    def setup_ui(self):
         self.setObjectName('MediaTab')
-        super(MediaTab, self).setupUi()
+        super(MediaTab, self).setup_ui()
         self.advanced_group_box = QtWidgets.QGroupBox(self.left_column)
         self.advanced_group_box.setObjectName('advanced_group_box')
         self.advanced_layout = QtWidgets.QVBoxLayout(self.advanced_group_box)
@@ -52,7 +52,7 @@ class MediaTab(SettingsTab):
         self.left_layout.addStretch()
         self.right_layout.addStretch()
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         self.advanced_group_box.setTitle(UiStrings().Advanced)
         self.override_player_check_box.setText(translate('MediaPlugin.MediaTab', 'Allow media player to be overridden'))
         self.auto_start_check_box.setText(translate('MediaPlugin.MediaTab', 'Start new Live media automatically'))

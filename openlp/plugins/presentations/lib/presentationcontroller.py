@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -29,6 +29,7 @@ from openlp.core.common.path import Path, create_paths
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.lib import create_thumb, validate_thumb
+
 
 log = logging.getLogger(__name__)
 
@@ -326,14 +327,14 @@ class PresentationDocument(object):
         titles_path = self.get_thumbnail_folder() / 'titles.txt'
         try:
             titles = titles_path.read_text().splitlines()
-        except:
+        except Exception:
             log.exception('Failed to open/read existing titles file')
             titles = []
         for slide_no, title in enumerate(titles, 1):
             notes_path = self.get_thumbnail_folder() / 'slideNotes{number:d}.txt'.format(number=slide_no)
             try:
                 note = notes_path.read_text()
-            except:
+            except Exception:
                 log.exception('Failed to open/read notes file')
                 note = ''
             notes.append(note)

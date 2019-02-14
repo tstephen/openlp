@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -24,8 +24,8 @@ Functional tests to test the remote index
 """
 from unittest.mock import MagicMock, patch
 
-from openlp.core.api.endpoint.remote import index
 from openlp.core.api.endpoint.core import TRANSLATED_STRINGS
+from openlp.core.api.endpoint.remote import index
 
 
 @patch('openlp.core.api.endpoint.remote.remote_endpoint')

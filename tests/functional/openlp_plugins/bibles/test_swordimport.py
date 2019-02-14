@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -25,16 +25,17 @@ This module contains tests for the SWORD Bible importer.
 from unittest import TestCase, skipUnless
 from unittest.mock import MagicMock, patch
 
+from openlp.plugins.bibles.lib.db import BibleDB
+from tests.utils import load_external_result_data
+from tests.utils.constants import RESOURCE_PATH
+
+
 try:
     from openlp.plugins.bibles.lib.importers.sword import SwordBible
     HAS_PYSWORD = True
 except ImportError:
     HAS_PYSWORD = False
 
-from openlp.plugins.bibles.lib.db import BibleDB
-
-from tests.utils import load_external_result_data
-from tests.utils.constants import RESOURCE_PATH
 
 TEST_PATH = RESOURCE_PATH / 'bibles'
 

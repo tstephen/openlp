@@ -45,4 +45,11 @@ resources/innosetup/Output
 resources/windows/warnOpenLP.txt
 *.ropeproject
 tags
+output
+htmlcov
+node_modules
+openlp-test-projectordb.sqlite
+package-lock.json
+.cache
+test
 tests.kdev4

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -25,7 +25,7 @@ Module to test the EditCustomForm.
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
-from PyQt5 import QtTest, QtCore, QtWidgets
+from PyQt5 import QtCore, QtTest, QtWidgets
 
 from openlp.core.common.registry import Registry
 from openlp.plugins.custom.forms.editcustomform import EditCustomForm
@@ -84,7 +84,7 @@ class TestEditCustomForm(TestCase, TestMixin):
         Test the on_add_button_clicked_test method / add_button button.
         """
         # GIVEN: A mocked QDialog.exec() method
-        with patch('PyQt5.QtWidgets.QDialog.exec') as mocked_exec:
+        with patch('PyQt5.QtWidgets.QDialog.exec'):
             # WHEN: Add a new slide.
             QtTest.QTest.mouseClick(self.form.add_button, QtCore.Qt.LeftButton)
 

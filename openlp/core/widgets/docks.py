@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -27,7 +27,9 @@ import logging
 from PyQt5 import QtWidgets
 
 from openlp.core.display.screens import ScreenList
-from openlp.core.lib import StringContent, build_icon
+from openlp.core.lib import build_icon
+from openlp.core.lib.plugin import StringContent
+
 
 log = logging.getLogger(__name__)
 
@@ -48,7 +50,7 @@ class OpenLPDockWidget(QtWidgets.QDockWidget):
             self.setWindowIcon(build_icon(icon))
         # Sort out the minimum width.
         screens = ScreenList()
-        main_window_docbars = screens.current['size'].width() // 5
+        main_window_docbars = screens.current.display_geometry.width() // 5
         if main_window_docbars > 300:
             self.setMinimumWidth(300)
         else:

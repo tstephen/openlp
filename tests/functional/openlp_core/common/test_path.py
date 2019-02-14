@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -26,8 +26,8 @@ import os
 from unittest import TestCase
 from unittest.mock import ANY, MagicMock, patch
 
-from openlp.core.common.path import Path, copy, copyfile, copytree, create_paths, path_to_str, replace_params, \
-    str_to_path, which, files_to_paths
+from openlp.core.common.path import Path, copy, copyfile, copytree, create_paths, files_to_paths, path_to_str, \
+    replace_params, str_to_path, which
 
 
 class TestShutil(TestCase):
@@ -271,13 +271,12 @@ class TestPath(TestCase):
 
     def test_str_to_path_type_error(self):
         """
-        Test that `str_to_path` raises a type error when called with an invalid type
+        Test that `str_to_path` returns None if called with invalid information
         """
         # GIVEN: The `str_to_path` function
         # WHEN: Calling `str_to_path` with an invalid Type
-        # THEN: A TypeError should have been raised
-        with self.assertRaises(TypeError):
-            str_to_path(Path())
+        # THEN: None is returned
+        assert str_to_path(Path()) is None
 
     def test_str_to_path_empty_str(self):
         """
@@ -398,7 +397,7 @@ class TestPath(TestCase):
         try:
             create_paths(mocked_path)
             assert False, 'create_paths should have thrown an exception'
-        except:
+        except Exception:
             # THEN: `create_paths` raises an exception
             pass
 
