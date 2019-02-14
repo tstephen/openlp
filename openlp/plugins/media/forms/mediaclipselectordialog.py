@@ -28,7 +28,7 @@ from openlp.core.ui.icons import UiIcons
 
 
 class Ui_MediaClipSelector(object):
-    def setupUi(self, media_clip_selector):
+    def setup_ui(self, media_clip_selector):
         media_clip_selector.setObjectName('media_clip_selector')
         media_clip_selector.resize(554, 654)
         self.combobox_size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
@@ -161,7 +161,7 @@ class Ui_MediaClipSelector(object):
         self.save_button = self.button_box.button(QtWidgets.QDialogButtonBox.Save)
         self.main_layout.addWidget(self.button_box)
 
-        self.retranslateUi(media_clip_selector)
+        self.retranslate_ui(media_clip_selector)
         self.button_box.accepted.connect(media_clip_selector.accept)
         self.button_box.rejected.connect(media_clip_selector.reject)
         QtCore.QMetaObject.connectSlotsByName(media_clip_selector)
@@ -181,7 +181,7 @@ class Ui_MediaClipSelector(object):
         media_clip_selector.setTabOrder(self.jump_end_button, self.save_button)
         media_clip_selector.setTabOrder(self.save_button, self.close_button)
 
-    def retranslateUi(self, media_clip_selector):
+    def retranslate_ui(self, media_clip_selector):
         media_clip_selector.setWindowTitle(translate('MediaPlugin.MediaClipSelector', 'Select Media Clip'))
         self.source_groupbox.setTitle(translate('MediaPlugin.MediaClipSelector', 'Source'))
         self.media_path_label.setText(translate('MediaPlugin.MediaClipSelector', 'Media path:'))

@@ -28,6 +28,7 @@ from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.common.i18n import translate
 from openlp.core.version import get_version
+
 from .aboutdialog import UiAboutDialog
 
 

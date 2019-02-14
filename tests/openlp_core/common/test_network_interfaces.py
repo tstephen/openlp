@@ -29,7 +29,6 @@ from PyQt5.QtNetwork import QHostAddress, QNetworkAddressEntry, QNetworkInterfac
 
 import openlp.core.common
 from openlp.core.common import get_local_ip4
-
 from tests.helpers.testmixin import TestMixin
 
 

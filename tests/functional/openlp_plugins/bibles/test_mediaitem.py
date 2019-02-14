@@ -29,8 +29,8 @@ from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.common.registry import Registry
 from openlp.core.lib.mediamanageritem import MediaManagerItem
-from openlp.plugins.bibles.lib.mediaitem import BibleMediaItem, BibleSearch, ResultsTab, SearchStatus, SearchTabs, \
-    get_reference_separators, VALID_TEXT_SEARCH
+from openlp.plugins.bibles.lib.mediaitem import VALID_TEXT_SEARCH, BibleMediaItem, BibleSearch, ResultsTab, \
+    SearchStatus, SearchTabs, get_reference_separators
 from tests.helpers.testmixin import TestMixin
 
 

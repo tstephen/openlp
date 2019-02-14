@@ -34,6 +34,7 @@ from openlp.core.threading import ThreadWorker, run_thread
 from openlp.plugins.songs.forms.songselectdialog import Ui_SongSelectDialog
 from openlp.plugins.songs.lib.songselect import SongSelectImport
 
+
 log = logging.getLogger(__name__)
 
 

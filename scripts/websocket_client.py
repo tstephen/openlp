@@ -22,8 +22,9 @@
 ###############################################################################
 
 import asyncio
-import websockets
 import random
+
+import websockets
 
 
 async def tester():

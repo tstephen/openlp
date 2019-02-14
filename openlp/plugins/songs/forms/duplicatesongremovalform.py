@@ -37,6 +37,7 @@ from openlp.plugins.songs.lib import delete_song
 from openlp.plugins.songs.lib.db import Song
 from openlp.plugins.songs.lib.songcompare import songs_probably_equal
 
+
 log = logging.getLogger(__name__)
 
 
@@ -129,7 +130,7 @@ class DuplicateSongRemovalForm(OpenLPWizard, RegistryProperties):
         self.dummy_page = QtWidgets.QWizardPage()
         self.dummy_page_id = self.addPage(self.dummy_page)
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         """
         Song wizard localisation.
         """

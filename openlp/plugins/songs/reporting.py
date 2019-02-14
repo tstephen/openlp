@@ -32,6 +32,7 @@ from openlp.core.lib.ui import critical_error_message_box
 from openlp.core.widgets.dialogs import FileDialog
 from openlp.plugins.songs.lib.db import Song
 
+
 log = logging.getLogger(__name__)
 
 

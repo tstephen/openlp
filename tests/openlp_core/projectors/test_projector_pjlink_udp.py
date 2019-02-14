@@ -30,8 +30,8 @@ from unittest.mock import call, patch
 import openlp.core.projectors.pjlink
 from openlp.core.common.registry import Registry
 from openlp.core.projectors.constants import PJLINK_PORT
-from openlp.core.projectors.tab import ProjectorTab
 from openlp.core.projectors.pjlink import PJLinkUDP
+from openlp.core.projectors.tab import ProjectorTab
 
 from tests.helpers.testmixin import TestMixin
 from tests.resources.projector.data import TEST1_DATA

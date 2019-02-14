@@ -23,15 +23,15 @@
 from PyQt5 import QtWidgets
 
 from openlp.core.common.i18n import translate
-from openlp.core.ui.icons import UiIcons
 from openlp.core.lib.ui import create_button, create_button_box
+from openlp.core.ui.icons import UiIcons
 
 
 class Ui_AlertDialog(object):
     """
     Alert UI Class
     """
-    def setupUi(self, alert_dialog):
+    def setup_ui(self, alert_dialog):
         """
         Setup the Alert UI dialog
 
@@ -83,9 +83,9 @@ class Ui_AlertDialog(object):
         self.button_box = create_button_box(alert_dialog, 'button_box', ['close'],
                                             [self.display_button, self.display_close_button])
         self.alert_dialog_layout.addWidget(self.button_box, 2, 0, 1, 2)
-        self.retranslateUi(alert_dialog)
+        self.retranslate_ui(alert_dialog)
 
-    def retranslateUi(self, alert_dialog):
+    def retranslate_ui(self, alert_dialog):
         """
         Retranslate the UI strings
 

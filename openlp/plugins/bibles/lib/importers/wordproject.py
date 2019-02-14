@@ -24,10 +24,11 @@ import re
 from tempfile import TemporaryDirectory
 from zipfile import ZipFile
 
-from bs4 import BeautifulSoup, Tag, NavigableString
+from bs4 import BeautifulSoup, NavigableString, Tag
 
 from openlp.core.common.path import Path
 from openlp.plugins.bibles.lib.bibleimport import BibleImport
+
 
 BOOK_NUMBER_PATTERN = re.compile(r'\[(\d+)\]')
 REPLACE_SPACES = re.compile(r'\s{2,}')

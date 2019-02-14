@@ -40,7 +40,7 @@ class SongBookForm(QtWidgets.QDialog, Ui_SongBookDialog):
         """
         super(SongBookForm, self).__init__(parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint |
                                            QtCore.Qt.WindowCloseButtonHint)
-        self.setupUi(self)
+        self.setup_ui(self)
 
     def exec(self, clear=True):
         """

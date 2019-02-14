@@ -29,6 +29,7 @@ import re
 from openlp.core.common.settings import Settings
 from openlp.plugins.songs.lib.importers.songimport import SongImport
 
+
 log = logging.getLogger(__name__)
 
 

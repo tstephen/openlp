@@ -35,23 +35,23 @@ from openlp.core.state import State
 from openlp.core.api.http import register_endpoint
 from openlp.core.common.actions import ActionList
 from openlp.core.common.i18n import UiStrings, translate
-from openlp.core.ui.icons import UiIcons
 from openlp.core.common.registry import Registry
 from openlp.core.lib import build_icon
-from openlp.core.lib.plugin import Plugin, StringContent
 from openlp.core.lib.db import Manager
+from openlp.core.lib.plugin import Plugin, StringContent
 from openlp.core.lib.ui import create_action
+from openlp.core.ui.icons import UiIcons
 from openlp.plugins.songs import reporting
 from openlp.plugins.songs.endpoint import api_songs_endpoint, songs_endpoint
 from openlp.plugins.songs.forms.duplicatesongremovalform import DuplicateSongRemovalForm
 from openlp.plugins.songs.forms.songselectform import SongSelectForm
 from openlp.plugins.songs.lib import clean_song, upgrade
-from openlp.plugins.songs.lib.db import init_schema, Song
+from openlp.plugins.songs.lib.db import Song, init_schema
 from openlp.plugins.songs.lib.importer import SongFormat
 from openlp.plugins.songs.lib.importers.openlp import OpenLPSongImport
-from openlp.plugins.songs.lib.mediaitem import SongMediaItem
-from openlp.plugins.songs.lib.mediaitem import SongSearch
+from openlp.plugins.songs.lib.mediaitem import SongMediaItem, SongSearch
 from openlp.plugins.songs.lib.songstab import SongsTab
+
 
 log = logging.getLogger(__name__)
 __default_settings__ = {

@@ -28,6 +28,7 @@ from openlp.core.common import is_win
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 
+
 try:
     import qdarkstyle
     HAS_DARK_STYLE = True

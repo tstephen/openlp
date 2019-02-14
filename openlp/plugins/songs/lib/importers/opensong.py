@@ -32,6 +32,7 @@ from openlp.plugins.songs.lib import VerseType
 from openlp.plugins.songs.lib.importers.songimport import SongImport
 from openlp.plugins.songs.lib.ui import SongStrings
 
+
 log = logging.getLogger(__name__)
 
 

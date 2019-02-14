@@ -25,8 +25,9 @@ Package to test the openlp.core.ui.projector.networkutils package.
 
 from unittest import TestCase
 
-from openlp.core.common import verify_ip_address, md5_hash, qmd5_hash
-from tests.resources.projector.data import TEST_PIN, TEST_SALT, TEST_HASH
+from openlp.core.common import md5_hash, qmd5_hash, verify_ip_address
+from tests.resources.projector.data import TEST_HASH, TEST_PIN, TEST_SALT
+
 
 salt = TEST_SALT
 pin = TEST_PIN

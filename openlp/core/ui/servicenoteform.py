@@ -41,8 +41,8 @@ class ServiceNoteForm(QtWidgets.QDialog, RegistryProperties):
         """
         super(ServiceNoteForm, self).__init__(Registry().get('main_window'), QtCore.Qt.WindowSystemMenuHint |
                                               QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowCloseButtonHint)
-        self.setupUi()
-        self.retranslateUi()
+        self.setup_ui()
+        self.retranslate_ui()
 
     def exec(self):
         """
@@ -51,7 +51,7 @@ class ServiceNoteForm(QtWidgets.QDialog, RegistryProperties):
         self.text_edit.setFocus()
         return QtWidgets.QDialog.exec(self)
 
-    def setupUi(self):
+    def setup_ui(self):
         """
         Set up the UI of the dialog
         """
@@ -66,7 +66,7 @@ class ServiceNoteForm(QtWidgets.QDialog, RegistryProperties):
         self.button_box = create_button_box(self, 'button_box', ['cancel', 'save'])
         self.dialog_layout.addWidget(self.button_box)
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         """
         Translate the UI on the fly
         """

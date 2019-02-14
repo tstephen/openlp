@@ -37,7 +37,7 @@ class AuthorsForm(QtWidgets.QDialog, Ui_AuthorsDialog):
         """
         super(AuthorsForm, self).__init__(parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint |
                                           QtCore.Qt.WindowCloseButtonHint)
-        self.setupUi(self)
+        self.setup_ui(self)
         self.auto_display_name = False
         self.first_name_edit.textEdited.connect(self.on_first_name_edited)
         self.last_name_edit.textEdited.connect(self.on_last_name_edited)

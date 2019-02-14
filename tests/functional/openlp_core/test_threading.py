@@ -25,7 +25,7 @@ Package to test the openlp.core.threading package.
 from inspect import isfunction
 from unittest.mock import MagicMock, call, patch
 
-from openlp.core.threading import ThreadWorker, run_thread, get_thread_worker, is_thread_finished, make_remove_thread
+from openlp.core.threading import ThreadWorker, get_thread_worker, is_thread_finished, make_remove_thread, run_thread
 
 
 def test_run_thread_no_name():

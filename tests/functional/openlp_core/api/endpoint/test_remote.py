@@ -24,8 +24,8 @@ Functional tests to test the remote index
 """
 from unittest.mock import MagicMock, patch
 
-from openlp.core.api.endpoint.remote import index
 from openlp.core.api.endpoint.core import TRANSLATED_STRINGS
+from openlp.core.api.endpoint.remote import index
 
 
 @patch('openlp.core.api.endpoint.remote.remote_endpoint')

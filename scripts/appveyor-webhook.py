@@ -27,13 +27,14 @@ on github the normal triggering mechanisms can't be use. The project is
 registered as subversion repository. A webhook is used to trigger new builds.
 The appveyor.yml used for the build is send to appveyor when calling the hook.
 """
-import json
-import urllib
-import urllib.request
 import datetime
+import json
 import sys
 import time
-from subprocess import Popen, PIPE
+import urllib
+import urllib.request
+from subprocess import PIPE, Popen
+
 
 appveyor_build_url = 'https://ci.appveyor.com/project/OpenLP/{project}/build'
 appveyor_api_url = 'https://ci.appveyor.com/api/projects/OpenLP/{project}'

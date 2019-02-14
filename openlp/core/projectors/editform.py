@@ -29,9 +29,10 @@ from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.common import verify_ip_address
 from openlp.core.common.i18n import translate
-from openlp.core.ui.icons import UiIcons
 from openlp.core.projectors.constants import PJLINK_PORT
 from openlp.core.projectors.db import Projector
+from openlp.core.ui.icons import UiIcons
+
 
 log = logging.getLogger(__name__)
 log.debug('editform loaded')
@@ -42,7 +43,7 @@ class Ui_ProjectorEditForm(object):
     The :class:`~openlp.core.lib.ui.projector.editform.Ui_ProjectorEditForm` class defines
     the user interface for the ProjectorEditForm dialog.
     """
-    def setupUi(self, edit_projector_dialog):
+    def setup_ui(self, edit_projector_dialog):
         """
         Create the interface layout.
         """
@@ -108,7 +109,7 @@ class Ui_ProjectorEditForm(object):
                                                      QtWidgets.QDialogButtonBox.Cancel)
         self.dialog_layout.addWidget(self.button_box, 8, 0, 1, 2)
 
-    def retranslateUi(self, edit_projector_dialog):
+    def retranslate_ui(self, edit_projector_dialog):
         if self.new_projector:
             title = translate('OpenLP.ProjectorEditForm', 'Add New Projector')
             self.projector.port = PJLINK_PORT
@@ -150,7 +151,7 @@ class ProjectorEditForm(QtWidgets.QDialog, Ui_ProjectorEditForm):
         super(ProjectorEditForm, self).__init__(parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint |
                                                 QtCore.Qt.WindowCloseButtonHint)
         self.projectordb = projectordb
-        self.setupUi(self)
+        self.setup_ui(self)
         self.button_box.accepted.connect(self.accept_me)
         self.button_box.helpRequested.connect(self.help_me)
         self.button_box.rejected.connect(self.cancel_me)
@@ -169,7 +170,7 @@ class ProjectorEditForm(QtWidgets.QDialog, Ui_ProjectorEditForm):
             self.ip_text_label.setVisible(True)
             # Since it's already defined, IP address is unchangeable, so focus on port number
             self.port_text.setFocus()
-        self.retranslateUi(self)
+        self.retranslate_ui(self)
         reply = QtWidgets.QDialog.exec(self)
         return reply
 

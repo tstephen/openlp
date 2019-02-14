@@ -30,7 +30,9 @@ import logging
 import re
 
 from openlp.core.common import is_win
+
 from .openoffice import OpenOfficeImport
+
 
 log = logging.getLogger(__name__)
 

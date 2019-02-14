@@ -23,20 +23,21 @@
 import logging
 
 from PyQt5 import QtCore, QtWidgets
-from sqlalchemy.sql import or_, func, and_
+from sqlalchemy.sql import and_, func, or_
 
 from openlp.core.common.i18n import UiStrings, translate
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.lib import ServiceItemContext, check_item_selected
 from openlp.core.lib.mediamanageritem import MediaManagerItem
-from openlp.core.lib.serviceitem import ItemCapabilities
 from openlp.core.lib.plugin import PluginStatus
+from openlp.core.lib.serviceitem import ItemCapabilities
 from openlp.core.lib.ui import create_widget_action
 from openlp.core.ui.icons import UiIcons
 from openlp.plugins.custom.forms.editcustomform import EditCustomForm
 from openlp.plugins.custom.lib.customxmlhandler import CustomXMLBuilder, CustomXMLParser
 from openlp.plugins.custom.lib.db import CustomSlide
+
 
 log = logging.getLogger(__name__)
 
@@ -102,7 +103,7 @@ class CustomMediaItem(MediaManagerItem):
         self.add_custom_from_service = Settings().value(self.settings_section + '/add custom from service')
         self.is_search_as_you_type_enabled = Settings().value('advanced/search as type')
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         """
 
         """
@@ -350,7 +351,7 @@ class CustomMediaItem(MediaManagerItem):
         else:
             custom.credits = ''
         custom_xml = CustomXMLBuilder()
-        for (idx, slide) in enumerate(item._raw_frames):
+        for (idx, slide) in enumerate(item.slides):
             custom_xml.add_verse_to_lyrics('custom', str(idx + 1), slide['raw_slide'])
         custom.text = str(custom_xml.extract_xml(), 'utf-8')
         self.plugin.db_manager.save_object(custom)

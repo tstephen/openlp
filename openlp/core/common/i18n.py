@@ -29,9 +29,10 @@ from collections import namedtuple
 
 from PyQt5 import QtCore, QtWidgets
 
-from openlp.core.common import is_win, is_macosx
+from openlp.core.common import is_macosx, is_win
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.settings import Settings
+
 
 log = logging.getLogger(__name__)
 

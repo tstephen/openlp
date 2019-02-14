@@ -30,7 +30,9 @@ from openlp.core.common.path import create_paths
 from openlp.core.common.settings import Settings
 from openlp.core.lib.ui import critical_error_message_box
 from openlp.plugins.songusage.lib.db import SongUsageItem
+
 from .songusagedetaildialog import Ui_SongUsageDetailDialog
+
 
 log = logging.getLogger(__name__)
 
@@ -48,7 +50,7 @@ class SongUsageDetailForm(QtWidgets.QDialog, Ui_SongUsageDetailDialog, RegistryP
         super(SongUsageDetailForm, self).__init__(parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint |
                                                   QtCore.Qt.WindowCloseButtonHint)
         self.plugin = plugin
-        self.setupUi(self)
+        self.setup_ui(self)
 
     def initialise(self):
         """

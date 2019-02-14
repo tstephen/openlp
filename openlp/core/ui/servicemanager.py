@@ -37,17 +37,17 @@ from openlp.core.common import ThemeLevel, delete_file
 from openlp.core.common.actions import ActionList, CategoryOrder
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.i18n import UiStrings, format_time, translate
-from openlp.core.ui.icons import UiIcons
 from openlp.core.common.json import OpenLPJsonDecoder, OpenLPJsonEncoder
 from openlp.core.common.mixins import LogMixin, RegistryProperties
 from openlp.core.common.path import Path, str_to_path
 from openlp.core.common.registry import Registry, RegistryBase
 from openlp.core.common.settings import Settings
 from openlp.core.lib import build_icon
-from openlp.core.lib.plugin import PluginStatus
-from openlp.core.lib.serviceitem import ServiceItem, ItemCapabilities
 from openlp.core.lib.exceptions import ValidationError
-from openlp.core.lib.ui import critical_error_message_box, create_widget_action, find_and_set_in_combo_box
+from openlp.core.lib.plugin import PluginStatus
+from openlp.core.lib.serviceitem import ItemCapabilities, ServiceItem
+from openlp.core.lib.ui import create_widget_action, critical_error_message_box, find_and_set_in_combo_box
+from openlp.core.ui.icons import UiIcons
 from openlp.core.ui.serviceitemeditform import ServiceItemEditForm
 from openlp.core.ui.servicenoteform import ServiceNoteForm
 from openlp.core.ui.starttimeform import StartTimeForm
@@ -730,7 +730,9 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
                 if theme:
                     find_and_set_in_combo_box(self.theme_combo_box, theme, set_missing=False)
                     if theme == self.theme_combo_box.currentText():
-                        self.renderer.set_service_theme(theme)
+                        # TODO: Use a local display widget
+                        # self.preview_display.set_theme(get_theme_from_name(theme))
+                        pass
             else:
                 if self._save_lite:
                     service_item.set_from_service(item)
@@ -1166,7 +1168,7 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
         # Repaint the screen
         self.service_manager_list.clear()
         self.service_manager_list.clearSelection()
-        for item_count, item in enumerate(self.service_items):
+        for item_index, item in enumerate(self.service_items):
             service_item_from_item = item['service_item']
             tree_widget_item = QtWidgets.QTreeWidgetItem(self.service_manager_list)
             if service_item_from_item.is_valid:
@@ -1215,17 +1217,17 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
             tree_widget_item.setData(0, QtCore.Qt.UserRole, item['order'])
             tree_widget_item.setSelected(item['selected'])
             # Add the children to their parent tree_widget_item.
-            for count, frame in enumerate(service_item_from_item.get_frames()):
+            for slide_index, slide in enumerate(service_item_from_item.slides):
                 child = QtWidgets.QTreeWidgetItem(tree_widget_item)
                 # prefer to use a display_title
                 if service_item_from_item.is_capable(ItemCapabilities.HasDisplayTitle):
-                    text = frame['display_title'].replace('\n', ' ')
+                    text = slide['display_title'].replace('\n', ' ')
                 else:
-                    text = frame['title'].replace('\n', ' ')
+                    text = slide['title'].replace('\n', ' ')
                 child.setText(0, text[:40])
-                child.setData(0, QtCore.Qt.UserRole, count)
-                if service_item == item_count:
-                    if item['expanded'] and service_item_child == count:
+                child.setData(0, QtCore.Qt.UserRole, slide_index)
+                if service_item == item_index:
+                    if item['expanded'] and service_item_child == slide_index:
                         self.service_manager_list.setCurrentItem(child)
                     elif service_item_child == -1:
                         self.service_manager_list.setCurrentItem(tree_widget_item)
@@ -1248,7 +1250,8 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
         :param current_index: The combo box index for the selected item
         """
         self.service_theme = self.theme_combo_box.currentText()
-        self.renderer.set_service_theme(self.service_theme)
+        # TODO: Use a local display widget
+        # self.preview_display.set_theme(get_theme_from_name(theme))
         Settings().setValue(self.main_window.service_manager_settings_section + '/service theme', self.service_theme)
         self.regenerate_service_items(True)
 
@@ -1340,7 +1343,7 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
             self.repaint_service_list(s_item, child)
             self.live_controller.replace_service_manager_item(item)
         else:
-            item.render()
+            # item.render()
             # nothing selected for dnd
             if self.drop_position == -1:
                 if isinstance(item, list):
@@ -1589,7 +1592,8 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
             theme_group.addAction(create_widget_action(self.theme_menu, theme, text=theme, checked=False,
                                   triggers=self.on_theme_change_action))
         find_and_set_in_combo_box(self.theme_combo_box, self.service_theme)
-        self.renderer.set_service_theme(self.service_theme)
+        # TODO: Sort this out
+        # self.renderer.set_service_theme(self.service_theme)
         self.regenerate_service_items()
 
     def on_theme_change_action(self):

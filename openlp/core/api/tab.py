@@ -31,6 +31,7 @@ from openlp.core.common.settings import Settings
 from openlp.core.lib.settingstab import SettingsTab
 from openlp.core.ui.icons import UiIcons
 
+
 ZERO_URL = '0.0.0.0'
 
 
@@ -43,9 +44,9 @@ class ApiTab(SettingsTab):
         advanced_translated = translate('OpenLP.AdvancedTab', 'Advanced')
         super(ApiTab, self).__init__(parent, 'api', advanced_translated)
 
-    def setupUi(self):
+    def setup_ui(self):
         self.setObjectName('ApiTab')
-        super(ApiTab, self).setupUi()
+        super(ApiTab, self).setup_ui()
         self.server_settings_group_box = QtWidgets.QGroupBox(self.left_column)
         self.server_settings_group_box.setObjectName('server_settings_group_box')
         self.server_settings_layout = QtWidgets.QFormLayout(self.server_settings_group_box)
@@ -154,7 +155,7 @@ class ApiTab(SettingsTab):
         self.thumbnails_check_box.stateChanged.connect(self.on_thumbnails_check_box_changed)
         self.address_edit.textChanged.connect(self.set_urls)
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         self.tab_title_visible = translate('RemotePlugin.RemoteTab', 'Remote Interface')
         self.server_settings_group_box.setTitle(translate('RemotePlugin.RemoteTab', 'Server Settings'))
         self.address_label.setText(translate('RemotePlugin.RemoteTab', 'Serve on IP address:'))

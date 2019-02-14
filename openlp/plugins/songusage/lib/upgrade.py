@@ -25,9 +25,10 @@ backend for the SongsUsage plugin
 """
 import logging
 
-from sqlalchemy import Table, Column, types
+from sqlalchemy import Column, Table, types
 
 from openlp.core.lib.db import get_upgrade_op
+
 
 log = logging.getLogger(__name__)
 __version__ = 2

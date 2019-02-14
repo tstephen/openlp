@@ -26,7 +26,6 @@ from unittest import TestCase
 from unittest.mock import call, patch
 
 import openlp.core.projectors.pjlink
-
 from openlp.core.projectors.constants import S_NOT_CONNECTED
 from openlp.core.projectors.db import Projector
 from openlp.core.projectors.pjlink import PJLink

@@ -32,6 +32,7 @@ from openlp.core.display.screens import ScreenList
 from openlp.core.ui import settingsform
 from tests.helpers.testmixin import TestMixin
 
+
 SCREEN = {
     'primary': False,
     'number': 1,

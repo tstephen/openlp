@@ -32,7 +32,7 @@ class Ui_AuthorsDialog(object):
     The :class:`~openlp.plugins.songs.forms.authorsdialog.Ui_AuthorsDialog` class defines the user interface for the
     AuthorsForm dialog.
     """
-    def setupUi(self, authors_dialog):
+    def setup_ui(self, authors_dialog):
         """
         Set up the UI for the dialog.
         """
@@ -65,10 +65,10 @@ class Ui_AuthorsDialog(object):
         self.dialog_layout.addLayout(self.author_layout)
         self.button_box = create_button_box(authors_dialog, 'button_box', ['cancel', 'save'])
         self.dialog_layout.addWidget(self.button_box)
-        self.retranslateUi(authors_dialog)
+        self.retranslate_ui(authors_dialog)
         authors_dialog.setMaximumHeight(authors_dialog.sizeHint().height())
 
-    def retranslateUi(self, authors_dialog):
+    def retranslate_ui(self, authors_dialog):
         """
         Translate the UI on the fly.
         """

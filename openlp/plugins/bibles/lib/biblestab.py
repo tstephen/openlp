@@ -29,8 +29,9 @@ from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.lib.settingstab import SettingsTab
 from openlp.core.lib.ui import find_and_set_in_combo_box
-from openlp.plugins.bibles.lib import LayoutStyle, DisplayStyle, update_reference_separators, \
-    get_reference_separator, LanguageSelection
+from openlp.plugins.bibles.lib import DisplayStyle, LanguageSelection, LayoutStyle, get_reference_separator, \
+    update_reference_separators
+
 
 log = logging.getLogger(__name__)
 
@@ -47,9 +48,9 @@ class BiblesTab(SettingsTab):
         self.display_style = 0
         super().__init__(*args, **kwargs)
 
-    def setupUi(self):
+    def setup_ui(self):
         self.setObjectName('BiblesTab')
-        super(BiblesTab, self).setupUi()
+        super(BiblesTab, self).setup_ui()
         self.verse_display_group_box = QtWidgets.QGroupBox(self.left_column)
         self.verse_display_group_box.setObjectName('verse_display_group_box')
         self.verse_display_layout = QtWidgets.QFormLayout(self.verse_display_group_box)
@@ -174,7 +175,7 @@ class BiblesTab(SettingsTab):
         self.bible_search_while_typing_check_box.stateChanged.connect(
             self.on_bible_search_while_typing_check_box_changed)
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         self.verse_display_group_box.setTitle(translate('BiblesPlugin.BiblesTab', 'Verse Display'))
         self.is_verse_number_visible_check_box.setText(translate('BiblesPlugin.BiblesTab', 'Show verse numbers'))
         self.new_chapters_check_box.setText(translate('BiblesPlugin.BiblesTab', 'Only show new chapter numbers'))

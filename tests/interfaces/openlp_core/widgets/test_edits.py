@@ -28,7 +28,7 @@ from unittest.mock import MagicMock, call, patch
 from PyQt5 import QtCore, QtGui, QtTest, QtWidgets
 
 from openlp.core.common.registry import Registry
-from openlp.core.widgets.edits import SearchEdit, HistoryComboBox
+from openlp.core.widgets.edits import HistoryComboBox, SearchEdit
 from tests.helpers.testmixin import TestMixin
 
 

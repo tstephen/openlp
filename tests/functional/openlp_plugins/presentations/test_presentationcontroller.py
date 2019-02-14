@@ -29,6 +29,7 @@ from unittest.mock import MagicMock, call, patch
 from openlp.core.common.path import Path
 from openlp.plugins.presentations.lib.presentationcontroller import PresentationController, PresentationDocument
 
+
 FOLDER_TO_PATCH = 'openlp.plugins.presentations.lib.presentationcontroller.PresentationDocument.get_thumbnail_folder'
 
 

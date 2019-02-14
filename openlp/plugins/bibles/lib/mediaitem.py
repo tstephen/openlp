@@ -26,14 +26,14 @@ from enum import IntEnum, unique
 
 from PyQt5 import QtCore, QtWidgets
 
-from openlp.core.common.i18n import UiStrings, translate, get_locale_key
+from openlp.core.common.i18n import UiStrings, get_locale_key, translate
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.lib import ServiceItemContext
 from openlp.core.lib.mediamanageritem import MediaManagerItem
 from openlp.core.lib.serviceitem import ItemCapabilities
-from openlp.core.lib.ui import set_case_insensitive_completer, create_horizontal_adjusting_combo_box, \
-    critical_error_message_box, find_and_set_in_combo_box
+from openlp.core.lib.ui import create_horizontal_adjusting_combo_box, critical_error_message_box, \
+    find_and_set_in_combo_box, set_case_insensitive_completer
 from openlp.core.ui.icons import UiIcons
 from openlp.core.widgets.edits import SearchEdit
 from openlp.plugins.bibles.forms.bibleimportform import BibleImportForm
@@ -234,8 +234,8 @@ class BibleMediaItem(MediaManagerItem):
         self.results_view_tab.setCurrentIndex(ResultsTab.Search)
         self.page_layout.addWidget(self.results_view_tab)
 
-    def setupUi(self):
-        super().setupUi()
+    def setup_ui(self):
+        super().setup_ui()
         sort_model = QtCore.QSortFilterProxyModel(self.select_book_combo_box)
         model = self.select_book_combo_box.model()
         # Reparent the combo box model to the sort proxy, otherwise it will be deleted when we change the comobox's
@@ -269,8 +269,8 @@ class BibleMediaItem(MediaManagerItem):
         self.on_results_view_tab_total_update(ResultsTab.Saved)
         self.on_results_view_tab_total_update(ResultsTab.Search)
 
-    def retranslateUi(self):
-        log.debug('retranslateUi')
+    def retranslate_ui(self):
+        log.debug('retranslate_ui')
         self.chapter_label.setText(translate('BiblesPlugin.MediaItem', 'Chapter:'))
         self.verse_label.setText(translate('BiblesPlugin.MediaItem', 'Verse:'))
         self.style_combo_box.setItemText(LayoutStyle.VersePerSlide, UiStrings().VersePerSlide)
@@ -797,8 +797,8 @@ class BibleMediaItem(MediaManagerItem):
                               'Please make sure that your reference follows one of these patterns:</strong><br><br>%s')
                     % UiStrings().BibleScriptureError % get_reference_separators())
         elif self.search_edit.current_search_type() == BibleSearch.Combined and get_reference_match('full').match(text):
-                # Valid reference found. Do reference search.
-                self.text_reference_search(text)
+            # Valid reference found. Do reference search.
+            self.text_reference_search(text)
         else:
             # It can only be a 'Combined' search without a valid reference, or a 'Text' search
             if self.search_status == SearchStatus.SearchAsYouType:

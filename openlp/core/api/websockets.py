@@ -35,6 +35,7 @@ from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.threading import ThreadWorker, run_thread
 
+
 log = logging.getLogger(__name__)
 
 

@@ -21,7 +21,7 @@
 ###############################################################################
 import logging
 import re
-from subprocess import check_output, CalledProcessError
+from subprocess import CalledProcessError, check_output
 
 from openlp.core.common import check_binary_exists, is_win
 from openlp.core.common.applocation import AppLocation
@@ -29,6 +29,7 @@ from openlp.core.common.path import which
 from openlp.core.common.settings import Settings
 from openlp.core.display.screens import ScreenList
 from openlp.plugins.presentations.lib.presentationcontroller import PresentationController, PresentationDocument
+
 
 if is_win():
     from subprocess import STARTUPINFO, STARTF_USESHOWWINDOW
@@ -249,7 +250,7 @@ class PdfDocument(PresentationDocument):
                     self.image_files.append(image_path)
             self.num_pages = len(self.image_files)
             return True
-        size = ScreenList().current['size']
+        size = ScreenList().current.display_geometry
         # Generate images from PDF that will fit the frame.
         runlog = ''
         try:

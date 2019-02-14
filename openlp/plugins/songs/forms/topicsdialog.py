@@ -31,7 +31,7 @@ class Ui_TopicsDialog(object):
     """
     The user interface for the topics dialog.
     """
-    def setupUi(self, topics_dialog):
+    def setup_ui(self, topics_dialog):
         """
         Set up the user interface for the topics dialog.
         """
@@ -51,10 +51,10 @@ class Ui_TopicsDialog(object):
         self.dialog_layout.addLayout(self.name_layout)
         self.button_box = create_button_box(topics_dialog, 'button_box', ['cancel', 'save'])
         self.dialog_layout.addWidget(self.button_box)
-        self.retranslateUi(topics_dialog)
+        self.retranslate_ui(topics_dialog)
         topics_dialog.setMaximumHeight(topics_dialog.sizeHint().height())
 
-    def retranslateUi(self, topics_dialog):
+    def retranslate_ui(self, topics_dialog):
         """
         Translate the UI on the fly.
         """
