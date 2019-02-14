@@ -46,6 +46,7 @@ from openlp.plugins.presentations.lib.presentationcontroller import Presentation
 if is_win():
     from win32com.client import Dispatch
     import pywintypes
+    uno_available = False
     # Declare an empty exception to match the exception imported from UNO
 
     class ErrorCodeIOException(Exception):
