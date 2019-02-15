@@ -56,7 +56,8 @@ after_test:
   - appveyor DownloadFile http://bazaar.launchpad.net/~tomasgroth/openlp/packaging-webengine/tarball -FileName packaging.tar.gz
   - 7z e packaging.tar.gz
   - 7z x packaging.tar
-  - mv ~openlp-core/openlp/packaging packaging
+  #- mv ~openlp-core/openlp/packaging packaging
+  - mv ~tomasgroth/openlp/packaging-webengine packaging
   # If this is trunk we should also build the manual
   - ps: >-
       If (BUILD_DOCS) {
