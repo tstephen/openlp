@@ -220,7 +220,7 @@ class UiFirstTimeWizard(object):
         self.theme_combo_box.setEditable(False)
         self.default_theme_layout.addWidget(self.theme_combo_box, stretch=1)
         self.theme_options_layout.addLayout(self.default_theme_layout, stretch=1)
-        self.select_buttons_layout = QtWidgets.QHBoxLayout(self.themes_page)
+        self.select_buttons_layout = QtWidgets.QHBoxLayout()
         self.themes_select_all_button = QtWidgets.QToolButton(self.themes_page)
         self.themes_select_all_button.setIcon(UiIcons().plus)
         self.select_buttons_layout.addWidget(self.themes_select_all_button, stretch=1, alignment=QtCore.Qt.AlignRight)

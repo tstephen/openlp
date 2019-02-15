@@ -88,6 +88,7 @@ class ThemeListWidgetItem(QtWidgets.QListWidgetItem):
         """
         self.setIcon(build_icon(thumbnail_path))
 
+
 class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
     """
     This is the Theme Import Wizard, which allows easy creation and editing of OpenLP themes.
@@ -172,9 +173,9 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
         try:
             web_config = get_web_page('{host}{name}'.format(host=self.web, name='download_3.0.json'),
                                       headers={'User-Agent': user_agent})
-            web_config = Path(
-                'C:\\Users\\sroom\\Documents\\Phill Ridout\\play_ground\\openlp\\ftw-json\\download_3.0.json'
-            ).read_text(encoding='utf-8')  # TODO: Remove!!!!!
+            # web_config = Path(
+            #     'C:\\Users\\sroom\\Documents\\Phill Ridout\\play_ground\\openlp\\ftw-json\\download_3.0.json'
+            # ).read_text(encoding='utf-8')  # TODO: Remove!!!!!
         except ConnectionError as e:
             QtWidgets.QMessageBox.critical(self, translate('OpenLP.FirstTimeWizard', 'Network Error'),
                                            translate('OpenLP.FirstTimeWizard', 'There was a network error attempting '
