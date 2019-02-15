@@ -246,15 +246,17 @@ class PresentationDocument(object):
     def next_step(self):
         """
         Triggers the next effect of slide on the running presentation. This might be the next animation on the current
-        slide, or the next slide
+        slide, or the next slide.
+        Returns True if we stepped beyond the slides of the presentation
         """
         return False
 
     def previous_step(self):
         """
         Triggers the previous slide on the running presentation
+        Returns True if we stepped beyond the slides of the presentation
         """
-        pass
+        return False
 
     def convert_thumbnail(self, image_path, index):
         """

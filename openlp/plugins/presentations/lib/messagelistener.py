@@ -203,8 +203,10 @@ class Controller(object):
             return
         if not self.activate():
             return
-        self.doc.previous_step()
+        ret = self.doc.previous_step()
         self.poll()
+        print('previous returning: %d' % ret)
+        return ret
 
     def shutdown(self):
         """
@@ -435,11 +437,12 @@ class MessageListener(object):
         """
         is_live = message[1]
         if is_live:
-            self.live_handler.previous()
+            ret = self.live_handler.previous()
             if Settings().value('core/click live slide to unblank'):
                 Registry().execute('slidecontroller_live_unblank')
+            return ret
         else:
-            self.preview_handler.previous()
+            return self.preview_handler.previous()
 
     def shutdown(self, message):
         """

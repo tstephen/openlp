@@ -468,12 +468,16 @@ class PowerpointDocument(PresentationDocument):
         Triggers the previous slide on the running presentation.
         """
         log.debug('previous_step')
+        # if we are at the presentations start we can't go further back, just return True
+        if self.presentation.SlideShowWindow.View.GetClickIndex() == 0 and self.get_slide_number() == 1:
+            return True
         try:
             self.presentation.SlideShowWindow.View.Previous()
         except (AttributeError, pywintypes.com_error):
             log.exception('Caught exception while in previous_step')
             trace_error_handler(log)
             self.show_error_msg()
+        return False
 
     def get_slide_text(self, slide_no):
         """

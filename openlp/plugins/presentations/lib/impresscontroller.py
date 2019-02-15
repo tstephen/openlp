@@ -46,6 +46,18 @@ from openlp.plugins.presentations.lib.presentationcontroller import Presentation
 if is_win():
     from win32com.client import Dispatch
     import pywintypes
+    uno_available = False
+    try:
+        service_manager = Dispatch('com.sun.star.ServiceManager')
+        service_manager._FlagAsMethod('Bridge_GetStruct')
+        XSlideShowListenerObj = service_manager.Bridge_GetStruct('com.sun.star.presentation.XSlideShowListener')
+
+        class SlideShowListenerImport(XSlideShowListenerObj.__class__):
+            pass
+    except (AttributeError, pywintypes.com_error):
+        class SlideShowListenerImport(object):
+            pass
+    
     # Declare an empty exception to match the exception imported from UNO
 
     class ErrorCodeIOException(Exception):
@@ -57,6 +69,9 @@ else:
         from com.sun.star.beans import PropertyValue
         from com.sun.star.task import ErrorCodeIOException
         from com.sun.star.presentation import XSlideShowListener
+
+        class SlideShowListenerImport(unohelper.Base, XSlideShowListener):
+            pass
 
         uno_available = True
     except ImportError:
@@ -504,8 +519,10 @@ class ImpressDocument(PresentationDocument):
             notes.append(note)
         self.save_titles_and_notes(titles, notes)
 
+        if is_win():
+            property_object = self.controller.manager.Bridge_GetStruct('com.sun.star.beans.PropertyValue')
 
-class SlideShowListener(unohelper.Base, XSlideShowListener):
+class SlideShowListener(SlideShowListenerImport):
     """
     Listener interface to receive global slide show events.
     """
