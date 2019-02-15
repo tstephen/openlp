@@ -233,7 +233,7 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
         Set up display at start of theme edit.
         """
         self.restart()
-        self.web = 'https://openlp.org/files/frw/'
+        self.web = 'https://get.openlp.org/ftw/'
         self.cancel_button.clicked.connect(self.on_cancel_button_clicked)
         self.no_internet_finish_button.clicked.connect(self.on_no_internet_finish_button_clicked)
         self.no_internet_cancel_button.clicked.connect(self.on_no_internet_cancel_button_clicked)
