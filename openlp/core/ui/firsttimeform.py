@@ -69,7 +69,8 @@ class ThemeListWidgetItem(QtWidgets.QListWidgetItem):
         worker.download_succeeded.connect(self._on_thumbnail_downloaded)
         thread_name = f'thumbnail_download_{thumbnail}'
         run_thread(worker, thread_name)
-        ftw.thumbnail_download_threads.append(thread_name)  # TODO: Already in the application que
+        ftw.thumbnail_download_threads.append(thread_name)
+
 
     def _on_download_failed(self):
         """

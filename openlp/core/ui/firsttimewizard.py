@@ -68,7 +68,6 @@ class ThemeListWidget(QtWidgets.QListWidget):
         self.setResizeMode(QtWidgets.QListView.Adjust)
         self.setViewMode(QtWidgets.QListView.IconMode)
         self.setUniformItemSizes(True)
-        self.setWordWrap(True)
 
     def resizeEvent(self, event):
         """
@@ -222,10 +221,10 @@ class UiFirstTimeWizard(object):
         self.theme_options_layout.addLayout(self.default_theme_layout, stretch=1)
         self.select_buttons_layout = QtWidgets.QHBoxLayout()
         self.themes_select_all_button = QtWidgets.QToolButton(self.themes_page)
-        self.themes_select_all_button.setIcon(UiIcons().plus)
+        self.themes_select_all_button.setIcon(UiIcons().select_all)
         self.select_buttons_layout.addWidget(self.themes_select_all_button, stretch=1, alignment=QtCore.Qt.AlignRight)
         self.themes_deselect_all_button = QtWidgets.QToolButton(self.themes_page)
-        self.themes_deselect_all_button.setIcon(UiIcons().minus)
+        self.themes_deselect_all_button.setIcon(UiIcons().select_none)
         self.select_buttons_layout.addWidget(self.themes_deselect_all_button)
         self.theme_options_layout.addLayout(self.select_buttons_layout, stretch=1)
         self.themes_layout.addLayout(self.theme_options_layout)
