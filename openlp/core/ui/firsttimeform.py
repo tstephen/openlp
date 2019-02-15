@@ -176,7 +176,7 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
             # web_config = Path(
             #     'C:\\Users\\sroom\\Documents\\Phill Ridout\\play_ground\\openlp\\ftw-json\\download_3.0.json'
             # ).read_text(encoding='utf-8')  # TODO: Remove!!!!!
-        except ConnectionError as e:
+        except ConnectionError:
             QtWidgets.QMessageBox.critical(self, translate('OpenLP.FirstTimeWizard', 'Network Error'),
                                            translate('OpenLP.FirstTimeWizard', 'There was a network error attempting '
                                                      'to connect to retrieve initial configuration information'),

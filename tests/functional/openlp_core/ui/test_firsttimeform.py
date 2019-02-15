@@ -184,7 +184,7 @@ class TestFirstTimeForm(TestCase, TestMixin):
                 patch.object(frw, 'theme_combo_box', **{'findText.return_value': 3}) as mocked_theme_combo_box, \
                 patch.multiple(frw, songs_check_box=DEFAULT, bible_check_box=DEFAULT, presentation_check_box=DEFAULT,
                                image_check_box=DEFAULT, media_check_box=DEFAULT, custom_check_box=DEFAULT,
-                               song_usage_check_box=DEFAULT, alert_check_box=DEFAULT) as mocked_check_boxes, \
+                               song_usage_check_box=DEFAULT, alert_check_box=DEFAULT), \
                 patch.object(Registry, 'register_function') as mocked_register_function, \
                 patch('openlp.core.ui.firsttimeform.Settings', return_value=mocked_settings), \
                 patch('openlp.core.ui.firsttimeform.gettempdir', return_value='temp') as mocked_gettempdir, \

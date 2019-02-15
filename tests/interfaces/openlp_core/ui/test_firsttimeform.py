@@ -59,7 +59,7 @@ class TestThemeListWidgetItem(TestCase, TestMixin):
         Test that icon get set to indicate a failure when `DownloadWorker` emits the download_failed signal
         """
         # GIVEN: An instance of `DownloadWorker`
-        instance = ThemeListWidgetItem('url', self.sample_theme_data, MagicMock())
+        instance = ThemeListWidgetItem('url', self.sample_theme_data, MagicMock())  # noqa Overcome GC issue
         worker_threads = Registry().get('application').worker_threads
         worker = worker_threads['thumbnail_download_BlueBurst.png']['worker']
 
@@ -76,7 +76,7 @@ class TestThemeListWidgetItem(TestCase, TestMixin):
         signal
         """
         # GIVEN: An instance of `DownloadWorker`
-        instance = ThemeListWidgetItem('url', self.sample_theme_data, MagicMock())
+        instance = ThemeListWidgetItem('url', self.sample_theme_data, MagicMock())  # noqa Overcome GC issue
         worker_threads = Registry().get('application').worker_threads
         worker = worker_threads['thumbnail_download_BlueBurst.png']['worker']
         test_path = Path('downlaoded', 'file')
