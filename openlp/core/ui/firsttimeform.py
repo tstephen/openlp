@@ -71,7 +71,6 @@ class ThemeListWidgetItem(QtWidgets.QListWidgetItem):
         run_thread(worker, thread_name)
         ftw.thumbnail_download_threads.append(thread_name)
 
-
     def _on_download_failed(self):
         """
         Set an icon to indicate that the thumbnail download has failed.
