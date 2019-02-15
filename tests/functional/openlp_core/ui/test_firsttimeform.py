@@ -153,7 +153,7 @@ class TestFirstTimeForm(TestCase, TestMixin):
 
             # THEN: The default values should have been set
             mocked_restart.assert_called_once()
-            assert 'https://openlp.org/files/frw/' == frw.web, 'The default URL should be set'
+            assert 'https://get.openlp.org/ftw/' == frw.web, 'The default URL should be set'
             mocked_cancel_button.clicked.connect.assert_called_once_with(frw.on_cancel_button_clicked)
             mocked_no_internet_finish_btn.clicked.connect.assert_called_once_with(
                 frw.on_no_internet_finish_button_clicked)
@@ -200,7 +200,7 @@ class TestFirstTimeForm(TestCase, TestMixin):
 
             # THEN: The default values should have been set
             mocked_restart.assert_called_once()
-            assert 'https://openlp.org/files/frw/' == frw.web, 'The default URL should be set'
+            assert 'https://get.openlp.org/ftw/' == frw.web, 'The default URL should be set'
             mocked_cancel_button.clicked.connect.assert_called_once_with(frw.on_cancel_button_clicked)
             mocked_no_internet_finish_btn.clicked.connect.assert_called_once_with(
                 frw.on_no_internet_finish_button_clicked)
