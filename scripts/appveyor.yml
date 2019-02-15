@@ -70,7 +70,7 @@ after_test:
         &"$env:PYTHON\python.exe" builders/windows-builder.py --skip-update -c windows/config-appveyor.ini -b ../openlp-branch -d ../documentation --portable --tag-override TAG
       } else {
         cd packaging
-        &"$env:PYTHON\python.exe" builders/windows-builder.py --skip-update --skip-translations -c windows/config-appveyor.ini -b ../openlp-branch --portable --tag-override TAG
+        &"$env:PYTHON\python.exe" builders/windows-builder.py -v --skip-update --skip-translations -c windows/config-appveyor.ini -b ../openlp-branch --portable --tag-override TAG
       }
 
 artifacts:
