@@ -27,12 +27,16 @@ import logging
 import sys
 import time
 from random import randint
+from tempfile import gettempdir
 
 import requests
+from PyQt5 import QtCore
 
 from openlp.core.common import trace_error_handler
+from openlp.core.common.path import Path
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import ProxyMode, Settings
+from openlp.core.threading import ThreadWorker
 
 
 log = logging.getLogger(__name__ + '.__init__')
@@ -227,4 +231,46 @@ def download_file(update_object, url, file_path, sha256=None):
     return True
 
 
-__all__ = ['get_web_page']
+class DownloadWorker(ThreadWorker):
+    """
+    This worker allows a file to be downloaded in a thread
+    """
+    download_failed = QtCore.pyqtSignal()
+    download_succeeded = QtCore.pyqtSignal(Path)
+
+    def __init__(self, base_url, file_name):
+        """
+        Set up the worker object
+        """
+        self._base_url = base_url
+        self._file_name = file_name
+        self._download_cancelled = False
+        super().__init__()
+
+    def start(self):
+        """
+        Download the url to the temporary directory
+        """
+        if self._download_cancelled:
+            self.quit.emit()
+            return
+        try:
+            dest_path = Path(gettempdir()) / 'openlp' / self._file_name
+            url = f'{self._base_url}{self._file_name}'
+            is_success = download_file(self, url, dest_path)
+            if is_success and not self._download_cancelled:
+                self.download_succeeded.emit(dest_path)
+            else:
+                self.download_failed.emit()
+        except:                                                                 # noqa
+            log.exception('Unable to download %s', url)
+            self.download_failed.emit()
+        finally:
+            self.quit.emit()
+
+    @QtCore.pyqtSlot()
+    def cancel_download(self):
+        """
+        A slot to allow the download to be cancelled from outside of the thread
+        """
+        self._download_cancelled = True

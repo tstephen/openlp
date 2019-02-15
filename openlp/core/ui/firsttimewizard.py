@@ -49,6 +49,40 @@ class FirstTimePage(object):
     Progress = 8
 
 
+class ThemeListWidget(QtWidgets.QListWidget):
+    """
+    Subclass a QListWidget so we can make it look better when it resizes.
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
+        self.setVerticalScrollMode(QtWidgets.QAbstractItemView.ScrollPerPixel)
+        self.setSelectionMode(QtWidgets.QAbstractItemView.MultiSelection)
+        self.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+        self.setIconSize(QtCore.QSize(133, 100))
+        self.setMovement(QtWidgets.QListView.Static)
+        self.setFlow(QtWidgets.QListView.LeftToRight)
+        self.setProperty("isWrapping", True)
+        self.setResizeMode(QtWidgets.QListView.Adjust)
+        self.setViewMode(QtWidgets.QListView.IconMode)
+        self.setUniformItemSizes(True)
+        self.setWordWrap(True)
+
+    def resizeEvent(self, event):
+        """
+        Resize the grid so the list looks better when its resized/
+
+        :param QtGui.QResizeEvent event: Not used
+        :return: None
+        """
+        nominal_width = 141  # Icon width of 133 + 4 each side
+        max_items_per_row = self.viewport().width() // nominal_width or 1  # or 1 to avoid divide by 0 errors
+        col_size = (self.viewport().width() - 1) / max_items_per_row
+        self.setGridSize(QtCore.QSize(col_size, 140))
+
+
 class UiFirstTimeWizard(object):
     """
     The UI widgets for the first time wizard.
@@ -175,27 +209,26 @@ class UiFirstTimeWizard(object):
         self.themes_page = QtWidgets.QWizardPage()
         self.themes_page.setObjectName('themes_page')
         self.themes_layout = QtWidgets.QVBoxLayout(self.themes_page)
-        self.themes_layout.setContentsMargins(20, 50, 20, 60)
         self.themes_layout.setObjectName('themes_layout')
-        self.themes_list_widget = QtWidgets.QListWidget(self.themes_page)
-        self.themes_list_widget.setViewMode(QtWidgets.QListView.IconMode)
-        self.themes_list_widget.setMovement(QtWidgets.QListView.Static)
-        self.themes_list_widget.setFlow(QtWidgets.QListView.LeftToRight)
-        self.themes_list_widget.setSpacing(4)
-        self.themes_list_widget.setUniformItemSizes(True)
-        self.themes_list_widget.setIconSize(QtCore.QSize(133, 100))
-        self.themes_list_widget.setWrapping(False)
-        self.themes_list_widget.setObjectName('themes_list_widget')
+        self.themes_list_widget = ThemeListWidget(self.themes_page)
         self.themes_layout.addWidget(self.themes_list_widget)
+        self.theme_options_layout = QtWidgets.QHBoxLayout()
         self.default_theme_layout = QtWidgets.QHBoxLayout()
         self.theme_label = QtWidgets.QLabel(self.themes_page)
         self.default_theme_layout.addWidget(self.theme_label)
         self.theme_combo_box = QtWidgets.QComboBox(self.themes_page)
         self.theme_combo_box.setEditable(False)
-        self.theme_combo_box.setInsertPolicy(QtWidgets.QComboBox.NoInsert)
-        self.theme_combo_box.setSizeAdjustPolicy(QtWidgets.QComboBox.AdjustToContents)
-        self.default_theme_layout.addWidget(self.theme_combo_box)
-        self.themes_layout.addLayout(self.default_theme_layout)
+        self.default_theme_layout.addWidget(self.theme_combo_box, stretch=1)
+        self.theme_options_layout.addLayout(self.default_theme_layout, stretch=1)
+        self.select_buttons_layout = QtWidgets.QHBoxLayout(self.themes_page)
+        self.themes_select_all_button = QtWidgets.QToolButton(self.themes_page)
+        self.themes_select_all_button.setIcon(UiIcons().plus)
+        self.select_buttons_layout.addWidget(self.themes_select_all_button, stretch=1, alignment=QtCore.Qt.AlignRight)
+        self.themes_deselect_all_button = QtWidgets.QToolButton(self.themes_page)
+        self.themes_deselect_all_button.setIcon(UiIcons().minus)
+        self.select_buttons_layout.addWidget(self.themes_deselect_all_button)
+        self.theme_options_layout.addLayout(self.select_buttons_layout, stretch=1)
+        self.themes_layout.addLayout(self.theme_options_layout)
         first_time_wizard.setPage(FirstTimePage.Themes, self.themes_page)
         # Progress page
         self.progress_page = QtWidgets.QWizardPage()
@@ -271,9 +304,12 @@ class UiFirstTimeWizard(object):
         self.songs_page.setSubTitle(translate('OpenLP.FirstTimeWizard', 'Select and download public domain songs.'))
         self.bibles_page.setTitle(translate('OpenLP.FirstTimeWizard', 'Sample Bibles'))
         self.bibles_page.setSubTitle(translate('OpenLP.FirstTimeWizard', 'Select and download free Bibles.'))
+        # Themes Page
         self.themes_page.setTitle(translate('OpenLP.FirstTimeWizard', 'Sample Themes'))
         self.themes_page.setSubTitle(translate('OpenLP.FirstTimeWizard', 'Select and download sample themes.'))
-        self.theme_label.setText(translate('OpenLP.FirstTimeWizard', 'Select default theme:'))
+        self.theme_label.setText(translate('OpenLP.FirstTimeWizard', 'Default theme:'))
+        self.themes_select_all_button.setToolTip(translate('OpenLP.FirstTimeWizard', 'Select all'))
+        self.themes_deselect_all_button.setToolTip(translate('OpenLP.FirstTimeWizard', 'Deselect all'))
         self.progress_page.setTitle(translate('OpenLP.FirstTimeWizard', 'Downloading and Configuring'))
         self.progress_page.setSubTitle(translate('OpenLP.FirstTimeWizard', 'Please wait while resources are downloaded '
                                                                            'and OpenLP is configured.'))
