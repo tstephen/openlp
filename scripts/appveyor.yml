@@ -18,7 +18,7 @@ install:
   # Download and unpack mupdf
   - appveyor DownloadFile https://mupdf.com/downloads/archive/mupdf-1.14.0-windows.zip
   - 7z x mupdf-1.14.0-windows.zip
-  - cp mupdf-1.14.0-windows/mupdf.exe openlp-branch/mupdf.exe
+  - cp mupdf-1.14.0-windows/mutool.exe openlp-branch/mutool.exe
   # Download and unpack mediainfo
   - appveyor DownloadFile https://mediaarea.net/download/binary/mediainfo/18.08.1/MediaInfo_CLI_18.08.1_Windows_i386.zip
   - mkdir MediaInfo
@@ -52,7 +52,8 @@ after_test:
   # - curl -L -O http://downloads.sourceforge.net/project/portableapps/NSIS%20Portable/NSISPortable_3.0_English.paf.exe
   # - NSISPortable_3.0_English.paf.exe /S
   # Get the packaging code
-  - appveyor DownloadFile http://bazaar.launchpad.net/~openlp-core/openlp/packaging/tarball -FileName packaging.tar.gz
+  #- appveyor DownloadFile http://bazaar.launchpad.net/~openlp-core/openlp/packaging/tarball -FileName packaging.tar.gz
+  - appveyor DownloadFile http://bazaar.launchpad.net/~tomasgroth/openlp/packaging-webengine/tarball -FileName packaging.tar.gz
   - 7z e packaging.tar.gz
   - 7z x packaging.tar
   - mv ~openlp-core/openlp/packaging packaging
