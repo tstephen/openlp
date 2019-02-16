@@ -173,9 +173,6 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
         try:
             web_config = get_web_page('{host}{name}'.format(host=self.web, name='download_3.0.json'),
                                       headers={'User-Agent': user_agent})
-            # web_config = Path(
-            #     'C:\\Users\\sroom\\Documents\\Phill Ridout\\play_ground\\openlp\\ftw-json\\download_3.0.json'
-            # ).read_text(encoding='utf-8')  # TODO: Remove!!!!!
         except ConnectionError:
             QtWidgets.QMessageBox.critical(self, translate('OpenLP.FirstTimeWizard', 'Network Error'),
                                            translate('OpenLP.FirstTimeWizard', 'There was a network error attempting '
@@ -192,18 +189,15 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
             config = json.loads(web_config)
             meta = config['_meta']
             self.web = meta['base_url']
-
             self.songs_url = self.web + meta['songs_dir'] + '/'
             self.bibles_url = self.web + meta['bibles_dir'] + '/'
             self.themes_url = self.web + meta['themes_dir'] + '/'
-
             for song in config['songs'].values():
                 self.application.process_events()
                 item = QtWidgets.QListWidgetItem(song['title'], self.songs_list_widget)
                 item.setData(QtCore.Qt.UserRole, (song['file_name'], song['sha256']))
                 item.setCheckState(QtCore.Qt.Unchecked)
                 item.setFlags(item.flags() | QtCore.Qt.ItemIsUserCheckable)
-
             for lang in config['bibles'].values():
                 self.application.process_events()
                 lang_item = QtWidgets.QTreeWidgetItem(self.bibles_tree_widget, [lang['title']])
@@ -215,7 +209,6 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
                     item.setFlags(item.flags() | QtCore.Qt.ItemIsUserCheckable)
             self.bibles_tree_widget.expandAll()
             self.application.process_events()
-
             for theme in config['themes'].values():
                 ThemeListWidgetItem(self.themes_url, theme, self, self.themes_list_widget)
             self.application.process_events()

@@ -48,7 +48,6 @@ class TestThemeListWidgetItem(TestCase):
     def setUp(self):
         self.sample_theme_data = {'file_name': 'BlueBurst.otz', 'sha256': 'sha_256_hash',
                                   'thumbnail': 'BlueBurst.png', 'title': 'Blue Burst'}
-
         download_worker_patcher = patch('openlp.core.ui.firsttimeform.DownloadWorker')
         self.addCleanup(download_worker_patcher.stop)
         self.mocked_download_worker = download_worker_patcher.start()

@@ -36,7 +36,6 @@ class TestThemeListWidgetItem(TestCase, TestMixin):
     def setUp(self):
         self.sample_theme_data = {'file_name': 'BlueBurst.otz', 'sha256': 'sha_256_hash',
                                   'thumbnail': 'BlueBurst.png', 'title': 'Blue Burst'}
-
         Registry.create()
         self.registry = Registry()
         mocked_app = MagicMock()
