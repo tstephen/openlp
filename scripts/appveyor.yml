@@ -14,7 +14,7 @@ environment:
 
 install:
   # Install dependencies from pypi
-  - "%PYTHON%\\python.exe -m pip install sqlalchemy alembic appdirs chardet beautifulsoup4 lxml Mako mysql-connector-python pytest mock pyodbc psycopg2 pypiwin32 websockets asyncio waitress six webob requests QtAwesome PyQt5 pymediainfo"
+  - "%PYTHON%\\python.exe -m pip install sqlalchemy alembic appdirs chardet beautifulsoup4 lxml Mako mysql-connector-python pytest mock pyodbc psycopg2 pypiwin32 websockets asyncio waitress six webob requests QtAwesome PyQt5 PyQtWebEngine pymediainfo"
   # Download and unpack mupdf
   - appveyor DownloadFile https://mupdf.com/downloads/archive/mupdf-1.14.0-windows.zip
   - 7z x mupdf-1.14.0-windows.zip
@@ -68,7 +68,7 @@ after_test:
         &"$env:PYTHON\python.exe" builders/windows-builder.py --skip-update -c windows/config-appveyor.ini -b ../openlp-branch -d ../documentation --portable --tag-override TAG
       } else {
         cd packaging
-        &"$env:PYTHON\python.exe" builders/windows-builder.py -v --skip-update --skip-translations -c windows/config-appveyor.ini -b ../openlp-branch --portable --tag-override TAG
+        &"$env:PYTHON\python.exe" builders/windows-builder.py --skip-update --skip-translations -c windows/config-appveyor.ini -b ../openlp-branch --portable --tag-override TAG
       }
 
 artifacts:
