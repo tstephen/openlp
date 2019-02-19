@@ -10,7 +10,9 @@ clone_script:
   - mv BRANCHPATH openlp-branch
 
 environment:
-  PYTHON: C:\\Python37-x64
+  matrix:
+    - PYTHON: C:\\Python37-x64
+    - PYTHON: C:\\Python37
 
 install:
   # Install dependencies from pypi

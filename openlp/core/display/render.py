@@ -706,6 +706,7 @@ class Renderer(RegistryBase, LogMixin, RegistryProperties, DisplayWindow):
             else:
                 # The remaining elements do not fit, thus reset the indexes, create a new list and continue.
                 raw_list = raw_list[index + 1:]
+                print(raw_list)
                 raw_list[0] = raw_tags + raw_list[0]
                 html_list = html_list[index + 1:]
                 html_list[0] = html_tags + html_list[0]
