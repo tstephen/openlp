@@ -67,7 +67,7 @@ class ThemeListWidgetItem(QtWidgets.QListWidgetItem):
         worker = DownloadWorker(themes_url, thumbnail)
         worker.download_failed.connect(self._on_download_failed)
         worker.download_succeeded.connect(self._on_thumbnail_downloaded)
-        thread_name = f'thumbnail_download_{thumbnail}'
+        thread_name = 'thumbnail_download_{thumbnail}'.format(thumbnail=thumbnail)
         run_thread(worker, thread_name)
         ftw.thumbnail_download_threads.append(thread_name)
 
@@ -396,7 +396,7 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
                 iterator += 1
             # Loop through the themes list and increase for each selected item
             for item in self.themes_list_widget.selectedItems():
-                size = get_url_file_size(f'{self.themes_url}{item.file_name}')
+                size = get_url_file_size('{url}{file}'.format(url=self.themes_url, file=item.file_name))
                 self.max_progress += size
         except urllib.error.URLError:
             trace_error_handler(log)
@@ -517,9 +517,9 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
         for item in self.themes_list_widget.selectedItems():
             self._increment_progress_bar(self.downloading.format(name=item.file_name), 0)
             self.previous_size = 0
-            if not download_file(
-                    self, f'{self.themes_url}{item.file_name}', themes_destination_path / item.file_name, item.sha256):
-                missed_files.append(f'Theme: {item.file_name}')
+            if not download_file(self, '{url}{file}'.format(url=self.themes_url, file=item.file_name),
+                                 themes_destination_path / item.file_name, item.sha256):
+                missed_files.append('Theme: name'.format(name=item.file_name))
         if missed_files:
             file_list = ''
             for entry in missed_files:

@@ -256,13 +256,13 @@ class DownloadWorker(ThreadWorker):
             return
         try:
             dest_path = Path(gettempdir()) / 'openlp' / self._file_name
-            url = f'{self._base_url}{self._file_name}'
+            url = '{url}{name}'.format(url=self._base_url, name=self._file_name)
             is_success = download_file(self, url, dest_path)
             if is_success and not self._download_cancelled:
                 self.download_succeeded.emit(dest_path)
             else:
                 self.download_failed.emit()
-        except:                                                                 # noqa
+        except Exception:
             log.exception('Unable to download %s', url)
             self.download_failed.emit()
         finally:
