@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -49,6 +49,7 @@ from openlp.core.ui.media import MediaState, ItemMediaInfo, MediaType, parse_opt
 from openlp.core.ui.media.endpoint import media_endpoint
 from openlp.core.ui.media.vlcplayer import VlcPlayer, get_vlc
 from openlp.core.widgets.toolbar import OpenLPToolbar
+
 
 log = logging.getLogger(__name__)
 
@@ -381,7 +382,7 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         log.debug('video mediatype: ' + str(controller.media_info.media_type))
         # dont care about actual theme, set a black background
         if controller.is_live and not controller.media_info.is_background:
-            display.frame.evaluateJavaScript('show_video("setBackBoard", null, null,"visible");')
+            display.frame.runJavaScript('show_video("setBackBoard", null, null,"visible");')
         # now start playing - Preview is autoplay!
         autoplay = False
         # Preview requested
@@ -451,7 +452,7 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         # When called from mediaitem display is None
         if display is None:
             display = controller.preview_display
-        self.vlc_player.load(display)
+        self.vlc_player.load(display, filename)
         self.resize(display, self.vlc_player)
         self.current_media_players[controller.controller_type] = self.vlc_player
         if audio_track == -1 and subtitle_track == -1:
@@ -533,7 +534,7 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
             self.media_volume(controller, controller.media_info.volume)
         if first_time:
             if not controller.media_info.is_background:
-                display.frame.evaluateJavaScript('show_blank("desktop");')
+                display.frame.runJavaScript('show_blank("desktop");')
             self.current_media_players[controller.controller_type].set_visible(display, True)
             controller.mediabar.actions['playbackPlay'].setVisible(False)
             controller.mediabar.actions['playbackPause'].setVisible(True)
@@ -653,7 +654,7 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         display = self._define_display(controller)
         if controller.controller_type in self.current_media_players:
             if not looping_background:
-                display.frame.evaluateJavaScript('show_blank("black");')
+                display.frame.runJavaScript('show_blank("black");')
             self.current_media_players[controller.controller_type].stop(display)
             self.current_media_players[controller.controller_type].set_visible(display, False)
             controller.seek_slider.setSliderPosition(0)
@@ -724,7 +725,7 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
             display.override = {}
             self.current_media_players[controller.controller_type].reset(display)
             self.current_media_players[controller.controller_type].set_visible(display, False)
-            display.frame.evaluateJavaScript('show_video("setBackBoard", null, null, "hidden");')
+            display.frame.runJavaScript('show_video("setBackBoard", null, null, "hidden");')
             del self.current_media_players[controller.controller_type]
 
     def media_hide(self, msg):

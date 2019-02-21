@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -49,7 +49,7 @@ class EditCustomForm(QtWidgets.QDialog, Ui_CustomEditDialog):
                                              QtCore.Qt.WindowCloseButtonHint)
         self.manager = manager
         self.media_item = media_item
-        self.setupUi(self)
+        self.setup_ui(self)
         # Create other objects and forms.
         self.edit_slide_form = EditCustomSlideForm(self)
         # Connecting signals and slots

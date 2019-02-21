@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -28,7 +28,6 @@ import re
 from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.common.i18n import UiStrings, translate
-from openlp.core.ui.icons import UiIcons
 from openlp.core.common.mixins import RegistryProperties
 from openlp.core.common.path import path_to_str, str_to_path
 from openlp.core.common.registry import Registry
@@ -37,10 +36,12 @@ from openlp.core.lib import ServiceItemContext
 from openlp.core.lib.plugin import StringContent
 from openlp.core.lib.serviceitem import ServiceItem
 from openlp.core.lib.ui import create_widget_action, critical_error_message_box
+from openlp.core.ui.icons import UiIcons
 from openlp.core.widgets.dialogs import FileDialog
 from openlp.core.widgets.edits import SearchEdit
 from openlp.core.widgets.toolbar import OpenLPToolbar
 from openlp.core.widgets.views import ListWidgetWithDnD
+
 
 log = logging.getLogger(__name__)
 
@@ -108,8 +109,8 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
         self.page_layout.setSpacing(0)
         self.page_layout.setContentsMargins(0, 0, 0, 0)
         self.required_icons()
-        self.setupUi()
-        self.retranslateUi()
+        self.setup_ui()
+        self.retranslate_ui()
         self.auto_select_id = -1
 
     def setup_item(self):
@@ -133,7 +134,7 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
         self.can_make_live = True
         self.can_add_to_service = True
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         """
         This method is called automatically to provide OpenLP with the opportunity to translate the ``MediaManagerItem``
         to another language.
@@ -148,7 +149,7 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
             self.toolbar = OpenLPToolbar(self)
             self.page_layout.addWidget(self.toolbar)
 
-    def setupUi(self):
+    def setup_ui(self):
         """
         This method sets up the interface on the button. Plugin developers use this to add and create toolbars, and the
         rest of the interface of the media manager item.

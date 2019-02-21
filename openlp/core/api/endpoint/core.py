@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -30,8 +30,8 @@ from openlp.core.api.http.endpoint import Endpoint
 from openlp.core.common.i18n import UiStrings, translate
 from openlp.core.common.registry import Registry
 from openlp.core.lib import image_to_byte
-from openlp.core.lib.plugin import StringContent
-from openlp.core.lib.plugin import PluginStatus
+from openlp.core.lib.plugin import PluginStatus, StringContent
+
 
 template_dir = 'templates'
 static_dir = 'static'

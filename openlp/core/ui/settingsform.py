@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -26,6 +26,7 @@ import logging
 
 from PyQt5 import QtCore, QtWidgets
 
+from openlp.core.state import State
 from openlp.core.api.tab import ApiTab
 from openlp.core.common.mixins import RegistryProperties
 from openlp.core.common.registry import Registry
@@ -33,8 +34,11 @@ from openlp.core.lib import build_icon
 from openlp.core.projectors.tab import ProjectorTab
 from openlp.core.ui.advancedtab import AdvancedTab
 from openlp.core.ui.generaltab import GeneralTab
+from openlp.core.ui.screenstab import ScreensTab
 from openlp.core.ui.themestab import ThemesTab
+# from openlp.core.ui.media.playertab import PlayerTab
 from openlp.core.ui.settingsdialog import Ui_SettingsDialog
+
 
 log = logging.getLogger(__name__)
 
@@ -52,7 +56,7 @@ class SettingsForm(QtWidgets.QDialog, Ui_SettingsDialog, RegistryProperties):
         super(SettingsForm, self).__init__(parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint |
                                            QtCore.Qt.WindowCloseButtonHint)
         self.processes = []
-        self.setupUi(self)
+        self.setup_ui(self)
         self.setting_list_widget.currentRowChanged.connect(self.list_item_changed)
         self.general_tab = None
         self.themes_tab = None
@@ -71,11 +75,14 @@ class SettingsForm(QtWidgets.QDialog, Ui_SettingsDialog, RegistryProperties):
             # take at 0 and the rest shuffle up.
             self.stacked_layout.takeAt(0)
         self.insert_tab(self.general_tab)
+        self.insert_tab(self.advanced_tab)
+        self.insert_tab(self.screens_tab)
         self.insert_tab(self.themes_tab)
         self.insert_tab(self.advanced_tab)
+        # self.insert_tab(self.player_tab)
         self.insert_tab(self.projector_tab)
         self.insert_tab(self.api_tab)
-        for plugin in self.plugin_manager.plugins:
+        for plugin in State().list_plugins():
             if plugin.settings_tab:
                 self.insert_tab(plugin.settings_tab, plugin.is_active())
         self.setting_list_widget.setCurrentRow(0)
@@ -148,21 +155,22 @@ class SettingsForm(QtWidgets.QDialog, Ui_SettingsDialog, RegistryProperties):
         """
         Run any post-setup code for the tabs on the form
         """
-        # General tab
-        self.general_tab = GeneralTab(self)
-        # Themes tab
-        self.themes_tab = ThemesTab(self)
-        # Projector Tab
-        self.projector_tab = ProjectorTab(self)
-        # Advanced tab
-        self.advanced_tab = AdvancedTab(self)
-        # Api tab
-        self.api_tab = ApiTab(self)
+        try:
+            self.general_tab = GeneralTab(self)
+            self.themes_tab = ThemesTab(self)
+            self.projector_tab = ProjectorTab(self)
+            self.advanced_tab = AdvancedTab(self)
+            # self.player_tab = PlayerTab(self)
+            self.api_tab = ApiTab(self)
+            self.screens_tab = ScreensTab(self)
+        except Exception as e:
+            print(e)
+        # Post setup
         self.general_tab.post_set_up()
         self.themes_tab.post_set_up()
         self.advanced_tab.post_set_up()
         self.api_tab.post_set_up()
-        for plugin in self.plugin_manager.plugins:
+        for plugin in State().list_plugins():
             if plugin.settings_tab:
                 plugin.settings_tab.post_set_up()
 

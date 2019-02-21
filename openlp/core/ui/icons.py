@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,12 +23,13 @@
 The :mod:`languages` module provides a list of icons.
 """
 import logging
-import qtawesome as qta
 
+import qtawesome as qta
 from PyQt5 import QtGui, QtWidgets
 
 from openlp.core.common.applocation import AppLocation
 from openlp.core.lib import build_icon
+
 
 log = logging.getLogger(__name__)
 

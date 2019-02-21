@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2015 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,13 +23,13 @@
 Package to test the openlp.core.projectors.pjlink commands package.
 """
 from unittest import TestCase, skip
-from unittest.mock import patch, call
+from unittest.mock import call, patch
 
 import openlp.core.projectors.pjlink
 from openlp.core.projectors.constants import PJLINK_PORT, S_CONNECTED, S_OFF, S_ON
 from openlp.core.projectors.db import Projector
 from openlp.core.projectors.pjlink import PJLink, PJLinkUDP
-from tests.resources.projector.data import TEST_HASH, TEST_PIN, TEST_SALT, TEST1_DATA, TEST2_DATA
+from tests.resources.projector.data import TEST1_DATA, TEST2_DATA, TEST_HASH, TEST_PIN, TEST_SALT
 
 
 class TestPJLinkCommands(TestCase):

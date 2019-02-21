@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -30,11 +30,13 @@ from openlp.core.common import get_images_filter, is_not_image_file
 from openlp.core.common.i18n import UiStrings, translate
 from openlp.core.common.mixins import RegistryProperties
 from openlp.core.common.registry import Registry
-from openlp.core.lib.theme import BackgroundType, BackgroundGradientType
+from openlp.core.lib.theme import BackgroundGradientType, BackgroundType
 from openlp.core.lib.ui import critical_error_message_box
+# TODO: Fix this. Use a "get_video_extensions" method which uses the current media player
+from openlp.core.ui.media.vlcplayer import VIDEO_EXT
 from openlp.core.ui.themelayoutform import ThemeLayoutForm
-from openlp.core.ui.media.webkitplayer import VIDEO_EXT
-from .themewizard import Ui_ThemeWizard
+from openlp.core.ui.themewizard import Ui_ThemeWizard
+
 
 log = logging.getLogger(__name__)
 
@@ -59,7 +61,7 @@ class ThemeForm(QtWidgets.QWizard, Ui_ThemeWizard, RegistryProperties):
         """
         Set up the class. This method is mocked out by the tests.
         """
-        self.setupUi(self)
+        self.setup_ui(self)
         self.registerFields()
         self.update_theme_allowed = True
         self.temp_background_filename = None
@@ -217,15 +219,19 @@ class ThemeForm(QtWidgets.QWizard, Ui_ThemeWizard, RegistryProperties):
         Generate layout preview and display the form.
         """
         self.update_theme()
-        width = self.renderer.width
-        height = self.renderer.height
+        width = self.renderer.width()
+        height = self.renderer.height()
         pixmap = QtGui.QPixmap(width, height)
         pixmap.fill(QtCore.Qt.white)
         paint = QtGui.QPainter(pixmap)
         paint.setPen(QtGui.QPen(QtCore.Qt.blue, 2))
-        paint.drawRect(self.renderer.get_main_rectangle(self.theme))
+        main_rect = QtCore.QRect(self.theme.font_main_x, self.theme.font_main_y,
+                                 self.theme.font_main_width - 1, self.theme.font_main_height - 1)
+        paint.drawRect(main_rect)
         paint.setPen(QtGui.QPen(QtCore.Qt.red, 2))
-        paint.drawRect(self.renderer.get_footer_rectangle(self.theme))
+        footer_rect = QtCore.QRect(self.theme.font_footer_x, self.theme.font_footer_y,
+                                   self.theme.font_footer_width - 1, self.theme.font_footer_height - 1)
+        paint.drawRect(footer_rect)
         paint.end()
         self.theme_layout_form.exec(pixmap)
 

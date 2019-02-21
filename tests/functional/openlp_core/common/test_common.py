@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -25,8 +25,8 @@ Functional tests to test the AppLocation class and related methods.
 from unittest import TestCase
 from unittest.mock import MagicMock, call, patch
 
-from openlp.core.common import clean_button_text, de_hump, extension_loader, is_macosx, is_linux, \
-    is_win, normalize_str, path_to_module, trace_error_handler
+from openlp.core.common import clean_button_text, de_hump, extension_loader, is_linux, is_macosx, is_win, \
+    normalize_str, path_to_module, trace_error_handler
 from openlp.core.common.path import Path
 
 

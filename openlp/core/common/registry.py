@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -26,6 +26,7 @@ import logging
 import sys
 
 from openlp.core.common import de_hump, trace_error_handler
+
 
 log = logging.getLogger(__name__)
 
@@ -143,6 +144,7 @@ class Registry(object):
         if event in self.functions_list:
             for function in self.functions_list[event]:
                 try:
+                    log.debug('Running function {} for {}'.format(function, event))
                     result = function(*args, **kwargs)
                     if result:
                         results.append(result)

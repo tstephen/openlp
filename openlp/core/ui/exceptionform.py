@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -27,48 +27,15 @@ import os
 import platform
 import re
 
-import bs4
-import sqlalchemy
-from PyQt5 import Qt, QtCore, QtGui, QtWebKit, QtWidgets
-from lxml import etree
-
-try:
-    import migrate
-    MIGRATE_VERSION = getattr(migrate, '__version__', '< 0.7')
-except ImportError:
-    MIGRATE_VERSION = '-'
-try:
-    import chardet
-    CHARDET_VERSION = chardet.__version__
-except ImportError:
-    CHARDET_VERSION = '-'
-try:
-    import enchant
-    ENCHANT_VERSION = enchant.__version__
-except ImportError:
-    ENCHANT_VERSION = '-'
-try:
-    import mako
-    MAKO_VERSION = mako.__version__
-except ImportError:
-    MAKO_VERSION = '-'
-try:
-    WEBKIT_VERSION = QtWebKit.qWebKitVersion()
-except AttributeError:
-    WEBKIT_VERSION = '-'
-try:
-    from openlp.core.ui.media.vlcplayer import VERSION
-    VLC_VERSION = VERSION
-except ImportError:
-    VLC_VERSION = '-'
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from openlp.core.common import is_linux
 from openlp.core.common.i18n import UiStrings, translate
 from openlp.core.common.mixins import RegistryProperties
 from openlp.core.common.settings import Settings
 from openlp.core.ui.exceptiondialog import Ui_ExceptionDialog
+from openlp.core.version import get_library_versions, get_version
 from openlp.core.widgets.dialogs import FileDialog
-from openlp.core.version import get_version
 
 
 log = logging.getLogger(__name__)
@@ -83,7 +50,7 @@ class ExceptionForm(QtWidgets.QDialog, Ui_ExceptionDialog, RegistryProperties):
         Constructor.
         """
         super(ExceptionForm, self).__init__(None, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint)
-        self.setupUi(self)
+        self.setup_ui(self)
         self.settings_section = 'crashreport'
         self.report_text = '**OpenLP Bug Report**\n' \
             'Version: {version}\n\n' \
@@ -109,15 +76,9 @@ class ExceptionForm(QtWidgets.QDialog, Ui_ExceptionDialog, RegistryProperties):
         description = self.description_text_edit.toPlainText()
         traceback = self.exception_text_edit.toPlainText()
         system = translate('OpenLP.ExceptionForm', 'Platform: {platform}\n').format(platform=platform.platform())
-        libraries = ('Python: {python}\nQt5: {qt5}\nPyQt5: {pyqt5}\nQtWebkit: {qtwebkit}\nSQLAlchemy: {sqalchemy}\n'
-                     'SQLAlchemy Migrate: {migrate}\nBeautifulSoup: {soup}\nlxml: {etree}\nChardet: {chardet}\n'
-                     'PyEnchant: {enchant}\nMako: {mako}\npyUNO bridge: {uno}\n'
-                     'VLC: {vlc}\n').format(python=platform.python_version(), qt5=Qt.qVersion(),
-                                            pyqt5=Qt.PYQT_VERSION_STR, qtwebkit=WEBKIT_VERSION,
-                                            sqalchemy=sqlalchemy.__version__, migrate=MIGRATE_VERSION,
-                                            soup=bs4.__version__, etree=etree.__version__, chardet=CHARDET_VERSION,
-                                            enchant=ENCHANT_VERSION, mako=MAKO_VERSION,
-                                            uno=self._pyuno_import(), vlc=VLC_VERSION)
+        library_versions = get_library_versions()
+        library_versions['PyUNO'] = self._get_pyuno_version()
+        libraries = '\n'.join(['{}: {}'.format(library, version) for library, version in library_versions.items()])
 
         if is_linux():
             if os.environ.get('KDE_FULL_SESSION') == 'true':
@@ -215,7 +176,7 @@ class ExceptionForm(QtWidgets.QDialog, Ui_ExceptionDialog, RegistryProperties):
         self.save_report_button.setEnabled(state)
         self.send_report_button.setEnabled(state)
 
-    def _pyuno_import(self):
+    def _get_pyuno_version(self):
         """
         Added here to define only when the form is actioned. The uno interface spits out lots of exception messages
         if the import is at a file level.  If uno import is changed this could be reverted.

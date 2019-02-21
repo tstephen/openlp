@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -30,8 +30,9 @@ from openlp.core.common.i18n import UiStrings, translate
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.lib.settingstab import SettingsTab
-from openlp.core.ui.icons import UiIcons
 from openlp.core.projectors import DialogSourceStyle
+from openlp.core.ui.icons import UiIcons
+
 
 log = logging.getLogger(__name__)
 log.debug('projectortab module loaded')
@@ -54,12 +55,12 @@ class ProjectorTab(SettingsTab):
         Registry().register_function('udp_broadcast_add', self.add_udp_listener)
         Registry().register_function('udp_broadcast_remove', self.remove_udp_listener)
 
-    def setupUi(self):
+    def setup_ui(self):
         """
         Setup the UI
         """
         self.setObjectName('ProjectorTab')
-        super(ProjectorTab, self).setupUi()
+        super(ProjectorTab, self).setup_ui()
         self.connect_box = QtWidgets.QGroupBox(self.left_column)
         self.connect_box.setObjectName('connect_box')
         self.connect_box_layout = QtWidgets.QFormLayout(self.connect_box)
@@ -103,7 +104,7 @@ class ProjectorTab(SettingsTab):
         self.connect_on_linkup.setObjectName('connect_on_linkup')
         self.connect_box_layout.addRow(self.connect_on_linkup)
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         """
         Translate the UI on the fly
         """

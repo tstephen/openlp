@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -22,7 +22,7 @@
 """
 The UI widgets of the print service dialog.
 """
-from PyQt5 import QtCore, QtWidgets, QtPrintSupport
+from PyQt5 import QtCore, QtPrintSupport, QtWidgets
 
 from openlp.core.common.i18n import UiStrings, translate
 from openlp.core.ui.icons import UiIcons
@@ -45,7 +45,7 @@ class Ui_PrintServiceDialog(object):
     """
     The UI of the print service dialog
     """
-    def setupUi(self, print_service_dialog):
+    def setup_ui(self, print_service_dialog):
         """
         Set up the UI
         """
@@ -127,10 +127,10 @@ class Ui_PrintServiceDialog(object):
         self.options_group_box.setLayout(self.group_layout)
         self.options_layout.addWidget(self.options_group_box)
 
-        self.retranslateUi(print_service_dialog)
+        self.retranslate_ui(print_service_dialog)
         self.options_button.toggled.connect(self.toggle_options)
 
-    def retranslateUi(self, print_service_dialog):
+    def retranslate_ui(self, print_service_dialog):
         """
         Translate the UI on the fly
         """

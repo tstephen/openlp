@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -42,12 +42,12 @@ class PresentationTab(SettingsTab):
         super(PresentationTab, self).__init__(parent, title, visible_title, icon_path)
         self.activated = False
 
-    def setupUi(self):
+    def setup_ui(self):
         """
         Create the controls for the settings tab
         """
         self.setObjectName('PresentationTab')
-        super(PresentationTab, self).setupUi()
+        super(PresentationTab, self).setup_ui()
         self.controllers_group_box = QtWidgets.QGroupBox(self.left_column)
         self.controllers_group_box.setObjectName('controllers_group_box')
         self.controllers_layout = QtWidgets.QVBoxLayout(self.controllers_group_box)
@@ -99,7 +99,7 @@ class PresentationTab(SettingsTab):
         self.program_path_edit.pathChanged.connect(self.on_program_path_edit_path_changed)
         self.pdf_program_check_box.clicked.connect(self.program_path_edit.setEnabled)
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         """
         Make any translation changes
         """

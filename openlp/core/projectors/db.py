@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -35,16 +35,19 @@ The Projector table keeps track of entries for controlled projectors.
 """
 
 import logging
-log = logging.getLogger(__name__)
-log.debug('projector.lib.db module loaded')
 
 from sqlalchemy import Column, ForeignKey, Integer, MetaData, String, and_
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.orm import relationship
 
 from openlp.core.lib.db import Manager, init_db, init_url
-from openlp.core.projectors.constants import PJLINK_DEFAULT_CODES
 from openlp.core.projectors import upgrade
+from openlp.core.projectors.constants import PJLINK_DEFAULT_CODES
+
+
+log = logging.getLogger(__name__)
+log.debug('projector.lib.db module loaded')
+
 
 Base = declarative_base(MetaData())
 

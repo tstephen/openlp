@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -28,12 +28,13 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 from openlp.core.common import is_macosx
 from openlp.core.common.i18n import UiStrings, translate
-from openlp.core.ui.icons import UiIcons
 from openlp.core.common.mixins import RegistryProperties
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.lib.ui import add_welcome_page
+from openlp.core.ui.icons import UiIcons
 from openlp.core.widgets.dialogs import FileDialog
+
 
 log = logging.getLogger(__name__)
 
@@ -109,7 +110,7 @@ class OpenLPWizard(QtWidgets.QWizard, RegistryProperties):
         self.delete_icon = UiIcons().delete
         self.finish_button = self.button(QtWidgets.QWizard.FinishButton)
         self.cancel_button = self.button(QtWidgets.QWizard.CancelButton)
-        self.setupUi(image)
+        self.setup_ui(image)
         self.register_fields()
         self.custom_init()
         self.custom_signals()
@@ -118,7 +119,7 @@ class OpenLPWizard(QtWidgets.QWizard, RegistryProperties):
             self.error_copy_to_button.clicked.connect(self.on_error_copy_to_button_clicked)
             self.error_save_to_button.clicked.connect(self.on_error_save_to_button_clicked)
 
-    def setupUi(self, image):
+    def setup_ui(self, image):
         """
         Set up the wizard UI.
         :param image: path to start up image
@@ -135,7 +136,7 @@ class OpenLPWizard(QtWidgets.QWizard, RegistryProperties):
         self.add_custom_pages()
         if self.with_progress_page:
             self.add_progress_page()
-        self.retranslateUi()
+        self.retranslate_ui()
 
     def register_fields(self):
         """

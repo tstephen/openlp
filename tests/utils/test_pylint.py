@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -24,7 +24,10 @@ Package to test for proper bzr tags.
 """
 import platform
 import sys
-from unittest import TestCase, SkipTest
+from unittest import SkipTest, TestCase
+
+from openlp.core.common import is_win
+
 
 try:
     from pylint import epylint as lint
@@ -32,7 +35,6 @@ try:
 except ImportError:
     raise SkipTest('pylint not installed - skipping tests using pylint.')
 
-from openlp.core.common import is_win
 
 TOLERATED_ERRORS = {'registryproperties.py': ['access-member-before-definition'],
                     'opensong.py': ['no-name-in-module'],

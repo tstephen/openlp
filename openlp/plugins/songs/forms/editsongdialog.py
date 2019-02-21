@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,7 +23,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from openlp.core.common.i18n import UiStrings, translate
-from openlp.core.lib.ui import create_button_box, create_button
+from openlp.core.lib.ui import create_button, create_button_box
 from openlp.core.ui import SingleColumnTableWidget
 from openlp.core.ui.icons import UiIcons
 from openlp.plugins.songs.lib.ui import SongStrings
@@ -34,7 +34,7 @@ class Ui_EditSongDialog(object):
     The :class:`~openlp.plugins.songs.forms.editsongdialog.Ui_EditSongDialog` class defines the user interface for the
     EditSongForm dialog.
     """
-    def setupUi(self, edit_song_dialog):
+    def setup_ui(self, edit_song_dialog):
         edit_song_dialog.setObjectName('edit_song_dialog')
         edit_song_dialog.setWindowIcon(UiIcons().main_icon)
         edit_song_dialog.resize(900, 600)
@@ -293,9 +293,9 @@ class Ui_EditSongDialog(object):
         self.button_box = create_button_box(edit_song_dialog, 'button_box', ['cancel', 'save'])
         self.bottom_layout.addWidget(self.button_box)
         self.dialog_layout.addLayout(self.bottom_layout)
-        self.retranslateUi(edit_song_dialog)
+        self.retranslate_ui(edit_song_dialog)
 
-    def retranslateUi(self, edit_song_dialog):
+    def retranslate_ui(self, edit_song_dialog):
         """
         Translate the UI on the fly.
         """

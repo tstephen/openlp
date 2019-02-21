@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -26,6 +26,7 @@ from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.common.i18n import LanguageManager
 from openlp.core.lib.ui import create_action
+
 from .firsttimelanguagedialog import Ui_FirstTimeLanguageDialog
 
 
@@ -39,7 +40,7 @@ class FirstTimeLanguageForm(QtWidgets.QDialog, Ui_FirstTimeLanguageDialog):
         """
         super(FirstTimeLanguageForm, self).__init__(parent, QtCore.Qt.WindowSystemMenuHint |
                                                     QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowCloseButtonHint)
-        self.setupUi(self)
+        self.setup_ui(self)
         self.qm_list = LanguageManager.get_qm_list()
         self.language_combo_box.addItem('Autodetect')
         self.language_combo_box.addItems(sorted(self.qm_list.keys()))

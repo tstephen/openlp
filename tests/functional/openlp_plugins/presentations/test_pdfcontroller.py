@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -24,7 +24,7 @@ This module contains tests for the PdfController
 """
 import os
 from tempfile import mkdtemp
-from unittest import TestCase, SkipTest
+from unittest import SkipTest, TestCase
 from unittest.mock import MagicMock, patch
 
 from PyQt5 import QtCore, QtGui
@@ -33,9 +33,9 @@ from openlp.core.common.path import Path
 from openlp.core.common.settings import Settings
 from openlp.core.display.screens import ScreenList
 from openlp.plugins.presentations.lib.pdfcontroller import PdfController, PdfDocument
-
-from tests.utils.constants import RESOURCE_PATH
 from tests.helpers.testmixin import TestMixin
+from tests.utils.constants import RESOURCE_PATH
+
 
 __default_settings__ = {
     'presentations/enable_pdf_program': False,
@@ -134,8 +134,8 @@ class TestPdfController(TestCase, TestMixin):
         image = QtGui.QImage(os.path.join(str(self.temp_folder_path), 'pdf_test1.pdf', 'mainslide001.png'))
         # Based on the converter used the resolution will differ a bit
         if controller.gsbin:
-            assert 760 == image.height(), 'The height should be 760'
-            assert 537 == image.width(), 'The width should be 537'
+            assert 1076 == image.height(), 'The height should be 1076'
+            assert 760 == image.width(), 'The width should be 760'
         else:
             assert 768 == image.height(), 'The height should be 768'
             assert 543 == image.width(), 'The width should be 543'

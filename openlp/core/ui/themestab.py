@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -45,12 +45,12 @@ class ThemesTab(SettingsTab):
         theme_translated = translate('OpenLP.ThemesTab', 'Themes')
         super(ThemesTab, self).__init__(parent, 'Themes', theme_translated)
 
-    def setupUi(self):
+    def setup_ui(self):
         """
         Set up the UI
         """
         self.setObjectName('ThemesTab')
-        super(ThemesTab, self).setupUi()
+        super(ThemesTab, self).setup_ui()
         self.global_group_box = QtWidgets.QGroupBox(self.left_column)
         self.global_group_box.setObjectName('global_group_box')
         self.global_group_box_layout = QtWidgets.QVBoxLayout(self.global_group_box)
@@ -109,7 +109,7 @@ class ThemesTab(SettingsTab):
         self.default_combo_box.activated.connect(self.on_default_combo_box_changed)
         Registry().register_function('theme_update_list', self.update_theme_list)
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         """
         Translate the UI on the fly
         """
@@ -188,7 +188,7 @@ class ThemesTab(SettingsTab):
         Set the global default theme
         """
         self.global_theme = self.default_combo_box.currentText()
-        self.renderer.set_global_theme()
+        # self.renderer.set_global_theme()
         self._preview_global_theme()
 
     def update_theme_list(self, theme_list):
@@ -204,7 +204,7 @@ class ThemesTab(SettingsTab):
         self.default_combo_box.clear()
         self.default_combo_box.addItems(theme_list)
         find_and_set_in_combo_box(self.default_combo_box, self.global_theme)
-        self.renderer.set_global_theme()
+        # self.renderer.set_global_theme()
         self.renderer.set_theme_level(self.theme_level)
         if self.global_theme is not '':
             self._preview_global_theme()

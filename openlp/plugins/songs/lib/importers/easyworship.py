@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -31,9 +31,10 @@ import zlib
 
 from openlp.core.common.i18n import translate
 from openlp.core.common.path import Path
-from openlp.plugins.songs.lib import VerseType
-from openlp.plugins.songs.lib import retrieve_windows_encoding, strip_rtf
+from openlp.plugins.songs.lib import VerseType, retrieve_windows_encoding, strip_rtf
+
 from .songimport import SongImport
+
 
 # regex: at least two newlines, can have spaces between them
 SLIDE_BREAK_REGEX = re.compile(r'\n *?\n[\n ]*')

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -31,6 +31,7 @@ from openlp.core.common.path import Path
 from openlp.core.common.settings import Settings
 from openlp.plugins.media.lib.mediaitem import MediaMediaItem
 from tests.helpers.testmixin import TestMixin
+
 
 __default_settings__ = {
     'media/media auto start': QtCore.Qt.Unchecked,

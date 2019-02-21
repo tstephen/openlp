@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -35,7 +35,7 @@ mentioned above, like so::
 
         def __init__(self, parent=None):
             super(AuthorsForm, self).__init__(parent)
-            self.setupUi(self)
+            self.setup_ui(self)
 
 This allows OpenLP to use ``self.object`` for all the GUI elements while keeping them separate from the functionality,
 so that it is easier to recreate the GUI from the .ui files later if necessary.

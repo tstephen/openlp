@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -25,7 +25,7 @@ Package to test the openlp.core.threading package.
 from inspect import isfunction
 from unittest.mock import MagicMock, call, patch
 
-from openlp.core.threading import ThreadWorker, run_thread, get_thread_worker, is_thread_finished, make_remove_thread
+from openlp.core.threading import ThreadWorker, get_thread_worker, is_thread_finished, make_remove_thread, run_thread
 
 
 def test_run_thread_no_name():

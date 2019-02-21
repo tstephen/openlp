@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -24,15 +24,17 @@ import logging
 from PyQt5 import QtCore, QtWidgets
 from sqlalchemy.sql import and_
 
-from openlp.core.common.i18n import UiStrings, translate, get_natural_key
+from openlp.core.common.i18n import UiStrings, get_natural_key, translate
 from openlp.core.common.mixins import RegistryProperties
 from openlp.core.common.registry import Registry
 from openlp.core.lib.ui import critical_error_message_box
 from openlp.plugins.songs.forms.authorsform import AuthorsForm
 from openlp.plugins.songs.forms.songbookform import SongBookForm
 from openlp.plugins.songs.forms.topicsform import TopicsForm
-from openlp.plugins.songs.lib.db import Author, Book, Topic, Song
+from openlp.plugins.songs.lib.db import Author, Book, Song, Topic
+
 from .songmaintenancedialog import Ui_SongMaintenanceDialog
+
 
 log = logging.getLogger(__name__)
 
@@ -47,7 +49,7 @@ class SongMaintenanceForm(QtWidgets.QDialog, Ui_SongMaintenanceDialog, RegistryP
         """
         super(SongMaintenanceForm, self).__init__(parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint |
                                                   QtCore.Qt.WindowCloseButtonHint)
-        self.setupUi(self)
+        self.setup_ui(self)
         self.manager = manager
         self.author_form = AuthorsForm(self)
         self.topic_form = TopicsForm(self)

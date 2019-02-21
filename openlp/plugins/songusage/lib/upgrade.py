@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -25,9 +25,10 @@ backend for the SongsUsage plugin
 """
 import logging
 
-from sqlalchemy import Table, Column, types
+from sqlalchemy import Column, Table, types
 
 from openlp.core.lib.db import get_upgrade_op
+
 
 log = logging.getLogger(__name__)
 __version__ = 2

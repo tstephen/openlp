@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -32,6 +32,7 @@ from openlp.core.common.mixins import RegistryProperties
 from openlp.core.lib.plugin import PluginStatus
 from openlp.core.ui.plugindialog import Ui_PluginViewDialog
 
+
 log = logging.getLogger(__name__)
 
 
@@ -47,7 +48,7 @@ class PluginForm(QtWidgets.QDialog, Ui_PluginViewDialog, RegistryProperties):
                                          QtCore.Qt.WindowCloseButtonHint)
         self.active_plugin = None
         self.programmatic_change = False
-        self.setupUi(self)
+        self.setup_ui(self)
         self.load()
         self._clear_details()
         # Right, now let's put some signals and slots together!

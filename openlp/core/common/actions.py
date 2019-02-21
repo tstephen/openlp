@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -28,6 +28,7 @@ import logging
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from openlp.core.common.settings import Settings
+
 
 log = logging.getLogger(__name__)
 
@@ -113,7 +114,6 @@ class CategoryActionList(object):
             if item[1] == action:
                 self.actions.remove(item)
                 return
-        log.warning('Action "{action}" does not exist.'.format(action=action))
 
 
 class CategoryList(object):

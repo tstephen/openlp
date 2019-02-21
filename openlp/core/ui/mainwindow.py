@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -33,11 +33,10 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from openlp.core.state import State
 from openlp.core.api import websockets
 from openlp.core.api.http import server
-from openlp.core.common import is_win, is_macosx, add_actions
+from openlp.core.common import add_actions, is_macosx, is_win
 from openlp.core.common.actions import ActionList, CategoryOrder
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.i18n import LanguageManager, UiStrings, translate
-from openlp.core.ui.icons import UiIcons
 from openlp.core.common.mixins import LogMixin, RegistryProperties
 from openlp.core.common.path import Path, copyfile, create_paths
 from openlp.core.common.registry import Registry
@@ -46,26 +45,27 @@ from openlp.core.display.screens import ScreenList
 from openlp.core.lib.plugin import PluginStatus
 from openlp.core.lib.ui import create_action
 from openlp.core.projectors.manager import ProjectorManager
-from openlp.core.ui.shortcutlistform import ShortcutListForm
-from openlp.core.ui.formattingtagform import FormattingTagForm
-from openlp.core.ui.thememanager import ThemeManager
-from openlp.core.ui.servicemanager import ServiceManager
 from openlp.core.ui.aboutform import AboutForm
-from openlp.core.ui.pluginform import PluginForm
-from openlp.core.ui.settingsform import SettingsForm
 from openlp.core.ui.firsttimeform import FirstTimeForm
+from openlp.core.ui.formattingtagform import FormattingTagForm
+from openlp.core.ui.icons import UiIcons
+from openlp.core.ui.pluginform import PluginForm
 from openlp.core.ui.printserviceform import PrintServiceForm
+from openlp.core.ui.servicemanager import ServiceManager
+from openlp.core.ui.settingsform import SettingsForm
+from openlp.core.ui.shortcutlistform import ShortcutListForm
 from openlp.core.ui.style import PROGRESSBAR_STYLE, get_library_stylesheet
+from openlp.core.ui.thememanager import ThemeManager
 from openlp.core.version import get_version
 from openlp.core.widgets.dialogs import FileDialog
-from openlp.core.widgets.docks import OpenLPDockWidget, MediaDockManager
+from openlp.core.widgets.docks import MediaDockManager, OpenLPDockWidget
 
 
 class Ui_MainWindow(object):
     """
     This is the UI part of the main window.
     """
-    def setupUi(self, main_window):
+    def setup_ui(self, main_window):
         """
         Set up the user interface
         """
@@ -340,7 +340,7 @@ class Ui_MainWindow(object):
                     self.tools_menu.menuAction(), self.settings_menu.menuAction(), self.help_menu.menuAction()))
         add_actions(self, [self.search_shortcut_action])
         # Initialise the translation
-        self.retranslateUi(main_window)
+        self.retranslate_ui(main_window)
         self.media_tool_box.setCurrentIndex(0)
         # Connect up some signals and slots
         self.file_menu.aboutToShow.connect(self.update_recent_files_menu)
@@ -351,7 +351,7 @@ class Ui_MainWindow(object):
         self.set_lock_panel(panel_locked)
         self.settings_imported = False
 
-    def retranslateUi(self, main_window):
+    def retranslate_ui(self, main_window):
         """
         Set up the translation system
         """
@@ -500,10 +500,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
         self.formatting_tag_form = FormattingTagForm(self)
         self.shortcut_form = ShortcutListForm(self)
         # Set up the interface
-        self.setupUi(self)
+        self.setup_ui(self)
         # Define the media Dock Manager
         self.media_dock_manager = MediaDockManager(self.media_tool_box)
-        # Load settings after setupUi so default UI sizes are overwritten
+        # Load settings after setup_ui so default UI sizes are overwritten
         # Once settings are loaded update the menu with the recent files.
         self.update_recent_files_menu()
         self.plugin_form = PluginForm(self)
@@ -577,8 +577,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
         """
         process the bootstrap post setup request
         """
-        self.preview_controller.panel.setVisible(Settings().value('user interface/preview panel'))
-        self.live_controller.panel.setVisible(Settings().value('user interface/live panel'))
+        # self.preview_controller.panel.setVisible(Settings().value('user interface/preview panel'))
+        # self.live_controller.panel.setVisible(Settings().value('user interface/live panel'))
         self.load_settings()
         self.restore_current_media_manager_item()
         Registry().execute('theme_update_global')
@@ -629,8 +629,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
         Show the main form, as well as the display form
         """
         QtWidgets.QWidget.show(self)
-        if self.live_controller.display.isVisible():
-            self.live_controller.display.setFocus()
+        # if self.live_controller.display.isVisible():
+        #     self.live_controller.display.setFocus()
         self.activateWindow()
         if self.arguments:
             self.open_cmd_line_files(self.arguments)
@@ -813,13 +813,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
         """
         self.settings_form.exec()
 
-    def paintEvent(self, event):
-        """
-        We need to make sure, that the SlidePreview's size is correct.
-        """
-        self.preview_controller.preview_size_changed()
-        self.live_controller.preview_size_changed()
-
     def on_settings_shortcuts_item_clicked(self):
         """
         Show the shortcuts dialog
@@ -999,7 +992,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
         """
         self.application.set_busy_cursor()
         self.image_manager.update_display()
-        self.renderer.update_display()
+        # self.renderer.update_display()
         self.preview_controller.screen_size_changed()
         self.live_controller.screen_size_changed()
         self.setFocus()
@@ -1070,7 +1063,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
         # Close down the display
         if self.live_controller.display:
             self.live_controller.display.close()
-            self.live_controller.display = None
+            # self.live_controller.display = None
         # Clean temporary files used by services
         self.service_manager_contents.clean_up()
         if is_win():

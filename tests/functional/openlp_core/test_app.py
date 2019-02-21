@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -24,6 +24,9 @@ from unittest import TestCase, skip
 from unittest.mock import MagicMock, patch
 
 from PyQt5 import QtCore, QtWidgets
+
+# Mock QtWebEngineWidgets
+sys.modules['PyQt5.QtWebEngineWidgets'] = MagicMock()
 
 from openlp.core.app import OpenLP, parse_options
 from openlp.core.common.settings import Settings

@@ -5,7 +5,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -24,18 +24,19 @@
 This module contains tests for the CCLI SongSelect importer.
 """
 from unittest import TestCase
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock, call, patch
 from urllib.error import URLError
 
 from PyQt5 import QtWidgets
 
 from openlp.core.common.registry import Registry
-from openlp.plugins.songs.forms.songselectform import SongSelectForm, SearchWorker
+from openlp.plugins.songs.forms.songselectform import SearchWorker, SongSelectForm
 from openlp.plugins.songs.lib import Song
-from openlp.plugins.songs.lib.songselect import SongSelectImport, LOGOUT_URL, BASE_URL
+from openlp.plugins.songs.lib.songselect import BASE_URL, LOGOUT_URL, SongSelectImport
 from tests.helpers.songfileimport import SongImportTestHelper
 from tests.helpers.testmixin import TestMixin
 from tests.utils.constants import RESOURCE_PATH
+
 
 TEST_PATH = RESOURCE_PATH / 'songs' / 'songselect'
 

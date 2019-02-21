@@ -5,7 +5,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -74,9 +74,8 @@ MODULES = [
     'PyQt5.QtOpenGL',
     'PyQt5.QtSvg',
     'PyQt5.QtTest',
-    'PyQt5.QtWebKit',
+    'PyQt5.QtWebEngineWidgets',
     'PyQt5.QtMultimedia',
-    'pymediainfo',
     'appdirs',
     'sqlalchemy',
     'alembic',
