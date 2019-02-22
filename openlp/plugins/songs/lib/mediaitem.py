@@ -585,9 +585,11 @@ class SongMediaItem(MediaManagerItem):
         if Settings().value('songs/add songbook slide') and song.songbook_entries:
             first_slide = '\n'
             for songbook_entry in song.songbook_entries:
-                first_slide = first_slide + '{book}/{num}/{pub}\n\n'.format(book=songbook_entry.songbook.name,
-                                                                            num=songbook_entry.entry,
-                                                                            pub=songbook_entry.songbook.publisher)
+                first_slide += '{book} #{num}'.format(book=songbook_entry.songbook.name,
+                                                      num=songbook_entry.entry)
+                if songbook_entry.songbook.publisher:
+                    first_slide += ' ({pub})'.format(pub=songbook_entry.songbook.publisher)
+                first_slide += '\n\n'
 
             service_item.add_from_text(first_slide, 'O1')
         # no verse list or only 1 space (in error)
