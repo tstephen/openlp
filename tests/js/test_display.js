@@ -154,7 +154,7 @@ describe("The Display object", function () {
 });
 
 describe("Display.alert", function () {
-  var alertBackground, alert;
+  var alertBackground, alert, settings;
 
   beforeEach(function () {
     document.body.innerHTML = "";
@@ -164,60 +164,91 @@ describe("Display.alert", function () {
     alert = document.createElement("p");
     alert.setAttribute("id","alert");
     alertBackground.appendChild(alert);
+    settings = '{ \
+      "location": 1, "font_face": "Segoe UI, Tahoma, Geneva, Verdana, sans-serif", \
+      "font_size": 40, "font_color": "#ffffff", "background_color": "#660000" \
+    }';
   });
 
   it("should return null if called without any text", function () {
-    expect(Display.alert("","2")).toBeNull();
+    expect(Display.alert("",settings)).toBeNull();
   });
 
-  it("should set correct alert text", function () {
-    Display.alert("OPEN-LP-3.0 Alert Test", "2");
+  it("should set the correct alert text", function () {    
+    Display.alert("OPEN-LP-3.0 Alert Test", settings);
     expect(alert.innerHTML).toEqual("OPEN-LP-3.0 Alert Test");
   });
 
   it("should set the correct alert position", function () {
-    expect(Display.alert("Alert Location Test","2")).toEqual("2");
+    expect(Display.alert("Alert Location Test", settings)).toEqual(1);
   });
 });
 
 describe("The doEntranceTransition", function () {
 
-  var alertBackground;
+  var alertBackground, alertText;
+  // TODO: Fix tests to accommodate new behaviour with CSS classes and settings modification
 
   beforeEach(function() {
     document.body.innerHTML = "";
     alertBackground = document.createElement("div");
     alertBackground.setAttribute("id", "alert-background");
     document.body.appendChild(alertBackground);
+    alertText = document.createElement("p");
+    alertText.setAttribute("id","alert");
+    alertBackground.appendChild(alertText);
     alertBackground.style.top = '0px';
-    alertBackground.style.height = "0%";
+    alertBackground.style.height = "0%";    
   });
 
   it("should set the correct styles for the alert when location is top of the page", function () {
-    Display.doEntranceTransition("0");
-    expect(alertBackground.style.bottom).toEqual('');
-    expect(alertBackground.style.top).toEqual('0px');
-    expect(alertBackground.style.transition).toEqual("2s linear");
-    expect(alertBackground.style.height).toEqual("25%");
-    expect(alertBackground.style.visibility).toEqual("visible");
+    var settings = {
+      "location": 0, "font_face": "Segoe UI, Tahoma, Geneva, Verdana, sans-serif", 
+      "font_size": 40, "font_color": "#ffffff", "background_color": "#660000"
+    };
+
+    Display.doEntranceTransition(settings);
+
+    setTimeout( function() {
+      expect(alertBackground.style.bottom).toEqual('');
+      expect(alertBackground.style.top).toEqual('0px');
+      expect(alertBackground.style.transition).toEqual("2s linear");
+      expect(alertBackground.style.height).toEqual("25%");
+      expect(alertBackground.style.visibility).toEqual("visible");
+    }, 500);
+    
   });
 
   it("should set the correct styles for the alert when location is middle of the page", function () {
-    Display.doEntranceTransition("1");
+    var settings = {
+      "location": 0, "font_face": "Segoe UI, Tahoma, Geneva, Verdana, sans-serif", 
+      "font_size": 40, "font_color": "#ffffff", "background_color": "#660000"
+    };
+
+    Display.doEntranceTransition(settings);
+    //To be replaced
     var middlePosition = ((window.innerHeight - alertBackground.clientHeight) / 2) + 'px';
     expect(alertBackground.style.top).toEqual(middlePosition);
-    expect(alertBackground.classList.contains("middle-entrance-animation"));
     expect(alertBackground.style.height).toEqual("25%");
     expect(alertBackground.style.visibility).toEqual("visible");
   });
 
   it("should set the correct styles for the alert when location is bottom of the page", function () {
-    Display.doEntranceTransition("2");
-    expect(alertBackground.style.top).toEqual('');
-    expect(alertBackground.style.bottom).toEqual('0px');    
-    expect(alertBackground.style.transition).toEqual("2s linear");
-    expect(alertBackground.style.height).toEqual("25%");
-    expect(alertBackground.style.visibility).toEqual("visible");
+    var settings = {
+      "location": 0, "font_face": "Segoe UI, Tahoma, Geneva, Verdana, sans-serif", 
+      "font_size": 40, "font_color": "#ffffff", "background_color": "#660000"
+    };
+
+    Display.doEntranceTransition(settings);
+
+    setTimeout(function() {
+      expect(alertBackground.style.top).toEqual('');
+      expect(alertBackground.style.bottom).toEqual('0px');    
+      expect(alertBackground.style.transition).toEqual("2s linear");
+      expect(alertBackground.style.height).toEqual("25%");
+      expect(alertBackground.style.visibility).toEqual("visible");
+    }, 500);
+    
   });
 });
 
@@ -232,19 +263,22 @@ describe("The doExitTransition", function () {
   });
 
   it("should remove the styles correctly when the location is the top of the page", function () {
-    Display.doExitTransition("0");
+    Display.doExitTransition(0);
+
     expect(alertBackground.style.height).toEqual('0%');
     expect(alertBackground.style.transition).toEqual("2s linear");
   });
 
   it("should remove the styles correctly when the location is middle of the page", function () {
-    Display.doExitTransition("1");
+    Display.doExitTransition(1);
+
     expect(alertBackground.style.height).toEqual('0%');
     expect(alertBackground.classList.contains("middle-exit-animation"));
   });
 
 it("should remove the styles correctly when the location is the bottom of the page", function () {
-  Display.doExitTransition("2");
+  Display.doExitTransition(2);
+
   expect(alertBackground.style.height).toEqual('0%');
   expect(alertBackground.style.transition).toEqual("2s linear");
 });

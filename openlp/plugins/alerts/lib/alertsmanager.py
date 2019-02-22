@@ -23,6 +23,8 @@
 The :mod:`~openlp.plugins.alerts.lib.alertsmanager` module contains the part of the plugin which manages storing and
 displaying of alerts.
 """
+import json
+
 from PyQt5 import QtCore
 
 from openlp.core.common.i18n import translate
@@ -83,8 +85,16 @@ class AlertsManager(QtCore.QObject, RegistryBase, LogMixin, RegistryProperties):
                                    not Settings().value('core/display on monitor')):
             return
         text = self.alert_list.pop(0)
-        alert_tab = self.parent().settings_tab
-        self.live_controller.displays[0].alert(text, alert_tab.location)
+        # Put alert settings together for dict
+        alert_settings = {
+            'background_color': Settings().value('alerts/background color'),
+            'location': Settings().value('alerts/location'),
+            'font_face': Settings().value('alerts/font face'),
+            'font_size': Settings().value('alerts/font size'),
+            'font_color': Settings().value('alerts/font color'),
+            'timeout': Settings().value().value('alerts/timeout')
+        }
+        self.live_controller.displays[0].alert(text, json.dumps(alert_settings))
         # Check to see if we have a timer running.
         #if self.timer_id == 0:
         #    self.timer_id = self.startTimer(int(alert_tab.timeout) * 1000)

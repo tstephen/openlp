@@ -3,6 +3,7 @@
   <head>
     <title>Display Window</title>
     <link href="reveal.css" rel="stylesheet">
+    <link href="display.css" rel="stylesheet">
     <style type="text/css">
     body {
       background: transparent !important;
@@ -25,90 +26,19 @@
       z-index: -1;
     }
 
-    /* Animation key frames for horizontal scrolling of alert */
-    @keyframes alert-scrolling-text {
-      from { margin-left: 100%; }
-      to {  margin-left: -300% }
-    }
-    /* Middle fade-in alert animation */
-    @keyframes middle-fade-in {
-      from { opacity: 0;}
-      to { opacity: 1;}
-    }
-
-    /* Middle fade-out alert animation */
-    @keyframes middle-fade-out {
-      from { opacity: 1;}
-      to { opacity: 0;}
-    }
-
-    /* Fade in when alert location is in the middle */
-    .middle-entrance-animation {
-      animation-duration: 2s;
-      animation-timing-function: linear;
-      animation-name: middle-fade-in;
-    }
-
-    /* Fade out when alert location is in the middle */
-    .middle-exit-animation {
-      animation-duration: 2s;
-      animation-timing-function: linear;
-      animation-name: middle-fade-out;
-    }
-
-    .horizontal-scroll-animation {
-      animation-duration: 10s;
-      animation-iteration-count: 1;
-      animation-timing-function: linear;
-      animation-name: alert-scrolling-text;
-    }
-
-    /* ALERT STYLING */
-    #alert-background {
-      position: absolute;
-      margin: 0;
-      padding: 0;
-      left: 0px;
-      right: 0px;
-      z-index: 10;
-      width: 100%;
-      height: 0%;
-      vertical-align: middle;
-      color: #ffffff;
-      background-color: #660000;
-      overflow: hidden;
-      visibility:hidden;
-    }
-
-    #alert {
-      position: relative;
-      top: 50%;
-      transform: translateY(-50%);
-      margin-top: 0%;
-      margin-right: 0%;
-      margin-left: 100%;
-      margin-bottom: 0%;
-      z-index: 11;
-      overflow: visible;
-      white-space: nowrap;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      font-size: 100pt;
-      color: #ffffff;
-      visibility: hidden;
-    }
-
     </style>
     <script type="text/javascript" src="qrc:///qtwebchannel/qwebchannel.js"></script>
     <script type="text/javascript" src="reveal.js"></script>
-    <script type="text/javascript" src="display.js"></script>
+    <script type="text/javascript" src="display.css"></script>
   </head>
 
   <body>
     <div class="reveal">
       <div id="global-background" class="slide-background present" data-loaded="true"></div>
-      <div id="alert-background"><p id="alert">Testing alerts</p></div>
+      <div id="alert-background" class="normal"><p id="alert">Testing alerts</p></div>
       <div class="slides"></div>
       <div class="footer"></div>
     </div>
+    <script type="text/javascript" src="display.js"></script>
   </body>
 </html>

@@ -1,0 +1,57 @@
+/* Animation key frames for horizontal scrolling of alert */
+@keyframes alert-scrolling-text {
+  from { margin-left: 100%; }
+  to {  margin-left: -300% }
+}
+
+.horizontal-scroll-animation {
+  animation-duration: 10s;
+  animation-iteration-count: 1;
+  animation-timing-function: linear;
+  animation-name: alert-scrolling-text;
+}
+
+/* ALERT STYLING */
+
+.normal {
+  position: absolute;
+  margin: 0;
+  padding: 0;
+  left: 0;
+  z-index: 10;
+  width: 100%;
+  height: 0%;
+  vertical-align: middle;
+  overflow: hidden;
+  visibility:hidden;
+}
+
+.normal.middle {
+  top: 50%;  
+  left: 50%;
+  margin-right: -50%;
+  transform: translate(-50%, -50%);
+  bottom: initial;
+}
+
+.normal.top {
+  top: 0;
+  bottom: initial;
+}
+
+.normal.bottom {
+  top: initial;
+  bottom: 0;
+}
+
+#alert {
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+  margin: 0% 0% 0% 100%;
+  z-index: 11;
+  overflow: visible;
+  white-space: nowrap;
+  color: #ffffff;
+  visibility: hidden;
+}

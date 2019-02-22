@@ -67,17 +67,15 @@ var TransitionState = {
  */
 var AnimationState = {
   NoAnimation: "noAnimation",
-  ScrollingAnimation: "scrollingAnimation",
-  FadeInAnimation: "fadeInAnimation",
-  FadeOutAnimation: "fadeOutAnimation"
+  ScrollingAnimation: "scrollingAnimation"
 };
 /**
  * Alert location enumeration
  */
 var AlertLocation = {
-  Top: "0",
-  Middle: "1",
-  Bottom: "2"
+  Top: 0,
+  Middle: 1,
+  Bottom: 2
 };
 
 /**
@@ -411,119 +409,97 @@ var Display = {
    * @param {string} text - The alert text
    * @param {int} location - The location of the text (top, middle or bottom)
   */
-  alert: function (text, location) {
-    console.debug(" alert text: " + text + ", location: " + location);
+  alert: function (text, alert_settings) {
+    console.debug(" alert text: " + text + ", alert settings: " + alert_settings);
 
     if (text == "") {
       return null;
     }
 
+    var settings = JSON.parse(alert_settings);
+
     var alertBackground = $("#alert-background")[0];
     var alertText = $("#alert")[0];
+    
+    alertText.innerHTML = text;    
 
-    alertText.innerHTML = text;
-
-    /* Bring in the transition background */
-    Display._transitionState = Display.doEntranceTransition(location);
-
+    /* Start the entrance transition */
+    Display._transitionState = Display.doEntranceTransition(settings);
+    // TODO: Add functinoality for no scroll and queue if not all alerts have been displayed
     alertBackground.addEventListener('transitionend', function (e) {
       e.stopPropagation();
-      if (Display._transitionState == TransitionState.EntranceTransition) {
+      if (Display._transitionState === TransitionState.EntranceTransition) {
         alertText.style.visibility = "visible";
         alertText.classList.add("horizontal-scroll-animation");
+        Display._animationState = AnimationState.ScrollingAnimation;
+        Display._transitionState = TransitionState.NoTransition 
       }
-      else if (Display._transitionState == TransitionState.ExitTransition) {
+      else if (Display._transitionState === TransitionState.ExitTransition) {
         Display._transitionState = TransitionState.NoTransition;
-        alertBackground.style.visibility = "hidden";
         alertText.style.visibility = "hidden";
-        alertBackground.style.top = "";
-        alertBackground.style.bottom = "";
-        alertBackground.style.height = "";
-        alertBackground.style.transition = "";
-        alertBackground.classList.remove("middle-exit-animation");
+        alertBackground.classList = "";
+        alertBackground.classList.add("normal");
       }
     });
 
-    alertBackground.addEventListener('animationend', function () {
-
-      if (Display._animationState == AnimationState.FadeInAnimation) {
-        alertText.style.visibility = "visible";
-        alertText.classList.add("horizontal-scroll-animation");
-        alertText.classList.remove("middle-entrance-animation");
-        Display._animationState = AnimationState.ScrollingAnimation;
-      }
-      else if (Display._animationState == AnimationState.FadeOutAnimation) {
-        alertBackground.style.visibility = "hidden";
-        alertBackground.classList.remove("middle-exit-animation");
-        Display._animationState = AnimationState.NoAnimation;
-      }
-      else if (alertText.classList.contains("horizontal-scroll-animation")) {
+    alertBackground.addEventListener('animationend', function (e) {
+      e.stopPropagation();
+      if (Display._animationState === AnimationState.ScrollingAnimation) {
         alertText.classList.remove("horizontal-scroll-animation");
         alertText.style.visibility = "hidden";
         Display._animationState = AnimationState.NoAnimation;
-        Display._transitionState = Display.doExitTransition(location);
+        Display._transitionState = Display.doExitTransition();
       }
-
     });
 
   /*
    * The implementation should show an alert.
    * It should be able to handle receiving a new alert before a previous one is "finished", basically queueing it.
    */
-    return location;
+    return settings.location;
   },
 
   /**
    * Start background entrance transition for display of alert
-   * @param {string} location - String showing the location of the alert on screen
+   * @param {number} location - Number showing the location of the alert on screen
    */
-  doEntranceTransition: function (location) {
+  doEntranceTransition: function (settings) {
     var alertBackground = $("#alert-background")[0];
-
-    switch (location) {
+    var alertText = $("#alert")[0];
+    switch (settings.location) {
       case AlertLocation.Top:
-        alertBackground.style.bottom = '';
-        alertBackground.style.top = '0px';        
-        alertBackground.style.height = "25%";
-        alertBackground.style.transition = "2s linear";
+        alertBackground.classList.add("top");                       
         break;
       case AlertLocation.Middle:
-        alertBackground.style.top = ((window.innerHeight - alertBackground.clientHeight) / 2) + 'px';
-        alertBackground.style.height = "25%";
-        alertBackground.classList.add("middle-entrance-animation");
-        Display._animationState = AnimationState.FadeInAnimation;
+        // alertBackground.style.top = ((window.innerHeight - alertBackground.clientHeight) / 2) + 'px';
+        alertBackground.classList.add("middle");                
         break;
       case AlertLocation.Bottom:
       default:
-        alertBackground.style.top = '';
-        alertBackground.style.bottom = '0px';        
-        alertBackground.style.height = "25%";
-        alertBackground.style.transition= "2s linear";
+        alertBackground.classList.add("bottom");                       
         break;
     }
-    alertBackground.style.visibility = "visible";
+    alertText.style.color = settings.font_color;
+    alertText.style.fontFamily = settings.font_face;
+    alertText.style.fontSize = settings.font_size + "pt";
+    alertBackground.style.backgroundColor = settings.background_color;
+    // Wait for styles to be set first before starting transitions
+    setTimeout( function() {
+      alertBackground.style.height = "25%";
+      alertBackground.style.transition = "2s linear";
+      alertBackground.style.visibility = "visible";
+    }, 200);
     return TransitionState.EntranceTransition;
-
   },
 
   /**
    * Start background exit transition once alert has been displayed
    * @param {string} location - Integer showing the location of the alert on screen
    */
-  doExitTransition: function (location) {
-
+  doExitTransition: function () {
     var alertBackground = $("#alert-background")[0];
-
-    if (location == AlertLocation.Top || location == AlertLocation.Bottom) {
-      alertBackground.style.height = "0%";
-      alertBackground.style.transition = '2s linear';      
-    }
-    else if (location == AlertLocation.Middle) {
-      alertBackground.classList.add("middle-exit-animation");
-      alertBackground.style.height = "0%";      
-      Display._animationState = AnimationState.FadeOutAnimation;
-    }
-
+    alertBackground.style.height = "0%";
+    alertBackground.style.transition = '2s linear';      
     return TransitionState.ExitTransition;
   },
   /**
