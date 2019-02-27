@@ -681,8 +681,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
             return
         first_run_wizard = FirstTimeForm(self)
         first_run_wizard.initialize(ScreenList())
-        first_run_wizard.exec()
-        if first_run_wizard.was_cancelled:
+        if first_run_wizard.exec() == QtWidgets.QDialog.Rejected:
             return
         self.application.set_busy_cursor()
         self.first_time()

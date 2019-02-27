@@ -158,16 +158,20 @@ def get_web_page(url, headers=None, update_openlp=False, proxy=None):
     return response.text
 
 
-def get_url_file_size(url):
+def get_url_file_size(url, proxy=None):
     """
     Get the size of a file.
 
     :param url: The URL of the file we want to download.
+    :param dict | ProxyMode | None proxy: ProxyMode enum or a dictionary containing the proxy servers, with their types
+        as the key e.g. {'http': 'http://proxyserver:port', 'https': 'https://proxyserver:port'}
     """
     retries = 0
+    if not isinstance(proxy, dict):
+        proxy = get_proxy_settings(mode=proxy)
     while True:
         try:
-            response = requests.head(url, timeout=float(CONNECTION_TIMEOUT), allow_redirects=True)
+            response = requests.head(url, proxies=proxy, timeout=float(CONNECTION_TIMEOUT), allow_redirects=True)
             return int(response.headers['Content-Length'])
         except OSError:
             if retries > CONNECTION_RETRIES:
@@ -178,7 +182,7 @@ def get_url_file_size(url):
                 continue
 
 
-def download_file(update_object, url, file_path, sha256=None):
+def download_file(update_object, url, file_path, sha256=None, proxy=None):
     """"
     Download a file given a URL.  The file is retrieved in chunks, giving the ability to cancel the download at any
     point. Returns False on download error.
@@ -187,15 +191,19 @@ def download_file(update_object, url, file_path, sha256=None):
     :param url: URL to download
     :param file_path: Destination file
     :param sha256: The check sum value to be checked against the download value
+    :param dict | ProxyMode | None proxy: ProxyMode enum or a dictionary containing the proxy servers, with their types
+        as the key e.g. {'http': 'http://proxyserver:port', 'https': 'https://proxyserver:port'}
     """
     block_count = 0
     block_size = 4096
     retries = 0
+    if not isinstance(proxy, dict):
+        proxy = get_proxy_settings(mode=proxy)
     log.debug('url_get_file: %s', url)
     while retries < CONNECTION_RETRIES:
         try:
             with file_path.open('wb') as saved_file:
-                response = requests.get(url, timeout=float(CONNECTION_TIMEOUT), stream=True)
+                response = requests.get(url,  proxies=proxy, timeout=float(CONNECTION_TIMEOUT), stream=True)
                 if sha256:
                     hasher = hashlib.sha256()
                 # Download until finished or canceled.
@@ -244,21 +252,21 @@ class DownloadWorker(ThreadWorker):
         """
         self._base_url = base_url
         self._file_name = file_name
-        self._download_cancelled = False
+        self.was_cancelled = False
         super().__init__()
 
     def start(self):
         """
         Download the url to the temporary directory
         """
-        if self._download_cancelled:
+        if self.was_cancelled:
             self.quit.emit()
             return
         try:
             dest_path = Path(gettempdir()) / 'openlp' / self._file_name
             url = '{url}{name}'.format(url=self._base_url, name=self._file_name)
             is_success = download_file(self, url, dest_path)
-            if is_success and not self._download_cancelled:
+            if is_success and not self.was_cancelled:
                 self.download_succeeded.emit(dest_path)
             else:
                 self.download_failed.emit()
@@ -273,4 +281,4 @@ class DownloadWorker(ThreadWorker):
         """
         A slot to allow the download to be cancelled from outside of the thread
         """
-        self._download_cancelled = True
+        self.was_cancelled = True

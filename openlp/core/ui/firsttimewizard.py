@@ -39,14 +39,15 @@ class FirstTimePage(object):
     An enumeration class with each of the pages of the wizard.
     """
     Welcome = 0
-    ScreenConfig = 1
-    Download = 2
-    NoInternet = 3
-    Plugins = 4
-    Songs = 5
-    Bibles = 6
-    Themes = 7
-    Progress = 8
+    Plugins = 1
+    ScreenConfig = 2
+    SampleOption = 3
+    Download = 4
+    NoInternet = 5
+    Songs = 6
+    Bibles = 7
+    Themes = 8
+    Progress = 9
 
 
 class ThemeListWidget(QtWidgets.QListWidget):
@@ -97,20 +98,13 @@ class UiFirstTimeWizard(object):
         first_time_wizard.resize(550, 386)
         first_time_wizard.setModal(True)
         first_time_wizard.setOptions(QtWidgets.QWizard.IndependentPages | QtWidgets.QWizard.NoBackButtonOnStartPage |
-                                     QtWidgets.QWizard.NoBackButtonOnLastPage | QtWidgets.QWizard.HaveCustomButton1 |
-                                     QtWidgets.QWizard.HaveCustomButton2)
+                                     QtWidgets.QWizard.NoBackButtonOnLastPage | QtWidgets.QWizard.HaveCustomButton1)
         if is_macosx():                                                                             # pragma: nocover
             first_time_wizard.setPixmap(QtWidgets.QWizard.BackgroundPixmap,
                                         QtGui.QPixmap(':/wizards/openlp-osx-wizard.png'))
             first_time_wizard.resize(634, 386)
         else:
             first_time_wizard.setWizardStyle(QtWidgets.QWizard.ModernStyle)
-        self.finish_button = self.button(QtWidgets.QWizard.FinishButton)
-        self.no_internet_finish_button = self.button(QtWidgets.QWizard.CustomButton1)
-        self.cancel_button = self.button(QtWidgets.QWizard.CancelButton)
-        self.no_internet_cancel_button = self.button(QtWidgets.QWizard.CustomButton2)
-        self.next_button = self.button(QtWidgets.QWizard.NextButton)
-        self.back_button = self.button(QtWidgets.QWizard.BackButton)
         add_welcome_page(first_time_wizard, ':/wizards/wizard_firsttime.bmp')
         # The screen config page
         self.screen_page = QtWidgets.QWizardPage()
@@ -121,6 +115,18 @@ class UiFirstTimeWizard(object):
         self.screen_selection_widget.load()
         self.screen_page_layout.addRow(self.screen_selection_widget)
         first_time_wizard.setPage(FirstTimePage.ScreenConfig, self.screen_page)
+        # Download Samples page
+        self.resource_page = QtWidgets.QWizardPage()
+        self.resource_page.setObjectName('resource_page')
+        self.resource_page.setFinalPage(True)
+        self.resource_layout = QtWidgets.QVBoxLayout(self.resource_page)
+        self.resource_layout.setContentsMargins(50, 20, 50, 20)
+        self.resource_layout.setObjectName('resource_layout')
+        self.resource_label = QtWidgets.QLabel(self.resource_page)
+        self.resource_label.setObjectName('resource_label')
+        self.resource_label.setWordWrap(True)
+        self.resource_layout.addWidget(self.resource_label)
+        first_time_wizard.setPage(FirstTimePage.SampleOption, self.resource_page)
         # The download page
         self.download_page = QtWidgets.QWizardPage()
         self.download_page.setObjectName('download_page')
@@ -134,6 +140,7 @@ class UiFirstTimeWizard(object):
         # The "you don't have an internet connection" page.
         self.no_internet_page = QtWidgets.QWizardPage()
         self.no_internet_page.setObjectName('no_internet_page')
+        self.no_internet_page.setFinalPage(True)
         self.no_internet_layout = QtWidgets.QVBoxLayout(self.no_internet_page)
         self.no_internet_layout.setContentsMargins(50, 30, 50, 40)
         self.no_internet_layout.setObjectName('no_internet_layout')
@@ -242,27 +249,32 @@ class UiFirstTimeWizard(object):
         self.progress_bar.setObjectName('progress_bar')
         self.progress_layout.addWidget(self.progress_bar)
         first_time_wizard.setPage(FirstTimePage.Progress, self.progress_page)
-        self.retranslate_ui(first_time_wizard)
+        self.retranslate_ui()
 
-    def retranslate_ui(self, first_time_wizard):
+    def retranslate_ui(self):
         """
         Translate the UI on the fly
 
         :param first_time_wizard: The wizard form
         """
-        first_time_wizard.setWindowTitle(translate('OpenLP.FirstTimeWizard', 'First Time Wizard'))
+        self.finish_button_text = clean_button_text(self.buttonText(QtWidgets.QWizard.FinishButton))
+        back_button_text = clean_button_text(self.buttonText(QtWidgets.QWizard.BackButton))
+        next_button_text = clean_button_text(self.buttonText(QtWidgets.QWizard.NextButton))
+
+        self.setWindowTitle(translate('OpenLP.FirstTimeWizard', 'First Time Wizard'))
         text = translate('OpenLP.FirstTimeWizard', 'Welcome to the First Time Wizard')
-        first_time_wizard.title_label.setText('<span style="font-size:14pt; font-weight:600;">{text}'
-                                              '</span>'.format(text=text))
-        button = clean_button_text(first_time_wizard.buttonText(QtWidgets.QWizard.NextButton))
-        first_time_wizard.information_label.setText(
+        self.title_label.setText('<span style="font-size:14pt; font-weight:600;">{text}</span>'.format(text=text))
+        self.information_label.setText(
             translate('OpenLP.FirstTimeWizard', 'This wizard will help you to configure OpenLP for initial use. '
-                                                'Click the {button} button below to start.').format(button=button))
+                                                'Click the \'{next_button}\' button below to start.'
+                      ).format(next_button=next_button_text))
+        self.setButtonText(
+            QtWidgets.QWizard.CustomButton1, translate('OpenLP.FirstTimeWizard', 'Internet Settings'))
         self.download_page.setTitle(translate('OpenLP.FirstTimeWizard', 'Downloading Resource Index'))
-        self.download_page.setSubTitle(translate('OpenLP.FirstTimeWizard', 'Please wait while the resource index is '
-                                                                           'downloaded.'))
-        self.download_label.setText(translate('OpenLP.FirstTimeWizard', 'Please wait while OpenLP downloads the '
-                                                                        'resource index file...'))
+        self.download_page.setSubTitle(translate('OpenLP.FirstTimeWizard',
+                                                 'Please wait while the resource index is downloaded.'))
+        self.download_label.setText(translate('OpenLP.FirstTimeWizard',
+                                              'Please wait while OpenLP downloads the resource index file...'))
         self.plugin_page.setTitle(translate('OpenLP.FirstTimeWizard', 'Select parts of the program you wish to use'))
         self.plugin_page.setSubTitle(translate('OpenLP.FirstTimeWizard',
                                                'You can also change these settings after the Wizard.'))
@@ -270,11 +282,10 @@ class UiFirstTimeWizard(object):
         self.screen_page.setSubTitle(translate('OpenLP.FirstTimeWizard',
                                                'Choose the main display screen for OpenLP.'))
         self.songs_check_box.setText(translate('OpenLP.FirstTimeWizard', 'Songs'))
-        self.custom_check_box.setText(translate('OpenLP.FirstTimeWizard',
-                                                'Custom Slides – Easier to manage than songs and they have their own'
-                                                ' list of slides'))
-        self.bible_check_box.setText(translate('OpenLP.FirstTimeWizard',
-                                               'Bibles – Import and show Bibles'))
+        self.custom_check_box.setText(
+            translate('OpenLP.FirstTimeWizard',
+                      'Custom Slides – Easier to manage than songs and they have their own list of slides'))
+        self.bible_check_box.setText(translate('OpenLP.FirstTimeWizard', 'Bibles – Import and show Bibles'))
         self.image_check_box.setText(translate('OpenLP.FirstTimeWizard',
                                                'Images – Show images or replace background with them'))
         self.presentation_check_box.setText(translate('OpenLP.FirstTimeWizard',
@@ -283,22 +294,25 @@ class UiFirstTimeWizard(object):
         self.song_usage_check_box.setText(translate('OpenLP.FirstTimeWizard', 'Song Usage Monitor'))
         self.alert_check_box.setText(translate('OpenLP.FirstTimeWizard',
                                                'Alerts – Display informative messages while showing other slides'))
+        self.resource_page.setTitle(translate('OpenLP.FirstTimeWizard', 'Resource Data'))
+        self.resource_page.setSubTitle(translate('OpenLP.FirstTimeWizard', 'Can OpenLP download some resource data?'))
+        self.resource_label.setText(
+            translate('OpenLP.FirstTimeWizard',
+                      'OpenLP has collected some resources that we have permission to distribute.\n\n'
+                      'If you would like to download some of these resources click the \'{next_button}\' button, '
+                      'otherwise click the \'{finish_button}\' button.'
+                      ).format(next_button=next_button_text, finish_button=self.finish_button_text))
         self.no_internet_page.setTitle(translate('OpenLP.FirstTimeWizard', 'No Internet Connection'))
-        self.no_internet_page.setSubTitle(
-            translate('OpenLP.FirstTimeWizard', 'Unable to detect an Internet connection.'))
-        button = clean_button_text(first_time_wizard.buttonText(QtWidgets.QWizard.FinishButton))
-        self.no_internet_text = translate('OpenLP.FirstTimeWizard',
-                                          'No Internet connection was found. The First Time Wizard needs an Internet '
-                                          'connection in order to be able to download sample songs, Bibles and themes.'
-                                          '  Click the {button} button now to start OpenLP with initial settings and '
-                                          'no sample data.\n\nTo re-run the First Time Wizard and import this sample '
-                                          'data at a later time, check your Internet connection and re-run this '
-                                          'wizard by selecting "Tools/Re-run First Time Wizard" from OpenLP.'
-                                          ).format(button=button)
-        button = clean_button_text(first_time_wizard.buttonText(QtWidgets.QWizard.CancelButton))
-        self.cancel_wizard_text = translate('OpenLP.FirstTimeWizard',
-                                            '\n\nTo cancel the First Time Wizard completely (and not start OpenLP), '
-                                            'click the {button} button now.').format(button=button)
+        self.no_internet_page.setSubTitle(translate('OpenLP.FirstTimeWizard', 'Cannot connect to the internet.'))
+        self.no_internet_label.setText(
+            translate('OpenLP.FirstTimeWizard',
+                      'OpenLP could not connect to the internet to get information about the sample data available.\n\n'
+                      'Please check your internet connection. If your church uses a proxy server click the '
+                      '\'Internet Settings\' button below and enter the server details there.\n\nClick the '
+                      '\'{back_button}\' button to try again.\n\nIf you click the \'{finish_button}\' '
+                      'button you can download the data at a later time by selecting \'Re-run First Time Wizard\' '
+                      'from the \'Tools\' menu in OpenLP.'
+                      ).format(back_button=back_button_text, finish_button=self.finish_button_text))
         self.songs_page.setTitle(translate('OpenLP.FirstTimeWizard', 'Sample Songs'))
         self.songs_page.setSubTitle(translate('OpenLP.FirstTimeWizard', 'Select and download public domain songs.'))
         self.bibles_page.setTitle(translate('OpenLP.FirstTimeWizard', 'Sample Bibles'))
@@ -310,13 +324,8 @@ class UiFirstTimeWizard(object):
         self.themes_select_all_button.setToolTip(translate('OpenLP.FirstTimeWizard', 'Select all'))
         self.themes_deselect_all_button.setToolTip(translate('OpenLP.FirstTimeWizard', 'Deselect all'))
         self.progress_page.setTitle(translate('OpenLP.FirstTimeWizard', 'Downloading and Configuring'))
-        self.progress_page.setSubTitle(translate('OpenLP.FirstTimeWizard', 'Please wait while resources are downloaded '
-                                                                           'and OpenLP is configured.'))
-        self.progress_label.setText(translate('OpenLP.FirstTimeWizard', 'Starting configuration process...'))
-        first_time_wizard.setButtonText(QtWidgets.QWizard.CustomButton1,
-                                        clean_button_text(first_time_wizard.buttonText(QtWidgets.QWizard.FinishButton)))
-        first_time_wizard.setButtonText(QtWidgets.QWizard.CustomButton2,
-                                        clean_button_text(first_time_wizard.buttonText(QtWidgets.QWizard.CancelButton)))
+        self.progress_page.setSubTitle(
+            translate('OpenLP.FirstTimeWizard', 'Please wait while resources are downloaded and OpenLP is configured.'))
 
     def on_projectors_check_box_clicked(self):
         # When clicking projectors_check box, change the visibility setting for Projectors panel.

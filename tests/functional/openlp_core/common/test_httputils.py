@@ -224,7 +224,7 @@ class TestHttpUtils(TestCase, TestMixin):
         file_size = get_url_file_size(fake_url)
 
         # THEN: The correct methods are called with the correct arguments and a web page is returned
-        mocked_requests.head.assert_called_once_with(fake_url, allow_redirects=True, timeout=30.0)
+        mocked_requests.head.assert_called_once_with(fake_url, allow_redirects=True, proxies=None, timeout=30.0)
         assert file_size == 100
 
     @patch('openlp.core.common.httputils.requests')

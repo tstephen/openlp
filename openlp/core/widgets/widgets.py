@@ -150,6 +150,34 @@ class ProxyWidget(QtWidgets.QGroupBox):
         settings.setValue('advanced/proxy password', self.password_edit.text())
 
 
+class ProxyDialog(QtWidgets.QDialog):
+    """
+    A basic dialog to show proxy settingd
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.layout = QtWidgets.QVBoxLayout(self)
+        self.proxy_widget = ProxyWidget(self)
+        self.layout.addWidget(self.proxy_widget)
+        self.button_box = \
+            QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel, self)
+        self.layout.addWidget(self.button_box)
+        self.button_box.accepted.connect(self.accept)
+        self.button_box.rejected.connect(self.reject)
+
+    def accept(self):
+        """
+        Reimplement the the accept slot so that the ProxyWidget settings can be saved.
+        :rtype: None
+        """
+        self.proxy_widget.save()
+        super().accept()
+
+    def retranslate_ui(self):
+        self.proxy_widget.retranslate_ui()
+        self.setWindowTitle(translate('OpenLP.ProxyDialog', 'Proxy Server Settings'))
+
+
 class ScreenButton(QtWidgets.QPushButton):
     """
     A special button class that holds the screen information about it

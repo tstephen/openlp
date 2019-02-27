@@ -27,6 +27,8 @@ import tempfile
 from unittest import TestCase
 from unittest.mock import MagicMock, call, patch, DEFAULT
 
+from PyQt5 import QtWidgets
+
 from openlp.core.common.path import Path
 from openlp.core.common.registry import Registry
 from openlp.core.ui.firsttimeform import FirstTimeForm, ThemeListWidgetItem
@@ -120,9 +122,22 @@ class TestFirstTimeForm(TestCase, TestMixin):
         # THEN: The screens should be set up, and the default values initialised
         assert expected_screens == frw.screens, 'The screens should be correct'
         assert frw.web_access is True, 'The default value of self.web_access should be True'
-        assert frw.was_cancelled is False, 'The default value of self.was_cancelled should be False'
         assert [] == frw.thumbnail_download_threads, 'The list of threads should be empty'
         assert frw.has_run_wizard is False, 'has_run_wizard should be False'
+
+    @patch('openlp.core.ui.firsttimewizard.QtWidgets.QWizard.exec')
+    def test_exec(self, mocked_qwizard_exec):
+
+        # GIVEN: An instance of FirstTimeForm
+        frw = FirstTimeForm(None)
+        with patch.object(frw, 'set_defaults') as mocked_set_defaults:
+
+            # WHEN: exec is called
+            frw.exec()
+
+            # THEN: The wizard should be reset and the exec methon on the super class should have been called
+            mocked_set_defaults.assert_called_once()
+            mocked_qwizard_exec.assert_called_once()
 
     def test_set_defaults(self):
         """
@@ -134,8 +149,6 @@ class TestFirstTimeForm(TestCase, TestMixin):
         mocked_settings = MagicMock()
         mocked_settings.value.side_effect = lambda key: {'core/has run wizard': False}[key]
         with patch.object(frw, 'restart') as mocked_restart, \
-                patch.object(frw, 'cancel_button') as mocked_cancel_button, \
-                patch.object(frw, 'no_internet_finish_button') as mocked_no_internet_finish_btn, \
                 patch.object(frw, 'currentIdChanged') as mocked_currentIdChanged, \
                 patch.object(frw, 'theme_combo_box') as mocked_theme_combo_box, \
                 patch.object(frw, 'songs_check_box') as mocked_songs_check_box, \
@@ -153,12 +166,8 @@ class TestFirstTimeForm(TestCase, TestMixin):
             # THEN: The default values should have been set
             mocked_restart.assert_called_once()
             assert 'https://get.openlp.org/ftw/' == frw.web, 'The default URL should be set'
-            mocked_cancel_button.clicked.connect.assert_called_once_with(frw.on_cancel_button_clicked)
-            mocked_no_internet_finish_btn.clicked.connect.assert_called_once_with(
-                frw.on_no_internet_finish_button_clicked)
             mocked_currentIdChanged.connect.assert_called_once_with(frw.on_current_id_changed)
             mocked_register_function.assert_called_once_with('config_screen_changed', frw.screen_selection_widget.load)
-            mocked_no_internet_finish_btn.setVisible.assert_called_once_with(False)
             mocked_settings.value.assert_has_calls([call('core/has run wizard')])
             mocked_gettempdir.assert_called_once()
             mocked_create_paths.assert_called_once_with(Path('temp', 'openlp'))
@@ -177,8 +186,6 @@ class TestFirstTimeForm(TestCase, TestMixin):
         mocked_settings.value.side_effect = \
             lambda key: {'core/has run wizard': True, 'themes/global theme': 'Default Theme'}[key]
         with patch.object(frw, 'restart') as mocked_restart, \
-                patch.object(frw, 'cancel_button') as mocked_cancel_button, \
-                patch.object(frw, 'no_internet_finish_button') as mocked_no_internet_finish_btn, \
                 patch.object(frw, 'currentIdChanged') as mocked_currentIdChanged, \
                 patch.object(frw, 'theme_combo_box', **{'findText.return_value': 3}) as mocked_theme_combo_box, \
                 patch.multiple(frw, songs_check_box=DEFAULT, bible_check_box=DEFAULT, presentation_check_box=DEFAULT,
@@ -200,12 +207,8 @@ class TestFirstTimeForm(TestCase, TestMixin):
             # THEN: The default values should have been set
             mocked_restart.assert_called_once()
             assert 'https://get.openlp.org/ftw/' == frw.web, 'The default URL should be set'
-            mocked_cancel_button.clicked.connect.assert_called_once_with(frw.on_cancel_button_clicked)
-            mocked_no_internet_finish_btn.clicked.connect.assert_called_once_with(
-                frw.on_no_internet_finish_button_clicked)
             mocked_currentIdChanged.connect.assert_called_once_with(frw.on_current_id_changed)
             mocked_register_function.assert_called_once_with('config_screen_changed', frw.screen_selection_widget.load)
-            mocked_no_internet_finish_btn.setVisible.assert_called_once_with(False)
             mocked_settings.value.assert_has_calls([call('core/has run wizard'), call('themes/global theme')])
             mocked_gettempdir.assert_called_once()
             mocked_create_paths.assert_called_once_with(Path('temp', 'openlp'))
@@ -219,12 +222,79 @@ class TestFirstTimeForm(TestCase, TestMixin):
             mocked_theme_combo_box.findText.assert_called_once_with('Default Theme')
             mocked_theme_combo_box.setCurrentIndex(3)
 
+    @patch('openlp.core.ui.firsttimewizard.QtWidgets.QWizard.accept')
+    @patch('openlp.core.ui.firsttimewizard.Settings')
+    def test_accept_method(self, mocked_settings, mocked_qwizard_accept):
+        """
+        Test the FirstTimeForm.accept method
+        """
+        # GIVEN: An instance of FirstTimeForm
+        frw = FirstTimeForm(None)
+        with patch.object(frw, '_set_plugin_status') as mocked_set_plugin_status, \
+                patch.multiple(frw, songs_check_box=DEFAULT, bible_check_box=DEFAULT, presentation_check_box=DEFAULT,
+                               image_check_box=DEFAULT, media_check_box=DEFAULT, custom_check_box=DEFAULT,
+                               song_usage_check_box=DEFAULT, alert_check_box=DEFAULT) as mocked_check_boxes, \
+                patch.object(frw, 'screen_selection_widget') as mocked_screen_selection_widget:
+
+            # WHEN: Calling accept
+            frw.accept()
+
+            # THEN: The selected plugins should be enabled, the screen selection saved and the super method called
+            mocked_set_plugin_status.assert_has_calls([
+                call(mocked_check_boxes['songs_check_box'], 'songs/status'),
+                call(mocked_check_boxes['bible_check_box'], 'bibles/status'),
+                call(mocked_check_boxes['presentation_check_box'], 'presentations/status'),
+                call(mocked_check_boxes['image_check_box'], 'images/status'),
+                call(mocked_check_boxes['media_check_box'], 'media/status'),
+                call(mocked_check_boxes['custom_check_box'], 'custom/status'),
+                call(mocked_check_boxes['song_usage_check_box'], 'songusage/status'),
+                call(mocked_check_boxes['alert_check_box'], 'alerts/status')])
+            mocked_screen_selection_widget.save.assert_called_once()
+            mocked_qwizard_accept.assert_called_once()
+
+    @patch('openlp.core.ui.firsttimewizard.Settings')
+    def test_accept_method_theme_not_selected(self, mocked_settings):
+        """
+        Test the FirstTimeForm.accept method when there is no default theme selected
+        """
+        # GIVEN: An instance of FirstTimeForm
+        frw = FirstTimeForm(None)
+        with patch.object(frw, '_set_plugin_status'), \
+                patch.object(frw, 'screen_selection_widget'), \
+                patch.object(frw, 'theme_combo_box', **{'currentIndex.return_value': '-1'}):
+
+            # WHEN: Calling accept and the currentIndex method of the theme_combo_box returns -1
+            frw.accept()
+
+            # THEN: OpenLP should not try to save a theme name
+            mocked_settings.setValue.assert_not_called()
+
+    @patch('openlp.core.ui.firsttimeform.Settings')
+    def test_accept_method_theme_selected(self, mocked_settings):
+        """
+        Test the FirstTimeForm.accept method when a default theme is selected
+        """
+        # GIVEN: An instance of FirstTimeForm
+        frw = FirstTimeForm(None)
+        with patch.object(frw, '_set_plugin_status'), \
+             patch.object(frw, 'screen_selection_widget'), \
+             patch.object(
+                 frw, 'theme_combo_box', **{'currentIndex.return_value': 0, 'currentText.return_value': 'Test Item'}):
+
+            # WHEN: Calling accept and the currentIndex method of the theme_combo_box returns 0
+            frw.accept()
+
+            # THEN: The 'currentItem' in the combobox should have been set as the default theme.
+            mocked_settings().setValue.assert_called_once_with('themes/global theme', 'Test Item')
+
+    @patch('openlp.core.ui.firsttimewizard.QtWidgets.QWizard.reject')
     @patch('openlp.core.ui.firsttimeform.time')
     @patch('openlp.core.ui.firsttimeform.get_thread_worker')
     @patch('openlp.core.ui.firsttimeform.is_thread_finished')
-    def test_on_cancel_button_clicked(self, mocked_is_thread_finished, mocked_get_thread_worker, mocked_time):
+    def test_reject_method(
+            self, mocked_is_thread_finished, mocked_get_thread_worker, mocked_time, mocked_qwizard_reject):
         """
-        Test that the cancel button click slot shuts down the threads correctly
+        Test that the reject method shuts down the threads correctly
         """
         # GIVEN: A FRW, some mocked threads and workers (that isn't quite done) and other mocked stuff
         mocked_worker = MagicMock()
@@ -235,17 +305,47 @@ class TestFirstTimeForm(TestCase, TestMixin):
         frw.thumbnail_download_threads = ['test_thread']
         with patch.object(frw.application, 'set_normal_cursor') as mocked_set_normal_cursor:
 
-            # WHEN: on_cancel_button_clicked() is called
-            frw.on_cancel_button_clicked()
+            # WHEN: the reject method is called
+            frw.reject()
 
             # THEN: The right things should be called in the right order
-            assert frw.was_cancelled is True, 'The was_cancelled property should have been set to True'
             mocked_get_thread_worker.assert_called_once_with('test_thread')
             mocked_worker.cancel_download.assert_called_once()
             mocked_is_thread_finished.assert_called_with('test_thread')
             assert mocked_is_thread_finished.call_count == 2, 'isRunning() should have been called twice'
             mocked_time.sleep.assert_called_once_with(0.1)
-            mocked_set_normal_cursor.assert_called_once_with()
+            mocked_set_normal_cursor.assert_called_once()
+            mocked_qwizard_reject.assert_called_once()
+
+    @patch('openlp.core.ui.firsttimeform.ProxyDialog')
+    def test_on_custom_button_clicked(self, mocked_proxy_dialog):
+        """
+        Test _on_custom_button when it is called whe the 'internet settings' (CustomButton1) button is not clicked.
+        """
+        # GIVEN: An instance of the FirstTimeForm
+        frw = FirstTimeForm(None)
+
+        # WHEN: Calling _on_custom_button_clicked with a different button to the 'internet settings button.
+        frw._on_custom_button_clicked(QtWidgets.QWizard.CustomButton2)
+
+        # THEN: The ProxyDialog should not be shown.
+        mocked_proxy_dialog.assert_not_called()
+
+    @patch('openlp.core.ui.firsttimeform.ProxyDialog')
+    def test_on_custom_button_clicked_internet_settings(self, mocked_proxy_dialog):
+        """
+        Test _on_custom_button when it is called when the 'internet settings' (CustomButton1) button is clicked.
+        """
+        # GIVEN: An instance of the FirstTimeForm
+        frw = FirstTimeForm(None)
+
+        # WHEN: Calling _on_custom_button_clicked with the constant for the 'internet settings' button (CustomButton1)
+        frw._on_custom_button_clicked(QtWidgets.QWizard.CustomButton1)
+
+        # THEN: The ProxyDialog should be shown.
+        mocked_proxy_dialog.assert_called_with(frw)
+        mocked_proxy_dialog().retranslate_ui.assert_called_once()
+        mocked_proxy_dialog().exec.assert_called_once()
 
     @patch('openlp.core.ui.firsttimeform.critical_error_message_box')
     def test__parse_config_invalid_config(self, mocked_critical_error_message_box):
