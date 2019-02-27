@@ -32,13 +32,11 @@ from PyQt5 import QtCore, QtWebChannel, QtWidgets
 from openlp.core.common.path import Path, path_to_str
 from openlp.core.common.settings import Settings
 from openlp.core.common.registry import Registry
+from openlp.core.common.applocation import AppLocation
 from openlp.core.ui import HideMode
 from openlp.core.display.screens import ScreenList
 
 log = logging.getLogger(__name__)
-DISPLAY_PATH = Path(__file__).parent / 'html' / 'display.html'
-CHECKERBOARD_PATH = Path(__file__).parent / 'html' / 'checkerboard.png'
-OPENLP_SPLASH_SCREEN_PATH = Path(__file__).parent / 'html' / 'openlp-splash-screen.png'
 
 
 class MediaWatcher(QtCore.QObject):
@@ -126,7 +124,11 @@ class DisplayWindow(QtWidgets.QWidget):
         self.webview.page().setBackgroundColor(QtCore.Qt.transparent)
         self.layout.addWidget(self.webview)
         self.webview.loadFinished.connect(self.after_loaded)
-        self.set_url(QtCore.QUrl.fromLocalFile(path_to_str(DISPLAY_PATH)))
+        display_base_path = AppLocation.get_directory(AppLocation.AppDir) / 'core' / 'display' / 'html'
+        self.display_path = display_base_path / 'display.html'
+        self.checkerboard_path = display_base_path / 'checkerboard.png'
+        self.openlp_splash_screen_path = display_base_path / 'openlp-splash-screen.png'
+        self.set_url(QtCore.QUrl.fromLocalFile(path_to_str(self.display_path)))
         self.media_watcher = MediaWatcher(self)
         self.channel = QtWebChannel.QWebChannel(self)
         self.channel.registerObject('mediaWatcher', self.media_watcher)
@@ -169,7 +171,7 @@ class DisplayWindow(QtWidgets.QWidget):
         bg_color = Settings().value('core/logo background color')
         image = Settings().value('core/logo file')
         if path_to_str(image).startswith(':'):
-            image = OPENLP_SPLASH_SCREEN_PATH
+            image = self.openlp_splash_screen_path
         image_uri = image.as_uri()
         self.run_javascript('Display.setStartupSplashScreen("{bg_color}", "{image}");'.format(bg_color=bg_color,
                                                                                               image=image_uri))
@@ -329,7 +331,7 @@ class DisplayWindow(QtWidgets.QWidget):
         if theme.background_type == 'transparent' and not self.is_display:
             theme_copy = copy.deepcopy(theme)
             theme_copy.background_type = 'image'
-            theme_copy.background_filename = CHECKERBOARD_PATH
+            theme_copy.background_filename = self.checkerboard_path
             exported_theme = theme_copy.export_theme()
         else:
             exported_theme = theme.export_theme()
