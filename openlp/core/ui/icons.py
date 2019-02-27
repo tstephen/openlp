@@ -138,6 +138,8 @@ class UiIcons(object):
             'search_plus': {'icon': 'fa.search-plus'},
             'search_ref': {'icon': 'fa.institution'},
             'search_text': {'icon': 'op.search-text'},
+            'select_all': {'icon': 'fa.check-square-o'},
+            'select_none': {'icon': 'fa.square-o'},
             'settings': {'icon': 'fa.cogs'},
             'shortcuts': {'icon': 'fa.wrench'},
             'song_usage': {'icon': 'fa.line-chart'},
