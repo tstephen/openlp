@@ -25,7 +25,7 @@ displaying of alerts.
 """
 import json
 
-from PyQt5 import QtCore
+from PyQt5 import QtCore, QtGui
 
 from openlp.core.common.i18n import translate
 from openlp.core.common.mixins import LogMixin, RegistryProperties
@@ -87,12 +87,12 @@ class AlertsManager(QtCore.QObject, RegistryBase, LogMixin, RegistryProperties):
         text = self.alert_list.pop(0)
         # Put alert settings together for dict
         alert_settings = {
-            'background_color': Settings().value('alerts/background color'),
+            'background_color': self.hex_to_rgb(Settings().value('alerts/background color')),
             'location': Settings().value('alerts/location'),
             'font_face': Settings().value('alerts/font face'),
             'font_size': Settings().value('alerts/font size'),
-            'font_color': Settings().value('alerts/font color'),
-            'timeout': Settings().value().value('alerts/timeout')
+            'font_color': self.hex_to_rgb(Settings().value('alerts/font color')),
+            'timeout': Settings().value('alerts/timeout')
         }
         self.live_controller.displays[0].alert(text, json.dumps(alert_settings))
         # Check to see if we have a timer running.
@@ -111,3 +111,10 @@ class AlertsManager(QtCore.QObject, RegistryBase, LogMixin, RegistryProperties):
         self.killTimer(self.timer_id)
         self.timer_id = 0
         self.generate_alert()
+
+    def hex_to_rgb(self, hex_color):
+        rgb_values = QtGui.QColor(hex_color)
+        rgb_color = 'rgb(' + str(rgb_values.red()) + ", " \
+                    + str(rgb_values.green()) + ", " + \
+                    str(rgb_values.blue()) + ")"
+        return rgb_color

@@ -488,7 +488,7 @@ var Display = {
       alertBackground.style.height = "25%";
       alertBackground.style.transition = "2s linear";
       alertBackground.style.visibility = "visible";
-    }, 200);
+    }, 50);
     return TransitionState.EntranceTransition;
   },
 
@@ -499,7 +499,7 @@ var Display = {
   doExitTransition: function () {
     var alertBackground = $("#alert-background")[0];
     alertBackground.style.height = "0%";
-    alertBackground.style.transition = '2s linear';      
+    alertBackground.style.transition = "2s linear";      
     return TransitionState.ExitTransition;
   },
   /**

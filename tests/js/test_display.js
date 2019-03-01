@@ -186,69 +186,70 @@ describe("Display.alert", function () {
 
 describe("The doEntranceTransition", function () {
 
-  var alertBackground, alertText;
+  var alertBackground, alertText, css, settings, style;
   // TODO: Fix tests to accommodate new behaviour with CSS classes and settings modification
 
   beforeEach(function() {
     document.body.innerHTML = "";
+    style = document.createElement("style");
+    style.type = "text/css";
+    css = '.normal { position: absolute; margin: 0; padding: 0; left: 0; z-index: 10; \
+      width: 100%; height: 0%; vertical-align: middle; overflow: hidden; visibility:hidden; \
+    }';
+    settings = {
+      "location": 2, "font_face": "Tahoma", "font_size": 40, 
+      "font_color": "rgb(255, 255, 255)", "background_color": "rgb(102, 0, 0)"
+    };
+    style.innerHTML = css;
+    document.head.appendChild(style);
     alertBackground = document.createElement("div");
     alertBackground.setAttribute("id", "alert-background");
-    document.body.appendChild(alertBackground);
+    alertBackground.setAttribute("class", "normal");    
+    document.body.appendChild(alertBackground);    
     alertText = document.createElement("p");
     alertText.setAttribute("id","alert");
     alertBackground.appendChild(alertText);
-    alertBackground.style.top = '0px';
-    alertBackground.style.height = "0%";    
   });
 
-  it("should set the correct styles for the alert when location is top of the page", function () {
-    var settings = {
-      "location": 0, "font_face": "Segoe UI, Tahoma, Geneva, Verdana, sans-serif", 
-      "font_size": 40, "font_color": "#ffffff", "background_color": "#660000"
-    };
-
+  it("should apply the styles correctly when doEntranceTransition is called", function(done) {
     Display.doEntranceTransition(settings);
-
-    setTimeout( function() {
-      expect(alertBackground.style.bottom).toEqual('');
-      expect(alertBackground.style.top).toEqual('0px');
-      expect(alertBackground.style.transition).toEqual("2s linear");
-      expect(alertBackground.style.height).toEqual("25%");
-      expect(alertBackground.style.visibility).toEqual("visible");
-    }, 500);
-    
-  });
-
-  it("should set the correct styles for the alert when location is middle of the page", function () {
-    var settings = {
-      "location": 0, "font_face": "Segoe UI, Tahoma, Geneva, Verdana, sans-serif", 
-      "font_size": 40, "font_color": "#ffffff", "background_color": "#660000"
-    };
-
-    Display.doEntranceTransition(settings);
-    //To be replaced
-    var middlePosition = ((window.innerHeight - alertBackground.clientHeight) / 2) + 'px';
-    expect(alertBackground.style.top).toEqual(middlePosition);
-    expect(alertBackground.style.height).toEqual("25%");
-    expect(alertBackground.style.visibility).toEqual("visible");
-  });
-
-  it("should set the correct styles for the alert when location is bottom of the page", function () {
-    var settings = {
-      "location": 0, "font_face": "Segoe UI, Tahoma, Geneva, Verdana, sans-serif", 
-      "font_size": 40, "font_color": "#ffffff", "background_color": "#660000"
-    };
-
-    Display.doEntranceTransition(settings);
+    expect(alertBackground.classList.contains("bottom")).toBe(true);
 
     setTimeout(function() {
-      expect(alertBackground.style.top).toEqual('');
-      expect(alertBackground.style.bottom).toEqual('0px');    
-      expect(alertBackground.style.transition).toEqual("2s linear");
+      expect(alertText.style.fontFamily).toEqual(settings.font_face);
+      expect(alertText.style.color).toEqual(settings.font_color);
+      expect(alertText.style.fontSize).toEqual(settings.font_size + "pt");
+      expect(alertBackground.style.backgroundColor).toEqual(settings.background_color);
+      expect(alertBackground.classList.contains("bottom")).toBe(true);
       expect(alertBackground.style.height).toEqual("25%");
+      expect(alertBackground.style.transition).toEqual("2s linear");
       expect(alertBackground.style.visibility).toEqual("visible");
-    }, 500);
+      done();
+    }, 60);
+  });
+
+  it("should set the correct class for the alert when location is top of the page", function () {
+    settings.location = 0;
+    Display.doEntranceTransition(settings);
+
+    expect(alertBackground.classList.contains("normal")).toBe(true);
+    expect(alertBackground.classList.contains("top")).toBe(true);
+
+  });
+
+  it("should set the correct class for the alert when location is middle of the page", function () {
+    settings.location = 1;
+    Display.doEntranceTransition(settings);
     
+    expect(alertBackground.classList.contains("normal")).toBe(true);
+    expect(alertBackground.classList.contains("middle")).toBe(true);       
+  });
+
+  it("should set the correct class for the alert when location is bottom of the page", function () {
+    Display.doEntranceTransition(settings);
+
+    expect(alertBackground.classList.contains("normal")).toBe(true);
+    expect(alertBackground.classList.contains("bottom")).toBe(true);
   });
 });
 
@@ -262,27 +263,12 @@ describe("The doExitTransition", function () {
     document.body.appendChild(alertBackground);
   });
 
-  it("should remove the styles correctly when the location is the top of the page", function () {
-    Display.doExitTransition(0);
+  it("should transition correctly when the doExitTransition method is called", function () {
+    Display.doExitTransition();
 
     expect(alertBackground.style.height).toEqual('0%');
     expect(alertBackground.style.transition).toEqual("2s linear");
   });
-
-  it("should remove the styles correctly when the location is middle of the page", function () {
-    Display.doExitTransition(1);
-
-    expect(alertBackground.style.height).toEqual('0%');
-    expect(alertBackground.classList.contains("middle-exit-animation"));
-  });
-
-it("should remove the styles correctly when the location is the bottom of the page", function () {
-  Display.doExitTransition(2);
-
-  expect(alertBackground.style.height).toEqual('0%');
-  expect(alertBackground.style.transition).toEqual("2s linear");
-});
-
 });
 
 
