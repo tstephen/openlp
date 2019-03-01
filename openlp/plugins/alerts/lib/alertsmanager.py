@@ -85,13 +85,18 @@ class AlertsManager(QtCore.QObject, RegistryBase, LogMixin, RegistryProperties):
                                    not Settings().value('core/display on monitor')):
             return
         text = self.alert_list.pop(0)
-        # Put alert settings together for dict
+
+        # Get the rgb color format of the font & background hex colors from settings
+        rgb_font_color = self.hex_to_rgb(QtGui.QColor(Settings().value('alerts/font color')))
+        rgb_background_color = self.hex_to_rgb(QtGui.QColor(Settings().value('alerts/background color')))
+
+        # Put alert settings together in dict that will be passed to Display in Javascript
         alert_settings = {
-            'background_color': self.hex_to_rgb(Settings().value('alerts/background color')),
+            'background_color': rgb_background_color,
             'location': Settings().value('alerts/location'),
             'font_face': Settings().value('alerts/font face'),
             'font_size': Settings().value('alerts/font size'),
-            'font_color': self.hex_to_rgb(Settings().value('alerts/font color')),
+            'font_color': rgb_font_color,
             'timeout': Settings().value('alerts/timeout')
         }
         self.live_controller.displays[0].alert(text, json.dumps(alert_settings))
@@ -112,9 +117,12 @@ class AlertsManager(QtCore.QObject, RegistryBase, LogMixin, RegistryProperties):
         self.timer_id = 0
         self.generate_alert()
 
-    def hex_to_rgb(self, hex_color):
-        rgb_values = QtGui.QColor(hex_color)
-        rgb_color = 'rgb(' + str(rgb_values.red()) + ", " \
-                    + str(rgb_values.green()) + ", " + \
-                    str(rgb_values.blue()) + ")"
-        return rgb_color
+    def hex_to_rgb(self, rgb_values):
+        """
+        Converts rgb color values from QColor to rgb string
+
+        :param rgb_values:
+        :return: rgb color string
+        :rtype: string
+        """
+        return "rgb(" + rgb_values.red() + ", " + rgb_values.green() + ", " + rgb_values.blue() + ")"
