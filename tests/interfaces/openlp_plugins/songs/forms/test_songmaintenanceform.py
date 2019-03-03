@@ -236,8 +236,8 @@ class TestSongMaintenanceForm(TestCase, TestMixin):
         assert MockedQListWidgetItem.call_args_list == expected_widget_item_calls, MockedQListWidgetItem.call_args_list
         mocked_author_item1.setData.assert_called_once_with(QtCore.Qt.UserRole, 2)
         mocked_author_item2.setData.assert_called_once_with(QtCore.Qt.UserRole, 1)
-        mocked_authors_list_widget.addItem.call_args_list == [
-            call(mocked_author_item1), call(mocked_author_item2)]
+        mocked_authors_list_widget.addItem.assert_has_calls([
+            call(mocked_author_item1), call(mocked_author_item2)])
 
     @patch('openlp.plugins.songs.forms.songmaintenanceform.QtWidgets.QListWidgetItem')
     @patch('openlp.plugins.songs.forms.songmaintenanceform.Topic')

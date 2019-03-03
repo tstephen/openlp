@@ -601,9 +601,9 @@ class TestPJLinkCommands(TestCase):
 
             # THEN: Power should be set to ON
             assert pjlink.power == S_STANDBY, 'Power should not have changed'
-            assert mock_UpdateIcons.emit.called is False, 'projectorUpdateIcons() should not have been called'
-            mock_change_status.called is False, 'change_status() should not have been called'
-            mock_send_command.called is False, 'send_command() should not have been called'
+            mock_UpdateIcons.emit.assert_not_called()
+            mock_change_status.assert_not_called()
+            mock_send_command.assert_not_called()
             mock_log.warning.assert_has_calls(log_warn_calls)
 
     def test_projector_process_powr_off(self):
@@ -623,9 +623,9 @@ class TestPJLinkCommands(TestCase):
 
             # THEN: Power should be set to ON
             assert pjlink.power == S_STANDBY, 'Power should have changed to S_STANDBY'
-            assert mock_UpdateIcons.emit.called is True, 'projectorUpdateIcons should have been called'
-            mock_change_status.called is True, 'change_status should have been called'
-            mock_send_command.called is False, 'send_command should not have been called'
+            mock_UpdateIcons.emit.assert_called_with()
+            mock_change_status.assert_called_with(313)
+            mock_send_command.assert_not_called()
 
     def test_projector_process_rfil_save(self):
         """
