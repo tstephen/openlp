@@ -705,11 +705,13 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
             else:
                 raise ValidationError(msg='No service data found')
         except (NameError, OSError, ValidationError, zipfile.BadZipFile):
+            self.application.set_normal_cursor()
             self.log_exception('Problem loading service file {name}'.format(name=file_path))
             critical_error_message_box(
                 message=translate('OpenLP.ServiceManager',
-                                  'The service file {file_path} could not be loaded because it is either corrupt, or '
-                                  'not a valid OpenLP 2 or OpenLP 3 service file.'.format(file_path=file_path)))
+                                  'The service file {file_path} could not be loaded because it is either corrupt, '
+                                  'inaccessible, or not a valid OpenLP 2 or OpenLP 3 service file.'
+                                  ).format(file_path=file_path))
         self.main_window.finished_progress_bar()
         self.application.set_normal_cursor()
         self.repaint_service_list(-1, -1)

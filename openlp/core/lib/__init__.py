@@ -242,16 +242,16 @@ def image_to_byte(image, base_64=True):
     """
     Resize an image to fit on the current screen for the web and returns it as a byte stream.
 
-    :param image: The image to converted.
+    :param image: The image to be converted.
     :param base_64: If True returns the image as Base64 bytes, otherwise the image is returned as a byte array.
         To preserve original intention, this defaults to True
     """
     log.debug('image_to_byte - start')
     byte_array = QtCore.QByteArray()
     # use buffer to store pixmap into byteArray
-    buffie = QtCore.QBuffer(byte_array)
-    buffie.open(QtCore.QIODevice.WriteOnly)
-    image.save(buffie, "PNG")
+    buffer = QtCore.QBuffer(byte_array)
+    buffer.open(QtCore.QIODevice.WriteOnly)
+    image.save(buffer, "PNG")
     log.debug('image_to_byte - end')
     if not base_64:
         return byte_array

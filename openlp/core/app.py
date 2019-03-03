@@ -405,7 +405,12 @@ def main(args=None):
                 None, translate('OpenLP', 'Settings Upgrade'),
                 translate('OpenLP', 'Your settings are about to be upgraded. A backup will be created at '
                                     '{back_up_path}').format(back_up_path=back_up_path))
-            settings.export(back_up_path)
+            try:
+                settings.export(back_up_path)
+            except OSError:
+                QtWidgets.QMessageBox.warning(
+                    None, translate('OpenLP', 'Settings Upgrade'),
+                    translate('OpenLP', 'Settings back up failed.\n\nContinuining to upgrade.'))
         settings.upgrade_settings()
     # First time checks in settings
     if not Settings().value('core/has run wizard'):

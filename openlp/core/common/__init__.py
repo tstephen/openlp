@@ -34,7 +34,7 @@ from ipaddress import IPv4Address, IPv6Address, AddressValueError
 from shutil import which
 from subprocess import check_output, CalledProcessError, STDOUT
 
-from PyQt5 import QtGui
+from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtCore import QCryptographicHash as QHash
 from PyQt5.QtNetwork import QAbstractSocket, QHostAddress, QNetworkInterface
 from chardet.universaldetector import UniversalDetector
@@ -474,10 +474,10 @@ def get_file_encoding(file_path):
                 if not chunk:
                     break
                 detector.feed(chunk)
-            detector.close()
-        return detector.result
     except OSError:
         log.exception('Error detecting file encoding')
+    finally:
+        return detector.close()
 
 
 def normalize_str(irregular_string):
