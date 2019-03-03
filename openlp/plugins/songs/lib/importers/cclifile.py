@@ -254,7 +254,6 @@ class CCLIFileImport(SongImport):
         song_author = ''
         verse_start = False
         for line in text_list:
-            verse_type = 'v'
             clean_line = line.strip()
             if not clean_line:
                 if line_number == 0:
@@ -279,7 +278,7 @@ class CCLIFileImport(SongImport):
                     elif not verse_start:
                         # We have the verse descriptor
                         verse_desc_parts = clean_line.split(' ')
-                        if len(verse_desc_parts) == 2:
+                        if len(verse_desc_parts):
                             if verse_desc_parts[0].startswith('Ver'):
                                 verse_type = VerseType.tags[VerseType.Verse]
                             elif verse_desc_parts[0].startswith('Ch'):
