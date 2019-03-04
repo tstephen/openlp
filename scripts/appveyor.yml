@@ -54,12 +54,10 @@ after_test:
   # - curl -L -O http://downloads.sourceforge.net/project/portableapps/NSIS%20Portable/NSISPortable_3.0_English.paf.exe
   # - NSISPortable_3.0_English.paf.exe /S
   # Get the packaging code
-  #- appveyor DownloadFile http://bazaar.launchpad.net/~openlp-core/openlp/packaging/tarball -FileName packaging.tar.gz
-  - appveyor DownloadFile http://bazaar.launchpad.net/~tomasgroth/openlp/packaging-webengine/tarball -FileName packaging.tar.gz
+  - appveyor DownloadFile http://bazaar.launchpad.net/~openlp-core/openlp/packaging/tarball -FileName packaging.tar.gz
   - 7z e packaging.tar.gz
   - 7z x packaging.tar
-  #- mv ~openlp-core/openlp/packaging packaging
-  - mv ~tomasgroth/openlp/packaging-webengine packaging
+  - mv ~openlp-core/openlp/packaging packaging
   # If this is trunk we should also build the manual
   - ps: >-
       If (BUILD_DOCS) {
