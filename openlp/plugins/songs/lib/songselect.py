@@ -81,7 +81,7 @@ class SongSelectImport(object):
         :param username: SongSelect username
         :param password: SongSelect password
         :param callback: Method to notify of progress.
-        :return: True on success, False on failure.
+        :return: subscription level on success, None on failure.
         """
         if callback:
             callback()
@@ -115,11 +115,20 @@ class SongSelectImport(object):
             return False
         if callback:
             callback()
-        if posted_page.find('input', id='SearchText') is not None:
-            return True
+        if posted_page.find('input', id='SearchText') is not None or posted_page.find('div', id="select-organization") is not None:
+            try:
+                home_page = BeautifulSoup(self.opener.open(BASE_URL).read(), 'lxml')
+            except (TypeError, URLError) as error:
+                log.exception('Could not reach SongSelect, {error}'.format(error=error))
+            subscription_element = home_page.find('div', {'class': 'subscriptionlevel'})
+            if subscription_element is not None:
+                self.subscription_level = subscription_element.string.strip()
+            else:
+                self.subscription_level = 'premium'
+            return self.subscription_level
         else:
             log.debug(posted_page)
-            return False
+            return None
 
     def logout(self):
         """
@@ -128,7 +137,7 @@ class SongSelectImport(object):
         try:
             self.opener.open(LOGOUT_URL)
         except (TypeError, URLError) as error:
-            log.exception('Could not log of SongSelect, {error}'.format(error=error))
+            log.exception('Could not log out of SongSelect, {error}'.format(error=error))
 
     def search(self, search_text, max_results, callback=None):
         """
@@ -145,7 +154,7 @@ class SongSelectImport(object):
             'PrimaryLanguage': '',
             'Keys': '',
             'Themes': '',
-            'List': '',
+            'List': '' if self.subscription_level == 'premium' else 'publicdomain',
             'Sort': '',
             'SearchText': search_text
         }

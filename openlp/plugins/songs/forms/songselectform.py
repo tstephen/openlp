@@ -263,8 +263,9 @@ class SongSelectForm(QtWidgets.QDialog, Ui_SongSelectDialog, RegistryProperties)
         self.login_progress_bar.setVisible(True)
         self.application.process_events()
         # Log the user in
-        if not self.song_select_importer.login(
-                self.username_edit.text(), self.password_edit.text(), self._update_login_progress):
+        subscription_level = self.song_select_importer.login(
+                self.username_edit.text(), self.password_edit.text(), self._update_login_progress)
+        if not subscription_level:
             QtWidgets.QMessageBox.critical(
                 self,
                 translate('SongsPlugin.SongSelectForm', 'Error Logging In'),
