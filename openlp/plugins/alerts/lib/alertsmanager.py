@@ -101,7 +101,7 @@ class AlertsManager(QtCore.QObject, RegistryBase, LogMixin, RegistryProperties):
         }
         self.live_controller.displays[0].alert(text, json.dumps(alert_settings))
         # Check to see if we have a timer running.
-        #if self.timer_id == 0:
+        # if self.timer_id == 0:
         #    self.timer_id = self.startTimer(int(alert_tab.timeout) * 1000)
 
     def timerEvent(self, event):
@@ -125,4 +125,4 @@ class AlertsManager(QtCore.QObject, RegistryBase, LogMixin, RegistryProperties):
         :return: rgb color string
         :rtype: string
         """
-        return "rgb(" + rgb_values.red() + ", " + rgb_values.green() + ", " + rgb_values.blue() + ")"
+        return "rgb(" + str(rgb_values.red()) + ", " + str(rgb_values.green()) + ", " + str(rgb_values.blue()) + ")"

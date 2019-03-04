@@ -155,6 +155,7 @@ describe("The Display object", function () {
 
 describe("Display.alert", function () {
   var alertBackground, alert, settings;
+  var alerts = [];
 
   beforeEach(function () {
     document.body.innerHTML = "";
@@ -181,6 +182,10 @@ describe("Display.alert", function () {
 
   it("should set the correct alert position", function () {
     expect(Display.alert("Alert Location Test", settings)).toEqual(1);
+  });
+
+  it("should add the alert to the alert queue", function() {
+    //Uses the alerts array
   });
 });
 
@@ -222,7 +227,7 @@ describe("The doEntranceTransition", function () {
       expect(alertBackground.style.backgroundColor).toEqual(settings.background_color);
       expect(alertBackground.classList.contains("bottom")).toBe(true);
       expect(alertBackground.style.height).toEqual("25%");
-      expect(alertBackground.style.transition).toEqual("2s linear");
+      expect(alertBackground.style.transition).toEqual("1s linear");
       expect(alertBackground.style.visibility).toEqual("visible");
       done();
     }, 60);
@@ -267,7 +272,7 @@ describe("The doExitTransition", function () {
     Display.doExitTransition();
 
     expect(alertBackground.style.height).toEqual('0%');
-    expect(alertBackground.style.transition).toEqual("2s linear");
+    expect(alertBackground.style.transition).toEqual("1s linear");
   });
 });
 

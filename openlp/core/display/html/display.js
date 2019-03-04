@@ -55,11 +55,10 @@ var AudioState = {
 /**
  * Transition state enumeration
  */
-
 var TransitionState = {
-   EntranceTransition: "entranceTransition",
-   NoTransition: "noTransition",
-   ExitTransition: "exitTransition"
+  EntranceTransition: "entranceTransition",
+  NoTransition: "noTransition",
+  ExitTransition: "exitTransition"
 };
 
 /**
@@ -69,6 +68,7 @@ var AnimationState = {
   NoAnimation: "noAnimation",
   ScrollingAnimation: "scrollingAnimation"
 };
+
 /**
  * Alert location enumeration
  */
@@ -78,10 +78,10 @@ var AlertLocation = {
   Bottom: 2
 };
 
-/**
- *
- * @param {Location} selector
- */
+var AlertState = {
+  Displaying: "displaying",
+  NotDisplaying: "notDisplaying"
+}
 
 /**
  * Return an array of elements based on the selector query
@@ -283,7 +283,9 @@ AudioPlayer.prototype.stop = function () {
  * The Display object is what we use from OpenLP
  */
 var Display = {
+  _alerts: [],
   _slides: {},
+  _alertState: AlertState.NotDisplaying,
   _transitionState: TransitionState.NoTransition,
   _animationState: AnimationState.NoAnimation,
   _revealConfig: {
@@ -404,6 +406,23 @@ var Display = {
     Display._slides['0'] = 0;
     Display.reinit();
   },
+  /** 
+  * Display the next alert in the queue
+  */
+  getNextAlert: function () {
+
+    console.debug("Checking queue for alerts");
+    if (Display._alerts.length > 0) {
+      var alertObject = JSON.parse(this._alerts.shift());
+      setTimeout(function() {
+        Display.alert(alertObject.text, alertObject.settings);
+      },1000);
+      
+    } 
+    else {
+      console.debug("No alerts found");
+    }
+  },
   /**
    * Display an alert
    * @param {string} text - The alert text
@@ -415,18 +434,26 @@ var Display = {
     if (text == "") {
       return null;
     }
-
+    else {
+      if (this._alertState === AlertState.Displaying) {
+        var alertObject = {};
+        alertObject.text = text;
+        alertObject.settings = alert_settings;
+        this._alerts.push(JSON.stringify(alertObject));        
+        return null;
+      }
+    }
     var settings = JSON.parse(alert_settings);
-
     var alertBackground = $("#alert-background")[0];
     var alertText = $("#alert")[0];
-    
-    alertText.innerHTML = text;    
+    alertText.innerHTML = text;
 
     /* Start the entrance transition */
-    Display._transitionState = Display.doEntranceTransition(settings);
-    // TODO: Add functinoality for no scroll and queue if not all alerts have been displayed
-    alertBackground.addEventListener('transitionend', function (e) {
+    this._alertState = AlertState.Displaying;
+    this._transitionState = Display.doEntranceTransition(settings);
+    
+    // TODO: Add functionality for no scroll and queue if not all alerts have been displayed
+    alertBackground.addEventListener('transitionend', function (e) {      
       e.stopPropagation();
       if (Display._transitionState === TransitionState.EntranceTransition) {
         alertText.style.visibility = "visible";
@@ -436,9 +463,11 @@ var Display = {
       }
       else if (Display._transitionState === TransitionState.ExitTransition) {
         Display._transitionState = TransitionState.NoTransition;
+        Display._alertState = AlertState.NotDisplaying;
         alertText.style.visibility = "hidden";
         alertBackground.classList = "";
         alertBackground.classList.add("normal");
+        Display.getNextAlert();
       }
     });
 
@@ -447,16 +476,10 @@ var Display = {
       if (Display._animationState === AnimationState.ScrollingAnimation) {
         alertText.classList.remove("horizontal-scroll-animation");
         alertText.style.visibility = "hidden";
-        Display._animationState = AnimationState.NoAnimation;
-        Display._transitionState = Display.doExitTransition();
+        Display._animationState = AnimationState.NoAnimation;                         
+        Display.doExitTransition();        
       }
     });
-
-  /*
-   * The implementation should show an alert.
-   * It should be able to handle receiving a new alert before a previous one is "finished", basically queueing it.
-   */
-    return settings.location;
   },
 
   /**
@@ -471,7 +494,6 @@ var Display = {
         alertBackground.classList.add("top");                       
         break;
       case AlertLocation.Middle:
-        // alertBackground.style.top = ((window.innerHeight - alertBackground.clientHeight) / 2) + 'px';
         alertBackground.classList.add("middle");                
         break;
       case AlertLocation.Bottom:
@@ -486,7 +508,7 @@ var Display = {
     // Wait for styles to be set first before starting transitions
     setTimeout( function() {
       alertBackground.style.height = "25%";
-      alertBackground.style.transition = "2s linear";
+      alertBackground.style.transition = "1s linear";
       alertBackground.style.visibility = "visible";
     }, 50);
     return TransitionState.EntranceTransition;
@@ -499,8 +521,8 @@ var Display = {
   doExitTransition: function () {
     var alertBackground = $("#alert-background")[0];
     alertBackground.style.height = "0%";
-    alertBackground.style.transition = "2s linear";      
-    return TransitionState.ExitTransition;
+    alertBackground.style.transition = "1s linear";           
+    this._transitionState = TransitionState.ExitTransition;    
   },
   /**
    * Add a slides. If the slide exists but the HTML is different, update the slide.
