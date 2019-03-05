@@ -273,6 +273,13 @@ class SongSelectForm(QtWidgets.QDialog, Ui_SongSelectDialog, RegistryProperties)
                           'There was a problem logging in, perhaps your username or password is incorrect?')
             )
         else:
+            if subscription_level == 'Free':
+                QtWidgets.QMessageBox.information(
+                    self, 
+                    translate('SongsPlugin.SongSelectForm', 'Free user'), 
+                    translate('SongsPlugin.SongSelectForm', 
+                        'You logged in with a free account, the search will be limited to songs in the public domain.')
+                )
             if self.save_password_checkbox.isChecked():
                 Settings().setValue(self.plugin.settings_section + '/songselect username', self.username_edit.text())
                 Settings().setValue(self.plugin.settings_section + '/songselect password', self.password_edit.text())

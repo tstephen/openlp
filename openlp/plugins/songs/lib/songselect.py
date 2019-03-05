@@ -115,20 +115,31 @@ class SongSelectImport(object):
             return False
         if callback:
             callback()
-        if posted_page.find('input', id='SearchText') is not None or posted_page.find('div', id="select-organization") is not None:
+        # Page if user is in an organization
+        if posted_page.find('input', id='SearchText') is not None:
+            self.subscription_level = self.find_subscription_level(posted_page)
+            return self.subscription_level
+        # Page if user is not in an organization
+        elif posted_page.find('div', id="select-organization") is not None:
             try:
                 home_page = BeautifulSoup(self.opener.open(BASE_URL).read(), 'lxml')
             except (TypeError, URLError) as error:
                 log.exception('Could not reach SongSelect, {error}'.format(error=error))
-            subscription_element = home_page.find('div', {'class': 'subscriptionlevel'})
-            if subscription_element is not None:
-                self.subscription_level = subscription_element.string.strip()
-            else:
-                self.subscription_level = 'premium'
+            self.subscription_level = self.find_subscription_level(home_page)
             return self.subscription_level
         else:
             log.debug(posted_page)
             return None
+    
+    def find_subscription_level(self, page):
+        scripts = page.find_all('script')
+        for tag in scripts:
+            if tag.string:
+                match = re.search("'Subscription': '(?P<subscription_level>[^']+)", tag.string)
+                if match:
+                    return match.group('subscription_level')
+        log.error('Could not determine SongSelect subscription level')
+        return 'unkown'
 
     def logout(self):
         """
