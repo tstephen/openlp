@@ -165,7 +165,7 @@ class SongSelectImport(object):
             'PrimaryLanguage': '',
             'Keys': '',
             'Themes': '',
-            'List': '' if self.subscription_level == 'premium' else 'publicdomain',
+            'List': 'publicdomain' if self.subscription_level == 'Free' else '',
             'Sort': '',
             'SearchText': search_text
         }
