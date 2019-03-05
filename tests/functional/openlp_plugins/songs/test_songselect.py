@@ -129,7 +129,7 @@ class TestSongSelectImport(TestCase, TestMixin):
         assert 2 == mocked_login_page.find.call_count, 'find should have been called twice on the login page'
         assert 1 == mocked_posted_page.find.call_count, 'find should have been called once on the posted page'
         assert 2 == mocked_opener.open.call_count, 'opener should have been called twice'
-        assert result is 'unkown', 'The login method should have returned the subscription level'
+        assert result is None, 'The login method should have returned the subscription level'
 
     @patch('openlp.plugins.songs.lib.songselect.build_opener')
     @patch('openlp.plugins.songs.lib.songselect.BeautifulSoup')
@@ -159,7 +159,7 @@ class TestSongSelectImport(TestCase, TestMixin):
         assert 2 == mocked_login_page.find.call_count, 'find should have been called twice on the login page'
         assert 1 == mocked_posted_page.find.call_count, 'find should have been called once on the posted page'
         assert 'https://profile.ccli.com/do/login', mocked_opener.open.call_args_list[1][0][0]
-        assert result is 'unkown', 'The login method should have returned the subscription level'
+        assert result is None, 'The login method should have returned the subscription level'
 
     @patch('openlp.plugins.songs.lib.songselect.build_opener')
     def test_logout(self, mocked_build_opener):

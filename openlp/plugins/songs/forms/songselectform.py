@@ -264,7 +264,7 @@ class SongSelectForm(QtWidgets.QDialog, Ui_SongSelectDialog, RegistryProperties)
         self.application.process_events()
         # Log the user in
         subscription_level = self.song_select_importer.login(
-                self.username_edit.text(), self.password_edit.text(), self._update_login_progress)
+            self.username_edit.text(), self.password_edit.text(), self._update_login_progress)
         if not subscription_level:
             QtWidgets.QMessageBox.critical(
                 self,
@@ -275,10 +275,11 @@ class SongSelectForm(QtWidgets.QDialog, Ui_SongSelectDialog, RegistryProperties)
         else:
             if subscription_level == 'Free':
                 QtWidgets.QMessageBox.information(
-                    self, 
-                    translate('SongsPlugin.SongSelectForm', 'Free user'), 
-                    translate('SongsPlugin.SongSelectForm', 
-                        'You logged in with a free account, the search will be limited to songs in the public domain.')
+                    self,
+                    translate('SongsPlugin.SongSelectForm', 'Free user'),
+                    translate('SongsPlugin.SongSelectForm', 'You logged in with a free account, '
+                                                            'the search will be limited to songs '
+                                                            'in the public domain.')
                 )
             if self.save_password_checkbox.isChecked():
                 Settings().setValue(self.plugin.settings_section + '/songselect username', self.username_edit.text())

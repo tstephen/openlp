@@ -130,7 +130,7 @@ class SongSelectImport(object):
         else:
             log.debug(posted_page)
             return None
-    
+
     def find_subscription_level(self, page):
         scripts = page.find_all('script')
         for tag in scripts:
@@ -139,7 +139,7 @@ class SongSelectImport(object):
                 if match:
                     return match.group('subscription_level')
         log.error('Could not determine SongSelect subscription level')
-        return 'unkown'
+        return None
 
     def logout(self):
         """
