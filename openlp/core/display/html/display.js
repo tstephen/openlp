@@ -80,6 +80,7 @@ var AlertLocation = {
 
 var AlertState = {
   Displaying: "displaying",
+  DisplayingFromQueue: "displayingFrom Queue",
   NotDisplaying: "notDisplaying"
 }
 
@@ -406,39 +407,18 @@ var Display = {
     Display._slides['0'] = 0;
     Display.reinit();
   },
-  /** 
-  * Display the next alert in the queue
-  */
-  getNextAlert: function () {
-
-    console.debug("Checking queue for alerts");
-    if (Display._alerts.length > 0) {
-      var alertObject = JSON.parse(this._alerts.shift());
-      setTimeout(function() {
-        Display.alert(alertObject.text, alertObject.settings);
-      },1000);
-      
-    } 
-    else {
-      console.debug("No alerts found");
-    }
-  },
   /**
    * Display an alert
    * @param {string} text - The alert text
    * @param {int} location - The location of the text (top, middle or bottom)
   */
   alert: function (text, alert_settings) {
-    console.debug(" alert text: " + text + ", alert settings: " + alert_settings);
-
     if (text == "") {
       return null;
     }
     else {
       if (this._alertState === AlertState.Displaying) {
-        var alertObject = {};
-        alertObject.text = text;
-        alertObject.settings = alert_settings;
+        var alertObject = {text: text, settings: alert_settings};        
         this._alerts.push(JSON.stringify(alertObject));        
         return null;
       }
@@ -447,12 +427,14 @@ var Display = {
     var alertBackground = $("#alert-background")[0];
     var alertText = $("#alert")[0];
     alertText.innerHTML = text;
-
-    /* Start the entrance transition */
-    this._alertState = AlertState.Displaying;
-    this._transitionState = Display.doEntranceTransition(settings);
+    /* Check if the alert is a queued alert */
+    if (this._alertState !== AlertState.DisplayingFromQueue) {
+      this._alertState = AlertState.Displaying;
+    }
     
-    // TODO: Add functionality for no scroll and queue if not all alerts have been displayed
+    Display.doEntranceTransition(settings);
+    
+    // TODO: Add functionality for no scroll
     alertBackground.addEventListener('transitionend', function (e) {      
       e.stopPropagation();
       if (Display._transitionState === TransitionState.EntranceTransition) {
@@ -462,12 +444,10 @@ var Display = {
         Display._transitionState = TransitionState.NoTransition 
       }
       else if (Display._transitionState === TransitionState.ExitTransition) {
-        Display._transitionState = TransitionState.NoTransition;
-        Display._alertState = AlertState.NotDisplaying;
+        Display._transitionState = TransitionState.NoTransition;        
         alertText.style.visibility = "hidden";
         alertBackground.classList = "";
-        alertBackground.classList.add("normal");
-        Display.getNextAlert();
+        alertBackground.classList.add("normal");        
       }
     });
 
@@ -476,19 +456,18 @@ var Display = {
       if (Display._animationState === AnimationState.ScrollingAnimation) {
         alertText.classList.remove("horizontal-scroll-animation");
         alertText.style.visibility = "hidden";
-        Display._animationState = AnimationState.NoAnimation;                         
-        Display.doExitTransition();        
+        Display._animationState = AnimationState.NoAnimation;                                         
       }
     });
   },
-
   /**
    * Start background entrance transition for display of alert
-   * @param {number} location - Number showing the location of the alert on screen
+   * @param {object} settings - Settings for styling the alert
    */
   doEntranceTransition: function (settings) {
     var alertBackground = $("#alert-background")[0];
     var alertText = $("#alert")[0];
+    var transitionSetting;
     switch (settings.location) {
       case AlertLocation.Top:
         alertBackground.classList.add("top");                       
@@ -505,15 +484,21 @@ var Display = {
     alertText.style.fontFamily = settings.font_face;
     alertText.style.fontSize = settings.font_size + "pt";
     alertBackground.style.backgroundColor = settings.background_color;
-    // Wait for styles to be set first before starting transitions
+
+    if (this._alertState === AlertState.DisplayingFromQueue) {
+      transitionSetting = "1s linear 1s";
+    }
+    else {
+      transitionSetting = "1s linear";
+    } 
+    // Wait for styles to be set first before starting transition
     setTimeout( function() {
       alertBackground.style.height = "25%";
-      alertBackground.style.transition = "1s linear";
+      alertBackground.style.transition = transitionSetting;
       alertBackground.style.visibility = "visible";
     }, 50);
-    return TransitionState.EntranceTransition;
+    this._transitionState = TransitionState.EntranceTransition;
   },
-
   /**
    * Start background exit transition once alert has been displayed
    * @param {string} location - Integer showing the location of the alert on screen
@@ -522,7 +507,22 @@ var Display = {
     var alertBackground = $("#alert-background")[0];
     alertBackground.style.height = "0%";
     alertBackground.style.transition = "1s linear";           
-    this._transitionState = TransitionState.ExitTransition;    
+    this._transitionState = TransitionState.ExitTransition;
+    this._alertState = AlertState.NotDisplaying;
+    Display.getNextAlert();    
+  },
+  /** 
+  * Display the next alert in the queue
+  */
+  getNextAlert: function () {
+    if (Display._alerts.length > 0) {
+      var alertObject = JSON.parse(this._alerts.shift());
+      this._alertState = AlertState.DisplayingFromQueue;
+      Display.alert(alertObject.text, alertObject.settings);    
+    } 
+    else {
+      return null;
+    }
   },
   /**
    * Add a slides. If the slide exists but the HTML is different, update the slide.

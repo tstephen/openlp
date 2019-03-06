@@ -154,8 +154,7 @@ describe("The Display object", function () {
 });
 
 describe("Display.alert", function () {
-  var alertBackground, alert, settings;
-  var alerts = [];
+  var alertBackground, alert, settings,_alertState;
 
   beforeEach(function () {
     document.body.innerHTML = "";
@@ -180,21 +179,22 @@ describe("Display.alert", function () {
     expect(alert.innerHTML).toEqual("OPEN-LP-3.0 Alert Test");
   });
 
-  it("should set the correct alert position", function () {
-    expect(Display.alert("Alert Location Test", settings)).toEqual(1);
-  });
+  it("should add alerts to the queue correctly if it called when an alert is displaying", function () {
+    Display._alerts = [];
+    Display._alertState = AlertState.Displaying;
+    var alertObject = {text: "Testing alert queue", settings: settings};
+    var queuedAlert = JSON.stringify(alertObject);
+    Display.alert("Testing alert queue", settings);
 
-  it("should add the alert to the alert queue", function() {
-    //Uses the alerts array
+    expect(Display._alerts.length).toEqual(1);
+    expect(Display._alerts[0]).toEqual(queuedAlert);
   });
 });
 
-describe("The doEntranceTransition", function () {
+describe("Display.doEntranceTransition", function () {
 
   var alertBackground, alertText, css, settings, style;
-  // TODO: Fix tests to accommodate new behaviour with CSS classes and settings modification
-
-  beforeEach(function() {
+  beforeEach(function () {
     document.body.innerHTML = "";
     style = document.createElement("style");
     style.type = "text/css";
@@ -214,51 +214,52 @@ describe("The doEntranceTransition", function () {
     alertText = document.createElement("p");
     alertText.setAttribute("id","alert");
     alertBackground.appendChild(alertText);
+    Display._alertState = AlertState.NotDisplaying;
   });
 
-  it("should apply the styles correctly when doEntranceTransition is called", function(done) {
+  it("should set the correct transition state", function () {
     Display.doEntranceTransition(settings);
-    expect(alertBackground.classList.contains("bottom")).toBe(true);
+    expect(Display._transitionState).toEqual(TransitionState.EntranceTransition);
+  })
 
-    setTimeout(function() {
+  it("should apply the styles correctly when doEntranceTransition is called", function (done) {
+    Display.doEntranceTransition(settings);
+    expect(alertBackground.className).toBe("normal bottom");
+
+    setTimeout(function () {
       expect(alertText.style.fontFamily).toEqual(settings.font_face);
       expect(alertText.style.color).toEqual(settings.font_color);
       expect(alertText.style.fontSize).toEqual(settings.font_size + "pt");
-      expect(alertBackground.style.backgroundColor).toEqual(settings.background_color);
-      expect(alertBackground.classList.contains("bottom")).toBe(true);
+      expect(alertBackground.style.backgroundColor).toEqual(settings.background_color);      
       expect(alertBackground.style.height).toEqual("25%");
       expect(alertBackground.style.transition).toEqual("1s linear");
       expect(alertBackground.style.visibility).toEqual("visible");
       done();
-    }, 60);
+    }, 50);
   });
 
   it("should set the correct class for the alert when location is top of the page", function () {
     settings.location = 0;
     Display.doEntranceTransition(settings);
 
-    expect(alertBackground.classList.contains("normal")).toBe(true);
-    expect(alertBackground.classList.contains("top")).toBe(true);
-
+    expect(alertBackground.className).toEqual("normal top");
   });
 
   it("should set the correct class for the alert when location is middle of the page", function () {
     settings.location = 1;
     Display.doEntranceTransition(settings);
     
-    expect(alertBackground.classList.contains("normal")).toBe(true);
-    expect(alertBackground.classList.contains("middle")).toBe(true);       
+    expect(alertBackground.className).toEqual("normal middle");       
   });
 
   it("should set the correct class for the alert when location is bottom of the page", function () {
     Display.doEntranceTransition(settings);
 
-    expect(alertBackground.classList.contains("normal")).toBe(true);
-    expect(alertBackground.classList.contains("bottom")).toBe(true);
+    expect(alertBackground.className).toEqual("normal bottom");
   });
 });
 
-describe("The doExitTransition", function () {
+describe("Display.doExitTransition", function () {
   var alertBackground;
 
   beforeEach(function () {
@@ -266,16 +267,55 @@ describe("The doExitTransition", function () {
     alertBackground = document.createElement("div");
     alertBackground.setAttribute("id", "alert-background");
     document.body.appendChild(alertBackground);
+    Display._alerts = [];
   });
 
-  it("should transition correctly when the doExitTransition method is called", function () {
+  it("should set the styles correctly when the doExitTransition method is called", function () {    
     Display.doExitTransition();
 
     expect(alertBackground.style.height).toEqual('0%');
-    expect(alertBackground.style.transition).toEqual("1s linear");
+    expect(alertBackground.style.transition).toEqual("1s linear");    
   });
+
+  it("should set the correct states when doExitTransition is called", function () {
+    Display.doExitTransition();
+
+    expect(Display._alertState).toEqual(AlertState.NotDisplaying);
+    expect(Display._transitionState).toEqual(TransitionState.ExitTransition);
+  });
+
+  it("should call the getNextAlert method to get the next alert on the queue", function () {
+    spyOn(Display,"getNextAlert");
+    Display.doExitTransition();
+    
+    expect(Display.getNextAlert).toHaveBeenCalled();
+  }); 
 });
 
+describe("Display.getNextAlert", function () {
+  Display.getNextAlert();
+
+  it("should return null if there are no alerts in the queue", function () {
+    Display._alerts = [];
+    Display.getNextAlert();
+
+    expect(Display.getNextAlert()).toBeNull();
+  });
+
+  it("should call the alert function correctly if there is an alert in the queue", function () {    
+    var settings = {
+      "location": 2, "font_face": "Tahoma", "font_size": 40, 
+      "font_color": "rgb(255, 255, 255)", "background_color": "rgb(102, 0, 0)"
+    };
+    var alertObject = {text: "Queued Alert", settings: settings};
+    Display._alerts.push(JSON.stringify(alertObject));
+    spyOn(Display,"alert");    
+    Display.getNextAlert();
+    
+    expect(Display.alert).toHaveBeenCalled();
+    expect(Display.alert).toHaveBeenCalledWith("Queued Alert",alertObject.settings);
+  });
+});
 
 describe("Display.addTextSlide", function () {
   beforeEach(function() {
@@ -386,6 +426,7 @@ describe("Display.setTextSlides", function () {
     };
 
     spyOn(Display, "reinit");
+    spyOn(Reveal, "slide");    
 
     Display.setTextSlides(slides);
     Display.setTheme(theme);
