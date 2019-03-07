@@ -44,7 +44,7 @@ class TestBzrTags(TestCase):
         # WHEN getting the branches tags
         try:
             bzr = Popen(('bzr', 'tags', '--directory=' + path), stdout=PIPE)
-        except:
+        except Exception:
             raise SkipTest('bzr is not installed')
         std_out = bzr.communicate()[0]
         count = len(TAGS1)

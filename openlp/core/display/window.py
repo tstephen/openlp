@@ -29,7 +29,7 @@ import copy
 
 from PyQt5 import QtCore, QtWebChannel, QtWidgets
 
-from openlp.core.common.path import Path, path_to_str
+from openlp.core.common.path import path_to_str
 from openlp.core.common.settings import Settings
 from openlp.core.common.registry import Registry
 from openlp.core.common.applocation import AppLocation
