@@ -324,7 +324,7 @@ class TestPath(TestCase):
         obj = path.json_object(extra=1, args=2)
 
         # THEN: A JSON decodable object should have been returned.
-        assert obj == {'__Path__': ('/', 'base', 'path', 'to', 'fi.le')}
+        assert obj == {'__Path__': (os.sep, 'base', 'path', 'to', 'fi.le')}
 
     def test_path_json_object_base_path(self):
         """
