@@ -454,9 +454,11 @@ var Display = {
     alertBackground.addEventListener('animationend', function (e) {
       e.stopPropagation();
       if (Display._animationState === AnimationState.ScrollingAnimation) {
+        console.debug("Scrolling animation finished");
         alertText.classList.remove("horizontal-scroll-animation");
         alertText.style.visibility = "hidden";
-        Display._animationState = AnimationState.NoAnimation;                                         
+        Display._animationState = AnimationState.NoAnimation;
+        Display.doExitTransition();                                         
       }
     });
   },
@@ -486,7 +488,7 @@ var Display = {
     alertBackground.style.backgroundColor = settings.background_color;
 
     if (this._alertState === AlertState.DisplayingFromQueue) {
-      transitionSetting = "1s linear 1s";
+      transitionSetting = "1s linear 2s";
     }
     else {
       transitionSetting = "1s linear";
