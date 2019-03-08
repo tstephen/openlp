@@ -47,6 +47,7 @@ class TestThemeListWidgetItem(TestCase):
     """
     Test the :class:`ThemeListWidgetItem` class
     """
+
     def setUp(self):
         self.sample_theme_data = {'file_name': 'BlueBurst.otz', 'sha256': 'sha_256_hash',
                                   'thumbnail': 'BlueBurst.png', 'title': 'Blue Burst'}
@@ -61,7 +62,7 @@ class TestThemeListWidgetItem(TestCase):
         """
         Test that the theme data is loaded correctly in to a ThemeListWidgetItem object when instantiated
         """
-        # GIVEN: A sample theme dictanary object
+        # GIVEN: A sample theme dictionary object
         # WHEN: Creating an instance of `ThemeListWidgetItem`
         instance = ThemeListWidgetItem('url', self.sample_theme_data, MagicMock())
 
@@ -76,7 +77,7 @@ class TestThemeListWidgetItem(TestCase):
         """
         Test that the `DownloadWorker` worker is set up correctly and that the thread is started.
         """
-        # GIVEN: A sample theme dictanary object
+        # GIVEN: A sample theme dictionary object
         mocked_ftw = MagicMock(spec=FirstTimeForm)
         mocked_ftw.thumbnail_download_threads = []
 
@@ -259,8 +260,7 @@ class TestFirstTimeForm(TestCase, TestMixin):
         """
         # GIVEN: An instance of FirstTimeForm
         frw = FirstTimeForm(None)
-        with patch.object(frw, '_set_plugin_status'), \
-                patch.object(frw, 'screen_selection_widget'), \
+        with patch.object(frw, '_set_plugin_status'), patch.object(frw, 'screen_selection_widget'), \
                 patch.object(frw, 'theme_combo_box', **{'currentIndex.return_value': '-1'}):
 
             # WHEN: Calling accept and the currentIndex method of the theme_combo_box returns -1
@@ -277,9 +277,9 @@ class TestFirstTimeForm(TestCase, TestMixin):
         # GIVEN: An instance of FirstTimeForm
         frw = FirstTimeForm(None)
         with patch.object(frw, '_set_plugin_status'), \
-             patch.object(frw, 'screen_selection_widget'), \
-             patch.object(
-                 frw, 'theme_combo_box', **{'currentIndex.return_value': 0, 'currentText.return_value': 'Test Item'}):
+                patch.object(frw, 'screen_selection_widget'), \
+                patch.object(
+                frw, 'theme_combo_box', **{'currentIndex.return_value': 0, 'currentText.return_value': 'Test Item'}):
 
             # WHEN: Calling accept and the currentIndex method of the theme_combo_box returns 0
             frw.accept()
@@ -379,8 +379,8 @@ class TestFirstTimeForm(TestCase, TestMixin):
 
         # THEN: the critical_error_message_box should have been called
         mocked_message_box.critical.assert_called_once_with(
-            first_time_form, 'Network Error', 'There was a network error attempting to connect to retrieve '
-            'initial configuration information', 'OK')
+            first_time_form, 'Network Error',
+            'There was a network error attempting to connect to retrieve initial configuration information', 'OK')
 
     @patch('openlp.core.ui.firsttimewizard.Settings')
     def test_on_projectors_check_box_checked(self, MockSettings):
