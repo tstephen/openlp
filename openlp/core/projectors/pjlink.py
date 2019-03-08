@@ -528,8 +528,9 @@ class PJLinkCommands(object):
             sources.append(source)
         sources.sort()
         self.source_available = sources
-        log.debug('({ip}) Setting projector sources_available to "{data}"'.format(ip=self.entry.name,
-                                                                                  data=self.source_available))
+        log.debug('({ip}) Setting projector source_available to "{data}"'.format(ip=self.entry.name,
+                                                                                 data=self.source_available))
+        self.projectorUpdateIcons.emit()
         return
 
     def process_lamp(self, data):
@@ -886,6 +887,9 @@ class PJLink(QtNetwork.QTcpSocket, PJLinkCommands):
         elif status >= S_NOT_CONNECTED and status in QSOCKET_STATE:
             # Socket connection status update
             self.status_connect = status
+            # Check if we need to update error state as well
+            if self.error_status != S_OK and status != S_NOT_CONNECTED:
+                self.error_status = S_OK
         elif status >= S_NOT_CONNECTED and status in PROJECTOR_STATE:
             # Only affects the projector status
             self.projector_status = status
@@ -905,7 +909,14 @@ class PJLink(QtNetwork.QTcpSocket, PJLinkCommands):
                                                                     message=status_message if msg is None else msg))
 
         # Now that we logged extra information for debugging, broadcast the original change/message
-        (code, message) = self._get_status(status)
+        # Check for connection errors first
+        if self.error_status != S_OK:
+            log.debug('({ip}) Signalling error code'.format(ip=self.entry.name))
+            (code, message) = self._get_status(self.error_status)
+            status = self.error_status
+        else:
+            log.debug('({ip}) Signalling status code'.format(ip=self.entry.name))
+            (code, message) = self._get_status(status)
         if msg is not None:
             message = msg
         elif message is None:
@@ -953,7 +964,7 @@ class PJLink(QtNetwork.QTcpSocket, PJLinkCommands):
             log.error('({ip}) Invalid initial packet received - closing socket'.format(ip=self.entry.name))
             return self.disconnect_from_host()
         # Convert the initial login prompt with the expected PJLink normal command format for processing
-        log.debug('({ip}) check_login(): Formatting initial connection prompt'
+        log.debug('({ip}) check_login(): Formatting initial connection prompt '
                   'to PJLink packet'.format(ip=self.entry.name))
         return self.get_data('{start}{clss}{data}'.format(start=PJLINK_PREFIX,
                                                           clss='1',

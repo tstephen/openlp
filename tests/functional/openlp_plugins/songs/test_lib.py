@@ -199,7 +199,7 @@ class TestLib(TestCase):
         result = _remove_typos(diff)
 
         # THEN: There should be no typos in the middle anymore. The remaining equals should have been merged.
-        assert len(result) is 1, 'The result should contain only one element.'
+        assert len(result) == 1, 'The result should contain only one element.'
         assert result[0][0] == 'equal', 'The result should contain an equal element.'
         assert result[0][1] == 0, 'The start indices should be kept.'
         assert result[0][2] == 22, 'The stop indices should be kept.'
