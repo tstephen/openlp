@@ -261,6 +261,7 @@ class TestFirstTimeForm(TestCase, TestMixin):
         # GIVEN: An instance of FirstTimeForm
         frw = FirstTimeForm(None)
         with patch.object(frw, '_set_plugin_status'), patch.object(frw, 'screen_selection_widget'), \
+                patch.object(frw, 'setup_ui'), \
                 patch.object(frw, 'theme_combo_box', **{'currentIndex.return_value': '-1'}):
 
             # WHEN: Calling accept and the currentIndex method of the theme_combo_box returns -1
