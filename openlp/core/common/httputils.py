@@ -203,7 +203,7 @@ def download_file(update_object, url, file_path, sha256=None, proxy=None):
     while retries < CONNECTION_RETRIES:
         try:
             with file_path.open('wb') as saved_file:
-                response = requests.get(url,  proxies=proxy, timeout=float(CONNECTION_TIMEOUT), stream=True)
+                response = requests.get(url, proxies=proxy, timeout=float(CONNECTION_TIMEOUT), stream=True)
                 if sha256:
                     hasher = hashlib.sha256()
                 # Download until finished or canceled.

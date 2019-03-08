@@ -32,7 +32,7 @@ from tempfile import gettempdir
 
 from PyQt5 import QtCore, QtWidgets
 
-from openlp.core.common import clean_button_text, trace_error_handler
+from openlp.core.common import trace_error_handler
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.httputils import DownloadWorker, download_file, get_url_file_size, get_web_page
 from openlp.core.common.i18n import translate
@@ -435,7 +435,6 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
         """
         Clean up the UI after the process has finished.
         """
-        complete_str = ''
         if self.max_progress:
             self.progress_bar.setValue(self.progress_bar.maximum())
             if self.has_run_wizard:
