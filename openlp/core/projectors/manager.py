@@ -484,8 +484,7 @@ class ProjectorManager(QtWidgets.QWidget, RegistryBase, UiProjectorManager, LogM
                 projector = list_item.data(QtCore.Qt.UserRole)
                 try:
                     projector.link.connect_to_host()
-                except Exception as e:
-                    print(e)
+                except Exception:
                     continue
 
     def on_delete_projector(self, opt=None):

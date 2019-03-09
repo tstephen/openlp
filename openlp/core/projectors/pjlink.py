@@ -912,11 +912,11 @@ class PJLink(QtNetwork.QTcpSocket, PJLinkCommands):
         # Check for connection errors first
         if self.error_status != S_OK:
             log.debug('({ip}) Signalling error code'.format(ip=self.entry.name))
-            (code, message) = self._get_status(self.error_status)
+            code, message = self._get_status(self.error_status)
             status = self.error_status
         else:
             log.debug('({ip}) Signalling status code'.format(ip=self.entry.name))
-            (code, message) = self._get_status(status)
+            code, message = self._get_status(status)
         if msg is not None:
             message = msg
         elif message is None:
