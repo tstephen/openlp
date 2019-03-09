@@ -126,7 +126,7 @@ class TestFirstTimeForm(TestCase, TestMixin):
         assert [] == frw.thumbnail_download_threads, 'The list of threads should be empty'
         assert frw.has_run_wizard is False, 'has_run_wizard should be False'
 
-    @patch('openlp.core.ui.firsttimewizard.QtWidgets.QWizard.exec')
+    @patch('openlp.core.ui.firsttimeform.QtWidgets.QWizard.exec')
     def test_exec(self, mocked_qwizard_exec):
 
         # GIVEN: An instance of FirstTimeForm
@@ -223,9 +223,10 @@ class TestFirstTimeForm(TestCase, TestMixin):
             mocked_theme_combo_box.findText.assert_called_once_with('Default Theme')
             mocked_theme_combo_box.setCurrentIndex(3)
 
-    @patch('openlp.core.ui.firsttimewizard.QtWidgets.QWizard.accept')
-    @patch('openlp.core.ui.firsttimewizard.Settings')
-    def test_accept_method(self, mocked_settings, mocked_qwizard_accept):
+
+    @patch('openlp.core.ui.firsttimeform.Settings')
+    @patch('openlp.core.ui.firsttimeform.QtWidgets.QWizard.accept')
+    def test_accept_method(self, mocked_qwizard_accept, *args):
         """
         Test the FirstTimeForm.accept method
         """
@@ -253,7 +254,7 @@ class TestFirstTimeForm(TestCase, TestMixin):
             mocked_screen_selection_widget.save.assert_called_once()
             mocked_qwizard_accept.assert_called_once()
 
-    @patch('openlp.core.ui.firsttimewizard.Settings')
+    @patch('openlp.core.ui.firsttimeform.Settings')
     def test_accept_method_theme_not_selected(self, mocked_settings):
         """
         Test the FirstTimeForm.accept method when there is no default theme selected
@@ -261,14 +262,13 @@ class TestFirstTimeForm(TestCase, TestMixin):
         # GIVEN: An instance of FirstTimeForm
         frw = FirstTimeForm(None)
         with patch.object(frw, '_set_plugin_status'), patch.object(frw, 'screen_selection_widget'), \
-                patch.object(frw, 'setup_ui'), \
-                patch.object(frw, 'theme_combo_box', **{'currentIndex.return_value': '-1'}):
+                patch.object(frw, 'theme_combo_box', **{'currentIndex.return_value': -1}):
 
             # WHEN: Calling accept and the currentIndex method of the theme_combo_box returns -1
             frw.accept()
 
             # THEN: OpenLP should not try to save a theme name
-            mocked_settings.setValue.assert_not_called()
+            mocked_settings().setValue.assert_not_called()
 
     @patch('openlp.core.ui.firsttimeform.Settings')
     def test_accept_method_theme_selected(self, mocked_settings):
@@ -288,7 +288,7 @@ class TestFirstTimeForm(TestCase, TestMixin):
             # THEN: The 'currentItem' in the combobox should have been set as the default theme.
             mocked_settings().setValue.assert_called_once_with('themes/global theme', 'Test Item')
 
-    @patch('openlp.core.ui.firsttimewizard.QtWidgets.QWizard.reject')
+    @patch('openlp.core.ui.firsttimeform.QtWidgets.QWizard.reject')
     @patch('openlp.core.ui.firsttimeform.time')
     @patch('openlp.core.ui.firsttimeform.get_thread_worker')
     @patch('openlp.core.ui.firsttimeform.is_thread_finished')
@@ -383,7 +383,7 @@ class TestFirstTimeForm(TestCase, TestMixin):
             first_time_form, 'Network Error',
             'There was a network error attempting to connect to retrieve initial configuration information', 'OK')
 
-    @patch('openlp.core.ui.firsttimewizard.Settings')
+    @patch('openlp.core.ui.firsttimeform.Settings')
     def test_on_projectors_check_box_checked(self, MockSettings):
         """
         Test that the projector panel is shown when the checkbox in the first time wizard is checked
@@ -398,10 +398,10 @@ class TestFirstTimeForm(TestCase, TestMixin):
         frw.on_projectors_check_box_clicked()
 
         # THEN: The visibility of the projects panel should have been set
-        mocked_settings.value.assert_called_once_with('projector/show after wizard')
-        mocked_settings.setValue.assert_called_once_with('projector/show after wizard', False)
+        mocked_settings().value.assert_called_once_with('projector/show after wizard')
+        mocked_settings().setValue.assert_called_once_with('projector/show after wizard', False)
 
-    @patch('openlp.core.ui.firsttimewizard.Settings')
+    @patch('openlp.core.ui.firsttimeform.Settings')
     def test_on_projectors_check_box_unchecked(self, MockSettings):
         """
         Test that the projector panel is shown when the checkbox in the first time wizard is checked

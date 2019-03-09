@@ -336,6 +336,13 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
             proxy_dialog.retranslate_ui()
             proxy_dialog.exec()
 
+    def on_projectors_check_box_clicked(self):
+        # When clicking projectors_check box, change the visibility setting for Projectors panel.
+        if Settings().value('projector/show after wizard'):
+            Settings().setValue('projector/show after wizard', False)
+        else:
+            Settings().setValue('projector/show after wizard', True)
+
     def on_themes_list_widget_selection_changed(self):
         """
         Update the `theme_combo_box` with the selected items

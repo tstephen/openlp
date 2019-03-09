@@ -326,10 +326,3 @@ class UiFirstTimeWizard(object):
         self.progress_page.setTitle(translate('OpenLP.FirstTimeWizard', 'Downloading and Configuring'))
         self.progress_page.setSubTitle(
             translate('OpenLP.FirstTimeWizard', 'Please wait while resources are downloaded and OpenLP is configured.'))
-
-    def on_projectors_check_box_clicked(self):
-        # When clicking projectors_check box, change the visibility setting for Projectors panel.
-        if Settings().value('projector/show after wizard'):
-            Settings().setValue('projector/show after wizard', False)
-        else:
-            Settings().setValue('projector/show after wizard', True)
