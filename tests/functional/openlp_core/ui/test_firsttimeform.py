@@ -398,8 +398,8 @@ class TestFirstTimeForm(TestCase, TestMixin):
         frw.on_projectors_check_box_clicked()
 
         # THEN: The visibility of the projects panel should have been set
-        mocked_settings().value.assert_called_once_with('projector/show after wizard')
-        mocked_settings().setValue.assert_called_once_with('projector/show after wizard', False)
+        mocked_settings.value.assert_called_once_with('projector/show after wizard')
+        mocked_settings.setValue.assert_called_once_with('projector/show after wizard', False)
 
     @patch('openlp.core.ui.firsttimeform.Settings')
     def test_on_projectors_check_box_unchecked(self, MockSettings):
