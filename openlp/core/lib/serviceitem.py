@@ -263,7 +263,7 @@ class ServiceItem(RegistryProperties):
             file_location = os.path.join(path, file_name)
             file_location_hash = md5_hash(file_location.encode('utf-8'))
             image = os.path.join(str(AppLocation.get_section_data_path(self.name)), 'thumbnails',
-                                 file_location_hash, ntpath.basename(image))
+                                 file_location_hash, ntpath.basename(image))  #TODO: Pathlib
         self.slides.append({'title': file_name, 'image': image, 'path': path, 'display_title': display_title,
                             'notes': notes, 'thumbnail': image})
         # if self.is_capable(ItemCapabilities.HasThumbnails):
@@ -361,7 +361,7 @@ class ServiceItem(RegistryProperties):
                 if isinstance(file_path, str):
                     # Handle service files prior to OpenLP 3.0
                     # Windows can handle both forward and backward slashes, so we use ntpath to get the basename
-                    file_path = Path(path, ntpath.basename(file_path))
+                    file_path = path / ntpath.basename(file_path)
                 self.background_audio.append(file_path)
         self.theme_overwritten = header.get('theme_overwritten', False)
         if self.service_item_type == ServiceItemType.Text:
@@ -374,7 +374,7 @@ class ServiceItem(RegistryProperties):
             if path:
                 self.has_original_files = False
                 for text_image in service_item['serviceitem']['data']:
-                    file_path = os.path.join(path, text_image)
+                    file_path = path / text_image
                     self.add_from_image(file_path, text_image, background)
             else:
                 for text_image in service_item['serviceitem']['data']:

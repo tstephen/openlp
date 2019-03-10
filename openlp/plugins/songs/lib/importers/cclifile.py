@@ -67,7 +67,7 @@ class CCLIFileImport(SongImport):
                         details = {'confidence': 1, 'encoding': 'utf-8'}
                     except UnicodeDecodeError:
                         details = chardet.detect(detect_content)
-                in_file = codecs.open(str(file_path), 'r', details['encoding'])
+                in_file = codecs.open(file_path, 'r', details['encoding'])
                 if not in_file.read(1) == '\ufeff':
                     # not UTF or no BOM was found
                     in_file.seek(0)

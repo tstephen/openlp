@@ -422,10 +422,10 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
         :rtype: bool
         """
         try:
-            with zipfile.ZipFile(str(theme_path), 'w') as theme_zip:
+            with zipfile.ZipFile(theme_path, 'w') as theme_zip:
                 source_path = self.theme_path / theme_name
                 for file_path in source_path.iterdir():
-                    theme_zip.write(str(file_path), os.path.join(theme_name, file_path.name))
+                    theme_zip.write(file_path, Path(theme_name, file_path.name))
             return True
         except OSError as ose:
             self.log_exception('Export Theme Failed')
@@ -567,7 +567,7 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
         json_theme = False
         theme_name = ""
         try:
-            with zipfile.ZipFile(str(file_path)) as theme_zip:
+            with zipfile.ZipFile(file_path) as theme_zip:
                 json_file = [name for name in theme_zip.namelist() if os.path.splitext(name)[1].lower() == '.json']
                 if len(json_file) != 1:
                     # TODO: remove XML handling after once the upgrade path from 2.4 is no longer required

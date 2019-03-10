@@ -141,7 +141,7 @@ class TestServiceItem(TestCase, TestMixin):
         """
         # GIVEN: A new service item and a mocked add icon function
         image_name = 'image_1.jpg'
-        test_file = os.path.join(str(TEST_PATH), image_name)
+        test_file = TEST_PATH / image_name
         frame_array = {'path': test_file, 'title': image_name}
 
         service_item = ServiceItem(None)
@@ -154,7 +154,7 @@ class TestServiceItem(TestCase, TestMixin):
                 mocked_get_section_data_path:
             mocked_exists.return_value = True
             mocked_get_section_data_path.return_value = Path('/path/')
-            service_item.set_from_service(line, str(TEST_PATH))
+            service_item.set_from_service(line, TEST_PATHb)
 
         # THEN: We should get back a valid service item
         assert service_item.is_valid is True, 'The new service item should be valid'

@@ -197,7 +197,7 @@ class VlcPlayer(MediaPlayer):
         """
         return get_vlc() is not None
 
-    def load(self, display, file):
+    def load(self, display, file):  # TODO: pathlib
         """
         Load a video into VLC
 

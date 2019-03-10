@@ -63,8 +63,8 @@ class TestRemoteDeploy(TestCase):
         deploy_zipfile(root_path, 'site.zip')
 
         # THEN: the zip file should have been extracted to the right location
-        MockZipFile.assert_called_once_with('/tmp/remotes/site.zip')
-        mocked_zipfile.extractall.assert_called_once_with('/tmp/remotes')
+        MockZipFile.assert_called_once_with(Path('/tmp/remotes/site.zip'))
+        mocked_zipfile.extractall.assert_called_once_with(Path('/tmp/remotes'))
 
     @patch('openlp.core.api.deploy.Registry')
     @patch('openlp.core.api.deploy.get_web_page')

@@ -229,8 +229,8 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
         Initialize media item.
         """
         self.list_view.clear()
-        self.service_path = str(AppLocation.get_section_data_path(self.settings_section) / 'thumbnails')
-        create_paths(Path(self.service_path))
+        self.service_path = AppLocation.get_section_data_path(self.settings_section) / 'thumbnails'
+        create_paths(self.service_path)
         self.load_list([path_to_str(file) for file in Settings().value(self.settings_section + '/media files')])
         self.rebuild_players()
 
@@ -264,7 +264,7 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
         :param media: The media
         :param target_group:
         """
-        media.sort(key=lambda file_name: get_natural_key(os.path.split(str(file_name))[1]))
+        media.sort(key=lambda file_path: get_natural_key(file_path.name))
         for track in media:
             track_info = QtCore.QFileInfo(track)
             item_name = None

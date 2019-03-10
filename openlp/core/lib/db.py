@@ -144,7 +144,7 @@ def get_db_path(plugin_name, db_file_name=None):
         return 'sqlite:///{path}/{name}'.format(path=AppLocation.get_section_data_path(plugin_name), name=db_file_name)
 
 
-def handle_db_error(plugin_name, db_file_name):
+def handle_db_error(plugin_name, db_file_name):  # TODO: To pathlib
     """
     Log and report to the user that a database cannot be loaded
 
@@ -159,7 +159,7 @@ def handle_db_error(plugin_name, db_file_name):
                                          'OpenLP cannot load your database.\n\nDatabase: {db}').format(db=db_path))
 
 
-def init_url(plugin_name, db_file_name=None):
+def init_url(plugin_name, db_file_name=None):  # TODO: Pathlib
     """
     Return the database URL.
 

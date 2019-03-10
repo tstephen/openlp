@@ -478,7 +478,7 @@ class AdvancedTab(SettingsTab):
                 minute=self.service_name_time.time().minute()
             )
         try:
-            service_name_example = format_time(str(self.service_name_edit.text()), local_time)
+            service_name_example = format_time(self.service_name_edit.text(), local_time)
         except ValueError:
             preset_is_valid = False
             service_name_example = translate('OpenLP.AdvancedTab', 'Syntax error.')

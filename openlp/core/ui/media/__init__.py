@@ -54,7 +54,7 @@ class ItemMediaInfo(object):
     """
     This class hold the media related info
     """
-    file_info = None
+    file_info = None  # TODO: Ptahlib?
     volume = 100
     is_background = False
     can_loop_playback = False

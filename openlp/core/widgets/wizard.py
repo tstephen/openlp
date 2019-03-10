@@ -300,7 +300,7 @@ class OpenLPWizard(QtWidgets.QWizard, RegistryProperties):
         file_path, filter_used = FileDialog.getOpenFileName(
             self, title, Settings().value(self.plugin.settings_section + '/' + setting_name), filters)
         if file_path:
-            editbox.setText(str(file_path))
+            editbox.setText(str(file_path))  # TODO: to pathdedit
             Settings().setValue(self.plugin.settings_section + '/' + setting_name, file_path.parent)
 
     def get_folder(self, title, editbox, setting_name):
@@ -316,5 +316,5 @@ class OpenLPWizard(QtWidgets.QWizard, RegistryProperties):
             self, title, Settings().value(self.plugin.settings_section + '/' + setting_name),
             FileDialog.ShowDirsOnly)
         if folder_path:
-            editbox.setText(str(folder_path))
+            editbox.setText(str(folder_path))  # TODO: to pathedit
             Settings().setValue(self.plugin.settings_section + '/' + setting_name, folder_path)

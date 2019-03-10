@@ -51,7 +51,7 @@ class WordProjectBible(BibleImport):
         Unzip the file to a temporary directory
         """
         self.tmp = TemporaryDirectory()
-        with ZipFile(str(self.file_path)) as zip_file:
+        with ZipFile(self.file_path) as zip_file:
             zip_file.extractall(self.tmp.name)
         self.base_path = Path(self.tmp.name, self.file_path.stem)
 
