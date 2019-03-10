@@ -455,7 +455,7 @@ class AdvancedTab(SettingsTab):
         Service Name options changed
         """
         self.service_name_day.setEnabled(default_service_enabled)
-        time_enabled = default_service_enabled and self.service_name_day.currentIndex() is not 7
+        time_enabled = default_service_enabled and self.service_name_day.currentIndex() != 7
         self.service_name_time.setEnabled(time_enabled)
         self.service_name_edit.setEnabled(default_service_enabled)
         self.service_name_revert_button.setEnabled(default_service_enabled)
@@ -497,7 +497,7 @@ class AdvancedTab(SettingsTab):
         """
         React to the day of the service name changing.
         """
-        self.service_name_time.setEnabled(service_day is not 7)
+        self.service_name_time.setEnabled(service_day != 7)
         self.update_service_name_example(None)
 
     def on_service_name_revert_button_clicked(self):

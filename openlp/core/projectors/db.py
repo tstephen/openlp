@@ -417,11 +417,17 @@ class ProjectorDB(Manager):
                   value: (str) From ProjectorSource, Sources tables or PJLink default code list
         """
         source_dict = {}
+        # Apparently, there was a change to the projector object. Test for which object has db id
+        if hasattr(projector, "id"):
+            chk = projector.id
+        elif hasattr(projector.entry, "id"):
+            chk = projector.entry.id
+
         # Get default list first
         for key in projector.source_available:
             item = self.get_object_filtered(ProjectorSource,
                                             and_(ProjectorSource.code == key,
-                                                 ProjectorSource.projector_id == projector.id))
+                                                 ProjectorSource.projector_id == chk))
             if item is None:
                 source_dict[key] = PJLINK_DEFAULT_CODES[key]
             else:
