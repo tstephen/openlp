@@ -166,7 +166,8 @@ describe("Display.alert", function () {
     alertBackground.appendChild(alert);
     settings = '{ \
       "location": 1, "font_face": "Segoe UI, Tahoma, Geneva, Verdana, sans-serif", \
-      "font_size": 40, "font_color": "#ffffff", "background_color": "#660000" \
+      "font_size": 40, "font_color": "#ffffff", "background_color": "#660000", \
+      "timeout": 5, "repeat": 1, "scrolling_text": true \
     }';
   });
 
@@ -203,7 +204,8 @@ describe("Display.doEntranceTransition", function () {
     }';
     settings = {
       "location": 2, "font_face": "Tahoma", "font_size": 40, 
-      "font_color": "rgb(255, 255, 255)", "background_color": "rgb(102, 0, 0)"
+      "font_color": "rgb(255, 255, 255)", "background_color": "rgb(102, 0, 0)",
+      "timeout": 5, "repeat": 1, "scrolling_text": true
     };
     style.innerHTML = css;
     document.head.appendChild(style);
@@ -305,7 +307,8 @@ describe("Display.getNextAlert", function () {
   it("should call the alert function correctly if there is an alert in the queue", function () {    
     var settings = {
       "location": 2, "font_face": "Tahoma", "font_size": 40, 
-      "font_color": "rgb(255, 255, 255)", "background_color": "rgb(102, 0, 0)"
+      "font_color": "rgb(255, 255, 255)", "background_color": "rgb(102, 0, 0)",
+      "timeout": 5, "repeat": 1, "scrolling_text": true
     };
     var alertObject = {text: "Queued Alert", settings: settings};
     Display._alerts.push(JSON.stringify(alertObject));
@@ -315,6 +318,20 @@ describe("Display.getNextAlert", function () {
     expect(Display.alert).toHaveBeenCalled();
     expect(Display.alert).toHaveBeenCalledWith("Queued Alert",alertObject.settings);
   });
+});
+
+describe("Display.transitionEnd", function () {
+  beforeEach(function () {
+    document.body.innerHTML = "";
+    alertBackground = document.createElement("div");
+    alertBackground.setAttribute("id", "alert-background");
+    alertBackground.setAttribute("class", "normal");    
+    document.body.appendChild(alertBackground);    
+    alertText = document.createElement("p");
+    alertText.setAttribute("id","alert");
+    alertBackground.appendChild(alertText);
+  });
+  // it("should")
 });
 
 describe("Display.addTextSlide", function () {

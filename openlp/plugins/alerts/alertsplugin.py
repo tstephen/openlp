@@ -125,7 +125,9 @@ __default_settings__ = {
     'alerts/location': AlertLocation.Bottom,
     'alerts/background color': '#660000',
     'alerts/font color': '#ffffff',
-    'alerts/timeout': 5
+    'alerts/timeout': 10,
+    'alerts/repeat': 1,
+    'alerts/scroll': True
 }
 
 

@@ -66,7 +66,8 @@ var TransitionState = {
  */
 var AnimationState = {
   NoAnimation: "noAnimation",
-  ScrollingAnimation: "scrollingAnimation"
+  ScrollingText: "scrollingText",
+  NonScrollingText: "noScrollingText"
 };
 
 /**
@@ -433,29 +434,16 @@ var Display = {
     }
     
     Display.doEntranceTransition(settings);
-    
-    // TODO: Add functionality for no scroll
-    alertBackground.addEventListener('transitionend', function (e) {      
+        
+    alertBackground.addEventListener('transitionend', function(e) {
       e.stopPropagation();
-      if (Display._transitionState === TransitionState.EntranceTransition) {
-        alertText.style.visibility = "visible";
-        alertText.classList.add("horizontal-scroll-animation");
-        Display._animationState = AnimationState.ScrollingAnimation;
-        Display._transitionState = TransitionState.NoTransition 
-      }
-      else if (Display._transitionState === TransitionState.ExitTransition) {
-        Display._transitionState = TransitionState.NoTransition;        
-        alertText.style.visibility = "hidden";
-        alertBackground.classList = "";
-        alertBackground.classList.add("normal");        
-      }
+      Display.transitionEndEvent(settings);
     });
 
-    alertBackground.addEventListener('animationend', function (e) {
+    alertText.addEventListener('animationend', function (e) {
       e.stopPropagation();
-      if (Display._animationState === AnimationState.ScrollingAnimation) {
-        console.debug("Scrolling animation finished");
-        alertText.classList.remove("horizontal-scroll-animation");
+      if (Display._animationState === AnimationState.ScrollingText) {        
+        alertText.style.animation = "";
         alertText.style.visibility = "hidden";
         Display._animationState = AnimationState.NoAnimation;
         Display.doExitTransition();                                         
@@ -484,7 +472,7 @@ var Display = {
     }
     alertText.style.color = settings.font_color;
     alertText.style.fontFamily = settings.font_face;
-    alertText.style.fontSize = settings.font_size + "pt";
+    alertText.style.fontSize = settings.font_size + "pt";    
     alertBackground.style.backgroundColor = settings.background_color;
 
     if (this._alertState === AlertState.DisplayingFromQueue) {
@@ -516,7 +504,7 @@ var Display = {
   /** 
   * Display the next alert in the queue
   */
-  getNextAlert: function () {
+  getNextAlert: function () {    
     if (Display._alerts.length > 0) {
       var alertObject = JSON.parse(this._alerts.shift());
       this._alertState = AlertState.DisplayingFromQueue;
@@ -524,6 +512,39 @@ var Display = {
     } 
     else {
       return null;
+    }
+  },
+  /**
+   * Set text styles and animations when transitions are are completed
+   * @param {event} event - The event that has occured
+   * @param {json} settings object - The settings to use for the animation
+   */
+  transitionEndEvent: function (settings) {    
+    var alertBackground = $("#alert-background")[0];
+    var alertText = $("#alert")[0];    
+    if (Display._transitionState === TransitionState.EntranceTransition) {
+      alertText.style.visibility = "visible";
+      if (settings.scroll) {
+          var animationSettings = "alert-scrolling-text " + settings.timeout +
+                                  "s linear 0s " + settings.repeat + " normal";                                        
+          alertText.style.animation = animationSettings;                                              
+          Display._animationState = AnimationState.ScrollingText;
+      }
+      else {
+          Display._animationState = AnimationState.NonScrollingText;            
+          setTimeout (function () {
+            alertText.style.visibility = "hidden";
+            Display._animationState = AnimationState.NoAnimation;
+            Display.doExitTransition();
+          }, settings.timeout * 1000);
+      }
+      Display._transitionState = TransitionState.NoTransition 
+    }
+    else if (Display._transitionState === TransitionState.ExitTransition) {
+      Display._transitionState = TransitionState.NoTransition;        
+      alertText.style.visibility = "hidden";
+      alertBackground.classList = "";
+      alertBackground.classList.add("normal");        
     }
   },
   /**

@@ -97,7 +97,9 @@ class AlertsManager(QtCore.QObject, RegistryBase, LogMixin, RegistryProperties):
             'font_face': Settings().value('alerts/font face'),
             'font_size': Settings().value('alerts/font size'),
             'font_color': rgb_font_color,
-            'timeout': Settings().value('alerts/timeout')
+            'timeout': Settings().value('alerts/timeout'),
+            'repeat': Settings().value('alerts/repeat'),
+            'scroll': Settings().value('alerts/scroll')
         }
         self.live_controller.displays[0].alert(text, json.dumps(alert_settings))
         # Check to see if we have a timer running.
