@@ -26,7 +26,6 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 from openlp.core.common import clean_button_text, is_macosx
 from openlp.core.common.i18n import translate
-from openlp.core.common.settings import Settings
 from openlp.core.lib.ui import add_welcome_page
 from openlp.core.ui.icons import UiIcons
 

@@ -223,7 +223,6 @@ class TestFirstTimeForm(TestCase, TestMixin):
             mocked_theme_combo_box.findText.assert_called_once_with('Default Theme')
             mocked_theme_combo_box.setCurrentIndex(3)
 
-
     @patch('openlp.core.ui.firsttimeform.Settings')
     @patch('openlp.core.ui.firsttimeform.QtWidgets.QWizard.accept')
     def test_accept_method(self, mocked_qwizard_accept, *args):
