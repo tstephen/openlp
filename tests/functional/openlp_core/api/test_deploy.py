@@ -15,13 +15,12 @@
 # FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
 # more details.                                                               #
 #                                                                             #
-
-
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
-from tempfile import mkdtemp
 # You should have received a copy of the GNU General Public License along     #
 # with this program; if not, write to the Free Software Foundation, Inc., 59  #
+# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
+###############################################################################
+import os
+from tempfile import mkdtemp
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
@@ -57,7 +56,8 @@ class TestRemoteDeploy(TestCase):
         # GIVEN: A new downloaded zip file
         mocked_zipfile = MagicMock()
         MockZipFile.return_value = mocked_zipfile
-        root_path = Path('/tmp/remotes')
+        root_path_str = '{sep}tmp{sep}remotes'.format(sep=os.sep)
+        root_path = Path(root_path_str)
 
         # WHEN: deploy_zipfile() is called
         deploy_zipfile(root_path, 'site.zip')

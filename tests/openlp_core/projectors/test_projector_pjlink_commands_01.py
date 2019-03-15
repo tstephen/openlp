@@ -452,12 +452,16 @@ class TestPJLinkCommands(TestCase):
         """
         Test saving video source available information
         """
+
         # GIVEN: Test object
         with patch.object(openlp.core.projectors.pjlink, 'log') as mock_log:
             pjlink = PJLink(Projector(**TEST1_DATA), no_poll=True)
             pjlink.source_available = []
-            log_debug_calls = [call('({ip}) Setting projector sources_available to '
+            log_debug_calls = [call('({ip}) reset_information() connect status is '
+                                    'S_NOT_CONNECTED'.format(ip=pjlink.name)),
+                               call('({ip}) Setting projector source_available to '
                                     '"[\'11\', \'12\', \'21\', \'22\', \'31\', \'32\']"'.format(ip=pjlink.name))]
+
             chk_data = '21 12 11 22 32 31'  # Although they should already be sorted, use unsorted to verify method
             chk_test = ['11', '12', '21', '22', '31', '32']
 

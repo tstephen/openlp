@@ -117,13 +117,17 @@ class UiIcons(object):
             'presentation': {'icon': 'fa.bar-chart'},
             'preview': {'icon': 'fa.laptop'},
             'projector': {'icon': 'op.video'},
-            'projector_connect': {'icon': 'fa.plug'},
+            'projector_connect': {'icon': 'fa.plug'},  # Projector connect
             'projector_cooldown': {'icon': 'fa.video-camera', 'attr': 'blue'},
-            'projector_disconnect': {'icon': 'fa.plug', 'attr': 'lightGray'},
+            'projector_disconnect': {'icon': 'fa.plug', 'attr': 'lightGray'},  # Projector disconnect
             'projector_error': {'icon': 'fa.video-camera', 'attr': 'red'},
             'projector_hdmi': {'icon': 'op.hdmi'},
-            'projector_off': {'icon': 'fa.video-camera', 'attr': 'black'},
-            'projector_on': {'icon': 'fa.video-camera', 'attr': 'green'},
+            'projector_power_off': {'icon': 'fa.video-camera', 'attr': 'red'},  # Toolbar power off
+            'projector_power_on': {'icon': 'fa.video-camera', 'attr': 'green'},  # Toolbar power on
+            'projector_off': {'icon': 'fa.video-camera', 'attr': 'black'},  # Projector off
+            'projector_on': {'icon': 'fa.video-camera', 'attr': 'green'},  # Projector on
+            'projector_select_connect': {'icon': 'fa.plug', 'attr': 'green'},  # Toolbar connect
+            'projector_select_disconnect': {'icon': 'fa.plug', 'attr': 'red'},  # Toolbar disconnect
             'projector_warmup': {'icon': 'fa.video-camera', 'attr': 'yellow'},
             'picture': {'icon': 'fa.picture-o'},
             'print': {'icon': 'fa.print'},

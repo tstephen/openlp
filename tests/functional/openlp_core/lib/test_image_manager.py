@@ -178,7 +178,7 @@ class TestImageManager(TestCase, TestMixin):
         # THEN a KeyError is thrown
         with self.assertRaises(KeyError) as context:
             self.image_manager.get_image(TEST_PATH, 'church1.jpg')
-        assert context.exception is not '', 'KeyError exception should have been thrown for missing image'
+        assert context.exception != '', 'KeyError exception should have been thrown for missing image'
 
     @patch('openlp.core.lib.imagemanager.run_thread')
     def test_different_dimension_image(self, mocked_run_thread):
@@ -211,7 +211,7 @@ class TestImageManager(TestCase, TestMixin):
         # WHEN: calling with correct image, but wrong dimensions
         with self.assertRaises(KeyError) as context:
             self.image_manager.get_image(full_path, 'church.jpg', 120, 120)
-        assert context.exception is not '', 'KeyError exception should have been thrown for missing dimension'
+        assert context.exception != '', 'KeyError exception should have been thrown for missing dimension'
 
     @patch('openlp.core.lib.imagemanager.resize_image')
     @patch('openlp.core.lib.imagemanager.image_to_byte')
