@@ -12,7 +12,6 @@
 }
 
 /* ALERT STYLING */
-
 .normal {
   position: absolute;
   margin: 0;
@@ -47,8 +46,7 @@
   position: relative;
   top: 50%;
   transform: translateY(-50%);
-  margin: 0% 0% 0% 100%;
-  z-index: 11;
+  z-index: 12;
   overflow: visible;
   white-space: nowrap;
   color: #ffffff;
