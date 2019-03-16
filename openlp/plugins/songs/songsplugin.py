@@ -121,7 +121,7 @@ class SongsPlugin(Plugin):
         self.song_export_item.setVisible(True)
         self.song_tools_menu.menuAction().setVisible(True)
         action_list = ActionList.get_instance()
-        #action_list.add_action(self.song_import_item, UiStrings().Import)
+        action_list.add_action(self.song_import_item, UiStrings().Import)
         action_list.add_action(self.song_export_item, UiStrings().Export)
         action_list.add_action(self.tools_reindex_item, UiStrings().Tools)
         action_list.add_action(self.tools_find_duplicates, UiStrings().Tools)
