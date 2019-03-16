@@ -750,7 +750,7 @@ class BiblesResourcesDB(QtCore.QObject, Manager):
         ]
 
 
-class AlternativeBookNamesDB(QtCore.QObject, Manager):
+class AlternativeBookNamesDB(Manager):
     """
     This class represents a database-bound alternative book names system.
     """
@@ -765,8 +765,9 @@ class AlternativeBookNamesDB(QtCore.QObject, Manager):
         """
         if AlternativeBookNamesDB.cursor is None:
             file_path = AppLocation.get_directory(AppLocation.DataDir) / 'bibles' / 'alternative_book_names.sqlite'
+            exists = file_path.exists()
             AlternativeBookNamesDB.conn = sqlite3.connect(str(file_path))
-            if not file_path.exists():
+            if not exists:
                 # create new DB, create table alternative_book_names
                 AlternativeBookNamesDB.conn.execute(
                     'CREATE TABLE alternative_book_names(id INTEGER NOT NULL, '

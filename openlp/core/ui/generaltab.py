@@ -47,7 +47,6 @@ class GeneralTab(SettingsTab):
         """
         Initialise the general settings tab
         """
-        self.logo_file = ':/graphics/openlp-splash-screen.png'
         self.logo_background_color = '#ffffff'
         self.screens = ScreenList()
         self.icon_path = ':/icon/openlp-logo.svg'
