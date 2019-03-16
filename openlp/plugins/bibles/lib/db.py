@@ -159,10 +159,10 @@ class BibleDB(Manager):
             if not isinstance(self.name, str):
                 self.name = str(self.name, 'utf-8')
             # TODO: To path object
-            file_path = Path(clean_filename(self.name) + '.sqlite')
+            self.file_path = Path(clean_filename(self.name) + '.sqlite')
         if 'file' in kwargs:
-            file_path = kwargs['file']
-        Manager.__init__(self, 'bibles', init_schema, file_path, upgrade)
+            self.file_path = kwargs['file']
+        Manager.__init__(self, 'bibles', init_schema, self.file_path, upgrade)
         if self.session and 'file' in kwargs:
             self.get_name()
         self._is_web_bible = None
