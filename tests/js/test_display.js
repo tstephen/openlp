@@ -154,7 +154,7 @@ describe("The Display object", function () {
 });
 
 describe("Display.alert", function () {
-  var alertBackground, alert, settings,_alertState;
+  var alertBackground, alert, settings;
 
   beforeEach(function () {
     document.body.innerHTML = "";
@@ -190,16 +190,23 @@ describe("Display.alert", function () {
     expect(Display._alerts.length).toEqual(1);
     expect(Display._alerts[0]).toEqual(queuedAlert);
   });
+
+  it("should set the alert settings correctly", function() {
+    Display.alert("Testing settings", settings);
+
+    console.debug("Settings", JSON.parse(settings));
+    expect(Display._alertSettings).toEqual(JSON.parse(settings));
+  });
 });
 
-describe("Display.doEntranceTransition", function () {
+describe("Display.showAlertBackground", function () {
 
-  var alertBackground, alertText, css, settings, style;
+  var alertBackground, css, settings, style;
   beforeEach(function () {
     document.body.innerHTML = "";
     style = document.createElement("style");
     style.type = "text/css";
-    css = '.normal { position: absolute; margin: 0; padding: 0; left: 0; z-index: 10; \
+    css = '.bg-default { position: absolute; margin: 0; padding: 0; left: 0; z-index: 10; \
       width: 100%; height: 0%; vertical-align: middle; overflow: hidden; visibility:hidden; \
     }';
     settings = {
@@ -211,27 +218,21 @@ describe("Display.doEntranceTransition", function () {
     document.head.appendChild(style);
     alertBackground = document.createElement("div");
     alertBackground.setAttribute("id", "alert-background");
-    alertBackground.setAttribute("class", "normal");    
-    document.body.appendChild(alertBackground);    
-    alertText = document.createElement("p");
-    alertText.setAttribute("id","alert");
-    alertBackground.appendChild(alertText);
+    alertBackground.setAttribute("class", "bg-default");    
+    document.body.appendChild(alertBackground);       
     Display._alertState = AlertState.NotDisplaying;
   });
 
   it("should set the correct transition state", function () {
-    Display.doEntranceTransition(settings);
+    Display.showAlertBackground(settings);
     expect(Display._transitionState).toEqual(TransitionState.EntranceTransition);
   })
 
-  it("should apply the styles correctly when doEntranceTransition is called", function (done) {
-    Display.doEntranceTransition(settings);
-    expect(alertBackground.className).toBe("normal bottom");
+  it("should apply the styles correctly when showAlertBackground is called", function (done) {
+    Display.showAlertBackground(settings);
+    expect(alertBackground.className).toBe("bg-default bottom");
 
-    setTimeout(function () {
-      expect(alertText.style.fontFamily).toEqual(settings.font_face);
-      expect(alertText.style.color).toEqual(settings.font_color);
-      expect(alertText.style.fontSize).toEqual(settings.font_size + "pt");
+    setTimeout(function () {      
       expect(alertBackground.style.backgroundColor).toEqual(settings.background_color);      
       expect(alertBackground.style.height).toEqual("25%");
       expect(alertBackground.style.transition).toEqual("1s linear");
@@ -240,28 +241,28 @@ describe("Display.doEntranceTransition", function () {
     }, 50);
   });
 
-  it("should set the correct class for the alert when location is top of the page", function () {
+  it("should set the correct class when location is top of the page", function () {
     settings.location = 0;
-    Display.doEntranceTransition(settings);
+    Display.showAlertBackground(settings);
 
-    expect(alertBackground.className).toEqual("normal top");
+    expect(alertBackground.className).toEqual("bg-default top");
   });
 
-  it("should set the correct class for the alert when location is middle of the page", function () {
+  it("should set the correct class when location is middle of the page", function () {
     settings.location = 1;
-    Display.doEntranceTransition(settings);
+    Display.showAlertBackground(settings);
     
-    expect(alertBackground.className).toEqual("normal middle");       
+    expect(alertBackground.className).toEqual("bg-default middle");       
   });
 
-  it("should set the correct class for the alert when location is bottom of the page", function () {
-    Display.doEntranceTransition(settings);
+  it("should set the correct class when location is bottom of the page", function () {
+    Display.showAlertBackground(settings);
 
-    expect(alertBackground.className).toEqual("normal bottom");
+    expect(alertBackground.className).toEqual("bg-default bottom");
   });
 });
 
-describe("Display.doExitTransition", function () {
+describe("Display.hideAlertBackground", function () {
   var alertBackground;
 
   beforeEach(function () {
@@ -272,36 +273,29 @@ describe("Display.doExitTransition", function () {
     Display._alerts = [];
   });
 
-  it("should set the styles correctly when the doExitTransition method is called", function () {    
-    Display.doExitTransition();
+  it("should set the styles correctly when the hideAlertBackground method is called", function () {    
+    Display.hideAlertBackground();
 
     expect(alertBackground.style.height).toEqual('0%');
     expect(alertBackground.style.transition).toEqual("1s linear");    
   });
 
-  it("should set the correct states when doExitTransition is called", function () {
-    Display.doExitTransition();
+  it("should set the correct states when hideAlertBackground is called", function () {
+    Display.hideAlertBackground();
 
     expect(Display._alertState).toEqual(AlertState.NotDisplaying);
     expect(Display._transitionState).toEqual(TransitionState.ExitTransition);
   });
-
-  it("should call the getNextAlert method to get the next alert on the queue", function () {
-    spyOn(Display,"getNextAlert");
-    Display.doExitTransition();
-    
-    expect(Display.getNextAlert).toHaveBeenCalled();
-  }); 
 });
 
-describe("Display.getNextAlert", function () {
-  Display.getNextAlert();
+describe("Display.displayNextAlert", function () {
+  Display.displayNextAlert();
 
   it("should return null if there are no alerts in the queue", function () {
     Display._alerts = [];
-    Display.getNextAlert();
+    Display.displayNextAlert();
 
-    expect(Display.getNextAlert()).toBeNull();
+    expect(Display.displayNextAlert()).toBeNull();
   });
 
   it("should call the alert function correctly if there is an alert in the queue", function () {    
@@ -313,14 +307,14 @@ describe("Display.getNextAlert", function () {
     var alertObject = {text: "Queued Alert", settings: settings};
     Display._alerts.push(JSON.stringify(alertObject));
     spyOn(Display, "alert");    
-    Display.getNextAlert();
+    Display.displayNextAlert();
     
     expect(Display.alert).toHaveBeenCalled();
     expect(Display.alert).toHaveBeenCalledWith("Queued Alert",alertObject.settings);
   });
 });
 
-describe("Display.textAnimationEnd", function() {
+describe("Display.hideAlertText", function() {
   var alertBackground, alertText;
   beforeEach(function () {
     document.body.innerHTML = "";
@@ -330,98 +324,96 @@ describe("Display.textAnimationEnd", function() {
     alertText = document.createElement("p");
     alertText.setAttribute("id", "alert");
     alertText.style.visibility = "visible";
-    alertText.style.animation = "alert-scrolling-text 5s linear 0s 1 normal";
+    alertText.style.animation = "alert-scrolling-text 5s linear 0s 1 bg-default";
     alertBackground.appendChild(alertText);
     Display._animationState = AnimationState.ScrollingText;
   });
 
   it("should reset the text styles and animation state after the text has scrolled", function() {    
-    Display.textAnimationEnd();
+    Display.hideAlertText();
 
     expect(alertText.style.animation).toEqual("");
     expect(alertText.style.visibility).toEqual("hidden");
+    expect(alertText.style.color).toEqual("rgb(255, 255, 255)");
+    expect(alertText.style.fontSize).toEqual("40pt");    
     expect(Display._animationState).toEqual(AnimationState.NoAnimation);
   });
 
-  it("should call the doExitTranstion method", function() {
-    spyOn(Display, "doExitTransition");
-    Display.textAnimationEnd();
+  it("should call the alert background method", function() {
+    spyOn(Display, "hideAlertBackground");
+    Display.hideAlertText();
 
-    expect(Display.doExitTransition).toHaveBeenCalled();
+    expect(Display.hideAlertBackground).toHaveBeenCalled();
   });
 });
 
-describe("Display.alertEntranceTransitionEnd", function () {
-  var alertBackground, alertText;
+describe("Display.showAlertText", function () {
+  var alertText, settings;
   beforeEach(function () {
-    document.body.innerHTML = "";
-    alertBackground = document.createElement("div");
-    alertBackground.setAttribute("id", "alert-background");
-    alertBackground.setAttribute("class", "normal");    
-    document.body.appendChild(alertBackground);    
+    document.body.innerHTML = "";    
     alertText = document.createElement("p");
     alertText.setAttribute("id","alert");
-    alertBackground.appendChild(alertText);
-  });
-
-  it("should set the correct styles on entrance transition (with scroll)", function () {
-    var settings = {
+    document.body.appendChild(alertText);
+    settings = {
       "location": 2, "font_face": "Tahoma", "font_size": 40, 
       "font_color": "rgb(255, 255, 255)", "background_color": "rgb(102, 0, 0)",
-      "timeout": 5, "repeat": 1, "scroll": true
-    };    
+      "timeout": 0.01, "repeat": 1, "scroll": true
+    };
     Display._transitionState = TransitionState.EntranceTransition;
-    Display.alertEntranceTransitionEnd(settings);
+  });
+
+  it("should set the correct styles on the text", function() {
+    Display.showAlertText(settings);    
 
     expect(alertText.style.visibility).toEqual("visible");
-    expect(alertText.style.animation).toEqual("alert-scrolling-text 5s linear 0s 1 normal");
-    expect(Display._animationState).toEqual(AnimationState.ScrollingText);
-    expect(Display._transitionState).toEqual(TransitionState.NoTransition);
+    expect(alertText.style.color).toEqual("rgb(255, 255, 255)");
+    expect(alertText.style.fontFamily).toEqual("Tahoma");
+    expect(alertText.style.fontSize).toEqual("40pt");    
+  });
+
+  it("should set the correct animation when text is set to scroll)", function () {            
+    Display.showAlertText(settings);
+
+    expect(alertText.style.animation).toEqual("alert-scrolling-text " + settings.timeout + "s linear 0s 1 normal");
+    expect(Display._animationState).toEqual(AnimationState.ScrollingText);    
   });
 
   it("should set the correct styles on entrance transition (without scroll)", function (done) {
-
-    var settings = {
-      "location": 2, "font_face": "Tahoma", "font_size": 40, 
-      "font_color": "rgb(255, 255, 255)", "scroll": false, "repeat": 1,
-      "timeout": 0.01, "background_color": "rgb(102, 0, 0)"
-    };        
+    settings.scroll = false;       
     Display._transitionState = TransitionState.EntranceTransition;
-    spyOn(Display, "doExitTransition");    
-    Display.alertEntranceTransitionEnd(settings);
+    spyOn(Display, "hideAlertBackground");    
+    Display.showAlertText(settings);
 
     expect(alertText.style.visibility).toEqual("visible");
     expect(alertText.style.animation).toEqual("");
     expect(Display._animationState).toEqual(AnimationState.NonScrollingText);    
-    expect(Display._transitionState).toEqual(TransitionState.NoTransition);
-    setTimeout (function () {            
+    setTimeout (function () {
+      expect(alertText.className).toEqual("no-scroll");
       expect(Display._animationState).toEqual(AnimationState.NoAnimation);
-      expect(Display.doExitTransition).toHaveBeenCalled();
+      expect(Display.hideAlertBackground).toHaveBeenCalled();
       done();
     }, settings.timeout * 1000);
   });
 });
 
-describe("Display.alertExitTransitionEnd", function () {
-  var alertBackground, alertText;
+describe("Display.hideAlertBackground", function () {
+  var alertBackground;
   beforeEach( function() {
     document.body.innerHTML = "";
     alertBackground = document.createElement("div");
     alertBackground.setAttribute("id", "alert-background");
-    alertBackground.setAttribute("class", "normal");    
+    alertBackground.setAttribute("class", "bg-default");    
     document.body.appendChild(alertBackground);    
-    alertText = document.createElement("p");
-    alertText.setAttribute("id","alert");
-    alertBackground.appendChild(alertText);
   });
   
-
-  it("should set the styles to default on exit transition", function() {
-    Display.alertExitTransitionEnd();
-
-    expect(Display._transitionState).toEqual(TransitionState.NoTransition);
-    expect(alertText.style.visibility).toEqual("hidden");
-    expect(alertBackground.className).toEqual("normal");
+  it("reset the background to default once an aletr has been displayed", function() {
+    spyOn(Display, "displayNextAlert");
+    Display.hideAlertBackground();
+    
+    expect(Display._transitionState).toEqual(TransitionState.ExitTransition);
+    expect(Display._alertState).toEqual(AlertState.NotDisplaying);
+    expect(alertBackground.style.height).toEqual("0%");    
+    expect(alertBackground.className).toEqual("bg-default");    
   });
 });
 

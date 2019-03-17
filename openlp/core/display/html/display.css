@@ -11,8 +11,8 @@
   animation-name: alert-scrolling-text;
 }
 
-/* ALERT STYLING */
-.normal {
+/* ALERT BACKGROUND STYLING */
+.bg-default {
   position: absolute;
   margin: 0;
   padding: 0;
@@ -24,7 +24,7 @@
   visibility:hidden;
 }
 
-.normal.middle {
+.bg-default.middle {
   top: 50%;  
   left: 50%;
   margin-right: -50%;
@@ -32,16 +32,17 @@
   bottom: initial;
 }
 
-.normal.top {
+.bg-default.top {
   top: 0;
   bottom: initial;
 }
 
-.normal.bottom {
+.bg-default.bottom {
   top: initial;
   bottom: 0;
 }
 
+/* ALERT BACKGROUND STYLING */
 #alert {
   position: relative;
   top: 50%;
@@ -51,4 +52,8 @@
   white-space: nowrap;
   color: #ffffff;
   visibility: hidden;
+}
+
+.no-scroll {
+  margin: 0 20px;
 }

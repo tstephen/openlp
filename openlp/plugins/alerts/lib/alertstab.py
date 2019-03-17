@@ -205,6 +205,7 @@ class AlertsTab(SettingsTab):
         self.font_color_button.color = self.font_color
         self.background_color_button.color = self.background_color
         self.repeat_spin_box.setValue(self.repeat)
+        self.repeat_spin_box.setEnabled(self.scroll)
         self.vertical_combo_box.setCurrentIndex(self.location)
         self.scroll_check_box.setChecked(self.scroll)
         font = QtGui.QFont()
