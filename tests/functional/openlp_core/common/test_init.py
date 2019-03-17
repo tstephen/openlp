@@ -309,9 +309,9 @@ class TestInit(TestCase, TestMixin):
         """
         # GIVEN: A mocked UniversalDetector instance with done attribute set to True after first iteration
         with patch('openlp.core.common.UniversalDetector') as mocked_universal_detector, \
-                patch.object(Path, 'open', return_value=BytesIO(b"data" * 260)) as mocked_open:
+                patch.object(Path, 'open', return_value=BytesIO(b'data' * 260)) as mocked_open:
             encoding_result = {'encoding': 'UTF-8', 'confidence': 0.99}
-            mocked_universal_detector_inst = MagicMock(result=encoding_result)
+            mocked_universal_detector_inst = MagicMock(**{'close.return_value': encoding_result})
             type(mocked_universal_detector_inst).done = PropertyMock(side_effect=[False, True])
             mocked_universal_detector.return_value = mocked_universal_detector_inst
 
@@ -320,7 +320,7 @@ class TestInit(TestCase, TestMixin):
 
             # THEN: The feed method of UniversalDetector should only br called once before returning a result
             mocked_open.assert_called_once_with('rb')
-            assert mocked_universal_detector_inst.feed.mock_calls == [call(b"data" * 256)]
+            assert mocked_universal_detector_inst.feed.mock_calls == [call(b'data' * 256)]
             mocked_universal_detector_inst.close.assert_called_once_with()
             assert result == encoding_result
 
@@ -331,10 +331,10 @@ class TestInit(TestCase, TestMixin):
         # GIVEN: A mocked UniversalDetector instance which isn't set to done and a mocked open, with 1040 bytes of test
         #       data (enough to run the iterator twice)
         with patch('openlp.core.common.UniversalDetector') as mocked_universal_detector, \
-                patch.object(Path, 'open', return_value=BytesIO(b"data" * 260)) as mocked_open:
+                patch.object(Path, 'open', return_value=BytesIO(b'data' * 260)) as mocked_open:
             encoding_result = {'encoding': 'UTF-8', 'confidence': 0.99}
             mocked_universal_detector_inst = MagicMock(mock=mocked_universal_detector,
-                                                       **{'done': False, 'result': encoding_result})
+                                                       **{'done': False, 'close.return_value': encoding_result})
             mocked_universal_detector.return_value = mocked_universal_detector_inst
 
             # WHEN: Calling get_file_encoding
@@ -342,7 +342,7 @@ class TestInit(TestCase, TestMixin):
 
             # THEN: The feed method of UniversalDetector should have been called twice before returning a result
             mocked_open.assert_called_once_with('rb')
-            assert mocked_universal_detector_inst.feed.mock_calls == [call(b"data" * 256), call(b"data" * 4)]
+            assert mocked_universal_detector_inst.feed.mock_calls == [call(b'data' * 256), call(b'data' * 4)]
             mocked_universal_detector_inst.close.assert_called_once_with()
             assert result == encoding_result
 
@@ -352,13 +352,19 @@ class TestInit(TestCase, TestMixin):
         """
         # GIVEN: A mocked UniversalDetector instance which isn't set to done and a mocked open, with 1040 bytes of test
         #       data (enough to run the iterator twice)
-        with patch('openlp.core.common.UniversalDetector'), \
+        with patch('openlp.core.common.UniversalDetector') as mocked_universal_detector, \
                 patch('builtins.open', side_effect=OSError), \
                 patch('openlp.core.common.log') as mocked_log:
+            encoding_result = {'encoding': 'UTF-8', 'confidence': 0.99}
+            mocked_universal_detector_inst = MagicMock(mock=mocked_universal_detector,
+                                                       **{'done': False, 'close.return_value': encoding_result})
+            mocked_universal_detector.return_value = mocked_universal_detector_inst
 
             # WHEN: Calling get_file_encoding
             result = get_file_encoding(Path('file name'))
 
             # THEN: log.exception should be called and get_file_encoding should return None
             mocked_log.exception.assert_called_once_with('Error detecting file encoding')
-            assert result is None
+            mocked_universal_detector_inst.feed.assert_not_called()
+            mocked_universal_detector_inst.close.assert_called_once_with()
+            assert result == encoding_result

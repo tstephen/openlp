@@ -179,9 +179,8 @@ class TestShutil(TestCase):
             # WHEN: Calling :func:`openlp.core.common.path.rmtree` with the path parameter as Path object type
             path.rmtree()
 
-            # THEN: :func:`shutil.rmtree` should have been called with the str equivalents of the Path object.
-            mocked_shutil_rmtree.assert_called_once_with(
-                os.path.join('test', 'path'), False, None)
+            # THEN: :func:`shutil.rmtree` should have been called with the the Path object.
+            mocked_shutil_rmtree.assert_called_once_with(Path('test', 'path'), False, None)
 
     def test_rmtree_optional_params(self):
         """
@@ -198,8 +197,7 @@ class TestShutil(TestCase):
 
             # THEN: :func:`shutil.rmtree` should have been called with the optional parameters, with out any of the
             #       values being modified
-            mocked_shutil_rmtree.assert_called_once_with(
-                os.path.join('test', 'path'), True, mocked_on_error)
+            mocked_shutil_rmtree.assert_called_once_with(path, True, mocked_on_error)
 
     def test_which_no_command(self):
         """

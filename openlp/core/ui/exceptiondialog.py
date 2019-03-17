@@ -77,11 +77,11 @@ class Ui_ExceptionDialog(object):
         self.save_report_button = create_button(exception_dialog, 'save_report_button',
                                                 icon=UiIcons().save,
                                                 click=self.on_save_report_button_clicked)
-        self.attach_tile_button = create_button(exception_dialog, 'attach_tile_button',
+        self.attach_file_button = create_button(exception_dialog, 'attach_file_button',
                                                 icon=UiIcons().open,
                                                 click=self.on_attach_file_button_clicked)
         self.button_box = create_button_box(exception_dialog, 'button_box', ['close'],
-                                            [self.send_report_button, self.save_report_button, self.attach_tile_button])
+                                            [self.send_report_button, self.save_report_button, self.attach_file_button])
         self.exception_layout.addWidget(self.button_box)
 
         self.retranslate_ui(exception_dialog)
@@ -112,4 +112,4 @@ class Ui_ExceptionDialog(object):
                       ).format(first_part=exception_part1))
         self.send_report_button.setText(translate('OpenLP.ExceptionDialog', 'Send E-Mail'))
         self.save_report_button.setText(translate('OpenLP.ExceptionDialog', 'Save to File'))
-        self.attach_tile_button.setText(translate('OpenLP.ExceptionDialog', 'Attach File'))
+        self.attach_file_button.setText(translate('OpenLP.ExceptionDialog', 'Attach File'))

@@ -329,8 +329,13 @@ class SongImportForm(OpenLPWizard, RegistryProperties):
             importer = self.plugin.import_songs(
                 source_format,
                 file_paths=self.get_list_of_paths(self.format_widgets[source_format]['file_list_widget']))
-        importer.do_import()
-        self.progress_label.setText(WizardStrings.FinishedImport)
+        try:
+            importer.do_import()
+            self.progress_label.setText(WizardStrings.FinishedImport)
+        except OSError as e:
+            log.exception('Importing songs failed')
+            self.progress_label.setText(translate('SongsPlugin.ImportWizardForm',
+                                                  'Your Song import failed. {error}').format(error=e))
 
     def on_error_copy_to_button_clicked(self):
         """

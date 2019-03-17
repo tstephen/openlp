@@ -27,13 +27,11 @@ import logging
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from openlp.core.common import is_macosx
-from openlp.core.common.i18n import UiStrings, translate
+from openlp.core.common.i18n import translate
 from openlp.core.common.mixins import RegistryProperties
 from openlp.core.common.registry import Registry
-from openlp.core.common.settings import Settings
 from openlp.core.lib.ui import add_welcome_page
 from openlp.core.ui.icons import UiIcons
-from openlp.core.widgets.dialogs import FileDialog
 
 
 log = logging.getLogger(__name__)
@@ -280,41 +278,3 @@ class OpenLPWizard(QtWidgets.QWizard, RegistryProperties):
         self.finish_button.setVisible(True)
         self.cancel_button.setVisible(False)
         self.application.process_events()
-
-    def get_file_name(self, title, editbox, setting_name, filters=''):
-        """
-        Opens a FileDialog and saves the filename to the given editbox.
-
-        :param str title: The title of the dialog.
-        :param QtWidgets.QLineEdit editbox:  An QLineEdit.
-        :param str setting_name: The place where to save the last opened directory.
-        :param str filters: The file extension filters. It should contain the file description
-            as well as the file extension. For example::
-
-                'OpenLP 2 Databases (*.sqlite)'
-        :rtype: None
-        """
-        if filters:
-            filters += ';;'
-        filters += '%s (*)' % UiStrings().AllFiles
-        file_path, filter_used = FileDialog.getOpenFileName(
-            self, title, Settings().value(self.plugin.settings_section + '/' + setting_name), filters)
-        if file_path:
-            editbox.setText(str(file_path))
-            Settings().setValue(self.plugin.settings_section + '/' + setting_name, file_path.parent)
-
-    def get_folder(self, title, editbox, setting_name):
-        """
-        Opens a FileDialog and saves the selected folder to the given editbox.
-
-        :param str title: The title of the dialog.
-        :param QtWidgets.QLineEdit editbox: An QLineEditbox.
-        :param str setting_name: The place where to save the last opened directory.
-        :rtype: None
-        """
-        folder_path = FileDialog.getExistingDirectory(
-            self, title, Settings().value(self.plugin.settings_section + '/' + setting_name),
-            FileDialog.ShowDirsOnly)
-        if folder_path:
-            editbox.setText(str(folder_path))
-            Settings().setValue(self.plugin.settings_section + '/' + setting_name, folder_path)

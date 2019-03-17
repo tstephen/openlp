@@ -542,16 +542,16 @@ class ImageMediaItem(MediaManagerItem):
         image_items.sort(key=lambda item: get_natural_key(item.text(0)))
         target_group.addChildren(image_items)
 
-    def generate_slide_data(self, service_item, item=None, xml_version=False, remote=False,
-                            context=ServiceItemContext.Service):
+    def generate_slide_data(self, service_item, *, item=None, remote=False, context=ServiceItemContext.Service,
+                            **kwargs):
         """
         Generate the slide data. Needs to be implemented by the plugin.
 
         :param service_item: The service item to be built on
         :param item: The Song item to be used
-        :param xml_version: The xml version (not used)
         :param remote: Triggered from remote
         :param context: Why is it being generated
+        :param kwargs: Consume other unused args specified by the base implementation, but not use by this one.
         """
         background = QtGui.QColor(Settings().value(self.settings_section + '/background color'))
         if item:

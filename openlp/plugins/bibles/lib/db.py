@@ -158,11 +158,10 @@ class BibleDB(Manager):
             self.name = kwargs['name']
             if not isinstance(self.name, str):
                 self.name = str(self.name, 'utf-8')
-            # TODO: To path object
-            file_path = Path(clean_filename(self.name) + '.sqlite')
+            self.file_path = Path(clean_filename(self.name) + '.sqlite')
         if 'file' in kwargs:
-            file_path = kwargs['file']
-        Manager.__init__(self, 'bibles', init_schema, file_path, upgrade)
+            self.file_path = kwargs['file']
+        Manager.__init__(self, 'bibles', init_schema, self.file_path, upgrade)
         if self.session and 'file' in kwargs:
             self.get_name()
         self._is_web_bible = None
@@ -750,7 +749,7 @@ class BiblesResourcesDB(QtCore.QObject, Manager):
         ]
 
 
-class AlternativeBookNamesDB(QtCore.QObject, Manager):
+class AlternativeBookNamesDB(Manager):
     """
     This class represents a database-bound alternative book names system.
     """
@@ -765,8 +764,9 @@ class AlternativeBookNamesDB(QtCore.QObject, Manager):
         """
         if AlternativeBookNamesDB.cursor is None:
             file_path = AppLocation.get_directory(AppLocation.DataDir) / 'bibles' / 'alternative_book_names.sqlite'
+            exists = file_path.exists()
             AlternativeBookNamesDB.conn = sqlite3.connect(str(file_path))
-            if not file_path.exists():
+            if not exists:
                 # create new DB, create table alternative_book_names
                 AlternativeBookNamesDB.conn.execute(
                     'CREATE TABLE alternative_book_names(id INTEGER NOT NULL, '

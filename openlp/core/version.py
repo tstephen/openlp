@@ -200,7 +200,7 @@ def get_library_versions():
     """
     library_versions = OrderedDict([(library, _get_lib_version(*args)) for library, args in LIBRARIES.items()])
     # Just update the dict for display purposes, changing the None to a '-'
-    for library, version in library_versions:
+    for library, version in library_versions.items():
         if version is None:
             library_versions[library] = '-'
     return library_versions

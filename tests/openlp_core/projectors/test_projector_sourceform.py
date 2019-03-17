@@ -83,8 +83,8 @@ class ProjectorSourceFormTest(TestCase, TestMixin):
         Delete all C++ objects at end so we don't segfault.
         """
         self.projectordb.session.close()
-        del(self.projectordb)
-        del(self.projector)
+        del self.projectordb
+        del self.projector
         retries = 0
         while retries < 5:
             try:
