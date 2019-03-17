@@ -25,7 +25,6 @@ The service manager sets up, loads, saves and manages services.
 import html
 import json
 import os
-import shutil
 import zipfile
 from contextlib import suppress
 from datetime import datetime, timedelta

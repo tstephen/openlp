@@ -251,6 +251,7 @@ class CCLIFileImport(SongImport):
         line_number = 0
         check_first_verse_line = False
         verse_text = ''
+        verse_type = VerseType.tags[VerseType.Verse]
         song_author = ''
         verse_start = False
         for line in text_list:
@@ -262,6 +263,7 @@ class CCLIFileImport(SongImport):
                     if verse_text:
                         self.add_verse(verse_text, verse_type)
                         verse_text = ''
+                        verse_type = VerseType.tags[VerseType.Verse]
                         verse_start = False
             else:
                 # line_number=0, song title

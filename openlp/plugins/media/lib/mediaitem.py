@@ -29,7 +29,7 @@ from openlp.core.state import State
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.i18n import UiStrings, get_natural_key, translate
 from openlp.core.common.mixins import RegistryProperties
-from openlp.core.common.path import Path, create_paths, path_to_str
+from openlp.core.common.path import create_paths, path_to_str
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.lib import MediaType, ServiceItemContext, check_item_selected
