@@ -263,7 +263,7 @@ class ServiceItem(RegistryProperties):
             file_location = os.path.join(path, file_name)
             file_location_hash = md5_hash(file_location.encode('utf-8'))
             image = os.path.join(str(AppLocation.get_section_data_path(self.name)), 'thumbnails',
-                                 file_location_hash, ntpath.basename(image))  #TODO: Pathlib
+                                 file_location_hash, ntpath.basename(image))  # TODO: Pathlib
         self.slides.append({'title': file_name, 'image': image, 'path': path, 'display_title': display_title,
                             'notes': notes, 'thumbnail': image})
         # if self.is_capable(ItemCapabilities.HasThumbnails):

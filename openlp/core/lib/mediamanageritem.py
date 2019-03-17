@@ -454,14 +454,13 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
         """
         pass
 
-    def generate_slide_data(self, service_item, *, item=None, xml_version=False, remote=False,
-                            context=ServiceItemContext.Live, file_path=None):
+    def generate_slide_data(self, service_item, *, item=None, remote=False, context=ServiceItemContext.Live,
+                            file_path=None):
         """
         Generate the slide data. Needs to be implemented by the plugin.
 
         :param service_item: The service Item to be processed
         :param item: The database item to be used to build the service item
-        :param xml_version:
         :param remote: Was this remote triggered (False)
         :param context: The service context
         :param openlp.core.common.path.Path file_path:
@@ -626,17 +625,16 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
                                                             'You must select a {title} '
                                                             'service item.').format(title=self.title))
 
-    def build_service_item(self, item=None, xml_version=False, remote=False, context=ServiceItemContext.Live):
+    def build_service_item(self, item=None, remote=False, context=ServiceItemContext.Live):
         """
         Common method for generating a service item
         :param item: Service Item to be built.
-        :param xml_version: version of XML (False)
         :param remote: Remote triggered (False)
         :param context: The context on which this is called
         """
         service_item = ServiceItem(self.plugin)
         service_item.add_icon()
-        if self.generate_slide_data(service_item, item=item, xml_version=xml_version, remote=remote, context=context):
+        if self.generate_slide_data(service_item, item=item, remote=remote, context=context):
             return service_item
         else:
             return None

@@ -150,7 +150,7 @@ def handle_db_error(plugin_name, db_file_path):
     Log and report to the user that a database cannot be loaded
 
     :param plugin_name: Name of plugin
-    :param  openlp.core.common.path.Path db_file_path: File name of database
+    :param openlp.core.common.path.Path db_file_path: File name of database
     :return: None
     """
     db_path = get_db_path(plugin_name, db_file_path)
