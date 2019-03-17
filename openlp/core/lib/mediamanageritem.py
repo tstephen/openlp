@@ -454,15 +454,17 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
         """
         pass
 
-    def generate_slide_data(self, service_item, item=None, xml_version=False, remote=False,
-                            context=ServiceItemContext.Live):
+    def generate_slide_data(self, service_item, *, item=None, xml_version=False, remote=False,
+                            context=ServiceItemContext.Live, file_path=None):
         """
         Generate the slide data. Needs to be implemented by the plugin.
+
         :param service_item: The service Item to be processed
         :param item: The database item to be used to build the service item
         :param xml_version:
         :param remote: Was this remote triggered (False)
         :param context: The service context
+        :param openlp.core.common.path.Path file_path:
         """
         raise NotImplementedError('MediaManagerItem.generate_slide_data needs to be defined by the plugin')
 
@@ -634,7 +636,7 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
         """
         service_item = ServiceItem(self.plugin)
         service_item.add_icon()
-        if self.generate_slide_data(service_item, item, xml_version, remote, context):
+        if self.generate_slide_data(service_item, item=item, xml_version=xml_version, remote=remote, context=context):
             return service_item
         else:
             return None

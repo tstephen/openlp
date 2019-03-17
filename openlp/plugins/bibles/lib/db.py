@@ -158,7 +158,6 @@ class BibleDB(Manager):
             self.name = kwargs['name']
             if not isinstance(self.name, str):
                 self.name = str(self.name, 'utf-8')
-            # TODO: To path object
             self.file_path = Path(clean_filename(self.name) + '.sqlite')
         if 'file' in kwargs:
             self.file_path = kwargs['file']

@@ -263,15 +263,13 @@ def create_thumb(image_path, thumb_path, return_icon=True, size=None):
     """
     Create a thumbnail from the given image path and depending on ``return_icon`` it returns an icon from this thumb.
 
-    :param image_path: The image file to create the icon from.
-    :param thumb_path: The filename to save the thumbnail to.
+    :param openlp.core.common.path.Path image_path: The image file to create the icon from.
+    :param openlp.core.common.path.Path thumb_path: The filename to save the thumbnail to.
     :param return_icon: States if an icon should be build and returned from the thumb. Defaults to ``True``.
     :param size: Allows to state a own size (QtCore.QSize) to use. Defaults to ``None``, which means that a default
      height of 88 is used.
     :return: The final icon.
     """
-    # TODO: To path object
-    thumb_path = Path(thumb_path)
     reader = QtGui.QImageReader(str(image_path))
     if size is None:
         # No size given; use default height of 88

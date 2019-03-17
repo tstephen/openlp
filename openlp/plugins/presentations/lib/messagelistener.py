@@ -337,14 +337,8 @@ class MessageListener(object):
             # Create a copy of the original item, and then clear the original item so it can be filled with images
             item_cpy = copy.copy(item)
             item.__init__(None)
-            if is_live:
-                # TODO: To Path object
-                self.media_item.generate_slide_data(item, item_cpy, False, False, ServiceItemContext.Live,
-                                                    str(file_path))
-            else:
-                # TODO: To Path object
-                self.media_item.generate_slide_data(item, item_cpy, False, False, ServiceItemContext.Preview,
-                                                    str(file_path))
+            context = ServiceItemContext.Live if is_live else ServiceItemContext.Preview
+            self.media_item.generate_slide_data(item, item=item_cpy, context=context, file_path=file_path)
             # Some of the original serviceitem attributes is needed in the new serviceitem
             item.footer = item_cpy.footer
             item.from_service = item_cpy.from_service

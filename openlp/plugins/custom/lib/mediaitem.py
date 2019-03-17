@@ -219,15 +219,12 @@ class CustomMediaItem(MediaManagerItem):
         self.search_text_edit.setFocus()
         self.search_text_edit.selectAll()
 
-    def generate_slide_data(self, service_item, item=None, xml_version=False,
-                            remote=False, context=ServiceItemContext.Service):
+    def generate_slide_data(self, service_item, *, item=None, **kwargs):
         """
         Generate the slide data. Needs to be implemented by the plugin.
         :param service_item: To be updated
         :param item: The custom database item to be used
-        :param xml_version: No used
-        :param remote: Is this triggered by the Preview Controller or Service Manager.
-        :param context: Why is this item required to be build (Default Service).
+        :param kwargs: Consume other unused args specified by the base implementation, but not use by this one.
         """
         item_id = self._get_id_of_item_to_generate(item, self.remote_custom)
         service_item.add_capability(ItemCapabilities.CanEdit)
