@@ -62,7 +62,6 @@ class SettingsForm(QtWidgets.QDialog, Ui_SettingsDialog, RegistryProperties):
         self.themes_tab = None
         self.projector_tab = None
         self.advanced_tab = None
-        self.player_tab = None
         self.api_tab = None
 
     def exec(self):
@@ -156,18 +155,16 @@ class SettingsForm(QtWidgets.QDialog, Ui_SettingsDialog, RegistryProperties):
         """
         Run any post-setup code for the tabs on the form
         """
-        # General tab
-        self.general_tab = GeneralTab(self)
-        # Themes tab
-        self.themes_tab = ThemesTab(self)
-        # Projector Tab
-        self.projector_tab = ProjectorTab(self)
-        # Advanced tab
-        self.advanced_tab = AdvancedTab(self)
-        # Advanced tab
-        self.player_tab = MediaTab(self)
-        # Api tab
-        self.api_tab = ApiTab(self)
+        try:
+            self.general_tab = GeneralTab(self)
+            self.themes_tab = ThemesTab(self)
+            self.projector_tab = ProjectorTab(self)
+            self.advanced_tab = AdvancedTab(self)
+            self.player_tab = MediaTab(self)
+            self.api_tab = ApiTab(self)
+            self.screens_tab = ScreensTab(self)
+        except Exception as e:
+            print(e)
         self.general_tab.post_set_up()
         self.themes_tab.post_set_up()
         self.advanced_tab.post_set_up()

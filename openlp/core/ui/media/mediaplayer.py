@@ -52,11 +52,12 @@ class MediaPlayer(RegistryProperties):
         """
         return False
 
-    def setup(self, display):
+    def setup(self, display, live_display):
         """
         Create the related widgets for the current display
 
         :param display: The display to be updated.
+        :param live_display: Is the display a live one.
         """
         pass
 
@@ -78,10 +79,11 @@ class MediaPlayer(RegistryProperties):
         """
         pass
 
-    def play(self, display):
+    def play(self, controller, display):
         """
         Starts playing of current Media File
 
+        :param controller: Which Controller is running the show.
         :param display: The display to be updated.
         """
         pass
@@ -206,7 +208,7 @@ class MediaPlayer(RegistryProperties):
         :param display: Identify the Display type
         :return: None
         """
-        if display.controller.is_live:
+        if display.is_display:
             self.set_live_state(state)
         else:
             self.set_preview_state(state)

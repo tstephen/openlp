@@ -51,12 +51,12 @@ class MediaTab(SettingsTab):
         player_translated = translate('OpenLP.MediaTab', 'Media')
         super(MediaTab, self).__init__(parent, 'Media', player_translated)
 
-    def setupUi(self):
+    def setup_ui(self):
         """
         Set up the UI
         """
         self.setObjectName('MediaTab')
-        super(MediaTab, self).setupUi()
+        super(MediaTab, self).setup_ui()
         self.live_media_group_box = QtWidgets.QGroupBox(self.left_column)
         self.live_media_group_box.setObjectName('live_media_group_box')
         self.media_layout = QtWidgets.QVBoxLayout(self.live_media_group_box)
