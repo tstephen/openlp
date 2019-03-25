@@ -315,7 +315,7 @@ var Display = {
     section.setAttribute("style", "height: 100%; width: 100%; position: relative;");
     var img = document.createElement('img');
     img.src = image;
-    img.setAttribute("style", "position: absolute; top: 0; bottom: 0; left: 0; right: 0; margin: auto;");
+    img.setAttribute("style", "position: absolute; top: 0; bottom: 0; left: 0; right: 0; margin: auto; max-height: 100%; max-width: 100%");
     section.appendChild(img);
     slidesDiv.appendChild(section);
     Display._slides['0'] = 0;

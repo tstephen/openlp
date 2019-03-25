@@ -24,6 +24,7 @@
 The entrypoint for OpenLP
 """
 import faulthandler
+import logging
 import multiprocessing
 import sys
 
@@ -34,14 +35,19 @@ from openlp.core.common import is_macosx, is_win
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.path import create_paths
 
+log = logging.getLogger(__name__)
+
 
 def set_up_fault_handling():
     """
     Set up the Python fault handler
     """
     # Create the cache directory if it doesn't exist, and enable the fault handler to log to an error log file
-    create_paths(AppLocation.get_directory(AppLocation.CacheDir))
-    faulthandler.enable((AppLocation.get_directory(AppLocation.CacheDir) / 'error.log').open('wb'))
+    try:
+        create_paths(AppLocation.get_directory(AppLocation.CacheDir))
+        faulthandler.enable((AppLocation.get_directory(AppLocation.CacheDir) / 'error.log').open('wb'))
+    except OSError:
+        log.exception('An exception occurred when enabling the fault handler')
 
 
 def start():

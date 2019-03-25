@@ -24,7 +24,7 @@ Package to test for proper bzr tags.
 """
 import os
 from subprocess import PIPE, Popen
-from unittest import TestCase
+from unittest import TestCase, SkipTest
 
 
 TAGS1 = {'1.9.0', '1.9.1', '1.9.2', '1.9.3', '1.9.4', '1.9.5', '1.9.6', '1.9.7', '1.9.8', '1.9.9', '1.9.10',
@@ -42,7 +42,10 @@ class TestBzrTags(TestCase):
         path = os.path.dirname(__file__)
 
         # WHEN getting the branches tags
-        bzr = Popen(('bzr', 'tags', '--directory=' + path), stdout=PIPE)
+        try:
+            bzr = Popen(('bzr', 'tags', '--directory=' + path), stdout=PIPE)
+        except Exception:
+            raise SkipTest('bzr is not installed')
         std_out = bzr.communicate()[0]
         count = len(TAGS1)
         tags = [line.decode('utf-8').split()[0] for line in std_out.splitlines()]

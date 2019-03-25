@@ -78,7 +78,7 @@ class Path(PathVariant):
         :param onerror: Handler function to handle any errors
         :rtype: None
         """
-        shutil.rmtree(str(self), ignore_errors, onerror)
+        shutil.rmtree(self, ignore_errors, onerror)
 
 
 def replace_params(args, kwargs, params):

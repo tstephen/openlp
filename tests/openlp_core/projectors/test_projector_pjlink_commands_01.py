@@ -452,12 +452,16 @@ class TestPJLinkCommands(TestCase):
         """
         Test saving video source available information
         """
+
         # GIVEN: Test object
         with patch.object(openlp.core.projectors.pjlink, 'log') as mock_log:
             pjlink = PJLink(Projector(**TEST1_DATA), no_poll=True)
             pjlink.source_available = []
-            log_debug_calls = [call('({ip}) Setting projector sources_available to '
+            log_debug_calls = [call('({ip}) reset_information() connect status is '
+                                    'S_NOT_CONNECTED'.format(ip=pjlink.name)),
+                               call('({ip}) Setting projector source_available to '
                                     '"[\'11\', \'12\', \'21\', \'22\', \'31\', \'32\']"'.format(ip=pjlink.name))]
+
             chk_data = '21 12 11 22 32 31'  # Although they should already be sorted, use unsorted to verify method
             chk_test = ['11', '12', '21', '22', '31', '32']
 
@@ -601,9 +605,9 @@ class TestPJLinkCommands(TestCase):
 
             # THEN: Power should be set to ON
             assert pjlink.power == S_STANDBY, 'Power should not have changed'
-            assert mock_UpdateIcons.emit.called is False, 'projectorUpdateIcons() should not have been called'
-            mock_change_status.called is False, 'change_status() should not have been called'
-            mock_send_command.called is False, 'send_command() should not have been called'
+            mock_UpdateIcons.emit.assert_not_called()
+            mock_change_status.assert_not_called()
+            mock_send_command.assert_not_called()
             mock_log.warning.assert_has_calls(log_warn_calls)
 
     def test_projector_process_powr_off(self):
@@ -623,9 +627,9 @@ class TestPJLinkCommands(TestCase):
 
             # THEN: Power should be set to ON
             assert pjlink.power == S_STANDBY, 'Power should have changed to S_STANDBY'
-            assert mock_UpdateIcons.emit.called is True, 'projectorUpdateIcons should have been called'
-            mock_change_status.called is True, 'change_status should have been called'
-            mock_send_command.called is False, 'send_command should not have been called'
+            mock_UpdateIcons.emit.assert_called_with()
+            mock_change_status.assert_called_with(313)
+            mock_send_command.assert_not_called()
 
     def test_projector_process_rfil_save(self):
         """

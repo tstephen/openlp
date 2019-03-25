@@ -25,40 +25,69 @@ Package to test the openlp.core.ui.firsttimeform package.
 import os
 import tempfile
 from unittest import TestCase
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import MagicMock, call, patch, DEFAULT
 
 from openlp.core.common.path import Path
 from openlp.core.common.registry import Registry
-from openlp.core.ui.firsttimeform import FirstTimeForm
+from openlp.core.ui.firsttimeform import FirstTimeForm, ThemeListWidgetItem
 from tests.helpers.testmixin import TestMixin
 
 
-FAKE_CONFIG = """
-[general]
-base url = http://example.com/frw/
-[songs]
-directory = songs
-[bibles]
-directory = bibles
-[themes]
-directory = themes
+INVALID_CONFIG = """
+{
+  "_comments": "The most recent version should be added to https://openlp.org/files/frw/download_3.0.json",
+  "_meta": {
+}
 """
 
-FAKE_BROKEN_CONFIG = """
-[general]
-base url = http://example.com/frw/
-[songs]
-directory = songs
-[bibles]
-directory = bibles
-"""
 
-FAKE_INVALID_CONFIG = """
-<html>
-<head><title>This is not a config file</title></head>
-<body>Some text</body>
-</html>
-"""
+class TestThemeListWidgetItem(TestCase):
+    """
+    Test the :class:`ThemeListWidgetItem` class
+    """
+    def setUp(self):
+        self.sample_theme_data = {'file_name': 'BlueBurst.otz', 'sha256': 'sha_256_hash',
+                                  'thumbnail': 'BlueBurst.png', 'title': 'Blue Burst'}
+        download_worker_patcher = patch('openlp.core.ui.firsttimeform.DownloadWorker')
+        self.addCleanup(download_worker_patcher.stop)
+        self.mocked_download_worker = download_worker_patcher.start()
+        run_thread_patcher = patch('openlp.core.ui.firsttimeform.run_thread')
+        self.addCleanup(run_thread_patcher.stop)
+        self.mocked_run_thread = run_thread_patcher.start()
+
+    def test_init_sample_data(self):
+        """
+        Test that the theme data is loaded correctly in to a ThemeListWidgetItem object when instantiated
+        """
+        # GIVEN: A sample theme dictanary object
+        # WHEN: Creating an instance of `ThemeListWidgetItem`
+        instance = ThemeListWidgetItem('url', self.sample_theme_data, MagicMock())
+
+        # THEN: The data should have been set correctly
+        assert instance.file_name == 'BlueBurst.otz'
+        assert instance.sha256 == 'sha_256_hash'
+        assert instance.text() == 'Blue Burst'
+        assert instance.toolTip() == 'Blue Burst'
+        self.mocked_download_worker.assert_called_once_with('url', 'BlueBurst.png')
+
+    def test_init_download_worker(self):
+        """
+        Test that the `DownloadWorker` worker is set up correctly and that the thread is started.
+        """
+        # GIVEN: A sample theme dictanary object
+        mocked_ftw = MagicMock(spec=FirstTimeForm)
+        mocked_ftw.thumbnail_download_threads = []
+
+        # WHEN: Creating an instance of `ThemeListWidgetItem`
+        instance = ThemeListWidgetItem('url', self.sample_theme_data, mocked_ftw)
+
+        # THEN: The `DownloadWorker` should have been set up with the appropriate data
+        self.mocked_download_worker.assert_called_once_with('url', 'BlueBurst.png')
+        self.mocked_download_worker.download_failed.connect.called_once_with(instance._on_download_failed())
+        self.mocked_download_worker.download_succeeded.connect.called_once_with(instance._on_thumbnail_downloaded)
+        self.mocked_run_thread.assert_called_once_with(
+            self.mocked_download_worker(), 'thumbnail_download_BlueBurst.png')
+        assert mocked_ftw.thumbnail_download_threads == ['thumbnail_download_BlueBurst.png']
 
 
 class TestFirstTimeForm(TestCase, TestMixin):
@@ -92,7 +121,7 @@ class TestFirstTimeForm(TestCase, TestMixin):
         assert expected_screens == frw.screens, 'The screens should be correct'
         assert frw.web_access is True, 'The default value of self.web_access should be True'
         assert frw.was_cancelled is False, 'The default value of self.was_cancelled should be False'
-        assert [] == frw.theme_screenshot_threads, 'The list of threads should be empty'
+        assert [] == frw.thumbnail_download_threads, 'The list of threads should be empty'
         assert frw.has_run_wizard is False, 'has_run_wizard should be False'
 
     def test_set_defaults(self):
@@ -109,6 +138,7 @@ class TestFirstTimeForm(TestCase, TestMixin):
                 patch.object(frw, 'no_internet_finish_button') as mocked_no_internet_finish_btn, \
                 patch.object(frw, 'currentIdChanged') as mocked_currentIdChanged, \
                 patch.object(frw, 'theme_combo_box') as mocked_theme_combo_box, \
+                patch.object(frw, 'songs_check_box') as mocked_songs_check_box, \
                 patch.object(Registry, 'register_function') as mocked_register_function, \
                 patch('openlp.core.ui.firsttimeform.Settings', return_value=mocked_settings), \
                 patch('openlp.core.ui.firsttimeform.gettempdir', return_value='temp') as mocked_gettempdir, \
@@ -122,7 +152,7 @@ class TestFirstTimeForm(TestCase, TestMixin):
 
             # THEN: The default values should have been set
             mocked_restart.assert_called_once()
-            assert 'http://openlp.org/files/frw/' == frw.web, 'The default URL should be set'
+            assert 'https://get.openlp.org/ftw/' == frw.web, 'The default URL should be set'
             mocked_cancel_button.clicked.connect.assert_called_once_with(frw.on_cancel_button_clicked)
             mocked_no_internet_finish_btn.clicked.connect.assert_called_once_with(
                 frw.on_no_internet_finish_button_clicked)
@@ -134,6 +164,7 @@ class TestFirstTimeForm(TestCase, TestMixin):
             mocked_create_paths.assert_called_once_with(Path('temp', 'openlp'))
             mocked_theme_combo_box.clear.assert_called_once()
             mocked_theme_manager.assert_not_called()
+            mocked_songs_check_box.assert_not_called()
 
     def test_set_defaults_rerun(self):
         """
@@ -150,12 +181,17 @@ class TestFirstTimeForm(TestCase, TestMixin):
                 patch.object(frw, 'no_internet_finish_button') as mocked_no_internet_finish_btn, \
                 patch.object(frw, 'currentIdChanged') as mocked_currentIdChanged, \
                 patch.object(frw, 'theme_combo_box', **{'findText.return_value': 3}) as mocked_theme_combo_box, \
+                patch.multiple(frw, songs_check_box=DEFAULT, bible_check_box=DEFAULT, presentation_check_box=DEFAULT,
+                               image_check_box=DEFAULT, media_check_box=DEFAULT, custom_check_box=DEFAULT,
+                               song_usage_check_box=DEFAULT, alert_check_box=DEFAULT), \
                 patch.object(Registry, 'register_function') as mocked_register_function, \
                 patch('openlp.core.ui.firsttimeform.Settings', return_value=mocked_settings), \
                 patch('openlp.core.ui.firsttimeform.gettempdir', return_value='temp') as mocked_gettempdir, \
                 patch('openlp.core.ui.firsttimeform.create_paths') as mocked_create_paths, \
                 patch.object(frw.application, 'set_normal_cursor'):
-            mocked_theme_manager = MagicMock(**{'get_themes.return_value': ['a', 'b', 'c']})
+            mocked_plugin_manager = MagicMock()
+            mocked_theme_manager = MagicMock(**{'get_themes.return_value': ['b', 'a', 'c']})
+            Registry().register('plugin_manager', mocked_plugin_manager)
             Registry().register('theme_manager', mocked_theme_manager)
 
             # WHEN: The set_defaults() method is run
@@ -163,7 +199,7 @@ class TestFirstTimeForm(TestCase, TestMixin):
 
             # THEN: The default values should have been set
             mocked_restart.assert_called_once()
-            assert 'http://openlp.org/files/frw/' == frw.web, 'The default URL should be set'
+            assert 'https://get.openlp.org/ftw/' == frw.web, 'The default URL should be set'
             mocked_cancel_button.clicked.connect.assert_called_once_with(frw.on_cancel_button_clicked)
             mocked_no_internet_finish_btn.clicked.connect.assert_called_once_with(
                 frw.on_no_internet_finish_button_clicked)
@@ -173,9 +209,13 @@ class TestFirstTimeForm(TestCase, TestMixin):
             mocked_settings.value.assert_has_calls([call('core/has run wizard'), call('themes/global theme')])
             mocked_gettempdir.assert_called_once()
             mocked_create_paths.assert_called_once_with(Path('temp', 'openlp'))
-            mocked_theme_manager.assert_not_called()
+            mocked_theme_manager.get_themes.assert_called_once()
             mocked_theme_combo_box.clear.assert_called_once()
-            mocked_theme_combo_box.addItem.assert_has_calls([call('a'), call('b'), call('c')])
+            mocked_plugin_manager.get_plugin_by_name.assert_has_calls(
+                [call('songs'), call('bibles'), call('presentations'), call('images'), call('media'), call('custom'),
+                 call('songusage'), call('alerts')], any_order=True)
+            mocked_plugin_manager.get_plugin_by_name.assert_has_calls([call().is_active()] * 8, any_order=True)
+            mocked_theme_combo_box.addItems.assert_called_once_with(['a', 'b', 'c'])
             mocked_theme_combo_box.findText.assert_called_once_with('Default Theme')
             mocked_theme_combo_box.setCurrentIndex(3)
 
@@ -192,7 +232,7 @@ class TestFirstTimeForm(TestCase, TestMixin):
         mocked_is_thread_finished.side_effect = [False, True]
         frw = FirstTimeForm(None)
         frw.initialize(MagicMock())
-        frw.theme_screenshot_threads = ['test_thread']
+        frw.thumbnail_download_threads = ['test_thread']
         with patch.object(frw.application, 'set_normal_cursor') as mocked_set_normal_cursor:
 
             # WHEN: on_cancel_button_clicked() is called
@@ -201,43 +241,26 @@ class TestFirstTimeForm(TestCase, TestMixin):
             # THEN: The right things should be called in the right order
             assert frw.was_cancelled is True, 'The was_cancelled property should have been set to True'
             mocked_get_thread_worker.assert_called_once_with('test_thread')
-            mocked_worker.set_download_canceled.assert_called_with(True)
+            mocked_worker.cancel_download.assert_called_once()
             mocked_is_thread_finished.assert_called_with('test_thread')
             assert mocked_is_thread_finished.call_count == 2, 'isRunning() should have been called twice'
             mocked_time.sleep.assert_called_once_with(0.1)
             mocked_set_normal_cursor.assert_called_once_with()
 
-    def test_broken_config(self):
+    @patch('openlp.core.ui.firsttimeform.critical_error_message_box')
+    def test__parse_config_invalid_config(self, mocked_critical_error_message_box):
         """
-        Test if we can handle an config file with missing data
+        Test `FirstTimeForm._parse_config` when called with invalid data
         """
-        # GIVEN: A mocked get_web_page, a First Time Wizard, an expected screen object, and a mocked broken config file
-        with patch('openlp.core.ui.firsttimeform.get_web_page') as mocked_get_web_page:
-            first_time_form = FirstTimeForm(None)
-            first_time_form.initialize(MagicMock())
-            mocked_get_web_page.return_value = FAKE_BROKEN_CONFIG
+        # GIVEN: An instance of `FirstTimeForm`
+        first_time_form = FirstTimeForm(None)
 
-            # WHEN: The First Time Wizard is downloads the config file
-            first_time_form._download_index()
+        # WHEN: Calling _parse_config with a string containing invalid data
+        result = first_time_form._parse_config(INVALID_CONFIG)
 
-            # THEN: The First Time Form should not have web access
-            assert first_time_form.web_access is False, 'There should not be web access with a broken config file'
-
-    def test_invalid_config(self):
-        """
-        Test if we can handle an config file in invalid format
-        """
-        # GIVEN: A mocked get_web_page, a First Time Wizard, an expected screen object, and a mocked invalid config file
-        with patch('openlp.core.ui.firsttimeform.get_web_page') as mocked_get_web_page:
-            first_time_form = FirstTimeForm(None)
-            first_time_form.initialize(MagicMock())
-            mocked_get_web_page.return_value = FAKE_INVALID_CONFIG
-
-            # WHEN: The First Time Wizard is downloads the config file
-            first_time_form._download_index()
-
-            # THEN: The First Time Form should not have web access
-            assert first_time_form.web_access is False, 'There should not be web access with an invalid config file'
+        # THEN: _parse_data should return False and the user should have should have been informed.
+        assert result is False
+        mocked_critical_error_message_box.assert_called_once()
 
     @patch('openlp.core.ui.firsttimeform.get_web_page')
     @patch('openlp.core.ui.firsttimeform.QtWidgets.QMessageBox')

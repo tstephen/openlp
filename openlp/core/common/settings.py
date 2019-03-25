@@ -542,7 +542,7 @@ class Settings(QtCore.QSettings):
                         old_values = [self._convert_value(old_value, default_value)
                                       for old_value, default_value in zip(old_values, default_values)]
                     # Iterate over our rules and check what the old_value should be "converted" to.
-                    new_value = None
+                    new_value = old_values[0]
                     for new_rule, old_rule in rules:
                         # If the value matches with the condition (rule), then use the provided value. This is used to
                         # convert values. E. g. an old value 1 results in True, and 0 in False.

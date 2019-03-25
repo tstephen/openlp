@@ -463,14 +463,14 @@ class BibleImportForm(OpenLPWizard):
                         UiStrings().NFSs, translate('BiblesPlugin.ImportWizardForm',
                                                     'You need to specify a file with books of the Bible to use in the '
                                                     'import.'))
-                    self.csv_books_edit.setFocus()
+                    self.csv_books_path_edit.setFocus()
                     return False
                 elif not self.field('csv_versefile'):
                     critical_error_message_box(
                         UiStrings().NFSs,
                         translate('BiblesPlugin.ImportWizardForm', 'You need to specify a file of Bible verses to '
                                                                    'import.'))
-                    self.csv_verses_edit.setFocus()
+                    self.csv_verses_pathedit.setFocus()
                     return False
             elif self.field('source_format') == BibleFormat.OpenSong:
                 if not self.field('opensong_file'):

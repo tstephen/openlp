@@ -134,6 +134,7 @@ class TestProjectorDB(TestCase, TestMixin):
         """
         Set up anything necessary for all tests
         """
+        self.tmp_folder = mkdtemp(prefix='openlp_')
         # Create a test app to keep from segfaulting
         Registry.create()
         self.registry = Registry()
@@ -153,11 +154,11 @@ class TestProjectorDB(TestCase, TestMixin):
                 patch('openlp.core.ui.mainwindow.ThemeManager'), \
                 patch('openlp.core.ui.mainwindow.ProjectorManager'), \
                 patch('openlp.core.ui.mainwindow.websockets.WebSocketServer'), \
-                patch('openlp.core.ui.mainwindow.server.HttpServer'):
+                patch('openlp.core.ui.mainwindow.server.HttpServer'), \
+                patch('openlp.core.state.State.list_plugins') as mock_plugins:
+            mock_plugins.return_value = []
             self.main_window = MainWindow()
 
-        # Create a temporary database directory and database
-        self.tmp_folder = mkdtemp(prefix='openlp_')
         tmpdb_url = 'sqlite:///{db}'.format(db=os.path.join(self.tmp_folder, TEST_DB))
         mocked_init_url.return_value = tmpdb_url
         self.projector = ProjectorDB()

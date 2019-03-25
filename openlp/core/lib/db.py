@@ -132,8 +132,9 @@ def get_db_path(plugin_name, db_file_name=None):
     Create a path to a database from the plugin name and database name
 
     :param plugin_name: Name of plugin
-    :param db_file_name: File name of database
-    :return: The path to the database as type str
+    :param openlp.core.common.path.Path | str | None db_file_name: File name of database
+    :return: The path to the database
+    :rtype: str
     """
     if db_file_name is None:
         return 'sqlite:///{path}/{plugin}.sqlite'.format(path=AppLocation.get_section_data_path(plugin_name),
@@ -144,15 +145,15 @@ def get_db_path(plugin_name, db_file_name=None):
         return 'sqlite:///{path}/{name}'.format(path=AppLocation.get_section_data_path(plugin_name), name=db_file_name)
 
 
-def handle_db_error(plugin_name, db_file_name):
+def handle_db_error(plugin_name, db_file_path):
     """
     Log and report to the user that a database cannot be loaded
 
     :param plugin_name: Name of plugin
-    :param db_file_name: File name of database
+    :param openlp.core.common.path.Path db_file_path: File name of database
     :return: None
     """
-    db_path = get_db_path(plugin_name, db_file_name)
+    db_path = get_db_path(plugin_name, db_file_path)
     log.exception('Error loading database: {db}'.format(db=db_path))
     critical_error_message_box(translate('OpenLP.Manager', 'Database Error'),
                                translate('OpenLP.Manager',
@@ -161,10 +162,13 @@ def handle_db_error(plugin_name, db_file_name):
 
 def init_url(plugin_name, db_file_name=None):
     """
-    Return the database URL.
+    Construct the connection string for a database.
 
     :param plugin_name: The name of the plugin for the database creation.
-    :param db_file_name: The database file name. Defaults to None resulting in the plugin_name being used.
+    :param openlp.core.common.path.Path | str | None db_file_name: The database file name. Defaults to None resulting
+                                                                   in the plugin_name being used.
+    :return: The database URL
+    :rtype: str
     """
     settings = Settings()
     settings.beginGroup(plugin_name)
@@ -345,7 +349,7 @@ class Manager(object):
         Runs the initialisation process that includes creating the connection to the database and the tables if they do
         not exist.
 
-        :param plugin_name:  The name to setup paths and settings section names
+        :param plugin_name: The name to setup paths and settings section names
         :param init_schema: The init_schema function for this database
         :param openlp.core.common.path.Path db_file_path: The file name to use for this database. Defaults to None
             resulting in the plugin_name being used.
@@ -357,14 +361,14 @@ class Manager(object):
         self.db_url = None
         if db_file_path:
             log.debug('Manager: Creating new DB url')
-            self.db_url = init_url(plugin_name, str(db_file_path))
+            self.db_url = init_url(plugin_name, str(db_file_path))  # TOdO :PATHLIB
         else:
             self.db_url = init_url(plugin_name)
         if upgrade_mod:
             try:
                 db_ver, up_ver = upgrade_db(self.db_url, upgrade_mod)
             except (SQLAlchemyError, DBAPIError):
-                handle_db_error(plugin_name, str(db_file_path))
+                handle_db_error(plugin_name, db_file_path)
                 return
             if db_ver > up_ver:
                 critical_error_message_box(
@@ -379,7 +383,7 @@ class Manager(object):
             try:
                 self.session = init_schema(self.db_url)
             except (SQLAlchemyError, DBAPIError):
-                handle_db_error(plugin_name, str(db_file_path))
+                handle_db_error(plugin_name, db_file_path)
         else:
             self.session = session
 

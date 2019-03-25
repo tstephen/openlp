@@ -141,7 +141,7 @@ class TestServiceItem(TestCase, TestMixin):
         """
         # GIVEN: A new service item and a mocked add icon function
         image_name = 'image_1.jpg'
-        test_file = os.path.join(str(TEST_PATH), image_name)
+        test_file = TEST_PATH / image_name
         frame_array = {'path': test_file, 'title': image_name}
 
         service_item = ServiceItem(None)
@@ -154,13 +154,13 @@ class TestServiceItem(TestCase, TestMixin):
                 mocked_get_section_data_path:
             mocked_exists.return_value = True
             mocked_get_section_data_path.return_value = Path('/path/')
-            service_item.set_from_service(line, str(TEST_PATH))
+            service_item.set_from_service(line, TEST_PATH)
 
         # THEN: We should get back a valid service item
         assert service_item.is_valid is True, 'The new service item should be valid'
         assert test_file == service_item.get_rendered_frame(0), 'The first frame should match the path to the image'
         assert frame_array == service_item.get_frames()[0], 'The return should match frame array1'
-        assert test_file == str(service_item.get_frame_path(0)), \
+        assert test_file == service_item.get_frame_path(0), \
             'The frame path should match the full path to the image'
         assert image_name == service_item.get_frame_title(0), 'The frame title should match the image name'
         assert image_name == service_item.get_display_title(), 'The display title should match the first image name'
@@ -328,7 +328,7 @@ class TestServiceItem(TestCase, TestMixin):
 
         # WHEN: We add a custom from a saved service
         line = convert_file_service_item(TEST_PATH, 'serviceitem-song-linked-audio.osj')
-        service_item.set_from_service(line, '/test/')
+        service_item.set_from_service(line, Path('/test/'))
 
         # THEN: We should get back a valid service item
         assert service_item.is_valid is True, 'The new service item should be valid'

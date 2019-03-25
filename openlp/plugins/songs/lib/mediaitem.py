@@ -557,16 +557,14 @@ class SongMediaItem(MediaManagerItem):
             self.plugin.manager.save_object(new_song)
         self.on_song_list_load()
 
-    def generate_slide_data(self, service_item, item=None, xml_version=False, remote=False,
-                            context=ServiceItemContext.Service):
+    def generate_slide_data(self, service_item, *, item=None, context=ServiceItemContext.Service, **kwargs):
         """
         Generate the slide data. Needs to be implemented by the plugin.
 
         :param service_item: The service item to be built on
         :param item: The Song item to be used
-        :param xml_version: The xml version (not used)
-        :param remote: Triggered from remote
         :param context: Why is it being generated
+        :param kwargs: Consume other unused args specified by the base implementation, but not use by this one.
         """
         log.debug('generate_slide_data: {service}, {item}, {remote}'.format(service=service_item, item=item,
                                                                             remote=self.remote_song))

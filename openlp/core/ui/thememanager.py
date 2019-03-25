@@ -150,7 +150,7 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
         self.global_theme = Settings().value(self.settings_section + '/global theme')
         self.build_theme_path()
         self.load_first_time_themes()
-        self.upgrade_themes()
+        self.upgrade_themes()  # TODO: Can be removed when upgrade path from OpenLP 2.4 no longer needed
 
     def bootstrap_post_set_up(self):
         """
@@ -422,10 +422,10 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
         :rtype: bool
         """
         try:
-            with zipfile.ZipFile(str(theme_path), 'w') as theme_zip:
+            with zipfile.ZipFile(theme_path, 'w') as theme_zip:
                 source_path = self.theme_path / theme_name
                 for file_path in source_path.iterdir():
-                    theme_zip.write(str(file_path), os.path.join(theme_name, file_path.name))
+                    theme_zip.write(file_path, Path(theme_name, file_path.name))
             return True
         except OSError as ose:
             self.log_exception('Export Theme Failed')
@@ -567,10 +567,10 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
         json_theme = False
         theme_name = ""
         try:
-            with zipfile.ZipFile(str(file_path)) as theme_zip:
+            with zipfile.ZipFile(file_path) as theme_zip:
                 json_file = [name for name in theme_zip.namelist() if os.path.splitext(name)[1].lower() == '.json']
                 if len(json_file) != 1:
-                    # TODO: remove XML handling after the 2.6 release.
+                    # TODO: remove XML handling after once the upgrade path from 2.4 is no longer required
                     xml_file = [name for name in theme_zip.namelist() if os.path.splitext(name)[1].lower() == '.xml']
                     if len(xml_file) != 1:
                         self.log_error('Theme contains "{val:d}" theme files'.format(val=len(xml_file)))
@@ -607,12 +607,12 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
                     else:
                         with full_name.open('wb') as out_file:
                             out_file.write(theme_zip.read(zipped_file))
-        except (OSError, zipfile.BadZipFile):
+        except (OSError, ValidationError, zipfile.BadZipFile):
             self.log_exception('Importing theme from zip failed {name}'.format(name=file_path))
-            raise ValidationError
-        except ValidationError:
-            critical_error_message_box(translate('OpenLP.ThemeManager', 'Validation Error'),
-                                       translate('OpenLP.ThemeManager', 'File is not a valid theme.'))
+            critical_error_message_box(
+                translate('OpenLP.ThemeManager', 'Import Error'),
+                translate('OpenLP.ThemeManager', 'There was a problem imoorting {file_name}.\n\nIt is corrupt,'
+                                                 'inaccessible or not a valid theme.').format(file_name=file_path))
         finally:
             if not abort_import:
                 # As all files are closed, we can create the Theme.
