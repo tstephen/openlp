@@ -29,6 +29,7 @@ from unittest.mock import MagicMock, patch
 
 from PyQt5 import QtCore, QtGui
 
+from openlp.core.common import is_macosx
 from openlp.core.common.path import Path
 from openlp.core.common.settings import Settings
 from openlp.core.display.screens import ScreenList
@@ -47,6 +48,18 @@ SCREEN = {
     'number': 1,
     'size': QtCore.QRect(0, 0, 1024, 768)
 }
+
+
+def get_screen_resolution():
+    """
+    Get the screen resolution
+    """
+    if is_macosx():
+        from AppKit import NSScreen
+        screen_size = NSScreen.mainScreen().frame().size
+        return screen_size.width, screen_size.height
+    else:
+        return 1024, 768
 
 
 class TestPdfController(TestCase, TestMixin):
@@ -137,8 +150,9 @@ class TestPdfController(TestCase, TestMixin):
             assert 1076 == image.height(), 'The height should be 1076'
             assert 760 == image.width(), 'The width should be 760'
         else:
-            assert 768 == image.height(), 'The height should be 768'
-            assert 543 == image.width(), 'The width should be 543'
+            width, height = get_screen_resolution()
+            assert image.height() == height, 'The height should be 768'
+            assert image.width() == 543, 'The width should be 543'
 
     @patch('openlp.plugins.presentations.lib.pdfcontroller.check_binary_exists')
     def test_process_check_binary_mudraw(self, mocked_check_binary_exists):
