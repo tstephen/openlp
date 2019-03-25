@@ -262,8 +262,7 @@ class VlcPlayer(MediaPlayer):
         :param output_display: The display where the media is
         :return:
         """
-        # output_display.vlc_widget.resize(output_display.size())
-        pass
+        output_display.vlc_widget.resize(output_display.size())
 
     def play(self, controller, output_display):
         """
