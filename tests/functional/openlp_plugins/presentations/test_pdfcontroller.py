@@ -29,7 +29,7 @@ from unittest.mock import MagicMock, patch
 
 from PyQt5 import QtCore, QtGui
 
-from openlp.core.common import is_macosx
+from openlp.core.common import is_macosx, is_linux, is_win
 from openlp.core.common.path import Path
 from openlp.core.common.settings import Settings
 from openlp.core.display.screens import ScreenList
@@ -58,6 +58,13 @@ def get_screen_resolution():
         from AppKit import NSScreen
         screen_size = NSScreen.mainScreen().frame().size
         return screen_size.width, screen_size.height
+    elif is_win():
+        from win32api import GetSystemMetrics
+        return GetSystemMetrics(0), GetSystemMetrics(1)
+    elif is_linux():
+        from Xlib.display import Display
+        resolution = Display().screen().root.get_geometry()
+        return resolution.width, resolution.height
     else:
         return 1024, 768
 
