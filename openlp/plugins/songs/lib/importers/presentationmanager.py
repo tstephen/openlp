@@ -63,6 +63,7 @@ class PresentationManagerImport(SongImport):
             if tree.docinfo.encoding.lower() != 'unicode':
                 # If the XML string is a bytes object, lxml sometimes croaks
                 xml = xml.decode(tree.docinfo.encoding)
+            print(xml)
             root = objectify.fromstring(xml)
             self.process_song(root, file_path)
 
