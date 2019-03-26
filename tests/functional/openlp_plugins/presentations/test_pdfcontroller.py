@@ -159,7 +159,7 @@ class TestPdfController(TestCase, TestMixin):
         else:
             width, height = get_screen_resolution()
             # Calculate the width of the PDF based on the aspect ratio of the PDF
-            width = int(round(width * 0.70703125, 0))
+            width = int(round(height * 0.70703125, 0))
             assert image.height() == height, 'The height should be {height}'.format(height=height)
             assert image.width() == width, 'The width should be {width}'.format(width=width)
 
