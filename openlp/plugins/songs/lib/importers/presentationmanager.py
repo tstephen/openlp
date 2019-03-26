@@ -51,6 +51,7 @@ class PresentationManagerImport(SongImport):
                 encoding = get_file_encoding(file_path)['encoding']
                 # Open file with detected encoding and remove encoding declaration
                 text = file_path.read_text(encoding=encoding)
+                print(text)
                 text = re.sub(r'.+\?>\n', '', text)
                 try:
                     tree = etree.fromstring(text, parser=etree.XMLParser(recover=True))
@@ -59,12 +60,7 @@ class PresentationManagerImport(SongImport):
                                    translate('SongsPlugin.PresentationManagerImport',
                                              'File is not in XML-format, which is the only format supported.'))
                     continue
-            xml = etree.tostring(tree)
-            if tree.docinfo.encoding.lower() != 'unicode':
-                # If the XML string is a bytes object, lxml sometimes croaks
-                xml = xml.decode(tree.docinfo.encoding)
-            print(xml)
-            root = objectify.fromstring(xml)
+            root = objectify.fromstring(etree.tostring(tree))
             self.process_song(root, file_path)
 
     def _get_attr(self, elem, name):
