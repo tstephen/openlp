@@ -59,7 +59,11 @@ class PresentationManagerImport(SongImport):
                                    translate('SongsPlugin.PresentationManagerImport',
                                              'File is not in XML-format, which is the only format supported.'))
                     continue
-            root = objectify.fromstring(etree.tostring(tree).decode(tree.docinfo.encoding))
+            xml = etree.tostring(tree)
+            if tree.docinfo.encoding.lower() != 'unicode':
+                # If the XML string is a bytes object, lxml sometimes croaks
+                xml = xml.decode(tree.docinfo.encoding)
+            root = objectify.fromstring(xml)
             self.process_song(root, file_path)
 
     def _get_attr(self, elem, name):
