@@ -158,8 +158,10 @@ class TestPdfController(TestCase, TestMixin):
             assert 760 == image.width(), 'The width should be 760'
         else:
             width, height = get_screen_resolution()
-            assert image.height() == height, 'The height should be 768'
-            assert image.width() == 543, 'The width should be 543'
+            # Calculate the width of the PDF based on the aspect ratio of the PDF
+            width = int(round(width * 0.70703125, 0))
+            assert image.height() == height, 'The height should be {height}'.format(height=height)
+            assert image.width() == width, 'The width should be {width}'.format(width=width)
 
     @patch('openlp.plugins.presentations.lib.pdfcontroller.check_binary_exists')
     def test_process_check_binary_mudraw(self, mocked_check_binary_exists):
