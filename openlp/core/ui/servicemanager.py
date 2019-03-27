@@ -25,7 +25,6 @@ The service manager sets up, loads, saves and manages services.
 import html
 import json
 import os
-import shutil
 import zipfile
 from contextlib import suppress
 from datetime import datetime, timedelta
@@ -234,7 +233,7 @@ class Ui_ServiceManager(object):
         self.service_manager_list.itemExpanded.connect(self.expanded)
         # Last little bits of setting up
         self.service_theme = Settings().value(self.main_window.service_manager_settings_section + '/service theme')
-        self.service_path = str(AppLocation.get_section_data_path('servicemanager'))
+        self.service_path = AppLocation.get_section_data_path('servicemanager')
         # build the drag and drop context menu
         self.dnd_menu = QtWidgets.QMenu()
         self.new_action = self.dnd_menu.addAction(translate('OpenLP.ServiceManager', '&Add New Item'))
@@ -590,11 +589,11 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
                 self.main_window.increment_progress_bar(service_content_size)
                 # Finally add all the listed media files.
                 for write_path in write_list:
-                    zip_file.write(str(write_path), str(write_path))
+                    zip_file.write(write_path, write_path)
                     self.main_window.increment_progress_bar(write_path.stat().st_size)
                 with suppress(FileNotFoundError):
                     file_path.unlink()
-                os.link(temp_file.name, str(file_path))
+                os.link(temp_file.name, file_path)
             Settings().setValue(self.main_window.service_manager_settings_section + '/last directory', file_path.parent)
         except (PermissionError, OSError) as error:
             self.log_exception('Failed to save service to disk: {name}'.format(name=file_path))
@@ -679,7 +678,7 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
         service_data = None
         self.application.set_busy_cursor()
         try:
-            with zipfile.ZipFile(str(file_path)) as zip_file:
+            with zipfile.ZipFile(file_path) as zip_file:
                 compressed_size = 0
                 for zip_info in zip_file.infolist():
                     compressed_size += zip_info.compress_size
@@ -692,7 +691,7 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
                             service_data = json_file.read()
                     else:
                         zip_info.filename = os.path.basename(zip_info.filename)
-                        zip_file.extract(zip_info, str(self.service_path))
+                        zip_file.extract(zip_info, self.service_path)
                     self.main_window.increment_progress_bar(zip_info.compress_size)
             if service_data:
                 items = json.loads(service_data, cls=OpenLPJsonDecoder)
@@ -705,11 +704,13 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
             else:
                 raise ValidationError(msg='No service data found')
         except (NameError, OSError, ValidationError, zipfile.BadZipFile):
+            self.application.set_normal_cursor()
             self.log_exception('Problem loading service file {name}'.format(name=file_path))
             critical_error_message_box(
                 message=translate('OpenLP.ServiceManager',
-                                  'The service file {file_path} could not be loaded because it is either corrupt, or '
-                                  'not a valid OpenLP 2 or OpenLP 3 service file.'.format(file_path=file_path)))
+                                  'The service file {file_path} could not be loaded because it is either corrupt, '
+                                  'inaccessible, or not a valid OpenLP 2 or OpenLP 3 service file.'
+                                  ).format(file_path=file_path))
         self.main_window.finished_progress_bar()
         self.application.set_normal_cursor()
         self.repaint_service_list(-1, -1)
@@ -1237,11 +1238,11 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
         """
         Empties the service_path of temporary files on system exit.
         """
-        for file_name in os.listdir(self.service_path):
-            file_path = Path(self.service_path, file_name)
+        for file_path in self.service_path.iterdir():
             delete_file(file_path)
-        if os.path.exists(os.path.join(self.service_path, 'audio')):
-            shutil.rmtree(os.path.join(self.service_path, 'audio'), True)
+        audio_path = self.service_path / 'audio'
+        if audio_path.exists():
+            audio_path.rmtree(True)
 
     def on_theme_combo_box_selected(self, current_index):
         """

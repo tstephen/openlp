@@ -95,12 +95,14 @@ class ExceptionForm(QtWidgets.QDialog, Ui_ExceptionDialog, RegistryProperties):
         """
         Saving exception log and system information to a file.
         """
-        file_path, filter_used = FileDialog.getSaveFileName(
-            self,
-            translate('OpenLP.ExceptionForm', 'Save Crash Report'),
-            Settings().value(self.settings_section + '/last directory'),
-            translate('OpenLP.ExceptionForm', 'Text files (*.txt *.log *.text)'))
-        if file_path:
+        while True:
+            file_path, filter_used = FileDialog.getSaveFileName(
+                self,
+                translate('OpenLP.ExceptionForm', 'Save Crash Report'),
+                Settings().value(self.settings_section + '/last directory'),
+                translate('OpenLP.ExceptionForm', 'Text files (*.txt *.log *.text)'))
+            if file_path is None:
+                break
             Settings().setValue(self.settings_section + '/last directory', file_path.parent)
             opts = self._create_report()
             report_text = self.report_text.format(version=opts['version'], description=opts['description'],
@@ -108,8 +110,13 @@ class ExceptionForm(QtWidgets.QDialog, Ui_ExceptionDialog, RegistryProperties):
             try:
                 with file_path.open('w') as report_file:
                     report_file.write(report_text)
-            except OSError:
+                    break
+            except OSError as e:
                 log.exception('Failed to write crash report')
+                QtWidgets.QMessageBox.warning(
+                    self, translate('OpenLP.ExceptionDialog', 'Failed to Save Report'),
+                    translate('OpenLP.ExceptionDialog', 'The following error occured when saving the report.\n\n'
+                                                        '{exception}').format(file_name=file_path, exception=e))
 
     def on_send_report_button_clicked(self):
         """

@@ -317,8 +317,7 @@ def set_up_logging(log_path):
     """
     create_paths(log_path, do_not_log=True)
     file_path = log_path / 'openlp.log'
-    # TODO: FileHandler accepts a Path object in Py3.6
-    logfile = logging.FileHandler(str(file_path), 'w', encoding='UTF-8')
+    logfile = logging.FileHandler(file_path, 'w', encoding='UTF-8')
     logfile.setFormatter(logging.Formatter('%(asctime)s %(threadName)s %(name)-55s %(levelname)-8s %(message)s'))
     log.addHandler(logfile)
     if log.isEnabledFor(logging.DEBUG):
@@ -364,7 +363,7 @@ def main(args=None):
         portable_settings_path = data_path / 'OpenLP.ini'
         # Make this our settings file
         log.info('INI file: {name}'.format(name=portable_settings_path))
-        Settings.set_filename(str(portable_settings_path))
+        Settings.set_filename(portable_settings_path)
         portable_settings = Settings()
         # Set our data path
         log.info('Data path: {name}'.format(name=data_path))
@@ -405,7 +404,12 @@ def main(args=None):
                 None, translate('OpenLP', 'Settings Upgrade'),
                 translate('OpenLP', 'Your settings are about to be upgraded. A backup will be created at '
                                     '{back_up_path}').format(back_up_path=back_up_path))
-            settings.export(back_up_path)
+            try:
+                settings.export(back_up_path)
+            except OSError:
+                QtWidgets.QMessageBox.warning(
+                    None, translate('OpenLP', 'Settings Upgrade'),
+                    translate('OpenLP', 'Settings back up failed.\n\nContinuining to upgrade.'))
         settings.upgrade_settings()
     # First time checks in settings
     if not Settings().value('core/has run wizard'):

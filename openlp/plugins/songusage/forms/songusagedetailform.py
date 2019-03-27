@@ -85,7 +85,7 @@ class SongUsageDetailForm(QtWidgets.QDialog, Ui_SongUsageDetailDialog, RegistryP
             self.main_window.error_message(
                 translate('SongUsagePlugin.SongUsageDetailForm', 'Output Path Not Selected'),
                 translate('SongUsagePlugin.SongUsageDetailForm', 'You have not set a valid output location for your'
-                          ' song usage report. \nPlease select an existing path on your computer.')
+                          ' song usage report.\nPlease select an existing path on your computer.')
             )
             return
         create_paths(path)
@@ -112,7 +112,7 @@ class SongUsageDetailForm(QtWidgets.QDialog, Ui_SongUsageDetailDialog, RegistryP
                 self.main_window.information_message(
                     translate('SongUsagePlugin.SongUsageDetailForm', 'Report Creation'),
                     translate('SongUsagePlugin.SongUsageDetailForm',
-                              'Report \n{name} \nhas been successfully created. ').format(name=report_file_name)
+                              'Report\n{name}\nhas been successfully created.').format(name=report_file_name)
                 )
         except OSError as ose:
             log.exception('Failed to write out song usage records')

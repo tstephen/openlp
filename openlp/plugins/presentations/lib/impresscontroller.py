@@ -57,9 +57,8 @@ if is_win():
     except (AttributeError, pywintypes.com_error):
         class SlideShowListenerImport(object):
             pass
-    
-    # Declare an empty exception to match the exception imported from UNO
 
+    # Declare an empty exception to match the exception imported from UNO
     class ErrorCodeIOException(Exception):
         pass
 else:

@@ -29,7 +29,7 @@ from openlp.core.state import State
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.i18n import UiStrings, get_natural_key, translate
 from openlp.core.common.mixins import RegistryProperties
-from openlp.core.common.path import Path, create_paths, path_to_str
+from openlp.core.common.path import create_paths, path_to_str
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.lib import MediaType, ServiceItemContext, check_item_selected
@@ -166,16 +166,16 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
         # self.display_type_combo_box.currentIndexChanged.connect(self.override_player_changed)
         pass
 
-    def generate_slide_data(self, service_item, item=None, xml_version=False, remote=False,
-                            context=ServiceItemContext.Service):
+    def generate_slide_data(self, service_item, *, item=None, remote=False, context=ServiceItemContext.Service,
+                            **kwargs):
         """
         Generate the slide data. Needs to be implemented by the plugin.
 
         :param service_item: The service item to be built on
         :param item: The Song item to be used
-        :param xml_version: The xml version (not used)
         :param remote: Triggered from remote
         :param context: Why is it being generated
+        :param kwargs: Consume other unused args specified by the base implementation, but not use by this one.
         """
         if item is None:
             item = self.list_view.currentItem()
@@ -229,8 +229,8 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
         Initialize media item.
         """
         self.list_view.clear()
-        self.service_path = str(AppLocation.get_section_data_path(self.settings_section) / 'thumbnails')
-        create_paths(Path(self.service_path))
+        self.service_path = AppLocation.get_section_data_path(self.settings_section) / 'thumbnails'
+        create_paths(self.service_path)
         self.load_list([path_to_str(file) for file in Settings().value(self.settings_section + '/media files')])
         self.rebuild_players()
 
@@ -264,7 +264,7 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
         :param media: The media
         :param target_group:
         """
-        media.sort(key=lambda file_name: get_natural_key(os.path.split(str(file_name))[1]))
+        media.sort(key=lambda file_path: get_natural_key(file_path.name))
         for track in media:
             track_info = QtCore.QFileInfo(track)
             item_name = None

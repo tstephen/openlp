@@ -48,9 +48,9 @@ class BibleImport(BibleDB, LogMixin, RegistryProperties):
         """
         Check if the supplied file is compressed
 
-        :param file_path: A path to the file to check
+        :param openlp.core.common.path.Path file_path: A path to the file to check
         """
-        if is_zipfile(str(file_path)):
+        if is_zipfile(file_path):
             critical_error_message_box(
                 message=translate('BiblesPlugin.BibleImport',
                                   'The file "{file}" you supplied is compressed. You must decompress it before import.'
