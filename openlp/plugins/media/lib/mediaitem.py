@@ -264,6 +264,7 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
         :param media: The media
         :param target_group:
         """
+        # TODO needs to be fixed as no idea why this fails
         # media.sort(key=lambda file_path: get_natural_key(file_path.name))
         for track in media:
             track_info = QtCore.QFileInfo(track)

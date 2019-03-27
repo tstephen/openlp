@@ -165,8 +165,6 @@ class VlcPlayer(MediaPlayer):
         output_display.vlc_widget.setFrameStyle(QtWidgets.QFrame.NoFrame)
         # creating a basic vlc instance
         command_line_options = '--no-video-title-show'
-        if not output_display.has_audio:
-            command_line_options += ' --no-audio --no-video-title-show'
         if Settings().value('advanced/hide mouse') and live_display:
             command_line_options += ' --mouse-hide-timeout=0'
         output_display.vlc_instance = vlc.Instance(command_line_options)

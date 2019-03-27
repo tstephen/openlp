@@ -259,8 +259,8 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
                 log.debug('video is not optical and live')
                 controller.media_info.length = service_item.media_length
                 is_valid = self._check_file_type(controller, display)
-            #display.override['theme'] = ''
-            #display.override['video'] = True
+            # display.override['theme'] = ''
+            # display.override['video'] = True
             if controller.media_info.is_background:
                 # ignore start/end time
                 controller.media_info.start_time = 0
