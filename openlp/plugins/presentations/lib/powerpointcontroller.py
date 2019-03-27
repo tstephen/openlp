@@ -318,6 +318,9 @@ class PowerpointDocument(PresentationDocument):
             size = ScreenList().current.display_geometry
             ppt_window = None
             try:
+                # Disable the presentation console
+                self.presentation.SlideShowSettings.ShowPresenterView = 0
+                # Start the presentation
                 ppt_window = self.presentation.SlideShowSettings.Run()
             except (AttributeError, pywintypes.com_error):
                 log.exception('Caught exception while in start_presentation')
