@@ -45,7 +45,7 @@ class PresentationManagerImport(SongImport):
                 return
             self.import_wizard.increment_progress_bar(WizardStrings.ImportingType.format(source=file_path.name))
             try:
-                tree = etree.parse(str(file_path), parser=etree.XMLParser())
+                tree = etree.parse(str(file_path), parser=etree.XMLParser(recover=True))
             except etree.XMLSyntaxError:
                 # Try to detect encoding and use it
                 encoding = get_file_encoding(file_path)['encoding']
@@ -53,7 +53,7 @@ class PresentationManagerImport(SongImport):
                 text = file_path.read_text(encoding=encoding)
                 text = re.sub(r'.+\?>\n', '', text)
                 try:
-                    tree = etree.fromstring(text, parser=etree.XMLParser())
+                    tree = etree.fromstring(text, parser=etree.XMLParser(recover=True))
                 except ValueError:
                     self.log_error(file_path,
                                    translate('SongsPlugin.PresentationManagerImport',
