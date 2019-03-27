@@ -210,8 +210,8 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         """
         # Generic controls
         controller.mediabar.setVisible(value)
-        #if controller.is_live and controller.display:
-            #if self.current_media_players and value:
+        # if controller.is_live and controller.display:
+            # if self.current_media_players and value:
             #    controller.display.set_transparency(False)
 
     @staticmethod
@@ -286,7 +286,7 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
             return False
         log.debug('video media type: ' + str(controller.media_info.media_type))
         # dont care about actual theme, set a black background
-        #if controller.is_live and not controller.media_info.is_background:
+        # if controller.is_live and not controller.media_info.is_background:
         #    display.frame.runJavaScript('show_video("setBackBoard", null, null,"visible");')
         # now start playing - Preview is autoplay!
         autoplay = False
@@ -550,7 +550,7 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         """
         display = self._define_display(controller)
         if controller.controller_type in self.current_media_players:
-            #if not looping_background:
+            # if not looping_background:
             #    display.frame.runJavaScript('show_blank("black");')
             self.current_media_players[controller.controller_type].stop(display)
             self.current_media_players[controller.controller_type].set_visible(display, False)

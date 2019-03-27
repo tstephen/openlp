@@ -22,13 +22,11 @@
 """
 The :mod:`~openlp.core.ui.media.playertab` module holds the configuration tab for the media stuff.
 """
-import platform
 
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtWidgets
 
 from openlp.core.common import is_linux, is_win
-from openlp.core.common.i18n import UiStrings, translate
-from openlp.core.common.registry import Registry
+from openlp.core.common.i18n import translate
 from openlp.core.common.settings import Settings
 from openlp.core.lib.settingstab import SettingsTab
 from openlp.core.ui.icons import UiIcons

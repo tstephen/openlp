@@ -373,7 +373,7 @@ class TestVLCPlayer(TestCase, TestMixin):
         assert mocked_vlc_media == mocked_display.vlc_media
         mocked_display.vlc_media_player.set_media.assert_called_with(mocked_vlc_media)
         mocked_vlc_media.parse.assert_called_with()
-        # mocked_volume.assert_called_with(mocked_display, 100)
+        mocked_volume.assert_called_with(mocked_display, 100)
         assert result is True
 
     @patch('openlp.core.ui.media.vlcplayer.is_win')
@@ -962,15 +962,13 @@ class TestVLCPlayer(TestCase, TestMixin):
         vlc_player = VlcPlayer(None)
 
         # WHEN: update_ui() is called
-        with patch.object(vlc_player, 'stop') as mocked_stop, \
-                patch.object(vlc_player, 'set_visible') as mocked_set_visible:
+        with patch.object(vlc_player, 'stop') as mocked_stop:
             vlc_player.update_ui(mocked_controller, mocked_display)
 
         # THEN: Certain methods should be called
         mocked_stop.assert_called_with(mocked_display)
         assert 1 == mocked_stop.call_count
         mocked_display.vlc_media_player.get_time.assert_called_with()
-        # mocked_set_visible.assert_called_with(mocked_display, False)
         mocked_controller.seek_slider.setSliderPosition.assert_called_with(300)
         expected_calls = [call(True), call(False)]
         assert expected_calls == mocked_controller.seek_slider.blockSignals.call_args_list
