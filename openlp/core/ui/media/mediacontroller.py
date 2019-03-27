@@ -211,8 +211,8 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         # Generic controls
         controller.mediabar.setVisible(value)
         # if controller.is_live and controller.display:
-            # if self.current_media_players and value:
-            #    controller.display.set_transparency(False)
+        #    if self.current_media_players and value:
+        #       controller.display.set_transparency(False)
 
     @staticmethod
     def resize(display, player):
@@ -434,7 +434,7 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         else:
             self.media_volume(controller, controller.media_info.volume)
         if first_time:
-            #if not controller.media_info.is_background:
+            # if not controller.media_info.is_background:
             #    display.frame.runJavaScript('show_blank("desktop");')
             self.current_media_players[controller.controller_type].set_visible(display, True)
             controller.mediabar.actions['playbackPlay'].setVisible(False)

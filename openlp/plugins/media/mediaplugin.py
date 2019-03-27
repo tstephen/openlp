@@ -24,8 +24,6 @@ The Media plugin
 """
 import logging
 
-from PyQt5 import QtCore
-
 from openlp.core.state import State
 from openlp.core.api.http import register_endpoint
 from openlp.core.common.i18n import translate
