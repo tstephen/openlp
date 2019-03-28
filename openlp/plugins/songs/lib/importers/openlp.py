@@ -106,7 +106,7 @@ class OpenLPSongImport(SongImport):
             pass
 
         # Check the file type
-        if not isinstance(self.import_source, str) or not self.import_source.endswith('.sqlite'):
+        if self.import_source.suffix != '.sqlite':
             self.log_error(self.import_source, translate('SongsPlugin.OpenLPSongImport',
                                                          'Not a valid OpenLP 2 song database.'))
             return

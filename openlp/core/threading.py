@@ -76,11 +76,11 @@ def get_thread_worker(thread_name):
     Get the worker by the thread name
 
     :param str thread_name: The name of the thread
-    :returns: The worker for this thread name
+    :returns: The worker for this thread name, or None
     """
     thread_info = Registry().get('application').worker_threads.get(thread_name)
     if not thread_info:
-        raise KeyError('No thread named "{}" exists'.format(thread_name))
+        return
     return thread_info.get('worker')
 
 

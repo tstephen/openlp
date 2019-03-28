@@ -49,13 +49,6 @@ def report_song_list():
         Path(translate('SongPlugin.ReportSongList', 'song_extract.csv')),
         translate('SongPlugin.ReportSongList', 'CSV format (*.csv)'))
 
-    if report_file_path is None:
-        main_window.error_message(
-            translate('SongPlugin.ReportSongList', 'Output Path Not Selected'),
-            translate('SongPlugin.ReportSongList', 'You have not set a valid output location for your report. \n'
-                                                   'Please select an existing path on your computer.')
-        )
-        return
     report_file_path.with_suffix('.csv')
     Registry().get('application').set_busy_cursor()
     try:
