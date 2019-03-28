@@ -120,13 +120,20 @@ requires = [
     'lxml',
     'Mako',
     'pymediainfo >= 2.2',
-    'PyQt5 >= 5.5',
+    'PyQt5 >= 5.12',
+    'PyQtWebEngine',
     'QtAwesome',
     'requests',
     'SQLAlchemy >= 0.5',
     'waitress',
     'WebOb',
     'websockets'
+]
+test_requires = [
+    'nose2',
+    'pylint',
+    'pyodbc',
+    'pysword'
 ]
 if sys.platform.startswith('win'):
     requires.append('pywin32')
@@ -137,6 +144,8 @@ elif sys.platform.startswith('darwin'):
     ])
 elif sys.platform.startswith('linux'):
     requires.append('dbus-python')
+    test_requires.append('xlib')
+
 
 setup(
     name='OpenLP',
@@ -202,7 +211,7 @@ using a computer and a data projector.""",
         'jenkins': ['python-jenkins'],
         'launchpad': ['launchpadlib']
     },
-    tests_require=['nose2', 'pylint', 'pyodbc', 'pysword'],
+    tests_require=test_requires,
     test_suite='nose2.collector.collector',
     entry_points={'gui_scripts': ['openlp = run_openlp:start']}
 )
