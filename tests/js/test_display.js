@@ -176,18 +176,15 @@ describe("Display.alert", function () {
   });
 
   it("should set the correct alert text", function () { 
-    spyOn("Display", "addAlertToQueue");       
-    spyOn("Display", "initAlertEventListeners");
-    spyOn("Display", "setAlertKeyframes");
-    spyOn("Display", "showAlertBackground");
+    spyOn(Display, "setAlertKeyframes");    
     Display.alert("OPEN-LP-3.0 Alert Test", settings);
-
-    expect(Display.setAlertText).toHaveBeenCalled();
-    expect(alert.innerHTML).toEqual("OPEN-LP-3.0 Alert Test");
+    
+    expect(alertText.innerHTML).toEqual("OPEN-LP-3.0 Alert Test");
   });
 
   it("should call the addAlertToQueue method if an alert is displaying", function () {
-    spyOn("Display", "addAlertToQueue");
+    spyOn(Display, "addAlertToQueue");
+    spyOn(Display, "setAlertKeyframes");
     Display._alerts = [];
     Display._alertState = AlertState.Displaying;
     var text = "Testing alert queue";
@@ -198,47 +195,10 @@ describe("Display.alert", function () {
   });
 
   it("should set the alert settings correctly", function() {
-    spyOn("Display", "setAlertKeyframes");
+    spyOn(Display, "setAlertKeyframes");
     Display.alert("Testing settings", settings);
         
     expect(Display._alertSettings).toEqual(JSON.parse(settings));
-  });
-});
-
-describe("Display.initAlertEventListeners", function() {
-  var alertBackground, styles, alertText;
-  beforeEach(function() {    
-    document.body.innerHTML = "";
-    styles = document.createElement("style");
-    styles.innerHTML = "@keyframes test { from {background-color: red;} \
-                                            to {background-color: yellow;}";
-    document.head.appendChild(styles);
-    alertBackground = document.createElement("div");
-    alertBackground.setAttribute("id", "alert-background");
-    document.body.appendChild(alertBackground);
-    alertText = document.createElement("p");
-    alertText.setAttribute("id","alert");
-    alertBackground.appendChild(alertText);
-    alertBackground.style.opacity = 0;
-    alertBackground.style.transition = "opacity 0.001s linear";
-    Display.initAlertEventListeners();    
-  });
-
-  it("should set the transition end event listener correctly", function() {
-    spyOn("Display", "alertTransitionEndEvent");
-
-    alertBackground.style.opacity = 1;
-
-    expect(Display.alertTransitionEndEvent).toHaveBeenCalled();
-
-  });
-
-  it("should set the animation end event listener correctly", function() {
-    spyOn("Display", "alertAnimationEndEvent");    
-    
-    alertText.style.animation = "test 0.01s linear";
-
-    expect(Display.alertAnimationEndEvent).toHaveBeenCalled();
   });
 });
 
@@ -269,7 +229,7 @@ describe("Display.showAlertBackground", function () {
   it("should set the correct transition state", function () {
     Display.showAlertBackground(settings);
     expect(Display._transitionState).toEqual(TransitionState.EntranceTransition);
-  })
+  });
 
   it("should apply the styles correctly when showAlertBackground is called", function (done) {
     Display.showAlertBackground(settings);
@@ -277,10 +237,8 @@ describe("Display.showAlertBackground", function () {
 
     setTimeout(function () {      
       expect(alertBackground.style.backgroundColor).toEqual(settings.background_color);      
-      expect(alertBackground.style.height).toEqual("auto");
-      expect(alertBackground.style.minHeight).toEqual("25%");
-      expect(alertBackground.style.transition).toEqual("height 1s linear");
-      expect(alertBackground.style.visibility).toEqual("visible");
+      expect(alertBackground.classList.contains("show")).toBe(true);      
+      expect(alertBackground.style.transition).toEqual("min-height 1s linear");      
       done();
     }, 50);
   });  
@@ -301,10 +259,8 @@ describe("Display.hideAlertBackground", function () {
     
     expect(Display._transitionState).toEqual(TransitionState.ExitTransition);
     expect(Display._alertState).toEqual(AlertState.NotDisplaying);
-    expect(alertBackground.style.transition).toEqual("height 1s linear"); 
-    expect(alertBackground.style.height).toEqual("0%");
-    expect(alertBackground.style.minHeight).toEqual("0%"); 
-    expect(alertBackground.className).toEqual("bg-default");    
+    expect(alertBackground.style.transition).toEqual("min-height 1s linear");      
+    expect(alertBackground.className).toEqual("hide");    
   });
 });
 
@@ -488,20 +444,18 @@ describe("Display.alertTransitionEndEvent", function() {
   it("should set the correct state and call showAlertText after the alert entrance transition", function() {    
     var fake_settings = {test: "fake_settings"};  
     Display._alertSettings = fake_settings;
-    spyOn("Display", "showAlertText");    
-    Display._transitionState = TransitionState.EntranceTransition;
-    var event = document.createEvent("animationend");
-    Display.alertTransitionEnd(event);
+    spyOn(Display, "showAlertText");    
+    Display._transitionState = TransitionState.EntranceTransition;    
+    Display.alertTransitionEndEvent();
 
     expect(Display._transitionState).toEqual(TransitionState.NoTransition);
-    expect(Display.alertTransitionEndEvent).toHaveBeenCalledWith(fake_settings);
+    expect(Display.showAlertText).toHaveBeenCalledWith(fake_settings);
   });
   
   it("should set the correct state, class and call displayNextAlert after the alert exit transition", function() {        
-    spyOn("Display", "displayNextAlert");    
-    Display._transitionState = TransitionState.ExitTransition;
-    var event = document.createEvent("animationend");
-    Display.alertTransitionEnd(event);
+    spyOn(Display, "displayNextAlert");    
+    Display._transitionState = TransitionState.ExitTransition;    
+    Display.alertTransitionEndEvent();
     
     expect(Display._transitionState).toEqual(TransitionState.NoTransition);
     expect(Display.displayNextAlert).toHaveBeenCalled();
@@ -510,7 +464,9 @@ describe("Display.alertTransitionEndEvent", function() {
 
 describe("Display.alertAnimationEndEvent", function () {
   it("should call the hideAlertText method", function() {
-    spyOn("Display","hideAlertText");
+    spyOn(Display, "hideAlertText");
+
+    Display.alertAnimationEndEvent();
 
     expect(Display.hideAlertText).toHaveBeenCalled();
   });

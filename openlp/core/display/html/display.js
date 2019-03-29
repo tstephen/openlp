@@ -413,19 +413,28 @@ var Display = {
    * "timeout": 10, "repeat": 2, "scroll": true}'
   */
   alert: function (text, alert_settings) {
+    var alertBackground = $('#alert-background')[0];
+    var alertText = $('#alert')[0];
     if (text == "") {
       return null;
     }
     else {
       if (this._alertState === AlertState.Displaying || this._alertState === AlertState.DisplayingFromQueue) {
-        addAlertToQueue(text, alert_settings);
+        Display.addAlertToQueue(text, alert_settings);
       }
     }
     var settings = JSON.parse(alert_settings);
     this._alertSettings = settings;    
     Display.setAlertText(text);
     
-    Display.initAlertEventListeners();
+    alertBackground.addEventListener('transitionend', function(e) {
+      e.stopPropagation();
+      Display.alertTransitionEndEvent();
+    });
+    alertText.addEventListener('animationend', function(e) {
+      e.stopPropagation();
+      Display.alertAnimationEndEvent();
+    });
 
     if (settings.scroll === true) {
       Display.setAlertKeyframes($('#alert'[0].scrollWidth));  
@@ -436,17 +445,7 @@ var Display = {
     }
     
     Display.showAlertBackground(settings);                
-  },
-  /**
-   * Initialize alert event listeners
-   */
-  initAlertEventListeners: function () {
-    var alertBackground = $("#alert-background")[0];
-    var alertText = $("#alert")[0];
-
-    alertBackground.addEventListener('transitionend', Display.alertTransitionEndEvent, false);
-    alertText.addEventListener('animationend', Display.alertAnimationEndEvent, false);
-  },
+  },  
   /**
    * Add an alert to the alert queue 
    * @param {string} text - The alert text to be displayed
@@ -482,28 +481,20 @@ var Display = {
   /**
    * The alertTransitionEndEvent called after a transition has ended
    */
-  alertTransitionEndEvent: function (e) {
-    e.stopPropagation();
+  alertTransitionEndEvent: function () {    
     if (Display._transitionState === TransitionState.EntranceTransition) {        
       Display._transitionState = TransitionState.NoTransition;
-      Display.showAlertText(Display._alertSettings);
-      console.log("Show alert has been called");
+      Display.showAlertText(Display._alertSettings);      
     }
     else if (Display._transitionState === TransitionState.ExitTransition) {        
-      Display._transitionState = TransitionState.NoTransition;      
+      Display._transitionState = TransitionState.NoTransition;            
       Display.displayNextAlert();        
-    } 
-    else if (Display._transitionState === "animatingText") {
-      if (e.propertyName === "transform") {
-        console.log("The text transform has ended");
-      }
-    }
+    }    
   },
   /**
    * The alertAnimationEndEvent called after a animation has ended
    */
-  alertAnimationEndEvent: function (e) {
-    e.stopPropagation();         
+  alertAnimationEndEvent: function () {          
     Display.hideAlertText(); 
   },
   /**
@@ -519,17 +510,16 @@ var Display = {
     alertBackground.style.backgroundColor = settings.background_color;
 
     if (Display._alertState === AlertState.DisplayingFromQueue) {
-      transitionSetting = "height 1s linear 2s";
+      transitionSetting = "min-height 1s linear 2s";
     }
     else {
-      transitionSetting = "height 1s linear";
+      transitionSetting = "min-height 1s linear";
     }     
     // Wait for styles to be set first before starting transition
-    setTimeout( function() {
-      alertBackground.style.height = "auto";
-      alertBackground.style.minHeight = "25%";
+    setTimeout( function() {      
       alertBackground.style.transition = transitionSetting;
-      alertBackground.style.visibility = "visible";      
+      alertBackground.classList.add("show");
+      alertBackground.classList.remove("hide");            
     }, 50);
     this._transitionState = TransitionState.EntranceTransition;
   },
@@ -557,11 +547,10 @@ var Display = {
    * Hide the alert background after the alert has been shown
    */
   hideAlertBackground: function () {
-    var alertBackground = $("#alert-background")[0];    
-    alertBackground.style.height = "0%";
-    alertBackground.style.minHeight = "0%";
-    alertBackground.style.transition = "height 1s linear";
-    alertBackground.className = "bg-default";
+    var alertBackground = $("#alert-background")[0];        
+    alertBackground.style.transition = "min-height 1s linear";
+    alertBackground.classList.remove("show");
+    alertBackground.classList.add("hide");
     this._transitionState = TransitionState.ExitTransition;
     this._alertState = AlertState.NotDisplaying;        
   },

@@ -27,6 +27,16 @@
   align-items: center;
 }
 
+.bg-default.show {
+  height: auto;
+  min-height: 25%;
+}
+
+.bg-default.hide {
+  height: 0;
+  min-height: 0;
+}
+
 .bg-default.middle {
   top: 50%;  
   left: 50%;
