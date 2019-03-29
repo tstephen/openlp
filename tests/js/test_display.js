@@ -154,20 +154,20 @@ describe("The Display object", function () {
 });
 
 describe("Display.alert", function () {
-  var alertBackground, alert, settings;
+  var alertBackground, alertText, settings;
 
   beforeEach(function () {
     document.body.innerHTML = "";
     alertBackground = document.createElement("div");
     alertBackground.setAttribute("id", "alert-background");
     document.body.appendChild(alertBackground);
-    alert = document.createElement("p");
-    alert.setAttribute("id","alert");
-    alertBackground.appendChild(alert);
+    alertText = document.createElement("p");
+    alertText.setAttribute("id","alert");
+    alertBackground.appendChild(alertText);
     settings = '{ \
       "location": 1, "font_face": "Segoe UI, Tahoma, Geneva, Verdana, sans-serif", \
       "font_size": 40, "font_color": "#ffffff", "background_color": "#660000", \
-      "timeout": 5, "repeat": 1, "scrolling_text": true \
+      "timeout": 5, "repeat": 1, "scroll": true \
     }';
   });
 
@@ -175,27 +175,70 @@ describe("Display.alert", function () {
     expect(Display.alert("",settings)).toBeNull();
   });
 
-  it("should set the correct alert text", function () {    
+  it("should set the correct alert text", function () { 
+    spyOn("Display", "addAlertToQueue");       
+    spyOn("Display", "initAlertEventListeners");
+    spyOn("Display", "setAlertKeyframes");
+    spyOn("Display", "showAlertBackground");
     Display.alert("OPEN-LP-3.0 Alert Test", settings);
+
+    expect(Display.setAlertText).toHaveBeenCalled();
     expect(alert.innerHTML).toEqual("OPEN-LP-3.0 Alert Test");
   });
 
-  it("should add alerts to the queue correctly if it called when an alert is displaying", function () {
+  it("should call the addAlertToQueue method if an alert is displaying", function () {
+    spyOn("Display", "addAlertToQueue");
     Display._alerts = [];
     Display._alertState = AlertState.Displaying;
-    var alertObject = {text: "Testing alert queue", settings: settings};
-    var queuedAlert = JSON.stringify(alertObject);
-    Display.alert("Testing alert queue", settings);
-
-    expect(Display._alerts.length).toEqual(1);
-    expect(Display._alerts[0]).toEqual(queuedAlert);
+    var text = "Testing alert queue";
+    
+    Display.alert(text, settings);
+    
+    expect(Display.addAlertToQueue).toHaveBeenCalledWith(text, settings);
   });
 
   it("should set the alert settings correctly", function() {
+    spyOn("Display", "setAlertKeyframes");
     Display.alert("Testing settings", settings);
-
-    console.debug("Settings", JSON.parse(settings));
+        
     expect(Display._alertSettings).toEqual(JSON.parse(settings));
+  });
+});
+
+describe("Display.initAlertEventListeners", function() {
+  var alertBackground, styles, alertText;
+  beforeEach(function() {    
+    document.body.innerHTML = "";
+    styles = document.createElement("style");
+    styles.innerHTML = "@keyframes test { from {background-color: red;} \
+                                            to {background-color: yellow;}";
+    document.head.appendChild(styles);
+    alertBackground = document.createElement("div");
+    alertBackground.setAttribute("id", "alert-background");
+    document.body.appendChild(alertBackground);
+    alertText = document.createElement("p");
+    alertText.setAttribute("id","alert");
+    alertBackground.appendChild(alertText);
+    alertBackground.style.opacity = 0;
+    alertBackground.style.transition = "opacity 0.001s linear";
+    Display.initAlertEventListeners();    
+  });
+
+  it("should set the transition end event listener correctly", function() {
+    spyOn("Display", "alertTransitionEndEvent");
+
+    alertBackground.style.opacity = 1;
+
+    expect(Display.alertTransitionEndEvent).toHaveBeenCalled();
+
+  });
+
+  it("should set the animation end event listener correctly", function() {
+    spyOn("Display", "alertAnimationEndEvent");    
+    
+    alertText.style.animation = "test 0.01s linear";
+
+    expect(Display.alertAnimationEndEvent).toHaveBeenCalled();
   });
 });
 
@@ -234,57 +277,184 @@ describe("Display.showAlertBackground", function () {
 
     setTimeout(function () {      
       expect(alertBackground.style.backgroundColor).toEqual(settings.background_color);      
-      expect(alertBackground.style.height).toEqual("25%");
-      expect(alertBackground.style.transition).toEqual("1s linear");
+      expect(alertBackground.style.height).toEqual("auto");
+      expect(alertBackground.style.minHeight).toEqual("25%");
+      expect(alertBackground.style.transition).toEqual("height 1s linear");
       expect(alertBackground.style.visibility).toEqual("visible");
       done();
     }, 50);
-  });
+  });  
+});
 
-  it("should set the correct class when location is top of the page", function () {
-    settings.location = 0;
-    Display.showAlertBackground(settings);
+describe("Display.hideAlertBackground", function () {
+  var alertBackground;
+  beforeEach( function() {
+    document.body.innerHTML = "";
+    alertBackground = document.createElement("div");
+    alertBackground.setAttribute("id", "alert-background");      
+    document.body.appendChild(alertBackground);    
+  });
+  
+  it("reset the background to default once an alert has been displayed", function() {
+    //spyOn(Display, "displayNextAlert");
+    Display.hideAlertBackground();
+    
+    expect(Display._transitionState).toEqual(TransitionState.ExitTransition);
+    expect(Display._alertState).toEqual(AlertState.NotDisplaying);
+    expect(alertBackground.style.transition).toEqual("height 1s linear"); 
+    expect(alertBackground.style.height).toEqual("0%");
+    expect(alertBackground.style.minHeight).toEqual("0%"); 
+    expect(alertBackground.className).toEqual("bg-default");    
+  });
+});
+
+describe("Display.setAlertText", function() {
+  var alertText;
+  beforeEach( function() {
+    document.body.innerHTML = "";
+    alertText = document.createElement("p");
+    alertText.setAttribute("id", "alert");      
+    document.body.appendChild(alertText);    
+  });
+  it("should set the alert text correctly", function () {    
+    Display.setAlertText("OpenLP Alert Text");
+
+    expect(alertText.textContent).toEqual("OpenLP Alert Text");
+  });
+});
+
+describe("Display.setAlertLocation", function() {
+  beforeEach(function() {
+    document.body.innerHTML = "";    
+    alertBackground = document.createElement("p");
+    alertBackground.setAttribute("id","alert-background");
+    alertBackground.setAttribute("class","bg-default");
+    document.body.appendChild(alertBackground);
+  });
+  it("should set the correct class when location is top of the page", function () {    
+    Display.setAlertLocation(0);
 
     expect(alertBackground.className).toEqual("bg-default top");
   });
 
-  it("should set the correct class when location is middle of the page", function () {
-    settings.location = 1;
-    Display.showAlertBackground(settings);
+  it("should set the correct class when location is middle of the page", function () {    
+    Display.setAlertLocation(1);
     
     expect(alertBackground.className).toEqual("bg-default middle");       
   });
 
   it("should set the correct class when location is bottom of the page", function () {
-    Display.showAlertBackground(settings);
+    Display.setAlertLocation(2);
 
     expect(alertBackground.className).toEqual("bg-default bottom");
   });
 });
 
-describe("Display.hideAlertBackground", function () {
-  var alertBackground;
+describe("Display.showAlertText", function () {
+  var alertText, settings;
+  beforeEach(function () {
+    document.body.innerHTML = "";    
+    alertText = document.createElement("p");
+    alertText.setAttribute("id","alert");
+    document.body.appendChild(alertText);
+    settings = {
+      "location": 2, "font_face": "Tahoma", "font_size": 40, 
+      "font_color": "rgb(255, 255, 255)", "background_color": "rgb(102, 0, 0)",
+      "timeout": 0.01, "repeat": 1, "scroll": true
+    };
+    Display._transitionState = TransitionState.EntranceTransition;
+  });
 
+  it("should set the correct styles on the text", function() {    
+    Display.showAlertText(settings);    
+
+    expect(alertText.style.opacity).toEqual('1');
+    expect(alertText.style.color).toEqual("rgb(255, 255, 255)");
+    expect(alertText.style.fontFamily).toEqual("Tahoma");
+    expect(alertText.style.fontSize).toEqual("40pt");    
+  });
+
+  it("should set the correct animation when text is set to scroll)", function () {              
+    Display.showAlertText(settings);
+
+    expect(alertText.style.animation).toEqual("alert-scrolling-text " + settings.timeout + "s linear 0s 1 normal");
+    expect(Display._animationState).toEqual(AnimationState.ScrollingText);    
+  });
+
+  it("should set the correct styles when text is not scrolling", function (done) {
+    settings.scroll = false;       
+    Display._transitionState = TransitionState.EntranceTransition;   
+    spyOn(Display, "hideAlertText");    
+    Display.showAlertText(settings);
+
+    expect(alertText.style.opacity).toEqual('1');
+    expect(alertText.style.animation).toEqual("");
+    expect(Display._animationState).toEqual(AnimationState.NonScrollingText);    
+    setTimeout (function () {
+      expect(alertText.className).toEqual("no-scroll");
+      expect(Display._animationState).toEqual(AnimationState.NoAnimation);
+      expect(Display.hideAlertText).toHaveBeenCalled();      
+      done();
+    }, settings.timeout * 1000);
+  });
+});
+
+describe("Display.hideAlertText", function() {
+  var alertBackground, alertText, keyframeStyle;
   beforeEach(function () {
     document.body.innerHTML = "";
-    alertBackground = document.createElement("div");
-    alertBackground.setAttribute("id", "alert-background");
-    document.body.appendChild(alertBackground);
+    // keyframeStyle = document.createElement("style");
+    // keyframeStyle.setAttribute("id", "keyframeStyles");    
+    // document.head.appendChild(keyframeStyle);
+    // alertBackground = document.createElement("div");
+    // alertBackground.setAttribute("id", "alert-background");
+    // document.body.appendChild(alertBackground);
+    alertText = document.createElement("p");
+    alertText.setAttribute("id", "alert");
+    alertText.style.opacity = 1;
+    alertText.style.animation = "alert-scrolling-text 5s linear 0s 1 bg-default";
+    document.body.appendChild(alertText);    
+    Display._animationState = AnimationState.ScrollingText;
+  });
+
+  it("should reset the text styles and animation state after the text has scrolled", function() {
+    spyOn(Display, "resetAlertKeyframes");
+    spyOn(Display, "hideAlertBackground");    
+    Display.hideAlertText();
+
+    expect(alertText.style.animation).toEqual("");
+    expect(alertText.style.opacity).toEqual('0');
+    expect(alertText.style.color).toEqual("rgb(255, 255, 255)");
+    expect(alertText.style.fontSize).toEqual("40pt");    
+    expect(Display._animationState).toEqual(AnimationState.NoAnimation);
+  });
+
+  it("should call the hideAlertBackground and resetAlertKeyframes methods", function() {
+    spyOn(Display, "hideAlertBackground");
+    spyOn(Display, "resetAlertKeyframes");    
+    Display.hideAlertText();
+
+    expect(Display.hideAlertBackground).toHaveBeenCalled();
+    expect(Display.resetAlertKeyframes).toHaveBeenCalled();
+  });  
+});
+
+describe("Display.addAlertToQueue", function () {  
+  it("should add an alert to the queue if one is displaying already", function() {
     Display._alerts = [];
-  });
+    Display._alertState = AlertState.Displaying;
+    settings = '{ \
+      "location": 1, "font_face": "Segoe UI, Tahoma, Geneva, Verdana, sans-serif", \
+      "font_size": 40, "font_color": "#ffffff", "background_color": "#660000", \
+      "timeout": 5, "repeat": 1, "scrolling_text": true \
+    }';
+    var alertObject = {text: "Testing alert queue", settings: settings};
+    var queuedAlert = JSON.stringify(alertObject);    
+    
+    Display.addAlertToQueue("Testing alert queue", settings);
 
-  it("should set the styles correctly when the hideAlertBackground method is called", function () {    
-    Display.hideAlertBackground();
-
-    expect(alertBackground.style.height).toEqual('0%');
-    expect(alertBackground.style.transition).toEqual("1s linear");    
-  });
-
-  it("should set the correct states when hideAlertBackground is called", function () {
-    Display.hideAlertBackground();
-
-    expect(Display._alertState).toEqual(AlertState.NotDisplaying);
-    expect(Display._transitionState).toEqual(TransitionState.ExitTransition);
+    expect(Display._alerts.length).toEqual(1);
+    expect(Display._alerts[0]).toEqual(queuedAlert);
   });
 });
 
@@ -314,106 +484,74 @@ describe("Display.displayNextAlert", function () {
   });
 });
 
-describe("Display.hideAlertText", function() {
-  var alertBackground, alertText;
-  beforeEach(function () {
-    document.body.innerHTML = "";
-    alertBackground = document.createElement("div");
-    alertBackground.setAttribute("id", "alert-background");
-    document.body.appendChild(alertBackground);
-    alertText = document.createElement("p");
-    alertText.setAttribute("id", "alert");
-    alertText.style.visibility = "visible";
-    alertText.style.animation = "alert-scrolling-text 5s linear 0s 1 bg-default";
-    alertBackground.appendChild(alertText);
-    Display._animationState = AnimationState.ScrollingText;
-  });
-
-  it("should reset the text styles and animation state after the text has scrolled", function() {    
-    Display.hideAlertText();
-
-    expect(alertText.style.animation).toEqual("");
-    expect(alertText.style.visibility).toEqual("hidden");
-    expect(alertText.style.color).toEqual("rgb(255, 255, 255)");
-    expect(alertText.style.fontSize).toEqual("40pt");    
-    expect(Display._animationState).toEqual(AnimationState.NoAnimation);
-  });
-
-  it("should call the alert background method", function() {
-    spyOn(Display, "hideAlertBackground");
-    Display.hideAlertText();
-
-    expect(Display.hideAlertBackground).toHaveBeenCalled();
-  });
-});
-
-describe("Display.showAlertText", function () {
-  var alertText, settings;
-  beforeEach(function () {
-    document.body.innerHTML = "";    
-    alertText = document.createElement("p");
-    alertText.setAttribute("id","alert");
-    document.body.appendChild(alertText);
-    settings = {
-      "location": 2, "font_face": "Tahoma", "font_size": 40, 
-      "font_color": "rgb(255, 255, 255)", "background_color": "rgb(102, 0, 0)",
-      "timeout": 0.01, "repeat": 1, "scroll": true
-    };
+describe("Display.alertTransitionEndEvent", function() {
+  it("should set the correct state and call showAlertText after the alert entrance transition", function() {    
+    var fake_settings = {test: "fake_settings"};  
+    Display._alertSettings = fake_settings;
+    spyOn("Display", "showAlertText");    
     Display._transitionState = TransitionState.EntranceTransition;
-  });
+    var event = document.createEvent("animationend");
+    Display.alertTransitionEnd(event);
 
-  it("should set the correct styles on the text", function() {
-    Display.showAlertText(settings);    
-
-    expect(alertText.style.visibility).toEqual("visible");
-    expect(alertText.style.color).toEqual("rgb(255, 255, 255)");
-    expect(alertText.style.fontFamily).toEqual("Tahoma");
-    expect(alertText.style.fontSize).toEqual("40pt");    
-  });
-
-  it("should set the correct animation when text is set to scroll)", function () {            
-    Display.showAlertText(settings);
-
-    expect(alertText.style.animation).toEqual("alert-scrolling-text " + settings.timeout + "s linear 0s 1 normal");
-    expect(Display._animationState).toEqual(AnimationState.ScrollingText);    
-  });
-
-  it("should set the correct styles on entrance transition (without scroll)", function (done) {
-    settings.scroll = false;       
-    Display._transitionState = TransitionState.EntranceTransition;
-    spyOn(Display, "hideAlertBackground");    
-    Display.showAlertText(settings);
-
-    expect(alertText.style.visibility).toEqual("visible");
-    expect(alertText.style.animation).toEqual("");
-    expect(Display._animationState).toEqual(AnimationState.NonScrollingText);    
-    setTimeout (function () {
-      expect(alertText.className).toEqual("no-scroll");
-      expect(Display._animationState).toEqual(AnimationState.NoAnimation);
-      expect(Display.hideAlertBackground).toHaveBeenCalled();
-      done();
-    }, settings.timeout * 1000);
-  });
-});
-
-describe("Display.hideAlertBackground", function () {
-  var alertBackground;
-  beforeEach( function() {
-    document.body.innerHTML = "";
-    alertBackground = document.createElement("div");
-    alertBackground.setAttribute("id", "alert-background");
-    alertBackground.setAttribute("class", "bg-default");    
-    document.body.appendChild(alertBackground);    
+    expect(Display._transitionState).toEqual(TransitionState.NoTransition);
+    expect(Display.alertTransitionEndEvent).toHaveBeenCalledWith(fake_settings);
   });
   
-  it("reset the background to default once an aletr has been displayed", function() {
-    spyOn(Display, "displayNextAlert");
-    Display.hideAlertBackground();
+  it("should set the correct state, class and call displayNextAlert after the alert exit transition", function() {        
+    spyOn("Display", "displayNextAlert");    
+    Display._transitionState = TransitionState.ExitTransition;
+    var event = document.createEvent("animationend");
+    Display.alertTransitionEnd(event);
     
-    expect(Display._transitionState).toEqual(TransitionState.ExitTransition);
-    expect(Display._alertState).toEqual(AlertState.NotDisplaying);
-    expect(alertBackground.style.height).toEqual("0%");    
-    expect(alertBackground.className).toEqual("bg-default");    
+    expect(Display._transitionState).toEqual(TransitionState.NoTransition);
+    expect(Display.displayNextAlert).toHaveBeenCalled();
+  });
+});
+
+describe("Display.alertAnimationEndEvent", function () {
+  it("should call the hideAlertText method", function() {
+    spyOn("Display","hideAlertText");
+
+    expect(Display.hideAlertText).toHaveBeenCalled();
+  });
+});
+
+describe("Display.setAlertKeyframes", function () {
+  var keyframeStyle;
+  beforeEach( function () {
+    document.head.innerHTML = "";
+    keyframeStyle = document.createElement("style");
+    keyframeStyle.setAttribute("id", "keyframeStyles");
+    document.head.appendChild(keyframeStyle);    
+  });
+
+  it("should set the correct keyframes", function () {
+    var scrollWidth = 3200;
+    var scrollWidthPercentage = (Math.ceil((((scrollWidth / screen.width) * 100) + 1) / 10) * 10) + 110;
+    var keyframeHtml = "@keyframes alert-scrolling-text {" +
+      "from { transform: translateX(110%); } " +
+      "to { transform: translateX(-" + scrollWidthPercentage +"%);}";        
+        
+    expect(Display.setAlertKeyframes(scrollWidth)).toEqual(keyframeHtml);
+    expect(keyframeStyle.innerHTML).toEqual(keyframeHtml);
+  });
+});
+
+describe("Display.resetAlertKeyframes", function () {
+  var keyframeStyle;
+  beforeEach( function () {
+    document.head.innerHTML = "";  
+    keyframeStyle = document.createElement("style");
+    keyframeStyle.setAttribute("id", "keyframeStyles");
+    document.head.appendChild(keyframeStyle);
+    keyframeStyle.innerHTML = "@keyframes alert-scrolling-text {" + 
+                                "from { margin-left: 110%; } to { margin-left: -220;}";    
+  });
+
+  it("shoud reset the key frames after scrolling the text", function () {        
+    Display.resetAlertKeyframes();
+
+    expect(keyframeStyle.innerHTML).toEqual("");
   });
 });
 

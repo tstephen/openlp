@@ -165,10 +165,6 @@ function _pathToString(path) {
 }
 
 /**
- *
- */
-
-/**
  * An audio player with a play list
  */
 var AudioPlayer = function (audioElement) {
@@ -422,49 +418,129 @@ var Display = {
     }
     else {
       if (this._alertState === AlertState.Displaying || this._alertState === AlertState.DisplayingFromQueue) {
-        var alertObject = {text: text, settings: alert_settings};        
-        this._alerts.push(JSON.stringify(alertObject));        
-        return null;
+        addAlertToQueue(text, alert_settings);
       }
     }
     var settings = JSON.parse(alert_settings);
-    this._alertSettings = settings;
-    var alertBackground = $("#alert-background")[0];
-    var alertText = $("#alert")[0];
-    alertText.innerHTML = text;
+    this._alertSettings = settings;    
+    Display.setAlertText(text);
+    
+    Display.initAlertEventListeners();
+
+    if (settings.scroll === true) {
+      Display.setAlertKeyframes($('#alert'[0].scrollWidth));  
+    }
     /* Check if the alert is a queued alert */
-    if (this._alertState !== AlertState.DisplayingFromQueue) {
-      this._alertState = AlertState.Displaying;
+    if (Display._alertState !== AlertState.DisplayingFromQueue) {
+      Display._alertState = AlertState.Displaying;
     }
     
-    Display.showAlertBackground(settings);
-        
-    alertBackground.addEventListener('transitionend', function (e) {
-      e.stopPropagation();
-      if (Display._transitionState === TransitionState.EntranceTransition) {        
-        Display._transitionState = TransitionState.NoTransition;
-        Display.showAlertText(Display._alertSettings);
-      }
-      else if (Display._transitionState === TransitionState.ExitTransition){        
-        Display._transitionState = TransitionState.NoTransition;
-        alertBackground.classList = "bg-default";
-        Display.displayNextAlert();        
-      }
-    });
+    Display.showAlertBackground(settings);                
+  },
+  /**
+   * Initialize alert event listeners
+   */
+  initAlertEventListeners: function () {
+    var alertBackground = $("#alert-background")[0];
+    var alertText = $("#alert")[0];
 
-    alertText.addEventListener('animationend', function (e) {
-      e.stopPropagation();      
-      Display.hideAlertText();      
-    });
+    alertBackground.addEventListener('transitionend', Display.alertTransitionEndEvent, false);
+    alertText.addEventListener('animationend', Display.alertAnimationEndEvent, false);
+  },
+  /**
+   * Add an alert to the alert queue 
+   * @param {string} text - The alert text to be displayed
+   * @param {string} setttings - JSON object containing the settings for the alert
+   */
+  addAlertToQueue: function (text, settings) {
+    var alertObject = {text: text, settings: settings};        
+    this._alerts.push(JSON.stringify(alertObject));
+    return null;   
+  },
+  /**
+   * Set Alert Text
+   * @param {string} text - The alert text to display
+   */
+  setAlertText: function (text) {
+    var alertText = $("#alert")[0];
+    alertText.textContent = text;
+  },
+  /**
+   * Set the keyframe styles for the scrolling text
+   * @param {int} scrollWidth - The length of the paragraph with the alert text 
+   */
+  setAlertKeyframes: function (scrollWidth) {
+    var keyframeStyle = $('#keyframeStyles')[0];
+    var scrollWidthPercentage = Math.ceil((((scrollWidth / screen.width) * 100) + 1) / 10) * 10;
+    scrollWidthPercentage += 110; // Scroll the full text length
+    var keyframes = "@keyframes alert-scrolling-text {" +
+                              "from { transform: translateX(110%); } " +
+                              "to { transform: translateX(-" + scrollWidthPercentage + "%);}";    
+    keyframeStyle.innerHTML = keyframes;    
+    return keyframes;
+  },    
+  /**
+   * The alertTransitionEndEvent called after a transition has ended
+   */
+  alertTransitionEndEvent: function (e) {
+    e.stopPropagation();
+    if (Display._transitionState === TransitionState.EntranceTransition) {        
+      Display._transitionState = TransitionState.NoTransition;
+      Display.showAlertText(Display._alertSettings);
+      console.log("Show alert has been called");
+    }
+    else if (Display._transitionState === TransitionState.ExitTransition) {        
+      Display._transitionState = TransitionState.NoTransition;      
+      Display.displayNextAlert();        
+    } 
+    else if (Display._transitionState === "animatingText") {
+      if (e.propertyName === "transform") {
+        console.log("The text transform has ended");
+      }
+    }
+  },
+  /**
+   * The alertAnimationEndEvent called after a animation has ended
+   */
+  alertAnimationEndEvent: function (e) {
+    e.stopPropagation();         
+    Display.hideAlertText(); 
   },
   /**
    * Start background entrance transition for display of alert
-   * @param {object} location - The location of the alert (top, middle or bottom)
+   * @param {string} JSON object - JSON object containing the alert settings
    */
   showAlertBackground: function (settings) {    
     var alertBackground = $("#alert-background")[0];   
     var transitionSetting;
-    switch (settings.location) {
+
+    Display.setAlertLocation(settings.location);
+          
+    alertBackground.style.backgroundColor = settings.background_color;
+
+    if (Display._alertState === AlertState.DisplayingFromQueue) {
+      transitionSetting = "height 1s linear 2s";
+    }
+    else {
+      transitionSetting = "height 1s linear";
+    }     
+    // Wait for styles to be set first before starting transition
+    setTimeout( function() {
+      alertBackground.style.height = "auto";
+      alertBackground.style.minHeight = "25%";
+      alertBackground.style.transition = transitionSetting;
+      alertBackground.style.visibility = "visible";      
+    }, 50);
+    this._transitionState = TransitionState.EntranceTransition;
+  },
+  /**
+   * Set the location of the alert
+   * @param {int} location - Integer number with the location of the alert on screen
+   */
+  setAlertLocation: function (location) {
+    var alertBackground = $("#alert-background")[0];
+
+    switch (location) {
       case AlertLocation.Top:
         alertBackground.classList.add("top");                       
         break;
@@ -475,31 +551,17 @@ var Display = {
       default:
         alertBackground.classList.add("bottom");                       
         break;
-    }      
-    alertBackground.style.backgroundColor = settings.background_color;
-
-    if (this._alertState === AlertState.DisplayingFromQueue) {
-      transitionSetting = "1s linear 2s";
     }
-    else {
-      transitionSetting = "1s linear";
-    }     
-    // Wait for styles to be set first before starting transition
-    setTimeout( function() {
-      alertBackground.style.height = "25%";
-      alertBackground.style.transition = transitionSetting;
-      alertBackground.style.visibility = "visible";      
-    }, 50);
-    this._transitionState = TransitionState.EntranceTransition;
   },
   /**
-   * Start background exit transition once alert has been displayed
-   * @param {string} location - Integer showing the location of the alert on screen
+   * Hide the alert background after the alert has been shown
    */
   hideAlertBackground: function () {
     var alertBackground = $("#alert-background")[0];    
     alertBackground.style.height = "0%";
-    alertBackground.style.transition = "1s linear";           
+    alertBackground.style.minHeight = "0%";
+    alertBackground.style.transition = "height 1s linear";
+    alertBackground.className = "bg-default";
     this._transitionState = TransitionState.ExitTransition;
     this._alertState = AlertState.NotDisplaying;        
   },
@@ -508,21 +570,22 @@ var Display = {
    * @param {json} settings object - The settings to use for the animation
    */
   showAlertText: function (settings) {        
-    var alertText = $("#alert")[0];  
-    alertText.style.visibility = "visible";
+    var alertText = $("#alert")[0];         
+    alertText.style.opacity = 1;
     alertText.style.color = settings.font_color;
     alertText.style.fontFamily = settings.font_face;
     alertText.style.fontSize = settings.font_size + "pt";
-    alertText.classList.add("no-scroll");    
-    if (settings.scroll) {             
+            
+    if (settings.scroll) {      
       var animationSettings = "alert-scrolling-text " + settings.timeout +
-                              "s linear 0s " + settings.repeat + " normal";        
-      alertText.style.animation = animationSettings;        
+                              "s linear 0s " + settings.repeat + " normal";       
+      alertText.style.animation = animationSettings;
       Display._animationState = AnimationState.ScrollingText;
     }
     else {                
       Display._animationState = AnimationState.NonScrollingText; 
-      alertText.style.animation = "";      
+      alertText.style.animation = "";
+      alertText.classList.add("no-scroll");      
       setTimeout (function () {                       
         Display._animationState = AnimationState.NoAnimation;        
         Display.hideAlertText();
@@ -533,14 +596,15 @@ var Display = {
    *  Reset styling and hide the alert text after displaying the animation
    */
   hideAlertText: function () {
-    var alertText = $('#alert')[0];
-    alertText.style.animation = "";
-    alertText.classList = "";
-    alertText.style.visibility = "hidden";
+    var alertText = $('#alert')[0];            
+    alertText.style.animation = "";    
+    alertText.classList = "";    
+    alertText.style.opacity = 0;
     alertText.style.color = "rgb(255, 255, 255)"; 
     alertText.style.fontSize = "40pt";
-    Display._animationState = AnimationState.NoAnimation;
-    Display.hideAlertBackground();                                         
+    Display._animationState = AnimationState.NoAnimation;    
+    Display.hideAlertBackground();
+    Display.resetAlertKeyframes();                                         
   },
   /** 
   * Display the next alert in the queue
@@ -554,7 +618,14 @@ var Display = {
     else {
       return null;
     }
-  },    
+  },  
+  /**
+   * Reset animation keyframes after displaying alert
+   */
+  resetAlertKeyframes: function () {
+    var keyframeStyle = document.getElementById('keyframeStyles');    
+    keyframeStyle.innerHTML = "";
+  },
   /**
    * Add a slide. If the slide exists but the HTML is different, update the slide.
    * @param {string} verse - The verse number, e.g. "v1"
