@@ -40,8 +40,8 @@ IS_MAC = sys.platform.startswith('dar')
 
 VERS = {
     'Python': '3.6',
-    'PyQt5': '5.5',
-    'Qt5': '5.5',
+    'PyQt5': '5.12',
+    'Qt5': '5.12',
     'pymediainfo': '2.2',
     'sqlalchemy': '0.5',
     'enchant': '1.6'
@@ -57,6 +57,7 @@ WIN32_MODULES = [
 LINUX_MODULES = [
     # Optical drive detection.
     'dbus',
+    'Xlib',
 ]
 
 MACOSX_MODULES = [
@@ -93,6 +94,7 @@ MODULES = [
 
 
 OPTIONAL_MODULES = [
+    ('qdarkstyle', '(dark style support)'),
     ('mysql.connector', '(MySQL support)'),
     ('pyodbc', '(ODBC support)'),
     ('psycopg2', '(PostgreSQL support)'),

@@ -112,39 +112,6 @@ except Exception:
 finally:
     ver_file.close()
 
-requires = [
-    'alembic',
-    'appdirs',
-    'beautifulsoup4',
-    'chardet',
-    'lxml',
-    'Mako',
-    'pymediainfo >= 2.2',
-    'PyQt5 >= 5.12',
-    'PyQtWebEngine',
-    'QtAwesome',
-    'requests',
-    'SQLAlchemy >= 0.5',
-    'waitress',
-    'WebOb',
-    'websockets'
-]
-test_requires = [
-    'nose2',
-    'pylint',
-    'pyodbc',
-    'pysword'
-]
-if sys.platform.startswith('win'):
-    requires.append('pywin32')
-elif sys.platform.startswith('darwin'):
-    requires.extend([
-        'pyobjc',
-        'pyobjc-framework-Cocoa'
-    ])
-elif sys.platform.startswith('linux'):
-    requires.append('dbus-python')
-    test_requires.append('python-xlib')
 
 
 setup(
@@ -200,7 +167,27 @@ using a computer and a data projector.""",
     include_package_data=True,
     zip_safe=False,
     python_requires='>=3.6',
-    install_requires=requires,
+    install_requires=[
+        'alembic',
+        'appdirs',
+        'beautifulsoup4',
+        'chardet',
+        'dbus-python; platform_system=="Linux"',
+        'lxml',
+        'Mako',
+        'pymediainfo >= 2.2',
+        'pyobjc; platform_system=="Darwin"',
+        'pyobjc-framework-Cocoa; platform_system=="Darwin"',
+        'PyQt5 >= 5.12',
+        'PyQtWebEngine',
+        'pywin32; platform_system=="Windows"',
+        'QtAwesome',
+        'requests',
+        'SQLAlchemy >= 0.5',
+        'waitress',
+        'WebOb',
+        'websockets'
+    ],
     extras_require={
         'darkstyle': ['QDarkStyle'],
         'mysql': ['mysql-connector-python'],
@@ -212,7 +199,13 @@ using a computer and a data projector.""",
         'jenkins': ['python-jenkins'],
         'launchpad': ['launchpadlib']
     },
-    tests_require=test_requires,
+    tests_require=[
+        'nose2',
+        'pylint',
+        'pyodbc',
+        'pysword',
+        'python-xlib; platform_system=="Linux"'
+    ],
     test_suite='nose2.collector.collector',
     entry_points={'gui_scripts': ['openlp = run_openlp:start']}
 )
