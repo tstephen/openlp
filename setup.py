@@ -144,7 +144,7 @@ elif sys.platform.startswith('darwin'):
     ])
 elif sys.platform.startswith('linux'):
     requires.append('dbus-python')
-    test_requires.append('xlib')
+    test_requires.append('python-xlib')
 
 
 setup(
@@ -202,6 +202,7 @@ using a computer and a data projector.""",
     python_requires='>=3.6',
     install_requires=requires,
     extras_require={
+        'darkstyle': ['QDarkStyle'],
         'mysql': ['mysql-connector-python'],
         'odbc': ['pyodbc'],
         'postgresql': ['psycopg2'],
