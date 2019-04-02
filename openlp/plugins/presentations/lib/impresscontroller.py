@@ -36,7 +36,7 @@ import time
 
 from PyQt5 import QtCore
 
-from openlp.core.common import delete_file, get_uno_command, get_uno_instance, is_win
+from openlp.core.common import delete_file, get_uno_command, get_uno_instance, is_win, trace_error_handler
 from openlp.core.common.registry import Registry
 from openlp.core.display.screens import ScreenList
 from openlp.plugins.presentations.lib.presentationcontroller import PresentationController, PresentationDocument, \
@@ -55,7 +55,7 @@ if is_win():
         class SlideShowListenerImport(XSlideShowListenerObj.__class__):
             pass
     except (AttributeError, pywintypes.com_error):
-        class SlideShowListenerImport(object):
+        class SlideShowListenerImport():
             pass
 
     # Declare an empty exception to match the exception imported from UNO
@@ -97,6 +97,8 @@ class ImpressController(PresentationController):
         self.process = None
         self.desktop = None
         self.manager = None
+        self.conf_provider = None
+        self.presenter_screen_disabled_by_openlp = False
 
     def check_available(self):
         """
@@ -105,8 +107,7 @@ class ImpressController(PresentationController):
         log.debug('check_available')
         if is_win():
             return self.get_com_servicemanager() is not None
-        else:
-            return uno_available
+        return uno_available
 
     def start_process(self):
         """
@@ -146,6 +147,7 @@ class ImpressController(PresentationController):
             self.manager = uno_instance.ServiceManager
             log.debug('get UNO Desktop Openoffice - createInstanceWithContext - Desktop')
             desktop = self.manager.createInstanceWithContext("com.sun.star.frame.Desktop", uno_instance)
+            self.toggle_presentation_screen(False)
             return desktop
         except Exception:
             log.warning('Failed to get UNO desktop')
@@ -163,6 +165,7 @@ class ImpressController(PresentationController):
             desktop = self.manager.createInstance('com.sun.star.frame.Desktop')
         except (AttributeError, pywintypes.com_error):
             log.warning('Failure to find desktop - Impress may have closed')
+        self.toggle_presentation_screen(False)
         return desktop if desktop else None
 
     def get_com_servicemanager(self):
@@ -181,6 +184,8 @@ class ImpressController(PresentationController):
         Called at system exit to clean up any running presentations.
         """
         log.debug('Kill OpenOffice')
+        if self.presenter_screen_disabled_by_openlp:
+            self._toggle_presentation_screen(True)
         while self.docs:
             self.docs[0].close_presentation()
         desktop = None
@@ -209,6 +214,51 @@ class ImpressController(PresentationController):
                 log.debug('OpenOffice killed')
             except Exception:
                 log.warning('Failed to terminate OpenOffice')
+
+    def toggle_presentation_screen(self, target_value):
+        """
+        Enable or disable the Presentation Screen/Console
+        """
+        # Create Instance of ConfigurationProvider
+        if not self.conf_provider:
+            if is_win():
+                self.conf_provider = self.manager.createInstance("com.sun.star.configuration.ConfigurationProvider")
+            else:
+                self.conf_provider = self.manager.createInstanceWithContext("com.sun.star.configuration.ConfigurationProvider", uno.getComponentContext())
+        # Setup lookup properties to get Impress settings
+        properties = []
+        properties.append(self.create_property('nodepath', 'org.openoffice.Office.Impress'))
+        properties = tuple(properties)
+        try:
+            # Get an updateable configuration view
+            impress_conf_props = self.conf_provider.createInstanceWithArguments('com.sun.star.configuration.ConfigurationUpdateAccess', properties)
+            # Get the specific setting for presentation screen
+            presenter_screen_enabled = impress_conf_props.getHierarchicalPropertyValue('Misc/Start/EnablePresenterScreen')
+            # If the presentation screen is enabled we disable it
+            if presenter_screen_enabled != target_value:
+                impress_conf_props.setHierarchicalPropertyValue('Misc/Start/EnablePresenterScreen', target_value)
+                impress_conf_props.commitChanges()
+                # if target_value is False this is an attempt to disable the Presenter Screen
+                # so we make a note that it has been disabled, so it can be enabled again on close.
+                if target_value == False:
+                    self.presenter_screen_disabled_by_openlp = True
+        except Exception as e:
+            log.exception(e)
+            trace_error_handler(log)
+            return
+
+    def create_property(self, name, value):
+        """
+        Create an OOo style property object which are passed into some Uno methods.
+        """
+        log.debug('create property OpenOffice')
+        if is_win():
+            property_object = self.manager.Bridge_GetStruct('com.sun.star.beans.PropertyValue')
+        else:
+            property_object = PropertyValue()
+        property_object.Name = name
+        property_object.Value = value
+        return property_object
 
 
 class ImpressDocument(PresentationDocument):
@@ -250,7 +300,7 @@ class ImpressDocument(PresentationDocument):
             return False
         self.desktop = desktop
         properties = []
-        properties.append(self.create_property('Hidden', True))
+        properties.append(self.controller.create_property('Hidden', True))
         properties = tuple(properties)
         try:
             self.document = desktop.loadComponentFromURL(url, '_blank', 0, properties)
@@ -277,7 +327,7 @@ class ImpressDocument(PresentationDocument):
         temp_folder_path = self.get_temp_folder()
         thumb_dir_url = temp_folder_path.as_uri()
         properties = []
-        properties.append(self.create_property('FilterName', 'impress_png_Export'))
+        properties.append(self.controller.create_property('FilterName', 'impress_png_Export'))
         properties = tuple(properties)
         doc = self.document
         pages = doc.getDrawPages()
@@ -298,19 +348,6 @@ class ImpressDocument(PresentationDocument):
                 log.exception('ERROR! ErrorCodeIOException {error:d}'.format(error=exception.ErrCode))
             except Exception:
                 log.exception('{path} - Unable to store openoffice preview'.format(path=path))
-
-    def create_property(self, name, value):
-        """
-        Create an OOo style property object which are passed into some Uno methods.
-        """
-        log.debug('create property OpenOffice')
-        if is_win():
-            property_object = self.controller.manager.Bridge_GetStruct('com.sun.star.beans.PropertyValue')
-        else:
-            property_object = PropertyValue()
-        property_object.Name = name
-        property_object.Value = value
-        return property_object
 
     def close_presentation(self):
         """
@@ -376,8 +413,7 @@ class ImpressDocument(PresentationDocument):
         log.debug('is blank OpenOffice')
         if self.control and self.control.isRunning():
             return self.control.isPaused()
-        else:
-            return False
+        return False
 
     def stop_presentation(self):
         """
@@ -513,7 +549,7 @@ class ImpressDocument(PresentationDocument):
             titles.append(self.__get_text_from_page(slide_no, TextType.Title).replace('\r\n', ' ')
                                                                              .replace('\n', ' ').strip())
             note = self.__get_text_from_page(slide_no, TextType.Notes)
-            if len(note) == 0:
+            if not note:
                 note = ' '
             notes.append(note)
         self.save_titles_and_notes(titles, notes)
