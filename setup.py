@@ -22,7 +22,6 @@
 ###############################################################################
 
 import re
-import sys
 from subprocess import Popen, PIPE
 
 from setuptools import setup, find_packages
@@ -111,7 +110,6 @@ except Exception:
     version_string = ver_file.read().strip()
 finally:
     ver_file.close()
-
 
 
 setup(

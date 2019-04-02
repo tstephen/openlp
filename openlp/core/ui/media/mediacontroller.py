@@ -26,8 +26,8 @@ related to playing media, such as sliders.
 import datetime
 import logging
 
-from pymediainfo import MediaInfo
 from subprocess import check_output
+from pymediainfo import MediaInfo
 from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.state import State
