@@ -79,10 +79,21 @@ var AlertLocation = {
   Bottom: 2
 };
 
+/**
+ * Alert state enumeration
+ */
 var AlertState = {
-  Displaying: "displaying",
-  DisplayingFromQueue: "displayingFrom Queue",
+  Displaying: "displaying",  
   NotDisplaying: "notDisplaying"
+}
+
+/**
+ * Alert delay enumeration 
+ */
+var AlertDelay = {
+  FiftyMilliseconds: 50,
+  OneSecond: 1000,
+  OnePointFiveSeconds: 1500
 }
 
 /**
@@ -419,30 +430,32 @@ var Display = {
       return null;
     }
     else {
-      if (this._alertState === AlertState.Displaying || this._alertState === AlertState.DisplayingFromQueue) {
+      if (this._alertState === AlertState.Displaying) {
         Display.addAlertToQueue(text, alert_settings);
       }
     }
     var settings = JSON.parse(alert_settings);
     this._alertSettings = settings;    
     Display.setAlertText(text);
-    
-    alertBackground.addEventListener('transitionend', function(e) {
-      e.stopPropagation();
-      Display.alertTransitionEndEvent();
-    });
-    alertText.addEventListener('animationend', function(e) {
-      e.stopPropagation();
-      Display.alertAnimationEndEvent();
-    });
 
     if (settings.scroll === true) {
-      Display.setAlertKeyframes($('#alert'[0].scrollWidth));  
+      Display.setAlertKeyframes(alertText.scrollWidth);  
     }
     /* Check if the alert is a queued alert */
     if (Display._alertState !== AlertState.DisplayingFromQueue) {
       Display._alertState = AlertState.Displaying;
     }
+    
+    alertBackground.addEventListener('transitionend', function(e) {
+      e.stopPropagation();
+      console.debug("The transition has ended");            
+      Display.alertTransitionEndEvent();
+    });
+    alertText.addEventListener('animationend', function(e) {
+      e.stopPropagation();
+      console.debug("The animation has ended");      
+      Display.alertAnimationEndEvent();
+    });    
     
     Display.showAlertBackground(settings);                
   },  
@@ -487,8 +500,11 @@ var Display = {
       Display.showAlertText(Display._alertSettings);      
     }
     else if (Display._transitionState === TransitionState.ExitTransition) {        
-      Display._transitionState = TransitionState.NoTransition;            
-      Display.displayNextAlert();        
+      Display._transitionState = TransitionState.NoTransition;      
+      setTimeout(function () {
+        Display.showNextAlert();
+      }, AlertDelay.OnePointFiveSeconds);
+              
     }    
   },
   /**
@@ -503,24 +519,18 @@ var Display = {
    */
   showAlertBackground: function (settings) {    
     var alertBackground = $("#alert-background")[0];   
-    var transitionSetting;
+    var transitionSetting = "min-height 1s linear";
 
     Display.setAlertLocation(settings.location);
           
     alertBackground.style.backgroundColor = settings.background_color;
-
-    if (Display._alertState === AlertState.DisplayingFromQueue) {
-      transitionSetting = "min-height 1s linear 2s";
-    }
-    else {
-      transitionSetting = "min-height 1s linear";
-    }     
+        
     // Wait for styles to be set first before starting transition
     setTimeout( function() {      
       alertBackground.style.transition = transitionSetting;
       alertBackground.classList.add("show");
       alertBackground.classList.remove("hide");            
-    }, 50);
+    }, AlertDelay.FiftyMilliseconds);
     this._transitionState = TransitionState.EntranceTransition;
   },
   /**
@@ -578,7 +588,7 @@ var Display = {
       setTimeout (function () {                       
         Display._animationState = AnimationState.NoAnimation;        
         Display.hideAlertText();
-      }, settings.timeout * 1000);
+      }, settings.timeout * AlertDelay.OneSecond);
     }                 
   },
   /**
@@ -598,7 +608,7 @@ var Display = {
   /** 
   * Display the next alert in the queue
   */
-  displayNextAlert: function () {    
+  showNextAlert: function () {      
     if (Display._alerts.length > 0) {
       var alertObject = JSON.parse(this._alerts.shift());
       this._alertState = AlertState.DisplayingFromQueue;

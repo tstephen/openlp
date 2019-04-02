@@ -254,7 +254,7 @@ describe("Display.hideAlertBackground", function () {
   });
   
   it("reset the background to default once an alert has been displayed", function() {
-    //spyOn(Display, "displayNextAlert");
+    //spyOn(Display, "showNextAlert");
     Display.hideAlertBackground();
     
     expect(Display._transitionState).toEqual(TransitionState.ExitTransition);
@@ -414,14 +414,14 @@ describe("Display.addAlertToQueue", function () {
   });
 });
 
-describe("Display.displayNextAlert", function () {
-  Display.displayNextAlert();
+describe("Display.showNextAlert", function () {
+  Display.showNextAlert();
 
   it("should return null if there are no alerts in the queue", function () {
     Display._alerts = [];
-    Display.displayNextAlert();
+    Display.showNextAlert();
 
-    expect(Display.displayNextAlert()).toBeNull();
+    expect(Display.showNextAlert()).toBeNull();
   });
 
   it("should call the alert function correctly if there is an alert in the queue", function () {    
@@ -433,7 +433,7 @@ describe("Display.displayNextAlert", function () {
     var alertObject = {text: "Queued Alert", settings: settings};
     Display._alerts.push(JSON.stringify(alertObject));
     spyOn(Display, "alert");    
-    Display.displayNextAlert();
+    Display.showNextAlert();
     
     expect(Display.alert).toHaveBeenCalled();
     expect(Display.alert).toHaveBeenCalledWith("Queued Alert",alertObject.settings);
@@ -452,13 +452,12 @@ describe("Display.alertTransitionEndEvent", function() {
     expect(Display.showAlertText).toHaveBeenCalledWith(fake_settings);
   });
   
-  it("should set the correct state, class and call displayNextAlert after the alert exit transition", function() {        
-    spyOn(Display, "displayNextAlert");    
+  it("should set the correct state after the alert exit transition", function() {        
+    spyOn(Display, "showNextAlert");    
     Display._transitionState = TransitionState.ExitTransition;    
     Display.alertTransitionEndEvent();
     
-    expect(Display._transitionState).toEqual(TransitionState.NoTransition);
-    expect(Display.displayNextAlert).toHaveBeenCalled();
+    expect(Display._transitionState).toEqual(TransitionState.NoTransition);    
   });
 });
 
