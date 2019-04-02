@@ -41,7 +41,7 @@ IS_MAC = sys.platform.startswith('dar')
 VERS = {
     'Python': '3.6',
     'PyQt5': '5.12',
-    'Qt5': '5.12',
+    'Qt5': '5.9',
     'pymediainfo': '2.2',
     'sqlalchemy': '0.5',
     'enchant': '1.6'
