@@ -204,43 +204,26 @@ describe("Display.alert", function () {
 
 describe("Display.showAlertBackground", function () {
 
-  var alertBackground, css, settings, style;
+  var alertBackground, bg_color;
   beforeEach(function () {
-    document.body.innerHTML = "";
-    style = document.createElement("style");
-    style.type = "text/css";
-    css = '.bg-default { position: absolute; margin: 0; padding: 0; left: 0; z-index: 10; \
-      width: 100%; height: 0%; vertical-align: middle; overflow: hidden; visibility:hidden; \
-    }';
-    settings = {
-      "location": 2, "font_face": "Tahoma", "font_size": 40, 
-      "font_color": "rgb(255, 255, 255)", "background_color": "rgb(102, 0, 0)",
-      "timeout": 5, "repeat": 1, "scrolling_text": true
-    };
-    style.innerHTML = css;
-    document.head.appendChild(style);
+    document.body.innerHTML = "";        
+    bg_color = "rgb(102, 0, 0)";
     alertBackground = document.createElement("div");
     alertBackground.setAttribute("id", "alert-background");
     alertBackground.setAttribute("class", "bg-default");    
-    document.body.appendChild(alertBackground);       
-    Display._alertState = AlertState.NotDisplaying;
+    document.body.appendChild(alertBackground);           
   });
 
   it("should set the correct transition state", function () {
-    Display.showAlertBackground(settings);
+    Display.showAlertBackground(bg_color);
     expect(Display._transitionState).toEqual(TransitionState.EntranceTransition);
   });
 
-  it("should apply the styles correctly when showAlertBackground is called", function (done) {
-    Display.showAlertBackground(settings);
-    expect(alertBackground.className).toBe("bg-default bottom");
-
-    setTimeout(function () {      
-      expect(alertBackground.style.backgroundColor).toEqual(settings.background_color);      
-      expect(alertBackground.classList.contains("show")).toBe(true);      
-      expect(alertBackground.style.transition).toEqual("min-height 1s linear");      
-      done();
-    }, 50);
+  it("should apply the styles correctly when showAlertBackground is called", function () {
+    Display.showAlertBackground(bg_color);    
+         
+    expect(alertBackground.style.backgroundColor).toEqual(bg_color);      
+    expect(alertBackground.className).toEqual("bg-default show");                     
   });  
 });
 
@@ -249,18 +232,17 @@ describe("Display.hideAlertBackground", function () {
   beforeEach( function() {
     document.body.innerHTML = "";
     alertBackground = document.createElement("div");
-    alertBackground.setAttribute("id", "alert-background");      
+    alertBackground.setAttribute("id", "alert-background"); 
+    alertBackground.setAttribute("class", "bg-default show");     
     document.body.appendChild(alertBackground);    
   });
   
-  it("reset the background to default once an alert has been displayed", function() {
-    //spyOn(Display, "showNextAlert");
+  it("reset the background to default once an alert has been displayed", function() {    
     Display.hideAlertBackground();
     
     expect(Display._transitionState).toEqual(TransitionState.ExitTransition);
-    expect(Display._alertState).toEqual(AlertState.NotDisplaying);
-    expect(alertBackground.style.transition).toEqual("min-height 1s linear");      
-    expect(alertBackground.className).toEqual("hide");    
+    expect(Display._alertState).toEqual(AlertState.NotDisplaying);          
+    expect(alertBackground.className).toEqual("bg-default");    
   });
 });
 
@@ -303,6 +285,36 @@ describe("Display.setAlertLocation", function() {
     Display.setAlertLocation(2);
 
     expect(alertBackground.className).toEqual("bg-default bottom");
+  });
+});
+
+describe("Display.removeAlertLocation", function () {
+  beforeEach(function() {
+    document.body.innerHTML = "";    
+    alertBackground = document.createElement("p");
+    alertBackground.setAttribute("id", "alert-background");
+    alertBackground.setAttribute("class", "bg-default");
+    document.body.appendChild(alertBackground);
+  });
+  it("should remove the correct class when location is top of the page", function () {
+    alertBackground.classList.add("top");
+    Display.removeAlertLocation(0);
+
+    expect(alertBackground.className).toEqual("bg-default");
+  });
+
+  it("should remove the correct class when location is middle of the page", function () {
+    alertBackground.classList.add("middle");
+    Display.removeAlertLocation(1);
+    
+    expect(alertBackground.className).toEqual("bg-default");       
+  });
+
+  it("should remove the correct class when location is bottom of the page", function () {
+    alertBackground.classList.add("bottom");
+    Display.removeAlertLocation(2);
+
+    expect(alertBackground.className).toEqual("bg-default");
   });
 });
 
@@ -507,6 +519,16 @@ describe("Display.resetAlertKeyframes", function () {
     Display.resetAlertKeyframes();
 
     expect(keyframeStyle.innerHTML).toEqual("");
+  });
+});
+
+describe("Display.clearAlertSettings", function () {  
+  it("should clear the alert settings once an alert has been displayed", function () {
+    var fake_settings = {test: "fake_settings"};  
+    Display._alertSettings = fake_settings;
+    Display.clearAlertSettings();
+
+    expect(Display._alertSettings).toEqual({});
   });
 });
 

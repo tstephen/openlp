@@ -437,7 +437,7 @@ var Display = {
     var settings = JSON.parse(alert_settings);
     this._alertSettings = settings;    
     Display.setAlertText(text);
-
+    Display.setAlertLocation(settings.location);
     if (settings.scroll === true) {
       Display.setAlertKeyframes(alertText.scrollWidth);  
     }
@@ -446,18 +446,10 @@ var Display = {
       Display._alertState = AlertState.Displaying;
     }
     
-    alertBackground.addEventListener('transitionend', function(e) {
-      e.stopPropagation();
-      console.debug("The transition has ended");            
-      Display.alertTransitionEndEvent();
-    });
-    alertText.addEventListener('animationend', function(e) {
-      e.stopPropagation();
-      console.debug("The animation has ended");      
-      Display.alertAnimationEndEvent();
-    });    
+    alertBackground.addEventListener('transitionend', Display.alertTransitionEndEvent, false);            
+    alertText.addEventListener('animationend', Display.alertAnimationEndEvent, false);                          
     
-    Display.showAlertBackground(settings);                
+    Display.showAlertBackground(settings.background_color);                
   },  
   /**
    * Add an alert to the alert queue 
@@ -494,43 +486,38 @@ var Display = {
   /**
    * The alertTransitionEndEvent called after a transition has ended
    */
-  alertTransitionEndEvent: function () {    
+  alertTransitionEndEvent: function (e) {
+    e.stopPropagation();
+    console.debug("Transition end event reached");    
     if (Display._transitionState === TransitionState.EntranceTransition) {        
       Display._transitionState = TransitionState.NoTransition;
       Display.showAlertText(Display._alertSettings);      
     }
     else if (Display._transitionState === TransitionState.ExitTransition) {        
       Display._transitionState = TransitionState.NoTransition;      
-      setTimeout(function () {
+      Display.removeAlertLocation(Display._alertSettings.location);
+      Display.clearAlertSettings();      
+      setTimeout(function () {        
         Display.showNextAlert();
       }, AlertDelay.OnePointFiveSeconds);
               
     }    
   },
   /**
-   * The alertAnimationEndEvent called after a animation has ended
+   * The alertAnimationEndEvent called after an animation has ended
    */
-  alertAnimationEndEvent: function () {          
+  alertAnimationEndEvent: function (e) {
+    e.stopPropagation();                     
     Display.hideAlertText(); 
   },
   /**
    * Start background entrance transition for display of alert
-   * @param {string} JSON object - JSON object containing the alert settings
+   * @param {string} hex_color - The background color of the alert
    */
-  showAlertBackground: function (settings) {    
-    var alertBackground = $("#alert-background")[0];   
-    var transitionSetting = "min-height 1s linear";
-
-    Display.setAlertLocation(settings.location);
-          
-    alertBackground.style.backgroundColor = settings.background_color;
-        
-    // Wait for styles to be set first before starting transition
-    setTimeout( function() {      
-      alertBackground.style.transition = transitionSetting;
-      alertBackground.classList.add("show");
-      alertBackground.classList.remove("hide");            
-    }, AlertDelay.FiftyMilliseconds);
+  showAlertBackground: function (bg_color) {    
+    var alertBackground = $("#alert-background")[0];              
+    alertBackground.classList.add("show-bg");      
+    alertBackground.style.backgroundColor = bg_color;            
     this._transitionState = TransitionState.EntranceTransition;
   },
   /**
@@ -538,38 +525,59 @@ var Display = {
    * @param {int} location - Integer number with the location of the alert on screen
    */
   setAlertLocation: function (location) {
-    var alertBackground = $("#alert-background")[0];
+    var alertContainer = $(".alert-container")[0];
 
     switch (location) {
       case AlertLocation.Top:
-        alertBackground.classList.add("top");                       
+        alertContainer.classList.add("top");                       
         break;
       case AlertLocation.Middle:
-        alertBackground.classList.add("middle");                
+        alertContainer.classList.add("middle");                
         break;
       case AlertLocation.Bottom:
       default:
-        alertBackground.classList.add("bottom");                       
+        alertContainer.classList.add("bottom");                       
         break;
     }
+    console.debug("The classname set location is: " + alertContainer.className);
+  },
+  /**
+   * Remove the location class set after displaying the alert
+   * @param {int} location - Integer number with the location of the alert on screen
+   */
+  removeAlertLocation: function (location) {
+    var alertContainer = $(".alert-container")[0];
+    console.debug("The value of location for removal is: " + location);
+
+    switch (location) {
+      case AlertLocation.Top:
+        alertContainer.classList.remove("top");                       
+        break;
+      case AlertLocation.Middle:
+        alertContainer.classList.remove("middle");                
+        break;
+      case AlertLocation.Bottom:
+      default:
+        alertContainer.classList.remove("bottom");                       
+        break;
+    }
+    console.debug("The classname after removal is: " + alertContainer.className);
   },
   /**
    * Hide the alert background after the alert has been shown
    */
   hideAlertBackground: function () {
-    var alertBackground = $("#alert-background")[0];        
-    alertBackground.style.transition = "min-height 1s linear";
-    alertBackground.classList.remove("show");
-    alertBackground.classList.add("hide");
+    var alertBackground = $("#alert-background")[0];
+    alertBackground.classList.remove("show-bg");        
     this._transitionState = TransitionState.ExitTransition;
     this._alertState = AlertState.NotDisplaying;        
-  },
+  },  
   /**
    * Sets the alert text styles correctly after the entrance transition has ended.
    * @param {json} settings object - The settings to use for the animation
    */
   showAlertText: function (settings) {        
-    var alertText = $("#alert")[0];         
+    var alertText = $("#alert")[0];    
     alertText.style.opacity = 1;
     alertText.style.color = settings.font_color;
     alertText.style.fontFamily = settings.font_face;
@@ -582,11 +590,12 @@ var Display = {
       Display._animationState = AnimationState.ScrollingText;
     }
     else {                
-      Display._animationState = AnimationState.NonScrollingText; 
-      alertText.style.animation = "";
-      alertText.classList.add("no-scroll");      
+      Display._animationState = AnimationState.NonScrollingText;       
+      alertText.classList.add("show-text");      
       setTimeout (function () {                       
-        Display._animationState = AnimationState.NoAnimation;        
+        Display._animationState = AnimationState.NoAnimation;
+        alertText.classList.add("hide-text");
+        alertText.classList.remove("show-text");    
         Display.hideAlertText();
       }, settings.timeout * AlertDelay.OneSecond);
     }                 
@@ -596,12 +605,8 @@ var Display = {
    */
   hideAlertText: function () {
     var alertText = $('#alert')[0];            
-    alertText.style.animation = "";    
-    alertText.classList = "";    
-    alertText.style.opacity = 0;
-    alertText.style.color = "rgb(255, 255, 255)"; 
-    alertText.style.fontSize = "40pt";
-    Display._animationState = AnimationState.NoAnimation;    
+    Display._animationState = AnimationState.NoAnimation;
+    alertText.classList.add("hide-text");
     Display.hideAlertBackground();
     Display.resetAlertKeyframes();                                         
   },
@@ -624,6 +629,12 @@ var Display = {
   resetAlertKeyframes: function () {
     var keyframeStyle = document.getElementById('keyframeStyles');    
     keyframeStyle.innerHTML = "";
+  },
+  /**
+   * Clears the alert settings after displaying an alert 
+   */
+  clearAlertSettings: function () {    
+    this._alertSettings = {};    
   },
   /**
    * Add a slide. If the slide exists but the HTML is different, update the slide.
