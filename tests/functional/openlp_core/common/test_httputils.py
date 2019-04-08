@@ -224,7 +224,7 @@ class TestHttpUtils(TestCase, TestMixin):
         file_size = get_url_file_size(fake_url)
 
         # THEN: The correct methods are called with the correct arguments and a web page is returned
-        mocked_requests.head.assert_called_once_with(fake_url, allow_redirects=True, timeout=30.0)
+        mocked_requests.head.assert_called_once_with(fake_url, allow_redirects=True, proxies=None, timeout=30.0)
         assert file_size == 100
 
     @patch('openlp.core.common.httputils.requests')
@@ -249,34 +249,30 @@ class TestGetProxySettings(TestCase, TestMixin):
         self.addCleanup(self.destroy_settings)
 
     @patch('openlp.core.common.httputils.Settings')
-    def test_mode_arg_specified(self, MockSettings):
+    def test_mode_arg_specified(self, mocked_settings):
         """
         Test that the argument is used rather than reading the 'advanced/proxy mode' setting
         """
         # GIVEN: Mocked settings
-        mocked_settings = MagicMock()
-        MockSettings.return_value = mocked_settings
 
         # WHEN: Calling `get_proxy_settings` with the mode arg specified
         get_proxy_settings(mode=ProxyMode.NO_PROXY)
 
         # THEN: The mode arg should have been used rather than looking it up in the settings
-        mocked_settings.value.assert_not_called()
+        mocked_settings().value.assert_not_called()
 
     @patch('openlp.core.common.httputils.Settings')
-    def test_mode_incorrect_arg_specified(self, MockSettings):
+    def test_mode_incorrect_arg_specified(self, mocked_settings):
         """
         Test that the system settings are used when the mode arg specieied is invalid
         """
         # GIVEN: Mocked settings
-        mocked_settings = MagicMock()
-        MockSettings.return_value = mocked_settings
 
         # WHEN: Calling `get_proxy_settings` with an invalid mode arg specified
         result = get_proxy_settings(mode='qwerty')
 
         # THEN: An None should be returned
-        mocked_settings.value.assert_not_called()
+        mocked_settings().value.assert_not_called()
         assert result is None
 
     def test_no_proxy_mode(self):

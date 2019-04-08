@@ -555,16 +555,14 @@ class SongMediaItem(MediaManagerItem):
             self.plugin.manager.save_object(new_song)
         self.on_song_list_load()
 
-    def generate_slide_data(self, service_item, item=None, xml_version=False, remote=False,
-                            context=ServiceItemContext.Service):
+    def generate_slide_data(self, service_item, *, item=None, context=ServiceItemContext.Service, **kwargs):
         """
         Generate the slide data. Needs to be implemented by the plugin.
 
         :param service_item: The service item to be built on
         :param item: The Song item to be used
-        :param xml_version: The xml version (not used)
-        :param remote: Triggered from remote
         :param context: Why is it being generated
+        :param kwargs: Consume other unused args specified by the base implementation, but not use by this one.
         """
         log.debug('generate_slide_data: {service}, {item}, {remote}'.format(service=service_item, item=item,
                                                                             remote=self.remote_song))
@@ -583,9 +581,11 @@ class SongMediaItem(MediaManagerItem):
         if Settings().value('songs/add songbook slide') and song.songbook_entries:
             first_slide = '\n'
             for songbook_entry in song.songbook_entries:
-                first_slide = first_slide + '{book}/{num}/{pub}\n\n'.format(book=songbook_entry.songbook.name,
-                                                                            num=songbook_entry.entry,
-                                                                            pub=songbook_entry.songbook.publisher)
+                first_slide += '{book} #{num}'.format(book=songbook_entry.songbook.name,
+                                                      num=songbook_entry.entry)
+                if songbook_entry.songbook.publisher:
+                    first_slide += ' ({pub})'.format(pub=songbook_entry.songbook.publisher)
+                first_slide += '\n\n'
 
             service_item.add_from_text(first_slide, 'O1')
         # no verse list or only 1 space (in error)

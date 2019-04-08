@@ -681,8 +681,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
             return
         first_run_wizard = FirstTimeForm(self)
         first_run_wizard.initialize(ScreenList())
-        first_run_wizard.exec()
-        if first_run_wizard.was_cancelled:
+        if first_run_wizard.exec() == QtWidgets.QDialog.Rejected:
             return
         self.application.set_busy_cursor()
         self.first_time()
@@ -1334,7 +1333,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
                 self.show_status_message(
                     translate('OpenLP.MainWindow', 'Copying OpenLP data to new data directory location - {path} '
                               '- Please wait for copy to finish').format(path=self.new_data_path))
-                dir_util.copy_tree(str(old_data_path), str(self.new_data_path))
+                dir_util.copy_tree(old_data_path, self.new_data_path)
                 self.log_info('Copy successful')
             except (OSError, DistutilsFileError) as why:
                 self.application.set_normal_cursor()

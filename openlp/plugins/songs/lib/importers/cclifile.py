@@ -67,7 +67,7 @@ class CCLIFileImport(SongImport):
                         details = {'confidence': 1, 'encoding': 'utf-8'}
                     except UnicodeDecodeError:
                         details = chardet.detect(detect_content)
-                in_file = codecs.open(str(file_path), 'r', details['encoding'])
+                in_file = codecs.open(file_path, 'r', details['encoding'])
                 if not in_file.read(1) == '\ufeff':
                     # not UTF or no BOM was found
                     in_file.seek(0)
@@ -251,10 +251,10 @@ class CCLIFileImport(SongImport):
         line_number = 0
         check_first_verse_line = False
         verse_text = ''
+        verse_type = VerseType.tags[VerseType.Verse]
         song_author = ''
         verse_start = False
         for line in text_list:
-            verse_type = 'v'
             clean_line = line.strip()
             if not clean_line:
                 if line_number == 0:
@@ -263,6 +263,7 @@ class CCLIFileImport(SongImport):
                     if verse_text:
                         self.add_verse(verse_text, verse_type)
                         verse_text = ''
+                        verse_type = VerseType.tags[VerseType.Verse]
                         verse_start = False
             else:
                 # line_number=0, song title
@@ -279,7 +280,7 @@ class CCLIFileImport(SongImport):
                     elif not verse_start:
                         # We have the verse descriptor
                         verse_desc_parts = clean_line.split(' ')
-                        if len(verse_desc_parts) == 2:
+                        if len(verse_desc_parts):
                             if verse_desc_parts[0].startswith('Ver'):
                                 verse_type = VerseType.tags[VerseType.Verse]
                             elif verse_desc_parts[0].startswith('Ch'):

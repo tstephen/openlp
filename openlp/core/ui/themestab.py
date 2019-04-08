@@ -206,7 +206,7 @@ class ThemesTab(SettingsTab):
         find_and_set_in_combo_box(self.default_combo_box, self.global_theme)
         # self.renderer.set_global_theme()
         self.renderer.set_theme_level(self.theme_level)
-        if self.global_theme is not '':
+        if self.global_theme != '':
             self._preview_global_theme()
 
     def _preview_global_theme(self):

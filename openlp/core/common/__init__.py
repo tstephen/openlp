@@ -474,10 +474,10 @@ def get_file_encoding(file_path):
                 if not chunk:
                     break
                 detector.feed(chunk)
-            detector.close()
-        return detector.result
     except OSError:
         log.exception('Error detecting file encoding')
+    finally:
+        return detector.close()
 
 
 def normalize_str(irregular_string):

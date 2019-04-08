@@ -39,8 +39,8 @@ def deploy_zipfile(app_root_path, zip_name):
     :return: None
     """
     zip_path = app_root_path / zip_name
-    web_zip = ZipFile(str(zip_path))
-    web_zip.extractall(str(app_root_path))
+    web_zip = ZipFile(zip_path)
+    web_zip.extractall(app_root_path)
 
 
 def download_sha256():
