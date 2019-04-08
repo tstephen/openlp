@@ -122,7 +122,6 @@ class SongsTab(SettingsTab):
                                                           'Import missing songs from Service files'))
         self.songbook_slide_check_box.setText(translate('SongsPlugin.SongsTab',
                                                         'Add Songbooks as first slide'))
-        self.display_songbook_check_box.setText(translate('SongsPlugin.SongsTab', 'Display songbook in footer'))
         self.chords_info_label.setText(translate('SongsPlugin.SongsTab', 'If enabled all text between "[" and "]" will '
                                                                          'be regarded as chords.'))
         self.chords_group_box.setTitle(translate('SongsPlugin.SongsTab', 'Chords'))
