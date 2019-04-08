@@ -202,7 +202,7 @@ class Settings(QtCore.QSettings):
         'core/view mode': 'default',
         # The other display settings (display position and dimensions) are defined in the ScreenList class due to a
         # circular dependency.
-        'core/display on monitor': True,
+        'core/display on monitor': False,
         'core/override position': False,
         'core/monitor': {},
         'core/application version': '0.0',

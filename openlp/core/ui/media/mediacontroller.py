@@ -138,7 +138,10 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         Set up the controllers.
         :return:
         """
-        self.setup_display(self.live_controller.display, False)
+        try:
+            self.setup_display(self.live_controller.display, False)
+        except AttributeError:
+            State().update_pre_conditions('media', False)
         self.setup_display(self.preview_controller.preview_display, True)
 
     def display_controllers(self, controller_type):
