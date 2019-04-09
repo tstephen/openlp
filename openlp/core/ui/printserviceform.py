@@ -235,11 +235,11 @@ class PrintServiceForm(QtWidgets.QDialog, Ui_PrintServiceDialog, RegistryPropert
                 for slide in range(len(item.get_frames())):
                     self._add_element('li', item.get_frame_title(slide), ol)
             # add footer
-            foot_text = item.foot_text
-            foot_text = foot_text.partition('<br>')[2]
-            if foot_text:
-                foot_text = html.escape(foot_text.replace('<br>', '\n'))
-                self._add_element('div', foot_text.replace('\n', '<br>'), parent=div, class_id='itemFooter')
+            footer_html = item.footer_html
+            footer_html = footer_html.partition('<br>')[2]
+            if footer_html:
+                footer_html = html.escape(footer_html.replace('<br>', '\n'))
+                self._add_element('div', footer_html.replace('\n', '<br>'), parent=div, classId='itemFooter')
         # Add service items' notes.
         if self.notes_check_box.isChecked():
             if item.notes:

@@ -66,11 +66,8 @@ __default_settings__ = {
     'songs/add song from service': True,
     'songs/add songbook slide': False,
     'songs/display songbar': True,
-    'songs/display songbook': False,
-    'songs/display written by': True,
-    'songs/display copyright symbol': False,
-    'songs/last directory import': None,
-    'songs/last directory export': None,
+    'songs/last directory import': '',
+    'songs/last directory export': '',
     'songs/songselect username': '',
     'songs/songselect password': '',
     'songs/songselect searches': '',
@@ -78,6 +75,59 @@ __default_settings__ = {
     'songs/chord notation': 'english',  # Can be english, german or neo-latin
     'songs/mainview chords': False,
     'songs/disable chords import': False,
+    'songs/footer template': """\
+${title}<br/>
+
+%if authors_none:
+  <%
+    authors = ", ".join(authors_none)
+  %>
+  ${authors_none_label}:&nbsp;${authors}<br/>
+%endif
+
+%if authors_words_music:
+  <%
+    authors = ", ".join(authors_words_music)
+  %>
+  ${authors_words_music_label}:&nbsp;${authors}<br/>
+%endif
+
+%if authors_words:
+  <%
+    authors = ", ".join(authors_words)
+  %>
+  ${authors_words_label}:&nbsp;${authors}<br/>
+%endif
+
+%if authors_music:
+  <%
+    authors = ", ".join(authors_music)
+  %>
+  ${authors_music_label}:&nbsp;${authors}<br/>
+%endif
+
+%if authors_translation:
+  <%
+    authors = ", ".join(authors_translation)
+  %>
+  ${authors_translation_label}:&nbsp;${authors}<br/>
+%endif
+
+%if copyright:
+  &copy;&nbsp;${copyright}<br/>
+%endif
+
+%if songbook_entries:
+  <%
+    entries = ", ".join(songbook_entries)
+  %>
+  ${entries}<br/>
+%endif
+
+%if ccli_license:
+  ${ccli_license_label}&nbsp;${ccli_license}<br/>
+%endif
+""",
 }
 
 

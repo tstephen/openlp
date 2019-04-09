@@ -81,7 +81,8 @@ class ServiceItem(RegistryProperties):
         self.items = []
         self.icon = UiIcons().default
         self.raw_footer = []
-        self.foot_text = ''
+        # Plugins can set footer_html themselves. If they don't, it will be generated from raw_footer.
+        self.footer_html = ''
         self.theme = None
         self.service_item_type = None
         self.unique_identifier = 0
@@ -165,7 +166,8 @@ class ServiceItem(RegistryProperties):
         # the dict instead of rendering them again.
         previous_pages = {}
         index = 0
-        self.foot_text = '<br>'.join([_f for _f in self.raw_footer if _f])
+        if not self.footer_html:
+            self.footer_html = '<br>'.join([_f for _f in self.raw_footer if _f])
         for raw_slide in self.slides:
             verse_tag = raw_slide['verse']
             if verse_tag in previous_pages and previous_pages[verse_tag][0] == raw_slide:
@@ -178,7 +180,7 @@ class ServiceItem(RegistryProperties):
                     'title': raw_slide['title'],
                     'text': render_tags(page),
                     'verse': index,
-                    'footer': self.foot_text,
+                    'footer': self.footer_html,
                 }
                 self._rendered_slides.append(rendered_slide)
                 display_slide = {
