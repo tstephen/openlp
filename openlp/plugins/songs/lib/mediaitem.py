@@ -21,6 +21,7 @@
 ###############################################################################
 import logging
 import os
+import mako
 
 from PyQt5 import QtCore, QtWidgets
 from sqlalchemy.sql import and_, or_
@@ -35,7 +36,7 @@ from openlp.core.lib import ServiceItemContext, check_item_selected, create_sepa
 from openlp.core.lib.mediamanageritem import MediaManagerItem
 from openlp.core.lib.plugin import PluginStatus
 from openlp.core.lib.serviceitem import ItemCapabilities
-from openlp.core.lib.ui import create_widget_action
+from openlp.core.lib.ui import create_widget_action, critical_error_message_box
 from openlp.core.ui.icons import UiIcons
 from openlp.plugins.songs.forms.editsongform import EditSongForm
 from openlp.plugins.songs.forms.songexportform import SongExportForm
@@ -131,9 +132,6 @@ class SongMediaItem(MediaManagerItem):
         self.is_search_as_you_type_enabled = Settings().value('advanced/search as type')
         self.update_service_on_edit = Settings().value(self.settings_section + '/update service on edit')
         self.add_song_from_service = Settings().value(self.settings_section + '/add song from service')
-        self.display_songbook = Settings().value(self.settings_section + '/display songbook')
-        self.display_written_by_text = Settings().value(self.settings_section + '/display written by')
-        self.display_copyright_symbol = Settings().value(self.settings_section + '/display copyright symbol')
 
     def retranslate_ui(self):
         self.search_text_label.setText('{text}:'.format(text=UiStrings().Search))
@@ -583,9 +581,11 @@ class SongMediaItem(MediaManagerItem):
         if Settings().value('songs/add songbook slide') and song.songbook_entries:
             first_slide = '\n'
             for songbook_entry in song.songbook_entries:
-                first_slide = first_slide + '{book}/{num}/{pub}\n\n'.format(book=songbook_entry.songbook.name,
-                                                                            num=songbook_entry.entry,
-                                                                            pub=songbook_entry.songbook.publisher)
+                first_slide += '{book} #{num}'.format(book=songbook_entry.songbook.name,
+                                                      num=songbook_entry.entry)
+                if songbook_entry.songbook.publisher:
+                    first_slide += ' ({pub})'.format(pub=songbook_entry.songbook.publisher)
+                first_slide += '\n\n'
 
             service_item.add_from_text(first_slide, 'O1')
         # no verse list or only 1 space (in error)
@@ -675,12 +675,8 @@ class SongMediaItem(MediaManagerItem):
         item.raw_footer = []
         item.raw_footer.append(song.title)
         if authors_none:
-            # If the setting for showing "Written by:" is enabled, show it before unspecified authors.
-            if Settings().value('songs/display written by'):
-                item.raw_footer.append("{text}: {authors}".format(text=translate('OpenLP.Ui', 'Written by'),
-                                                                  authors=create_separated_list(authors_none)))
-            else:
-                item.raw_footer.append("{authors}".format(authors=create_separated_list(authors_none)))
+            item.raw_footer.append("{text}: {authors}".format(text=translate('OpenLP.Ui', 'Written by'),
+                                                              authors=create_separated_list(authors_none)))
         if authors_words_music:
             item.raw_footer.append("{text}: {authors}".format(text=AuthorType.Types[AuthorType.WordsAndMusic],
                                                               authors=create_separated_list(authors_words_music)))
@@ -694,34 +690,44 @@ class SongMediaItem(MediaManagerItem):
             item.raw_footer.append("{text}: {authors}".format(text=AuthorType.Types[AuthorType.Translation],
                                                               authors=create_separated_list(authors_translation)))
         if song.copyright:
-            if self.display_copyright_symbol:
-                item.raw_footer.append("{symbol} {song}".format(symbol=SongStrings.CopyrightSymbol,
-                                                                song=song.copyright))
-            else:
-                item.raw_footer.append(song.copyright)
-        if self.display_songbook and song.songbook_entries:
-            songbooks = [str(songbook_entry) for songbook_entry in song.songbook_entries]
+            item.raw_footer.append("{symbol} {song}".format(symbol=SongStrings.CopyrightSymbol,
+                                                            song=song.copyright))
+        songbooks = [str(songbook_entry) for songbook_entry in song.songbook_entries]
+        if song.songbook_entries:
             item.raw_footer.append(", ".join(songbooks))
         if Settings().value('core/ccli number'):
-            item.raw_footer.append(translate('SongsPlugin.MediaItem',
-                                             'CCLI License: ') + Settings().value('core/ccli number'))
-        item.metadata.append('<em>{label}:</em> {title}'.format(label=translate('SongsPlugin.MediaItem', 'Title'),
-                                                                title=song.title))
-        if song.alternate_title:
-            item.metadata.append('<em>{label}:</em> {title}'.
-                                 format(label=translate('SongsPlugin.MediaItem', 'Alt Title'),
-                                        title=song.alternate_title))
-        if song.songbook_entries:
-            for songbook_entry in song.songbook_entries:
-                item.metadata.append('<em>{label}:</em> {book}/{num}/{pub}'.
-                                     format(label=translate('SongsPlugin.MediaItem', 'Songbook'),
-                                            book=songbook_entry.songbook.name,
-                                            num=songbook_entry.entry,
-                                            pub=songbook_entry.songbook.publisher))
-        if song.topics:
-            for topics in song.topics:
-                item.metadata.append('<em>{label}:</em> {topic}'.
-                                     format(label=translate('SongsPlugin.MediaItem', 'Topic'), topic=topics.name))
+            item.raw_footer.append(translate('SongsPlugin.MediaItem', 'CCLI License: ') +
+                                   Settings().value('core/ccli number'))
+        footer_template = Settings().value('songs/footer template')
+        # Keep this in sync with the list in songstab.py
+        vars = {
+            'title': song.title,
+            'alternate_title': song.alternate_title,
+            'authors_none_label': translate('OpenLP.Ui', 'Written by'),
+            'authors_none': authors_none,
+            'authors_words_label': AuthorType.Types[AuthorType.Words],
+            'authors_words': authors_words,
+            'authors_music_label': AuthorType.Types[AuthorType.Music],
+            'authors_music': authors_music,
+            'authors_words_music_label': AuthorType.Types[AuthorType.WordsAndMusic],
+            'authors_words_music': authors_words_music,
+            'authors_translation_label': AuthorType.Types[AuthorType.Translation],
+            'authors_translation': authors_translation,
+            'authors_words_all': authors_words + authors_words_music,
+            'authors_music_all': authors_music + authors_words_music,
+            'copyright': song.copyright,
+            'songbook_entries': songbooks,
+            'ccli_license': Settings().value('core/ccli number'),
+            'ccli_license_label': translate('SongsPlugin.MediaItem', 'CCLI License'),
+            'ccli_number': song.ccli_number,
+            'topics': [topic.name for topic in song.topics]
+        }
+        try:
+            item.footer_html = mako.template.Template(footer_template).render_unicode(**vars).replace('\n', '')
+        except mako.exceptions.SyntaxException:
+            log.error('Failed to render Song footer html:\n' + mako.exceptions.text_error_template().render())
+            critical_error_message_box(message=translate('SongsPlugin.MediaItem',
+                                                         'Failed to render Song footer html.\nSee log for details'))
         return authors_all
 
     def service_load(self, item):

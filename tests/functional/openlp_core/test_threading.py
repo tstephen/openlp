@@ -133,15 +133,11 @@ def test_get_thread_worker_mising(MockRegistry):
     # GIVEN: A mocked thread worker
     MockRegistry.return_value.get.return_value.worker_threads = {}
 
-    try:
-        # WHEN: get_thread_worker() is called
-        get_thread_worker('test_thread')
-        assert False, 'A KeyError should have been raised'
-    except KeyError:
-        # THEN: The mocked worker is returned
-        pass
-    except Exception:
-        assert False, 'A KeyError should have been raised'
+    # WHEN: get_thread_worker() is called
+    result = get_thread_worker('test_thread')
+
+    # THEN: None should have been returned
+    assert result is None
 
 
 @patch('openlp.core.threading.Registry')

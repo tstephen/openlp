@@ -101,7 +101,7 @@ class OpenLP(QtWidgets.QApplication):
             ftw.initialize(screens)
             if ftw.exec() == QtWidgets.QDialog.Accepted:
                 Settings().setValue('core/has run wizard', True)
-            elif ftw.was_cancelled:
+            else:
                 QtCore.QCoreApplication.exit()
                 sys.exit()
         # Correct stylesheet bugs
