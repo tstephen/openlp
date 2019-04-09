@@ -25,9 +25,9 @@ This module contains tests for the WorshipCenter Pro song importer.
 from unittest import TestCase, skipUnless
 from unittest.mock import MagicMock, patch
 
-import pyodbc
 
 try:
+    import pyodbc
     from openlp.core.common.registry import Registry
     from openlp.plugins.songs.lib.importers.worshipcenterpro import WorshipCenterProImport
     CAN_RUN_TESTS = True
