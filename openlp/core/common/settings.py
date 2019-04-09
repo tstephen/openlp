@@ -129,6 +129,9 @@ class Settings(QtCore.QSettings):
         ``advanced/slide limits`` to ``SlideLimits.Wrap``. **NOTE**, this means that the rules have to cover all cases!
         So, if the type of the old value is bool, then there must be two rules.
     """
+    on_monitor_default = True
+    if log.isEnabledFor(logging.DEBUG):
+        on_monitor_default = False
     __default_settings__ = {
         'settings/version': 0,
         'advanced/add page break': False,
@@ -185,6 +188,7 @@ class Settings(QtCore.QSettings):
         'core/click live slide to unblank': False,
         'core/blank warning': False,
         'core/ccli number': '',
+        'core/experimental': False,
         'core/has run wizard': False,
         'core/language': '[en]',
         'core/last version test': '',
@@ -202,7 +206,7 @@ class Settings(QtCore.QSettings):
         'core/view mode': 'default',
         # The other display settings (display position and dimensions) are defined in the ScreenList class due to a
         # circular dependency.
-        'core/display on monitor': False,
+        'core/display on monitor': on_monitor_default,
         'core/override position': False,
         'core/monitor': {},
         'core/application version': '0.0',

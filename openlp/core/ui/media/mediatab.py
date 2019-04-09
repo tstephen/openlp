@@ -24,6 +24,7 @@ The :mod:`~openlp.core.ui.media.playertab` module holds the configuration tab fo
 """
 
 from PyQt5 import QtWidgets
+from PyQt5.QtMultimedia import QCameraInfo, QAudioDeviceInfo, QAudio
 
 from openlp.core.common import is_linux, is_win
 from openlp.core.common.i18n import translate
@@ -33,19 +34,6 @@ from openlp.core.ui.icons import UiIcons
 
 LINUX_STREAM = 'v4l2:///dev/video0'
 WIN_STREAM = 'dshow:// :dshow-vdev='
-
-#from PyQt5.QtMultimedia import QCameraInfo, QAudioDeviceInfo, QAudio
-
-#print('Video input:')
-#for cam in QCameraInfo.availableCameras():
-#    print('===============')
- ###   print(cam.deviceName())
-  #  print(cam.description())#
-#print()
-#print('Audio input:')
-#for au in QAudioDeviceInfo.availableDevices(QAudio.AudioInput):
-#    print('===============')
-#    print(au.deviceName())
 
 
 class MediaTab(SettingsTab):
