@@ -24,7 +24,7 @@ The :mod:`~openlp.core.ui.media.playertab` module holds the configuration tab fo
 """
 
 from PyQt5 import QtWidgets
-from PyQt5.QtMultimedia import QCameraInfo, QAudioDeviceInfo, QAudio
+# from PyQt5.QtMultimedia import QCameraInfo, QAudioDeviceInfo, QAudio
 
 from openlp.core.common import is_linux, is_win
 from openlp.core.common.i18n import translate
