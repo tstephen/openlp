@@ -116,6 +116,8 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
             self.can_preview = False
             self.can_make_live = False
             self.can_add_to_service = False
+        if State().check_preconditions('media_live'):
+            self.can_make_live = False
 
     def add_list_view_to_toolbar(self):
         """

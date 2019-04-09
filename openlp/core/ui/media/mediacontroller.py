@@ -125,8 +125,10 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         self.setup()
         self.vlc_player = VlcPlayer(self)
         State().add_service("mediacontroller", 0)
+        State().add_service("media_live", 0, requires="mediacontroller")
         if get_vlc() and pymediainfo_available:
             State().update_pre_conditions("mediacontroller", True)
+            State().update_pre_conditions('media_live', True)
         else:
             State().missing_text("mediacontroller", translate('OpenLP.SlideController',
                                  "VLC or pymediainfo are missing, so you are unable to play any media"))
@@ -141,7 +143,7 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         try:
             self.setup_display(self.live_controller.display, False)
         except AttributeError:
-            State().update_pre_conditions('media', False)
+            State().update_pre_conditions('media_live', False)
         self.setup_display(self.preview_controller.preview_display, True)
 
     def display_controllers(self, controller_type):

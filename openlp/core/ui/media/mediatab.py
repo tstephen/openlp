@@ -34,6 +34,19 @@ from openlp.core.ui.icons import UiIcons
 LINUX_STREAM = 'v4l2:///dev/video0'
 WIN_STREAM = 'dshow:// :dshow-vdev='
 
+#from PyQt5.QtMultimedia import QCameraInfo, QAudioDeviceInfo, QAudio
+
+#print('Video input:')
+#for cam in QCameraInfo.availableCameras():
+#    print('===============')
+ ###   print(cam.deviceName())
+  #  print(cam.description())#
+#print()
+#print('Audio input:')
+#for au in QAudioDeviceInfo.availableDevices(QAudio.AudioInput):
+#    print('===============')
+#    print(au.deviceName())
+
 
 class MediaTab(SettingsTab):
     """
