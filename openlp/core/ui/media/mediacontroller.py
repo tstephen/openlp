@@ -26,8 +26,13 @@ related to playing media, such as sliders.
 import datetime
 import logging
 
+try:
+    from pymediainfo import MediaInfo
+    pymediainfo_available = True
+except ImportError:
+    pymediainfo_available = False
+
 from subprocess import check_output
-from pymediainfo import MediaInfo
 from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.state import State
@@ -163,11 +168,11 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         self.setup()
         self.vlc_player = VlcPlayer(self)
         State().add_service("mediacontroller", 0)
-        if get_vlc():
+        if get_vlc() and pymediainfo_available:
             State().update_pre_conditions("mediacontroller", True)
         else:
             State().missing_text("mediacontroller", translate('OpenLP.SlideController',
-                                 "VLC is missing, so you are unable to play any media"))
+                                 "VLC or pymediainfo are missing, so you are unable to play any media"))
         self._generate_extensions_lists()
         return True
 
