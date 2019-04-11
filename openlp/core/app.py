@@ -28,6 +28,7 @@ logging and a plugin framework are contained within the openlp.core module.
 """
 import argparse
 import logging
+import os
 import sys
 import time
 from datetime import datetime
@@ -344,6 +345,9 @@ def main(args=None):
     # Bug #1018855: Set the WM_CLASS property in X11
     if not is_win() and not is_macosx():
         qt_args.append('OpenLP')
+    # Set the libvlc environment variable if we're frozen
+    if getattr(sys, 'frozen', False):
+        os.environ['PYTHON_VLC_LIB_PATH'] = str(AppLocation.get_directory(AppLocation.AppDir))
     # Initialise the resources
     qInitResources()
     # Now create and actually run the application.
