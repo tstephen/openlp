@@ -345,12 +345,6 @@ def main(args=None):
     # Bug #1018855: Set the WM_CLASS property in X11
     if not is_win() and not is_macosx():
         qt_args.append('OpenLP')
-    # Set the libvlc environment variable if we're frozen
-    if getattr(sys, 'frozen', False):
-        os.environ['PYTHON_VLC_LIB_PATH'] = str(AppLocation.get_directory(AppLocation.AppDir))
-        print('VLC Path: {}'.format(os.environ['PYTHON_VLC_LIB_PATH']))
-    else:
-        print('Not frozen: {}'.format(str(AppLocation.get_directory(AppLocation.AppDir))))
     # Initialise the resources
     qInitResources()
     # Now create and actually run the application.
@@ -381,6 +375,13 @@ def main(args=None):
     else:
         application.setApplicationName('OpenLP')
         set_up_logging(AppLocation.get_directory(AppLocation.CacheDir))
+    # Set the libvlc environment variable if we're frozen
+    if getattr(sys, 'frozen', False):
+        os.environ['PYTHON_VLC_LIB_PATH'] = str(AppLocation.get_directory(AppLocation.AppDir))
+        log.debug('VLC Path: {}'.format(os.environ['PYTHON_VLC_LIB_PATH']))
+    else:
+        log.debug('Not frozen: {}'.format(str(AppLocation.get_directory(AppLocation.AppDir))))
+    # Initialise the Registry
     Registry.create()
     Registry().register('application', application)
     Registry().set_flag('no_web_server', args.no_web_server)
