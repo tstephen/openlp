@@ -46,6 +46,7 @@ class BackgroundType(object):
     Image = 2
     Transparent = 3
     Video = 4
+    Stream = 5
 
     @staticmethod
     def to_string(background_type):
@@ -62,6 +63,8 @@ class BackgroundType(object):
             return 'transparent'
         elif background_type == BackgroundType.Video:
             return 'video'
+        elif background_type == BackgroundType.Stream:
+            return 'stream'
 
     @staticmethod
     def from_string(type_string):
@@ -78,6 +81,8 @@ class BackgroundType(object):
             return BackgroundType.Transparent
         elif type_string == 'video':
             return BackgroundType.Video
+        elif type_string == 'stream':
+            return BackgroundType.Stream
 
 
 class BackgroundGradientType(object):

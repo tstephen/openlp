@@ -41,7 +41,7 @@ class ScreensTab(SettingsTab):
         """
         Initialise the screen settings tab
         """
-        self.icon_path = UiIcons().settings
+        self.icon_path = UiIcons().desktop
         screens_translated = translate('OpenLP.ScreensTab', 'Screens')
         super(ScreensTab, self).__init__(parent, 'Screens', screens_translated)
         self.settings_section = 'core'
