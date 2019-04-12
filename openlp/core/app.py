@@ -377,10 +377,12 @@ def main(args=None):
         set_up_logging(AppLocation.get_directory(AppLocation.CacheDir))
     # Set the libvlc environment variable if we're frozen
     if getattr(sys, 'frozen', False):
-        os.environ['PYTHON_VLC_LIB_PATH'] = str(AppLocation.get_directory(AppLocation.AppDir))
+        if is_macosx():
+            vlc_lib = 'libvlc.dylib'
+        elif is_win():
+            vlc_lib = 'libvlc.dll'
+        os.environ['PYTHON_VLC_LIB_PATH'] = str(AppLocation.get_directory(AppLocation.AppDir) / vlc_lib)
         log.debug('VLC Path: {}'.format(os.environ['PYTHON_VLC_LIB_PATH']))
-    else:
-        log.debug('Not frozen: {}'.format(str(AppLocation.get_directory(AppLocation.AppDir))))
     # Initialise the Registry
     Registry.create()
     Registry().register('application', application)
