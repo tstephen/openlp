@@ -348,7 +348,9 @@ def main(args=None):
     # Set the libvlc environment variable if we're frozen
     if getattr(sys, 'frozen', False):
         os.environ['PYTHON_VLC_LIB_PATH'] = str(AppLocation.get_directory(AppLocation.AppDir))
-        log.debug(os.environ['PYTHON_VLC_LIB_PATH'])
+        log.debug('VLC Path: %s', os.environ['PYTHON_VLC_LIB_PATH'])
+    else:
+        log.debug('Not frozen')
     # Initialise the resources
     qInitResources()
     # Now create and actually run the application.
