@@ -20,8 +20,7 @@
 # Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
 ###############################################################################
 """
-The :mod:`~openlp.core.ui.media.mediacontroller` module contains a base class for media components and other widgets
-related to playing media, such as sliders.
+The :mod:`~openlp.core.ui.media.mediacontroller` module is the control module for all media playing.
 """
 import logging
 
@@ -124,14 +123,14 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         """
         self.setup()
         self.vlc_player = VlcPlayer(self)
-        State().add_service("mediacontroller", 0)
-        State().add_service("media_live", 0, requires="mediacontroller")
+        State().add_service('mediacontroller', 0)
+        State().add_service('media_live', 0, requires='mediacontroller')
         if get_vlc() and pymediainfo_available:
-            State().update_pre_conditions("mediacontroller", True)
+            State().update_pre_conditions('mediacontroller', True)
             State().update_pre_conditions('media_live', True)
         else:
-            State().missing_text("mediacontroller", translate('OpenLP.SlideController',
-                                 "VLC or pymediainfo are missing, so you are unable to play any media"))
+            State().missing_text('media_live', translate('OpenLP.SlideController',
+                                 'VLC or pymediainfo are missing, so you are unable to play any media'))
         self._generate_extensions_lists()
         return True
 
@@ -144,6 +143,8 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
             self.setup_display(self.live_controller.display, False)
         except AttributeError:
             State().update_pre_conditions('media_live', False)
+            State().missing_text('media_live', translate('OpenLP.SlideController',
+                                                         'No Displays configure so Live Media has been disabled'))
         self.setup_display(self.preview_controller.preview_display, True)
 
     def display_controllers(self, controller_type):
@@ -563,8 +564,7 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
             total_seconds = controller.media_info.length // 1000
             total_minutes = total_seconds // 60
             total_seconds %= 60
-            controller.position_label.setText(' %02d:%02d / %02d:%02d' %
-                                              (0, 0, total_minutes, total_seconds))
+            controller.position_label.setText(' %02d:%02d / %02d:%02d' % (0, 0, total_minutes, total_seconds))
             controller.mediabar.actions['playbackPlay'].setVisible(True)
             controller.mediabar.actions['playbackStop'].setDisabled(True)
             controller.mediabar.actions['playbackPause'].setVisible(False)

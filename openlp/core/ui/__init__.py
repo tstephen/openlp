@@ -93,4 +93,4 @@ class SingleColumnTableWidget(QtWidgets.QTableWidget):
             self.resizeRowsToContents()
 
 
-__all__ = ['SingleColumnTableWidget']
+__all__ = ['SingleColumnTableWidget', 'DisplayControllerType']

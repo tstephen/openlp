@@ -20,11 +20,11 @@
 # Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
 ###############################################################################
 """
-The :mod:`~openlp.core.ui.media.playertab` module holds the configuration tab for the media stuff.
+The :mod:`~openlp.core.ui.media.mediatab` module holds the configuration tab for the media stuff.
 """
 
 from PyQt5 import QtWidgets
-# from PyQt5.QtMultimedia import QCameraInfo, QAudioDeviceInfo, QAudio
+from PyQt5.QtMultimedia import QCameraInfo, QAudioDeviceInfo, QAudio
 
 from openlp.core.common import is_linux, is_win
 from openlp.core.common.i18n import translate
@@ -32,8 +32,9 @@ from openlp.core.common.settings import Settings
 from openlp.core.lib.settingstab import SettingsTab
 from openlp.core.ui.icons import UiIcons
 
-LINUX_STREAM = 'v4l2:///dev/video0'
-WIN_STREAM = 'dshow:// :dshow-vdev='
+LINUX_STREAM = 'v4l2://{video} :v4l2-standard= :input-slave={audio} :live-caching=300'
+WIN_STREAM = 'dshow://:dshow-vdev={video} :dshow-adev={audio} :live-caching=300'
+OSX_STREAM = 'avcapture://{video} :qtsound://{audio} :live-caching=300'
 
 
 class MediaTab(SettingsTab):
@@ -44,8 +45,6 @@ class MediaTab(SettingsTab):
         """
         Constructor
         """
-        # self.media_players = Registry().get('media_controller').media_players
-        # self.saved_used_players = None
         self.icon_path = UiIcons().video
         player_translated = translate('OpenLP.MediaTab', 'Media')
         super(MediaTab, self).__init__(parent, 'Media', player_translated)
@@ -81,13 +80,13 @@ class MediaTab(SettingsTab):
         # # Signals and slots
         self.browse_button.clicked.connect(self.on_revert)
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         """
         Translate the UI on the fly
         """
         self.live_media_group_box.setTitle(translate('MediaPlugin.MediaTab', 'Live Media'))
         self.stream_media_group_box.setTitle(translate('MediaPlugin.MediaTab', 'Stream Media Command'))
-        self.auto_start_check_box.setText(translate('MediaPlugin.MediaTab', 'Start automatically'))
+        self.auto_start_check_box.setText(translate('MediaPlugin.MediaTab', 'Start Live items automatically'))
 
     def load(self):
         """
@@ -100,6 +99,8 @@ class MediaTab(SettingsTab):
                 self.stream_edit.setPlainText(LINUX_STREAM)
             elif is_win:
                 self.stream_edit.setPlainText(WIN_STREAM)
+            else:
+                self.stream_edit.setPlainText(OSX_STREAM)
 
     def save(self):
         """
@@ -108,17 +109,7 @@ class MediaTab(SettingsTab):
         setting_key = self.settings_section + '/media auto start'
         if Settings().value(setting_key) != self.auto_start_check_box.checkState():
             Settings().setValue(setting_key, self.auto_start_check_box.checkState())
-        # settings = Settings()
-        # settings.beginGroup(self.settings_section)
-        # settings.setValue('background color', self.background_color)
-        # settings.endGroup()
-        # old_players, override_player = get_media_players()
-        # if self.used_players != old_players:
-        #     # clean old Media stuff
-        #     set_media_players(self.used_players, override_player)
-        #     self.settings_form.register_post_process('mediaitem_suffix_reset')
-        #     self.settings_form.register_post_process('mediaitem_media_rebuild')
-        #     self.settings_form.register_post_process('config_screen_changed')
+        Settings().setValue(self.settings_section + '/stream command', self.stream_edit.toPlainText())
 
     def post_set_up(self, post_update=False):
         """

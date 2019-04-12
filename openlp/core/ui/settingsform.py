@@ -61,6 +61,7 @@ class SettingsForm(QtWidgets.QDialog, Ui_SettingsDialog, RegistryProperties):
         self.setting_list_widget.currentRowChanged.connect(self.list_item_changed)
         self.general_tab = None
         self.themes_tab = None
+        self.player_tab = None
         self.projector_tab = None
         self.advanced_tab = None
         self.api_tab = None
@@ -79,7 +80,7 @@ class SettingsForm(QtWidgets.QDialog, Ui_SettingsDialog, RegistryProperties):
         self.insert_tab(self.advanced_tab)
         self.insert_tab(self.screens_tab)
         self.insert_tab(self.themes_tab)
-        if Settings().value('core/experimental'):
+        if Settings().value('core/experimental') and self.player_tab:
             self.insert_tab(self.player_tab)
         self.insert_tab(self.projector_tab)
         self.insert_tab(self.api_tab)
