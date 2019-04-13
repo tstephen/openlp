@@ -116,6 +116,8 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
             self.can_preview = False
             self.can_make_live = False
             self.can_add_to_service = False
+        if State().check_preconditions('media_live'):
+            self.can_make_live = False
 
     def add_list_view_to_toolbar(self):
         """
@@ -264,7 +266,8 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
         :param media: The media
         :param target_group:
         """
-        media.sort(key=lambda file_path: get_natural_key(file_path.name))
+        # TODO needs to be fixed as no idea why this fails
+        # media.sort(key=lambda file_path: get_natural_key(file_path.name))
         for track in media:
             track_info = QtCore.QFileInfo(track)
             item_name = None

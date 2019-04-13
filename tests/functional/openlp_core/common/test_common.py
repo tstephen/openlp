@@ -139,13 +139,13 @@ class TestCommonFunctions(TestCase):
         Test `path_to_module` when supplied with a `Path` object
         """
         # GIVEN: A `Path` object
-        path = Path('core', 'ui', 'media', 'webkitplayer.py')
+        path = Path('core', 'ui', 'media', 'vlcplayer.py')
 
         # WHEN: Calling path_to_module with the `Path` object
         result = path_to_module(path)
 
         # THEN: path_to_module should return the module name
-        assert result == 'openlp.core.ui.media.webkitplayer'
+        assert result == 'openlp.core.ui.media.vlcplayer'
 
     def test_trace_error_handler(self):
         """

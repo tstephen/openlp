@@ -48,6 +48,7 @@ class MediaType(object):
     CD = 3
     DVD = 4
     Folder = 5
+    Stream = 6
 
 
 class ItemMediaInfo(object):

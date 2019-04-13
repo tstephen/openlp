@@ -203,7 +203,10 @@ class ListPreviewWidget(QtWidgets.QTableWidget, RegistryProperties):
                     if self.service_item.is_capable(ItemCapabilities.HasThumbnails):
                         pixmap = QtGui.QPixmap(remove_url_prefix(slide['thumbnail']))
                     else:
-                        pixmap = QtGui.QPixmap(remove_url_prefix(slide['image']))
+                        if isinstance(slide['image'], QtGui.QIcon):
+                            pixmap = slide['image'].pixmap(QtCore.QSize(32, 32))
+                        else:
+                            pixmap = QtGui.QPixmap(remove_url_prefix(slide['image']))
                 else:
                     pixmap = QtGui.QPixmap(remove_url_prefix(slide['path']))
                 label.setPixmap(pixmap)

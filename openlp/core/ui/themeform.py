@@ -330,6 +330,8 @@ class ThemeForm(QtWidgets.QWizard, Ui_ThemeWizard, RegistryProperties):
             self.video_color_button.color = self.theme.background_border_color
             self.video_path_edit.path = self.theme.background_filename
             self.setField('background_type', 4)
+        elif self.theme.background_type == BackgroundType.to_string(BackgroundType.Stream):
+            self.setField('background_type', 5)
         elif self.theme.background_type == BackgroundType.to_string(BackgroundType.Transparent):
             self.setField('background_type', 3)
         if self.theme.background_direction == BackgroundGradientType.to_string(BackgroundGradientType.Horizontal):
