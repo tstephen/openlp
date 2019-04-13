@@ -187,7 +187,7 @@ class BibleManager(LogMixin, RegistryProperties):
         bible = self.db_cache[name]
         bible.session.close_all()
         bible.session = None
-        return delete_file(bible.path)
+        return delete_file(bible.path / '{name}{suffix}'.format(name=name, suffix=self.suffix))
 
     def get_bibles(self):
         """
