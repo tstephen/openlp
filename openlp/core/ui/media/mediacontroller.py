@@ -124,7 +124,7 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         self.setup()
         self.vlc_player = VlcPlayer(self)
         State().add_service('mediacontroller', 0)
-        State().add_service('media_live', 0, requires='mediacontroller')
+        State().add_service('media_live', 0)
         if get_vlc() and pymediainfo_available:
             State().update_pre_conditions('mediacontroller', True)
             State().update_pre_conditions('media_live', True)

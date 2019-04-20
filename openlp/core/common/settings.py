@@ -213,6 +213,7 @@ class Settings(QtCore.QSettings):
         'images/background color': '#000000',
         'media/media auto start': QtCore.Qt.Unchecked,
         'media/stream command': '',
+        'media/vlc additions': '',
         'remotes/download version': '0.0',
         'players/background color': '#000000',
         'servicemanager/last directory': None,

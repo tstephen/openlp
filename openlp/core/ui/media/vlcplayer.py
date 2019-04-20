@@ -164,9 +164,11 @@ class VlcPlayer(MediaPlayer):
         output_display.vlc_widget = QtWidgets.QFrame(output_display)
         output_display.vlc_widget.setFrameStyle(QtWidgets.QFrame.NoFrame)
         # creating a basic vlc instance
-        command_line_options = '--no-video-title-show'
+        command_line_options = '--no-video-title-show '
         if Settings().value('advanced/hide mouse') and live_display:
-            command_line_options += ' --mouse-hide-timeout=0'
+            command_line_options += '--mouse-hide-timeout=0 '
+        if Settings().value('media/vlc additions'):
+            command_line_options += Settings().value('media/vlc additions')
         output_display.vlc_instance = vlc.Instance(command_line_options)
         # creating an empty vlc media player
         output_display.vlc_media_player = output_display.vlc_instance.media_player_new()

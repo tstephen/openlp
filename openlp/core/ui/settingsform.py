@@ -30,7 +30,6 @@ from openlp.core.state import State
 from openlp.core.api.tab import ApiTab
 from openlp.core.common.mixins import RegistryProperties
 from openlp.core.common.registry import Registry
-from openlp.core.common.settings import Settings
 from openlp.core.lib import build_icon
 from openlp.core.projectors.tab import ProjectorTab
 from openlp.core.ui.advancedtab import AdvancedTab
@@ -80,8 +79,7 @@ class SettingsForm(QtWidgets.QDialog, Ui_SettingsDialog, RegistryProperties):
         self.insert_tab(self.advanced_tab)
         self.insert_tab(self.screens_tab)
         self.insert_tab(self.themes_tab)
-        if Settings().value('core/experimental') and self.player_tab:
-            self.insert_tab(self.player_tab)
+        self.insert_tab(self.player_tab)
         self.insert_tab(self.projector_tab)
         self.insert_tab(self.api_tab)
         for plugin in State().list_plugins():
@@ -162,8 +160,7 @@ class SettingsForm(QtWidgets.QDialog, Ui_SettingsDialog, RegistryProperties):
             self.themes_tab = ThemesTab(self)
             self.projector_tab = ProjectorTab(self)
             self.advanced_tab = AdvancedTab(self)
-            if Settings().value('core/experimental'):
-                self.player_tab = MediaTab(self)
+            self.player_tab = MediaTab(self)
             self.api_tab = ApiTab(self)
             self.screens_tab = ScreensTab(self)
         except Exception as e:
@@ -171,8 +168,7 @@ class SettingsForm(QtWidgets.QDialog, Ui_SettingsDialog, RegistryProperties):
         self.general_tab.post_set_up()
         self.themes_tab.post_set_up()
         self.advanced_tab.post_set_up()
-        if Settings().value('core/experimental'):
-            self.player_tab.post_set_up()
+        self.player_tab.post_set_up()
         self.api_tab.post_set_up()
         for plugin in State().list_plugins():
             if plugin.settings_tab:

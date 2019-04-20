@@ -93,16 +93,6 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
         to another language.
         """
         self.on_new_prompt = translate('MediaPlugin.MediaItem', 'Select Media')
-        # self.replace_action.setText(UiStrings().ReplaceBG)
-        # self.replace_action_context.setText(UiStrings().ReplaceBG)
-        # self.replace_action.setToolTip(UiStrings().ReplaceLiveBGDisabled)
-        # self.replace_action_context.setToolTip(UiStrings().ReplaceLiveBGDisabled)
-        # self.reset_action.setText(UiStrings().ResetBG)
-        # self.reset_action.setToolTip(UiStrings().ResetLiveBG)
-        # self.reset_action_context.setText(UiStrings().ResetBG)
-        # self.reset_action_context.setToolTip(UiStrings().ResetLiveBG)
-        # self.automatic = UiStrings().Automatic
-        # self.display_type_label.setText(translate('MediaPlugin.MediaItem', 'Use Player:'))
 
     def required_icons(self):
         """
@@ -117,7 +107,7 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
             self.can_make_live = False
             self.can_add_to_service = False
         if State().check_preconditions('media_live'):
-            self.can_make_live = False
+            self.can_make_live = True
 
     def add_list_view_to_toolbar(self):
         """
