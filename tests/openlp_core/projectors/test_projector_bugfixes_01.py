@@ -34,7 +34,7 @@ class TestPJLinkBugs(TestCase):
     """
     Tests for the PJLink module bugfixes
     """
-    def bug_1550891_process_clss_nonstandard_reply_1(self):
+    def test_bug_1550891_process_clss_nonstandard_reply_1(self):
         """
         Bugfix 1550891: CLSS request returns non-standard reply with Optoma/Viewsonic projector
         """
@@ -42,7 +42,7 @@ class TestPJLinkBugs(TestCase):
         # Keeping here for bug reference
         pass
 
-    def bug_1550891_process_clss_nonstandard_reply_2(self):
+    def test_bug_1550891_process_clss_nonstandard_reply_2(self):
         """
         Bugfix 1550891: CLSS request returns non-standard reply with BenQ projector
         """
@@ -50,7 +50,7 @@ class TestPJLinkBugs(TestCase):
         # Keeping here for bug reference
         pass
 
-    def bug_1593882_no_pin_authenticated_connection(self):
+    def test_bug_1593882_no_pin_authenticated_connection(self):
         """
         Test bug 1593882 no pin and authenticated request exception
         """
@@ -58,7 +58,7 @@ class TestPJLinkBugs(TestCase):
         # Keeping here for bug reference
         pass
 
-    def bug_1593883_pjlink_authentication(self):
+    def test_bug_1593883_pjlink_authentication(self):
         """
         Test bugfix 1593883 pjlink authentication and ticket 92187
         """
@@ -66,7 +66,7 @@ class TestPJLinkBugs(TestCase):
         # Keeping here for bug reference
         pass
 
-    def bug_1734275_process_lamp_nonstandard_reply(self):
+    def test_bug_1734275_process_lamp_nonstandard_reply(self):
         """
         Test bugfix 17342785 non-standard LAMP response with one lamp hours only
         """
