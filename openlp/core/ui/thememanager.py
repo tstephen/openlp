@@ -648,11 +648,6 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
         :rtype: None
         """
         self._write_theme(theme, image_source_path, image_destination_path)
-        if theme.background_type == BackgroundType.to_string(BackgroundType.Image):
-            self.image_manager.update_image_border(path_to_str(theme.background_filename),
-                                                   ImageSource.Theme,
-                                                   QtGui.QColor(theme.background_border_color))
-            self.image_manager.process_updates()
 
     def _write_theme(self, theme, image_source_path=None, image_destination_path=None):
         """
