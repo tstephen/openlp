@@ -216,9 +216,6 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         """
         # Generic controls
         controller.mediabar.setVisible(value)
-        # if controller.is_live and controller.display:
-        #    if self.current_media_players and value:
-        #       controller.display.set_transparency(False)
 
     @staticmethod
     def resize(display, player):
