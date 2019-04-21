@@ -67,4 +67,4 @@ class TestManager(TestCase):
             assert result is True
             mocked_close_all.assert_called_once_with()
             assert mocked_bible.session is None
-            mocked_delete_file.assert_called_once_with(Path('bibles'), 'KJV.sqlite')
+            mocked_delete_file.assert_called_once_with(Path('bibles') / 'KJV.sqlite')
