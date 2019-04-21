@@ -26,19 +26,18 @@ import os
 import zipfile
 from xml.etree.ElementTree import XML, ElementTree
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.common import delete_file
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.i18n import UiStrings, get_locale_key, translate
 from openlp.core.common.mixins import LogMixin, RegistryProperties
-from openlp.core.common.path import Path, copyfile, create_paths, path_to_str
+from openlp.core.common.path import Path, copyfile, create_paths
 from openlp.core.common.registry import Registry, RegistryBase
 from openlp.core.common.settings import Settings
-from openlp.core.lib import ImageSource, build_icon, check_item_selected, create_thumb, get_text_file_string, \
-    validate_thumb
+from openlp.core.lib import build_icon, check_item_selected, create_thumb, get_text_file_string, validate_thumb
 from openlp.core.lib.exceptions import ValidationError
-from openlp.core.lib.theme import BackgroundType, Theme
+from openlp.core.lib.theme import Theme
 from openlp.core.lib.ui import create_widget_action, critical_error_message_box
 from openlp.core.ui.filerenameform import FileRenameForm
 from openlp.core.ui.icons import UiIcons
