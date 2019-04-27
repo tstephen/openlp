@@ -113,9 +113,6 @@ class GeneralTab(SettingsTab):
         self.check_for_updates_check_box = QtWidgets.QCheckBox(self.startup_group_box)
         self.check_for_updates_check_box.setObjectName('check_for_updates_check_box')
         self.startup_layout.addWidget(self.check_for_updates_check_box)
-        self.experimental_check_box = QtWidgets.QCheckBox(self.startup_group_box)
-        self.experimental_check_box.setObjectName('experimental_check_box')
-        self.startup_layout.addWidget(self.experimental_check_box)
         self.right_layout.addWidget(self.startup_group_box)
         # Logo
         self.logo_group_box = QtWidgets.QGroupBox(self.right_column)
@@ -183,8 +180,6 @@ class GeneralTab(SettingsTab):
         self.logo_file_label.setText(translate('OpenLP.GeneralTab', 'Logo file:'))
         self.logo_hide_on_startup_check_box.setText(translate('OpenLP.GeneralTab', 'Don\'t show logo on startup'))
         self.check_for_updates_check_box.setText(translate('OpenLP.GeneralTab', 'Check for updates to OpenLP'))
-        self.experimental_check_box.setText(translate('OpenLP.GeneralTab',
-                                                      'Experimental features (use at your own risk)'))
         self.settings_group_box.setTitle(translate('OpenLP.GeneralTab', 'Application Settings'))
         self.save_check_service_check_box.setText(translate('OpenLP.GeneralTab',
                                                   'Prompt to save before starting a new service'))
@@ -227,7 +222,6 @@ class GeneralTab(SettingsTab):
         self.logo_hide_on_startup_check_box.setChecked(settings.value('logo hide on startup'))
         self.logo_color_button.color = self.logo_background_color
         self.check_for_updates_check_box.setChecked(settings.value('update check'))
-        self.experimental_check_box.setChecked(settings.value('experimental'))
         self.auto_preview_check_box.setChecked(settings.value('auto preview'))
         self.timeout_spin_box.setValue(settings.value('loop delay'))
         self.start_paused_check_box.setChecked(settings.value('audio start paused'))
@@ -247,7 +241,6 @@ class GeneralTab(SettingsTab):
         settings.setValue('logo file', self.logo_file_path_edit.path)
         settings.setValue('logo hide on startup', self.logo_hide_on_startup_check_box.isChecked())
         settings.setValue('update check', self.check_for_updates_check_box.isChecked())
-        settings.setValue('experimental', self.experimental_check_box.isChecked())
         settings.setValue('save prompt', self.save_check_service_check_box.isChecked())
         settings.setValue('auto unblank', self.auto_unblank_check_box.isChecked())
         settings.setValue('click live slide to unblank', self.click_live_slide_to_unblank_check_box.isChecked())

@@ -22,6 +22,7 @@
 """
 The :mod:`~openlp.core.ui.media.mediatab` module holds the configuration tab for the media stuff.
 """
+import logging
 
 from PyQt5 import QtWidgets
 from PyQt5.QtMultimedia import QCameraInfo, QAudioDeviceInfo, QAudio
@@ -35,6 +36,8 @@ from openlp.core.ui.icons import UiIcons
 LINUX_STREAM = 'v4l2://{video} :v4l2-standard= :input-slave={audio} :live-caching=300'
 WIN_STREAM = 'dshow://:dshow-vdev={video} :dshow-adev={audio} :live-caching=300'
 OSX_STREAM = 'avcapture://{video} :qtsound://{audio} :live-caching=300'
+
+log = logging.getLogger(__name__)
 
 
 class MediaTab(SettingsTab):
@@ -111,17 +114,12 @@ class MediaTab(SettingsTab):
             else:
                 self.stream_edit.setPlainText(OSX_STREAM)
         self.vlc_additions_edit.setPlainText(Settings().value(self.settings_section + '/vlc additions'))
-        if Settings().value('core/experimental'):
-            print('Video input:')
+        if Settings().value('advanced/experimental'):
             for cam in QCameraInfo.availableCameras():
-                print('===============')
-                print(cam.deviceName())
-                print(cam.description())
-            print()
-            print('Audio input:')
+                log.debug(cam.deviceName())
+                log.debug(cam.description())
             for au in QAudioDeviceInfo.availableDevices(QAudio.AudioInput):
-                print('===============')
-                print(au.deviceName())
+                log.debug(au.deviceName())
 
     def save(self):
         """
