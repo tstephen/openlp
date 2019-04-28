@@ -48,6 +48,7 @@ Website: http://pjlink.jbmia.or.jp/english/dl_class2.html
 """
 import logging
 from codecs import decode
+from copy import copy
 
 from PyQt5 import QtCore, QtNetwork
 
@@ -276,6 +277,7 @@ class PJLink(QtNetwork.QTcpSocket):
         self.model_lamp = None  # RLMP
         self.mute = None  # AVMT
         self.other_info = None  # INFO
+        self.pjlink_class = copy(PJLINK_CLASS)
         self.pjlink_name = None  # NAME
         self.power = S_OFF  # POWR
         self.serial_no = None  # SNUM
@@ -629,11 +631,14 @@ class PJLink(QtNetwork.QTcpSocket):
         :param salt: Optional  salt for md5 hash initial authentication
         :param priority: Option to send packet now rather than queue it up
         """
-        if QSOCKET_STATE[self.state()] != S_CONNECTED:
+        if QSOCKET_STATE[self.state()] != QSOCKET_STATE[S_CONNECTED]:
             log.warning('({ip}) send_command(): Not connected - returning'.format(ip=self.entry.name))
             return self.reset_information()
         if cmd not in PJLINK_VALID_CMD:
             log.error('({ip}) send_command(): Invalid command requested - ignoring.'.format(ip=self.entry.name))
+            if self.priority_queue or self.send_queue:
+                # Just in case there's already something to send
+                return self._send_command()
             return
         log.debug('({ip}) send_command(): Building cmd="{command}" opts="{data}"{salt}'.format(ip=self.entry.name,
                                                                                                command=cmd,
@@ -649,9 +654,9 @@ class PJLink(QtNetwork.QTcpSocket):
                                                                  options=opts,
                                                                  suffix=PJLINK_SUFFIX)
         if out in self.priority_queue:
-            log.debug('({ip}) send_command(): Already in priority queue - skipping'.format(ip=self.entry.name))
+            log.warning('({ip}) send_command(): Already in priority queue - skipping'.format(ip=self.entry.name))
         elif out in self.send_queue:
-            log.debug('({ip}) send_command(): Already in normal queue - skipping'.format(ip=self.entry.name))
+            log.warning('({ip}) send_command(): Already in normal queue - skipping'.format(ip=self.entry.name))
         else:
             if priority:
                 log.debug('({ip}) send_command(): Adding to priority queue'.format(ip=self.entry.name))
@@ -672,7 +677,8 @@ class PJLink(QtNetwork.QTcpSocket):
         :param utf8: Send as UTF-8 string otherwise send as ASCII string
         """
         if not data and not self.priority_queue and not self.send_queue:
-            log.debug('({ip}) _send_command(): Nothing to send - returning'.format(ip=self.entry.name))
+            log.warning('({ip}) _send_command(): Nothing to send - returning'.format(ip=self.entry.name))
+            self.send_busy = False
             return
         log.debug('({ip}) _send_command(data="{data}")'.format(ip=self.entry.name,
                                                                data=data.strip() if data else data))
@@ -684,7 +690,7 @@ class PJLink(QtNetwork.QTcpSocket):
         log.debug('({ip}) _send_command(): Connection status: {data}'.format(ip=self.entry.name,
                                                                              data=conn_state))
         if QSOCKET_STATE[self.state()] != S_CONNECTED:
-            log.debug('({ip}) _send_command() Not connected - abort'.format(ip=self.entry.name))
+            log.warning('({ip}) _send_command() Not connected - abort'.format(ip=self.entry.name))
             self.send_busy = False
             return self.disconnect_from_host()
         if data and data not in self.priority_queue:
@@ -707,7 +713,7 @@ class PJLink(QtNetwork.QTcpSocket):
             log.debug('({ip}) _send_command(): Getting normal queued packet'.format(ip=self.entry.name))
         else:
             # No data to send
-            log.debug('({ip}) _send_command(): No data to send'.format(ip=self.entry.name))
+            log.warning('({ip}) _send_command(): No data to send'.format(ip=self.entry.name))
             self.send_busy = False
             return
         self.send_busy = True
