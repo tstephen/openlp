@@ -239,7 +239,7 @@ class PrintServiceForm(QtWidgets.QDialog, Ui_PrintServiceDialog, RegistryPropert
             footer_html = footer_html.partition('<br>')[2]
             if footer_html:
                 footer_html = html.escape(footer_html.replace('<br>', '\n'))
-                self._add_element('div', footer_html.replace('\n', '<br>'), parent=div, classId='itemFooter')
+                self._add_element('div', footer_html.replace('\n', '<br>'), parent=div, class_id='itemFooter')
         # Add service items' notes.
         if self.notes_check_box.isChecked():
             if item.notes:

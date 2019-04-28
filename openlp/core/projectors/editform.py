@@ -37,6 +37,8 @@ from openlp.core.ui.icons import UiIcons
 log = logging.getLogger(__name__)
 log.debug('editform loaded')
 
+# TODO: Fix db entries for input source(s)
+
 
 class Ui_ProjectorEditForm(object):
     """

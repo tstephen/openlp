@@ -595,7 +595,7 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
         :param remote: Triggered from remote
         :param position: Position to place item
         """
-        service_item = self.build_service_item(item, True, remote=remote, context=ServiceItemContext.Service)
+        service_item = self.build_service_item(item, remote=remote, context=ServiceItemContext.Service)
         if service_item:
             service_item.from_plugin = False
             self.service_manager.add_service_item(service_item, replace=replace, position=position)
