@@ -59,15 +59,16 @@ class TestPJLinkRouting(TestCase):
         # GIVEN: Test object
         self.pjlink.pjlink_functions = MagicMock()
         log_warning_text = [call('({ip}) get_data(): Invalid packet - '
-                                 'unknown command "UNKN"'.format(ip=self.pjlink.name))]
+                                 'unknown command "UNKN"'.format(ip=self.pjlink.name)),
+                            call('({ip}) _send_command(): Nothing to send - '
+                                 'returning'.format(ip=self.pjlink.name))]
         log_debug_text = [call('(___TEST_ONE___) get_data(buffer="%1UNKN=Huh?"'),
                           call('(___TEST_ONE___) get_data(): Checking new data "%1UNKN=Huh?"'),
                           call('(___TEST_ONE___) get_data() header="%1UNKN" data="Huh?"'),
                           call('(___TEST_ONE___) get_data() version="1" cmd="UNKN"'),
                           call('(___TEST_ONE___) Cleaning buffer - msg = "get_data(): '
                                'Invalid packet - unknown command "UNKN""'),
-                          call('(___TEST_ONE___) Finished cleaning buffer - 0 bytes dropped'),
-                          call('(___TEST_ONE___) _send_command(): Nothing to send - returning')]
+                          call('(___TEST_ONE___) Finished cleaning buffer - 0 bytes dropped')]
         # WHEN: get_data called with an unknown command
         self.pjlink.get_data(buff='{prefix}1UNKN=Huh?'.format(prefix=PJLINK_PREFIX))
 
