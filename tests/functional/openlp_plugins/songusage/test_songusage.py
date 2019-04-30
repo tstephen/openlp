@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -45,8 +45,8 @@ class TestSongUsage(TestCase):
         # THEN: about() should return a string object
         assert isinstance(SongUsagePlugin.about(), str)
         # THEN: about() should return a non-empty string
-        assert len(SongUsagePlugin.about()) is not 0
-        assert len(SongUsagePlugin.about()) is not 0
+        assert len(SongUsagePlugin.about()) != 0
+        assert len(SongUsagePlugin.about()) != 0
 
     @patch('openlp.plugins.songusage.songusageplugin.Manager')
     def test_song_usage_init(self, MockedManager):

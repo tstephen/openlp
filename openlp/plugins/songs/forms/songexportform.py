@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -38,6 +38,7 @@ from openlp.core.widgets.wizard import OpenLPWizard, WizardStrings
 from openlp.plugins.songs.lib.db import Song
 from openlp.plugins.songs.lib.openlyricsexport import OpenLyricsExport
 
+
 log = logging.getLogger(__name__)
 
 
@@ -66,11 +67,11 @@ class SongExportForm(OpenLPWizard):
         log.debug('Stopping songs export')
         self.stop_export_flag = True
 
-    def setupUi(self, image):
+    def setup_ui(self, image):
         """
         Set up the song wizard UI.
         """
-        super(SongExportForm, self).setupUi(image)
+        super(SongExportForm, self).setup_ui(image)
 
     def custom_signals(self):
         """
@@ -135,7 +136,7 @@ class SongExportForm(OpenLPWizard):
         self.export_song_layout.addLayout(self.grid_layout)
         self.addPage(self.export_song_page)
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         """
         Song wizard localisation.
         """

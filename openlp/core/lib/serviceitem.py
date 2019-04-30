@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -24,22 +24,25 @@ The :mod:`serviceitem` provides the service item functionality including the
 type and capability of an item.
 """
 import datetime
-import html
 import logging
 import ntpath
 import os
 import uuid
+from copy import deepcopy
 
 from PyQt5 import QtGui
 
+from openlp.core.state import State
 from openlp.core.common import md5_hash
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.i18n import translate
-from openlp.core.ui.icons import UiIcons
 from openlp.core.common.mixins import RegistryProperties
 from openlp.core.common.path import Path
 from openlp.core.common.settings import Settings
-from openlp.core.lib import ImageSource, build_icon, clean_tags, expand_tags, expand_chords
+from openlp.core.display.render import remove_tags, render_tags
+from openlp.core.lib import ItemCapabilities
+from openlp.core.ui.icons import UiIcons
+
 
 log = logging.getLogger(__name__)
 
@@ -51,103 +54,6 @@ class ServiceItemType(object):
     Text = 1
     Image = 2
     Command = 3
-
-
-class ItemCapabilities(object):
-    """
-    Provides an enumeration of a service item's capabilities
-
-    ``CanPreview``
-            The capability to allow the ServiceManager to add to the preview tab when making the previous item live.
-
-    ``CanEdit``
-            The capability to allow the ServiceManager to allow the item to be edited
-
-    ``CanMaintain``
-            The capability to allow the ServiceManager to allow the item to be reordered.
-
-    ``RequiresMedia``
-            Determines is the service_item needs a Media Player
-
-    ``CanLoop``
-            The capability to allow the SlideController to allow the loop processing.
-
-    ``CanAppend``
-            The capability to allow the ServiceManager to add leaves to the
-            item
-
-    ``NoLineBreaks``
-            The capability to remove lines breaks in the renderer
-
-    ``OnLoadUpdate``
-            The capability to update MediaManager when a service Item is loaded.
-
-    ``AddIfNewItem``
-            Not Used
-
-    ``ProvidesOwnDisplay``
-            The capability to tell the SlideController the service Item has a different display.
-
-    ``HasDetailedTitleDisplay``
-            Being Removed and decommissioned.
-
-    ``HasVariableStartTime``
-            The capability to tell the ServiceManager that a change to start time is possible.
-
-    ``CanSoftBreak``
-            The capability to tell the renderer that Soft Break is allowed
-
-    ``CanWordSplit``
-            The capability to tell the renderer that it can split words is
-            allowed
-
-    ``HasBackgroundAudio``
-            That a audio file is present with the text.
-
-    ``CanAutoStartForLive``
-            The capability to ignore the do not play if display blank flag.
-
-    ``CanEditTitle``
-            The capability to edit the title of the item
-
-    ``IsOptical``
-            Determines is the service_item is based on an optical device
-
-    ``HasDisplayTitle``
-            The item contains 'displaytitle' on every frame which should be
-            preferred over 'title' when displaying the item
-
-    ``HasNotes``
-            The item contains 'notes'
-
-    ``HasThumbnails``
-            The item has related thumbnails available
-
-    ``HasMetaData``
-            The item has Meta Data about item
-    """
-    CanPreview = 1
-    CanEdit = 2
-    CanMaintain = 3
-    RequiresMedia = 4
-    CanLoop = 5
-    CanAppend = 6
-    NoLineBreaks = 7
-    OnLoadUpdate = 8
-    AddIfNewItem = 9
-    ProvidesOwnDisplay = 10
-    # HasDetailedTitleDisplay = 11
-    HasVariableStartTime = 12
-    CanSoftBreak = 13
-    CanWordSplit = 14
-    HasBackgroundAudio = 15
-    CanAutoStartForLive = 16
-    CanEditTitle = 17
-    IsOptical = 18
-    HasDisplayTitle = 19
-    HasNotes = 20
-    HasThumbnails = 21
-    HasMetaData = 22
 
 
 class ServiceItem(RegistryProperties):
@@ -166,17 +72,19 @@ class ServiceItem(RegistryProperties):
         """
         if plugin:
             self.name = plugin.name
+        self._rendered_slides = None
+        self._display_slides = None
         self.title = ''
+        self.slides = []
         self.processor = None
         self.audit = ''
         self.items = []
         self.icon = UiIcons().default
         self.raw_footer = []
-        self.foot_text = ''
+        # Plugins can set footer_html themselves. If they don't, it will be generated from raw_footer.
+        self.footer_html = ''
         self.theme = None
         self.service_item_type = None
-        self._raw_frames = []
-        self._display_frames = []
         self.unique_identifier = 0
         self.notes = ''
         self.from_plugin = False
@@ -247,59 +155,59 @@ class ServiceItem(RegistryProperties):
         else:
             self.icon = UiIcons().clone
 
-    def render(self, provides_own_theme_data=False):
+    def _create_slides(self):
         """
-        The render method is what generates the frames for the screen and obtains the display information from the
-        renderer. At this point all slides are built for the given display size.
+        Create frames for rendering and display
+        """
+        self._rendered_slides = []
+        self._display_slides = []
 
-        :param provides_own_theme_data: This switch disables the usage of the item's theme. However, this is
-            disabled by default. If this is used, it has to be taken care, that
-            the renderer knows the correct theme data. However, this is needed
-            for the theme manager.
+        # Save rendered pages to this dict. In the case that a slide is used twice we can use the pages saved to
+        # the dict instead of rendering them again.
+        previous_pages = {}
+        index = 0
+        if not self.footer_html:
+            self.footer_html = '<br>'.join([_f for _f in self.raw_footer if _f])
+        for raw_slide in self.slides:
+            verse_tag = raw_slide['verse']
+            if verse_tag in previous_pages and previous_pages[verse_tag][0] == raw_slide:
+                pages = previous_pages[verse_tag][1]
+            else:
+                pages = self.renderer.format_slide(raw_slide['text'], self)
+                previous_pages[verse_tag] = (raw_slide, pages)
+            for page in pages:
+                rendered_slide = {
+                    'title': raw_slide['title'],
+                    'text': render_tags(page),
+                    'verse': index,
+                    'footer': self.footer_html,
+                }
+                self._rendered_slides.append(rendered_slide)
+                display_slide = {
+                    'title': raw_slide['title'],
+                    'text': remove_tags(page),
+                    'verse': verse_tag,
+                }
+                self._display_slides.append(display_slide)
+                index += 1
+
+    @property
+    def rendered_slides(self):
         """
-        log.debug('Render called')
-        self._display_frames = []
-        self.bg_image_bytes = None
-        if not provides_own_theme_data:
-            self.renderer.set_item_theme(self.theme)
-            self.theme_data, self.main, self.footer = self.renderer.pre_render()
-        if self.service_item_type == ServiceItemType.Text:
-            expand_chord_tags = hasattr(self, 'name') and self.name == 'songs' and Settings().value(
-                'songs/enable chords')
-            log.debug('Formatting slides: {title}'.format(title=self.title))
-            # Save rendered pages to this dict. In the case that a slide is used twice we can use the pages saved to
-            # the dict instead of rendering them again.
-            previous_pages = {}
-            for slide in self._raw_frames:
-                verse_tag = slide['verseTag']
-                if verse_tag in previous_pages and previous_pages[verse_tag][0] == slide['raw_slide']:
-                    pages = previous_pages[verse_tag][1]
-                else:
-                    pages = self.renderer.format_slide(slide['raw_slide'], self)
-                    previous_pages[verse_tag] = (slide['raw_slide'], pages)
-                for page in pages:
-                    page = page.replace('<br>', '{br}')
-                    html_data = expand_tags(page.rstrip(), expand_chord_tags)
-                    new_frame = {
-                        'title': clean_tags(page),
-                        'text': clean_tags(page.rstrip(), expand_chord_tags),
-                        'chords_text': expand_chords(clean_tags(page.rstrip(), False)),
-                        'html': html_data.replace('&amp;nbsp;', '&nbsp;'),
-                        'printing_html': expand_tags(html.escape(page.rstrip()), expand_chord_tags, True),
-                        'verseTag': verse_tag,
-                    }
-                    self._display_frames.append(new_frame)
-        elif self.service_item_type == ServiceItemType.Image or self.service_item_type == ServiceItemType.Command:
-            pass
-        else:
-            log.error('Invalid value renderer: {item}'.format(item=self.service_item_type))
-        self.title = clean_tags(self.title)
-        # The footer should never be None, but to be compatible with a few
-        # nightly builds between 1.9.4 and 1.9.5, we have to correct this to
-        # avoid tracebacks.
-        if self.raw_footer is None:
-            self.raw_footer = []
-        self.foot_text = '<br>'.join([_f for _f in self.raw_footer if _f])
+        Render the frames and return them
+        """
+        if not self._rendered_slides:
+            self._create_slides()
+        return self._rendered_slides
+
+    @property
+    def display_slides(self):
+        """
+        Render the frames and return them
+        """
+        if not self._display_slides:
+            self._create_slides()
+        return self._display_slides
 
     def add_from_image(self, path, title, background=None, thumbnail=None):
         """
@@ -307,31 +215,34 @@ class ServiceItem(RegistryProperties):
 
         :param path: The directory in which the image file is located.
         :param title: A title for the slide in the service item.
-        :param background:
+        :param background: The background colour
         :param thumbnail: Optional alternative thumbnail, used for remote thumbnails.
         """
         if background:
             self.image_border = background
         self.service_item_type = ServiceItemType.Image
-        if not thumbnail:
-            self._raw_frames.append({'title': title, 'path': path})
-        else:
-            self._raw_frames.append({'title': title, 'path': path, 'image': thumbnail})
-        self.image_manager.add_image(path, ImageSource.ImagePlugin, self.image_border)
+        slide = {'title': title, 'path': path}
+        if thumbnail:
+            slide['thumbnail'] = thumbnail
+        self.slides.append(slide)
+        # self.image_manager.add_image(path, ImageSource.ImagePlugin, self.image_border)
         self._new_item()
 
-    def add_from_text(self, raw_slide, verse_tag=None):
+    def add_from_text(self, text, verse_tag=None):
         """
         Add a text slide to the service item.
 
-        :param raw_slide: The raw text of the slide.
+        :param text: The raw text of the slide.
         :param verse_tag:
         """
         if verse_tag:
             verse_tag = verse_tag.upper()
+        else:
+            # For items that don't have a verse tag, autoincrement the slide numbers
+            verse_tag = str(len(self.slides))
         self.service_item_type = ServiceItemType.Text
-        title = raw_slide[:30].split('\n')[0]
-        self._raw_frames.append({'title': title, 'raw_slide': raw_slide, 'verseTag': verse_tag})
+        title = text[:30].split('\n')[0]
+        self.slides.append({'title': title, 'text': text, 'verse': verse_tag})
         self._new_item()
 
     def add_from_command(self, path, file_name, image, display_title=None, notes=None):
@@ -348,17 +259,17 @@ class ServiceItem(RegistryProperties):
         # If the item should have a display title but this frame doesn't have one, we make one up
         if self.is_capable(ItemCapabilities.HasDisplayTitle) and not display_title:
             display_title = translate('OpenLP.ServiceItem',
-                                      '[slide {frame:d}]').format(frame=len(self._raw_frames) + 1)
+                                      '[slide {frame:d}]').format(frame=len(self.slides) + 1)
         # Update image path to match servicemanager location if file was loaded from service
         if image and not self.has_original_files and self.name == 'presentations':
             file_location = os.path.join(path, file_name)
             file_location_hash = md5_hash(file_location.encode('utf-8'))
             image = os.path.join(str(AppLocation.get_section_data_path(self.name)), 'thumbnails',
-                                 file_location_hash, ntpath.basename(image))
-        self._raw_frames.append({'title': file_name, 'image': image, 'path': path,
-                                 'display_title': display_title, 'notes': notes})
-        if self.is_capable(ItemCapabilities.HasThumbnails):
-            self.image_manager.add_image(image, ImageSource.CommandPlugins, '#000000')
+                                 file_location_hash, ntpath.basename(image))  # TODO: Pathlib
+        self.slides.append({'title': file_name, 'image': image, 'path': path, 'display_title': display_title,
+                            'notes': notes, 'thumbnail': image})
+        # if self.is_capable(ItemCapabilities.HasThumbnails):
+        #     self.image_manager.add_image(image, ImageSource.CommandPlugins, '#000000')
         self._new_item()
 
     def get_service_repr(self, lite_save):
@@ -393,15 +304,19 @@ class ServiceItem(RegistryProperties):
         }
         service_data = []
         if self.service_item_type == ServiceItemType.Text:
-            service_data = [slide for slide in self._raw_frames]
+            for slide in self.slides:
+                data_slide = deepcopy(slide)
+                data_slide['raw_slide'] = data_slide.pop('text')
+                data_slide['verseTag'] = data_slide.pop('verse')
+                service_data.append(data_slide)
         elif self.service_item_type == ServiceItemType.Image:
             if lite_save:
-                for slide in self._raw_frames:
+                for slide in self.slides:
                     service_data.append({'title': slide['title'], 'path': slide['path']})
             else:
-                service_data = [slide['title'] for slide in self._raw_frames]
+                service_data = [slide['title'] for slide in self.slides]
         elif self.service_item_type == ServiceItemType.Command:
-            for slide in self._raw_frames:
+            for slide in self.slides:
                 service_data.append({'title': slide['title'], 'image': slide['image'], 'path': slide['path'],
                                      'display_title': slide['display_title'], 'notes': slide['notes']})
         return {'header': service_header, 'data': service_data}
@@ -441,26 +356,27 @@ class ServiceItem(RegistryProperties):
         self.processor = header.get('processor', None)
         self.has_original_files = True
         self.metadata = header.get('item_meta_data', [])
-        if 'background_audio' in header:
+        if 'background_audio' in header and State().check_preconditions('media'):
             self.background_audio = []
             for file_path in header['background_audio']:
                 # In OpenLP 3.0 we switched to storing Path objects in JSON files
                 if isinstance(file_path, str):
                     # Handle service files prior to OpenLP 3.0
                     # Windows can handle both forward and backward slashes, so we use ntpath to get the basename
-                    file_path = Path(path, ntpath.basename(file_path))
+                    file_path = path / ntpath.basename(file_path)
                 self.background_audio.append(file_path)
         self.theme_overwritten = header.get('theme_overwritten', False)
         if self.service_item_type == ServiceItemType.Text:
             for slide in service_item['serviceitem']['data']:
-                self._raw_frames.append(slide)
+                self.add_from_text(slide['raw_slide'], slide['verseTag'])
+            self._create_slides()
         elif self.service_item_type == ServiceItemType.Image:
             settings_section = service_item['serviceitem']['header']['name']
             background = QtGui.QColor(Settings().value(settings_section + '/background color'))
             if path:
                 self.has_original_files = False
                 for text_image in service_item['serviceitem']['data']:
-                    file_path = os.path.join(path, text_image)
+                    file_path = path / text_image
                     self.add_from_image(file_path, text_image, background)
             else:
                 for text_image in service_item['serviceitem']['data']:
@@ -477,7 +393,7 @@ class ServiceItem(RegistryProperties):
                     self.add_from_command(path, text_image['title'], text_image['image'],
                                           text_image.get('display_title', ''), text_image.get('notes', ''))
                 else:
-                    self.add_from_command(text_image['path'], text_image['title'], text_image['image'])
+                    self.add_from_command(Path(text_image['path']), text_image['title'], text_image['image'])
         self._new_item()
 
     def get_display_title(self):
@@ -488,10 +404,10 @@ class ServiceItem(RegistryProperties):
                 or self.is_capable(ItemCapabilities.CanEditTitle):
             return self.title
         else:
-            if len(self._raw_frames) > 1:
+            if len(self.slides) > 1:
                 return self.title
             else:
-                return self._raw_frames[0]['title']
+                return self.slides[0]['title']
 
     def merge(self, other):
         """
@@ -507,7 +423,6 @@ class ServiceItem(RegistryProperties):
         if other.theme is not None:
             self.theme = other.theme
             self._new_item()
-        self.render()
         if self.is_capable(ItemCapabilities.HasBackgroundAudio):
             log.debug(self.background_audio)
 
@@ -577,9 +492,9 @@ class ServiceItem(RegistryProperties):
         Returns the frames for the ServiceItem
         """
         if self.service_item_type == ServiceItemType.Text:
-            return self._display_frames
+            return self.display_slides
         else:
-            return self._raw_frames
+            return self.slides
 
     def get_rendered_frame(self, row):
         """
@@ -588,18 +503,19 @@ class ServiceItem(RegistryProperties):
         :param row: The service item slide to be returned
         """
         if self.service_item_type == ServiceItemType.Text:
-            return self._display_frames[row]['html'].split('\n')[0]
+            # return self.display_frames[row]['html'].split('\n')[0]
+            return self.rendered_slides[row]['text']
         elif self.service_item_type == ServiceItemType.Image:
-            return self._raw_frames[row]['path']
+            return self.slides[row]['path']
         else:
-            return self._raw_frames[row]['image']
+            return self.slides[row]['image']
 
     def get_frame_title(self, row=0):
         """
         Returns the title of the raw frame
         """
         try:
-            return self._raw_frames[row]['title']
+            return self.get_frames()[row]['title']
         except IndexError:
             return ''
 
@@ -609,21 +525,25 @@ class ServiceItem(RegistryProperties):
         """
         if not frame:
             try:
-                frame = self._raw_frames[row]
+                frame = self.slides[row]
             except IndexError:
                 return ''
         if self.is_image() or self.is_capable(ItemCapabilities.IsOptical):
             path_from = frame['path']
         else:
             path_from = os.path.join(frame['path'], frame['title'])
+        if isinstance(path_from, str):
+            # Handle service files prior to OpenLP 3.0
+            # Windows can handle both forward and backward slashes, so we use ntpath to get the basename
+            path_from = Path(path_from)
         return path_from
 
     def remove_frame(self, frame):
         """
         Remove the specified frame from the item
         """
-        if frame in self._raw_frames:
-            self._raw_frames.remove(frame)
+        if frame in self.slides:
+            self.slides.remove(frame)
 
     def get_media_time(self):
         """
@@ -657,7 +577,6 @@ class ServiceItem(RegistryProperties):
         self.theme_overwritten = (theme is None)
         self.theme = theme
         self._new_item()
-        self.render()
 
     def remove_invalid_frames(self, invalid_paths=None):
         """
@@ -672,29 +591,29 @@ class ServiceItem(RegistryProperties):
         """
         Returns if there are any frames in the service item
         """
-        return not bool(self._raw_frames)
+        return not bool(self.slides)
 
     def validate_item(self, suffix_list=None):
         """
         Validates a service item to make sure it is valid
         """
         self.is_valid = True
-        for frame in self._raw_frames:
-            if self.is_image() and not os.path.exists(frame['path']):
+        for slide in self.slides:
+            if self.is_image() and not os.path.exists(slide['path']):
                 self.is_valid = False
                 break
             elif self.is_command():
-                if self.is_capable(ItemCapabilities.IsOptical):
-                    if not os.path.exists(frame['title']):
+                if self.is_capable(ItemCapabilities.IsOptical) and State().check_preconditions('media'):
+                    if not os.path.exists(slide['title']):
                         self.is_valid = False
                         break
                 else:
-                    file_name = os.path.join(frame['path'], frame['title'])
+                    file_name = os.path.join(slide['path'], slide['title'])
                     if not os.path.exists(file_name):
                         self.is_valid = False
                         break
                     if suffix_list and not self.is_text():
-                        file_suffix = frame['title'].split('.')[-1]
+                        file_suffix = slide['title'].split('.')[-1]
                         if file_suffix.lower() not in suffix_list:
                             self.is_valid = False
                             break

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -31,25 +31,27 @@ from tempfile import gettempdir
 
 from PyQt5 import QtCore, QtWidgets
 
+from openlp.core.state import State
 from openlp.core.api.http import register_endpoint
 from openlp.core.common.actions import ActionList
 from openlp.core.common.i18n import UiStrings, translate
-from openlp.core.ui.icons import UiIcons
 from openlp.core.common.registry import Registry
-from openlp.core.lib import Plugin, StringContent, build_icon
+from openlp.core.lib import build_icon
 from openlp.core.lib.db import Manager
+from openlp.core.lib.plugin import Plugin, StringContent
 from openlp.core.lib.ui import create_action
+from openlp.core.ui.icons import UiIcons
 from openlp.plugins.songs import reporting
 from openlp.plugins.songs.endpoint import api_songs_endpoint, songs_endpoint
 from openlp.plugins.songs.forms.duplicatesongremovalform import DuplicateSongRemovalForm
 from openlp.plugins.songs.forms.songselectform import SongSelectForm
 from openlp.plugins.songs.lib import clean_song, upgrade
-from openlp.plugins.songs.lib.db import init_schema, Song
+from openlp.plugins.songs.lib.db import Song, init_schema
 from openlp.plugins.songs.lib.importer import SongFormat
 from openlp.plugins.songs.lib.importers.openlp import OpenLPSongImport
-from openlp.plugins.songs.lib.mediaitem import SongMediaItem
-from openlp.plugins.songs.lib.mediaitem import SongSearch
+from openlp.plugins.songs.lib.mediaitem import SongMediaItem, SongSearch
 from openlp.plugins.songs.lib.songstab import SongsTab
+
 
 log = logging.getLogger(__name__)
 __default_settings__ = {
@@ -64,11 +66,8 @@ __default_settings__ = {
     'songs/add song from service': True,
     'songs/add songbook slide': False,
     'songs/display songbar': True,
-    'songs/display songbook': False,
-    'songs/display written by': True,
-    'songs/display copyright symbol': False,
-    'songs/last directory import': None,
-    'songs/last directory export': None,
+    'songs/last directory import': '',
+    'songs/last directory export': '',
     'songs/songselect username': '',
     'songs/songselect password': '',
     'songs/songselect searches': '',
@@ -76,6 +75,59 @@ __default_settings__ = {
     'songs/chord notation': 'english',  # Can be english, german or neo-latin
     'songs/mainview chords': False,
     'songs/disable chords import': False,
+    'songs/footer template': """\
+${title}<br/>
+
+%if authors_none:
+  <%
+    authors = ", ".join(authors_none)
+  %>
+  ${authors_none_label}:&nbsp;${authors}<br/>
+%endif
+
+%if authors_words_music:
+  <%
+    authors = ", ".join(authors_words_music)
+  %>
+  ${authors_words_music_label}:&nbsp;${authors}<br/>
+%endif
+
+%if authors_words:
+  <%
+    authors = ", ".join(authors_words)
+  %>
+  ${authors_words_label}:&nbsp;${authors}<br/>
+%endif
+
+%if authors_music:
+  <%
+    authors = ", ".join(authors_music)
+  %>
+  ${authors_music_label}:&nbsp;${authors}<br/>
+%endif
+
+%if authors_translation:
+  <%
+    authors = ", ".join(authors_translation)
+  %>
+  ${authors_translation_label}:&nbsp;${authors}<br/>
+%endif
+
+%if copyright:
+  &copy;&nbsp;${copyright}<br/>
+%endif
+
+%if songbook_entries:
+  <%
+    entries = ", ".join(songbook_entries)
+  %>
+  ${entries}<br/>
+%endif
+
+%if ccli_license:
+  ${ccli_license_label}&nbsp;${ccli_license}<br/>
+%endif
+""",
 }
 
 
@@ -98,6 +150,8 @@ class SongsPlugin(Plugin):
         self.songselect_form = None
         register_endpoint(songs_endpoint)
         register_endpoint(api_songs_endpoint)
+        State().add_service(self.name, self.weight, is_plugin=True)
+        State().update_pre_conditions(self.name, self.check_pre_conditions())
 
     def check_pre_conditions(self):
         """

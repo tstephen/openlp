@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -54,9 +54,9 @@ from collections import namedtuple
 
 from openlp.core.common import get_file_encoding
 from openlp.core.common.i18n import translate
-from openlp.core.common.path import Path
 from openlp.core.lib.exceptions import ValidationError
 from openlp.plugins.bibles.lib.bibleimport import BibleImport
+
 
 Book = namedtuple('Book', 'id, testament_id, name, abbreviation')
 Verse = namedtuple('Verse', 'book_id_name, chapter_number, number, text')

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -24,6 +24,7 @@ import shutil
 from contextlib import suppress
 
 from openlp.core.common import is_win
+
 
 if is_win():
     from pathlib import WindowsPath as PathVariant          # pragma: nocover
@@ -77,7 +78,7 @@ class Path(PathVariant):
         :param onerror: Handler function to handle any errors
         :rtype: None
         """
-        shutil.rmtree(str(self), ignore_errors, onerror)
+        shutil.rmtree(self, ignore_errors, onerror)
 
 
 def replace_params(args, kwargs, params):

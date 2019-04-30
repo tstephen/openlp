@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -30,44 +30,24 @@ import logging
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from openlp.core.common.i18n import translate
-from openlp.core.ui.icons import UiIcons
 from openlp.core.common.mixins import LogMixin, RegistryProperties
-from openlp.core.common.registry import RegistryBase
+from openlp.core.common.registry import Registry, RegistryBase
 from openlp.core.common.settings import Settings
 from openlp.core.lib.ui import create_widget_action
 from openlp.core.projectors import DialogSourceStyle
-from openlp.core.projectors.constants import E_AUTHENTICATION, E_ERROR, E_NETWORK, E_NOT_CONNECTED, \
-    E_SOCKET_TIMEOUT, E_UNKNOWN_SOCKET_ERROR, S_CONNECTED, S_CONNECTING, S_COOLDOWN, S_INITIALIZE, \
-    S_NOT_CONNECTED, S_OFF, S_ON, S_STANDBY, S_WARMUP, PJLINK_PORT, STATUS_CODE, STATUS_MSG, QSOCKET_STATE
+from openlp.core.projectors.constants import E_AUTHENTICATION, E_ERROR, E_NETWORK, E_NOT_CONNECTED, E_SOCKET_TIMEOUT,\
+    E_UNKNOWN_SOCKET_ERROR, QSOCKET_STATE, S_CONNECTED, S_CONNECTING, S_COOLDOWN, S_INITIALIZE, S_NOT_CONNECTED, S_OFF,\
+    S_ON, S_STANDBY, S_WARMUP, STATUS_CODE, STATUS_MSG
 
 from openlp.core.projectors.db import ProjectorDB
 from openlp.core.projectors.editform import ProjectorEditForm
 from openlp.core.projectors.pjlink import PJLink, PJLinkUDP
-from openlp.core.projectors.sourceselectform import SourceSelectTabs, SourceSelectSingle
+from openlp.core.projectors.sourceselectform import SourceSelectSingle, SourceSelectTabs
+from openlp.core.ui.icons import UiIcons
 from openlp.core.widgets.toolbar import OpenLPToolbar
 
 log = logging.getLogger(__name__)
 log.debug('projectormanager loaded')
-
-
-# Dict for matching projector status to display icon
-STATUS_ICONS = {
-    S_NOT_CONNECTED: ':/projector/projector_item_disconnect.png',
-    S_CONNECTING: ':/projector/projector_item_connect.png',
-    S_CONNECTED: ':/projector/projector_off.png',
-    S_OFF: ':/projector/projector_off.png',
-    S_INITIALIZE: ':/projector/projector_off.png',
-    S_STANDBY: ':/projector/projector_off.png',
-    S_WARMUP: ':/projector/projector_warmup.png',
-    S_ON: ':/projector/projector_on.png',
-    S_COOLDOWN: ':/projector/projector_cooldown.png',
-    E_ERROR: ':/projector/projector_error.png',
-    E_NETWORK: ':/projector/projector_not_connected_error.png',
-    E_SOCKET_TIMEOUT: ':/projector/projector_not_connected_error.png',
-    E_AUTHENTICATION: ':/projector/projector_not_connected_error.png',
-    E_UNKNOWN_SOCKET_ERROR: ':/projector/projector_not_connected_error.png',
-    E_NOT_CONNECTED: ':/projector/projector_not_connected_error.png'
-}
 
 
 class UiProjectorManager(object):
@@ -121,7 +101,7 @@ class UiProjectorManager(object):
         self.one_toolbar.add_toolbar_action('connect_projector',
                                             text=translate('OpenLP.ProjectorManager',
                                                            'Connect to selected projector.'),
-                                            icon=UiIcons().projector_connect,
+                                            icon=UiIcons().projector_select_connect,
                                             tooltip=translate('OpenLP.ProjectorManager',
                                                               'Connect to selected projector.'),
                                             triggers=self.on_connect_projector)
@@ -135,7 +115,7 @@ class UiProjectorManager(object):
         self.one_toolbar.add_toolbar_action('disconnect_projector',
                                             text=translate('OpenLP.ProjectorManager',
                                                            'Disconnect from selected projectors'),
-                                            icon=UiIcons().projector_disconnect,
+                                            icon=UiIcons().projector_select_disconnect,
                                             tooltip=translate('OpenLP.ProjectorManager',
                                                               'Disconnect from selected projector.'),
                                             triggers=self.on_disconnect_projector)
@@ -150,7 +130,7 @@ class UiProjectorManager(object):
         self.one_toolbar.add_toolbar_action('poweron_projector',
                                             text=translate('OpenLP.ProjectorManager',
                                                            'Power on selected projector'),
-                                            icon=UiIcons().projector_on,
+                                            icon=UiIcons().projector_power_on,
                                             tooltip=translate('OpenLP.ProjectorManager',
                                                               'Power on selected projector.'),
                                             triggers=self.on_poweron_projector)
@@ -163,7 +143,7 @@ class UiProjectorManager(object):
                                             triggers=self.on_poweron_projector)
         self.one_toolbar.add_toolbar_action('poweroff_projector',
                                             text=translate('OpenLP.ProjectorManager', 'Standby selected projector'),
-                                            icon=UiIcons().projector_off,
+                                            icon=UiIcons().projector_power_off,
                                             tooltip=translate('OpenLP.ProjectorManager',
                                                               'Put selected projector in standby.'),
                                             triggers=self.on_poweroff_projector)
@@ -297,7 +277,7 @@ class ProjectorManager(QtWidgets.QWidget, RegistryBase, UiProjectorManager, LogM
         self.projector_list = []
         self.source_select_form = None
         # Dictionary of PJLinkUDP objects to listen for UDP broadcasts from PJLink 2+ projectors.
-        # Key is port number that projectors use
+        # Key is port number
         self.pjlink_udp = {}
         # Dict for matching projector status to display icon
         self.status_icons = {
@@ -308,7 +288,7 @@ class ProjectorManager(QtWidgets.QWidget, RegistryBase, UiProjectorManager, LogM
             S_INITIALIZE: UiIcons().projector_on,
             S_STANDBY: UiIcons().projector_off,
             S_WARMUP: UiIcons().projector_warmup,
-            S_ON: UiIcons().projector_off,
+            S_ON: UiIcons().projector_on,
             S_COOLDOWN: UiIcons().projector_cooldown,
             E_ERROR: UiIcons().projector_error,
             E_NETWORK: UiIcons().error,
@@ -335,10 +315,6 @@ class ProjectorManager(QtWidgets.QWidget, RegistryBase, UiProjectorManager, LogM
         """
         Post-initialize setups.
         """
-        # Default PJLink port UDP socket
-        log.debug('Creating PJLinkUDP listener for default port {port}'.format(port=PJLINK_PORT))
-        self.pjlink_udp = {PJLINK_PORT: PJLinkUDP(port=PJLINK_PORT)}
-        self.pjlink_udp[PJLINK_PORT].bind(PJLINK_PORT)
         # Set 1.5 second delay before loading all projectors
         if self.autostart:
             log.debug('Delaying 1.5 seconds before loading all projectors')
@@ -350,6 +326,36 @@ class ProjectorManager(QtWidgets.QWidget, RegistryBase, UiProjectorManager, LogM
         self.projector_form.newProjector.connect(self.add_projector_from_wizard)
         self.projector_form.editProjector.connect(self.edit_projector_from_wizard)
         self.projector_list_widget.itemSelectionChanged.connect(self.update_icons)
+
+    def udp_listen_add(self, port):
+        """
+        Add UDP broadcast listener
+        """
+        if port in self.pjlink_udp:
+            log.warning('UDP Listener for port {port} already added - skipping'.format(port=port))
+        else:
+            log.debug('Adding UDP listener on port {port}'.format(port=port))
+            self.pjlink_udp[port] = PJLinkUDP(port=port)
+            Registry().execute('udp_broadcast_add', port=port, callback=self.pjlink_udp[port].check_settings)
+
+    def udp_listen_delete(self, port):
+        """
+        Remove a UDP broadcast listener
+        """
+        log.debug('Checking for UDP port {port} listener deletion'.format(port=port))
+        if port not in self.pjlink_udp:
+            log.warn('UDP listener for port {port} not there - skipping delete'.format(port=port))
+            return
+        keep_port = False
+        for item in self.projector_list:
+            if port == item.link.port:
+                keep_port = True
+        if keep_port:
+            log.warn('UDP listener for port {port} needed for other projectors - skipping delete'.format(port=port))
+            return
+        Registry().execute('udp_broadcast_remove', port=port)
+        del self.pjlink_udp[port]
+        log.debug('UDP listener for port {port} deleted'.format(port=port))
 
     def get_settings(self):
         """
@@ -444,7 +450,7 @@ class ProjectorManager(QtWidgets.QWidget, RegistryBase, UiProjectorManager, LogM
                 projector = list_item.data(QtCore.Qt.UserRole)
                 try:
                     projector.link.set_shutter_closed()
-                except:
+                except Exception:
                     continue
 
     def on_doubleclick_item(self, item, opt=None):
@@ -459,7 +465,7 @@ class ProjectorManager(QtWidgets.QWidget, RegistryBase, UiProjectorManager, LogM
             try:
                 log.debug('ProjectorManager: Calling connect_to_host() on "{ip}"'.format(ip=projector.link.ip))
                 projector.link.connect_to_host()
-            except:
+            except Exception:
                 log.debug('ProjectorManager: "{ip}" already connected - skipping'.format(ip=projector.link.ip))
         return
 
@@ -478,7 +484,7 @@ class ProjectorManager(QtWidgets.QWidget, RegistryBase, UiProjectorManager, LogM
                 projector = list_item.data(QtCore.Qt.UserRole)
                 try:
                     projector.link.connect_to_host()
-                except:
+                except Exception:
                     continue
 
     def on_delete_projector(self, opt=None):
@@ -518,25 +524,22 @@ class ProjectorManager(QtWidgets.QWidget, RegistryBase, UiProjectorManager, LogM
         except (AttributeError, TypeError):
             pass
         try:
-            projector.poll_timer.stop()
-            projector.poll_timer.timeout.disconnect(projector.link.poll_loop)
+            projector.link.poll_timer.stop()
+            projector.link.poll_timer.timeout.disconnect(projector.link.poll_loop)
         except (AttributeError, TypeError):
             pass
         try:
-            projector.socket_timer.stop()
-            projector.socket_timer.timeout.disconnect(projector.link.socket_abort)
-        except (AttributeError, TypeError):
-            pass
-        # Disconnect signals from projector being deleted
-        try:
-            self.pjlink_udp[projector.link.port].data_received.disconnect(projector.link.get_buffer)
+            projector.link.socket_timer.stop()
+            projector.link.socket_timer.timeout.disconnect(projector.link.socket_abort)
         except (AttributeError, TypeError):
             pass
 
+        old_port = projector.link.port
         # Rebuild projector list
         new_list = []
         for item in self.projector_list:
             if item.link.db_item.id == projector.link.db_item.id:
+                log.debug('Removing projector "{item}"'.format(item=item.link.name))
                 continue
             new_list.append(item)
         self.projector_list = new_list
@@ -546,6 +549,7 @@ class ProjectorManager(QtWidgets.QWidget, RegistryBase, UiProjectorManager, LogM
             log.warning('Delete projector {item} failed'.format(item=projector.db_item))
         for item in self.projector_list:
             log.debug('New projector list - item: {ip} {name}'.format(ip=item.link.ip, name=item.link.name))
+        self.udp_listen_delete(old_port)
 
     def on_disconnect_projector(self, opt=None):
         """
@@ -562,7 +566,7 @@ class ProjectorManager(QtWidgets.QWidget, RegistryBase, UiProjectorManager, LogM
                 projector = list_item.data(QtCore.Qt.UserRole)
                 try:
                     projector.link.disconnect_from_host()
-                except:
+                except Exception:
                     continue
 
     def on_edit_projector(self, opt=None):
@@ -595,7 +599,7 @@ class ProjectorManager(QtWidgets.QWidget, RegistryBase, UiProjectorManager, LogM
                 projector = list_item.data(QtCore.Qt.UserRole)
                 try:
                     projector.link.set_power_off()
-                except:
+                except Exception:
                     continue
 
     def on_poweron_projector(self, opt=None):
@@ -613,7 +617,7 @@ class ProjectorManager(QtWidgets.QWidget, RegistryBase, UiProjectorManager, LogM
                 projector = list_item.data(QtCore.Qt.UserRole)
                 try:
                     projector.link.set_power_on()
-                except:
+                except Exception:
                     continue
 
     def on_show_projector(self, opt=None):
@@ -631,7 +635,7 @@ class ProjectorManager(QtWidgets.QWidget, RegistryBase, UiProjectorManager, LogM
                 projector = list_item.data(QtCore.Qt.UserRole)
                 try:
                     projector.link.set_shutter_open()
-                except:
+                except Exception:
                     continue
 
     def on_status_projector(self, opt=None):
@@ -748,15 +752,8 @@ class ProjectorManager(QtWidgets.QWidget, RegistryBase, UiProjectorManager, LogM
         item.link.projectorAuthentication.connect(self.authentication_error)
         item.link.projectorNoAuthentication.connect(self.no_authentication_error)
         item.link.projectorUpdateIcons.connect(self.update_icons)
-        # Connect UDP signal to projector instances with same port
-        if item.link.port not in self.pjlink_udp:
-            log.debug('Adding new PJLinkUDP listener fo port {port}'.format(port=item.link.port))
-            self.pjlink_udp[item.link.port] = PJLinkUDP(port=item.link.port)
-            self.pjlink_udp[item.link.port].bind(item.link.port)
-        log.debug('Connecting PJLinkUDP port {port} signal to "{item}"'.format(port=item.link.port,
-                                                                               item=item.link.name))
-        self.pjlink_udp[item.link.port].data_received.connect(item.link.get_buffer)
-
+        # Add UDP listener for new projector port
+        self.udp_listen_add(item.link.port)
         self.projector_list.append(item)
         if start:
             item.link.connect_to_host()
@@ -783,13 +780,25 @@ class ProjectorManager(QtWidgets.QWidget, RegistryBase, UiProjectorManager, LogM
         :param projector: Projector() instance of projector with updated information
         """
         log.debug('edit_projector_from_wizard(ip={ip})'.format(ip=projector.ip))
+        old_port = self.old_projector.link.port
+        old_ip = self.old_projector.link.ip
         self.old_projector.link.name = projector.name
         self.old_projector.link.ip = projector.ip
         self.old_projector.link.pin = None if projector.pin == '' else projector.pin
-        self.old_projector.link.port = projector.port
         self.old_projector.link.location = projector.location
         self.old_projector.link.notes = projector.notes
         self.old_projector.widget.setText(projector.name)
+        self.old_projector.link.port = int(projector.port)
+        # Update projector list items
+        for item in self.projector_list:
+            if item.link.ip == old_ip:
+                item.link.port = int(projector.port)
+                # NOTE: This assumes (!) we are using IP addresses as keys
+                break
+        # Update UDP listeners before setting old_projector.port
+        if old_port != projector.port:
+            self.udp_listen_delete(old_port)
+            self.udp_listen_add(int(projector.port))
 
     def _load_projectors(self):
         """'
@@ -850,6 +859,7 @@ class ProjectorManager(QtWidgets.QWidget, RegistryBase, UiProjectorManager, LogM
         """
         Update the icons when the selected projectors change
         """
+        log.debug('update_icons(): Checking for selected projector items in list')
         count = len(self.projector_list_widget.selectedItems())
         projector = None
         if count == 0:
@@ -870,6 +880,7 @@ class ProjectorManager(QtWidgets.QWidget, RegistryBase, UiProjectorManager, LogM
             self.get_toolbar_item('blank_projector_multiple', hidden=True)
             self.get_toolbar_item('show_projector_multiple', hidden=True)
         elif count == 1:
+            log.debug('update_icons(): Found one item selected')
             projector = self.projector_list_widget.selectedItems()[0].data(QtCore.Qt.UserRole)
             connected = QSOCKET_STATE[projector.link.state()] == S_CONNECTED
             power = projector.link.power == S_ON
@@ -880,12 +891,14 @@ class ProjectorManager(QtWidgets.QWidget, RegistryBase, UiProjectorManager, LogM
             self.get_toolbar_item('blank_projector_multiple', hidden=True)
             self.get_toolbar_item('show_projector_multiple', hidden=True)
             if connected:
+                log.debug('update_icons(): Updating icons for connected state')
                 self.get_toolbar_item('view_projector', enabled=True)
                 self.get_toolbar_item('source_view_projector',
-                                      enabled=connected and power and projector.link.source_available is not None)
+                                      enabled=projector.link.source_available is not None and connected and power)
                 self.get_toolbar_item('edit_projector', hidden=True)
                 self.get_toolbar_item('delete_projector', hidden=True)
             else:
+                log.debug('update_icons(): Updating for not connected state')
                 self.get_toolbar_item('view_projector', hidden=True)
                 self.get_toolbar_item('source_view_projector', hidden=True)
                 self.get_toolbar_item('edit_projector', enabled=True)
@@ -901,6 +914,7 @@ class ProjectorManager(QtWidgets.QWidget, RegistryBase, UiProjectorManager, LogM
                 self.get_toolbar_item('blank_projector', enabled=False)
                 self.get_toolbar_item('show_projector', enabled=False)
         else:
+            log.debug('update_icons(): Updating for multiple items selected')
             self.get_toolbar_item('edit_projector', enabled=False)
             self.get_toolbar_item('delete_projector', enabled=False)
             self.get_toolbar_item('view_projector', hidden=True)

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -26,8 +26,10 @@ import os
 from unittest import TestCase
 from unittest.mock import MagicMock
 
-from openlp.core.api.http import register_endpoint, application, NotFound
+from openlp.core.api.http import register_endpoint, application
 from openlp.core.api.http.endpoint import Endpoint
+from openlp.core.api.http.errors import NotFound
+
 
 ROOT_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -68,7 +70,9 @@ class TestRouting(TestCase):
         rqst.method = 'GET'
         application.dispatch(rqst)
         # THEN: the not found id called
-        assert 1 == application.route_map['^\\/test\\/image$']['GET'].call_count, \
+        route_key = next(iter(application.route_map))
+        assert '/image' in route_key
+        assert 1 == application.route_map[route_key]['GET'].call_count, \
             'main_index function should have been called'
 
 

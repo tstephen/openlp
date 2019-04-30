@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -24,10 +24,11 @@ import re
 from tempfile import TemporaryDirectory
 from zipfile import ZipFile
 
-from bs4 import BeautifulSoup, Tag, NavigableString
+from bs4 import BeautifulSoup, NavigableString, Tag
 
 from openlp.core.common.path import Path
 from openlp.plugins.bibles.lib.bibleimport import BibleImport
+
 
 BOOK_NUMBER_PATTERN = re.compile(r'\[(\d+)\]')
 REPLACE_SPACES = re.compile(r'\s{2,}')
@@ -50,7 +51,7 @@ class WordProjectBible(BibleImport):
         Unzip the file to a temporary directory
         """
         self.tmp = TemporaryDirectory()
-        with ZipFile(str(self.file_path)) as zip_file:
+        with ZipFile(self.file_path) as zip_file:
             zip_file.extractall(self.tmp.name)
         self.base_path = Path(self.tmp.name, self.file_path.stem)
 

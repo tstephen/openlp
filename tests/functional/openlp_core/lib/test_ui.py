@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,14 +23,14 @@
 Package to test the openlp.core.lib.ui package.
 """
 from unittest import TestCase
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock, call, patch
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from openlp.core.common.i18n import UiStrings, translate
-from openlp.core.lib.ui import add_welcome_page, create_button_box, create_horizontal_adjusting_combo_box, \
-    create_button, create_action, create_valign_selection_widgets, find_and_set_in_combo_box, create_widget_action, \
-    set_case_insensitive_completer, critical_error_message_box
+from openlp.core.lib.ui import add_welcome_page, create_action, create_button, create_button_box, \
+    create_horizontal_adjusting_combo_box, create_valign_selection_widgets, create_widget_action, \
+    critical_error_message_box, find_and_set_in_combo_box, set_case_insensitive_completer
 
 
 class TestUi(TestCase):

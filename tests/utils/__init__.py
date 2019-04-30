@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -20,7 +20,6 @@
 # Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
 ###############################################################################
 import json
-import os
 
 
 def assert_length(expected, iterable, msg=None):
@@ -31,15 +30,13 @@ def assert_length(expected, iterable, msg=None):
 
 
 def convert_file_service_item(test_path, name, row=0):
-    service_file = os.path.join(test_path, name)
-    open_file = open(service_file, 'r')
-    try:
-        items = json.load(open_file)
-        first_line = items[row]
-    except OSError:
-        first_line = ''
-    finally:
-        open_file.close()
+    service_file = test_path / name
+    with service_file.open() as open_file:
+        try:
+            items = json.load(open_file)
+            first_line = items[row]
+        except OSError:
+            first_line = ''
     return first_line
 
 

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -28,7 +28,8 @@ from webob import Response
 from openlp.core.api.http.errors import NotFound
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.registry import Registry
-from openlp.core.lib import PluginStatus, image_to_byte
+from openlp.core.lib import image_to_byte
+from openlp.core.lib.plugin import PluginStatus
 
 
 def search(request, plugin_name, log):

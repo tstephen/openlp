@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -31,7 +31,8 @@ from openlp.core.common.mixins import RegistryProperties
 from openlp.core.common.path import Path
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
-from openlp.core.lib import ImageSource, ItemCapabilities, ServiceItem
+from openlp.core.lib.serviceitem import ItemCapabilities, ServiceItem
+from openlp.core.widgets.layouts import AspectRatioLayout
 
 
 def handle_mime_data_urls(mime_data):
@@ -51,6 +52,16 @@ def handle_mime_data_urls(mime_data):
             for path in local_path.iterdir():
                 file_paths.append(path)
     return file_paths
+
+
+def remove_url_prefix(filename):
+    """
+    Remove the "file://" URL prefix
+
+    :param str filename: The filename that may have a file URL prefix
+    :returns str: The file name without the file URL prefix
+    """
+    return filename.replace('file://', '')
 
 
 class ListPreviewWidget(QtWidgets.QTableWidget, RegistryProperties):
@@ -120,8 +131,8 @@ class ListPreviewWidget(QtWidgets.QTableWidget, RegistryProperties):
                         self.auto_row_height = max(self.viewport().height() / (-1 * max_img_row_height), 100)
                         height = min(height, self.auto_row_height)
                 # Apply new height to slides
-                for frame_number in range(len(self.service_item.get_frames())):
-                    self.setRowHeight(frame_number, height)
+                for slide_index in range(len(self.service_item.slides)):
+                    self.setRowHeight(slide_index, height)
 
     def row_resized(self, row, old_height, new_height):
         """
@@ -134,7 +145,7 @@ class ListPreviewWidget(QtWidgets.QTableWidget, RegistryProperties):
         # Get and validate label widget containing slide & adjust max width
         try:
             self.cellWidget(row, 0).children()[1].setMaximumWidth(new_height * self.screen_ratio)
-        except:
+        except Exception:
             return
 
     def screen_size_changed(self, screen_ratio):
@@ -167,67 +178,62 @@ class ListPreviewWidget(QtWidgets.QTableWidget, RegistryProperties):
         self.clear_list()
         row = 0
         text = []
-        for frame_number, frame in enumerate(self.service_item.get_frames()):
+        slides = self.service_item.display_slides if self.service_item.is_text() else self.service_item.slides
+        for slide_index, slide in enumerate(slides):
             self.setRowCount(self.slide_count() + 1)
             item = QtWidgets.QTableWidgetItem()
             slide_height = 0
             if self.service_item.is_text():
-                if frame['verseTag']:
+                if slide['verse']:
                     # These tags are already translated.
-                    verse_def = frame['verseTag']
+                    verse_def = slide['verse']
                     verse_def = '%s%s' % (verse_def[0], verse_def[1:])
                     two_line_def = '%s\n%s' % (verse_def[0], verse_def[1:])
                     row = two_line_def
                 else:
                     row += 1
-                item.setText(frame['text'])
+                item.setText(slide['text'])
             else:
                 label = QtWidgets.QLabel()
                 label.setContentsMargins(4, 4, 4, 4)
-                if self.service_item.is_media():
-                    label.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
-                else:
+                label.setAlignment(QtCore.Qt.AlignCenter)
+                if not self.service_item.is_media():
                     label.setScaledContents(True)
                 if self.service_item.is_command():
                     if self.service_item.is_capable(ItemCapabilities.HasThumbnails):
-                        image = self.image_manager.get_image(frame['image'], ImageSource.CommandPlugins)
-                        pixmap = QtGui.QPixmap.fromImage(image)
+                        pixmap = QtGui.QPixmap(remove_url_prefix(slide['thumbnail']))
                     else:
-                        pixmap = QtGui.QPixmap(frame['image'])
+                        if isinstance(slide['image'], QtGui.QIcon):
+                            pixmap = slide['image'].pixmap(QtCore.QSize(32, 32))
+                        else:
+                            pixmap = QtGui.QPixmap(remove_url_prefix(slide['image']))
                 else:
-                    image = self.image_manager.get_image(frame['path'], ImageSource.ImagePlugin)
-                    pixmap = QtGui.QPixmap.fromImage(image)
-                pixmap.setDevicePixelRatio(label.devicePixelRatio())
+                    pixmap = QtGui.QPixmap(remove_url_prefix(slide['path']))
                 label.setPixmap(pixmap)
+                container = QtWidgets.QWidget()
+                layout = AspectRatioLayout(container, self.screen_ratio)
+                layout.setContentsMargins(0, 0, 0, 0)
+                layout.addWidget(label)
+                container.setLayout(layout)
                 slide_height = width // self.screen_ratio
-                # Setup and validate row height cap if in use.
                 max_img_row_height = Settings().value('advanced/slide max height')
-                if isinstance(max_img_row_height, int) and max_img_row_height != 0:
+                if isinstance(max_img_row_height, int):
                     if max_img_row_height > 0 and slide_height > max_img_row_height:
-                        # Manual Setting
                         slide_height = max_img_row_height
-                    elif max_img_row_height < 0 and slide_height > self.auto_row_height:
-                        # Auto Setting
-                        slide_height = self.auto_row_height
-                    label.setMaximumWidth(slide_height * self.screen_ratio)
-                    label.resize(slide_height * self.screen_ratio, slide_height)
-                    # Build widget with stretch padding
-                    container = QtWidgets.QWidget()
-                    hbox = QtWidgets.QHBoxLayout()
-                    hbox.setContentsMargins(0, 0, 0, 0)
-                    hbox.addWidget(label, stretch=1)
-                    hbox.addStretch(0)
-                    container.setLayout(hbox)
-                    # Add to table
-                    self.setCellWidget(frame_number, 0, container)
-                else:
-                    # Add to table
-                    self.setCellWidget(frame_number, 0, label)
+                    elif max_img_row_height < 0:
+                        # If auto setting, show that number of slides, or if the resulting slides too small, 100px.
+                        # E.g. If setting is -4, 4 slides will be visible, unless those slides are < 100px high.
+                        self.auto_row_height = max(self.viewport().height() / (-1 * max_img_row_height), 100)
+                        slide_height = min(slide_height, self.auto_row_height)
+                self.setCellWidget(slide_index, 0, container)
                 row += 1
             text.append(str(row))
-            self.setItem(frame_number, 0, item)
+            self.setItem(slide_index, 0, item)
             if slide_height:
-                self.setRowHeight(frame_number, slide_height)
+                # First set the height to 1 and then to the right height. This makes the item display correctly.
+                # If this is not done, sometimes the image item is displayed as blank.
+                self.setRowHeight(slide_index, 1)
+                self.setRowHeight(slide_index, slide_height)
         self.setVerticalHeaderLabels(text)
         if self.service_item.is_text():
             self.resizeRowsToContents()

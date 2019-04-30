@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -32,6 +32,7 @@ from openlp.core.common.i18n import LANGUAGES, translate
 from openlp.core.lib.ui import critical_error_message_box
 from openlp.plugins.bibles.forms.languagedialog import Ui_LanguageDialog
 
+
 log = logging.getLogger(__name__)
 
 
@@ -47,7 +48,7 @@ class LanguageForm(QDialog, Ui_LanguageDialog):
         """
         super(LanguageForm, self).__init__(parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint |
                                            QtCore.Qt.WindowCloseButtonHint)
-        self.setupUi(self)
+        self.setup_ui(self)
 
     def exec(self, bible_name):
         if bible_name:

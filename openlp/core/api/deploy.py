@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -25,7 +25,7 @@ Download and "install" the remote web client
 from zipfile import ZipFile
 
 from openlp.core.common.applocation import AppLocation
-from openlp.core.common.httputils import download_file, get_web_page, get_url_file_size
+from openlp.core.common.httputils import download_file, get_url_file_size, get_web_page
 from openlp.core.common.registry import Registry
 
 
@@ -39,8 +39,8 @@ def deploy_zipfile(app_root_path, zip_name):
     :return: None
     """
     zip_path = app_root_path / zip_name
-    web_zip = ZipFile(str(zip_path))
-    web_zip.extractall(str(app_root_path))
+    web_zip = ZipFile(zip_path)
+    web_zip.extractall(app_root_path)
 
 
 def download_sha256():

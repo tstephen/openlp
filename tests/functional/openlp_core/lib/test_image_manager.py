@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -32,9 +32,10 @@ from PyQt5 import QtGui
 
 from openlp.core.common.registry import Registry
 from openlp.core.display.screens import ScreenList
-from openlp.core.lib.imagemanager import ImageWorker, ImageManager, Priority, PriorityQueue
+from openlp.core.lib.imagemanager import ImageManager, ImageWorker, Priority, PriorityQueue
 from tests.helpers.testmixin import TestMixin
 from tests.utils.constants import RESOURCE_PATH
+
 
 TEST_PATH = str(RESOURCE_PATH)
 
@@ -177,7 +178,7 @@ class TestImageManager(TestCase, TestMixin):
         # THEN a KeyError is thrown
         with self.assertRaises(KeyError) as context:
             self.image_manager.get_image(TEST_PATH, 'church1.jpg')
-        assert context.exception is not '', 'KeyError exception should have been thrown for missing image'
+        assert context.exception != '', 'KeyError exception should have been thrown for missing image'
 
     @patch('openlp.core.lib.imagemanager.run_thread')
     def test_different_dimension_image(self, mocked_run_thread):
@@ -210,7 +211,7 @@ class TestImageManager(TestCase, TestMixin):
         # WHEN: calling with correct image, but wrong dimensions
         with self.assertRaises(KeyError) as context:
             self.image_manager.get_image(full_path, 'church.jpg', 120, 120)
-        assert context.exception is not '', 'KeyError exception should have been thrown for missing dimension'
+        assert context.exception != '', 'KeyError exception should have been thrown for missing dimension'
 
     @patch('openlp.core.lib.imagemanager.resize_image')
     @patch('openlp.core.lib.imagemanager.image_to_byte')

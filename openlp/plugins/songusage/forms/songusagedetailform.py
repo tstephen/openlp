@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -30,7 +30,9 @@ from openlp.core.common.path import create_paths
 from openlp.core.common.settings import Settings
 from openlp.core.lib.ui import critical_error_message_box
 from openlp.plugins.songusage.lib.db import SongUsageItem
+
 from .songusagedetaildialog import Ui_SongUsageDetailDialog
+
 
 log = logging.getLogger(__name__)
 
@@ -48,7 +50,7 @@ class SongUsageDetailForm(QtWidgets.QDialog, Ui_SongUsageDetailDialog, RegistryP
         super(SongUsageDetailForm, self).__init__(parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint |
                                                   QtCore.Qt.WindowCloseButtonHint)
         self.plugin = plugin
-        self.setupUi(self)
+        self.setup_ui(self)
 
     def initialise(self):
         """
@@ -83,7 +85,7 @@ class SongUsageDetailForm(QtWidgets.QDialog, Ui_SongUsageDetailDialog, RegistryP
             self.main_window.error_message(
                 translate('SongUsagePlugin.SongUsageDetailForm', 'Output Path Not Selected'),
                 translate('SongUsagePlugin.SongUsageDetailForm', 'You have not set a valid output location for your'
-                          ' song usage report. \nPlease select an existing path on your computer.')
+                          ' song usage report.\nPlease select an existing path on your computer.')
             )
             return
         create_paths(path)
@@ -110,7 +112,7 @@ class SongUsageDetailForm(QtWidgets.QDialog, Ui_SongUsageDetailDialog, RegistryP
                 self.main_window.information_message(
                     translate('SongUsagePlugin.SongUsageDetailForm', 'Report Creation'),
                     translate('SongUsagePlugin.SongUsageDetailForm',
-                              'Report \n{name} \nhas been successfully created. ').format(name=report_file_name)
+                              'Report\n{name}\nhas been successfully created.').format(name=report_file_name)
                 )
         except OSError as ose:
             log.exception('Failed to write out song usage records')

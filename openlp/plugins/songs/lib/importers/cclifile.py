@@ -7,7 +7,7 @@ import logging
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -26,7 +26,9 @@ import chardet
 
 from openlp.core.common.i18n import translate
 from openlp.plugins.songs.lib import VerseType
+
 from .songimport import SongImport
+
 
 log = logging.getLogger(__name__)
 
@@ -65,7 +67,7 @@ class CCLIFileImport(SongImport):
                         details = {'confidence': 1, 'encoding': 'utf-8'}
                     except UnicodeDecodeError:
                         details = chardet.detect(detect_content)
-                in_file = codecs.open(str(file_path), 'r', details['encoding'])
+                in_file = codecs.open(file_path, 'r', details['encoding'])
                 if not in_file.read(1) == '\ufeff':
                     # not UTF or no BOM was found
                     in_file.seek(0)
@@ -249,10 +251,10 @@ class CCLIFileImport(SongImport):
         line_number = 0
         check_first_verse_line = False
         verse_text = ''
+        verse_type = VerseType.tags[VerseType.Verse]
         song_author = ''
         verse_start = False
         for line in text_list:
-            verse_type = 'v'
             clean_line = line.strip()
             if not clean_line:
                 if line_number == 0:
@@ -261,6 +263,7 @@ class CCLIFileImport(SongImport):
                     if verse_text:
                         self.add_verse(verse_text, verse_type)
                         verse_text = ''
+                        verse_type = VerseType.tags[VerseType.Verse]
                         verse_start = False
             else:
                 # line_number=0, song title
@@ -277,7 +280,7 @@ class CCLIFileImport(SongImport):
                     elif not verse_start:
                         # We have the verse descriptor
                         verse_desc_parts = clean_line.split(' ')
-                        if len(verse_desc_parts) == 2:
+                        if len(verse_desc_parts):
                             if verse_desc_parts[0].startswith('Ver'):
                                 verse_type = VerseType.tags[VerseType.Verse]
                             elif verse_desc_parts[0].startswith('Ch'):
@@ -289,10 +292,8 @@ class CCLIFileImport(SongImport):
                                 # verse type, so set flag
                                 verse_type = VerseType.tags[VerseType.Other]
                                 check_first_verse_line = True
-                            verse_number = verse_desc_parts[1]
                         else:
                             verse_type = VerseType.tags[VerseType.Other]
-                            verse_number = 1
                         verse_start = True
                     else:
                         # check first line for verse type

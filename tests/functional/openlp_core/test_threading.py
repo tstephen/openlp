@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -25,7 +25,7 @@ Package to test the openlp.core.threading package.
 from inspect import isfunction
 from unittest.mock import MagicMock, call, patch
 
-from openlp.core.threading import ThreadWorker, run_thread, get_thread_worker, is_thread_finished, make_remove_thread
+from openlp.core.threading import ThreadWorker, get_thread_worker, is_thread_finished, make_remove_thread, run_thread
 
 
 def test_run_thread_no_name():
@@ -133,15 +133,11 @@ def test_get_thread_worker_mising(MockRegistry):
     # GIVEN: A mocked thread worker
     MockRegistry.return_value.get.return_value.worker_threads = {}
 
-    try:
-        # WHEN: get_thread_worker() is called
-        get_thread_worker('test_thread')
-        assert False, 'A KeyError should have been raised'
-    except KeyError:
-        # THEN: The mocked worker is returned
-        pass
-    except Exception:
-        assert False, 'A KeyError should have been raised'
+    # WHEN: get_thread_worker() is called
+    result = get_thread_worker('test_thread')
+
+    # THEN: None should have been returned
+    assert result is None
 
 
 @patch('openlp.core.threading.Registry')

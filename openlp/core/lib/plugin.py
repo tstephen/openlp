@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -24,13 +24,12 @@ Provide the generic plugin functionality for OpenLP plugins.
 """
 import logging
 
-from PyQt5 import QtCore
-
 from openlp.core.common.i18n import UiStrings
 from openlp.core.common.mixins import RegistryProperties
-from openlp.core.common.registry import Registry
+from openlp.core.common.registry import Registry, RegistryBase
 from openlp.core.common.settings import Settings
 from openlp.core.version import get_version
+
 
 log = logging.getLogger(__name__)
 
@@ -60,7 +59,7 @@ class StringContent(object):
     VisibleName = 'visible_name'
 
 
-class Plugin(QtCore.QObject, RegistryProperties):
+class Plugin(RegistryBase, RegistryProperties):
     """
     Base class for openlp plugins to inherit from.
 
@@ -324,6 +323,9 @@ class Plugin(QtCore.QObject, RegistryProperties):
         Encapsulate access of plugins translated text strings
         """
         return self.text_strings[name]
+
+    def set_plugin_text_strings(self):
+        pass
 
     def set_plugin_ui_text_strings(self, tooltips):
         """

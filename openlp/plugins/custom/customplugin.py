@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -26,15 +26,18 @@ for the Custom Slides plugin.
 
 import logging
 
+from openlp.core.state import State
 from openlp.core.api.http import register_endpoint
 from openlp.core.common.i18n import translate
-from openlp.core.ui.icons import UiIcons
-from openlp.core.lib import Plugin, StringContent, build_icon
+from openlp.core.lib import build_icon
 from openlp.core.lib.db import Manager
+from openlp.core.lib.plugin import Plugin, StringContent
+from openlp.core.ui.icons import UiIcons
 from openlp.plugins.custom.endpoint import api_custom_endpoint, custom_endpoint
-from openlp.plugins.custom.lib import CustomMediaItem, CustomTab
 from openlp.plugins.custom.lib.db import CustomSlide, init_schema
-from openlp.plugins.custom.lib.mediaitem import CustomSearch
+from openlp.plugins.custom.lib.mediaitem import CustomMediaItem, CustomSearch
+from openlp.plugins.custom.lib.customtab import CustomTab
+
 
 log = logging.getLogger(__name__)
 
@@ -67,6 +70,8 @@ class CustomPlugin(Plugin):
         self.icon = build_icon(self.icon_path)
         register_endpoint(custom_endpoint)
         register_endpoint(api_custom_endpoint)
+        State().add_service(self.name, self.weight, is_plugin=True)
+        State().update_pre_conditions(self.name, self.check_pre_conditions())
 
     @staticmethod
     def about():

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,6 +23,7 @@
 from lxml import etree
 
 from openlp.plugins.bibles.lib.bibleimport import BibleImport
+
 
 NS = {'ns': 'http://www.bibletechnologies.net/2003/OSIS/namespace'}
 # Tags we don't use and can remove the content

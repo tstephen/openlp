@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,12 +23,13 @@
 The :mod:`languages` module provides a list of icons.
 """
 import logging
-import qtawesome as qta
 
+import qtawesome as qta
 from PyQt5 import QtGui, QtWidgets
 
 from openlp.core.common.applocation import AppLocation
 from openlp.core.lib import build_icon
+
 
 log = logging.getLogger(__name__)
 
@@ -78,7 +79,7 @@ class UiIcons(object):
             'book': {'icon': 'fa.book'},
             'bottom': {'icon': 'fa.angle-double-down'},
             'box': {'icon': 'fa.briefcase'},
-            'clapperboard': {'icon': 'fa.chess-board'},
+            'clapperboard': {'icon': 'fa.film'},
             'clock': {'icon': 'fa.clock-o'},
             'clone': {'icon': 'fa.clone'},
             'close': {'icon': 'fa.times-circle-o'},
@@ -116,13 +117,17 @@ class UiIcons(object):
             'presentation': {'icon': 'fa.bar-chart'},
             'preview': {'icon': 'fa.laptop'},
             'projector': {'icon': 'op.video'},
-            'projector_connect': {'icon': 'fa.plug'},
+            'projector_connect': {'icon': 'fa.plug'},  # Projector connect
             'projector_cooldown': {'icon': 'fa.video-camera', 'attr': 'blue'},
-            'projector_disconnect': {'icon': 'fa.plug', 'attr': 'lightGray'},
+            'projector_disconnect': {'icon': 'fa.plug', 'attr': 'lightGray'},  # Projector disconnect
             'projector_error': {'icon': 'fa.video-camera', 'attr': 'red'},
             'projector_hdmi': {'icon': 'op.hdmi'},
-            'projector_off': {'icon': 'fa.video-camera', 'attr': 'black'},
-            'projector_on': {'icon': 'fa.video-camera', 'attr': 'green'},
+            'projector_power_off': {'icon': 'fa.video-camera', 'attr': 'red'},  # Toolbar power off
+            'projector_power_on': {'icon': 'fa.video-camera', 'attr': 'green'},  # Toolbar power on
+            'projector_off': {'icon': 'fa.video-camera', 'attr': 'black'},  # Projector off
+            'projector_on': {'icon': 'fa.video-camera', 'attr': 'green'},  # Projector on
+            'projector_select_connect': {'icon': 'fa.plug', 'attr': 'green'},  # Toolbar connect
+            'projector_select_disconnect': {'icon': 'fa.plug', 'attr': 'red'},  # Toolbar disconnect
             'projector_warmup': {'icon': 'fa.video-camera', 'attr': 'yellow'},
             'picture': {'icon': 'fa.picture-o'},
             'print': {'icon': 'fa.print'},
@@ -137,6 +142,8 @@ class UiIcons(object):
             'search_plus': {'icon': 'fa.search-plus'},
             'search_ref': {'icon': 'fa.institution'},
             'search_text': {'icon': 'op.search-text'},
+            'select_all': {'icon': 'fa.check-square-o'},
+            'select_none': {'icon': 'fa.square-o'},
             'settings': {'icon': 'fa.cogs'},
             'shortcuts': {'icon': 'fa.wrench'},
             'song_usage': {'icon': 'fa.line-chart'},
@@ -173,9 +180,9 @@ class UiIcons(object):
                     setattr(self, key, qta.icon(icon))
                 except Exception:
                     import sys
-                    log.error("Unexpected error: %s" % sys.exc_info())
+                    log.error('Unexpected error: %s' % sys.exc_info())
                     setattr(self, key, qta.icon('fa.plus-circle', color='red'))
-            except:
+            except Exception:
                 setattr(self, key, qta.icon('fa.plus-circle', color='red'))
         self.main_icon = build_icon(':/icon/openlp-logo.svg')
 

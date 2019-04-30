@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -25,17 +25,20 @@ from datetime import datetime
 
 from PyQt5 import QtCore, QtWidgets
 
+from openlp.core.state import State
 from openlp.core.common.actions import ActionList
 from openlp.core.common.i18n import translate
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
-from openlp.core.lib import Plugin, StringContent
 from openlp.core.lib.db import Manager
+from openlp.core.lib.plugin import Plugin, StringContent
 from openlp.core.lib.ui import create_action
 from openlp.core.ui.icons import UiIcons
-from openlp.plugins.songusage.forms import SongUsageDetailForm, SongUsageDeleteForm
+from openlp.plugins.songusage.forms.songusagedetailform import SongUsageDetailForm
+from openlp.plugins.songusage.forms.songusagedeleteform import SongUsageDeleteForm
 from openlp.plugins.songusage.lib import upgrade
-from openlp.plugins.songusage.lib.db import init_schema, SongUsageItem
+from openlp.plugins.songusage.lib.db import SongUsageItem, init_schema
+
 
 log = logging.getLogger(__name__)
 
@@ -66,6 +69,8 @@ class SongUsagePlugin(Plugin):
         self.weight = -4
         self.icon = UiIcons().song_usage
         self.song_usage_active = False
+        State().add_service('song_usage', self.weight, is_plugin=True)
+        State().update_pre_conditions('song_usage', self.check_pre_conditions())
 
     def check_pre_conditions(self):
         """

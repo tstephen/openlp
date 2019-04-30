@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -24,18 +24,19 @@ This module contains tests for the PdfController
 """
 import os
 from tempfile import mkdtemp
-from unittest import TestCase, SkipTest
+from unittest import SkipTest, TestCase
 from unittest.mock import MagicMock, patch
 
 from PyQt5 import QtCore, QtGui
 
+from openlp.core.common import is_macosx, is_linux, is_win
 from openlp.core.common.path import Path
 from openlp.core.common.settings import Settings
 from openlp.core.display.screens import ScreenList
 from openlp.plugins.presentations.lib.pdfcontroller import PdfController, PdfDocument
-
-from tests.utils.constants import RESOURCE_PATH
 from tests.helpers.testmixin import TestMixin
+from tests.utils.constants import RESOURCE_PATH
+
 
 __default_settings__ = {
     'presentations/enable_pdf_program': False,
@@ -47,6 +48,25 @@ SCREEN = {
     'number': 1,
     'size': QtCore.QRect(0, 0, 1024, 768)
 }
+
+
+def get_screen_resolution():
+    """
+    Get the screen resolution
+    """
+    if is_macosx():
+        from AppKit import NSScreen
+        screen_size = NSScreen.mainScreen().frame().size
+        return screen_size.width, screen_size.height
+    elif is_win():
+        from win32api import GetSystemMetrics
+        return GetSystemMetrics(0), GetSystemMetrics(1)
+    elif is_linux():
+        from Xlib.display import Display
+        resolution = Display().screen().root.get_geometry()
+        return resolution.width, resolution.height
+    else:
+        return 1024, 768
 
 
 class TestPdfController(TestCase, TestMixin):
@@ -134,11 +154,14 @@ class TestPdfController(TestCase, TestMixin):
         image = QtGui.QImage(os.path.join(str(self.temp_folder_path), 'pdf_test1.pdf', 'mainslide001.png'))
         # Based on the converter used the resolution will differ a bit
         if controller.gsbin:
-            assert 760 == image.height(), 'The height should be 760'
-            assert 537 == image.width(), 'The width should be 537'
+            assert 1076 == image.height(), 'The height should be 1076'
+            assert 760 == image.width(), 'The width should be 760'
         else:
-            assert 768 == image.height(), 'The height should be 768'
-            assert 543 == image.width(), 'The width should be 543'
+            width, height = get_screen_resolution()
+            # Calculate the width of the PDF based on the aspect ratio of the PDF
+            width = int(round(height * 0.70703125, 0))
+            assert image.height() == height, 'The height should be {height}'.format(height=height)
+            assert image.width() == width, 'The width should be {width}'.format(width=width)
 
     @patch('openlp.plugins.presentations.lib.pdfcontroller.check_binary_exists')
     def test_process_check_binary_mudraw(self, mocked_check_binary_exists):

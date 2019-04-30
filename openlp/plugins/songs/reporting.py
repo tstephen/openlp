@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -32,6 +32,7 @@ from openlp.core.lib.ui import critical_error_message_box
 from openlp.core.widgets.dialogs import FileDialog
 from openlp.plugins.songs.lib.db import Song
 
+
 log = logging.getLogger(__name__)
 
 
@@ -48,13 +49,6 @@ def report_song_list():
         Path(translate('SongPlugin.ReportSongList', 'song_extract.csv')),
         translate('SongPlugin.ReportSongList', 'CSV format (*.csv)'))
 
-    if report_file_path is None:
-        main_window.error_message(
-            translate('SongPlugin.ReportSongList', 'Output Path Not Selected'),
-            translate('SongPlugin.ReportSongList', 'You have not set a valid output location for your report. \n'
-                                                   'Please select an existing path on your computer.')
-        )
-        return
     report_file_path.with_suffix('.csv')
     Registry().get('application').set_busy_cursor()
     try:

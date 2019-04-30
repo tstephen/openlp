@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,7 +23,8 @@
 This module contains tests for the WorshipCenter Pro song importer.
 """
 from unittest import TestCase, skipUnless
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
 
 try:
     import pyodbc
@@ -36,7 +37,7 @@ except ImportError:
 
 class DBTestRecord(object):
     """
-    Microsoft Access Driver is not available on non Microsoft Systems for this reason the :class:`TestRecord` is used
+    Microsoft Access Driver is not available on non Microsoft Systems for this reason the :class:`FakeRecord` is used
     to simulate a recordset that would be returned by pyobdc.
     """
     def __init__(self, id_, field, value):

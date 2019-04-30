@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -32,7 +32,7 @@ from unittest import TestCase
 import sqlalchemy
 
 from openlp.core.common.db import drop_column, drop_columns
-from openlp.core.lib.db import init_db, get_upgrade_op
+from openlp.core.lib.db import get_upgrade_op, init_db
 from tests.utils.constants import TEST_RESOURCES_PATH
 
 
@@ -63,7 +63,7 @@ class TestUtilsDBFunctions(TestCase):
                 if os.path.exists(self.tmp_folder):
                     shutil.rmtree(self.tmp_folder)
                 break
-            except:
+            except Exception:
                 time.sleep(1)
                 retries += 1
 

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -28,9 +28,9 @@ from unittest.mock import MagicMock, call, patch
 from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.common.registry import Registry
-from openlp.core.lib import MediaManagerItem
-from openlp.plugins.bibles.lib.mediaitem import BibleMediaItem, BibleSearch, ResultsTab, SearchStatus, SearchTabs, \
-    get_reference_separators, VALID_TEXT_SEARCH
+from openlp.core.lib.mediamanageritem import MediaManagerItem
+from openlp.plugins.bibles.lib.mediaitem import VALID_TEXT_SEARCH, BibleMediaItem, BibleSearch, ResultsTab, \
+    SearchStatus, SearchTabs, get_reference_separators
 from tests.helpers.testmixin import TestMixin
 
 
@@ -756,7 +756,7 @@ class TestMediaItem(TestCase, TestMixin):
         # GIVEN: An instance of :class:`MediaManagerItem` and mocked media_item.settings and select_book_combo_box
         self.media_item.version_combo_box = MagicMock(**{'currentData.return_value': None})
         self.media_item.select_book_combo_box = MagicMock()
-        with patch.object(self.media_item, 'initialise_advanced_bible') as mocked_initialise_advanced_bible:
+        with patch.object(self.media_item, 'initialise_advanced_bible'):
 
             # WHEN: Calling on_version_combo_box_index_changed
             self.media_item.on_version_combo_box_index_changed()
@@ -774,7 +774,7 @@ class TestMediaItem(TestCase, TestMixin):
         mocked_bible_db.name = 'ABC'
         self.media_item.version_combo_box = MagicMock(**{'currentData.return_value': mocked_bible_db})
         self.media_item.select_book_combo_box = MagicMock()
-        with patch.object(self.media_item, 'initialise_advanced_bible') as mocked_initialise_advanced_bible:
+        with patch.object(self.media_item, 'initialise_advanced_bible'):
 
             # WHEN: Calling on_version_combo_box_index_changed
             self.media_item.on_version_combo_box_index_changed()
@@ -792,7 +792,7 @@ class TestMediaItem(TestCase, TestMixin):
         self.media_item.list_view = MagicMock(**{'count.return_value': 5})
         self.media_item.style_combo_box = MagicMock()
         self.media_item.select_book_combo_box = MagicMock()
-        with patch.object(self.media_item, 'initialise_advanced_bible') as mocked_initialise_advanced_bible, \
+        with patch.object(self.media_item, 'initialise_advanced_bible'), \
                 patch('openlp.plugins.bibles.lib.mediaitem.critical_error_message_box') \
                 as mocked_critical_error_message_box:
 
@@ -815,7 +815,7 @@ class TestMediaItem(TestCase, TestMixin):
         self.media_item.list_view = MagicMock(**{'count.return_value': 5})
         self.media_item.style_combo_box = MagicMock()
         self.media_item.select_book_combo_box = MagicMock()
-        with patch.object(self.media_item, 'initialise_advanced_bible') as mocked_initialise_advanced_bible, \
+        with patch.object(self.media_item, 'initialise_advanced_bible'), \
                 patch('openlp.plugins.bibles.lib.mediaitem.critical_error_message_box',
                       return_value=QtWidgets.QMessageBox.No) as mocked_critical_error_message_box:
 

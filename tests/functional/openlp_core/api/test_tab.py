@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -24,7 +24,6 @@ This module contains tests for the lib submodule of the Remotes plugin.
 """
 import re
 from unittest import TestCase
-from unittest.mock import patch
 
 from PyQt5 import QtWidgets
 
@@ -33,6 +32,7 @@ from openlp.core.common import get_local_ip4
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from tests.helpers.testmixin import TestMixin
+
 
 __default_settings__ = {
     'api/twelve hour': True,

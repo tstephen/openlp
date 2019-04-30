@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -33,7 +33,8 @@ from PyQt5 import QtCore, QtGui
 
 from openlp.core.common import SlideLimits, ThemeLevel, is_linux, is_win
 from openlp.core.common.json import OpenLPJsonDecoder, OpenLPJsonEncoder
-from openlp.core.common.path import Path, str_to_path, files_to_paths
+from openlp.core.common.path import Path, files_to_paths, str_to_path
+
 
 log = logging.getLogger(__name__)
 
@@ -70,6 +71,34 @@ def media_players_conv(string):
     return string
 
 
+def upgrade_screens(number, x_position, y_position, height, width, can_override, is_display_screen):
+    """
+    Upgrade them monitor setting from a few single entries to a composite JSON entry
+
+    :param int number: The old monitor number
+    :param int x_position: The X position
+    :param int y_position: The Y position
+    :param bool can_override: Are the screen positions overridden
+    :param bool is_display_screen: Is this a display screen
+    :returns dict: Dictionary with the new value
+    """
+    geometry_key = 'geometry'
+    if can_override:
+        geometry_key = 'custom_geometry'
+    return {
+        number: {
+            'number': number,
+            geometry_key: {
+                'x': x_position,
+                'y': y_position,
+                'height': height,
+                'width': width
+            },
+            'is_display': is_display_screen
+        }
+    }
+
+
 class Settings(QtCore.QSettings):
     """
     Class to wrap QSettings.
@@ -100,6 +129,9 @@ class Settings(QtCore.QSettings):
         ``advanced/slide limits`` to ``SlideLimits.Wrap``. **NOTE**, this means that the rules have to cover all cases!
         So, if the type of the old value is bool, then there must be two rules.
     """
+    on_monitor_default = True
+    if log.isEnabledFor(logging.DEBUG):
+        on_monitor_default = False
     __default_settings__ = {
         'settings/version': 0,
         'advanced/add page break': False,
@@ -156,6 +188,7 @@ class Settings(QtCore.QSettings):
         'core/click live slide to unblank': False,
         'core/blank warning': False,
         'core/ccli number': '',
+        'core/experimental': False,
         'core/has run wizard': False,
         'core/language': '[en]',
         'core/last version test': '',
@@ -173,12 +206,13 @@ class Settings(QtCore.QSettings):
         'core/view mode': 'default',
         # The other display settings (display position and dimensions) are defined in the ScreenList class due to a
         # circular dependency.
-        'core/display on monitor': True,
+        'core/display on monitor': on_monitor_default,
         'core/override position': False,
+        'core/monitor': {},
         'core/application version': '0.0',
         'images/background color': '#000000',
-        'media/players': 'system,webkit',
-        'media/override player': QtCore.Qt.Unchecked,
+        'media/media auto start': QtCore.Qt.Unchecked,
+        'media/stream command': '',
         'remotes/download version': '0.0',
         'players/background color': '#000000',
         'servicemanager/last directory': None,
@@ -217,7 +251,8 @@ class Settings(QtCore.QSettings):
         'projector/last directory export': None,
         'projector/poll time': 20,  # PJLink  timeout is 30 seconds
         'projector/socket timeout': 5,  # 5 second socket timeout
-        'projector/source dialog type': 0  # Source select dialog box type
+        'projector/source dialog type': 0,  # Source select dialog box type
+        'projector/udp broadcast listen': False  # Enable/disable listening for PJLink 2 UDP broadcast packets
     }
     __file_path__ = ''
     # Settings upgrades prior to 3.0
@@ -274,7 +309,15 @@ class Settings(QtCore.QSettings):
         ('songuasge/db password', 'songusage/db password', []),
         ('songuasge/db hostname', 'songusage/db hostname', []),
         ('songuasge/db database', 'songusage/db database', []),
-        ('presentations / Powerpoint Viewer', '', [])
+        ('presentations / Powerpoint Viewer', '', []),
+        (['core/monitor', 'core/x position', 'core/y position', 'core/height', 'core/width', 'core/override',
+          'core/display on monitor'], 'core/screens', [(upgrade_screens, [1, 0, 0, None, None, False, False])]),
+        ('bibles/proxy name', '', []),  # Just remove these bible proxy settings. They weren't used in 2.4!
+        ('bibles/proxy address', '', []),
+        ('bibles/proxy username', '', []),
+        ('bibles/proxy password', '', []),
+        ('media/players', '', []),
+        ('media/override player', '', [])
     ]
 
     @staticmethod
@@ -503,7 +546,7 @@ class Settings(QtCore.QSettings):
                         old_values = [self._convert_value(old_value, default_value)
                                       for old_value, default_value in zip(old_values, default_values)]
                     # Iterate over our rules and check what the old_value should be "converted" to.
-                    new_value = None
+                    new_value = old_values[0]
                     for new_rule, old_rule in rules:
                         # If the value matches with the condition (rule), then use the provided value. This is used to
                         # convert values. E. g. an old value 1 results in True, and 0 in False.
@@ -540,7 +583,7 @@ class Settings(QtCore.QSettings):
         :param value: The value to save
         :rtype: None
         """
-        if isinstance(value, Path) or (isinstance(value, list) and value and isinstance(value[0], Path)):
+        if isinstance(value, (Path, dict)) or (isinstance(value, list) and value and isinstance(value[0], Path)):
             value = json.dumps(value, cls=OpenLPJsonEncoder)
         super().setValue(key, value)
 
@@ -563,8 +606,11 @@ class Settings(QtCore.QSettings):
             # An empty list saved to the settings results in a None type being returned.
             elif isinstance(default_value, list):
                 return []
+            # An empty dictionary saved to the settings results in a None type being returned.
+            elif isinstance(default_value, dict):
+                return {}
         elif isinstance(setting, str):
-            if '__Path__' in setting:
+            if '__Path__' in setting or setting.startswith('{'):
                 return json.loads(setting, cls=OpenLPJsonDecoder)
         # Convert the setting to the correct type.
         if isinstance(default_value, bool):
@@ -573,6 +619,8 @@ class Settings(QtCore.QSettings):
             # Sometimes setting is string instead of a boolean.
             return setting == 'true'
         if isinstance(default_value, int):
+            if setting is None:
+                return 0
             return int(setting)
         return setting
 

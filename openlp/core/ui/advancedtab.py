@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -31,12 +31,13 @@ from openlp.core.common import SlideLimits
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.i18n import UiStrings, format_time, translate
 from openlp.core.common.settings import Settings
-from openlp.core.lib import SettingsTab, build_icon
-from openlp.core.ui.style import HAS_DARK_STYLE
+from openlp.core.lib.settingstab import SettingsTab
 from openlp.core.ui.icons import UiIcons
+from openlp.core.ui.style import HAS_DARK_STYLE
 from openlp.core.widgets.edits import PathEdit
 from openlp.core.widgets.enums import PathEditType
 from openlp.core.widgets.widgets import ProxyWidget
+
 
 log = logging.getLogger(__name__)
 
@@ -59,12 +60,12 @@ class AdvancedTab(SettingsTab):
         advanced_translated = translate('OpenLP.AdvancedTab', 'Advanced')
         super(AdvancedTab, self).__init__(parent, 'Advanced', advanced_translated)
 
-    def setupUi(self):
+    def setup_ui(self):
         """
         Configure the UI elements for the tab.
         """
         self.setObjectName('AdvancedTab')
-        super(AdvancedTab, self).setupUi()
+        super(AdvancedTab, self).setup_ui()
         self.ui_group_box = QtWidgets.QGroupBox(self.left_column)
         self.ui_group_box.setObjectName('ui_group_box')
         self.ui_layout = QtWidgets.QFormLayout(self.ui_group_box)
@@ -241,7 +242,7 @@ class AdvancedTab(SettingsTab):
         self.next_item_radio_button.clicked.connect(self.on_next_item_button_clicked)
         self.search_as_type_check_box.stateChanged.connect(self.on_search_as_type_check_box_changed)
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         """
         Setup the interface translation strings.
         """
@@ -454,7 +455,7 @@ class AdvancedTab(SettingsTab):
         Service Name options changed
         """
         self.service_name_day.setEnabled(default_service_enabled)
-        time_enabled = default_service_enabled and self.service_name_day.currentIndex() is not 7
+        time_enabled = default_service_enabled and self.service_name_day.currentIndex() != 7
         self.service_name_time.setEnabled(time_enabled)
         self.service_name_edit.setEnabled(default_service_enabled)
         self.service_name_revert_button.setEnabled(default_service_enabled)
@@ -477,7 +478,7 @@ class AdvancedTab(SettingsTab):
                 minute=self.service_name_time.time().minute()
             )
         try:
-            service_name_example = format_time(str(self.service_name_edit.text()), local_time)
+            service_name_example = format_time(self.service_name_edit.text(), local_time)
         except ValueError:
             preset_is_valid = False
             service_name_example = translate('OpenLP.AdvancedTab', 'Syntax error.')
@@ -496,7 +497,7 @@ class AdvancedTab(SettingsTab):
         """
         React to the day of the service name changing.
         """
-        self.service_name_time.setEnabled(service_day is not 7)
+        self.service_name_time.setEnabled(service_day != 7)
         self.update_service_name_example(None)
 
     def on_service_name_revert_button_clicked(self):

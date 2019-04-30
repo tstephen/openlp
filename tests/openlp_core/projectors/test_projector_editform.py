@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -31,7 +31,7 @@ from openlp.core.common.registry import Registry
 from openlp.core.projectors.db import Projector, ProjectorDB
 from openlp.core.projectors.editform import ProjectorEditForm
 from tests.helpers.testmixin import TestMixin
-from tests.resources.projector.data import TEST_DB, TEST1_DATA
+from tests.resources.projector.data import TEST1_DATA, TEST_DB
 
 
 class TestProjectorEditForm(TestCase, TestMixin):

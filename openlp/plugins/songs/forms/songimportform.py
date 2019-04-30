@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -36,6 +36,7 @@ from openlp.core.widgets.enums import PathEditType
 from openlp.core.widgets.wizard import OpenLPWizard, WizardStrings
 from openlp.plugins.songs.lib.importer import SongFormat, SongFormatSelect
 
+
 log = logging.getLogger(__name__)
 
 
@@ -57,12 +58,12 @@ class SongImportForm(OpenLPWizard, RegistryProperties):
         super(SongImportForm, self).__init__(parent, plugin, 'songImportWizard', ':/wizards/wizard_song.bmp')
         self.clipboard = self.main_window.clipboard
 
-    def setupUi(self, image):
+    def setup_ui(self, image):
         """
         Set up the song wizard UI.
         """
         self.format_widgets = dict([(song_format, {}) for song_format in SongFormat.get_format_list()])
-        super(SongImportForm, self).setupUi(image)
+        super(SongImportForm, self).setup_ui(image)
         self.current_format = SongFormat.OpenLyrics
         self.format_stack.setCurrentIndex(self.current_format)
         self.format_combo_box.currentIndexChanged.connect(self.on_current_index_changed)
@@ -127,7 +128,7 @@ class SongImportForm(OpenLPWizard, RegistryProperties):
         self.source_layout.addLayout(self.format_stack)
         self.addPage(self.source_page)
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         """
         Song wizard localisation.
         """
@@ -328,8 +329,13 @@ class SongImportForm(OpenLPWizard, RegistryProperties):
             importer = self.plugin.import_songs(
                 source_format,
                 file_paths=self.get_list_of_paths(self.format_widgets[source_format]['file_list_widget']))
-        importer.do_import()
-        self.progress_label.setText(WizardStrings.FinishedImport)
+        try:
+            importer.do_import()
+            self.progress_label.setText(WizardStrings.FinishedImport)
+        except OSError as e:
+            log.exception('Importing songs failed')
+            self.progress_label.setText(translate('SongsPlugin.ImportWizardForm',
+                                                  'Your Song import failed. {error}').format(error=e))
 
     def on_error_copy_to_button_clicked(self):
         """

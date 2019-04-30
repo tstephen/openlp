@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -22,8 +22,9 @@
 """
 This module contains tests for the OpenLP song importer.
 """
+from pathlib import Path
 from unittest import TestCase
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 from openlp.core.common.registry import Registry
 from openlp.plugins.songs.lib.importers.openlp import OpenLPSongImport
@@ -66,10 +67,9 @@ class TestOpenLPImport(TestCase):
             importer.stop_import_flag = True
 
             # WHEN: Import source is not a list
-            for source in ['not a list', 0]:
-                importer.import_source = source
+            importer.import_source = Path()
 
-                # THEN: do_import should return none and the progress bar maximum should not be set.
-                assert importer.do_import() is None, 'do_import should return None when import_source is not a list'
-                assert mocked_import_wizard.progress_bar.setMaximum.called is False, \
-                    'setMaximum on import_wizard.progress_bar should not have been called'
+            # THEN: do_import should return none and the progress bar maximum should not be set.
+            assert importer.do_import() is None, 'do_import should return None when import_source is not a list'
+            assert mocked_import_wizard.progress_bar.setMaximum.called is False, \
+                'setMaximum on import_wizard.progress_bar should not have been called'

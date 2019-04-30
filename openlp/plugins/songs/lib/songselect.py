@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -33,8 +33,10 @@ from urllib.request import HTTPCookieProcessor, URLError, build_opener
 
 from bs4 import BeautifulSoup, NavigableString
 
-from openlp.plugins.songs.lib import Song, Author, Topic, VerseType, clean_song
+from openlp.plugins.songs.lib import VerseType, clean_song
+from openlp.plugins.songs.lib.db import Song, Author, Topic
 from openlp.plugins.songs.lib.openlyricsxml import SongXML
+
 
 USER_AGENTS = [
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) '
@@ -79,7 +81,7 @@ class SongSelectImport(object):
         :param username: SongSelect username
         :param password: SongSelect password
         :param callback: Method to notify of progress.
-        :return: True on success, False on failure.
+        :return: subscription level on success, None on failure.
         """
         if callback:
             callback()
@@ -113,11 +115,31 @@ class SongSelectImport(object):
             return False
         if callback:
             callback()
+        # Page if user is in an organization
         if posted_page.find('input', id='SearchText') is not None:
-            return True
+            self.subscription_level = self.find_subscription_level(posted_page)
+            return self.subscription_level
+        # Page if user is not in an organization
+        elif posted_page.find('div', id="select-organization") is not None:
+            try:
+                home_page = BeautifulSoup(self.opener.open(BASE_URL).read(), 'lxml')
+            except (TypeError, URLError) as error:
+                log.exception('Could not reach SongSelect, {error}'.format(error=error))
+            self.subscription_level = self.find_subscription_level(home_page)
+            return self.subscription_level
         else:
             log.debug(posted_page)
-            return False
+            return None
+
+    def find_subscription_level(self, page):
+        scripts = page.find_all('script')
+        for tag in scripts:
+            if tag.string:
+                match = re.search("'Subscription': '(?P<subscription_level>[^']+)", tag.string)
+                if match:
+                    return match.group('subscription_level')
+        log.error('Could not determine SongSelect subscription level')
+        return None
 
     def logout(self):
         """
@@ -126,7 +148,7 @@ class SongSelectImport(object):
         try:
             self.opener.open(LOGOUT_URL)
         except (TypeError, URLError) as error:
-            log.exception('Could not log of SongSelect, {error}'.format(error=error))
+            log.exception('Could not log out of SongSelect, {error}'.format(error=error))
 
     def search(self, search_text, max_results, callback=None):
         """
@@ -143,7 +165,7 @@ class SongSelectImport(object):
             'PrimaryLanguage': '',
             'Keys': '',
             'Themes': '',
-            'List': '',
+            'List': 'publicdomain' if self.subscription_level == 'Free' else '',
             'Sort': '',
             'SearchText': search_text
         }
@@ -170,6 +192,7 @@ class SongSelectImport(object):
                     callback(song)
                 songs.append(song)
                 if len(songs) >= max_results:
+                    self.run_search = False
                     break
             current_page += 1
         return songs

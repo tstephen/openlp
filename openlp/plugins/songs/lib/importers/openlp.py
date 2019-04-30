@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -25,7 +25,7 @@ song databases into the current installation database.
 """
 import logging
 
-from sqlalchemy import create_engine, MetaData, Table
+from sqlalchemy import MetaData, Table, create_engine
 from sqlalchemy.orm import class_mapper, mapper, relation, scoped_session, sessionmaker
 from sqlalchemy.orm.exc import UnmappedClassError
 
@@ -33,8 +33,10 @@ from openlp.core.common.i18n import translate
 from openlp.core.lib.db import BaseModel
 from openlp.core.widgets.wizard import WizardStrings
 from openlp.plugins.songs.lib import clean_song
-from openlp.plugins.songs.lib.db import Author, Book, Song, Topic, MediaFile
+from openlp.plugins.songs.lib.db import Author, Book, MediaFile, Song, Topic
+
 from .songimport import SongImport
+
 
 log = logging.getLogger(__name__)
 
@@ -104,7 +106,7 @@ class OpenLPSongImport(SongImport):
             pass
 
         # Check the file type
-        if not isinstance(self.import_source, str) or not self.import_source.endswith('.sqlite'):
+        if self.import_source.suffix != '.sqlite':
             self.log_error(self.import_source, translate('SongsPlugin.OpenLPSongImport',
                                                          'Not a valid OpenLP 2 song database.'))
             return

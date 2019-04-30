@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -90,7 +90,7 @@ class Poller(RegistryProperties):
         if self.stage_cache is None:
             try:
                 page = get_web_page("http://localhost:4316/stage")
-            except:
+            except Exception:
                 page = None
             if page:
                 self.stage_cache = True
@@ -106,7 +106,7 @@ class Poller(RegistryProperties):
         if self.live_cache is None:
             try:
                 page = get_web_page("http://localhost:4316/main")
-            except:
+            except Exception:
                 page = None
             if page:
                 self.live_cache = True
@@ -122,7 +122,7 @@ class Poller(RegistryProperties):
         if self.chords_cache is None:
             try:
                 page = get_web_page("http://localhost:4316/chords")
-            except:
+            except Exception:
                 page = None
             if page:
                 self.chords_cache = True

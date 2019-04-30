@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -30,6 +30,7 @@ import struct
 from openlp.core.widgets.wizard import WizardStrings
 from openlp.plugins.songs.lib import VerseType, retrieve_windows_encoding
 from openlp.plugins.songs.lib.importers.songimport import SongImport
+
 
 TITLE = 1
 AUTHOR = 2
@@ -223,5 +224,5 @@ class SongShowPlusImport(SongImport):
         try:
             # Don't question this, it works...
             return data.decode('utf-8').encode('cp1251').decode('cp1251')
-        except:
+        except Exception:
             return data.decode(retrieve_windows_encoding())

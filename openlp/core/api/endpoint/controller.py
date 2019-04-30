@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -31,7 +31,9 @@ from openlp.core.common.applocation import AppLocation
 from openlp.core.common.path import Path
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
-from openlp.core.lib import ItemCapabilities, create_thumb
+from openlp.core.lib import create_thumb
+from openlp.core.lib.serviceitem import ItemCapabilities
+
 
 log = logging.getLogger(__name__)
 
@@ -47,7 +49,7 @@ def controller_text(request):
 
     :param request: the http request - not used
     """
-    log.debug("controller_text ")
+    log.debug('controller_text')
     live_controller = Registry().get('live_controller')
     current_item = live_controller.service_item
     data = []
@@ -56,13 +58,14 @@ def controller_text(request):
             item = {}
             # Handle text (songs, custom, bibles)
             if current_item.is_text():
-                if frame['verseTag']:
-                    item['tag'] = str(frame['verseTag'])
+                if frame['verse']:
+                    item['tag'] = str(frame['verse'])
                 else:
                     item['tag'] = str(index + 1)
-                item['chords_text'] = str(frame['chords_text'])
-                item['text'] = str(frame['text'])
-                item['html'] = str(frame['html'])
+                # TODO: Figure out rendering chords
+                item['chords_text'] = str(frame.get('chords_text', ''))
+                item['text'] = frame['text']
+                item['html'] = current_item.get_rendered_frame(index)
             # Handle images, unless a custom thumbnail is given or if thumbnails is disabled
             elif current_item.is_image() and not frame.get('image', '') and Settings().value('api/thumbnails'):
                 item['tag'] = str(index + 1)

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -21,18 +21,20 @@
 ###############################################################################
 import logging
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtWidgets
 
-from openlp.core.common.i18n import UiStrings, translate, get_natural_key
+from openlp.core.common.i18n import UiStrings, get_natural_key, translate
 from openlp.core.common.path import path_to_str, str_to_path
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
-from openlp.core.lib import MediaManagerItem, ItemCapabilities, ServiceItemContext, \
-    build_icon, check_item_selected, create_thumb, validate_thumb
-from openlp.core.lib.ui import critical_error_message_box, create_horizontal_adjusting_combo_box
+from openlp.core.lib import ServiceItemContext, build_icon, check_item_selected, create_thumb, validate_thumb
+from openlp.core.lib.mediamanageritem import MediaManagerItem
+from openlp.core.lib.serviceitem import ItemCapabilities
+from openlp.core.lib.ui import create_horizontal_adjusting_combo_box, critical_error_message_box
 from openlp.core.ui.icons import UiIcons
-from openlp.plugins.presentations.lib import MessageListener
+from openlp.plugins.presentations.lib.messagelistener import MessageListener
 from openlp.plugins.presentations.lib.pdfcontroller import PDF_CONTROLLER_FILETYPES
+
 
 log = logging.getLogger(__name__)
 
@@ -54,7 +56,7 @@ class PresentationMediaItem(MediaManagerItem):
         self.controllers = controllers
         super(PresentationMediaItem, self).__init__(parent, plugin)
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         """
         The name of the plugin media displayed in UI
         """
@@ -258,16 +260,16 @@ class PresentationMediaItem(MediaManagerItem):
                     doc.presentation_deleted()
                 doc.close_presentation()
 
-    def generate_slide_data(self, service_item, item=None, xml_version=False, remote=False,
-                            context=ServiceItemContext.Service, file_path=None):
+    def generate_slide_data(self, service_item, *, item=None, remote=False, context=ServiceItemContext.Service,
+                            file_path=None, **kwargs):
         """
         Generate the slide data. Needs to be implemented by the plugin.
 
         :param service_item: The service item to be built on
         :param item: The Song item to be used
-        :param xml_version: The xml version (not used)
         :param remote: Triggered from remote
         :param context: Why is it being generated
+        :param kwargs: Consume other unused args specified by the base implementation, but not use by this one.
         """
         if item:
             items = [item]

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -26,8 +26,8 @@ import os
 from unittest import TestCase
 from unittest.mock import ANY, MagicMock, patch
 
-from openlp.core.common.path import Path, copy, copyfile, copytree, create_paths, path_to_str, replace_params, \
-    str_to_path, which, files_to_paths
+from openlp.core.common.path import Path, copy, copyfile, copytree, create_paths, files_to_paths, path_to_str, \
+    replace_params, str_to_path, which
 
 
 class TestShutil(TestCase):
@@ -179,9 +179,8 @@ class TestShutil(TestCase):
             # WHEN: Calling :func:`openlp.core.common.path.rmtree` with the path parameter as Path object type
             path.rmtree()
 
-            # THEN: :func:`shutil.rmtree` should have been called with the str equivalents of the Path object.
-            mocked_shutil_rmtree.assert_called_once_with(
-                os.path.join('test', 'path'), False, None)
+            # THEN: :func:`shutil.rmtree` should have been called with the the Path object.
+            mocked_shutil_rmtree.assert_called_once_with(Path('test', 'path'), False, None)
 
     def test_rmtree_optional_params(self):
         """
@@ -198,8 +197,7 @@ class TestShutil(TestCase):
 
             # THEN: :func:`shutil.rmtree` should have been called with the optional parameters, with out any of the
             #       values being modified
-            mocked_shutil_rmtree.assert_called_once_with(
-                os.path.join('test', 'path'), True, mocked_on_error)
+            mocked_shutil_rmtree.assert_called_once_with(path, True, mocked_on_error)
 
     def test_which_no_command(self):
         """
@@ -324,7 +322,7 @@ class TestPath(TestCase):
         obj = path.json_object(extra=1, args=2)
 
         # THEN: A JSON decodable object should have been returned.
-        assert obj == {'__Path__': ('/', 'base', 'path', 'to', 'fi.le')}
+        assert obj == {'__Path__': (os.sep, 'base', 'path', 'to', 'fi.le')}
 
     def test_path_json_object_base_path(self):
         """
@@ -397,7 +395,7 @@ class TestPath(TestCase):
         try:
             create_paths(mocked_path)
             assert False, 'create_paths should have thrown an exception'
-        except:
+        except Exception:
             # THEN: `create_paths` raises an exception
             pass
 

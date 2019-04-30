@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -22,12 +22,11 @@
 """
 Package to test the openlp.core.lib.languages package.
 """
-from unittest import skipIf
 from unittest.mock import MagicMock, patch
 
-from openlp.core.common import is_macosx
 from openlp.core.common.i18n import LANGUAGES, Language, UiStrings, get_language, get_locale_key, get_natural_key, \
-    translate
+    translate, LanguageManager
+from openlp.core.common.settings import Settings
 
 
 def test_languages_type():
@@ -112,7 +111,6 @@ def test_get_language_invalid_with_none():
     assert language is None
 
 
-@skipIf(is_macosx(), 'This test doesn\'t work on macOS currently')
 def test_get_locale_key():
     """
     Test the get_locale_key(string) function
@@ -156,6 +154,15 @@ def test_check_same_instance():
 
     # THEN: Check if the instances are the same.
     assert first_instance is second_instance, 'Two UiStrings objects should be the same instance'
+
+
+def test_get_language_from_settings():
+    assert LanguageManager.get_language() == 'en'
+
+
+def test_get_language_from_settings_returns_unchanged_if_unknown_format():
+    Settings().setValue('core/language', '(foobar)')
+    assert LanguageManager.get_language() == '(foobar)'
 
 
 def test_translate():

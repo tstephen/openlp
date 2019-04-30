@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -27,16 +27,16 @@ from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.common.i18n import translate
 from openlp.core.common.settings import Settings
-from openlp.core.lib import SettingsTab
+from openlp.core.lib.settingstab import SettingsTab
 
 
 class CustomTab(SettingsTab):
     """
     CustomTab is the Custom settings tab in the settings dialog.
     """
-    def setupUi(self):
+    def setup_ui(self):
         self.setObjectName('CustomTab')
-        super(CustomTab, self).setupUi()
+        super(CustomTab, self).setup_ui()
         self.custom_mode_group_box = QtWidgets.QGroupBox(self.left_column)
         self.custom_mode_group_box.setObjectName('custom_mode_group_box')
         self.custom_mode_layout = QtWidgets.QFormLayout(self.custom_mode_group_box)
@@ -53,7 +53,7 @@ class CustomTab(SettingsTab):
         self.display_footer_check_box.stateChanged.connect(self.on_display_footer_check_box_changed)
         self.add_from_service_checkbox.stateChanged.connect(self.on_add_from_service_check_box_changed)
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         self.custom_mode_group_box.setTitle(translate('CustomPlugin.CustomTab', 'Custom Display'))
         self.display_footer_check_box.setText(translate('CustomPlugin.CustomTab', 'Display footer'))
         self.add_from_service_checkbox.setText(translate('CustomPlugin.CustomTab',

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -31,7 +31,7 @@ from openlp.plugins.songs.lib import VerseType
 
 
 class Ui_EditVerseDialog(object):
-    def setupUi(self, edit_verse_dialog):
+    def setup_ui(self, edit_verse_dialog):
         edit_verse_dialog.setObjectName('edit_verse_dialog')
         edit_verse_dialog.setWindowIcon(UiIcons().main_icon)
         edit_verse_dialog.resize(400, 400)
@@ -86,9 +86,9 @@ class Ui_EditVerseDialog(object):
             self.dialog_layout.addLayout(self.transpose_layout)
         self.button_box = create_button_box(edit_verse_dialog, 'button_box', ['cancel', 'ok'])
         self.dialog_layout.addWidget(self.button_box)
-        self.retranslateUi(edit_verse_dialog)
+        self.retranslate_ui(edit_verse_dialog)
 
-    def retranslateUi(self, edit_verse_dialog):
+    def retranslate_ui(self, edit_verse_dialog):
         edit_verse_dialog.setWindowTitle(translate('SongsPlugin.EditVerseForm', 'Edit Verse'))
         self.verse_type_label.setText(translate('SongsPlugin.EditVerseForm', '&Verse type:'))
         self.verse_type_combo_box.setItemText(VerseType.Verse, VerseType.translated_names[VerseType.Verse])

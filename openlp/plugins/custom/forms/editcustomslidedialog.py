@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -29,7 +29,7 @@ from openlp.core.widgets.edits import SpellTextEdit
 
 
 class Ui_CustomSlideEditDialog(object):
-    def setupUi(self, custom_slide_edit_dialog):
+    def setup_ui(self, custom_slide_edit_dialog):
         custom_slide_edit_dialog.setObjectName('custom_slide_edit_dialog')
         custom_slide_edit_dialog.setWindowIcon(UiIcons().main_icon)
         custom_slide_edit_dialog.resize(350, 300)
@@ -42,9 +42,9 @@ class Ui_CustomSlideEditDialog(object):
         self.button_box = create_button_box(custom_slide_edit_dialog, 'button_box', ['cancel', 'save'],
                                             [self.split_button, self.insert_button])
         self.dialog_layout.addWidget(self.button_box)
-        self.retranslateUi(custom_slide_edit_dialog)
+        self.retranslate_ui(custom_slide_edit_dialog)
 
-    def retranslateUi(self, custom_slide_edit_dialog):
+    def retranslate_ui(self, custom_slide_edit_dialog):
         custom_slide_edit_dialog.setWindowTitle(translate('CustomPlugin.EditVerseForm', 'Edit Slide'))
         self.split_button.setText(UiStrings().Split)
         self.split_button.setToolTip(UiStrings().SplitToolTip)

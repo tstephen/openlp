@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -32,7 +32,7 @@ from PyQt5 import QtWidgets
 
 from openlp.core.common.path import Path
 from openlp.core.common.registry import Registry
-from openlp.core.ui import ThemeManager
+from openlp.core.ui.thememanager import ThemeManager
 from tests.utils.constants import RESOURCE_PATH
 
 
@@ -66,9 +66,9 @@ class TestThemeManager(TestCase):
         theme_manager._export_theme(Path('some', 'path', 'Default.otz'), 'Default')
 
         # THEN: The zipfile should be created at the given path
-        mocked_zipfile_init.assert_called_with(os.path.join('some', 'path', 'Default.otz'), 'w')
-        mocked_zipfile_write.assert_called_with(str(RESOURCE_PATH / 'themes' / 'Default' / 'Default.xml'),
-                                                os.path.join('Default', 'Default.xml'))
+        mocked_zipfile_init.assert_called_with(Path('some', 'path', 'Default.otz'), 'w')
+        mocked_zipfile_write.assert_called_with(RESOURCE_PATH / 'themes' / 'Default' / 'Default.xml',
+                                                Path('Default', 'Default.xml'))
 
     def test_initial_theme_manager(self):
         """

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -29,6 +29,7 @@ from openlp.core.common.path import Path
 from openlp.core.common.settings import Settings
 from openlp.plugins.bibles.lib import LanguageSelection, parse_reference
 from openlp.plugins.bibles.lib.db import BibleDB, BibleMeta
+
 from .importers.csvbible import CSVBible
 from .importers.http import HTTPBible
 from .importers.opensong import OpenSongBible
@@ -36,9 +37,10 @@ from .importers.osis import OSISBible
 from .importers.wordproject import WordProjectBible
 from .importers.zefania import ZefaniaBible
 
+
 try:
     from .importers.sword import SwordBible
-except:
+except ImportError:
     pass
 
 log = logging.getLogger(__name__)
@@ -116,7 +118,6 @@ class BibleManager(LogMixin, RegistryProperties):
         self.web = 'Web'
         self.db_cache = None
         self.path = AppLocation.get_section_data_path(self.settings_section)
-        self.proxy_name = Settings().value(self.settings_section + '/proxy name')
         self.suffix = '.sqlite'
         self.import_wizard = None
         self.reload_bibles()
@@ -149,11 +150,8 @@ class BibleManager(LogMixin, RegistryProperties):
             if self.db_cache[name].is_web_bible:
                 source = self.db_cache[name].get_object(BibleMeta, 'download_source')
                 download_name = self.db_cache[name].get_object(BibleMeta, 'download_name').value
-                meta_proxy = self.db_cache[name].get_object(BibleMeta, 'proxy_server')
                 web_bible = HTTPBible(self.parent, path=self.path, file=file_path, download_source=source.value,
                                       download_name=download_name)
-                if meta_proxy:
-                    web_bible.proxy_server = meta_proxy.value
                 self.db_cache[name] = web_bible
         log.debug('Bibles reloaded')
 
@@ -189,7 +187,7 @@ class BibleManager(LogMixin, RegistryProperties):
         bible = self.db_cache[name]
         bible.session.close_all()
         bible.session = None
-        return delete_file(Path(bible.path, bible.file))
+        return delete_file(bible.path / '{name}{suffix}'.format(name=name, suffix=self.suffix))
 
     def get_bibles(self):
         """

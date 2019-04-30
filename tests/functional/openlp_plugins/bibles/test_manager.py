@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -55,7 +55,8 @@ class TestManager(TestCase):
             instance = BibleManager(MagicMock())
             # We need to keep a reference to the mock for close_all as it gets set to None later on!
             mocked_close_all = MagicMock()
-            mocked_bible = MagicMock(file='KJV.sqlite', path='bibles', **{'session.close_all': mocked_close_all})
+            mocked_bible = MagicMock(file_path='KJV.sqlite', path=Path('bibles'),
+                                     **{'session.close_all': mocked_close_all})
             instance.db_cache = {'KJV': mocked_bible}
 
             # WHEN: Calling delete_bible with 'KJV'
@@ -66,4 +67,4 @@ class TestManager(TestCase):
             assert result is True
             mocked_close_all.assert_called_once_with()
             assert mocked_bible.session is None
-            mocked_delete_file.assert_called_once_with(Path('bibles', 'KJV.sqlite'))
+            mocked_delete_file.assert_called_once_with(Path('bibles') / 'KJV.sqlite')

@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -27,6 +27,7 @@ import logging
 from openlp.core.common import is_win
 from openlp.core.common.i18n import UiStrings, translate
 from openlp.core.widgets.wizard import WizardStrings
+
 from .importers.cclifile import CCLIFileImport
 from .importers.chordpro import ChordProImport
 from .importers.dreambeam import DreamBeamImport
@@ -49,6 +50,7 @@ from .importers.videopsalm import VideoPsalmImport
 from .importers.wordsofworship import WordsOfWorshipImport
 from .importers.worshipassistant import WorshipAssistantImport
 from .importers.zionworx import ZionWorxImport
+
 
 log = logging.getLogger(__name__)
 

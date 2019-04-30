@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -35,7 +35,7 @@ class ChooseGroupForm(QtWidgets.QDialog, Ui_ChooseGroupDialog):
         """
         super(ChooseGroupForm, self).__init__(parent, QtCore.Qt.WindowSystemMenuHint | QtCore.Qt.WindowTitleHint |
                                               QtCore.Qt.WindowCloseButtonHint)
-        self.setupUi(self)
+        self.setup_ui(self)
 
     def exec(self, selected_group=None):
         """
@@ -48,4 +48,5 @@ class ChooseGroupForm(QtWidgets.QDialog, Ui_ChooseGroupDialog):
             for index in range(self.group_combobox.count()):
                 if self.group_combobox.itemData(index) == selected_group:
                     self.group_combobox.setCurrentIndex(index)
+                    self.existing_radio_button.setChecked(True)
         return QtWidgets.QDialog.exec(self)

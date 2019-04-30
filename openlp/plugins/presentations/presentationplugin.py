@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -28,14 +28,19 @@ import os
 
 from PyQt5 import QtCore
 
+from openlp.core.state import State
 from openlp.core.api.http import register_endpoint
 from openlp.core.common import extension_loader
 from openlp.core.common.i18n import translate
-from openlp.core.ui.icons import UiIcons
 from openlp.core.common.settings import Settings
-from openlp.core.lib import Plugin, StringContent, build_icon
+from openlp.core.lib import build_icon
+from openlp.core.lib.plugin import Plugin, StringContent
+from openlp.core.ui.icons import UiIcons
 from openlp.plugins.presentations.endpoint import api_presentations_endpoint, presentations_endpoint
-from openlp.plugins.presentations.lib import PresentationController, PresentationMediaItem, PresentationTab
+from openlp.plugins.presentations.lib.presentationcontroller import PresentationController
+from openlp.plugins.presentations.lib.mediaitem import PresentationMediaItem
+from openlp.plugins.presentations.lib.presentationtab import PresentationTab
+
 
 log = logging.getLogger(__name__)
 
@@ -73,6 +78,8 @@ class PresentationPlugin(Plugin):
         self.icon = build_icon(self.icon_path)
         register_endpoint(presentations_endpoint)
         register_endpoint(api_presentations_endpoint)
+        State().add_service('presentation', self.weight, is_plugin=True)
+        State().update_pre_conditions('presentation', self.check_pre_conditions())
 
     def create_settings_tab(self, parent):
         """

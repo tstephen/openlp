@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -56,11 +56,11 @@ class SongReviewWidget(QtWidgets.QWidget):
         """
         super(SongReviewWidget, self).__init__(parent)
         self.song = song
-        self.setupUi()
-        self.retranslateUi()
+        self.setup_ui()
+        self.retranslate_ui()
         self.song_remove_button.clicked.connect(self.on_remove_button_clicked)
 
-    def setupUi(self):
+    def setup_ui(self):
         self.song_vertical_layout = QtWidgets.QVBoxLayout(self)
         self.song_vertical_layout.setObjectName('song_vertical_layout')
         self.song_group_box = QtWidgets.QGroupBox(self)
@@ -186,7 +186,7 @@ class SongReviewWidget(QtWidgets.QWidget):
         self.song_remove_button.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         self.song_vertical_layout.addWidget(self.song_remove_button, alignment=QtCore.Qt.AlignHCenter)
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         self.song_remove_button.setText('Remove')
         self.song_title_label.setText('Title:')
         self.song_alternate_title_label.setText('Alternate Title:')

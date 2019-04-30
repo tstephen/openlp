@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -26,18 +26,21 @@ from enum import IntEnum, unique
 
 from PyQt5 import QtCore, QtWidgets
 
-from openlp.core.common.i18n import UiStrings, translate, get_locale_key
+from openlp.core.common.i18n import UiStrings, get_locale_key, translate
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
-from openlp.core.lib import MediaManagerItem, ItemCapabilities, ServiceItemContext
-from openlp.core.lib.ui import set_case_insensitive_completer, create_horizontal_adjusting_combo_box, \
-    critical_error_message_box, find_and_set_in_combo_box
+from openlp.core.lib import ServiceItemContext
+from openlp.core.lib.mediamanageritem import MediaManagerItem
+from openlp.core.lib.serviceitem import ItemCapabilities
+from openlp.core.lib.ui import create_horizontal_adjusting_combo_box, critical_error_message_box, \
+    find_and_set_in_combo_box, set_case_insensitive_completer
 from openlp.core.ui.icons import UiIcons
 from openlp.core.widgets.edits import SearchEdit
 from openlp.plugins.bibles.forms.bibleimportform import BibleImportForm
 from openlp.plugins.bibles.forms.editbibleform import EditBibleForm
-from openlp.plugins.bibles.lib import DisplayStyle, LayoutStyle, VerseReferenceList, \
-    get_reference_match, get_reference_separator
+from openlp.plugins.bibles.lib import DisplayStyle, LayoutStyle, get_reference_match, \
+    get_reference_separator
+from openlp.plugins.bibles.lib.versereferencelist import VerseReferenceList
 
 log = logging.getLogger(__name__)
 
@@ -231,8 +234,8 @@ class BibleMediaItem(MediaManagerItem):
         self.results_view_tab.setCurrentIndex(ResultsTab.Search)
         self.page_layout.addWidget(self.results_view_tab)
 
-    def setupUi(self):
-        super().setupUi()
+    def setup_ui(self):
+        super().setup_ui()
         sort_model = QtCore.QSortFilterProxyModel(self.select_book_combo_box)
         model = self.select_book_combo_box.model()
         # Reparent the combo box model to the sort proxy, otherwise it will be deleted when we change the comobox's
@@ -266,8 +269,8 @@ class BibleMediaItem(MediaManagerItem):
         self.on_results_view_tab_total_update(ResultsTab.Saved)
         self.on_results_view_tab_total_update(ResultsTab.Search)
 
-    def retranslateUi(self):
-        log.debug('retranslateUi')
+    def retranslate_ui(self):
+        log.debug('retranslate_ui')
         self.chapter_label.setText(translate('BiblesPlugin.MediaItem', 'Chapter:'))
         self.verse_label.setText(translate('BiblesPlugin.MediaItem', 'Verse:'))
         self.style_combo_box.setItemText(LayoutStyle.VersePerSlide, UiStrings().VersePerSlide)
@@ -794,8 +797,8 @@ class BibleMediaItem(MediaManagerItem):
                               'Please make sure that your reference follows one of these patterns:</strong><br><br>%s')
                     % UiStrings().BibleScriptureError % get_reference_separators())
         elif self.search_edit.current_search_type() == BibleSearch.Combined and get_reference_match('full').match(text):
-                # Valid reference found. Do reference search.
-                self.text_reference_search(text)
+            # Valid reference found. Do reference search.
+            self.text_reference_search(text)
         else:
             # It can only be a 'Combined' search without a valid reference, or a 'Text' search
             if self.search_status == SearchStatus.SearchAsYouType:
@@ -908,16 +911,16 @@ class BibleMediaItem(MediaManagerItem):
             list_widget_items.append(bible_verse)
         return list_widget_items
 
-    def generate_slide_data(self, service_item, item=None, xml_version=False, remote=False,
-                            context=ServiceItemContext.Service):
+    def generate_slide_data(self, service_item, *, item=None, remote=False, context=ServiceItemContext.Service,
+                            **kwargs):
         """
         Generate the slide data. Needs to be implemented by the plugin.
 
         :param service_item: The service item to be built on
         :param item: The Song item to be used
-        :param xml_version: The xml version (not used)
         :param remote: Triggered from remote
         :param context: Why is it being generated
+        :param kwargs: Consume other unused args specified by the base implementation, but not use by this one.
         """
         log.debug('generating slide data')
         if item:

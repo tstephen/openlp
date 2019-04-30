@@ -1,11 +1,10 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -21,40 +20,30 @@
 # Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
 ###############################################################################
 """
-The entrypoint for OpenLP
+Interface tests to test the ThemeWizard class and related methods.
 """
-import faulthandler
-import multiprocessing
-import sys
+from unittest import TestCase
 
-from openlp.core.app import main
-from openlp.core.common import is_win, is_macosx
-from openlp.core.common.applocation import AppLocation
-from openlp.core.common.path import create_paths
+from openlp.core.common.registry import Registry
+from openlp.core.ui.themeform import ThemeForm
+from tests.helpers.testmixin import TestMixin
 
 
-def set_up_fault_handling():
+class TestThemeManager(TestCase, TestMixin):
     """
-    Set up the Python fault handler
+    Test the functions in the ThemeManager module
     """
-    # Create the cache directory if it doesn't exist, and enable the fault handler to log to an error log file
-    create_paths(AppLocation.get_directory(AppLocation.CacheDir))
-    faulthandler.enable((AppLocation.get_directory(AppLocation.CacheDir) / 'error.log').open('wb'))
+    def setUp(self):
+        """
+        Create the UI
+        """
+        Registry.create()
 
-
-if __name__ == '__main__':
-    """
-    Instantiate and run the application.
-    """
-    faulthandler.enable()
-    set_up_fault_handling()
-    # Add support for using multiprocessing from frozen Windows executable (built using PyInstaller),
-    # see https://docs.python.org/3/library/multiprocessing.html#multiprocessing.freeze_support
-    if is_win():
-        multiprocessing.freeze_support()
-    # Mac OS X passes arguments like '-psn_XXXX' to the application. This argument is actually a process serial number.
-    # However, this causes a conflict with other OpenLP arguments. Since we do not use this argument we can delete it
-    # to avoid any potential conflicts.
-    if is_macosx():
-        sys.argv = [x for x in sys.argv if not x.startswith('-psn')]
-    main()
+    def test_create_theme_wizard(self):
+        """
+        Test creating a ThemeForm instance
+        """
+        # GIVEN: A ThemeForm class
+        # WHEN: An object is created
+        # THEN: There should be no problems
+        ThemeForm(None)

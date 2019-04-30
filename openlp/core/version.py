@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -25,10 +25,9 @@ The :mod:`openlp.core.version` module downloads the version details for OpenLP.
 import logging
 import platform
 import sys
-import time
+from collections import OrderedDict
 from datetime import date
 from distutils.version import LooseVersion
-from subprocess import Popen, PIPE
 
 import requests
 from PyQt5 import QtCore
@@ -37,11 +36,24 @@ from openlp.core.common.applocation import AppLocation
 from openlp.core.common.settings import Settings
 from openlp.core.threading import ThreadWorker, run_thread
 
+
 log = logging.getLogger(__name__)
 
 APPLICATION_VERSION = {}
 CONNECTION_TIMEOUT = 30
 CONNECTION_RETRIES = 2
+LIBRARIES = OrderedDict([
+    ('Python', ('platform', 'python_version')),
+    ('PyQt5', ('PyQt5.Qt', 'PYQT_VERSION_STR')),
+    ('SQLAlchemy', ('sqlalchemy',)),
+    ('Alembic', ('alembic',)),
+    ('BeautifulSoup', ('bs4',)),
+    ('lxml', ('lxml.etree',)),
+    ('Chardet', ('chardet',)),
+    ('PyEnchant', ('enchant',)),
+    ('Mako', ('mako',)),
+    ('VLC', ('openlp.core.ui.media.vlcplayer', 'VERSION')),
+])
 
 
 class VersionWorker(ThreadWorker):
@@ -150,8 +162,45 @@ def get_version():
         'build': bits[1] if len(bits) > 1 else None
     }
     if APPLICATION_VERSION['build']:
-        log.info('Openlp version {version} build {build}'.format(version=APPLICATION_VERSION['version'],
+        log.info('OpenLP version {version} build {build}'.format(version=APPLICATION_VERSION['version'],
                                                                  build=APPLICATION_VERSION['build']))
     else:
-        log.info('Openlp version {version}'.format(version=APPLICATION_VERSION['version']))
+        log.info('OpenLP version {version}'.format(version=APPLICATION_VERSION['version']))
     return APPLICATION_VERSION
+
+
+def _get_lib_version(library, version_attr='__version__'):
+    """
+    Import a library and return the value of its version attribute.
+
+    :param str library: The name of the library to import
+    :param str version_attr: The name of the attribute containing the version number. Defaults to '__version__'
+    :returns str: The version number as a string
+    """
+    if library not in sys.modules:
+        try:
+            __import__(library)
+        except ImportError:
+            return None
+    if not hasattr(sys.modules[library], version_attr):
+        return 'OK'
+    else:
+        attr = getattr(sys.modules[library], version_attr)
+        if callable(attr):
+            return str(attr())
+        else:
+            return str(attr)
+
+
+def get_library_versions():
+    """
+    Read and return the versions of the libraries we use.
+
+    :returns OrderedDict: A dictionary of {'library': 'version'}
+    """
+    library_versions = OrderedDict([(library, _get_lib_version(*args)) for library, args in LIBRARIES.items()])
+    # Just update the dict for display purposes, changing the None to a '-'
+    for library, version in library_versions.items():
+        if version is None:
+            library_versions[library] = '-'
+    return library_versions

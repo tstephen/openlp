@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -25,19 +25,21 @@ import os
 
 from PyQt5 import QtCore, QtWidgets
 
+from openlp.core.state import State
 from openlp.core.common.applocation import AppLocation
-from openlp.core.common.i18n import UiStrings, translate, get_natural_key
+from openlp.core.common.i18n import UiStrings, get_natural_key, translate
 from openlp.core.common.mixins import RegistryProperties
-from openlp.core.common.path import Path, path_to_str, create_paths
+from openlp.core.common.path import create_paths, path_to_str
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
-from openlp.core.lib import ItemCapabilities, MediaManagerItem, MediaType, ServiceItem, ServiceItemContext, \
-    check_item_selected
-from openlp.core.lib.ui import create_widget_action, critical_error_message_box, create_horizontal_adjusting_combo_box
-from openlp.core.ui import DisplayControllerType
+from openlp.core.lib import MediaType, ServiceItemContext, check_item_selected
+from openlp.core.lib.mediamanageritem import MediaManagerItem
+from openlp.core.lib.serviceitem import ItemCapabilities
+from openlp.core.lib.ui import critical_error_message_box
 from openlp.core.ui.icons import UiIcons
-from openlp.core.ui.media import get_media_players, set_media_players, parse_optical_path, format_milliseconds
+from openlp.core.ui.media import parse_optical_path, format_milliseconds
 from openlp.core.ui.media.vlcplayer import get_vlc
+
 
 if get_vlc() is not None:
     from openlp.plugins.media.forms.mediaclipselectorform import MediaClipSelectorForm
@@ -80,31 +82,27 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
         self.has_search = True
         self.media_object = None
         # self.display_controller = DisplayController(self.parent())
-        Registry().register_function('video_background_replaced', self.video_background_replaced)
+        # Registry().register_function('video_background_replaced', self.video_background_replaced)
         Registry().register_function('mediaitem_media_rebuild', self.rebuild_players)
         # Allow DnD from the desktop
         self.list_view.activateDnD()
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         """
         This method is called automatically to provide OpenLP with the opportunity to translate the ``MediaManagerItem``
         to another language.
         """
         self.on_new_prompt = translate('MediaPlugin.MediaItem', 'Select Media')
-        self.replace_action.setText(UiStrings().ReplaceBG)
-        self.replace_action_context.setText(UiStrings().ReplaceBG)
-        if 'webkit' in get_media_players()[0]:
-            self.replace_action.setToolTip(UiStrings().ReplaceLiveBG)
-            self.replace_action_context.setToolTip(UiStrings().ReplaceLiveBG)
-        else:
-            self.replace_action.setToolTip(UiStrings().ReplaceLiveBGDisabled)
-            self.replace_action_context.setToolTip(UiStrings().ReplaceLiveBGDisabled)
-        self.reset_action.setText(UiStrings().ResetBG)
-        self.reset_action.setToolTip(UiStrings().ResetLiveBG)
-        self.reset_action_context.setText(UiStrings().ResetBG)
-        self.reset_action_context.setToolTip(UiStrings().ResetLiveBG)
-        self.automatic = UiStrings().Automatic
-        self.display_type_label.setText(translate('MediaPlugin.MediaItem', 'Use Player:'))
+        # self.replace_action.setText(UiStrings().ReplaceBG)
+        # self.replace_action_context.setText(UiStrings().ReplaceBG)
+        # self.replace_action.setToolTip(UiStrings().ReplaceLiveBGDisabled)
+        # self.replace_action_context.setToolTip(UiStrings().ReplaceLiveBGDisabled)
+        # self.reset_action.setText(UiStrings().ResetBG)
+        # self.reset_action.setToolTip(UiStrings().ResetLiveBG)
+        # self.reset_action_context.setText(UiStrings().ResetBG)
+        # self.reset_action_context.setToolTip(UiStrings().ResetLiveBG)
+        # self.automatic = UiStrings().Automatic
+        # self.display_type_label.setText(translate('MediaPlugin.MediaItem', 'Use Player:'))
 
     def required_icons(self):
         """
@@ -114,138 +112,72 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
         self.has_file_icon = True
         self.has_new_icon = False
         self.has_edit_icon = False
+        if not State().check_preconditions('media'):
+            self.can_preview = False
+            self.can_make_live = False
+            self.can_add_to_service = False
+        if State().check_preconditions('media_live'):
+            self.can_make_live = False
 
     def add_list_view_to_toolbar(self):
         """
         Creates the main widget for listing items.
         """
         MediaManagerItem.add_list_view_to_toolbar(self)
-        self.list_view.addAction(self.replace_action)
+        # self.list_view.addAction(self.replace_action)
 
     def add_start_header_bar(self):
         """
         Adds buttons to the start of the header bar.
         """
-        if 'vlc' in get_media_players()[0]:
-            disable_optical_button_text = False
+        if State().check_preconditions('media'):
             optical_button_text = translate('MediaPlugin.MediaItem', 'Load CD/DVD')
             optical_button_tooltip = translate('MediaPlugin.MediaItem', 'Load CD/DVD')
-        else:
-            disable_optical_button_text = True
-            optical_button_text = translate('MediaPlugin.MediaItem', 'Load CD/DVD')
-            optical_button_tooltip = translate('MediaPlugin.MediaItem',
-                                               'CD/DVD playback is only supported if VLC is installed and enabled.')
-        self.load_optical = self.toolbar.add_toolbar_action('load_optical', icon=UiIcons().optical,
-                                                            text=optical_button_text,
-                                                            tooltip=optical_button_tooltip,
-                                                            triggers=self.on_load_optical)
-        if disable_optical_button_text:
-            self.load_optical.setDisabled(True)
+            self.load_optical = self.toolbar.add_toolbar_action('load_optical', icon=UiIcons().optical,
+                                                                text=optical_button_text,
+                                                                tooltip=optical_button_tooltip,
+                                                                triggers=self.on_load_optical)
 
     def add_end_header_bar(self):
         """
         Adds buttons to the end of the header bar.
         """
         # Replace backgrounds do not work at present so remove functionality.
-        self.replace_action = self.toolbar.add_toolbar_action('replace_action', icon=UiIcons().theme,
-                                                              triggers=self.on_replace_click)
-        if 'webkit' not in get_media_players()[0]:
-            self.replace_action.setDisabled(True)
-            if hasattr(self, 'replace_action_context'):
-                self.replace_action_context.setDisabled(True)
-        self.reset_action = self.toolbar.add_toolbar_action('reset_action', icon=UiIcons().close,
-                                                            visible=False, triggers=self.on_reset_click)
-        self.media_widget = QtWidgets.QWidget(self)
-        self.media_widget.setObjectName('media_widget')
-        self.display_layout = QtWidgets.QFormLayout(self.media_widget)
-        self.display_layout.setContentsMargins(self.display_layout.spacing(), self.display_layout.spacing(),
-                                               self.display_layout.spacing(), self.display_layout.spacing())
-        self.display_layout.setObjectName('display_layout')
-        self.display_type_label = QtWidgets.QLabel(self.media_widget)
-        self.display_type_label.setObjectName('display_type_label')
-        self.display_type_combo_box = create_horizontal_adjusting_combo_box(
-            self.media_widget, 'display_type_combo_box')
-        self.display_type_label.setBuddy(self.display_type_combo_box)
-        self.display_layout.addRow(self.display_type_label, self.display_type_combo_box)
+        # self.replace_action = self.toolbar.add_toolbar_action('replace_action', icon=UiIcons().theme,
+        #                                                       triggers=self.on_replace_click)
+        # if 'webkit' not in get_media_players()[0]:
+        #     self.replace_action.setDisabled(True)
+        #     if hasattr(self, 'replace_action_context'):
+        #         self.replace_action_context.setDisabled(True)
+        # self.reset_action = self.toolbar.add_toolbar_action('reset_action', icon=UiIcons().close,
+        #                                                    visible=False, triggers=self.on_reset_click)
+        # self.media_widget = QtWidgets.QWidget(self)
+        # self.media_widget.setObjectName('media_widget')
+        # self.display_layout = QtWidgets.QFormLayout(self.media_widget)
+        # self.display_layout.setContentsMargins(self.display_layout.spacing(), self.display_layout.spacing(),
+        #                                        self.display_layout.spacing(), self.display_layout.spacing())
+        # self.display_layout.setObjectName('display_layout')
+        # self.display_type_label = QtWidgets.QLabel(self.media_widget)
+        # self.display_type_label.setObjectName('display_type_label')
+        # self.display_type_combo_box = create_horizontal_adjusting_combo_box(
+        #     self.media_widget, 'display_type_combo_box')
+        # self.display_type_label.setBuddy(self.display_type_combo_box)
+        # self.display_layout.addRow(self.display_type_label, self.display_type_combo_box)
         # Add the Media widget to the page layout.
-        self.page_layout.addWidget(self.media_widget)
-        self.display_type_combo_box.currentIndexChanged.connect(self.override_player_changed)
+        # self.page_layout.addWidget(self.media_widget)
+        # self.display_type_combo_box.currentIndexChanged.connect(self.override_player_changed)
+        pass
 
-    def add_custom_context_actions(self):
-        create_widget_action(self.list_view, separator=True)
-        self.replace_action_context = create_widget_action(
-            self.list_view, text=UiStrings().ReplaceBG, icon=':/slides/slide_theme.png',
-            triggers=self.on_replace_click)
-        self.reset_action_context = create_widget_action(
-            self.list_view, text=UiStrings().ReplaceLiveBG, icon=UiIcons().close,
-            visible=False, triggers=self.on_reset_click)
-
-    @staticmethod
-    def override_player_changed(index):
-        """
-        The Player has been overridden
-
-        :param index: Index
-        """
-        player = get_media_players()[0]
-        if index == 0:
-            set_media_players(player)
-        else:
-            set_media_players(player, player[index - 1])
-
-    def on_reset_click(self):
-        """
-        Called to reset the Live background with the media selected,
-        """
-        self.media_controller.media_reset(self.live_controller)
-        self.reset_action.setVisible(False)
-        self.reset_action_context.setVisible(False)
-
-    def video_background_replaced(self):
-        """
-        Triggered by main display on change of service item.
-        """
-        self.reset_action.setVisible(False)
-        self.reset_action_context.setVisible(False)
-
-    def on_replace_click(self):
-        """
-        Called to replace Live background with the media selected.
-        """
-        if check_item_selected(self.list_view,
-                               translate('MediaPlugin.MediaItem',
-                                         'You must select a media file to replace the background with.')):
-            item = self.list_view.currentItem()
-            filename = item.data(QtCore.Qt.UserRole)
-            if os.path.exists(filename):
-                service_item = ServiceItem()
-                service_item.title = 'webkit'
-                service_item.processor = 'webkit'
-                (path, name) = os.path.split(filename)
-                service_item.add_from_command(path, name, CLAPPERBOARD)
-                if self.media_controller.video(DisplayControllerType.Live, service_item, video_behind_text=True):
-                    self.reset_action.setVisible(True)
-                    self.reset_action_context.setVisible(True)
-                else:
-                    critical_error_message_box(UiStrings().LiveBGError,
-                                               translate('MediaPlugin.MediaItem',
-                                                         'There was no display item to amend.'))
-            else:
-                critical_error_message_box(UiStrings().LiveBGError,
-                                           translate('MediaPlugin.MediaItem',
-                                                     'There was a problem replacing your background, '
-                                                     'the media file "{name}" no longer exists.').format(name=filename))
-
-    def generate_slide_data(self, service_item, item=None, xml_version=False, remote=False,
-                            context=ServiceItemContext.Service):
+    def generate_slide_data(self, service_item, *, item=None, remote=False, context=ServiceItemContext.Service,
+                            **kwargs):
         """
         Generate the slide data. Needs to be implemented by the plugin.
 
         :param service_item: The service item to be built on
         :param item: The Song item to be used
-        :param xml_version: The xml version (not used)
         :param remote: Triggered from remote
         :param context: Why is it being generated
+        :param kwargs: Consume other unused args specified by the base implementation, but not use by this one.
         """
         if item is None:
             item = self.list_view.currentItem()
@@ -263,7 +195,7 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
                         translate('MediaPlugin.MediaItem',
                                   'The optical disc {name} is no longer available.').format(name=name))
                 return False
-            service_item.processor = self.display_type_combo_box.currentText()
+            service_item.processor = 'vlc'
             service_item.add_from_command(filename, name, CLAPPERBOARD)
             service_item.title = clip_name
             # Set the length
@@ -281,11 +213,10 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
                 return False
             (path, name) = os.path.split(filename)
             service_item.title = name
-            service_item.processor = self.display_type_combo_box.currentText()
+            service_item.processor = 'vlc'
             service_item.add_from_command(path, name, CLAPPERBOARD)
             # Only get start and end times if going to a service
-            if not self.media_controller.media_length(service_item):
-                return False
+            service_item.set_media_length(self.media_controller.media_length(filename))
         service_item.add_capability(ItemCapabilities.CanAutoStartForLive)
         service_item.add_capability(ItemCapabilities.CanEditTitle)
         service_item.add_capability(ItemCapabilities.RequiresMedia)
@@ -300,8 +231,8 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
         Initialize media item.
         """
         self.list_view.clear()
-        self.service_path = str(AppLocation.get_section_data_path(self.settings_section) / 'thumbnails')
-        create_paths(Path(self.service_path))
+        self.service_path = AppLocation.get_section_data_path(self.settings_section) / 'thumbnails'
+        create_paths(self.service_path)
         self.load_list([path_to_str(file) for file in Settings().value(self.settings_section + '/media files')])
         self.rebuild_players()
 
@@ -309,36 +240,12 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
         """
         Rebuild the tab in the media manager when changes are made in the settings.
         """
-        self.populate_display_types()
+        # self.populate_display_types()
         self.on_new_file_masks = translate('MediaPlugin.MediaItem',
                                            'Videos ({video});;Audio ({audio});;{files} '
                                            '(*)').format(video=' '.join(self.media_controller.video_extensions_list),
                                                          audio=' '.join(self.media_controller.audio_extensions_list),
                                                          files=UiStrings().AllFiles)
-
-    def populate_display_types(self):
-        """
-        Load the combobox with the enabled media players,  allowing user to select a specific player if settings allow.
-        """
-        # block signals to avoid unnecessary override_player_changed Signals while combo box creation
-        self.display_type_combo_box.blockSignals(True)
-        self.display_type_combo_box.clear()
-        used_players, override_player = get_media_players()
-        media_players = self.media_controller.media_players
-        current_index = 0
-        for player in used_players:
-            # load the drop down selection
-            self.display_type_combo_box.addItem(media_players[player].original_name)
-            if override_player == player:
-                current_index = len(self.display_type_combo_box)
-        if self.display_type_combo_box.count() > 1:
-            self.display_type_combo_box.insertItem(0, self.automatic)
-            self.display_type_combo_box.setCurrentIndex(current_index)
-        if override_player:
-            self.media_widget.show()
-        else:
-            self.media_widget.hide()
-        self.display_type_combo_box.blockSignals(False)
 
     def on_delete_click(self):
         """
@@ -359,7 +266,8 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
         :param media: The media
         :param target_group:
         """
-        media.sort(key=lambda file_name: get_natural_key(os.path.split(str(file_name))[1]))
+        # TODO needs to be fixed as no idea why this fails
+        # media.sort(key=lambda file_path: get_natural_key(file_path.name))
         for track in media:
             track_info = QtCore.QFileInfo(track)
             item_name = None

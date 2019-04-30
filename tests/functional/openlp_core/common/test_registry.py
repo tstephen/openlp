@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -184,4 +184,4 @@ class TestRegistryBase(TestCase):
         RegistryStub()
 
         # THEN: The bootstrap methods should be registered
-        assert len(Registry().functions_list) == 2, 'The bootstrap functions should be in the dict.'
+        assert len(Registry().functions_list) == 3, 'The bootstrap functions should be in the dict.'

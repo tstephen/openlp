@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -22,16 +22,19 @@
 
 import logging
 
+from openlp.core.state import State
 from openlp.core.api.http import register_endpoint
 from openlp.core.common.actions import ActionList
 from openlp.core.common.i18n import UiStrings, translate
 from openlp.core.ui.icons import UiIcons
-from openlp.core.lib import Plugin, StringContent, build_icon
+from openlp.core.lib.plugin import Plugin, StringContent
 from openlp.core.lib.ui import create_action
 from openlp.plugins.bibles.endpoint import api_bibles_endpoint, bibles_endpoint
-from openlp.plugins.bibles.lib import BibleManager, BiblesTab, BibleMediaItem, LayoutStyle, DisplayStyle, \
-    LanguageSelection
-from openlp.plugins.bibles.lib.mediaitem import BibleSearch
+from openlp.plugins.bibles.lib import LayoutStyle, DisplayStyle, LanguageSelection
+from openlp.plugins.bibles.lib.biblestab import BiblesTab
+from openlp.plugins.bibles.lib.manager import BibleManager
+from openlp.plugins.bibles.lib.mediaitem import BibleMediaItem, BibleSearch
+
 
 log = logging.getLogger(__name__)
 
@@ -51,10 +54,6 @@ __default_settings__ = {
     'bibles/display new chapter': False,
     'bibles/second bibles': True,
     'bibles/primary bible': '',
-    'bibles/proxy name': '',
-    'bibles/proxy address': '',
-    'bibles/proxy username': '',
-    'bibles/proxy password': '',
     'bibles/bible theme': '',
     'bibles/verse separator': '',
     'bibles/range separator': '',
@@ -80,6 +79,8 @@ class BiblePlugin(Plugin):
         self.manager = BibleManager(self)
         register_endpoint(bibles_endpoint)
         register_endpoint(api_bibles_endpoint)
+        State().add_service('bible', self.weight, is_plugin=True)
+        State().update_pre_conditions('bible', self.check_pre_conditions())
 
     def initialise(self):
         """

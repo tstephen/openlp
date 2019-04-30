@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -60,7 +60,6 @@ def get_local_ip4():
 
     :returns: Dict of interfaces
     """
-    # Get the local IPv4 active address(es) that are NOT localhost (lo or '127.0.0.1')
     log.debug('Getting local IPv4 interface(es) information')
     my_ip4 = {}
     for iface in QNetworkInterface.allInterfaces():
@@ -70,8 +69,6 @@ def get_local_ip4():
         log.debug('Checking address(es) protocol')
         for address in iface.addressEntries():
             ip = address.ip()
-            # NOTE: Next line will skip if interface is localhost - keep for now until we decide about it later
-            # if (ip.protocol() == QAbstractSocket.IPv4Protocol) and (ip != QHostAddress.LocalHost):
             log.debug('Checking for protocol == IPv4Protocol')
             if ip.protocol() == QAbstractSocket.IPv4Protocol:
                 log.debug('Getting interface information')
@@ -83,12 +80,13 @@ def get_local_ip4():
                                                                  ip.toIPv4Address()).toString()
                                         }
                 log.debug('Adding {iface} to active list'.format(iface=iface.name()))
+    if len(my_ip4) == 0:
+        log.warning('No active IPv4 network interfaces detected')
+        return my_ip4
     if 'localhost' in my_ip4:
         log.debug('Renaming windows localhost to lo')
         my_ip4['lo'] = my_ip4['localhost']
         my_ip4.pop('localhost')
-    if len(my_ip4) == 0:
-        log.warning('No active IPv4 network interfaces detected')
     if len(my_ip4) == 1:
         if 'lo' in my_ip4:
             # No active interfaces - so leave localhost in there
@@ -476,10 +474,10 @@ def get_file_encoding(file_path):
                 if not chunk:
                     break
                 detector.feed(chunk)
-            detector.close()
-        return detector.result
     except OSError:
         log.exception('Error detecting file encoding')
+    finally:
+        return detector.close()
 
 
 def normalize_str(irregular_string):

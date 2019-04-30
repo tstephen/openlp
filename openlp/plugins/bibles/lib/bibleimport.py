@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -27,7 +27,7 @@ from lxml import etree, objectify
 from openlp.core.common.i18n import get_language, translate
 from openlp.core.common.mixins import LogMixin, RegistryProperties
 from openlp.core.common.registry import Registry
-from openlp.core.lib import ValidationError
+from openlp.core.lib.exceptions import ValidationError
 from openlp.core.lib.ui import critical_error_message_box
 from openlp.plugins.bibles.lib.db import AlternativeBookNamesDB, BibleDB, BiblesResourcesDB
 
@@ -48,9 +48,9 @@ class BibleImport(BibleDB, LogMixin, RegistryProperties):
         """
         Check if the supplied file is compressed
 
-        :param file_path: A path to the file to check
+        :param openlp.core.common.path.Path file_path: A path to the file to check
         """
-        if is_zipfile(str(file_path)):
+        if is_zipfile(file_path):
             critical_error_message_box(
                 message=translate('BiblesPlugin.BibleImport',
                                   'The file "{file}" you supplied is compressed. You must decompress it before import.'

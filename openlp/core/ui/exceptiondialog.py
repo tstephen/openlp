@@ -4,7 +4,7 @@
 ###############################################################################
 # OpenLP - Open Source Lyrics Projection                                      #
 # --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
+# Copyright (c) 2008-2019 OpenLP Developers                                   #
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
@@ -23,18 +23,18 @@
 The GUI widgets of the exception dialog.
 """
 
-from PyQt5 import QtGui, QtWidgets
+from PyQt5 import QtWidgets
 
 from openlp.core.common.i18n import translate
-from openlp.core.ui.icons import UiIcons
 from openlp.core.lib.ui import create_button, create_button_box
+from openlp.core.ui.icons import UiIcons
 
 
 class Ui_ExceptionDialog(object):
     """
     The GUI widgets of the exception dialog.
     """
-    def setupUi(self, exception_dialog):
+    def setup_ui(self, exception_dialog):
         """
         Set up the UI.
         """
@@ -77,17 +77,17 @@ class Ui_ExceptionDialog(object):
         self.save_report_button = create_button(exception_dialog, 'save_report_button',
                                                 icon=UiIcons().save,
                                                 click=self.on_save_report_button_clicked)
-        self.attach_tile_button = create_button(exception_dialog, 'attach_tile_button',
+        self.attach_file_button = create_button(exception_dialog, 'attach_file_button',
                                                 icon=UiIcons().open,
                                                 click=self.on_attach_file_button_clicked)
         self.button_box = create_button_box(exception_dialog, 'button_box', ['close'],
-                                            [self.send_report_button, self.save_report_button, self.attach_tile_button])
+                                            [self.send_report_button, self.save_report_button, self.attach_file_button])
         self.exception_layout.addWidget(self.button_box)
 
-        self.retranslateUi(exception_dialog)
+        self.retranslate_ui(exception_dialog)
         self.description_text_edit.textChanged.connect(self.on_description_updated)
 
-    def retranslateUi(self, exception_dialog):
+    def retranslate_ui(self, exception_dialog):
         """
         Translate the widgets on the fly.
         """
@@ -112,4 +112,4 @@ class Ui_ExceptionDialog(object):
                       ).format(first_part=exception_part1))
         self.send_report_button.setText(translate('OpenLP.ExceptionDialog', 'Send E-Mail'))
         self.save_report_button.setText(translate('OpenLP.ExceptionDialog', 'Save to File'))
-        self.attach_tile_button.setText(translate('OpenLP.ExceptionDialog', 'Attach File'))
+        self.attach_file_button.setText(translate('OpenLP.ExceptionDialog', 'Attach File'))
