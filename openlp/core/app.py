@@ -30,6 +30,7 @@ import argparse
 import logging
 import sys
 import time
+import os
 from datetime import datetime
 from traceback import format_exception
 
@@ -359,7 +360,11 @@ def main(args=None):
         Settings.setDefaultFormat(Settings.IniFormat)
         # Get location OpenLPPortable.ini
         if args.portablepath:
-            portable_path = str_to_path(args.portablepath)
+            if os.path.isabs(args.portablepath):
+                portable_path = str_to_path(args.portablepath).resolve()
+            else:
+                portable_path = (AppLocation.get_directory(AppLocation.AppDir) / '..' /
+                                 str_to_path(args.portablepath)).resolve()
         else:
             portable_path = (AppLocation.get_directory(AppLocation.AppDir) / '..' / '..').resolve()
         data_path = portable_path / 'Data'
