@@ -187,6 +187,7 @@ using a computer and a data projector.""",
         'websockets'
     ],
     extras_require={
+        'agpl-pdf': ['PyMuPDF'],
         'darkstyle': ['QDarkStyle'],
         'mysql': ['mysql-connector-python'],
         'odbc': ['pyodbc'],

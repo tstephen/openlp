@@ -34,6 +34,12 @@ from openlp.plugins.presentations.lib.presentationcontroller import Presentation
 if is_win():
     from subprocess import STARTUPINFO, STARTF_USESHOWWINDOW
 
+try:
+    import fitz
+    PYMUPDF_AVAILABLE = True
+except ImportError:
+    PYMUPDF_AVAILABLE = False
+    
 log = logging.getLogger(__name__)
 
 PDF_CONTROLLER_FILETYPES = ['pdf', 'xps', 'oxps']
@@ -151,8 +157,10 @@ class PdfController(PresentationController):
             return True
         elif self.gsbin:
             return True
-        else:
-            return False
+        elif PYMUPDF_AVAILABLE:
+            self.also_supports = ['xps', 'oxps']
+            return True
+        return False
 
     def kill(self):
         """
@@ -276,6 +284,16 @@ class PdfDocument(PresentationDocument):
                                        '-r{res}'.format(res=resolution), '-dTextAlphaBits=4', '-dGraphicsAlphaBits=4',
                                        '-sOutputFile={output}'.format(output=temp_dir_path / 'mainslide%03d.png'),
                                        str(self.file_path)], startupinfo=self.startupinfo)
+            elif PYMUPDF_AVAILABLE:
+                log.debug('loading presentation using PyMuPDF')
+                pdf = fitz.open(str(self.file_path))
+                for i, page in enumerate(pdf, start=1):
+                    src_size = page.bound().round()
+                    # keep aspect ratio
+                    scale = min(size.width() / src_size.width, size.height() / src_size.height)
+                    m = fitz.Matrix(scale, scale)
+                    page.getPixmap(matrix=m, alpha=False).writeImage(str(temp_dir_path / 'mainslide{:03d}.png'.format(i)))
+                pdf.close()
             created_files = sorted(temp_dir_path.glob('*'))
             for image_path in created_files:
                 if image_path.is_file():
