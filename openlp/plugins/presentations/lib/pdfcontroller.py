@@ -39,7 +39,7 @@ try:
     PYMUPDF_AVAILABLE = True
 except ImportError:
     PYMUPDF_AVAILABLE = False
-    
+
 log = logging.getLogger(__name__)
 
 PDF_CONTROLLER_FILETYPES = ['pdf', 'xps', 'oxps']
@@ -292,7 +292,7 @@ class PdfDocument(PresentationDocument):
                     # keep aspect ratio
                     scale = min(size.width() / src_size.width, size.height() / src_size.height)
                     m = fitz.Matrix(scale, scale)
-                    page.getPixmap(matrix=m, alpha=False).writeImage(str(temp_dir_path / 'mainslide{:03d}.png'.format(i)))
+                    page.getPixmap(m, alpha=False).writeImage(str(temp_dir_path / 'mainslide{:03d}.png'.format(i)))
                 pdf.close()
             created_files = sorted(temp_dir_path.glob('*'))
             for image_path in created_files:
