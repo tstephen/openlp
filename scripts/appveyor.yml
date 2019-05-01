@@ -16,11 +16,7 @@ environment:
 
 install:
   # Install dependencies from pypi
-  - "%PYTHON%\\python.exe -m pip install sqlalchemy alembic appdirs chardet beautifulsoup4 lxml Mako mysql-connector-python pytest mock pyodbc psycopg2 pypiwin32 websockets asyncio waitress six webob requests QtAwesome PyQt5 PyQtWebEngine pymediainfo"
-  # Download and unpack mupdf
-  - appveyor DownloadFile https://mupdf.com/downloads/archive/mupdf-1.14.0-windows.zip
-  - 7z x mupdf-1.14.0-windows.zip
-  - cp mupdf-1.14.0-windows/mutool.exe openlp-branch/mutool.exe
+  - "%PYTHON%\\python.exe -m pip install sqlalchemy alembic appdirs chardet beautifulsoup4 lxml Mako mysql-connector-python pytest mock pyodbc psycopg2 pypiwin32 websockets asyncio waitress six webob requests QtAwesome PyQt5 PyQtWebEngine pymediainfo PyMuPDF"
 
 build: off
 
