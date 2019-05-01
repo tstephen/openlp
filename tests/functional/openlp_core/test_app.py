@@ -29,6 +29,7 @@ from PyQt5 import QtCore, QtWidgets
 sys.modules['PyQt5.QtWebEngineWidgets'] = MagicMock()
 
 from openlp.core.app import OpenLP, parse_options
+from openlp.core.common import is_win
 from openlp.core.common.settings import Settings
 from tests.utils.constants import RESOURCE_PATH
 
@@ -89,7 +90,11 @@ def test_parse_options_portable_and_portable_path():
     Test the parse options process works portable and portable-path
     """
     # GIVEN: a a set of system arguments.
-    sys.argv[1:] = ['--portable', '--portable-path .']
+    if is_win():
+        data_path = 'c:\\temp\\openlp-data'
+    else:
+        data_path = '/tmp/openlp-data'
+    sys.argv[1:] = ['--portable', '--portable-path', '{datapath}'.format(datapath=data_path)]
 
     # WHEN: We we parse them to expand to options
     args = parse_options()
@@ -98,7 +103,7 @@ def test_parse_options_portable_and_portable_path():
     assert args.loglevel == 'warning', 'The log level should be set to warning'
     assert args.no_error_form is False, 'The no_error_form should be set to False'
     assert args.portable is True, 'The portable flag should be set to true'
-    assert args.portablepath == '.', 'The portable path should be set to "."'
+    assert args.portablepath == data_path, 'The portable path should be set as expected'
     assert args.rargs == [], 'The service file should be blank'
 
 

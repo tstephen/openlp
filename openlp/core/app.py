@@ -41,7 +41,7 @@ from openlp.core.common import is_macosx, is_win
 from openlp.core.common.applocation import AppLocation
 from openlp.core.loader import loader
 from openlp.core.common.i18n import LanguageManager, UiStrings, translate
-from openlp.core.common.path import copytree, create_paths, str_to_path
+from openlp.core.common.path import copytree, create_paths, Path
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.display.screens import ScreenList
@@ -303,7 +303,8 @@ def parse_options(args=None):
     parser.add_argument('-p', '--portable', dest='portable', action='store_true',
                         help='Specify if this should be run as a portable app, ')
     parser.add_argument('-pp', '--portable-path', dest='portablepath', default=None,
-                        help='Specify the path of the portable data, defaults to "<AppDir>/../../".')
+                        help='Specify the path of the portable data, defaults to "{dir_name}".'.format(
+                            dir_name=os.path.join('<AppDir>', '..', '..')))
     parser.add_argument('-w', '--no-web-server', dest='no_web_server', action='store_true',
                         help='Turn off the Web and Socket Server ')
     parser.add_argument('rargs', nargs='?', default=[])
@@ -361,12 +362,12 @@ def main(args=None):
         # Get location OpenLPPortable.ini
         if args.portablepath:
             if os.path.isabs(args.portablepath):
-                portable_path = str_to_path(args.portablepath).resolve()
+                portable_path = Path(args.portablepath)
             else:
-                portable_path = (AppLocation.get_directory(AppLocation.AppDir) / '..' /
-                                 str_to_path(args.portablepath)).resolve()
+                portable_path = AppLocation.get_directory(AppLocation.AppDir) / '..' / args.portablepath
         else:
-            portable_path = (AppLocation.get_directory(AppLocation.AppDir) / '..' / '..').resolve()
+            portable_path = AppLocation.get_directory(AppLocation.AppDir) / '..' / '..'
+        portable_path = portable_path.resolve()
         data_path = portable_path / 'Data'
         set_up_logging(portable_path / 'Other')
         log.info('Running portable')
