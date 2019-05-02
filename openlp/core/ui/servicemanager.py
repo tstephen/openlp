@@ -430,11 +430,20 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
                     return False
         self.new_file()
 
-    def on_load_service_clicked(self, load_file=None):
+    def on_load_service_clicked(self, checked):
+        """
+        Handle the `fileOpenItem` action
+        
+        :param bool checked: Not used. 
+        :rtype: None
+        """
+        self.load_service()
+
+    def load_service(self, file_path=None):
         """
         Loads the service file and saves the existing one it there is one unchanged.
 
-        :param load_file: The service file to the loaded.  Will be None is from menu so selection will be required.
+        :param openlp.core.common.path.Path | None file_path: The service file to the loaded.
         """
         if self.is_modified():
             result = self.save_modified_service()
@@ -442,7 +451,7 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
                 return False
             elif result == QtWidgets.QMessageBox.Save:
                 self.decide_save_method()
-        if not load_file:
+        if not file_path:
             file_path, filter_used = FileDialog.getOpenFileName(
                 self.main_window,
                 translate('OpenLP.ServiceManager', 'Open File'),
@@ -450,8 +459,6 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
                 translate('OpenLP.ServiceManager', 'OpenLP Service Files (*.osz *.oszl)'))
             if not file_path:
                 return False
-        else:
-            file_path = str_to_path(load_file)
         Settings().setValue(self.main_window.service_manager_settings_section + '/last directory', file_path.parent)
         self.load_file(file_path)
 
@@ -670,8 +677,9 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
 
     def load_file(self, file_path):
         """
-        Load an existing service file
-        :param file_path:
+        Load an existing service file.
+
+        :param openlp.core.common.path.Path file_path: The service file to load.
         """
         if not file_path.exists():
             return False
@@ -1520,12 +1528,12 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
             event.setDropAction(QtCore.Qt.CopyAction)
             event.accept()
             for url in link.urls():
-                file_name = url.toLocalFile()
-                if file_name.endswith('.osz'):
-                    self.on_load_service_clicked(file_name)
-                elif file_name.endswith('.oszl'):
+                file_path = Path(url.toLocalFile())
+                if file_path.suffix == '.osz':
+                    self.load_service(file_path)
+                elif file_path.suffix == '.oszl':
                     # todo correct
-                    self.on_load_service_clicked(file_name)
+                    self.load_service(file_path)
         elif link.hasText():
             plugin = link.text()
             item = self.service_manager_list.itemAt(event.pos())

@@ -108,7 +108,6 @@ class TestMainWindow(TestCase, TestMixin):
         """
         # GIVEN a non service file as an argument to openlp
         service = 'run_openlp.py'
-        self.main_window.arguments = service
 
         # WHEN the argument is processed
         self.main_window.open_cmd_line_files(service)

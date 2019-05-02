@@ -287,12 +287,12 @@ class OpenLP(QtWidgets.QApplication):
         return QtWidgets.QApplication.event(self, event)
 
 
-def parse_options(args=None):
+def parse_options():
     """
     Parse the command line arguments
 
-    :param args: list of command line arguments
-    :return: a tuple of parsed options of type optparse.Value and a list of remaining argsZ
+    :return: An :object:`argparse.Namespace` insatnce containing the parsed args.
+    :rtype: argparse.Namespace
     """
     # Set up command line options.
     parser = argparse.ArgumentParser(prog='openlp')
@@ -304,9 +304,9 @@ def parse_options(args=None):
                         help='Specify if this should be run as a portable app, ')
     parser.add_argument('-w', '--no-web-server', dest='no_web_server', action='store_true',
                         help='Turn off the Web and Socket Server ')
-    parser.add_argument('rargs', nargs='?', default=[])
-    # Parse command line options and deal with them. Use args supplied pragmatically if possible.
-    return parser.parse_args(args) if args else parser.parse_args()
+    parser.add_argument('rargs', nargs='*', default=[])
+    # Parse command line options and deal with them.
+    return parser.parse_args()
 
 
 def set_up_logging(log_path):
@@ -325,13 +325,11 @@ def set_up_logging(log_path):
         print('Logging to: {name}'.format(name=file_path))
 
 
-def main(args=None):
+def main():
     """
     The main function which parses command line options and then runs
-
-    :param args: Some args
     """
-    args = parse_options(args)
+    args = parse_options()
     qt_args = ['--disable-web-security']
     # qt_args = []
     if args and args.loglevel.lower() in ['d', 'debug']:
@@ -345,6 +343,9 @@ def main(args=None):
     # Bug #1018855: Set the WM_CLASS property in X11
     if not is_win() and not is_macosx():
         qt_args.append('OpenLP')
+    # Set the libvlc environment variable if we're frozen
+    if getattr(sys, 'frozen', False):
+        os.environ['PYTHON_VLC_LIB_PATH'] = str(AppLocation.get_directory(AppLocation.AppDir))
     # Initialise the resources
     qInitResources()
     # Now create and actually run the application.
