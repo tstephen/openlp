@@ -23,8 +23,9 @@
 This module contains tests for the PdfController
 """
 import os
+from shutil import which
 from tempfile import mkdtemp
-from unittest import SkipTest, TestCase
+from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
 from PyQt5 import QtCore, QtGui
@@ -39,7 +40,8 @@ from tests.utils.constants import RESOURCE_PATH
 
 
 __default_settings__ = {
-    'presentations/enable_pdf_program': False,
+    'presentations/enable_pdf_program': True,
+    'presentations/pdf_program': None,
     'presentations/thumbnail_scheme': ''
 }
 
@@ -113,17 +115,16 @@ class TestPdfController(TestCase, TestMixin):
         # THEN: The name of the presentation controller should be correct
         assert 'Pdf' == controller.name, 'The name of the presentation controller should be correct'
 
-    def test_load_pdf(self):
+    def load_pdf(self, exe_path):
         """
-        Test loading of a Pdf using the PdfController
+        Test loading a Pdf using the PdfController
         """
         # GIVEN: A Pdf-file
         test_file_path = RESOURCE_PATH / 'presentations' / 'pdf_test1.pdf'
 
         # WHEN: The Pdf is loaded
+        Settings().setValue('presentations/pdf_program', exe_path)
         controller = PdfController(plugin=self.mock_plugin)
-        if not controller.check_available():
-            raise SkipTest('Could not detect mudraw or ghostscript, so skipping PDF test')
         controller.temp_folder = self.temp_folder_path
         controller.thumbnail_folder = self.thumbnail_folder_path
         document = PdfDocument(controller, test_file_path)
@@ -133,23 +134,22 @@ class TestPdfController(TestCase, TestMixin):
         assert loaded is True, 'The loading of the PDF should succeed.'
         assert 3 == document.get_slide_count(), 'The pagecount of the PDF should be 3.'
 
-    def test_load_pdf_pictures(self):
+    def load_pdf_pictures(self, exe_path):
         """
-        Test loading of a Pdf and check size of generate pictures
+        Test loading a Pdf and check the generated pictures' size
         """
         # GIVEN: A Pdf-file
         test_file_path = RESOURCE_PATH / 'presentations' / 'pdf_test1.pdf'
 
         # WHEN: The Pdf is loaded
+        Settings().setValue('presentations/pdf_program', exe_path)
         controller = PdfController(plugin=self.mock_plugin)
-        if not controller.check_available():
-            raise SkipTest('Could not detect mudraw or ghostscript, so skipping PDF test')
         controller.temp_folder = self.temp_folder_path
         controller.thumbnail_folder = self.thumbnail_folder_path
         document = PdfDocument(controller, test_file_path)
         loaded = document.load_presentation()
 
-        # THEN: The load should succeed and pictures should be created and have been scales to fit the screen
+        # THEN: The load should succeed and pictures should be created and have been scaled to fit the screen
         assert loaded is True, 'The loading of the PDF should succeed.'
         image = QtGui.QImage(os.path.join(str(self.temp_folder_path), 'pdf_test1.pdf', 'mainslide001.png'))
         # Based on the converter used the resolution will differ a bit
@@ -162,6 +162,19 @@ class TestPdfController(TestCase, TestMixin):
             width = int(round(height * 0.70703125, 0))
             assert image.height() == height, 'The height should be {height}'.format(height=height)
             assert image.width() == width, 'The width should be {width}'.format(width=width)
+
+    def test_load_pdf(self):
+        """
+        Test loading a Pdf with each of the installed backends
+        """
+        for exe_name in ['gs', 'mutool', 'mudraw']:
+            exe_path = which(exe_name)
+            if exe_path:
+                self.load_pdf(exe_path)
+                self.load_pdf_pictures(exe_path)
+        # PyMuPDF
+        self.load_pdf(None)
+        self.load_pdf_pictures(None)
 
     @patch('openlp.plugins.presentations.lib.pdfcontroller.check_binary_exists')
     def test_process_check_binary_mudraw(self, mocked_check_binary_exists):

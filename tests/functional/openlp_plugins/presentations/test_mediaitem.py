@@ -65,7 +65,7 @@ class TestMediaItem(TestCase, TestMixin):
         pdf_controller = MagicMock()
         pdf_controller.enabled.return_value = True
         pdf_controller.supports = ['pdf']
-        pdf_controller.also_supports = ['xps', 'oxps']
+        pdf_controller.also_supports = ['xps', 'oxps', 'epub', 'cbz', 'fb2']
         # Mock the controllers.
         self.media_item.controllers = {
             'Impress': impress_controller,
@@ -85,6 +85,9 @@ class TestMediaItem(TestCase, TestMixin):
         assert '*.pdf' in self.media_item.on_new_file_masks, 'The file mask should contain the pdf extension'
         assert '*.xps' in self.media_item.on_new_file_masks, 'The file mask should contain the xps extension'
         assert '*.oxps' in self.media_item.on_new_file_masks, 'The file mask should contain the oxps extension'
+        assert '*.epub' in self.media_item.on_new_file_masks, 'The file mask should contain the epub extension'
+        assert '*.cbz' in self.media_item.on_new_file_masks, 'The file mask should contain the cbz extension'
+        assert '*.fb2' in self.media_item.on_new_file_masks, 'The file mask should contain the fb2 extension'
 
     def test_clean_up_thumbnails(self):
         """
