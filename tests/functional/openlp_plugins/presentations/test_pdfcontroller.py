@@ -25,7 +25,7 @@ This module contains tests for the PdfController
 import os
 from shutil import which
 from tempfile import mkdtemp
-from unittest import SkipTest, TestCase
+from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
 from PyQt5 import QtCore, QtGui

@@ -333,7 +333,8 @@ class MessageListener(object):
         # the conversion has already been done at this point.
         file_type = file_path.suffix.lower()[1:]
         if file_type in PDF_CONTROLLER_FILETYPES:
-            log.debug('Converting from pdf/xps/oxps/epub/cbz/fb2 to images for serviceitem with file {name}'.format(name=file_path))
+            log.debug('Converting from pdf/xps/oxps/epub/cbz/fb2 to images for serviceitem with file {name}'
+                      .format(name=file_path))
             # Create a copy of the original item, and then clear the original item so it can be filled with images
             item_cpy = copy.copy(item)
             item.__init__(None)
