@@ -127,6 +127,9 @@ class PdfController(PresentationController):
                 self.mudrawbin = program_path
             elif program_type == 'mutool':
                 self.mutoolbin = program_path
+        elif PYMUPDF_AVAILABLE:
+            self.also_supports = ['xps', 'oxps']
+            return True
         else:
             # Fallback to autodetection
             application_path = AppLocation.get_directory(AppLocation.AppDir)
@@ -156,9 +159,6 @@ class PdfController(PresentationController):
             self.also_supports = ['xps', 'oxps']
             return True
         elif self.gsbin:
-            return True
-        elif PYMUPDF_AVAILABLE:
-            self.also_supports = ['xps', 'oxps']
             return True
         return False
 
