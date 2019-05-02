@@ -122,8 +122,6 @@ class TestPdfController(TestCase, TestMixin):
 
         # WHEN: The Pdf is loaded
         controller = PdfController(plugin=self.mock_plugin)
-        if not controller.check_available():
-            raise SkipTest('Could not detect mudraw or ghostscript, so skipping PDF test')
         controller.temp_folder = self.temp_folder_path
         controller.thumbnail_folder = self.thumbnail_folder_path
         document = PdfDocument(controller, test_file_path)
@@ -142,8 +140,6 @@ class TestPdfController(TestCase, TestMixin):
 
         # WHEN: The Pdf is loaded
         controller = PdfController(plugin=self.mock_plugin)
-        if not controller.check_available():
-            raise SkipTest('Could not detect mudraw or ghostscript, so skipping PDF test')
         controller.temp_folder = self.temp_folder_path
         controller.thumbnail_folder = self.thumbnail_folder_path
         document = PdfDocument(controller, test_file_path)

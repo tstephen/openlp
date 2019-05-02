@@ -201,6 +201,7 @@ using a computer and a data projector.""",
     tests_require=[
         'nose2',
         'pylint',
+        'PyMuPDF',
         'pyodbc',
         'pysword',
         'python-xlib; platform_system=="Linux"'
