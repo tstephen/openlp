@@ -42,7 +42,7 @@ except ImportError:
 
 log = logging.getLogger(__name__)
 
-PDF_CONTROLLER_FILETYPES = ['pdf', 'xps', 'oxps']
+PDF_CONTROLLER_FILETYPES = ['pdf', 'xps', 'oxps', 'epub', 'cbz', 'fb2']
 
 
 class PdfController(PresentationController):
@@ -128,7 +128,7 @@ class PdfController(PresentationController):
             elif program_type == 'mutool':
                 self.mutoolbin = program_path
         elif PYMUPDF_AVAILABLE:
-            self.also_supports = ['xps', 'oxps']
+            self.also_supports = ['xps', 'oxps', 'epub', 'cbz', 'fb2']
             return True
         else:
             # Fallback to autodetection
@@ -156,7 +156,7 @@ class PdfController(PresentationController):
                     elif (application_path / 'mutool').is_file():
                         self.mutoolbin = application_path / 'mutool'
         if self.mudrawbin or self.mutoolbin:
-            self.also_supports = ['xps', 'oxps']
+            self.also_supports = ['xps', 'oxps', 'epub', 'cbz', 'fb2']
             return True
         elif self.gsbin:
             return True
