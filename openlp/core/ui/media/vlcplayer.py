@@ -161,33 +161,35 @@ class VlcPlayer(MediaPlayer):
         :return:
         """
         vlc = get_vlc()
-        output_display.vlc_widget = QtWidgets.QFrame(output_display)
-        output_display.vlc_widget.setFrameStyle(QtWidgets.QFrame.NoFrame)
-        # creating a basic vlc instance
-        command_line_options = '--no-video-title-show'
-        if Settings().value('advanced/hide mouse') and live_display:
-            command_line_options += ' --mouse-hide-timeout=0'
-        output_display.vlc_instance = vlc.Instance(command_line_options)
-        # creating an empty vlc media player
-        output_display.vlc_media_player = output_display.vlc_instance.media_player_new()
-        output_display.vlc_widget.resize(output_display.size())
-        output_display.vlc_widget.raise_()
-        output_display.vlc_widget.hide()
-        # The media player has to be 'connected' to the QFrame.
-        # (otherwise a video would be displayed in it's own window)
-        # This is platform specific!
-        # You have to give the id of the QFrame (or similar object)
-        # to vlc, different platforms have different functions for this.
-        win_id = int(output_display.vlc_widget.winId())
-        if is_win():
-            output_display.vlc_media_player.set_hwnd(win_id)
-        elif is_macosx():
-            # We have to use 'set_nsobject' since Qt5 on OSX uses Cocoa
-            # framework and not the old Carbon.
-            output_display.vlc_media_player.set_nsobject(win_id)
-        else:
-            # for Linux/*BSD using the X Server
-            output_display.vlc_media_player.set_xwindow(win_id)
+        # Temporary workaround
+        if vlc:
+            output_display.vlc_widget = QtWidgets.QFrame(output_display)
+            output_display.vlc_widget.setFrameStyle(QtWidgets.QFrame.NoFrame)
+            # creating a basic vlc instance
+            command_line_options = '--no-video-title-show'
+            if Settings().value('advanced/hide mouse') and live_display:
+                command_line_options += ' --mouse-hide-timeout=0'
+            output_display.vlc_instance = vlc.Instance(command_line_options)
+            # creating an empty vlc media player
+            output_display.vlc_media_player = output_display.vlc_instance.media_player_new()
+            output_display.vlc_widget.resize(output_display.size())
+            output_display.vlc_widget.raise_()
+            output_display.vlc_widget.hide()
+            # The media player has to be 'connected' to the QFrame.
+            # (otherwise a video would be displayed in it's own window)
+            # This is platform specific!
+            # You have to give the id of the QFrame (or similar object)
+            # to vlc, different platforms have different functions for this.
+            win_id = int(output_display.vlc_widget.winId())
+            if is_win():
+                output_display.vlc_media_player.set_hwnd(win_id)
+            elif is_macosx():
+                # We have to use 'set_nsobject' since Qt5 on OSX uses Cocoa
+                # framework and not the old Carbon.
+                output_display.vlc_media_player.set_nsobject(win_id)
+            else:
+                # for Linux/*BSD using the X Server
+                output_display.vlc_media_player.set_xwindow(win_id)
         self.has_own_widget = True
 
     def check_available(self):
