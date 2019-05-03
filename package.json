@@ -18,7 +18,7 @@
     "test": "karma start"
   },
   "author": "OpenLP Developers",
-  "license": "GPL-2.0",
+  "license": "GPL-3.0-or-later",
   "devDependencies": {
     "karma-log-reporter": "0.0.4"
   }

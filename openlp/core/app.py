@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2019 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 
 """
 The :mod:`core` module provides all core application functions
@@ -30,6 +30,7 @@ import argparse
 import logging
 import sys
 import time
+import os
 from datetime import datetime
 from traceback import format_exception
 
@@ -40,7 +41,7 @@ from openlp.core.common import is_macosx, is_win
 from openlp.core.common.applocation import AppLocation
 from openlp.core.loader import loader
 from openlp.core.common.i18n import LanguageManager, UiStrings, translate
-from openlp.core.common.path import copytree, create_paths
+from openlp.core.common.path import copytree, create_paths, Path
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.display.screens import ScreenList
@@ -301,6 +302,9 @@ def parse_options(args=None):
                         help='Set logging to LEVEL level. Valid values are "debug", "info", "warning".')
     parser.add_argument('-p', '--portable', dest='portable', action='store_true',
                         help='Specify if this should be run as a portable app, ')
+    parser.add_argument('-pp', '--portable-path', dest='portablepath', default=None,
+                        help='Specify the path of the portable data, defaults to "{dir_name}".'.format(
+                            dir_name=os.path.join('<AppDir>', '..', '..')))
     parser.add_argument('-w', '--no-web-server', dest='no_web_server', action='store_true',
                         help='Turn off the Web and Socket Server ')
     parser.add_argument('rargs', nargs='?', default=[])
@@ -356,7 +360,14 @@ def main(args=None):
         application.setApplicationName('OpenLPPortable')
         Settings.setDefaultFormat(Settings.IniFormat)
         # Get location OpenLPPortable.ini
-        portable_path = (AppLocation.get_directory(AppLocation.AppDir) / '..' / '..').resolve()
+        if args.portablepath:
+            if os.path.isabs(args.portablepath):
+                portable_path = Path(args.portablepath)
+            else:
+                portable_path = AppLocation.get_directory(AppLocation.AppDir) / '..' / args.portablepath
+        else:
+            portable_path = AppLocation.get_directory(AppLocation.AppDir) / '..' / '..'
+        portable_path = portable_path.resolve()
         data_path = portable_path / 'Data'
         set_up_logging(portable_path / 'Other')
         log.info('Running portable')
