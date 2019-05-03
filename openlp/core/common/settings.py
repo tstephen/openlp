@@ -180,10 +180,8 @@ class Settings(QtCore.QSettings):
         'api/thumbnails': True,
         'crashreport/last directory': None,
         'formattingTags/html_tags': '',
-        'core/audio repeat list': False,
         'core/auto open': False,
         'core/auto preview': False,
-        'core/audio start paused': True,
         'core/auto unblank': False,
         'core/click live slide to unblank': False,
         'core/blank warning': False,
@@ -318,7 +316,9 @@ class Settings(QtCore.QSettings):
         ('bibles/proxy username', '', []),
         ('bibles/proxy password', '', []),
         ('media/players', '', []),
-        ('media/override player', '', [])
+        ('media/override player', '', []),
+        ('core/audio start paused', '', []),
+        ('core/audio repeat list', '', [])
     ]
 
     @staticmethod

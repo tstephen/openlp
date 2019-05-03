@@ -71,11 +71,8 @@ class MediaTab(SettingsTab):
         self.stream_media_layout = QtWidgets.QHBoxLayout(self.stream_media_group_box)
         self.stream_media_layout.setObjectName('stream_media_layout')
         self.stream_media_layout.setContentsMargins(0, 0, 0, 0)
-        self.stream_edit = QtWidgets.QPlainTextEdit(self)
+        self.stream_edit = QtWidgets.QLabel(self)
         self.stream_media_layout.addWidget(self.stream_edit)
-        self.browse_button = QtWidgets.QToolButton(self)
-        self.browse_button.setIcon(UiIcons().undo)
-        self.stream_media_layout.addWidget(self.browse_button)
         self.left_layout.addWidget(self.stream_media_group_box)
         self.vlc_additions_group_box = QtWidgets.QGroupBox(self.left_column)
         self.vlc_additions_group_box.setObjectName('vlc_additions_group_box')
@@ -84,12 +81,10 @@ class MediaTab(SettingsTab):
         self.vlc_additions_layout.setContentsMargins(0, 0, 0, 0)
         self.vlc_additions_edit = QtWidgets.QPlainTextEdit(self)
         self.vlc_additions_layout.addWidget(self.vlc_additions_edit)
-        self.vlc_additions_layout.addWidget(self.browse_button)
         self.left_layout.addWidget(self.vlc_additions_group_box)
         self.left_layout.addStretch()
         self.right_layout.addStretch()
         # # Signals and slots
-        self.browse_button.clicked.connect(self.on_revert)
 
     def retranslate_ui(self):
         """
@@ -105,14 +100,14 @@ class MediaTab(SettingsTab):
         Load the settings
         """
         self.auto_start_check_box.setChecked(Settings().value(self.settings_section + '/media auto start'))
-        self.stream_edit.setPlainText(Settings().value(self.settings_section + '/stream command'))
-        if not self.stream_edit.toPlainText():
+        self.stream_edit.setText(Settings().value(self.settings_section + '/stream command'))
+        if not self.stream_edit.text():
             if is_linux:
-                self.stream_edit.setPlainText(LINUX_STREAM)
+                self.stream_edit.setText(LINUX_STREAM)
             elif is_win:
-                self.stream_edit.setPlainText(WIN_STREAM)
+                self.stream_edit.setText(WIN_STREAM)
             else:
-                self.stream_edit.setPlainText(OSX_STREAM)
+                self.stream_edit.setText(OSX_STREAM)
         self.vlc_additions_edit.setPlainText(Settings().value(self.settings_section + '/vlc additions'))
         if Settings().value('advanced/experimental'):
             for cam in QCameraInfo.availableCameras():
@@ -128,7 +123,7 @@ class MediaTab(SettingsTab):
         setting_key = self.settings_section + '/media auto start'
         if Settings().value(setting_key) != self.auto_start_check_box.checkState():
             Settings().setValue(setting_key, self.auto_start_check_box.checkState())
-        Settings().setValue(self.settings_section + '/stream command', self.stream_edit.toPlainText())
+        Settings().setValue(self.settings_section + '/stream command', self.stream_edit.text())
         Settings().setValue(self.settings_section + '/vlc additions', self.vlc_additions_edit.toPlainText())
 
     def post_set_up(self, post_update=False):
