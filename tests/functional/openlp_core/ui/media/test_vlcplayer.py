@@ -151,7 +151,7 @@ class TestVLCPlayer(TestCase, TestMixin):
         assert mocked_output_display.vlc_widget == mocked_qframe
         mocked_qframe.setFrameStyle.assert_called_with(1)
         mocked_settings.value.assert_any_call('advanced/hide mouse')
-        mocked_settings.value.assert_any_call('media/vlc additions')
+        mocked_settings.value.assert_any_call('media/vlc arguments')
         mocked_vlc.Instance.assert_called_with('--no-video-title-show ')
         assert mocked_output_display.vlc_instance == mocked_instance
         mocked_instance.media_player_new.assert_called_with()

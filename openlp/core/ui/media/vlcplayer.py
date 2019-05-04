@@ -167,8 +167,8 @@ class VlcPlayer(MediaPlayer):
         command_line_options = '--no-video-title-show '
         if Settings().value('advanced/hide mouse') and live_display:
             command_line_options += '--mouse-hide-timeout=0 '
-        if Settings().value('media/vlc additions'):
-            command_line_options += Settings().value('media/vlc additions')
+        if Settings().value('media/vlc arguments'):
+            command_line_options += Settings().value('media/vlc arguments')
         output_display.vlc_instance = vlc.Instance(command_line_options)
         # creating an empty vlc media player
         output_display.vlc_media_player = output_display.vlc_instance.media_player_new()

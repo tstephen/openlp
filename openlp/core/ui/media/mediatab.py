@@ -74,14 +74,14 @@ class MediaTab(SettingsTab):
         self.stream_edit = QtWidgets.QLabel(self)
         self.stream_media_layout.addWidget(self.stream_edit)
         self.left_layout.addWidget(self.stream_media_group_box)
-        self.vlc_additions_group_box = QtWidgets.QGroupBox(self.left_column)
-        self.vlc_additions_group_box.setObjectName('vlc_additions_group_box')
-        self.vlc_additions_layout = QtWidgets.QHBoxLayout(self.vlc_additions_group_box)
-        self.vlc_additions_layout.setObjectName('vlc_additions_layout')
-        self.vlc_additions_layout.setContentsMargins(0, 0, 0, 0)
-        self.vlc_additions_edit = QtWidgets.QPlainTextEdit(self)
-        self.vlc_additions_layout.addWidget(self.vlc_additions_edit)
-        self.left_layout.addWidget(self.vlc_additions_group_box)
+        self.vlc_arguments_group_box = QtWidgets.QGroupBox(self.left_column)
+        self.vlc_arguments_group_box.setObjectName('vlc_arguments_group_box')
+        self.vlc_arguments_layout = QtWidgets.QHBoxLayout(self.vlc_arguments_group_box)
+        self.vlc_arguments_layout.setObjectName('vlc_arguments_layout')
+        self.vlc_arguments_layout.setContentsMargins(0, 0, 0, 0)
+        self.vlc_arguments_edit = QtWidgets.QPlainTextEdit(self)
+        self.vlc_arguments_layout.addWidget(self.vlc_arguments_edit)
+        self.left_layout.addWidget(self.vlc_arguments_group_box)
         self.left_layout.addStretch()
         self.right_layout.addStretch()
         # # Signals and slots
@@ -92,7 +92,7 @@ class MediaTab(SettingsTab):
         """
         self.live_media_group_box.setTitle(translate('MediaPlugin.MediaTab', 'Live Media'))
         self.stream_media_group_box.setTitle(translate('MediaPlugin.MediaTab', 'Stream Media Command'))
-        self.vlc_additions_group_box.setTitle(translate('MediaPlugin.MediaTab', 'VLC additional commands'))
+        self.vlc_arguments_group_box.setTitle(translate('MediaPlugin.MediaTab', 'VLC arguments'))
         self.auto_start_check_box.setText(translate('MediaPlugin.MediaTab', 'Start Live items automatically'))
 
     def load(self):
@@ -108,7 +108,7 @@ class MediaTab(SettingsTab):
                 self.stream_edit.setText(WIN_STREAM)
             else:
                 self.stream_edit.setText(OSX_STREAM)
-        self.vlc_additions_edit.setPlainText(Settings().value(self.settings_section + '/vlc additions'))
+        self.vlc_arguments_edit.setPlainText(Settings().value(self.settings_section + '/vlc arguments'))
         if Settings().value('advanced/experimental'):
             for cam in QCameraInfo.availableCameras():
                 log.debug(cam.deviceName())
@@ -124,7 +124,7 @@ class MediaTab(SettingsTab):
         if Settings().value(setting_key) != self.auto_start_check_box.checkState():
             Settings().setValue(setting_key, self.auto_start_check_box.checkState())
         Settings().setValue(self.settings_section + '/stream command', self.stream_edit.text())
-        Settings().setValue(self.settings_section + '/vlc additions', self.vlc_additions_edit.toPlainText())
+        Settings().setValue(self.settings_section + '/vlc arguments', self.vlc_arguments_edit.toPlainText())
 
     def post_set_up(self, post_update=False):
         """
