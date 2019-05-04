@@ -333,7 +333,7 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
             self.validate_and_load(file_paths)
         self.application.set_normal_cursor()
 
-    def load_file(self, data):
+    def handle_mime_data(self, data):
         """
         Turn file from Drag and Drop into an array so the Validate code can run it.
 
@@ -379,11 +379,11 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
         duplicates_found = False
         files_added = False
         for file_path in file_paths:
-            if path_to_str(file_path) in full_list:
+            if file_path in full_list:
                 duplicates_found = True
             else:
                 files_added = True
-                full_list.append(path_to_str(file_path))
+                full_list.append(file_path)
         if full_list and files_added:
             if target_group is None:
                 self.list_view.clear()
@@ -416,8 +416,8 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
         file_paths = []
         for index in range(self.list_view.count()):
             list_item = self.list_view.item(index)
-            filename = list_item.data(QtCore.Qt.UserRole)
-            file_paths.append(str_to_path(filename))
+            file_path = list_item.data(QtCore.Qt.UserRole)
+            file_paths.append(file_path)
         return file_paths
 
     def load_list(self, load_list, target_group):

@@ -463,8 +463,8 @@ def get_file_encoding(file_path):
     Utility function to incrementally detect the file encoding.
 
     :param openlp.core.common.path.Path file_path: Filename for the file to determine the encoding for.
-    :return: A dict with the keys 'encoding' and 'confidence'
-    :rtype: dict[str, float]
+    :return: The name of the encoding detected
+    :rtype: str
     """
     detector = UniversalDetector()
     try:
@@ -477,7 +477,7 @@ def get_file_encoding(file_path):
     except OSError:
         log.exception('Error detecting file encoding')
     finally:
-        return detector.close()
+        return detector.close()['encoding']
 
 
 def normalize_str(irregular_string):
