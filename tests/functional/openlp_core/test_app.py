@@ -138,7 +138,7 @@ def test_parse_options_file():
     assert args.loglevel == 'warning', 'The log level should be set to warning'
     assert args.no_error_form is False, 'The no_error_form should be set to False'
     assert args.portable is False, 'The portable flag should be set to false'
-    assert args.rargs == 'dummy_temp', 'The service file should not be blank'
+    assert args.rargs == ['dummy_temp'], 'The service file should not be blank'
 
 
 def test_parse_options_file_and_debug():
@@ -155,7 +155,7 @@ def test_parse_options_file_and_debug():
     assert args.loglevel == ' debug', 'The log level should be set to debug'
     assert args.no_error_form is False, 'The no_error_form should be set to False'
     assert args.portable is False, 'The portable flag should be set to false'
-    assert args.rargs == 'dummy_temp', 'The service file should not be blank'
+    assert args.rargs == ['dummy_temp'], 'The service file should not be blank'
 
 
 @skip('Figure out why this is causing a segfault')

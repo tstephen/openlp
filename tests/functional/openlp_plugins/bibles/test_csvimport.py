@@ -136,8 +136,7 @@ class TestCSVImport(TestCase):
         mocked_enter_file = MagicMock()
         mocked_csv_file.open.return_value.__enter__.return_value = mocked_enter_file
 
-        with patch('openlp.plugins.bibles.lib.importers.csvbible.get_file_encoding',
-                   return_value={'encoding': 'utf-8', 'confidence': 0.99}), \
+        with patch('openlp.plugins.bibles.lib.importers.csvbible.get_file_encoding', return_value='utf-8'), \
                 patch('openlp.plugins.bibles.lib.importers.csvbible.csv.reader',
                       return_value=iter(test_data)) as mocked_reader:
 

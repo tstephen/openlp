@@ -1356,6 +1356,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
     def open_cmd_line_files(self, args):
         """
         Open files passed in through command line arguments
+
+        :param list[str] args: List of remaining positionall arguments
         """
         for arg in args:
             file_name = os.path.expanduser(arg)
