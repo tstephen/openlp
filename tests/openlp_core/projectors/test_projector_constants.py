@@ -40,11 +40,12 @@ class TestProjectorConstants(TestCase):
         missing_str = []
 
         # GIVEN: List of defined E_* and S_* items defined in constants
+
         for item in constants.__dict__:
             if item.startswith('E_') or item.startswith('S_'):
                 check.append(item)
 
-        # WHEN: Verify defined list against STATUS_STR
+        # WHEN: Verify items were addeded to check
         for item in check:
             if constants.__dict__[item] not in STATUS_CODE:
                 missing_str.append(item)
