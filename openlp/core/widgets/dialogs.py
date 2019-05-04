@@ -35,7 +35,7 @@ class FileDialog(QtWidgets.QFileDialog):
         :type caption: str
         :type directory: openlp.core.common.path.Path
         :type options: QtWidgets.QFileDialog.Options
-        :rtype: tuple[openlp.core.common.path.Path, str]
+        :rtype: openlp.core.common.path.Path
         """
         args, kwargs = replace_params(args, kwargs, ((2, 'directory', path_to_str),))
 

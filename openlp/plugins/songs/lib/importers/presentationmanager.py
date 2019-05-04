@@ -48,7 +48,7 @@ class PresentationManagerImport(SongImport):
                 tree = etree.parse(str(file_path), parser=etree.XMLParser(recover=True))
             except etree.XMLSyntaxError:
                 # Try to detect encoding and use it
-                encoding = get_file_encoding(file_path)['encoding']
+                encoding = get_file_encoding(file_path)
                 # Open file with detected encoding and remove encoding declaration
                 text = file_path.read_text(encoding=encoding)
                 text = re.sub(r'.+\?>\n', '', text)

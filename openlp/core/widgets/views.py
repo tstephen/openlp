@@ -39,7 +39,7 @@ def handle_mime_data_urls(mime_data):
     """
     Process the data from a drag and drop operation.
 
-    :param PyQt5.QtCore.QMimeData mime_data: The mime data from the drag and drop opperation.
+    :param QtCore.QMimeData mime_data: The mime data from the drag and drop opperation.
     :return: A list of file paths that were dropped
     :rtype: list[openlp.core.common.path.Path]
     """
@@ -297,7 +297,7 @@ class ListWidgetWithDnD(QtWidgets.QListWidget):
         """
         self.setAcceptDrops(True)
         self.setDragDropMode(QtWidgets.QAbstractItemView.DragDrop)
-        Registry().register_function(('%s_dnd' % self.mime_data_text), self.parent().load_file)
+        Registry().register_function(('%s_dnd' % self.mime_data_text), self.parent().handle_mime_data)
 
     def clear(self, search_while_typing=False):
         """
@@ -412,7 +412,7 @@ class TreeWidgetWithDnD(QtWidgets.QTreeWidget):
         """
         self.setAcceptDrops(True)
         self.setDragDropMode(QtWidgets.QAbstractItemView.DragDrop)
-        Registry().register_function(('%s_dnd' % self.mime_data_text), self.parent().load_file)
+        Registry().register_function(('%s_dnd' % self.mime_data_text), self.parent().handle_mime_data)
         Registry().register_function(('%s_dnd_internal' % self.mime_data_text), self.parent().dnd_move_internal)
 
     def mouseMoveEvent(self, event):

@@ -102,7 +102,7 @@ class CSVBible(BibleImport):
         :rtype: list[namedtuple]
         """
         try:
-            encoding = get_file_encoding(file_path)['encoding']
+            encoding = get_file_encoding(file_path)
             with file_path.open('r', encoding=encoding, newline='') as csv_file:
                 csv_reader = csv.reader(csv_file, delimiter=',', quotechar='"')
                 return [results_tuple(*line) for line in csv_reader]

@@ -134,8 +134,8 @@ def extension_loader(glob_pattern, excluded_files=[]):
             importlib.import_module(module_name)
         except (ImportError, OSError):
             # On some platforms importing vlc.py might cause OSError exceptions. (e.g. Mac OS X)
-            log.warning('Failed to import {module_name} on path {extension_path}'
-                        .format(module_name=module_name, extension_path=extension_path))
+            log.exception('Failed to import {module_name} on path {extension_path}'
+                          .format(module_name=module_name, extension_path=extension_path))
 
 
 def path_to_module(path):

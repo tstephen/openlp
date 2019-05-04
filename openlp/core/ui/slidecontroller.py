@@ -112,7 +112,7 @@ class MediaSlider(QtWidgets.QSlider):
 
 class InfoLabel(QtWidgets.QLabel):
     """
-    InfoLabel is a subclassed QLabel. Created to provide the ablilty to add a ellipsis if the text is cut off. Original
+    InfoLabel is a subclassed QLabel. Created to provide the ability to add a ellipsis if the text is cut off. Original
     source: https://stackoverflow.com/questions/11446478/pyside-pyqt-truncate-text-in-qlabel-based-on-minimumsize
     """
 
