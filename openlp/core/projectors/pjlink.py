@@ -52,14 +52,15 @@ from copy import copy
 
 from PyQt5 import QtCore, QtNetwork
 
+from openlp.core.common import qmd5_hash
 from openlp.core.common.i18n import translate
 from openlp.core.common.settings import Settings
 from openlp.core.projectors.pjlinkcommands import process_command
-from openlp.core.projectors.constants import CONNECTION_ERRORS, E_CONNECTION_REFUSED, E_GENERAL, \
+from openlp.core.projectors.constants import CONNECTION_ERRORS, E_AUTHENTICATION, E_CONNECTION_REFUSED, E_GENERAL, \
     E_NETWORK, E_NOT_CONNECTED, E_SOCKET_TIMEOUT, PJLINK_CLASS, \
     PJLINK_MAX_PACKET, PJLINK_PORT, PJLINK_PREFIX, PJLINK_SUFFIX, \
-    PJLINK_VALID_CMD, PROJECTOR_STATE, QSOCKET_STATE, S_CONNECTED, S_CONNECTING, S_NOT_CONNECTED, S_OFF, S_OK, S_ON, \
-    STATUS_CODE, STATUS_MSG
+    PJLINK_VALID_CMD, PROJECTOR_STATE, QSOCKET_STATE, S_AUTHENTICATE, S_CONNECT, S_CONNECTED, S_CONNECTING, \
+    S_DATA_OK, S_NOT_CONNECTED, S_OFF, S_OK, S_ON, STATUS_CODE, STATUS_MSG
 
 
 log = logging.getLogger(__name__)
@@ -565,21 +566,10 @@ class PJLink(QtNetwork.QTcpSocket):
         #       V = PJLink class or version
         #       C = PJLink command
         version, cmd = header[1], header[2:].upper()
-        log.debug('({ip}) get_data() version="{version}" cmd="{cmd}"'.format(ip=self.entry.name,
-                                                                             version=version, cmd=cmd))
-        # TODO: Below commented for now since it seems to cause issues with testing some invalid data.
-        #       Revisit after more refactoring is finished.
-        '''
-        try:
-            version, cmd = header[1], header[2:].upper()
-            log.debug('({ip}) get_data() version="{version}" cmd="{cmd}"'.format(ip=self.entry.name,
-                                                                                 version=version, cmd=cmd))
-        except ValueError as e:
-            self.change_status(E_INVALID_DATA)
-            log.warning('({ip}) get_data(): Received data: "{data}"'.format(ip=self.entry.name, data=data_in))
-            self._trash_buffer('get_data(): Expected header + command + data')
-            return self.receive_data_signal()
-        '''
+        log.debug('({ip}) get_data() version="{version}" cmd="{cmd}" data="{data}"'.format(ip=self.entry.name,
+                                                                                           version=version,
+                                                                                           cmd=cmd,
+                                                                                           data=data))
         if cmd not in PJLINK_VALID_CMD:
             self._trash_buffer('get_data(): Invalid packet - unknown command "{data}"'.format(data=cmd))
             return self.receive_data_signal()
@@ -590,7 +580,38 @@ class PJLink(QtNetwork.QTcpSocket):
             if not ignore_class:
                 log.warning('({ip}) get_data(): Projector returned class reply higher '
                             'than projector stated class'.format(ip=self.entry.name))
-        process_command(self, cmd, data)
+                return self.receive_data_signal()
+
+        chk = process_command(self, cmd, data)
+        if chk is None:
+            # Command processed normally and not initial connection, so skip other checks
+            return self.receive_data_signal()
+        # PJLink initial connection checks
+        elif chk == S_DATA_OK:
+            # Previous command returned OK
+            log.debug('({ip}) OK returned - resending command'.format(ip=self.entry.name))
+            self.send_command(cmd=cmd, priority=True)
+        elif chk == S_CONNECT:
+            # Normal connection
+            log.debug('({ip}) Connecting normal'.format(ip=self.entry.name))
+            self.change_status(S_CONNECTED)
+            self.send_command(cmd='CLSS', priority=True)
+            self.readyRead.connect(self.get_socket)
+        elif chk == S_AUTHENTICATE:
+            # Connection with pin
+            log.debug('({ip}) Connecting with pin'.format(ip=self.entry.name))
+            data_hash = str(qmd5_hash(salt=chk[1].encode('utf-8'), data=self.pin.encode('utf-8')),
+                            encoding='ascii')
+            self.change_status(S_CONNECTED)
+            self.readyRead.connect(self.get_socket)
+            self.send_command(cmd='CLSS', salt=data_hash, priority=True)
+        elif chk == E_AUTHENTICATION:
+            # Projector did not like our pin
+            log.warning('({ip}) Failed authentication - disconnecting'.format(ip=self.entry.name))
+            self.disconnect_from_host()
+            self.projectorAuthentication.emit(self.entry.name)
+            self.change_status(status=E_AUTHENTICATION)
+
         return self.receive_data_signal()
 
     @QtCore.pyqtSlot(QtNetwork.QAbstractSocket.SocketError)
@@ -631,7 +652,9 @@ class PJLink(QtNetwork.QTcpSocket):
         :param salt: Optional  salt for md5 hash initial authentication
         :param priority: Option to send packet now rather than queue it up
         """
-        if QSOCKET_STATE[self.state()] != QSOCKET_STATE[S_CONNECTED]:
+        log.debug('({ip}) send_command(cmd="{cmd}" opts="{opts}" salt="{salt}" '
+                  'priority={pri}'.format(ip=self.entry.name, cmd=cmd, opts=opts, salt=salt, pri=priority))
+        if QSOCKET_STATE[self.state()] != S_CONNECTED:
             log.warning('({ip}) send_command(): Not connected - returning'.format(ip=self.entry.name))
             return self.reset_information()
         if cmd not in PJLINK_VALID_CMD:
@@ -640,11 +663,11 @@ class PJLink(QtNetwork.QTcpSocket):
                 # Just in case there's already something to send
                 return self._send_command()
             return
-        log.debug('({ip}) send_command(): Building cmd="{command}" opts="{data}"{salt}'.format(ip=self.entry.name,
-                                                                                               command=cmd,
-                                                                                               data=opts,
-                                                                                               salt='' if salt is None
-                                                                                               else ' with hash'))
+        log.debug('({ip}) send_command(): Building cmd="{command}" opts="{data}" '
+                  '{salt}'.format(ip=self.entry.name,
+                                  command=cmd,
+                                  data=opts,
+                                  salt='' if salt is None else 'with hash'))
         # Until we absolutely have to start doing version checks, use the default
         # for PJLink class
         header = PJLINK_HEADER.format(linkclass=PJLINK_VALID_CMD[cmd]['default'])

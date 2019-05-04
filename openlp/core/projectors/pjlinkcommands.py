@@ -30,14 +30,12 @@ NOTE: PJLink Class (version) checks are handled in the respective PJLink/PJLinkU
 import logging
 import re
 
-from openlp.core.common import qmd5_hash
-
 from openlp.core.common.i18n import translate
 from openlp.core.common.settings import Settings
 
 from openlp.core.projectors.constants import E_AUTHENTICATION, PJLINK_DEFAULT_CODES, PJLINK_ERRORS, \
-    PJLINK_ERST_DATA, PJLINK_ERST_STATUS, PJLINK_POWR_STATUS, S_CONNECTED, S_OFF, S_OK, S_ON, S_STANDBY, \
-    STATUS_MSG
+    PJLINK_ERST_DATA, PJLINK_ERST_STATUS, PJLINK_POWR_STATUS, S_AUTHENTICATE, S_CONNECT, S_DATA_OK, S_OFF, S_OK, S_ON, \
+    S_STANDBY, STATUS_MSG
 
 log = logging.getLogger(__name__)
 log.debug('Loading pjlinkcommands')
@@ -68,19 +66,18 @@ def process_command(projector, cmd, data):
     elif _data == 'OK':
         log.debug('({ip}) Command "{cmd}" returned OK'.format(ip=projector.entry.name, cmd=cmd))
         # A command returned successfully, so do a query on command to verify status
-        return projector.send_command(cmd=cmd, priority=True)
+        return S_DATA_OK
+
     elif _data in PJLINK_ERRORS:
         # Oops - projector error
         log.error('({ip}) {cmd}: {err}'.format(ip=projector.entry.name,
                                                cmd=cmd,
                                                err=STATUS_MSG[PJLINK_ERRORS[_data]]))
-        if PJLINK_ERRORS[_data] == E_AUTHENTICATION:
-            projector.disconnect_from_host()
-            projector.projectorAuthentication.emit(projector.name)
-            return projector.change_status(status=E_AUTHENTICATION)
+        return PJLINK_ERRORS[_data]
+
     # Command checks already passed
     log.debug('({ip}) Calling function for {cmd}'.format(ip=projector.entry.name, cmd=cmd))
-    pjlink_functions[cmd](projector=projector, data=data)
+    return pjlink_functions[cmd](projector=projector, data=data)
 
 
 def process_ackn(projector, data):
@@ -376,35 +373,28 @@ def process_pjlink(projector, data):
     if len(chk[0]) != 1:
         # Invalid - after splitting, first field should be 1 character, either '0' or '1' only
         log.error('({ip}) Invalid initial authentication scheme - aborting'.format(ip=projector.entry.name))
-        return projector.disconnect_from_host()
+        return E_AUTHENTICATION
     elif chk[0] == '0':
         # Normal connection no authentication
         if len(chk) > 1:
             # Invalid data - there should be nothing after a normal authentication scheme
             log.error('({ip}) Normal connection with extra information - aborting'.format(ip=projector.entry.name))
-            return projector.disconnect_from_host()
+            return E_AUTHENTICATION
         elif projector.pin:
             log.error('({ip}) Normal connection but PIN set - aborting'.format(ip=projector.entry.name))
-            return projector.disconnect_from_host()
-        else:
-            data_hash = None
+            return E_AUTHENTICATION
+        log.debug('({ip}) PJLINK: Returning S_CONNECT'.format(ip=projector.entry.name))
+        return S_CONNECT
     elif chk[0] == '1':
         if len(chk) < 2:
             # Not enough information for authenticated connection
             log.error('({ip}) Authenticated connection but not enough info - aborting'.format(ip=projector.entry.name))
-            return projector.disconnect_from_host()
+            return E_AUTHENTICATION
         elif not projector.pin:
             log.error('({ip}) Authenticate connection but no PIN - aborting'.format(ip=projector.entry.name))
-            return projector.disconnect_from_host()
-        else:
-            data_hash = str(qmd5_hash(salt=chk[1].encode('utf-8'), data=projector.pin.encode('utf-8')),
-                            encoding='ascii')
-    # Passed basic checks, so start connection
-    projector.readyRead.connect(projector.get_socket)
-    projector.change_status(S_CONNECTED)
-    log.debug('({ip}) process_pjlink(): Sending "CLSS" initial command'.format(ip=projector.entry.name))
-    # Since this is an initial connection, make it a priority just in case
-    return projector.send_command(cmd="CLSS", salt=data_hash, priority=True)
+            return E_AUTHENTICATION
+        log.debug('({ip}) PJLINK: Returning S_AUTHENTICATE'.format(ip=projector.entry.name))
+        return S_AUTHENTICATE
 
 
 def process_powr(projector, data):
