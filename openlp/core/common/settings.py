@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2019 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 This class contains the core default settings.
 """
@@ -129,6 +129,9 @@ class Settings(QtCore.QSettings):
         ``advanced/slide limits`` to ``SlideLimits.Wrap``. **NOTE**, this means that the rules have to cover all cases!
         So, if the type of the old value is bool, then there must be two rules.
     """
+    on_monitor_default = True
+    if log.isEnabledFor(logging.DEBUG):
+        on_monitor_default = False
     __default_settings__ = {
         'settings/version': 0,
         'advanced/add page break': False,
@@ -185,6 +188,7 @@ class Settings(QtCore.QSettings):
         'core/click live slide to unblank': False,
         'core/blank warning': False,
         'core/ccli number': '',
+        'core/experimental': False,
         'core/has run wizard': False,
         'core/language': '[en]',
         'core/last version test': '',
@@ -202,13 +206,13 @@ class Settings(QtCore.QSettings):
         'core/view mode': 'default',
         # The other display settings (display position and dimensions) are defined in the ScreenList class due to a
         # circular dependency.
-        'core/display on monitor': True,
+        'core/display on monitor': on_monitor_default,
         'core/override position': False,
         'core/monitor': {},
         'core/application version': '0.0',
         'images/background color': '#000000',
-        'media/players': 'system,webkit',
-        'media/override player': QtCore.Qt.Unchecked,
+        'media/media auto start': QtCore.Qt.Unchecked,
+        'media/stream command': '',
         'remotes/download version': '0.0',
         'players/background color': '#000000',
         'servicemanager/last directory': None,
@@ -311,7 +315,9 @@ class Settings(QtCore.QSettings):
         ('bibles/proxy name', '', []),  # Just remove these bible proxy settings. They weren't used in 2.4!
         ('bibles/proxy address', '', []),
         ('bibles/proxy username', '', []),
-        ('bibles/proxy password', '', [])
+        ('bibles/proxy password', '', []),
+        ('media/players', '', []),
+        ('media/override player', '', [])
     ]
 
     @staticmethod

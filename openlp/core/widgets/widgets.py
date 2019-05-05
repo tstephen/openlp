@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2019 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 The :mod:`~openlp.core.widgets.widgets` module contains custom widgets used in OpenLP
 """
@@ -148,6 +148,34 @@ class ProxyWidget(QtWidgets.QGroupBox):
         settings.setValue('advanced/proxy https', self.https_edit.text())
         settings.setValue('advanced/proxy username', self.username_edit.text())
         settings.setValue('advanced/proxy password', self.password_edit.text())
+
+
+class ProxyDialog(QtWidgets.QDialog):
+    """
+    A basic dialog to show proxy settingd
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.layout = QtWidgets.QVBoxLayout(self)
+        self.proxy_widget = ProxyWidget(self)
+        self.layout.addWidget(self.proxy_widget)
+        self.button_box = \
+            QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel, self)
+        self.layout.addWidget(self.button_box)
+        self.button_box.accepted.connect(self.accept)
+        self.button_box.rejected.connect(self.reject)
+
+    def accept(self):
+        """
+        Reimplement the the accept slot so that the ProxyWidget settings can be saved.
+        :rtype: None
+        """
+        self.proxy_widget.save()
+        super().accept()
+
+    def retranslate_ui(self):
+        self.proxy_widget.retranslate_ui()
+        self.setWindowTitle(translate('OpenLP.ProxyDialog', 'Proxy Server Settings'))
 
 
 class ScreenButton(QtWidgets.QPushButton):

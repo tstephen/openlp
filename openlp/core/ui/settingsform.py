@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2019 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 The :mod:`settingsform` provides a user interface for the OpenLP settings
 """
@@ -30,13 +30,14 @@ from openlp.core.state import State
 from openlp.core.api.tab import ApiTab
 from openlp.core.common.mixins import RegistryProperties
 from openlp.core.common.registry import Registry
+from openlp.core.common.settings import Settings
 from openlp.core.lib import build_icon
 from openlp.core.projectors.tab import ProjectorTab
 from openlp.core.ui.advancedtab import AdvancedTab
 from openlp.core.ui.generaltab import GeneralTab
 from openlp.core.ui.screenstab import ScreensTab
 from openlp.core.ui.themestab import ThemesTab
-# from openlp.core.ui.media.playertab import PlayerTab
+from openlp.core.ui.media.mediatab import MediaTab
 from openlp.core.ui.settingsdialog import Ui_SettingsDialog
 
 
@@ -78,8 +79,8 @@ class SettingsForm(QtWidgets.QDialog, Ui_SettingsDialog, RegistryProperties):
         self.insert_tab(self.advanced_tab)
         self.insert_tab(self.screens_tab)
         self.insert_tab(self.themes_tab)
-        self.insert_tab(self.advanced_tab)
-        # self.insert_tab(self.player_tab)
+        if Settings().value('core/experimental'):
+            self.insert_tab(self.player_tab)
         self.insert_tab(self.projector_tab)
         self.insert_tab(self.api_tab)
         for plugin in State().list_plugins():
@@ -160,15 +161,17 @@ class SettingsForm(QtWidgets.QDialog, Ui_SettingsDialog, RegistryProperties):
             self.themes_tab = ThemesTab(self)
             self.projector_tab = ProjectorTab(self)
             self.advanced_tab = AdvancedTab(self)
-            # self.player_tab = PlayerTab(self)
+            if Settings().value('core/experimental'):
+                self.player_tab = MediaTab(self)
             self.api_tab = ApiTab(self)
             self.screens_tab = ScreensTab(self)
         except Exception as e:
             print(e)
-        # Post setup
         self.general_tab.post_set_up()
         self.themes_tab.post_set_up()
         self.advanced_tab.post_set_up()
+        if Settings().value('core/experimental'):
+            self.player_tab.post_set_up()
         self.api_tab.post_set_up()
         for plugin in State().list_plugins():
             if plugin.settings_tab:

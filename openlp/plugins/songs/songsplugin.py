@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2019 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 The :mod:`~openlp.plugins.songs.songsplugin` module contains the Plugin class
 for the Songs plugin.
@@ -66,11 +66,8 @@ __default_settings__ = {
     'songs/add song from service': True,
     'songs/add songbook slide': False,
     'songs/display songbar': True,
-    'songs/display songbook': False,
-    'songs/display written by': True,
-    'songs/display copyright symbol': False,
-    'songs/last directory import': None,
-    'songs/last directory export': None,
+    'songs/last directory import': '',
+    'songs/last directory export': '',
     'songs/songselect username': '',
     'songs/songselect password': '',
     'songs/songselect searches': '',
@@ -78,6 +75,59 @@ __default_settings__ = {
     'songs/chord notation': 'english',  # Can be english, german or neo-latin
     'songs/mainview chords': False,
     'songs/disable chords import': False,
+    'songs/footer template': """\
+${title}<br/>
+
+%if authors_none:
+  <%
+    authors = ", ".join(authors_none)
+  %>
+  ${authors_none_label}:&nbsp;${authors}<br/>
+%endif
+
+%if authors_words_music:
+  <%
+    authors = ", ".join(authors_words_music)
+  %>
+  ${authors_words_music_label}:&nbsp;${authors}<br/>
+%endif
+
+%if authors_words:
+  <%
+    authors = ", ".join(authors_words)
+  %>
+  ${authors_words_label}:&nbsp;${authors}<br/>
+%endif
+
+%if authors_music:
+  <%
+    authors = ", ".join(authors_music)
+  %>
+  ${authors_music_label}:&nbsp;${authors}<br/>
+%endif
+
+%if authors_translation:
+  <%
+    authors = ", ".join(authors_translation)
+  %>
+  ${authors_translation_label}:&nbsp;${authors}<br/>
+%endif
+
+%if copyright:
+  &copy;&nbsp;${copyright}<br/>
+%endif
+
+%if songbook_entries:
+  <%
+    entries = ", ".join(songbook_entries)
+  %>
+  ${entries}<br/>
+%endif
+
+%if ccli_license:
+  ${ccli_license_label}&nbsp;${ccli_license}<br/>
+%endif
+""",
 }
 
 

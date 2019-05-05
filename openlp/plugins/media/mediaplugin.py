@@ -1,30 +1,28 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2019 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 The Media plugin
 """
 import logging
-
-from PyQt5 import QtCore
 
 from openlp.core.state import State
 from openlp.core.api.http import register_endpoint
@@ -34,7 +32,6 @@ from openlp.core.lib import build_icon
 from openlp.core.lib.plugin import Plugin, StringContent
 from openlp.plugins.media.endpoint import api_media_endpoint, media_endpoint
 from openlp.plugins.media.lib.mediaitem import MediaMediaItem
-from openlp.plugins.media.lib.mediatab import MediaTab
 
 
 log = logging.getLogger(__name__)
@@ -42,7 +39,6 @@ log = logging.getLogger(__name__)
 
 # Some settings starting with "media" are in core, because they are needed for core functionality.
 __default_settings__ = {
-    'media/media auto start': QtCore.Qt.Unchecked,
     'media/media files': [],
     'media/last directory': None
 }
@@ -77,15 +73,6 @@ class MediaPlugin(Plugin):
         Override app_startup() in order to do nothing
         """
         pass
-
-    def create_settings_tab(self, parent):
-        """
-        Create the settings Tab
-
-        :param parent:
-        """
-        visible_name = self.get_string(StringContent.VisibleName)
-        self.settings_tab = MediaTab(parent, self.name, visible_name['title'], self.icon_path)
 
     @staticmethod
     def about():

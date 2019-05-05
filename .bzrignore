@@ -15,6 +15,7 @@ documentation/build/html
 *.e4*
 *eric[1-9]project
 .git
+env
 # Git files
 .gitignore
 htmlcov

@@ -2,27 +2,26 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2019 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 
 import re
-import sys
 from subprocess import Popen, PIPE
 
 from setuptools import setup, find_packages
@@ -112,31 +111,6 @@ except Exception:
 finally:
     ver_file.close()
 
-requires = [
-    'alembic',
-    'appdirs',
-    'beautifulsoup4',
-    'chardet',
-    'lxml',
-    'Mako',
-    'pymediainfo >= 2.2',
-    'PyQt5 >= 5.5',
-    'QtAwesome',
-    'requests',
-    'SQLAlchemy >= 0.5',
-    'waitress',
-    'WebOb',
-    'websockets'
-]
-if sys.platform.startswith('win'):
-    requires.append('pywin32')
-elif sys.platform.startswith('darwin'):
-    requires.extend([
-        'pyobjc',
-        'pyobjc-framework-Cocoa'
-    ])
-elif sys.platform.startswith('linux'):
-    requires.append('dbus-python')
 
 setup(
     name='OpenLP',
@@ -154,7 +128,7 @@ using a computer and a data projector.""",
         'Environment :: X11 Applications :: Qt',
         'Intended Audience :: End Users/Desktop',
         'Intended Audience :: Religion',
-        'License :: OSI Approved :: GNU General Public License (GPL)',
+        'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
         'Natural Language :: Afrikaans',
         'Natural Language :: Dutch',
         'Natural Language :: English',
@@ -185,14 +159,36 @@ using a computer and a data projector.""",
     author='Raoul Snyman',
     author_email='raoulsnyman@openlp.org',
     url='https://openlp.org/',
-    license='GNU General Public License',
+    license='GPL-3.0-or-later',
     packages=find_packages(exclude=['ez_setup', 'tests*']),
     py_modules=['run_openlp'],
     include_package_data=True,
     zip_safe=False,
     python_requires='>=3.6',
-    install_requires=requires,
+    install_requires=[
+        'alembic',
+        'appdirs',
+        'beautifulsoup4',
+        'chardet',
+        'dbus-python; platform_system=="Linux"',
+        'lxml',
+        'Mako',
+        'pymediainfo >= 2.2',
+        'pyobjc; platform_system=="Darwin"',
+        'pyobjc-framework-Cocoa; platform_system=="Darwin"',
+        'PyQt5 >= 5.12',
+        'PyQtWebEngine',
+        'pywin32; platform_system=="Windows"',
+        'QtAwesome',
+        'requests',
+        'SQLAlchemy >= 0.5',
+        'waitress',
+        'WebOb',
+        'websockets'
+    ],
     extras_require={
+        'agpl-pdf': ['PyMuPDF'],
+        'darkstyle': ['QDarkStyle'],
         'mysql': ['mysql-connector-python'],
         'odbc': ['pyodbc'],
         'postgresql': ['psycopg2'],
@@ -202,7 +198,14 @@ using a computer and a data projector.""",
         'jenkins': ['python-jenkins'],
         'launchpad': ['launchpadlib']
     },
-    tests_require=['nose2', 'pylint', 'pyodbc', 'pysword'],
+    tests_require=[
+        'nose2',
+        'pylint',
+        'PyMuPDF',
+        'pyodbc',
+        'pysword',
+        'python-xlib; platform_system=="Linux"'
+    ],
     test_suite='nose2.collector.collector',
     entry_points={'gui_scripts': ['openlp = run_openlp:start']}
 )

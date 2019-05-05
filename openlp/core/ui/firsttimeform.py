@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2019 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 This module contains the first time wizard.
 """
@@ -32,7 +32,7 @@ from tempfile import gettempdir
 
 from PyQt5 import QtCore, QtWidgets
 
-from openlp.core.common import clean_button_text, trace_error_handler
+from openlp.core.common import trace_error_handler
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.httputils import DownloadWorker, download_file, get_url_file_size, get_web_page
 from openlp.core.common.i18n import translate
@@ -46,6 +46,7 @@ from openlp.core.lib.ui import critical_error_message_box
 from openlp.core.threading import get_thread_worker, is_thread_finished, run_thread
 from openlp.core.ui.firsttimewizard import FirstTimePage, UiFirstTimeWizard
 from openlp.core.ui.icons import UiIcons
+from openlp.core.widgets.widgets import ProxyDialog
 
 
 log = logging.getLogger(__name__)
@@ -91,7 +92,7 @@ class ThemeListWidgetItem(QtWidgets.QListWidgetItem):
 
 class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
     """
-    This is the Theme Import Wizard, which allows easy creation and editing of OpenLP themes.
+    This is the FirstTimeWizard, designed to help new users to get up and running quickly.
     """
     log.info('ThemeWizardForm loaded')
 
@@ -103,6 +104,7 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
         self.web_access = True
         self.web = ''
         self.setup_ui(self)
+        self.customButtonClicked.connect(self._on_custom_button_clicked)
         self.themes_list_widget.itemSelectionChanged.connect(self.on_themes_list_widget_selection_changed)
         self.themes_deselect_all_button.clicked.connect(self.themes_list_widget.clearSelection)
         self.themes_select_all_button.clicked.connect(self.themes_list_widget.selectAll)
@@ -111,13 +113,13 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
         """
         Returns the id of the next FirstTimePage to go to based on enabled plugins
         """
-        if FirstTimePage.ScreenConfig < self.currentId() < FirstTimePage.Songs and self.songs_check_box.isChecked():
+        if FirstTimePage.Download < self.currentId() < FirstTimePage.Songs and self.songs_check_box.isChecked():
             # If the songs plugin is enabled then go to the songs page
             return FirstTimePage.Songs
-        elif FirstTimePage.ScreenConfig < self.currentId() < FirstTimePage.Bibles and self.bible_check_box.isChecked():
+        elif FirstTimePage.Download < self.currentId() < FirstTimePage.Bibles and self.bible_check_box.isChecked():
             # Otherwise, if the Bibles plugin is enabled then go to the Bibles page
             return FirstTimePage.Bibles
-        elif FirstTimePage.ScreenConfig < self.currentId() < FirstTimePage.Themes:
+        elif FirstTimePage.Download < self.currentId() < FirstTimePage.Themes:
             # Otherwise, if the current page is somewhere between the Welcome and the Themes pages, go to the themes
             return FirstTimePage.Themes
         else:
@@ -133,9 +135,7 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
             if not self.web_access:
                 return FirstTimePage.NoInternet
             else:
-                return FirstTimePage.Plugins
-        elif self.currentId() == FirstTimePage.Plugins:
-            return self.get_next_page_id()
+                return FirstTimePage.Songs
         elif self.currentId() == FirstTimePage.Progress:
             return -1
         elif self.currentId() == FirstTimePage.NoInternet:
@@ -147,7 +147,7 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
         Run the wizard.
         """
         self.set_defaults()
-        return QtWidgets.QWizard.exec(self)
+        return super().exec()
 
     def initialize(self, screens):
         """
@@ -227,17 +227,13 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
         """
         self.restart()
         self.web = 'https://get.openlp.org/ftw/'
-        self.cancel_button.clicked.connect(self.on_cancel_button_clicked)
-        self.no_internet_finish_button.clicked.connect(self.on_no_internet_finish_button_clicked)
-        self.no_internet_cancel_button.clicked.connect(self.on_no_internet_cancel_button_clicked)
         self.currentIdChanged.connect(self.on_current_id_changed)
         Registry().register_function('config_screen_changed', self.screen_selection_widget.load)
-        self.no_internet_finish_button.setVisible(False)
-        self.no_internet_cancel_button.setVisible(False)
         # Check if this is a re-run of the wizard.
         self.has_run_wizard = Settings().value('core/has run wizard')
         create_paths(Path(gettempdir(), 'openlp'))
         self.theme_combo_box.clear()
+        self.button(QtWidgets.QWizard.CustomButton1).setVisible(False)
         if self.has_run_wizard:
             self.songs_check_box.setChecked(self.plugin_manager.get_plugin_by_name('songs').is_active())
             self.bible_check_box.setChecked(self.plugin_manager.get_plugin_by_name('bibles').is_active())
@@ -260,57 +256,92 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
         """
         Detects Page changes and updates as appropriate.
         """
-        # Keep track of the page we are at.  Triggering "Cancel" causes page_id to be a -1.
+        back_button = self.button(QtWidgets.QWizard.BackButton)
+        cancel_button = self.button(QtWidgets.QWizard.CancelButton)
+        internet_settings_button = self.button(QtWidgets.QWizard.CustomButton1)
+        next_button = self.button(QtWidgets.QWizard.NextButton)
+        back_button.setVisible(True)
+        next_button.setVisible(True)
+        internet_settings_button.setVisible(False)
         self.application.process_events()
-        if page_id != -1:
-            self.last_id = page_id
-        if page_id == FirstTimePage.Download:
-            self.back_button.setVisible(False)
-            self.next_button.setVisible(False)
-            # Set the no internet page text.
-            if self.has_run_wizard:
-                self.no_internet_label.setText(self.no_internet_text)
-            else:
-                self.no_internet_label.setText(self.no_internet_text + self.cancel_wizard_text)
+        if page_id == FirstTimePage.SampleOption:
+            internet_settings_button.setVisible(True)
+        elif page_id == FirstTimePage.Download:
+            back_button.setVisible(False)
+            next_button.setVisible(False)
             self.application.set_busy_cursor()
             self._download_index()
             self.application.set_normal_cursor()
-            self.back_button.setVisible(False)
-            self.next_button.setVisible(True)
             self.next()
         elif page_id == FirstTimePage.NoInternet:
-            self.back_button.setVisible(False)
-            self.next_button.setVisible(False)
-            self.cancel_button.setVisible(False)
-            self.no_internet_finish_button.setVisible(True)
-            if self.has_run_wizard:
-                self.no_internet_cancel_button.setVisible(False)
-            else:
-                self.no_internet_cancel_button.setVisible(True)
-        elif page_id == FirstTimePage.Plugins:
-            self.back_button.setVisible(False)
+            next_button.setVisible(False)
+            cancel_button.setVisible(False)
+            internet_settings_button.setVisible(True)
         elif page_id == FirstTimePage.Progress:
+            back_button.setVisible(False)
+            next_button.setVisible(False)
             self.application.set_busy_cursor()
             self._pre_wizard()
             self._perform_wizard()
             self._post_wizard()
             self.application.set_normal_cursor()
 
-    def on_cancel_button_clicked(self):
+    def accept(self):
         """
-        Process the triggering of the cancel button.
+        Called when the user clicks 'Finish'. Reimplement it to to save the plugin status
+
+        :rtype: None
+        """
+        self._set_plugin_status(self.songs_check_box, 'songs/status')
+        self._set_plugin_status(self.bible_check_box, 'bibles/status')
+        self._set_plugin_status(self.presentation_check_box, 'presentations/status')
+        self._set_plugin_status(self.image_check_box, 'images/status')
+        self._set_plugin_status(self.media_check_box, 'media/status')
+        self._set_plugin_status(self.custom_check_box, 'custom/status')
+        self._set_plugin_status(self.song_usage_check_box, 'songusage/status')
+        self._set_plugin_status(self.alert_check_box, 'alerts/status')
+        self.screen_selection_widget.save()
+        if self.theme_combo_box.currentIndex() != -1:
+            Settings().setValue('themes/global theme', self.theme_combo_box.currentText())
+        super().accept()
+
+    def reject(self):
+        """
+        Called when the user clicks the cancel button. Reimplement it to clean up the threads.
+
+        :rtype: None
         """
         self.was_cancelled = True
-        if self.thumbnail_download_threads:  # TODO: Use main thread list
-            for thread_name in self.thumbnail_download_threads:
-                worker = get_thread_worker(thread_name)
-                if worker:
-                    worker.cancel_download()
+        for thread_name in self.thumbnail_download_threads:
+            worker = get_thread_worker(thread_name)
+            if worker:
+                worker.cancel_download()
         # Was the thread created.
         if self.thumbnail_download_threads:
             while any([not is_thread_finished(thread_name) for thread_name in self.thumbnail_download_threads]):
                 time.sleep(0.1)
         self.application.set_normal_cursor()
+        super().reject()
+
+    def _on_custom_button_clicked(self, which):
+        """
+        Slot to handle the a click on one of the wizards custom buttons.
+
+        :param int QtWidgets.QWizard which: The button pressed
+        :rtype: None
+        """
+        # Internet settings button
+        if which == QtWidgets.QWizard.CustomButton1:
+            proxy_dialog = ProxyDialog(self)
+            proxy_dialog.retranslate_ui()
+            proxy_dialog.exec()
+
+    def on_projectors_check_box_clicked(self):
+        # When clicking projectors_check box, change the visibility setting for Projectors panel.
+        if Settings().value('projector/show after wizard'):
+            Settings().setValue('projector/show after wizard', False)
+        else:
+            Settings().setValue('projector/show after wizard', True)
 
     def on_themes_list_widget_selection_changed(self):
         """
@@ -329,23 +360,6 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
                     self.theme_combo_box.insertItem(0, item.text())
                 elif not item.isSelected() and cbox_index != -1:
                     self.theme_combo_box.removeItem(cbox_index)
-
-    def on_no_internet_finish_button_clicked(self):
-        """
-        Process the triggering of the "Finish" button on the No Internet page.
-        """
-        self.application.set_busy_cursor()
-        self._perform_wizard()
-        self.application.set_normal_cursor()
-        Settings().setValue('core/has run wizard', True)
-        self.close()
-
-    def on_no_internet_cancel_button_clicked(self):
-        """
-        Process the triggering of the "Cancel" button on the No Internet page.
-        """
-        self.was_cancelled = True
-        self.close()
 
     def update_progress(self, count, block_size):
         """
@@ -373,7 +387,7 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
         Prepare the UI for the process.
         """
         self.max_progress = 0
-        self.finish_button.setVisible(False)
+        self.button(QtWidgets.QWizard.FinishButton).setEnabled(False)
         self.application.process_events()
         try:
             # Loop through the songs list and increase for each selected item
@@ -432,54 +446,31 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
             self.progress_bar.setValue(self.progress_bar.maximum())
             if self.has_run_wizard:
                 text = translate('OpenLP.FirstTimeWizard',
-                                 'Download complete. Click the {button} button to return to OpenLP.'
-                                 ).format(button=clean_button_text(self.buttonText(QtWidgets.QWizard.FinishButton)))
-                self.progress_label.setText(text)
+                                 'Download complete. Click the \'{finish_button}\' button to return to OpenLP.')
             else:
                 text = translate('OpenLP.FirstTimeWizard',
-                                 'Download complete. Click the {button} button to start OpenLP.'
-                                 ).format(button=clean_button_text(self.buttonText(QtWidgets.QWizard.FinishButton)))
-                self.progress_label.setText(text)
+                                 'Download complete. Click the \'{finish_button}\' button to start OpenLP.')
         else:
             if self.has_run_wizard:
-                text = translate('OpenLP.FirstTimeWizard',
-                                 'Click the {button} button to return to OpenLP.'
-                                 ).format(button=clean_button_text(self.buttonText(QtWidgets.QWizard.FinishButton)))
-                self.progress_label.setText(text)
+                text = translate('OpenLP.FirstTimeWizard', 'Click the \'{finish_button}\' button to return to OpenLP.')
             else:
-                text = translate('OpenLP.FirstTimeWizard',
-                                 'Click the {button} button to start OpenLP.'
-                                 ).format(button=clean_button_text(self.buttonText(QtWidgets.QWizard.FinishButton)))
-                self.progress_label.setText(text)
-        self.finish_button.setVisible(True)
-        self.finish_button.setEnabled(True)
-        self.cancel_button.setVisible(False)
-        self.next_button.setVisible(False)
+                text = translate('OpenLP.FirstTimeWizard', 'Click the \'{finish_button}\' button to start OpenLP.')
+        self.progress_label.setText(text.format(finish_button=self.finish_button_text))
+        self.button(QtWidgets.QWizard.FinishButton).setEnabled(True)
+        self.button(QtWidgets.QWizard.CancelButton).setVisible(False)
         self.application.process_events()
 
     def _perform_wizard(self):
         """
         Run the tasks in the wizard.
         """
-        # Set plugin states
-        self._increment_progress_bar(translate('OpenLP.FirstTimeWizard', 'Enabling selected plugins...'))
-        self._set_plugin_status(self.songs_check_box, 'songs/status')
-        self._set_plugin_status(self.bible_check_box, 'bibles/status')
-        self._set_plugin_status(self.presentation_check_box, 'presentations/status')
-        self._set_plugin_status(self.image_check_box, 'images/status')
-        self._set_plugin_status(self.media_check_box, 'media/status')
-        self._set_plugin_status(self.custom_check_box, 'custom/status')
-        self._set_plugin_status(self.song_usage_check_box, 'songusage/status')
-        self._set_plugin_status(self.alert_check_box, 'alerts/status')
+
         if self.web_access:
             if not self._download_selected():
                 critical_error_message_box(translate('OpenLP.FirstTimeWizard', 'Download Error'),
                                            translate('OpenLP.FirstTimeWizard', 'There was a connection problem while '
                                                      'downloading, so further downloads will be skipped. Try to re-run '
                                                      'the First Time Wizard later.'))
-        self.screen_selection_widget.save()
-        if self.theme_combo_box.currentIndex() != -1:
-            Settings().setValue('themes/global theme', self.theme_combo_box.currentText())
 
     def _download_selected(self):
         """

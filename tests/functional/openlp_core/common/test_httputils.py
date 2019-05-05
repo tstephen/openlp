@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2019 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 Functional tests to test the AppLocation class and related methods.
 """
@@ -224,7 +224,7 @@ class TestHttpUtils(TestCase, TestMixin):
         file_size = get_url_file_size(fake_url)
 
         # THEN: The correct methods are called with the correct arguments and a web page is returned
-        mocked_requests.head.assert_called_once_with(fake_url, allow_redirects=True, timeout=30.0)
+        mocked_requests.head.assert_called_once_with(fake_url, allow_redirects=True, proxies=None, timeout=30.0)
         assert file_size == 100
 
     @patch('openlp.core.common.httputils.requests')
@@ -249,34 +249,30 @@ class TestGetProxySettings(TestCase, TestMixin):
         self.addCleanup(self.destroy_settings)
 
     @patch('openlp.core.common.httputils.Settings')
-    def test_mode_arg_specified(self, MockSettings):
+    def test_mode_arg_specified(self, mocked_settings):
         """
         Test that the argument is used rather than reading the 'advanced/proxy mode' setting
         """
         # GIVEN: Mocked settings
-        mocked_settings = MagicMock()
-        MockSettings.return_value = mocked_settings
 
         # WHEN: Calling `get_proxy_settings` with the mode arg specified
         get_proxy_settings(mode=ProxyMode.NO_PROXY)
 
         # THEN: The mode arg should have been used rather than looking it up in the settings
-        mocked_settings.value.assert_not_called()
+        mocked_settings().value.assert_not_called()
 
     @patch('openlp.core.common.httputils.Settings')
-    def test_mode_incorrect_arg_specified(self, MockSettings):
+    def test_mode_incorrect_arg_specified(self, mocked_settings):
         """
         Test that the system settings are used when the mode arg specieied is invalid
         """
         # GIVEN: Mocked settings
-        mocked_settings = MagicMock()
-        MockSettings.return_value = mocked_settings
 
         # WHEN: Calling `get_proxy_settings` with an invalid mode arg specified
         result = get_proxy_settings(mode='qwerty')
 
         # THEN: An None should be returned
-        mocked_settings.value.assert_not_called()
+        mocked_settings().value.assert_not_called()
         assert result is None
 
     def test_no_proxy_mode(self):
