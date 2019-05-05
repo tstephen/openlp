@@ -139,13 +139,14 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         Set up the controllers.
         :return:
         """
-        try:
-            self.setup_display(self.live_controller.display, False)
-        except AttributeError:
-            State().update_pre_conditions('media_live', False)
-            State().missing_text('media_live', translate('OpenLP.SlideController',
-                                                         'No Displays configure so Live Media has been disabled'))
-        self.setup_display(self.preview_controller.preview_display, True)
+        if State().check_preconditions('mediacontroller'):
+            try:
+                self.setup_display(self.live_controller.display, False)
+            except AttributeError:
+                State().update_pre_conditions('media_live', False)
+                State().missing_text('media_live', translate('OpenLP.SlideController',
+                                                             'No Displays configure so Live Media has been disabled'))
+            self.setup_display(self.preview_controller.preview_display, True)
 
     def display_controllers(self, controller_type):
         """
