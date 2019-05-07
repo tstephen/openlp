@@ -454,9 +454,9 @@ class TestPJLinkBase(TestCase):
                                                            suff=PJLINK_SUFFIX)
         log_error_calls = []
         log_warning_calls = []
-        log_debug_calls = [call('({ip}) send_command(): Building cmd="CLSS" opts="?"'.format(ip=self.pjlink.name)),
+        log_debug_calls = [call('({ip}) send_command(): Building cmd="CLSS" opts="?" '.format(ip=self.pjlink.name)),
                            call('({ip}) send_command(): Adding to normal queue'.format(ip=self.pjlink.name))]
-        mock_state.return_value = S_CONNECTED
+        mock_state.return_value = QSOCKET_STATE[S_CONNECTED]
 
         # Patch here since pjlink does not have priority or send queue's until instantiated
         with patch.object(self.pjlink, 'send_queue') as mock_send, \
@@ -488,9 +488,9 @@ class TestPJLinkBase(TestCase):
                                                            suff=PJLINK_SUFFIX)
         log_error_calls = []
         log_warning_calls = []
-        log_debug_calls = [call('({ip}) send_command(): Building cmd="CLSS" opts="?"'.format(ip=self.pjlink.name)),
+        log_debug_calls = [call('({ip}) send_command(): Building cmd="CLSS" opts="?" '.format(ip=self.pjlink.name)),
                            call('({ip}) send_command(): Adding to priority queue'.format(ip=self.pjlink.name))]
-        mock_state.return_value = S_CONNECTED
+        mock_state.return_value = QSOCKET_STATE[S_CONNECTED]
 
         # Patch here since pjlink does not have priority or send queue's until instantiated
         with patch.object(self.pjlink, 'send_queue') as mock_send, \
@@ -523,8 +523,10 @@ class TestPJLinkBase(TestCase):
         log_error_calls = []
         log_warning_calls = [call('({ip}) send_command(): Already in normal queue - '
                                   'skipping'.format(ip=self.pjlink.name))]
-        log_debug_calls = [call('({ip}) send_command(): Building cmd="CLSS" opts="?"'.format(ip=self.pjlink.name))]
-        mock_state.return_value = S_CONNECTED
+        log_debug_calls = [call('({ip}) send_command(cmd="CLSS" opts="?" salt="None" '
+                                'priority=False'.format(ip=self.pjlink.name)),
+                           call('({ip}) send_command(): Building cmd="CLSS" opts="?" '.format(ip=self.pjlink.name))]
+        mock_state.return_value = QSOCKET_STATE[S_CONNECTED]
         self.pjlink.send_queue = [test_command]
         self.pjlink.priority_queue = []
 
@@ -555,8 +557,10 @@ class TestPJLinkBase(TestCase):
         log_error_calls = []
         log_warning_calls = [call('({ip}) send_command(): Already in priority queue - '
                                   'skipping'.format(ip=self.pjlink.name))]
-        log_debug_calls = [call('({ip}) send_command(): Building cmd="CLSS" opts="?"'.format(ip=self.pjlink.name))]
-        mock_state.return_value = S_CONNECTED
+        log_debug_calls = [call('({ip}) send_command(cmd="CLSS" opts="?" salt="None" '
+                                'priority=True'.format(ip=self.pjlink.name)),
+                           call('({ip}) send_command(): Building cmd="CLSS" opts="?" '.format(ip=self.pjlink.name))]
+        mock_state.return_value = QSOCKET_STATE[S_CONNECTED]
         self.pjlink.send_queue = []
         self.pjlink.priority_queue = [test_command]
 
@@ -585,7 +589,7 @@ class TestPJLinkBase(TestCase):
                                 'ignoring.'.format(ip=self.pjlink.name))]
         log_warning_calls = []
         log_debug_calls = []
-        mock_state.return_value = S_CONNECTED
+        mock_state.return_value = QSOCKET_STATE[S_CONNECTED]
         self.pjlink.send_queue = []
         self.pjlink.priority_queue = []
 
@@ -617,7 +621,7 @@ class TestPJLinkBase(TestCase):
                                 'ignoring.'.format(ip=self.pjlink.name))]
         log_warning_calls = []
         log_debug_calls = []
-        mock_state.return_value = S_CONNECTED
+        mock_state.return_value = QSOCKET_STATE[S_CONNECTED]
         self.pjlink.send_queue = [test_command]
         self.pjlink.priority_queue = []
 
@@ -649,7 +653,7 @@ class TestPJLinkBase(TestCase):
                                 'ignoring.'.format(ip=self.pjlink.name))]
         log_warning_calls = []
         log_debug_calls = []
-        mock_state.return_value = S_CONNECTED
+        mock_state.return_value = QSOCKET_STATE[S_CONNECTED]
         self.pjlink.send_queue = []
         self.pjlink.priority_queue = [test_command]
 
