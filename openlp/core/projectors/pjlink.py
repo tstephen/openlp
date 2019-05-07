@@ -861,6 +861,24 @@ class PJLink(QtNetwork.QTcpSocket):
         log.debug('({ip}) Sending POWR command'.format(ip=self.entry.name))
         return self.send_command(cmd='POWR', priority=priority)
 
+    def set_audio_mute(self, priority=False):
+        """
+        Send command to set audio to muted
+        """
+        log.debug('({ip}) Setting AVMT to 21 (audio mute)'.format(ip=self.entry.name))
+        self.send_command(cmd='AVMT', opts='21', priority=True)
+        self.status_timer_add(cmd='AVMT', callback=self.get_av_mute_status)
+        self.poll_loop()
+
+    def set_audio_normal(self, priority=False):
+        """
+        Send command to set audio to normal
+        """
+        log.debug('({ip}) Setting AVMT to 20 (audio normal)'.format(ip=self.entry.name))
+        self.send_command(cmd='AVMT', opts='20', priority=True)
+        self.status_timer_add(cmd='AVMT', callback=self.get_av_mute_status)
+        self.poll_loop()
+
     def set_input_source(self, src=None):
         """
         Verify input source available as listed in 'INST' command,
@@ -924,9 +942,9 @@ class PJLink(QtNetwork.QTcpSocket):
             log.warning('({ip}) "{cmd}" already in checks - returning'.format(ip=self.entry.name, cmd=cmd))
             return
         log.debug('({ip}) Adding "{cmd}" callback for status timer'.format(ip=self.entry.name, cmd=cmd))
+        self.status_timer_checks[cmd] = callback
         if not self.status_timer.isActive():
             self.status_timer.start()
-        self.status_timer_checks[cmd] = callback
 
     def status_timer_delete(self, cmd):
         """

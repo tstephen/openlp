@@ -113,15 +113,21 @@ def process_avmt(projector, data):
                 '31': {'shutter': True, 'mute': True}
                 }
     if data not in settings:
-        log.warning('({ip}) Invalid shutter response: {data}'.format(ip=projector.entry.name, data=data))
+        log.warning('({ip}) Invalid av mute response: {data}'.format(ip=projector.entry.name, data=data))
         return
     shutter = settings[data]['shutter']
     mute = settings[data]['mute']
     # Check if we need to update the icons
     update_icons = (shutter != projector.shutter) or (mute != projector.mute)
-    projector.shutter = shutter
-    projector.mute = mute
     if update_icons:
+        if projector.shutter != shutter:
+            projector.shutter = shutter
+            log.debug('({ip}) Setting shutter to {chk}'.format(ip=projector.entry.name,
+                                                               chk='closed' if shutter else 'open'))
+        if projector.mute != mute:
+            projector.mute = mute
+            log.debug('({ip}) Setting speaker to {chk}'.format(ip=projector.entry.name,
+                                                               chk='muted' if shutter else 'normal'))
         if 'AVMT' in projector.status_timer_checks:
             projector.status_timer_delete('AVMT')
         projector.projectorUpdateIcons.emit()
