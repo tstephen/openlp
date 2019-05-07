@@ -246,8 +246,8 @@ class TestPJLinkCommands(TestCase):
         Test CLSS reply has no class number
         """
         # GIVEN: Test setup
-        log_error_calls = [call('({ip}) NAN CLSS version reply "Z" - '
-                                'defaulting to class "1"'.format(ip=self.pjlink.name))]
+        log_warning_calls = [call('({ip}) NAN CLSS version reply "Z" - '
+                                  'defaulting to class "1"'.format(ip=self.pjlink.name))]
         log_debug_calls = [call('({ip}) Processing command "CLSS" with data "Z"'.format(ip=self.pjlink.name)),
                            call('({ip}) Calling function for CLSS'.format(ip=self.pjlink.name)),
                            call('({ip}) Setting pjlink_class for this projector to "1"'.format(ip=self.pjlink.name))]
@@ -257,7 +257,7 @@ class TestPJLinkCommands(TestCase):
 
         # THEN: Projector class should be set with default value
         assert (self.pjlink.pjlink_class == '1'), 'Invalid NaN class reply should have set class=1'
-        mock_log.error.assert_has_calls(log_error_calls)
+        mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)
 
     @patch.object(openlp.core.projectors.pjlinkcommands, 'log')
@@ -266,8 +266,8 @@ class TestPJLinkCommands(TestCase):
         Test CLSS reply has no class number
         """
         # GIVEN: Test object
-        log_error_calls = [call('({ip}) No numbers found in class version reply "Invalid" '
-                                '- defaulting to class "1"'.format(ip=self.pjlink.name))]
+        log_warning_calls = [call('({ip}) No numbers found in class version reply "Invalid" '
+                                  '- defaulting to class "1"'.format(ip=self.pjlink.name))]
         log_debug_calls = [call('({ip}) Processing command "CLSS" with data "Invalid"'.format(ip=self.pjlink.name)),
                            call('({ip}) Calling function for CLSS'.format(ip=self.pjlink.name)),
                            call('({ip}) Setting pjlink_class for this projector to "1"'.format(ip=self.pjlink.name))]
@@ -277,7 +277,7 @@ class TestPJLinkCommands(TestCase):
 
         # THEN: Projector class should be set with default value
         assert (self.pjlink.pjlink_class == '1'), 'Invalid class reply should have set class=1'
-        mock_log.error.assert_has_calls(log_error_calls)
+        mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)
 
     @patch.object(openlp.core.projectors.pjlinkcommands, 'log')

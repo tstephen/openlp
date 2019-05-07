@@ -56,9 +56,9 @@ class TestPJLinkRouting(TestCase):
         Test projector received valid command invalid version
         """
         # GIVEN: Test object
-        log_warning_text = [call('({ip}) get_data() Command reply version does not match '
-                                 'a valid command version'.format(ip=self.pjlink.name)),
-                            call('({ip}) _send_command(): Nothing to send - returning'.format(ip=self.pjlink.name))]
+        log_warning_text = [call('({ip}) _send_command(): Nothing to send - returning'.format(ip=self.pjlink.name)),
+                            call('({ip}) get_data() Command reply version does not match '
+                                 'a valid command version'.format(ip=self.pjlink.name))]
         log_debug_text = [call('({ip}) get_data(buffer="{pre}XCLSS=X"'.format(ip=self.pjlink.name, pre=PJLINK_PREFIX)),
                           call('({ip}) get_data(): Checking new data "{pre}XCLSS=X"'.format(ip=self.pjlink.name,
                                                                                             pre=PJLINK_PREFIX)),
@@ -83,10 +83,10 @@ class TestPJLinkRouting(TestCase):
         Test projector receiving invalid command
         """
         # GIVEN: Test object
-        log_warning_text = [call('({ip}) get_data(): Invalid packet - '
-                                 'unknown command "UNKN"'.format(ip=self.pjlink.name)),
-                            call('({ip}) _send_command(): Nothing to send - '
-                                 'returning'.format(ip=self.pjlink.name))]
+        log_warning_text = [call('({ip}) _send_command(): Nothing to send - '
+                                 'returning'.format(ip=self.pjlink.name)),
+                            call('({ip}) get_data(): Invalid packet - '
+                                 'unknown command "UNKN"'.format(ip=self.pjlink.name))]
         log_debug_text = [call('({ip}) get_data(buffer="{pre}1UNKN=Huh?"'.format(ip=self.pjlink.name,
                                                                                  pre=PJLINK_PREFIX)),
                           call('({ip}) get_data(): Checking new data "{pre}1UNKN=Huh?"'.format(ip=self.pjlink.name,
@@ -113,9 +113,9 @@ class TestPJLinkRouting(TestCase):
         Test projector received valid command with command version higher than projector
         """
         # GIVEN: Test object
-        log_warning_text = [call('({ip}) get_data(): Projector returned class reply higher than projector '
-                                 'stated class'.format(ip=self.pjlink.name)),
-                            call('({ip}) _send_command(): Nothing to send - returning'.format(ip=self.pjlink.name))]
+        log_warning_text = [call('({ip}) _send_command(): Nothing to send - returning'.format(ip=self.pjlink.name)),
+                            call('({ip}) get_data(): Projector returned class reply higher than projector '
+                                 'stated class'.format(ip=self.pjlink.name))]
 
         log_debug_text = [call('({ip}) get_data(buffer="{pre}2ACKN=X"'.format(ip=self.pjlink.name,
                                                                               pre=PJLINK_PREFIX)),

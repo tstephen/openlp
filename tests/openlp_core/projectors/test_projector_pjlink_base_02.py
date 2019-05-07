@@ -132,37 +132,6 @@ class TestPJLinkBase(TestCase):
             assert (not mock_timer.called), 'Timer should not have been called'
             assert (not mock_reset.called), 'reset_information() should not have been called'
 
-    @patch.object(openlp.core.projectors.pjlink.PJLink, 'state')
-    @patch.object(openlp.core.projectors.pjlink.PJLink, 'reset_information')
-    @patch.object(openlp.core.projectors.pjlink, 'log')
-    def test_local_send_command_no_data_queue_check(self, mock_log, mock_reset, mock_state):
-        """
-        Test _underscore_send_command last queue length check
-        """
-        # GIVEN: Test object
-        log_error_calls = []
-        log_warning_calls = [call('({ip}) _send_command(): No data to send'.format(ip=self.pjlink.name))]
-        log_debug_calls = []
-        mock_state.return_value = QSOCKET_STATE[S_CONNECTED]
-        self.pjlink.priority_queue = []
-
-        # WHEN: _send_command called with no data and queue's emtpy
-        # Patch some attributes here since they are not available until after instantiation
-        with patch.object(self.pjlink, 'socket_timer') as mock_timer, \
-                patch.object(self.pjlink, 'send_queue') as mock_queue:
-            # Unlikely case of send_queue not really empty, but len(send_queue) returns 0
-            mock_queue.return_value = ['test']
-            mock_queue.__len__.return_value = 0
-            self.pjlink._send_command(data=None)
-
-            # THEN:
-            mock_log.error.assert_has_calls(log_error_calls)
-            mock_log.warning.assert_has_calls(log_warning_calls)
-            mock_log.debug.assert_has_calls(log_debug_calls)
-            assert (not self.pjlink.priority_queue), 'Priority queue should be empty'
-            assert (not mock_timer.called), 'Timer should not have been called'
-            assert (not mock_reset.called), 'reset_information() should not have been called'
-
     @patch.object(openlp.core.projectors.pjlink.PJLink, 'write')
     @patch.object(openlp.core.projectors.pjlink.PJLink, 'disconnect_from_host')
     @patch.object(openlp.core.projectors.pjlink.PJLink, 'state')
