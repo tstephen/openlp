@@ -96,7 +96,7 @@ class TestMainWindow(TestCase, TestMixin):
 
         # WHEN the argument is processed
         with patch.object(self.main_window.service_manager, 'load_file') as mocked_load_file:
-            self.main_window.open_cmd_line_files(service)
+            self.main_window.open_cmd_line_files([service])
 
         # THEN the service from the arguments is loaded
         mocked_load_file.assert_called_with(Path(service))
@@ -108,7 +108,6 @@ class TestMainWindow(TestCase, TestMixin):
         """
         # GIVEN a non service file as an argument to openlp
         service = 'run_openlp.py'
-        self.main_window.arguments = service
 
         # WHEN the argument is processed
         self.main_window.open_cmd_line_files(service)

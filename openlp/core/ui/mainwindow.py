@@ -22,7 +22,7 @@
 """
 This is the main window, where all the action happens.
 """
-import sys
+import os
 from datetime import datetime
 from distutils import dir_util
 from distutils.errors import DistutilsFileError
@@ -475,7 +475,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
         super(MainWindow, self).__init__()
         Registry().register('main_window', self)
         self.clipboard = self.application.clipboard()
-        self.arguments = ''.join(self.application.args)
         # Set up settings sections for the main application (not for use by plugins).
         self.ui_settings_section = 'user interface'
         self.general_settings_section = 'core'
@@ -632,8 +631,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
         # if self.live_controller.display.isVisible():
         #     self.live_controller.display.setFocus()
         self.activateWindow()
-        if self.arguments:
-            self.open_cmd_line_files(self.arguments)
+        if self.application.args:
+            self.open_cmd_line_files(self.application.args)
         elif Settings().value(self.general_settings_section + '/auto open'):
             self.service_manager_contents.load_last_file()
         # This will store currently used layout preset so it remains enabled on next startup.
@@ -1339,7 +1338,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
                 self.application.set_normal_cursor()
                 self.log_exception('Data copy failed {err}'.format(err=str(why)))
                 err_text = translate('OpenLP.MainWindow',
-                                     'OpenLP Data directory copy failed\n\n{err}').format(err=str(why)),
+                                     'OpenLP Data directory copy failed\n\n{err}').format(err=str(why))
                 QtWidgets.QMessageBox.critical(self, translate('OpenLP.MainWindow', 'New Data Directory Error'),
                                                err_text,
                                                QtWidgets.QMessageBox.StandardButtons(QtWidgets.QMessageBox.Ok))
@@ -1354,11 +1353,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
             settings.remove('advanced/data path')
         self.application.set_normal_cursor()
 
-    def open_cmd_line_files(self, filename):
+    def open_cmd_line_files(self, args):
         """
         Open files passed in through command line arguments
+
+        :param list[str] args: List of remaining positionall arguments
         """
-        if not isinstance(filename, str):
-            filename = str(filename, sys.getfilesystemencoding())
-        if filename.endswith(('.osz', '.oszl')):
-            self.service_manager_contents.load_file(Path(filename))
+        for arg in args:
+            file_name = os.path.expanduser(arg)
+            if os.path.isfile(file_name):
+                self.service_manager_contents.load_file(Path(file_name))

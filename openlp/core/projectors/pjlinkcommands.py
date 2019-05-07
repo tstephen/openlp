@@ -113,15 +113,21 @@ def process_avmt(projector, data):
                 '31': {'shutter': True, 'mute': True}
                 }
     if data not in settings:
-        log.warning('({ip}) Invalid shutter response: {data}'.format(ip=projector.entry.name, data=data))
+        log.warning('({ip}) Invalid av mute response: {data}'.format(ip=projector.entry.name, data=data))
         return
     shutter = settings[data]['shutter']
     mute = settings[data]['mute']
     # Check if we need to update the icons
     update_icons = (shutter != projector.shutter) or (mute != projector.mute)
-    projector.shutter = shutter
-    projector.mute = mute
     if update_icons:
+        if projector.shutter != shutter:
+            projector.shutter = shutter
+            log.debug('({ip}) Setting shutter to {chk}'.format(ip=projector.entry.name,
+                                                               chk='closed' if shutter else 'open'))
+        if projector.mute != mute:
+            projector.mute = mute
+            log.debug('({ip}) Setting speaker to {chk}'.format(ip=projector.entry.name,
+                                                               chk='muted' if shutter else 'normal'))
         if 'AVMT' in projector.status_timer_checks:
             projector.status_timer_delete('AVMT')
         projector.projectorUpdateIcons.emit()
@@ -147,14 +153,14 @@ def process_clss(projector, data):
         # fix the class reply is to just remove all non-digit characters.
         chk = re.findall(r'\d', data)
         if len(chk) < 1:
-            log.error('({ip}) No numbers found in class version reply "{data}" - '
-                      'defaulting to class "1"'.format(ip=projector.entry.name, data=data))
+            log.warning('({ip}) No numbers found in class version reply "{data}" - '
+                        'defaulting to class "1"'.format(ip=projector.entry.name, data=data))
             clss = '1'
         else:
             clss = chk[0]  # Should only be the first match
     elif not data.isdigit():
-        log.error('({ip}) NAN CLSS version reply "{data}" - '
-                  'defaulting to class "1"'.format(ip=projector.entry.name, data=data))
+        log.warning('({ip}) NAN CLSS version reply "{data}" - '
+                    'defaulting to class "1"'.format(ip=projector.entry.name, data=data))
         clss = '1'
     else:
         clss = data
@@ -276,12 +282,13 @@ def process_inpt(projector, data):
     if projector.source_available is not None:
         # We have available inputs, so verify it's in the list
         if data not in projector.source_available:
-            log.warn('({ip}) Input source not listed in available sources - ignoring'.format(ip=projector.entry.name))
+            log.warning('({ip}) Input source not listed in available sources - '
+                        'ignoring'.format(ip=projector.entry.name))
             return
     elif data not in PJLINK_DEFAULT_CODES:
         # Hmm - no sources available yet, so check with PJLink defaults
-        log.warn('({ip}) Input source not listed as a PJLink available source '
-                 '- ignoring'.format(ip=projector.entry.name))
+        log.warning('({ip}) Input source not listed as a PJLink valid source '
+                    '- ignoring'.format(ip=projector.entry.name))
         return
     projector.source = data
     log.debug('({ip}) Setting current source to "{data}"'.format(ip=projector.entry.name, data=projector.source))
@@ -320,7 +327,10 @@ def process_lamp(projector, data):
     lamps = []
     lamp_list = data.split()
     if len(lamp_list) < 2:
-        lamps.append({'Hours': int(lamp_list[0]), 'On': None})
+        # Invalid data - not enough information
+        log.warning('({ip}) process_lamp(): Invalid data "{data}" - '
+                    'Missing data'.format(ip=projector.entry.name, data=data))
+        return
     else:
         while lamp_list:
             if not lamp_list[0].isnumeric() or not lamp_list[1].isnumeric():
@@ -405,20 +415,22 @@ def process_powr(projector, data):
     :param projector: Projector instance
     :param data: Power status
     """
-    log.debug('({ip}: Processing POWR command'.format(ip=projector.entry.name))
-    if data in PJLINK_POWR_STATUS:
-        power = PJLINK_POWR_STATUS[data]
-        update_icons = projector.power != power
-        projector.power = power
-        projector.change_status(PJLINK_POWR_STATUS[data])
-        if update_icons:
-            projector.projectorUpdateIcons.emit()
-            # Update the input sources available
-            if power == S_ON:
-                projector.send_command('INST')
-    else:
+    log.debug('({ip}) Processing POWR command'.format(ip=projector.entry.name))
+    if data not in PJLINK_POWR_STATUS:
         # Log unknown status response
         log.warning('({ip}) Unknown power response: "{data}"'.format(ip=projector.entry.name, data=data))
+        return
+
+    power = PJLINK_POWR_STATUS[data]
+    update_icons = projector.power != power
+    if update_icons:
+        projector.power = power
+        projector.change_status(PJLINK_POWR_STATUS[data])
+        projector.projectorUpdateIcons.emit()
+        if power == S_ON:
+            # Input sources list should only be available after power on, so update here
+            projector.send_command('INST')
+
     if projector.power in [S_ON, S_STANDBY, S_OFF] and 'POWR' in projector.status_timer_checks:
         projector.status_timer_delete(cmd='POWR')
     return
