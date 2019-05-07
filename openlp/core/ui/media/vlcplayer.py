@@ -164,9 +164,11 @@ class VlcPlayer(MediaPlayer):
         output_display.vlc_widget = QtWidgets.QFrame(output_display)
         output_display.vlc_widget.setFrameStyle(QtWidgets.QFrame.NoFrame)
         # creating a basic vlc instance
-        command_line_options = '--no-video-title-show'
+        command_line_options = '--no-video-title-show '
         if Settings().value('advanced/hide mouse') and live_display:
-            command_line_options += ' --mouse-hide-timeout=0'
+            command_line_options += '--mouse-hide-timeout=0 '
+        if Settings().value('media/vlc arguments'):
+            command_line_options += Settings().value('media/vlc arguments')
         output_display.vlc_instance = vlc.Instance(command_line_options)
         # creating an empty vlc media player
         output_display.vlc_media_player = output_display.vlc_instance.media_player_new()
@@ -224,7 +226,8 @@ class VlcPlayer(MediaPlayer):
                 return False
             output_display.vlc_media = audio_cd_tracks.item_at_index(controller.media_info.title_track)
         elif controller.media_info.media_type == MediaType.Stream:
-            output_display.vlc_media = output_display.vlc_instance.media_new_location('ZZZZZZ')
+            stream_cmd = Settings().value('media/stream command')
+            output_display.vlc_media = output_display.vlc_instance.media_new_location(stream_cmd)
         else:
             output_display.vlc_media = output_display.vlc_instance.media_new_path(path)
         # put the media in the media player
@@ -240,7 +243,7 @@ class VlcPlayer(MediaPlayer):
         Wait no longer than 60 seconds. (loading an iso file needs a long time)
 
         :param media_state: The state of the playing media
-        :param display: The display where the media is
+        :param output_display: The display where the media is
         :return:
         """
         vlc = get_vlc()
@@ -314,7 +317,7 @@ class VlcPlayer(MediaPlayer):
         self.volume(output_display, output_display.media_info.volume)
         if start_time > 0 and output_display.vlc_media_player.is_seekable():
             output_display.vlc_media_player.set_time(int(start_time))
-        controller.seek_slider.setMaximum(output_display.media_info.length)
+        controller.seek_slider.setMaximum(controller.media_info.length)
         self.set_state(MediaState.Playing, output_display)
         output_display.vlc_widget.raise_()
         return True
@@ -361,9 +364,9 @@ class VlcPlayer(MediaPlayer):
         :param seek_value: The position of where a seek goes to
         :param output_display: The display where the media is
         """
-        if output_display.controller.media_info.media_type == MediaType.CD \
-                or output_display.controller.media_info.media_type == MediaType.DVD:
-            seek_value += int(output_display.controller.media_info.start_time)
+        if output_display.media_info.media_type == MediaType.CD \
+                or output_display.media_info.media_type == MediaType.DVD:
+            seek_value += int(output_display.media_info.start_time)
         if output_display.vlc_media_player.is_seekable():
             output_display.vlc_media_player.set_time(seek_value)
 

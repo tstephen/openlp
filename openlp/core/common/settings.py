@@ -180,15 +180,13 @@ class Settings(QtCore.QSettings):
         'api/thumbnails': True,
         'crashreport/last directory': None,
         'formattingTags/html_tags': '',
-        'core/audio repeat list': False,
         'core/auto open': False,
         'core/auto preview': False,
-        'core/audio start paused': True,
         'core/auto unblank': False,
         'core/click live slide to unblank': False,
         'core/blank warning': False,
         'core/ccli number': '',
-        'core/experimental': False,
+        'advanced/experimental': False,
         'core/has run wizard': False,
         'core/language': '[en]',
         'core/last version test': '',
@@ -213,6 +211,7 @@ class Settings(QtCore.QSettings):
         'images/background color': '#000000',
         'media/media auto start': QtCore.Qt.Unchecked,
         'media/stream command': '',
+        'media/vlc arguments': '',
         'remotes/download version': '0.0',
         'players/background color': '#000000',
         'servicemanager/last directory': None,
@@ -317,7 +316,9 @@ class Settings(QtCore.QSettings):
         ('bibles/proxy username', '', []),
         ('bibles/proxy password', '', []),
         ('media/players', '', []),
-        ('media/override player', '', [])
+        ('media/override player', '', []),
+        ('core/audio start paused', '', []),
+        ('core/audio repeat list', '', [])
     ]
 
     @staticmethod

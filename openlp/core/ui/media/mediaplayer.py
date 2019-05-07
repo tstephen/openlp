@@ -139,11 +139,12 @@ class MediaPlayer(RegistryProperties):
         """
         pass
 
-    def update_ui(self, display):
+    def update_ui(self, controller, output_display):
         """
         Do some ui related stuff (e.g. update the seek slider)
 
-        :param display: The display to be updated.
+        :param controller: Which Controller is running the show.
+        :param output_display: The display where the media is
         """
         pass
 
