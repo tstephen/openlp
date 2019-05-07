@@ -333,7 +333,7 @@ class Theme(object):
         else:
             # make string value unicode
             if not isinstance(value, str):
-                value = str(str(value), 'utf-8')
+                value = str(value, 'utf-8')
             # None means an empty string so lets have one.
             if value == 'None':
                 value = ''

@@ -22,6 +22,7 @@
 from PyQt5 import QtCore, QtNetwork
 
 from openlp.core.common.mixins import LogMixin
+from openlp.core.common.path import Path
 from openlp.core.common.registry import Registry
 
 
@@ -97,7 +98,7 @@ class Server(QtCore.QObject, LogMixin):
         msg = self.in_stream.readLine()
         if msg:
             self.log_debug("socket msg = " + msg)
-            Registry().get('service_manager').on_load_service_clicked(msg)
+            Registry().get('service_manager').load_service(Path(msg))
 
     def close_server(self):
         """

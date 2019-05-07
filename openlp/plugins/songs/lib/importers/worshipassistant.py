@@ -82,7 +82,7 @@ class WorshipAssistantImport(SongImport):
         Receive a CSV file to import.
         """
         # Get encoding
-        encoding = get_file_encoding(self.import_source)['encoding']
+        encoding = get_file_encoding(self.import_source)
         with self.import_source.open('r', encoding=encoding) as songs_file:
             songs_reader = csv.DictReader(songs_file, escapechar='\\')
             try:

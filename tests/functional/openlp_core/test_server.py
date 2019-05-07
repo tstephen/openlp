@@ -22,6 +22,7 @@
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
+from openlp.core.common.path import Path
 from openlp.core.common.registry import Registry
 from openlp.core.server import Server
 from tests.helpers.testmixin import TestMixin
@@ -83,8 +84,8 @@ class TestServer(TestCase, TestMixin):
         self.server._on_ready_read()
 
         # THEN: the service will be loaded
-        assert service_manager.on_load_service_clicked.call_count == 1
-        service_manager.on_load_service_clicked.assert_called_once_with(file_name)
+        assert service_manager.load_service.call_count == 1
+        service_manager.load_service.assert_called_once_with(Path(file_name))
 
     @patch("PyQt5.QtCore.QTextStream")
     def test_post_to_server(self, mocked_stream):

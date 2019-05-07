@@ -124,7 +124,7 @@ class SongBeamerImport(SongImport):
             self.chord_table = None
             if file_path.is_file():
                 # Detect the encoding
-                self.input_file_encoding = get_file_encoding(file_path)['encoding']
+                self.input_file_encoding = get_file_encoding(file_path)
                 # The encoding should only be ANSI (cp1252), UTF-8, Unicode, Big-Endian-Unicode.
                 # So if it doesn't start with 'u' we default to cp1252. See:
                 # https://forum.songbeamer.com/viewtopic.php?p=419&sid=ca4814924e37c11e4438b7272a98b6f2
