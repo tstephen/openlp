@@ -29,7 +29,6 @@ import sys
 import threading
 from datetime import datetime
 import vlc
-from distutils.version import LooseVersion
 
 from PyQt5 import QtWidgets
 
