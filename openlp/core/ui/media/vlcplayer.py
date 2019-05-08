@@ -78,48 +78,6 @@ def get_vlc():
             return None
     else:
         return vlc
-    #is_vlc_available = False
-    # try:
-    #     if is_macosx():
-    #         # Newer versions of VLC on OS X need this. See https://forum.videolan.org/viewtopic.php?t=124521
-    #         os.environ['VLC_PLUGIN_PATH'] = '/Applications/VLC.app/Contents/MacOS/plugins'
-    #     # On Windows when frozen in PyInstaller, we need to blank SetDllDirectoryW to allow loading of the VLC dll.
-    #     # This is due to limitations (by design) in PyInstaller. SetDllDirectoryW original value is restored once
-    #     # VLC has been imported.
-    #     if is_win():
-    #         buffer_size = 1024
-    #         dll_directory = ctypes.create_unicode_buffer(buffer_size)
-    #         new_buffer_size = ctypes.windll.kernel32.GetDllDirectoryW(buffer_size, dll_directory)
-    #         dll_directory = ''.join(dll_directory[:new_buffer_size]).replace('\0', '')
-    #         log.debug('Original DllDirectory: %s' % dll_directory)
-    #         ctypes.windll.kernel32.SetDllDirectoryW(None)
-    #     from openlp.core.ui.media.vendor import vlc
-    #     if is_win():
-    #         ctypes.windll.kernel32.SetDllDirectoryW(dll_directory)
-    #     is_vlc_available = bool(vlc.get_default_instance())
-    # except (ImportError, NameError, NotImplementedError):
-    #     pass
-    # except OSError as e:
-    #     # this will get raised the first time
-    #     if is_win():
-    #         if not isinstance(e, WindowsError) and e.winerror != 126:
-    #             raise
-    #     else:
-    #         pass
-    # if is_vlc_available:
-    #     try:
-    #         VERSION = vlc.libvlc_get_version().decode('UTF-8')
-    #     except Exception:
-    #         VERSION = '0.0.0'
-    #     # LooseVersion does not work when a string contains letter and digits (e. g. 2.0.5 Twoflower).
-    #     # http://bugs.python.org/issue14894
-    #     if LooseVersion(VERSION.split()[0]) < LooseVersion('1.1.0'):
-    #         is_vlc_available = False
-    #         log.debug('VLC could not be loaded, because the vlc version is too old: %s' % VERSION)
-    #if is_vlc_available:
-    #    return vlc
-    #else:
-    #    return None
 
 
 # On linux we need to initialise X threads, but not when running tests.
