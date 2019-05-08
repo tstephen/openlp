@@ -107,7 +107,7 @@ class TestMainWindow(TestCase, TestMixin):
         Test that passing a non service file does nothing.
         """
         # GIVEN a non service file as an argument to openlp
-        service = 'run_openlp.py'
+        service = 'setup.py'
 
         # WHEN the argument is processed
         self.main_window.open_cmd_line_files(service)
