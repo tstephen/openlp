@@ -89,7 +89,8 @@ MODULES = [
     'webob',
     'requests',
     'qtawesome',
-    'pymediainfo'
+    'pymediainfo',
+    'vlc'
 ]
 
 
