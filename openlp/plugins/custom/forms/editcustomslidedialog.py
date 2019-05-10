@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 
 from PyQt5 import QtWidgets
 
@@ -29,7 +29,7 @@ from openlp.core.widgets.edits import SpellTextEdit
 
 
 class Ui_CustomSlideEditDialog(object):
-    def setupUi(self, custom_slide_edit_dialog):
+    def setup_ui(self, custom_slide_edit_dialog):
         custom_slide_edit_dialog.setObjectName('custom_slide_edit_dialog')
         custom_slide_edit_dialog.setWindowIcon(UiIcons().main_icon)
         custom_slide_edit_dialog.resize(350, 300)
@@ -42,9 +42,9 @@ class Ui_CustomSlideEditDialog(object):
         self.button_box = create_button_box(custom_slide_edit_dialog, 'button_box', ['cancel', 'save'],
                                             [self.split_button, self.insert_button])
         self.dialog_layout.addWidget(self.button_box)
-        self.retranslateUi(custom_slide_edit_dialog)
+        self.retranslate_ui(custom_slide_edit_dialog)
 
-    def retranslateUi(self, custom_slide_edit_dialog):
+    def retranslate_ui(self, custom_slide_edit_dialog):
         custom_slide_edit_dialog.setWindowTitle(translate('CustomPlugin.EditVerseForm', 'Edit Slide'))
         self.split_button.setText(UiStrings().Split)
         self.split_button.setToolTip(UiStrings().SplitToolTip)

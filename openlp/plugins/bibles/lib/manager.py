@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 import logging
 
 from openlp.core.common import delete_file
@@ -29,12 +29,14 @@ from openlp.core.common.path import Path
 from openlp.core.common.settings import Settings
 from openlp.plugins.bibles.lib import LanguageSelection, parse_reference
 from openlp.plugins.bibles.lib.db import BibleDB, BibleMeta
+
 from .importers.csvbible import CSVBible
 from .importers.http import HTTPBible
 from .importers.opensong import OpenSongBible
 from .importers.osis import OSISBible
 from .importers.wordproject import WordProjectBible
 from .importers.zefania import ZefaniaBible
+
 
 try:
     from .importers.sword import SwordBible
@@ -185,7 +187,7 @@ class BibleManager(LogMixin, RegistryProperties):
         bible = self.db_cache[name]
         bible.session.close_all()
         bible.session = None
-        return delete_file(Path(bible.path, bible.file))
+        return delete_file(bible.path / '{name}{suffix}'.format(name=name, suffix=self.suffix))
 
     def get_bibles(self):
         """

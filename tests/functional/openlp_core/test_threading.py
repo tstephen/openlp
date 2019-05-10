@@ -1,31 +1,31 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 Package to test the openlp.core.threading package.
 """
 from inspect import isfunction
 from unittest.mock import MagicMock, call, patch
 
-from openlp.core.threading import ThreadWorker, run_thread, get_thread_worker, is_thread_finished, make_remove_thread
+from openlp.core.threading import ThreadWorker, get_thread_worker, is_thread_finished, make_remove_thread, run_thread
 
 
 def test_run_thread_no_name():
@@ -133,15 +133,11 @@ def test_get_thread_worker_mising(MockRegistry):
     # GIVEN: A mocked thread worker
     MockRegistry.return_value.get.return_value.worker_threads = {}
 
-    try:
-        # WHEN: get_thread_worker() is called
-        get_thread_worker('test_thread')
-        assert False, 'A KeyError should have been raised'
-    except KeyError:
-        # THEN: The mocked worker is returned
-        pass
-    except Exception:
-        assert False, 'A KeyError should have been raised'
+    # WHEN: get_thread_worker() is called
+    result = get_thread_worker('test_thread')
+
+    # THEN: None should have been returned
+    assert result is None
 
 
 @patch('openlp.core.threading.Registry')

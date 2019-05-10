@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 import json
 import logging
 import os
@@ -34,6 +34,7 @@ from openlp.core.common.settings import Settings
 from openlp.core.lib import create_thumb
 from openlp.core.lib.serviceitem import ItemCapabilities
 
+
 log = logging.getLogger(__name__)
 
 controller_endpoint = Endpoint('controller')
@@ -48,7 +49,7 @@ def controller_text(request):
 
     :param request: the http request - not used
     """
-    log.debug("controller_text ")
+    log.debug('controller_text')
     live_controller = Registry().get('live_controller')
     current_item = live_controller.service_item
     data = []
@@ -57,13 +58,14 @@ def controller_text(request):
             item = {}
             # Handle text (songs, custom, bibles)
             if current_item.is_text():
-                if frame['verseTag']:
-                    item['tag'] = str(frame['verseTag'])
+                if frame['verse']:
+                    item['tag'] = str(frame['verse'])
                 else:
                     item['tag'] = str(index + 1)
-                item['chords_text'] = str(frame['chords_text'])
-                item['text'] = str(frame['text'])
-                item['html'] = str(frame['html'])
+                # TODO: Figure out rendering chords
+                item['chords_text'] = str(frame.get('chords_text', ''))
+                item['text'] = frame['text']
+                item['html'] = current_item.get_rendered_frame(index)
             # Handle images, unless a custom thumbnail is given or if thumbnails is disabled
             elif current_item.is_image() and not frame.get('image', '') and Settings().value('api/thumbnails'):
                 item['tag'] = str(index + 1)

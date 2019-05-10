@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 Package to test the openlp.core.projectors.db module.
 record functions.
@@ -38,7 +38,7 @@ from openlp.core.projectors.constants import PJLINK_PORT
 from openlp.core.projectors.db import Manufacturer, Model, Projector, ProjectorDB, ProjectorSource, Source
 from openlp.core.ui.mainwindow import MainWindow
 from tests.helpers.testmixin import TestMixin
-from tests.resources.projector.data import TEST_DB_PJLINK1, TEST_DB, TEST1_DATA, TEST2_DATA, TEST3_DATA
+from tests.resources.projector.data import TEST1_DATA, TEST2_DATA, TEST3_DATA, TEST_DB, TEST_DB_PJLINK1
 from tests.utils.constants import TEST_RESOURCES_PATH
 
 
@@ -134,6 +134,7 @@ class TestProjectorDB(TestCase, TestMixin):
         """
         Set up anything necessary for all tests
         """
+        self.tmp_folder = mkdtemp(prefix='openlp_')
         # Create a test app to keep from segfaulting
         Registry.create()
         self.registry = Registry()
@@ -153,11 +154,11 @@ class TestProjectorDB(TestCase, TestMixin):
                 patch('openlp.core.ui.mainwindow.ThemeManager'), \
                 patch('openlp.core.ui.mainwindow.ProjectorManager'), \
                 patch('openlp.core.ui.mainwindow.websockets.WebSocketServer'), \
-                patch('openlp.core.ui.mainwindow.server.HttpServer'):
+                patch('openlp.core.ui.mainwindow.server.HttpServer'), \
+                patch('openlp.core.state.State.list_plugins') as mock_plugins:
+            mock_plugins.return_value = []
             self.main_window = MainWindow()
 
-        # Create a temporary database directory and database
-        self.tmp_folder = mkdtemp(prefix='openlp_')
         tmpdb_url = 'sqlite:///{db}'.format(db=os.path.join(self.tmp_folder, TEST_DB))
         mocked_init_url.return_value = tmpdb_url
         self.projector = ProjectorDB()

@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 
 from PyQt5 import QtWidgets
 
@@ -27,7 +27,7 @@ from openlp.core.lib.ui import create_button_box
 
 
 class Ui_AddGroupDialog(object):
-    def setupUi(self, add_group_dialog):
+    def setup_ui(self, add_group_dialog):
         add_group_dialog.setObjectName('add_group_dialog')
         add_group_dialog.resize(300, 10)
         self.dialog_layout = QtWidgets.QVBoxLayout(add_group_dialog)
@@ -48,10 +48,10 @@ class Ui_AddGroupDialog(object):
         self.dialog_layout.addLayout(self.name_layout)
         self.button_box = create_button_box(add_group_dialog, 'button_box', ['cancel', 'save'])
         self.dialog_layout.addWidget(self.button_box)
-        self.retranslateUi(add_group_dialog)
+        self.retranslate_ui(add_group_dialog)
         add_group_dialog.setMaximumHeight(add_group_dialog.sizeHint().height())
 
-    def retranslateUi(self, add_group_dialog):
+    def retranslate_ui(self, add_group_dialog):
         add_group_dialog.setWindowTitle(translate('ImagePlugin.AddGroupForm', 'Add group'))
         self.parent_group_label.setText(translate('ImagePlugin.AddGroupForm', 'Parent group:'))
         self.name_label.setText(translate('ImagePlugin.AddGroupForm', 'Group name:'))

@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 
 from PyQt5 import QtWidgets
 
@@ -42,12 +42,12 @@ class PresentationTab(SettingsTab):
         super(PresentationTab, self).__init__(parent, title, visible_title, icon_path)
         self.activated = False
 
-    def setupUi(self):
+    def setup_ui(self):
         """
         Create the controls for the settings tab
         """
         self.setObjectName('PresentationTab')
-        super(PresentationTab, self).setupUi()
+        super(PresentationTab, self).setup_ui()
         self.controllers_group_box = QtWidgets.QGroupBox(self.left_column)
         self.controllers_group_box.setObjectName('controllers_group_box')
         self.controllers_layout = QtWidgets.QVBoxLayout(self.controllers_group_box)
@@ -99,7 +99,7 @@ class PresentationTab(SettingsTab):
         self.program_path_edit.pathChanged.connect(self.on_program_path_edit_path_changed)
         self.pdf_program_check_box.clicked.connect(self.program_path_edit.setEnabled)
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         """
         Make any translation changes
         """

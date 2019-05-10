@@ -7,6 +7,7 @@ cover
 .coverage
 coverage
 .directory
+.vscode
 dist
 *.dll
 documentation/build/doctrees
@@ -14,6 +15,7 @@ documentation/build/html
 *.e4*
 *eric[1-9]project
 .git
+env
 # Git files
 .gitignore
 htmlcov
@@ -47,4 +49,11 @@ resources/windows/warnOpenLP.txt
 tags
 openlp/plugins/presentations/lib/vendor/Pyro4
 openlp/plugins/presentations/lib/vendor/serpent.py
+output
+htmlcov
+node_modules
+openlp-test-projectordb.sqlite
+package-lock.json
+.cache
+test
 tests.kdev4

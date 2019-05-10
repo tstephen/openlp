@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 The UI widgets for the time dialog
 """
@@ -33,7 +33,7 @@ class Ui_StartTimeDialog(object):
     """
     The UI widgets for the time dialog
     """
-    def setupUi(self, StartTimeDialog):
+    def setup_ui(self, StartTimeDialog):
         """
         Set up the UI
         """
@@ -107,10 +107,10 @@ class Ui_StartTimeDialog(object):
         self.dialog_layout.addWidget(self.second_spin_box, 3, 1, 1, 1)
         self.button_box = create_button_box(StartTimeDialog, 'button_box', ['cancel', 'ok'])
         self.dialog_layout.addWidget(self.button_box, 5, 2, 1, 2)
-        self.retranslateUi(StartTimeDialog)
+        self.retranslate_ui(StartTimeDialog)
         self.setMaximumHeight(self.sizeHint().height())
 
-    def retranslateUi(self, StartTimeDialog):
+    def retranslate_ui(self, StartTimeDialog):
         """
         Update the translations on the fly
         """

@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 Functional tests to test the AppLocation class and related methods.
 """
@@ -309,9 +309,9 @@ class TestInit(TestCase, TestMixin):
         """
         # GIVEN: A mocked UniversalDetector instance with done attribute set to True after first iteration
         with patch('openlp.core.common.UniversalDetector') as mocked_universal_detector, \
-                patch.object(Path, 'open', return_value=BytesIO(b"data" * 260)) as mocked_open:
+                patch.object(Path, 'open', return_value=BytesIO(b'data' * 260)) as mocked_open:
             encoding_result = {'encoding': 'UTF-8', 'confidence': 0.99}
-            mocked_universal_detector_inst = MagicMock(result=encoding_result)
+            mocked_universal_detector_inst = MagicMock(**{'close.return_value': encoding_result})
             type(mocked_universal_detector_inst).done = PropertyMock(side_effect=[False, True])
             mocked_universal_detector.return_value = mocked_universal_detector_inst
 
@@ -320,9 +320,9 @@ class TestInit(TestCase, TestMixin):
 
             # THEN: The feed method of UniversalDetector should only br called once before returning a result
             mocked_open.assert_called_once_with('rb')
-            assert mocked_universal_detector_inst.feed.mock_calls == [call(b"data" * 256)]
+            assert mocked_universal_detector_inst.feed.mock_calls == [call(b'data' * 256)]
             mocked_universal_detector_inst.close.assert_called_once_with()
-            assert result == encoding_result
+            assert result == 'UTF-8'
 
     def test_get_file_encoding_eof(self):
         """
@@ -331,10 +331,10 @@ class TestInit(TestCase, TestMixin):
         # GIVEN: A mocked UniversalDetector instance which isn't set to done and a mocked open, with 1040 bytes of test
         #       data (enough to run the iterator twice)
         with patch('openlp.core.common.UniversalDetector') as mocked_universal_detector, \
-                patch.object(Path, 'open', return_value=BytesIO(b"data" * 260)) as mocked_open:
+                patch.object(Path, 'open', return_value=BytesIO(b'data' * 260)) as mocked_open:
             encoding_result = {'encoding': 'UTF-8', 'confidence': 0.99}
             mocked_universal_detector_inst = MagicMock(mock=mocked_universal_detector,
-                                                       **{'done': False, 'result': encoding_result})
+                                                       **{'done': False, 'close.return_value': encoding_result})
             mocked_universal_detector.return_value = mocked_universal_detector_inst
 
             # WHEN: Calling get_file_encoding
@@ -342,9 +342,9 @@ class TestInit(TestCase, TestMixin):
 
             # THEN: The feed method of UniversalDetector should have been called twice before returning a result
             mocked_open.assert_called_once_with('rb')
-            assert mocked_universal_detector_inst.feed.mock_calls == [call(b"data" * 256), call(b"data" * 4)]
+            assert mocked_universal_detector_inst.feed.mock_calls == [call(b'data' * 256), call(b'data' * 4)]
             mocked_universal_detector_inst.close.assert_called_once_with()
-            assert result == encoding_result
+            assert result == 'UTF-8'
 
     def test_get_file_encoding_oserror(self):
         """
@@ -352,13 +352,19 @@ class TestInit(TestCase, TestMixin):
         """
         # GIVEN: A mocked UniversalDetector instance which isn't set to done and a mocked open, with 1040 bytes of test
         #       data (enough to run the iterator twice)
-        with patch('openlp.core.common.UniversalDetector'), \
+        with patch('openlp.core.common.UniversalDetector') as mocked_universal_detector, \
                 patch('builtins.open', side_effect=OSError), \
                 patch('openlp.core.common.log') as mocked_log:
+            encoding_result = {'encoding': 'UTF-8', 'confidence': 0.99}
+            mocked_universal_detector_inst = MagicMock(mock=mocked_universal_detector,
+                                                       **{'done': False, 'close.return_value': encoding_result})
+            mocked_universal_detector.return_value = mocked_universal_detector_inst
 
             # WHEN: Calling get_file_encoding
             result = get_file_encoding(Path('file name'))
 
             # THEN: log.exception should be called and get_file_encoding should return None
             mocked_log.exception.assert_called_once_with('Error detecting file encoding')
-            assert result is None
+            mocked_universal_detector_inst.feed.assert_not_called()
+            mocked_universal_detector_inst.close.assert_called_once_with()
+            assert result == 'UTF-8'

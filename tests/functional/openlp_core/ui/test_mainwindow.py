@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 Package to test openlp.core.ui.mainwindow package.
 """
@@ -27,13 +27,12 @@ from pathlib import Path
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
-from PyQt5 import QtGui, QtCore, QtWidgets
+from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.state import State
 from openlp.core.common.i18n import UiStrings
 from openlp.core.common.registry import Registry
 from openlp.core.display.screens import ScreenList
-from openlp.core.lib.plugin import PluginStatus
 from openlp.core.ui.mainwindow import MainWindow
 from tests.helpers.testmixin import TestMixin
 from tests.utils.constants import TEST_RESOURCES_PATH
@@ -70,20 +69,22 @@ class TestMainWindow(TestCase, TestMixin):
         self.add_toolbar_action_patcher = patch('openlp.core.ui.mainwindow.create_action')
         self.mocked_add_toolbar_action = self.add_toolbar_action_patcher.start()
         self.mocked_add_toolbar_action.side_effect = self._create_mock_action
-        mocked_plugin = MagicMock()
-        mocked_plugin.status = PluginStatus.Active
-        mocked_plugin.icon = QtGui.QIcon()
-        Registry().register('mock_plugin', mocked_plugin)
-        State().add_service("mock", 1, is_plugin=True, status=PluginStatus.Active)
-        with patch('openlp.core.display.screens.ScreenList.__instance__', spec=ScreenList) as mocked_screen_list:
-            mocked_screen_list.current = {'number': 0, 'size': QtCore.QSize(600, 800), 'primary': True}
-            self.main_window = MainWindow()
+        self.renderer_patcher = patch('openlp.core.display.render.Renderer')
+        self.mocked_renderer = self.renderer_patcher.start()
+        mocked_desktop = MagicMock()
+        mocked_desktop.screenCount.return_value = 1
+        mocked_desktop.screenGeometry.return_value = QtCore.QRect(0, 0, 1024, 768)
+        mocked_desktop.primaryScreen.return_value = 1
+        ScreenList.create(mocked_desktop)
+        State().load_settings()
+        self.main_window = MainWindow()
 
     def tearDown(self):
         """
         Delete all the C++ objects and stop all the patchers
         """
         del self.main_window
+        self.renderer_patcher.stop()
         self.add_toolbar_action_patcher.stop()
 
     def test_cmd_line_file(self):
@@ -95,7 +96,7 @@ class TestMainWindow(TestCase, TestMixin):
 
         # WHEN the argument is processed
         with patch.object(self.main_window.service_manager, 'load_file') as mocked_load_file:
-            self.main_window.open_cmd_line_files(service)
+            self.main_window.open_cmd_line_files([service])
 
         # THEN the service from the arguments is loaded
         mocked_load_file.assert_called_with(Path(service))
@@ -106,8 +107,7 @@ class TestMainWindow(TestCase, TestMixin):
         Test that passing a non service file does nothing.
         """
         # GIVEN a non service file as an argument to openlp
-        service = os.path.join('openlp.py')
-        self.main_window.arguments = [service]
+        service = 'run_openlp.py'
 
         # WHEN the argument is processed
         self.main_window.open_cmd_line_files(service)
@@ -162,10 +162,14 @@ class TestMainWindow(TestCase, TestMixin):
         # WHEN: you check the started functions
 
         # THEN: the following registry functions should have been registered
-        assert len(self.registry.service_list) == 8, \
-            'The registry should have 8 services, got {}'.format(self.registry.service_list.keys())
-        assert len(self.registry.functions_list) == 5, \
-            'The registry should have 5 functions, got {}'.format(self.registry.functions_list.keys())
+        expected_service_list = ['application', 'main_window', 'http_server', 'settings_form', 'service_manager',
+                                 'theme_manager', 'projector_manager']
+        expected_functions_list = ['bootstrap_initialise', 'bootstrap_post_set_up', 'bootstrap_completion',
+                                   'theme_update_global', 'config_screen_changed']
+        assert list(self.registry.service_list.keys()) == expected_service_list, \
+            'The service list should have been {}'.format(self.registry.service_list.keys())
+        assert list(self.registry.functions_list.keys()) == expected_functions_list, \
+            'The function list should have been {}'.format(self.registry.functions_list.keys())
         assert 'application' in self.registry.service_list, 'The application should have been registered.'
         assert 'main_window' in self.registry.service_list, 'The main_window should have been registered.'
 

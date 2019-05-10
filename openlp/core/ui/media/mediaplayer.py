@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 The :mod:`~openlp.core.ui.media.mediaplayer` module contains the MediaPlayer class.
 """
@@ -52,11 +52,12 @@ class MediaPlayer(RegistryProperties):
         """
         return False
 
-    def setup(self, display):
+    def setup(self, display, live_display):
         """
         Create the related widgets for the current display
 
         :param display: The display to be updated.
+        :param live_display: Is the display a live one.
         """
         pass
 
@@ -78,10 +79,11 @@ class MediaPlayer(RegistryProperties):
         """
         pass
 
-    def play(self, display):
+    def play(self, controller, display):
         """
         Starts playing of current Media File
 
+        :param controller: Which Controller is running the show.
         :param display: The display to be updated.
         """
         pass
@@ -137,11 +139,12 @@ class MediaPlayer(RegistryProperties):
         """
         pass
 
-    def update_ui(self, display):
+    def update_ui(self, controller, output_display):
         """
         Do some ui related stuff (e.g. update the seek slider)
 
-        :param display: The display to be updated.
+        :param controller: Which Controller is running the show.
+        :param output_display: The display where the media is
         """
         pass
 
@@ -206,7 +209,7 @@ class MediaPlayer(RegistryProperties):
         :param display: Identify the Display type
         :return: None
         """
-        if display.controller.is_live:
+        if display.is_display:
             self.set_live_state(state)
         else:
             self.set_preview_state(state)

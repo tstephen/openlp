@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 The Themes configuration tab
 """
@@ -45,12 +45,12 @@ class ThemesTab(SettingsTab):
         theme_translated = translate('OpenLP.ThemesTab', 'Themes')
         super(ThemesTab, self).__init__(parent, 'Themes', theme_translated)
 
-    def setupUi(self):
+    def setup_ui(self):
         """
         Set up the UI
         """
         self.setObjectName('ThemesTab')
-        super(ThemesTab, self).setupUi()
+        super(ThemesTab, self).setup_ui()
         self.global_group_box = QtWidgets.QGroupBox(self.left_column)
         self.global_group_box.setObjectName('global_group_box')
         self.global_group_box_layout = QtWidgets.QVBoxLayout(self.global_group_box)
@@ -109,7 +109,7 @@ class ThemesTab(SettingsTab):
         self.default_combo_box.activated.connect(self.on_default_combo_box_changed)
         Registry().register_function('theme_update_list', self.update_theme_list)
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         """
         Translate the UI on the fly
         """
@@ -188,7 +188,7 @@ class ThemesTab(SettingsTab):
         Set the global default theme
         """
         self.global_theme = self.default_combo_box.currentText()
-        self.renderer.set_global_theme()
+        # self.renderer.set_global_theme()
         self._preview_global_theme()
 
     def update_theme_list(self, theme_list):
@@ -204,9 +204,9 @@ class ThemesTab(SettingsTab):
         self.default_combo_box.clear()
         self.default_combo_box.addItems(theme_list)
         find_and_set_in_combo_box(self.default_combo_box, self.global_theme)
-        self.renderer.set_global_theme()
+        # self.renderer.set_global_theme()
         self.renderer.set_theme_level(self.theme_level)
-        if self.global_theme is not '':
+        if self.global_theme != '':
             self._preview_global_theme()
 
     def _preview_global_theme(self):

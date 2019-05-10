@@ -1,30 +1,32 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
+import os
 from tempfile import mkdtemp
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
-from openlp.core.api.deploy import deploy_zipfile, download_sha256, download_and_check
+from openlp.core.api.deploy import deploy_zipfile, download_and_check, download_sha256
 from openlp.core.common.path import Path
+
 
 CONFIG_FILE = '2c266badff1e3d140664c50fd1460a2b332b24d5ad8c267fa62e506b5eb6d894  deploy/site.zip\n2017_06_27'
 
@@ -54,14 +56,15 @@ class TestRemoteDeploy(TestCase):
         # GIVEN: A new downloaded zip file
         mocked_zipfile = MagicMock()
         MockZipFile.return_value = mocked_zipfile
-        root_path = Path('/tmp/remotes')
+        root_path_str = '{sep}tmp{sep}remotes'.format(sep=os.sep)
+        root_path = Path(root_path_str)
 
         # WHEN: deploy_zipfile() is called
         deploy_zipfile(root_path, 'site.zip')
 
         # THEN: the zip file should have been extracted to the right location
-        MockZipFile.assert_called_once_with('/tmp/remotes/site.zip')
-        mocked_zipfile.extractall.assert_called_once_with('/tmp/remotes')
+        MockZipFile.assert_called_once_with(Path('/tmp/remotes/site.zip'))
+        mocked_zipfile.extractall.assert_called_once_with(Path('/tmp/remotes'))
 
     @patch('openlp.core.api.deploy.Registry')
     @patch('openlp.core.api.deploy.get_web_page')

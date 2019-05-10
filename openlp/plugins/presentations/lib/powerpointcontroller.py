@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 This module is for controlling powerpoint. PPT API documentation:
 `http://msdn.microsoft.com/en-us/library/aa269321(office.10).aspx`_
@@ -34,6 +34,7 @@ from openlp.core.common.settings import Settings
 from openlp.core.display.screens import ScreenList
 from openlp.core.lib.ui import critical_error_message_box, translate
 from openlp.plugins.presentations.lib.presentationcontroller import PresentationController, PresentationDocument
+
 
 if is_win():
     from win32com.client import Dispatch
@@ -149,7 +150,7 @@ class PowerpointDocument(PresentationDocument):
             self.create_thumbnails()
             self.create_titles_and_notes()
             # Make sure powerpoint doesn't steal focus, unless we're on a single screen setup
-            if len(ScreenList().screen_list) > 1:
+            if len(ScreenList()) > 1:
                 Registry().get('main_window').activateWindow()
             return True
         except (AttributeError, pywintypes.com_error):
@@ -185,7 +186,7 @@ class PowerpointDocument(PresentationDocument):
         Close presentation and clean up objects. This is triggered by a new object being added to SlideController or
         OpenLP being shut down.
         """
-        log.debug('ClosePresentation')
+        log.debug('close_presentation')
         if self.presentation:
             try:
                 self.presentation.Close()
@@ -195,7 +196,7 @@ class PowerpointDocument(PresentationDocument):
         self.presentation = None
         self.controller.remove_doc(self)
         # Make sure powerpoint doesn't steal focus, unless we're on a single screen setup
-        if len(ScreenList().screen_list) > 1:
+        if len(ScreenList()) > 1:
             Registry().get('main_window').activateWindow()
 
     def is_loaded(self):
@@ -251,7 +252,7 @@ class PowerpointDocument(PresentationDocument):
         if self.presentation_hwnd:
             win32gui.FlashWindowEx(self.presentation_hwnd, win32con.FLASHW_STOP, 0, 0)
         # Make sure powerpoint doesn't steal focus, unless we're on a single screen setup
-        if len(ScreenList().screen_list) > 1:
+        if len(ScreenList()) > 1:
             Registry().get('main_window').activateWindow()
 
     def blank_screen(self):
@@ -314,7 +315,7 @@ class PowerpointDocument(PresentationDocument):
                     dpi = win32ui.GetForegroundWindow().GetDC().GetDeviceCaps(88)
                 except win32ui.error:
                     dpi = 96
-            size = ScreenList().current['size']
+            size = ScreenList().current.display_geometry
             ppt_window = None
             try:
                 ppt_window = self.presentation.SlideShowSettings.Run()
@@ -336,9 +337,14 @@ class PowerpointDocument(PresentationDocument):
                 log.debug('main display size:  y={y:d}, height={height:d}, '
                           'x={x:d}, width={width:d}'.format(y=size.y(), height=size.height(),
                                                             x=size.x(), width=size.width()))
-                win32gui.EnumWindows(self._window_enum_callback, size)
+                try:
+                    win32gui.EnumWindows(self._window_enum_callback, size)
+                except pywintypes.error:
+                    # When _window_enum_callback returns False to stop the enumeration (looping over open windows)
+                    # it causes an exception that is ignored here
+                    pass
             # Make sure powerpoint doesn't steal focus, unless we're on a single screen setup
-            if len(ScreenList().screen_list) > 1:
+            if len(ScreenList()) > 1:
                 Registry().get('main_window').activateWindow()
 
     def _window_enum_callback(self, hwnd, size):
@@ -368,6 +374,10 @@ class PowerpointDocument(PresentationDocument):
             self.presentation_hwnd = hwnd
             # Stop powerpoint from flashing in the taskbar
             win32gui.FlashWindowEx(self.presentation_hwnd, win32con.FLASHW_STOP, 0, 0)
+            # Returning false stops the enumeration (looping over open windows)
+            return False
+        else:
+            return True
 
     def get_slide_number(self):
         """
@@ -378,7 +388,7 @@ class PowerpointDocument(PresentationDocument):
         try:
             # We need 2 approaches to getting the current slide number, because
             # SlideShowWindow.View.Slide.SlideIndex wont work on the end-slide where Slide isn't available, and
-            # SlideShowWindow.View.CurrentShowPosition returns 0 when called when a transistion is executing (in 2013)
+            # SlideShowWindow.View.CurrentShowPosition returns 0 when called when a transition is executing (in 2013)
             # So we use SlideShowWindow.View.Slide.SlideIndex unless the state is done (ppSlideShowDone = 5)
             if self.presentation.SlideShowWindow.View.State != 5:
                 ret = self.presentation.SlideShowWindow.View.Slide.SlideNumber
@@ -442,7 +452,7 @@ class PowerpointDocument(PresentationDocument):
         if self.presentation_hwnd:
             win32gui.FlashWindowEx(self.presentation_hwnd, win32con.FLASHW_STOP, 0, 0)
         # Make sure powerpoint doesn't steal focus, unless we're on a single screen setup
-        if len(ScreenList().screen_list) > 1:
+        if len(ScreenList()) > 1:
             Registry().get('main_window').activateWindow()
 
     def previous_step(self):
@@ -489,7 +499,8 @@ class PowerpointDocument(PresentationDocument):
             except Exception:
                 log.exception('Exception raised when getting title text')
                 text = ''
-            titles.append(text.replace('\n', ' ').replace('\x0b', ' ') + '\n')
+            slide_title = text.replace('\r\n', ' ').replace('\n', ' ').replace('\x0b', ' ').strip()
+            titles.append(slide_title)
             note = _get_text_from_shapes(slide.NotesPage.Shapes)
             if len(note) == 0:
                 note = ' '

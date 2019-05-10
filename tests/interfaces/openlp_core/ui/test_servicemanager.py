@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
     Package to test the openlp.core.lib package.
 """
@@ -28,7 +28,7 @@ from unittest.mock import MagicMock, patch
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from openlp.core.common.registry import Registry
-from openlp.core.lib.serviceitem import ServiceItem, ItemCapabilities
+from openlp.core.lib.serviceitem import ItemCapabilities, ServiceItem
 from openlp.core.ui.servicemanager import ServiceManager
 from tests.helpers.testmixin import TestMixin
 
@@ -226,8 +226,8 @@ class TestServiceManager(TestCase, TestMixin):
             # A service item without capabilities.
             service_item = ServiceItem()
             service_item.add_capability(ItemCapabilities.CanLoop)
-            service_item._raw_frames.append("One")
-            service_item._raw_frames.append("Two")
+            service_item.slides.append("One")
+            service_item.slides.append("Two")
             self.service_manager.service_items = [{'service_item': service_item}]
             q_point = None
             # Mocked actions.

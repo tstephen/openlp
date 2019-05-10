@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 Provides the generic functions for interfacing plugins with the Media Manager.
 """
@@ -28,19 +28,19 @@ import re
 from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.common.i18n import UiStrings, translate
-from openlp.core.ui.icons import UiIcons
 from openlp.core.common.mixins import RegistryProperties
-from openlp.core.common.path import path_to_str, str_to_path
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.lib import ServiceItemContext
 from openlp.core.lib.plugin import StringContent
 from openlp.core.lib.serviceitem import ServiceItem
 from openlp.core.lib.ui import create_widget_action, critical_error_message_box
+from openlp.core.ui.icons import UiIcons
 from openlp.core.widgets.dialogs import FileDialog
 from openlp.core.widgets.edits import SearchEdit
 from openlp.core.widgets.toolbar import OpenLPToolbar
 from openlp.core.widgets.views import ListWidgetWithDnD
+
 
 log = logging.getLogger(__name__)
 
@@ -108,8 +108,8 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
         self.page_layout.setSpacing(0)
         self.page_layout.setContentsMargins(0, 0, 0, 0)
         self.required_icons()
-        self.setupUi()
-        self.retranslateUi()
+        self.setup_ui()
+        self.retranslate_ui()
         self.auto_select_id = -1
 
     def setup_item(self):
@@ -133,7 +133,7 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
         self.can_make_live = True
         self.can_add_to_service = True
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         """
         This method is called automatically to provide OpenLP with the opportunity to translate the ``MediaManagerItem``
         to another language.
@@ -148,7 +148,7 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
             self.toolbar = OpenLPToolbar(self)
             self.page_layout.addWidget(self.toolbar)
 
-    def setupUi(self):
+    def setup_ui(self):
         """
         This method sets up the interface on the button. Plugin developers use this to add and create toolbars, and the
         rest of the interface of the media manager item.
@@ -332,7 +332,7 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
             self.validate_and_load(file_paths)
         self.application.set_normal_cursor()
 
-    def load_file(self, data):
+    def handle_mime_data(self, data):
         """
         Turn file from Drag and Drop into an array so the Validate code can run it.
 
@@ -378,11 +378,11 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
         duplicates_found = False
         files_added = False
         for file_path in file_paths:
-            if path_to_str(file_path) in full_list:
+            if file_path in full_list:
                 duplicates_found = True
             else:
                 files_added = True
-                full_list.append(path_to_str(file_path))
+                full_list.append(file_path)
         if full_list and files_added:
             if target_group is None:
                 self.list_view.clear()
@@ -415,8 +415,8 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
         file_paths = []
         for index in range(self.list_view.count()):
             list_item = self.list_view.item(index)
-            filename = list_item.data(QtCore.Qt.UserRole)
-            file_paths.append(str_to_path(filename))
+            file_path = list_item.data(QtCore.Qt.UserRole)
+            file_paths.append(file_path)
         return file_paths
 
     def load_list(self, load_list, target_group):
@@ -453,15 +453,16 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
         """
         pass
 
-    def generate_slide_data(self, service_item, item=None, xml_version=False, remote=False,
-                            context=ServiceItemContext.Live):
+    def generate_slide_data(self, service_item, *, item=None, remote=False, context=ServiceItemContext.Live,
+                            file_path=None):
         """
         Generate the slide data. Needs to be implemented by the plugin.
+
         :param service_item: The service Item to be processed
         :param item: The database item to be used to build the service item
-        :param xml_version:
         :param remote: Was this remote triggered (False)
         :param context: The service context
+        :param openlp.core.common.path.Path file_path:
         """
         raise NotImplementedError('MediaManagerItem.generate_slide_data needs to be defined by the plugin')
 
@@ -593,7 +594,7 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
         :param remote: Triggered from remote
         :param position: Position to place item
         """
-        service_item = self.build_service_item(item, True, remote=remote, context=ServiceItemContext.Service)
+        service_item = self.build_service_item(item, remote=remote, context=ServiceItemContext.Service)
         if service_item:
             service_item.from_plugin = False
             self.service_manager.add_service_item(service_item, replace=replace, position=position)
@@ -623,17 +624,16 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
                                                             'You must select a {title} '
                                                             'service item.').format(title=self.title))
 
-    def build_service_item(self, item=None, xml_version=False, remote=False, context=ServiceItemContext.Live):
+    def build_service_item(self, item=None, remote=False, context=ServiceItemContext.Live):
         """
         Common method for generating a service item
         :param item: Service Item to be built.
-        :param xml_version: version of XML (False)
         :param remote: Remote triggered (False)
         :param context: The context on which this is called
         """
         service_item = ServiceItem(self.plugin)
         service_item.add_icon()
-        if self.generate_slide_data(service_item, item, xml_version, remote, context):
+        if self.generate_slide_data(service_item, item=item, remote=remote, context=context):
             return service_item
         else:
             return None

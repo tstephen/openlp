@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 Provide the theme XML and handling functions for OpenLP v2 themes.
 """
@@ -31,7 +31,8 @@ from openlp.core.common import de_hump
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.json import OpenLPJsonDecoder, OpenLPJsonEncoder
 from openlp.core.display.screens import ScreenList
-from openlp.core.lib import str_to_bool, get_text_file_string
+from openlp.core.lib import get_text_file_string, str_to_bool
+
 
 log = logging.getLogger(__name__)
 
@@ -45,6 +46,7 @@ class BackgroundType(object):
     Image = 2
     Transparent = 3
     Video = 4
+    Stream = 5
 
     @staticmethod
     def to_string(background_type):
@@ -61,6 +63,8 @@ class BackgroundType(object):
             return 'transparent'
         elif background_type == BackgroundType.Video:
             return 'video'
+        elif background_type == BackgroundType.Stream:
+            return 'stream'
 
     @staticmethod
     def from_string(type_string):
@@ -77,6 +81,8 @@ class BackgroundType(object):
             return BackgroundType.Transparent
         elif type_string == 'video':
             return BackgroundType.Video
+        elif type_string == 'stream':
+            return BackgroundType.Stream
 
 
 class BackgroundGradientType(object):
@@ -197,13 +203,13 @@ class Theme(object):
         Set the header and footer size into the current primary screen.
         10 px on each side is removed to allow for a border.
         """
-        current_screen = ScreenList().current
+        current_screen_geometry = ScreenList().current.display_geometry
         self.font_main_y = 0
-        self.font_main_width = current_screen['size'].width() - 20
-        self.font_main_height = current_screen['size'].height() * 9 / 10
-        self.font_footer_width = current_screen['size'].width() - 20
-        self.font_footer_y = current_screen['size'].height() * 9 / 10
-        self.font_footer_height = current_screen['size'].height() / 10
+        self.font_main_width = current_screen_geometry.width() - 20
+        self.font_main_height = current_screen_geometry.height() * 9 / 10
+        self.font_footer_width = current_screen_geometry.width() - 20
+        self.font_footer_y = current_screen_geometry.height() * 9 / 10
+        self.font_footer_height = current_screen_geometry.height() / 10
 
     def load_theme(self, theme, theme_path=None):
         """
@@ -327,7 +333,7 @@ class Theme(object):
         else:
             # make string value unicode
             if not isinstance(value, str):
-                value = str(str(value), 'utf-8')
+                value = str(value, 'utf-8')
             # None means an empty string so lets have one.
             if value == 'None':
                 value = ''

@@ -1,32 +1,32 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 Functional tests to test the AppLocation class and related methods.
 """
 from unittest import TestCase
 from unittest.mock import MagicMock, call, patch
 
-from openlp.core.common import clean_button_text, de_hump, extension_loader, is_macosx, is_linux, \
-    is_win, normalize_str, path_to_module, trace_error_handler
+from openlp.core.common import clean_button_text, de_hump, extension_loader, is_linux, is_macosx, is_win, \
+    normalize_str, path_to_module, trace_error_handler
 from openlp.core.common.path import Path
 
 
@@ -88,7 +88,7 @@ class TestCommonFunctions(TestCase):
             extension_loader('glob')
 
             # THEN: The `ImportError` should be caught and logged
-            assert mocked_logger.warning.called
+            assert mocked_logger.exception.called
 
     def test_extension_loader_os_error(self):
         """
@@ -106,7 +106,7 @@ class TestCommonFunctions(TestCase):
             extension_loader('glob')
 
             # THEN: The `OSError` should be caught and logged
-            assert mocked_logger.warning.called
+            assert mocked_logger.exception.called
 
     def test_de_hump_conversion(self):
         """
@@ -139,13 +139,13 @@ class TestCommonFunctions(TestCase):
         Test `path_to_module` when supplied with a `Path` object
         """
         # GIVEN: A `Path` object
-        path = Path('core', 'ui', 'media', 'webkitplayer.py')
+        path = Path('core', 'ui', 'media', 'vlcplayer.py')
 
         # WHEN: Calling path_to_module with the `Path` object
         result = path_to_module(path)
 
         # THEN: path_to_module should return the module name
-        assert result == 'openlp.core.ui.media.webkitplayer'
+        assert result == 'openlp.core.ui.media.vlcplayer'
 
     def test_trace_error_handler(self):
         """

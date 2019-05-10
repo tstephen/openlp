@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 Provides the store and management for Images automatically caching them and resizing them when needed. Only one copy of
 each image is needed in the system. A Thread is used to convert the image to a byte array so the user does not need to
@@ -34,8 +34,9 @@ from PyQt5 import QtCore
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.display.screens import ScreenList
-from openlp.core.lib import resize_image, image_to_byte
+from openlp.core.lib import image_to_byte, resize_image
 from openlp.core.threading import ThreadWorker, run_thread
+
 
 log = logging.getLogger(__name__)
 
@@ -184,8 +185,8 @@ class ImageManager(QtCore.QObject):
         super(ImageManager, self).__init__()
         Registry().register('image_manager', self)
         current_screen = ScreenList().current
-        self.width = current_screen['size'].width()
-        self.height = current_screen['size'].height()
+        self.width = current_screen.display_geometry.width()
+        self.height = current_screen.display_geometry.height()
         self._cache = {}
         self._conversion_queue = PriorityQueue()
         self.stop_manager = False
@@ -197,8 +198,8 @@ class ImageManager(QtCore.QObject):
         """
         log.debug('update_display')
         current_screen = ScreenList().current
-        self.width = current_screen['size'].width()
-        self.height = current_screen['size'].height()
+        self.width = current_screen.display_geometry.width()
+        self.height = current_screen.display_geometry.height()
         # Mark the images as dirty for a rebuild by setting the image and byte stream to None.
         for image in list(self._cache.values()):
             self._reset_image(image)

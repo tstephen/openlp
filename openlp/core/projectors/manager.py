@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 :mod: openlp.core.ui.projector.manager` module
 
@@ -30,44 +30,24 @@ import logging
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from openlp.core.common.i18n import translate
-from openlp.core.ui.icons import UiIcons
 from openlp.core.common.mixins import LogMixin, RegistryProperties
 from openlp.core.common.registry import Registry, RegistryBase
 from openlp.core.common.settings import Settings
 from openlp.core.lib.ui import create_widget_action
 from openlp.core.projectors import DialogSourceStyle
-from openlp.core.projectors.constants import E_AUTHENTICATION, E_ERROR, E_NETWORK, E_NOT_CONNECTED, \
-    E_SOCKET_TIMEOUT, E_UNKNOWN_SOCKET_ERROR, S_CONNECTED, S_CONNECTING, S_COOLDOWN, S_INITIALIZE, \
-    S_NOT_CONNECTED, S_OFF, S_ON, S_STANDBY, S_WARMUP, STATUS_CODE, STATUS_MSG, QSOCKET_STATE
+from openlp.core.projectors.constants import E_AUTHENTICATION, E_ERROR, E_NETWORK, E_NOT_CONNECTED, E_SOCKET_TIMEOUT,\
+    E_UNKNOWN_SOCKET_ERROR, QSOCKET_STATE, S_CONNECTED, S_CONNECTING, S_COOLDOWN, S_INITIALIZE, S_NOT_CONNECTED, S_OFF,\
+    S_ON, S_STANDBY, S_WARMUP, STATUS_CODE, STATUS_MSG
 
 from openlp.core.projectors.db import ProjectorDB
 from openlp.core.projectors.editform import ProjectorEditForm
 from openlp.core.projectors.pjlink import PJLink, PJLinkUDP
-from openlp.core.projectors.sourceselectform import SourceSelectTabs, SourceSelectSingle
+from openlp.core.projectors.sourceselectform import SourceSelectSingle, SourceSelectTabs
+from openlp.core.ui.icons import UiIcons
 from openlp.core.widgets.toolbar import OpenLPToolbar
 
 log = logging.getLogger(__name__)
 log.debug('projectormanager loaded')
-
-
-# Dict for matching projector status to display icon
-STATUS_ICONS = {
-    S_NOT_CONNECTED: ':/projector/projector_item_disconnect.png',
-    S_CONNECTING: ':/projector/projector_item_connect.png',
-    S_CONNECTED: ':/projector/projector_off.png',
-    S_OFF: ':/projector/projector_off.png',
-    S_INITIALIZE: ':/projector/projector_off.png',
-    S_STANDBY: ':/projector/projector_off.png',
-    S_WARMUP: ':/projector/projector_warmup.png',
-    S_ON: ':/projector/projector_on.png',
-    S_COOLDOWN: ':/projector/projector_cooldown.png',
-    E_ERROR: ':/projector/projector_error.png',
-    E_NETWORK: ':/projector/projector_not_connected_error.png',
-    E_SOCKET_TIMEOUT: ':/projector/projector_not_connected_error.png',
-    E_AUTHENTICATION: ':/projector/projector_not_connected_error.png',
-    E_UNKNOWN_SOCKET_ERROR: ':/projector/projector_not_connected_error.png',
-    E_NOT_CONNECTED: ':/projector/projector_not_connected_error.png'
-}
 
 
 class UiProjectorManager(object):
@@ -121,7 +101,7 @@ class UiProjectorManager(object):
         self.one_toolbar.add_toolbar_action('connect_projector',
                                             text=translate('OpenLP.ProjectorManager',
                                                            'Connect to selected projector.'),
-                                            icon=UiIcons().projector_connect,
+                                            icon=UiIcons().projector_select_connect,
                                             tooltip=translate('OpenLP.ProjectorManager',
                                                               'Connect to selected projector.'),
                                             triggers=self.on_connect_projector)
@@ -135,7 +115,7 @@ class UiProjectorManager(object):
         self.one_toolbar.add_toolbar_action('disconnect_projector',
                                             text=translate('OpenLP.ProjectorManager',
                                                            'Disconnect from selected projectors'),
-                                            icon=UiIcons().projector_disconnect,
+                                            icon=UiIcons().projector_select_disconnect,
                                             tooltip=translate('OpenLP.ProjectorManager',
                                                               'Disconnect from selected projector.'),
                                             triggers=self.on_disconnect_projector)
@@ -150,7 +130,7 @@ class UiProjectorManager(object):
         self.one_toolbar.add_toolbar_action('poweron_projector',
                                             text=translate('OpenLP.ProjectorManager',
                                                            'Power on selected projector'),
-                                            icon=UiIcons().projector_on,
+                                            icon=UiIcons().projector_power_on,
                                             tooltip=translate('OpenLP.ProjectorManager',
                                                               'Power on selected projector.'),
                                             triggers=self.on_poweron_projector)
@@ -163,7 +143,7 @@ class UiProjectorManager(object):
                                             triggers=self.on_poweron_projector)
         self.one_toolbar.add_toolbar_action('poweroff_projector',
                                             text=translate('OpenLP.ProjectorManager', 'Standby selected projector'),
-                                            icon=UiIcons().projector_off,
+                                            icon=UiIcons().projector_power_off,
                                             tooltip=translate('OpenLP.ProjectorManager',
                                                               'Put selected projector in standby.'),
                                             triggers=self.on_poweroff_projector)
@@ -308,7 +288,7 @@ class ProjectorManager(QtWidgets.QWidget, RegistryBase, UiProjectorManager, LogM
             S_INITIALIZE: UiIcons().projector_on,
             S_STANDBY: UiIcons().projector_off,
             S_WARMUP: UiIcons().projector_warmup,
-            S_ON: UiIcons().projector_off,
+            S_ON: UiIcons().projector_on,
             S_COOLDOWN: UiIcons().projector_cooldown,
             E_ERROR: UiIcons().projector_error,
             E_NETWORK: UiIcons().error,
@@ -879,6 +859,7 @@ class ProjectorManager(QtWidgets.QWidget, RegistryBase, UiProjectorManager, LogM
         """
         Update the icons when the selected projectors change
         """
+        log.debug('update_icons(): Checking for selected projector items in list')
         count = len(self.projector_list_widget.selectedItems())
         projector = None
         if count == 0:
@@ -899,6 +880,7 @@ class ProjectorManager(QtWidgets.QWidget, RegistryBase, UiProjectorManager, LogM
             self.get_toolbar_item('blank_projector_multiple', hidden=True)
             self.get_toolbar_item('show_projector_multiple', hidden=True)
         elif count == 1:
+            log.debug('update_icons(): Found one item selected')
             projector = self.projector_list_widget.selectedItems()[0].data(QtCore.Qt.UserRole)
             connected = QSOCKET_STATE[projector.link.state()] == S_CONNECTED
             power = projector.link.power == S_ON
@@ -909,12 +891,14 @@ class ProjectorManager(QtWidgets.QWidget, RegistryBase, UiProjectorManager, LogM
             self.get_toolbar_item('blank_projector_multiple', hidden=True)
             self.get_toolbar_item('show_projector_multiple', hidden=True)
             if connected:
+                log.debug('update_icons(): Updating icons for connected state')
                 self.get_toolbar_item('view_projector', enabled=True)
                 self.get_toolbar_item('source_view_projector',
-                                      enabled=connected and power and projector.link.source_available is not None)
+                                      enabled=projector.link.source_available is not None and connected and power)
                 self.get_toolbar_item('edit_projector', hidden=True)
                 self.get_toolbar_item('delete_projector', hidden=True)
             else:
+                log.debug('update_icons(): Updating for not connected state')
                 self.get_toolbar_item('view_projector', hidden=True)
                 self.get_toolbar_item('source_view_projector', hidden=True)
                 self.get_toolbar_item('edit_projector', enabled=True)
@@ -930,6 +914,7 @@ class ProjectorManager(QtWidgets.QWidget, RegistryBase, UiProjectorManager, LogM
                 self.get_toolbar_item('blank_projector', enabled=False)
                 self.get_toolbar_item('show_projector', enabled=False)
         else:
+            log.debug('update_icons(): Updating for multiple items selected')
             self.get_toolbar_item('edit_projector', enabled=False)
             self.get_toolbar_item('delete_projector', enabled=False)
             self.get_toolbar_item('view_projector', hidden=True)

@@ -1,31 +1,30 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 The service manager sets up, loads, saves and manages services.
 """
 import html
 import json
 import os
-import shutil
 import zipfile
 from contextlib import suppress
 from datetime import datetime, timedelta
@@ -37,17 +36,17 @@ from openlp.core.common import ThemeLevel, delete_file
 from openlp.core.common.actions import ActionList, CategoryOrder
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.i18n import UiStrings, format_time, translate
-from openlp.core.ui.icons import UiIcons
 from openlp.core.common.json import OpenLPJsonDecoder, OpenLPJsonEncoder
 from openlp.core.common.mixins import LogMixin, RegistryProperties
-from openlp.core.common.path import Path, str_to_path
+from openlp.core.common.path import Path
 from openlp.core.common.registry import Registry, RegistryBase
 from openlp.core.common.settings import Settings
 from openlp.core.lib import build_icon
-from openlp.core.lib.plugin import PluginStatus
-from openlp.core.lib.serviceitem import ServiceItem, ItemCapabilities
 from openlp.core.lib.exceptions import ValidationError
-from openlp.core.lib.ui import critical_error_message_box, create_widget_action, find_and_set_in_combo_box
+from openlp.core.lib.plugin import PluginStatus
+from openlp.core.lib.serviceitem import ItemCapabilities, ServiceItem
+from openlp.core.lib.ui import create_widget_action, critical_error_message_box, find_and_set_in_combo_box
+from openlp.core.ui.icons import UiIcons
 from openlp.core.ui.serviceitemeditform import ServiceItemEditForm
 from openlp.core.ui.servicenoteform import ServiceNoteForm
 from openlp.core.ui.starttimeform import StartTimeForm
@@ -234,7 +233,7 @@ class Ui_ServiceManager(object):
         self.service_manager_list.itemExpanded.connect(self.expanded)
         # Last little bits of setting up
         self.service_theme = Settings().value(self.main_window.service_manager_settings_section + '/service theme')
-        self.service_path = str(AppLocation.get_section_data_path('servicemanager'))
+        self.service_path = AppLocation.get_section_data_path('servicemanager')
         # build the drag and drop context menu
         self.dnd_menu = QtWidgets.QMenu()
         self.new_action = self.dnd_menu.addAction(translate('OpenLP.ServiceManager', '&Add New Item'))
@@ -431,11 +430,20 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
                     return False
         self.new_file()
 
-    def on_load_service_clicked(self, load_file=None):
+    def on_load_service_clicked(self, checked):
+        """
+        Handle the `fileOpenItem` action
+
+        :param bool checked: Not used.
+        :rtype: None
+        """
+        self.load_service()
+
+    def load_service(self, file_path=None):
         """
         Loads the service file and saves the existing one it there is one unchanged.
 
-        :param load_file: The service file to the loaded.  Will be None is from menu so selection will be required.
+        :param openlp.core.common.path.Path | None file_path: The service file to the loaded.
         """
         if self.is_modified():
             result = self.save_modified_service()
@@ -443,7 +451,7 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
                 return False
             elif result == QtWidgets.QMessageBox.Save:
                 self.decide_save_method()
-        if not load_file:
+        if not file_path:
             file_path, filter_used = FileDialog.getOpenFileName(
                 self.main_window,
                 translate('OpenLP.ServiceManager', 'Open File'),
@@ -451,8 +459,6 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
                 translate('OpenLP.ServiceManager', 'OpenLP Service Files (*.osz *.oszl)'))
             if not file_path:
                 return False
-        else:
-            file_path = str_to_path(load_file)
         Settings().setValue(self.main_window.service_manager_settings_section + '/last directory', file_path.parent)
         self.load_file(file_path)
 
@@ -590,11 +596,11 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
                 self.main_window.increment_progress_bar(service_content_size)
                 # Finally add all the listed media files.
                 for write_path in write_list:
-                    zip_file.write(str(write_path), str(write_path))
+                    zip_file.write(write_path, write_path)
                     self.main_window.increment_progress_bar(write_path.stat().st_size)
                 with suppress(FileNotFoundError):
                     file_path.unlink()
-                os.link(temp_file.name, str(file_path))
+                os.link(temp_file.name, file_path)
             Settings().setValue(self.main_window.service_manager_settings_section + '/last directory', file_path.parent)
         except (PermissionError, OSError) as error:
             self.log_exception('Failed to save service to disk: {name}'.format(name=file_path))
@@ -671,15 +677,16 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
 
     def load_file(self, file_path):
         """
-        Load an existing service file
-        :param file_path:
+        Load an existing service file.
+
+        :param openlp.core.common.path.Path file_path: The service file to load.
         """
         if not file_path.exists():
             return False
         service_data = None
         self.application.set_busy_cursor()
         try:
-            with zipfile.ZipFile(str(file_path)) as zip_file:
+            with zipfile.ZipFile(file_path) as zip_file:
                 compressed_size = 0
                 for zip_info in zip_file.infolist():
                     compressed_size += zip_info.compress_size
@@ -692,7 +699,7 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
                             service_data = json_file.read()
                     else:
                         zip_info.filename = os.path.basename(zip_info.filename)
-                        zip_file.extract(zip_info, str(self.service_path))
+                        zip_file.extract(zip_info, self.service_path)
                     self.main_window.increment_progress_bar(zip_info.compress_size)
             if service_data:
                 items = json.loads(service_data, cls=OpenLPJsonDecoder)
@@ -705,11 +712,13 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
             else:
                 raise ValidationError(msg='No service data found')
         except (NameError, OSError, ValidationError, zipfile.BadZipFile):
+            self.application.set_normal_cursor()
             self.log_exception('Problem loading service file {name}'.format(name=file_path))
             critical_error_message_box(
                 message=translate('OpenLP.ServiceManager',
-                                  'The service file {file_path} could not be loaded because it is either corrupt, or '
-                                  'not a valid OpenLP 2 or OpenLP 3 service file.'.format(file_path=file_path)))
+                                  'The service file {file_path} could not be loaded because it is either corrupt, '
+                                  'inaccessible, or not a valid OpenLP 2 or OpenLP 3 service file.'
+                                  ).format(file_path=file_path))
         self.main_window.finished_progress_bar()
         self.application.set_normal_cursor()
         self.repaint_service_list(-1, -1)
@@ -730,7 +739,9 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
                 if theme:
                     find_and_set_in_combo_box(self.theme_combo_box, theme, set_missing=False)
                     if theme == self.theme_combo_box.currentText():
-                        self.renderer.set_service_theme(theme)
+                        # TODO: Use a local display widget
+                        # self.preview_display.set_theme(get_theme_from_name(theme))
+                        pass
             else:
                 if self._save_lite:
                     service_item.set_from_service(item)
@@ -1166,7 +1177,7 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
         # Repaint the screen
         self.service_manager_list.clear()
         self.service_manager_list.clearSelection()
-        for item_count, item in enumerate(self.service_items):
+        for item_index, item in enumerate(self.service_items):
             service_item_from_item = item['service_item']
             tree_widget_item = QtWidgets.QTreeWidgetItem(self.service_manager_list)
             if service_item_from_item.is_valid:
@@ -1215,17 +1226,17 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
             tree_widget_item.setData(0, QtCore.Qt.UserRole, item['order'])
             tree_widget_item.setSelected(item['selected'])
             # Add the children to their parent tree_widget_item.
-            for count, frame in enumerate(service_item_from_item.get_frames()):
+            for slide_index, slide in enumerate(service_item_from_item.slides):
                 child = QtWidgets.QTreeWidgetItem(tree_widget_item)
                 # prefer to use a display_title
                 if service_item_from_item.is_capable(ItemCapabilities.HasDisplayTitle):
-                    text = frame['display_title'].replace('\n', ' ')
+                    text = slide['display_title'].replace('\n', ' ')
                 else:
-                    text = frame['title'].replace('\n', ' ')
+                    text = slide['title'].replace('\n', ' ')
                 child.setText(0, text[:40])
-                child.setData(0, QtCore.Qt.UserRole, count)
-                if service_item == item_count:
-                    if item['expanded'] and service_item_child == count:
+                child.setData(0, QtCore.Qt.UserRole, slide_index)
+                if service_item == item_index:
+                    if item['expanded'] and service_item_child == slide_index:
                         self.service_manager_list.setCurrentItem(child)
                     elif service_item_child == -1:
                         self.service_manager_list.setCurrentItem(tree_widget_item)
@@ -1235,11 +1246,11 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
         """
         Empties the service_path of temporary files on system exit.
         """
-        for file_name in os.listdir(self.service_path):
-            file_path = Path(self.service_path, file_name)
+        for file_path in self.service_path.iterdir():
             delete_file(file_path)
-        if os.path.exists(os.path.join(self.service_path, 'audio')):
-            shutil.rmtree(os.path.join(self.service_path, 'audio'), True)
+        audio_path = self.service_path / 'audio'
+        if audio_path.exists():
+            audio_path.rmtree(True)
 
     def on_theme_combo_box_selected(self, current_index):
         """
@@ -1248,7 +1259,8 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
         :param current_index: The combo box index for the selected item
         """
         self.service_theme = self.theme_combo_box.currentText()
-        self.renderer.set_service_theme(self.service_theme)
+        # TODO: Use a local display widget
+        # self.preview_display.set_theme(get_theme_from_name(theme))
         Settings().setValue(self.main_window.service_manager_settings_section + '/service theme', self.service_theme)
         self.regenerate_service_items(True)
 
@@ -1340,7 +1352,7 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
             self.repaint_service_list(s_item, child)
             self.live_controller.replace_service_manager_item(item)
         else:
-            item.render()
+            # item.render()
             # nothing selected for dnd
             if self.drop_position == -1:
                 if isinstance(item, list):
@@ -1516,12 +1528,12 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
             event.setDropAction(QtCore.Qt.CopyAction)
             event.accept()
             for url in link.urls():
-                file_name = url.toLocalFile()
-                if file_name.endswith('.osz'):
-                    self.on_load_service_clicked(file_name)
-                elif file_name.endswith('.oszl'):
+                file_path = Path(url.toLocalFile())
+                if file_path.suffix == '.osz':
+                    self.load_service(file_path)
+                elif file_path.suffix == '.oszl':
                     # todo correct
-                    self.on_load_service_clicked(file_name)
+                    self.load_service(file_path)
         elif link.hasText():
             plugin = link.text()
             item = self.service_manager_list.itemAt(event.pos())
@@ -1589,7 +1601,8 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
             theme_group.addAction(create_widget_action(self.theme_menu, theme, text=theme, checked=False,
                                   triggers=self.on_theme_change_action))
         find_and_set_in_combo_box(self.theme_combo_box, self.service_theme)
-        self.renderer.set_service_theme(self.service_theme)
+        # TODO: Sort this out
+        # self.renderer.set_service_theme(self.service_theme)
         self.regenerate_service_items()
 
     def on_theme_change_action(self):

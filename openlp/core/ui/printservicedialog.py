@@ -1,28 +1,28 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 The UI widgets of the print service dialog.
 """
-from PyQt5 import QtCore, QtWidgets, QtPrintSupport
+from PyQt5 import QtCore, QtPrintSupport, QtWidgets
 
 from openlp.core.common.i18n import UiStrings, translate
 from openlp.core.ui.icons import UiIcons
@@ -45,7 +45,7 @@ class Ui_PrintServiceDialog(object):
     """
     The UI of the print service dialog
     """
-    def setupUi(self, print_service_dialog):
+    def setup_ui(self, print_service_dialog):
         """
         Set up the UI
         """
@@ -127,10 +127,10 @@ class Ui_PrintServiceDialog(object):
         self.options_group_box.setLayout(self.group_layout)
         self.options_layout.addWidget(self.options_group_box)
 
-        self.retranslateUi(print_service_dialog)
+        self.retranslate_ui(print_service_dialog)
         self.options_button.toggled.connect(self.toggle_options)
 
-    def retranslateUi(self, print_service_dialog):
+    def retranslate_ui(self, print_service_dialog):
         """
         Translate the UI on the fly
         """

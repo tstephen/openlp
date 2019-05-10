@@ -1,32 +1,32 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 The bible import functions for OpenLP
 """
 import logging
 import urllib.error
 
-from PyQt5 import QtWidgets
 from lxml import etree
+from PyQt5 import QtWidgets
 
 try:
     from pysword import modules
@@ -36,7 +36,7 @@ except ImportError:
 
 from openlp.core.common import trace_error_handler
 from openlp.core.common.applocation import AppLocation
-from openlp.core.common.i18n import UiStrings, translate, get_locale_key
+from openlp.core.common.i18n import UiStrings, get_locale_key, translate
 from openlp.core.common.settings import Settings
 from openlp.core.lib.db import delete_database
 from openlp.core.lib.exceptions import ValidationError
@@ -44,8 +44,9 @@ from openlp.core.lib.ui import critical_error_message_box
 from openlp.core.widgets.edits import PathEdit
 from openlp.core.widgets.wizard import OpenLPWizard, WizardStrings
 from openlp.plugins.bibles.lib.db import clean_filename
-from openlp.plugins.bibles.lib.importers.http import CWExtract, BGExtract, BSExtract
+from openlp.plugins.bibles.lib.importers.http import BGExtract, BSExtract, CWExtract
 from openlp.plugins.bibles.lib.manager import BibleFormat
+
 
 log = logging.getLogger(__name__)
 
@@ -82,11 +83,11 @@ class BibleImportForm(OpenLPWizard):
         super(BibleImportForm, self).__init__(parent, bible_plugin,
                                               'bibleImportWizard', ':/wizards/wizard_importbible.bmp')
 
-    def setupUi(self, image):
+    def setup_ui(self, image):
         """
         Set up the UI for the bible wizard.
         """
-        super(BibleImportForm, self).setupUi(image)
+        super(BibleImportForm, self).setup_ui(image)
         self.format_combo_box.currentIndexChanged.connect(self.on_current_index_changed)
 
     def on_current_index_changed(self, index):
@@ -364,7 +365,7 @@ class BibleImportForm(OpenLPWizard):
         self.license_details_layout.setWidget(3, QtWidgets.QFormLayout.FieldRole, self.full_license_edit)
         self.addPage(self.license_details_page)
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         """
         Allow for localisation of the bible import wizard.
         """
@@ -462,14 +463,14 @@ class BibleImportForm(OpenLPWizard):
                         UiStrings().NFSs, translate('BiblesPlugin.ImportWizardForm',
                                                     'You need to specify a file with books of the Bible to use in the '
                                                     'import.'))
-                    self.csv_books_edit.setFocus()
+                    self.csv_books_path_edit.setFocus()
                     return False
                 elif not self.field('csv_versefile'):
                     critical_error_message_box(
                         UiStrings().NFSs,
                         translate('BiblesPlugin.ImportWizardForm', 'You need to specify a file of Bible verses to '
                                                                    'import.'))
-                    self.csv_verses_edit.setFocus()
+                    self.csv_verses_pathedit.setFocus()
                     return False
             elif self.field('source_format') == BibleFormat.OpenSong:
                 if not self.field('opensong_file'):

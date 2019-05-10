@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 
 # OOo API documentation:
 # http://api.openoffice.org/docs/common/ref/com/sun/star/presentation/XSlideShowController.html
@@ -42,9 +42,11 @@ from openlp.core.display.screens import ScreenList
 from openlp.plugins.presentations.lib.presentationcontroller import PresentationController, PresentationDocument, \
     TextType
 
+
 if is_win():
     from win32com.client import Dispatch
     import pywintypes
+    uno_available = False
     # Declare an empty exception to match the exception imported from UNO
 
     class ErrorCodeIOException(Exception):
@@ -239,7 +241,7 @@ class ImpressDocument(PresentationDocument):
             log.warning('Failed to load presentation {url}'.format(url=url))
             return False
         self.presentation = self.document.getPresentation()
-        self.presentation.Display = ScreenList().current['number'] + 1
+        self.presentation.Display = ScreenList().current.number + 1
         self.control = None
         self.create_thumbnails()
         self.create_titles_and_notes()
@@ -386,7 +388,7 @@ class ImpressDocument(PresentationDocument):
             self.control.activate()
             self.goto_slide(1)
         # Make sure impress doesn't steal focus, unless we're on a single screen setup
-        if len(ScreenList().screen_list) > 1:
+        if len(ScreenList()) > 1:
             Registry().get('main_window').activateWindow()
 
     def get_slide_number(self):
@@ -474,7 +476,8 @@ class ImpressDocument(PresentationDocument):
         notes = []
         pages = self.document.getDrawPages()
         for slide_no in range(1, pages.getCount() + 1):
-            titles.append(self.__get_text_from_page(slide_no, TextType.Title).replace('\n', ' ') + '\n')
+            titles.append(self.__get_text_from_page(slide_no, TextType.Title).replace('\r\n', ' ')
+                                                                             .replace('\n', ' ').strip())
             note = self.__get_text_from_page(slide_no, TextType.Notes)
             if len(note) == 0:
                 note = ' '

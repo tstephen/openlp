@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 The actual print service dialog
 """
@@ -26,7 +26,7 @@ import datetime
 import html
 
 import lxml.html
-from PyQt5 import QtCore, QtGui, QtWidgets, QtPrintSupport
+from PyQt5 import QtCore, QtGui, QtPrintSupport, QtWidgets
 
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.i18n import UiStrings, translate
@@ -35,6 +35,7 @@ from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.lib import get_text_file_string, image_to_byte
 from openlp.core.ui.printservicedialog import Ui_PrintServiceDialog, ZoomSize
+
 
 DEFAULT_CSS = """/*
 Edit this file to customize the service order print. Note, that not all CSS
@@ -133,7 +134,7 @@ class PrintServiceForm(QtWidgets.QDialog, Ui_PrintServiceDialog, RegistryPropert
         self.print_dialog = QtPrintSupport.QPrintDialog(self.printer, self)
         self.document = QtGui.QTextDocument()
         self.zoom = 0
-        self.setupUi(self)
+        self.setup_ui(self)
         # Load the settings for the dialog.
         settings = Settings()
         settings.beginGroup('advanced')
@@ -234,11 +235,11 @@ class PrintServiceForm(QtWidgets.QDialog, Ui_PrintServiceDialog, RegistryPropert
                 for slide in range(len(item.get_frames())):
                     self._add_element('li', item.get_frame_title(slide), ol)
             # add footer
-            foot_text = item.foot_text
-            foot_text = foot_text.partition('<br>')[2]
-            if foot_text:
-                foot_text = html.escape(foot_text.replace('<br>', '\n'))
-                self._add_element('div', foot_text.replace('\n', '<br>'), parent=div, class_id='itemFooter')
+            footer_html = item.footer_html
+            footer_html = footer_html.partition('<br>')[2]
+            if footer_html:
+                footer_html = html.escape(footer_html.replace('<br>', '\n'))
+                self._add_element('div', footer_html.replace('\n', '<br>'), parent=div, class_id='itemFooter')
         # Add service items' notes.
         if self.notes_check_box.isChecked():
             if item.notes:

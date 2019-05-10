@@ -1,29 +1,29 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from openlp.core.common.i18n import UiStrings, translate
-from openlp.core.lib.ui import create_button_box, create_button
+from openlp.core.lib.ui import create_button, create_button_box
 from openlp.core.ui import SingleColumnTableWidget
 from openlp.core.ui.icons import UiIcons
 from openlp.plugins.songs.lib.ui import SongStrings
@@ -34,7 +34,7 @@ class Ui_EditSongDialog(object):
     The :class:`~openlp.plugins.songs.forms.editsongdialog.Ui_EditSongDialog` class defines the user interface for the
     EditSongForm dialog.
     """
-    def setupUi(self, edit_song_dialog):
+    def setup_ui(self, edit_song_dialog):
         edit_song_dialog.setObjectName('edit_song_dialog')
         edit_song_dialog.setWindowIcon(UiIcons().main_icon)
         edit_song_dialog.resize(900, 600)
@@ -293,9 +293,9 @@ class Ui_EditSongDialog(object):
         self.button_box = create_button_box(edit_song_dialog, 'button_box', ['cancel', 'save'])
         self.bottom_layout.addWidget(self.button_box)
         self.dialog_layout.addLayout(self.bottom_layout)
-        self.retranslateUi(edit_song_dialog)
+        self.retranslate_ui(edit_song_dialog)
 
-    def retranslateUi(self, edit_song_dialog):
+    def retranslate_ui(self, edit_song_dialog):
         """
         Translate the UI on the fly.
         """

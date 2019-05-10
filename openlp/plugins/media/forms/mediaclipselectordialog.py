@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 
 
 from PyQt5 import QtCore, QtWidgets
@@ -28,7 +28,7 @@ from openlp.core.ui.icons import UiIcons
 
 
 class Ui_MediaClipSelector(object):
-    def setupUi(self, media_clip_selector):
+    def setup_ui(self, media_clip_selector):
         media_clip_selector.setObjectName('media_clip_selector')
         media_clip_selector.resize(554, 654)
         self.combobox_size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
@@ -161,7 +161,7 @@ class Ui_MediaClipSelector(object):
         self.save_button = self.button_box.button(QtWidgets.QDialogButtonBox.Save)
         self.main_layout.addWidget(self.button_box)
 
-        self.retranslateUi(media_clip_selector)
+        self.retranslate_ui(media_clip_selector)
         self.button_box.accepted.connect(media_clip_selector.accept)
         self.button_box.rejected.connect(media_clip_selector.reject)
         QtCore.QMetaObject.connectSlotsByName(media_clip_selector)
@@ -181,7 +181,7 @@ class Ui_MediaClipSelector(object):
         media_clip_selector.setTabOrder(self.jump_end_button, self.save_button)
         media_clip_selector.setTabOrder(self.save_button, self.close_button)
 
-    def retranslateUi(self, media_clip_selector):
+    def retranslate_ui(self, media_clip_selector):
         media_clip_selector.setWindowTitle(translate('MediaPlugin.MediaClipSelector', 'Select Media Clip'))
         self.source_groupbox.setTitle(translate('MediaPlugin.MediaClipSelector', 'Source'))
         self.media_path_label.setText(translate('MediaPlugin.MediaClipSelector', 'Media path:'))

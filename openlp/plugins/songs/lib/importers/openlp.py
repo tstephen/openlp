@@ -1,31 +1,31 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 The :mod:`openlp` module provides the functionality for importing OpenLP
 song databases into the current installation database.
 """
 import logging
 
-from sqlalchemy import create_engine, MetaData, Table
+from sqlalchemy import MetaData, Table, create_engine
 from sqlalchemy.orm import class_mapper, mapper, relation, scoped_session, sessionmaker
 from sqlalchemy.orm.exc import UnmappedClassError
 
@@ -33,8 +33,10 @@ from openlp.core.common.i18n import translate
 from openlp.core.lib.db import BaseModel
 from openlp.core.widgets.wizard import WizardStrings
 from openlp.plugins.songs.lib import clean_song
-from openlp.plugins.songs.lib.db import Author, Book, Song, Topic, MediaFile
+from openlp.plugins.songs.lib.db import Author, Book, MediaFile, Song, Topic
+
 from .songimport import SongImport
+
 
 log = logging.getLogger(__name__)
 
@@ -104,7 +106,7 @@ class OpenLPSongImport(SongImport):
             pass
 
         # Check the file type
-        if not isinstance(self.import_source, str) or not self.import_source.endswith('.sqlite'):
+        if self.import_source.suffix != '.sqlite':
             self.log_error(self.import_source, translate('SongsPlugin.OpenLPSongImport',
                                                          'Not a valid OpenLP 2 song database.'))
             return

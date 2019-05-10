@@ -1,36 +1,36 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 
 from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.common.i18n import translate
 from openlp.core.lib.ui import create_button_box
-from openlp.plugins.bibles.lib import LanguageSelection, BibleStrings
-from openlp.plugins.bibles.lib.db import BiblesResourcesDB
 from openlp.core.ui.icons import UiIcons
+from openlp.plugins.bibles.lib import BibleStrings, LanguageSelection
+from openlp.plugins.bibles.lib.db import BiblesResourcesDB
 
 
 class Ui_EditBibleDialog(object):
-    def setupUi(self, edit_bible_dialog):
+    def setup_ui(self, edit_bible_dialog):
         edit_bible_dialog.setObjectName('edit_bible_dialog')
         edit_bible_dialog.setWindowIcon(UiIcons().main_icon)
         edit_bible_dialog.resize(520, 400)
@@ -125,10 +125,10 @@ class Ui_EditBibleDialog(object):
         self.dialog_layout.addWidget(self.bible_tab_widget)
         self.button_box = create_button_box(edit_bible_dialog, 'button_box', ['cancel', 'save'])
         self.dialog_layout.addWidget(self.button_box)
-        self.retranslateUi(edit_bible_dialog)
+        self.retranslate_ui(edit_bible_dialog)
         QtCore.QMetaObject.connectSlotsByName(edit_bible_dialog)
 
-    def retranslateUi(self, edit_bible_dialog):
+    def retranslate_ui(self, edit_bible_dialog):
         self.book_names = BibleStrings().BookNames
         edit_bible_dialog.setWindowTitle(translate('BiblesPlugin.EditBibleForm', 'Bible Editor'))
         # Meta tab

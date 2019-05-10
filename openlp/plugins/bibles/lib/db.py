@@ -1,33 +1,33 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 
-import chardet
 import logging
 import re
 import sqlite3
 import time
 
+import chardet
 from PyQt5 import QtCore
-from sqlalchemy import Column, ForeignKey, Table, or_, types, func
+from sqlalchemy import Column, ForeignKey, Table, func, or_, types
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import class_mapper, mapper, relation
 from sqlalchemy.orm.exc import UnmappedClassError
@@ -36,9 +36,10 @@ from openlp.core.common import clean_filename
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.i18n import translate
 from openlp.core.common.path import Path
-from openlp.core.lib.db import BaseModel, init_db, Manager
+from openlp.core.lib.db import BaseModel, Manager, init_db
 from openlp.core.lib.ui import critical_error_message_box
 from openlp.plugins.bibles.lib import BibleStrings, LanguageSelection, upgrade
+
 
 log = logging.getLogger(__name__)
 
@@ -157,13 +158,12 @@ class BibleDB(Manager):
             self.name = kwargs['name']
             if not isinstance(self.name, str):
                 self.name = str(self.name, 'utf-8')
-            # TODO: To path object
-            file_path = Path(clean_filename(self.name) + '.sqlite')
+            self.file_path = Path(clean_filename(self.name) + '.sqlite')
         if 'file' in kwargs:
-            file_path = kwargs['file']
-        Manager.__init__(self, 'bibles', init_schema, file_path, upgrade)
+            self.file_path = kwargs['file']
+        Manager.__init__(self, 'bibles', init_schema, self.file_path, upgrade)
         if self.session and 'file' in kwargs:
-                self.get_name()
+            self.get_name()
         self._is_web_bible = None
 
     def get_name(self):
@@ -749,7 +749,7 @@ class BiblesResourcesDB(QtCore.QObject, Manager):
         ]
 
 
-class AlternativeBookNamesDB(QtCore.QObject, Manager):
+class AlternativeBookNamesDB(Manager):
     """
     This class represents a database-bound alternative book names system.
     """
@@ -764,8 +764,9 @@ class AlternativeBookNamesDB(QtCore.QObject, Manager):
         """
         if AlternativeBookNamesDB.cursor is None:
             file_path = AppLocation.get_directory(AppLocation.DataDir) / 'bibles' / 'alternative_book_names.sqlite'
+            exists = file_path.exists()
             AlternativeBookNamesDB.conn = sqlite3.connect(str(file_path))
-            if not file_path.exists():
+            if not exists:
                 # create new DB, create table alternative_book_names
                 AlternativeBookNamesDB.conn.execute(
                     'CREATE TABLE alternative_book_names(id INTEGER NOT NULL, '

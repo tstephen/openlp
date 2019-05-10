@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 The song import functions for OpenLP.
 """
@@ -35,6 +35,7 @@ from openlp.core.widgets.edits import PathEdit
 from openlp.core.widgets.enums import PathEditType
 from openlp.core.widgets.wizard import OpenLPWizard, WizardStrings
 from openlp.plugins.songs.lib.importer import SongFormat, SongFormatSelect
+
 
 log = logging.getLogger(__name__)
 
@@ -57,12 +58,12 @@ class SongImportForm(OpenLPWizard, RegistryProperties):
         super(SongImportForm, self).__init__(parent, plugin, 'songImportWizard', ':/wizards/wizard_song.bmp')
         self.clipboard = self.main_window.clipboard
 
-    def setupUi(self, image):
+    def setup_ui(self, image):
         """
         Set up the song wizard UI.
         """
         self.format_widgets = dict([(song_format, {}) for song_format in SongFormat.get_format_list()])
-        super(SongImportForm, self).setupUi(image)
+        super(SongImportForm, self).setup_ui(image)
         self.current_format = SongFormat.OpenLyrics
         self.format_stack.setCurrentIndex(self.current_format)
         self.format_combo_box.currentIndexChanged.connect(self.on_current_index_changed)
@@ -127,7 +128,7 @@ class SongImportForm(OpenLPWizard, RegistryProperties):
         self.source_layout.addLayout(self.format_stack)
         self.addPage(self.source_page)
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         """
         Song wizard localisation.
         """
@@ -328,8 +329,13 @@ class SongImportForm(OpenLPWizard, RegistryProperties):
             importer = self.plugin.import_songs(
                 source_format,
                 file_paths=self.get_list_of_paths(self.format_widgets[source_format]['file_list_widget']))
-        importer.do_import()
-        self.progress_label.setText(WizardStrings.FinishedImport)
+        try:
+            importer.do_import()
+            self.progress_label.setText(WizardStrings.FinishedImport)
+        except OSError as e:
+            log.exception('Importing songs failed')
+            self.progress_label.setText(translate('SongsPlugin.ImportWizardForm',
+                                                  'Your Song import failed. {error}').format(error=e))
 
     def on_error_copy_to_button_clicked(self):
         """

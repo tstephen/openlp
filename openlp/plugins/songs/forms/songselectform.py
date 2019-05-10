@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 The :mod:`~openlp.plugins.songs.forms.songselectform` module contains the GUI for the SongSelect importer
 """
@@ -33,6 +33,7 @@ from openlp.core.common.settings import Settings
 from openlp.core.threading import ThreadWorker, run_thread
 from openlp.plugins.songs.forms.songselectdialog import Ui_SongSelectDialog
 from openlp.plugins.songs.lib.songselect import SongSelectImport
+
 
 log = logging.getLogger(__name__)
 
@@ -262,8 +263,9 @@ class SongSelectForm(QtWidgets.QDialog, Ui_SongSelectDialog, RegistryProperties)
         self.login_progress_bar.setVisible(True)
         self.application.process_events()
         # Log the user in
-        if not self.song_select_importer.login(
-                self.username_edit.text(), self.password_edit.text(), self._update_login_progress):
+        subscription_level = self.song_select_importer.login(
+            self.username_edit.text(), self.password_edit.text(), self._update_login_progress)
+        if not subscription_level:
             QtWidgets.QMessageBox.critical(
                 self,
                 translate('SongsPlugin.SongSelectForm', 'Error Logging In'),
@@ -271,6 +273,14 @@ class SongSelectForm(QtWidgets.QDialog, Ui_SongSelectDialog, RegistryProperties)
                           'There was a problem logging in, perhaps your username or password is incorrect?')
             )
         else:
+            if subscription_level == 'Free':
+                QtWidgets.QMessageBox.information(
+                    self,
+                    translate('SongsPlugin.SongSelectForm', 'Free user'),
+                    translate('SongsPlugin.SongSelectForm', 'You logged in with a free account, '
+                                                            'the search will be limited to songs '
+                                                            'in the public domain.')
+                )
             if self.save_password_checkbox.isChecked():
                 Settings().setValue(self.plugin.settings_section + '/songselect username', self.username_edit.text())
                 Settings().setValue(self.plugin.settings_section + '/songselect password', self.password_edit.text())

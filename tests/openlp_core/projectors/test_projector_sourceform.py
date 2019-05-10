@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 :mod: `tests.interfaces.openlp_core_ui.test_projectorsourceform` module
 
@@ -33,10 +33,10 @@ from PyQt5.QtWidgets import QDialog
 
 from openlp.core.common.registry import Registry
 from openlp.core.projectors.constants import PJLINK_DEFAULT_CODES, PJLINK_DEFAULT_SOURCES
-from openlp.core.projectors.db import ProjectorDB, Projector
-from openlp.core.projectors.sourceselectform import source_group, SourceSelectSingle
+from openlp.core.projectors.db import Projector, ProjectorDB
+from openlp.core.projectors.sourceselectform import SourceSelectSingle, source_group
 from tests.helpers.testmixin import TestMixin
-from tests.resources.projector.data import TEST_DB, TEST1_DATA
+from tests.resources.projector.data import TEST1_DATA, TEST_DB
 
 
 def build_source_dict():
@@ -83,8 +83,8 @@ class ProjectorSourceFormTest(TestCase, TestMixin):
         Delete all C++ objects at end so we don't segfault.
         """
         self.projectordb.session.close()
-        del(self.projectordb)
-        del(self.projector)
+        del self.projectordb
+        del self.projector
         retries = 0
         while retries < 5:
             try:

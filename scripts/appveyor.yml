@@ -1,5 +1,8 @@
 version: OpenLP-win-ci-b{build}
 
+image:
+  - Visual Studio 2017
+
 clone_script:
   - curl -L https://bazaar.launchpad.net/BRANCHPATH/tarball -o sourcecode.tar.gz
   - 7z e sourcecode.tar.gz
@@ -7,40 +10,27 @@ clone_script:
   - mv BRANCHPATH openlp-branch
 
 environment:
-  PYTHON: C:\\Python34
+  matrix:
+    - PYTHON: C:\\Python37-x64
+    - PYTHON: C:\\Python37
 
 install:
   # Install dependencies from pypi
-  - "%PYTHON%\\python.exe -m pip install sqlalchemy alembic appdirs chardet beautifulsoup4 lxml Mako mysql-connector-python nose mock pyodbc==4.0.8 psycopg2 pypiwin32==219 pyenchant pymediainfo websockets asyncio waitress six webob requests QtAwesome"
-  # Download and install PyQt5
-  - appveyor DownloadFile https://downloads.sourceforge.net/project/pyqt/PyQt5/PyQt-5.5.1/PyQt5-5.5.1-gpl-Py3.4-Qt5.5.1-x32.exe
-  - PyQt5-5.5.1-gpl-Py3.4-Qt5.5.1-x32.exe /S
-  # Download and unpack mupdf
-  - appveyor DownloadFile https://mupdf.com/downloads/archive/mupdf-1.14.0-windows.zip
-  - 7z x mupdf-1.14.0-windows.zip
-  - cp mupdf-1.14.0-windows/mupdf.exe openlp-branch/mupdf.exe
-  # Download and unpack mediainfo
-  - appveyor DownloadFile https://mediaarea.net/download/binary/mediainfo/18.08.1/MediaInfo_CLI_18.08.1_Windows_i386.zip
-  - mkdir MediaInfo
-  - 7z x -oMediaInfo MediaInfo_CLI_18.08.1_Windows_i386.zip
-  - cp MediaInfo\\MediaInfo.exe openlp-branch\\MediaInfo.exe
+  - "%PYTHON%\\python.exe -m pip install sqlalchemy alembic appdirs chardet beautifulsoup4 lxml Mako mysql-connector-python pytest mock pyodbc psycopg2 pypiwin32 websockets asyncio waitress six webob requests QtAwesome PyQt5 PyQtWebEngine pymediainfo PyMuPDF"
 
 build: off
 
 test_script:
   - cd openlp-branch
   # Run the tests
-  - "%PYTHON%\\python.exe -m nose -v tests"
+  - "%PYTHON%\\python.exe -m pytest -v tests"
   # Go back to the user root folder
   - cd..
 
 after_test:
   # This is where we create a package using PyInstaller
-  # First get PyInstaller
-  - appveyor DownloadFile  https://github.com/pyinstaller/pyinstaller/releases/download/v3.2/PyInstaller-3.2.zip
-  - 7z x PyInstaller-3.2.zip
-  # Install PyInstaller dependencies
-  - "%PYTHON%\\python.exe -m pip install future pefile"
+  # Install PyInstaller 
+  - "%PYTHON%\\python.exe -m pip install pyinstaller"
   # Download and install Inno Setup - used for packaging
   - appveyor DownloadFile http://www.jrsoftware.org/download.php/is-unicode.exe
   - is-unicode.exe /VERYSILENT /SUPPRESSMSGBOXES /SP-

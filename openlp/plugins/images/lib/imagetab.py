@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 
 from PyQt5 import QtWidgets
 
@@ -32,9 +32,9 @@ class ImageTab(SettingsTab):
     """
     ImageTab is the images settings tab in the settings dialog.
     """
-    def setupUi(self):
+    def setup_ui(self):
         self.setObjectName('ImagesTab')
-        super(ImageTab, self).setupUi()
+        super(ImageTab, self).setup_ui()
         self.background_color_group_box = QtWidgets.QGroupBox(self.left_column)
         self.background_color_group_box.setObjectName('background_color_group_box')
         self.form_layout = QtWidgets.QFormLayout(self.background_color_group_box)
@@ -58,7 +58,7 @@ class ImageTab(SettingsTab):
         # Signals and slots
         self.background_color_button.colorChanged.connect(self.on_background_color_changed)
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         self.background_color_group_box.setTitle(UiStrings().BackgroundColor)
         self.background_color_label.setText(UiStrings().BackgroundColorColon)
         self.information_label.setText(

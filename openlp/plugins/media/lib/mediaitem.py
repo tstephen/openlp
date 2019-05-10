@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 
 import logging
 import os
@@ -27,9 +27,9 @@ from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.state import State
 from openlp.core.common.applocation import AppLocation
-from openlp.core.common.i18n import UiStrings, translate, get_natural_key
+from openlp.core.common.i18n import UiStrings, get_natural_key, translate
 from openlp.core.common.mixins import RegistryProperties
-from openlp.core.common.path import Path, path_to_str, create_paths
+from openlp.core.common.path import create_paths, path_to_str
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.lib import MediaType, ServiceItemContext, check_item_selected
@@ -39,6 +39,7 @@ from openlp.core.lib.ui import critical_error_message_box
 from openlp.core.ui.icons import UiIcons
 from openlp.core.ui.media import parse_optical_path, format_milliseconds
 from openlp.core.ui.media.vlcplayer import get_vlc
+
 
 if get_vlc() is not None:
     from openlp.plugins.media.forms.mediaclipselectorform import MediaClipSelectorForm
@@ -86,22 +87,12 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
         # Allow DnD from the desktop
         self.list_view.activateDnD()
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         """
         This method is called automatically to provide OpenLP with the opportunity to translate the ``MediaManagerItem``
         to another language.
         """
         self.on_new_prompt = translate('MediaPlugin.MediaItem', 'Select Media')
-        # self.replace_action.setText(UiStrings().ReplaceBG)
-        # self.replace_action_context.setText(UiStrings().ReplaceBG)
-        # self.replace_action.setToolTip(UiStrings().ReplaceLiveBGDisabled)
-        # self.replace_action_context.setToolTip(UiStrings().ReplaceLiveBGDisabled)
-        # self.reset_action.setText(UiStrings().ResetBG)
-        # self.reset_action.setToolTip(UiStrings().ResetLiveBG)
-        # self.reset_action_context.setText(UiStrings().ResetBG)
-        # self.reset_action_context.setToolTip(UiStrings().ResetLiveBG)
-        # self.automatic = UiStrings().Automatic
-        # self.display_type_label.setText(translate('MediaPlugin.MediaItem', 'Use Player:'))
 
     def required_icons(self):
         """
@@ -115,6 +106,8 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
             self.can_preview = False
             self.can_make_live = False
             self.can_add_to_service = False
+        if State().check_preconditions('media_live'):
+            self.can_make_live = True
 
     def add_list_view_to_toolbar(self):
         """
@@ -165,16 +158,16 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
         # self.display_type_combo_box.currentIndexChanged.connect(self.override_player_changed)
         pass
 
-    def generate_slide_data(self, service_item, item=None, xml_version=False, remote=False,
-                            context=ServiceItemContext.Service):
+    def generate_slide_data(self, service_item, *, item=None, remote=False, context=ServiceItemContext.Service,
+                            **kwargs):
         """
         Generate the slide data. Needs to be implemented by the plugin.
 
         :param service_item: The service item to be built on
         :param item: The Song item to be used
-        :param xml_version: The xml version (not used)
         :param remote: Triggered from remote
         :param context: Why is it being generated
+        :param kwargs: Consume other unused args specified by the base implementation, but not use by this one.
         """
         if item is None:
             item = self.list_view.currentItem()
@@ -228,8 +221,8 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
         Initialize media item.
         """
         self.list_view.clear()
-        self.service_path = str(AppLocation.get_section_data_path(self.settings_section) / 'thumbnails')
-        create_paths(Path(self.service_path))
+        self.service_path = AppLocation.get_section_data_path(self.settings_section) / 'thumbnails'
+        create_paths(self.service_path)
         self.load_list([path_to_str(file) for file in Settings().value(self.settings_section + '/media files')])
         self.rebuild_players()
 
@@ -263,7 +256,8 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
         :param media: The media
         :param target_group:
         """
-        media.sort(key=lambda file_name: get_natural_key(os.path.split(str(file_name))[1]))
+        # TODO needs to be fixed as no idea why this fails
+        # media.sort(key=lambda file_path: get_natural_key(file_path.name))
         for track in media:
             track_info = QtCore.QFileInfo(track)
             item_name = None
