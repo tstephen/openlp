@@ -35,7 +35,7 @@ from tests.resources.projector.data import TEST1_DATA
 
 class TestPJLinkCommands(TestCase):
     """
-    Tests PJLink get status commands part 1
+    Tests PJLink commands part 1
     """
     def setUp(self):
         """

@@ -20,7 +20,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>. #
 ##########################################################################
 """
-Package to test the openlp.core.projectors.pjlink base package.
+Package to test the openlp.core.projectors.pjlink base package part 2.
 """
 from unittest import TestCase
 from unittest.mock import call, patch
