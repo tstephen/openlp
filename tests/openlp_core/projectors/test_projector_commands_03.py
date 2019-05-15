@@ -74,7 +74,7 @@ class TestPJLinkCommands(TestCase):
         mock_log.error.assert_has_calls(log_error_calls)
         mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)
-        assert (chk == S_AUTHENTICATE), 'Should have returned {data}'.format(data=STATUS_CODE[S_AUTHENTICATE])
+        assert chk == S_AUTHENTICATE, 'Should have returned {data}'.format(data=STATUS_CODE[S_AUTHENTICATE])
 
     @patch.object(openlp.core.projectors.pjlinkcommands, 'log')
     def test_process_pjlink_authenticate_pin_not_set_error(self, mock_log):
@@ -98,7 +98,7 @@ class TestPJLinkCommands(TestCase):
         mock_log.error.assert_has_calls(log_error_calls)
         mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)
-        assert (chk == E_NO_AUTHENTICATION), \
+        assert chk == E_NO_AUTHENTICATION, \
             'Should have returned {data}'.format(data=STATUS_CODE[E_NO_AUTHENTICATION])
 
     @patch.object(openlp.core.projectors.pjlinkcommands, 'log')
@@ -124,7 +124,7 @@ class TestPJLinkCommands(TestCase):
         mock_log.error.assert_has_calls(log_error_calls)
         mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)
-        assert (chk == E_NO_AUTHENTICATION), \
+        assert chk == E_NO_AUTHENTICATION, \
             'Should have returned {data}'.format(data=STATUS_CODE[E_NO_AUTHENTICATION])
 
     @patch.object(openlp.core.projectors.pjlinkcommands, 'log')
@@ -150,7 +150,7 @@ class TestPJLinkCommands(TestCase):
         mock_log.error.assert_has_calls(log_error_calls)
         mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)
-        assert (chk == E_NO_AUTHENTICATION), \
+        assert chk == E_NO_AUTHENTICATION, \
             'Should have returned {data}'.format(data=STATUS_CODE[E_NO_AUTHENTICATION])
 
     @patch.object(openlp.core.projectors.pjlinkcommands, 'log')
@@ -175,7 +175,7 @@ class TestPJLinkCommands(TestCase):
         mock_log.error.assert_has_calls(log_error_calls)
         mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)
-        assert (chk == E_NO_AUTHENTICATION), \
+        assert chk == E_NO_AUTHENTICATION, \
             'Should have returned {data}'.format(data=STATUS_CODE[E_NO_AUTHENTICATION])
 
     @patch.object(openlp.core.projectors.pjlinkcommands, 'log')
@@ -201,7 +201,7 @@ class TestPJLinkCommands(TestCase):
         mock_log.error.assert_has_calls(log_error_calls)
         mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)
-        assert (chk == S_CONNECT), 'Should have returned {data}'.format(data=STATUS_CODE[S_CONNECT])
+        assert chk == S_CONNECT, 'Should have returned {data}'.format(data=STATUS_CODE[S_CONNECT])
 
     @patch.object(openlp.core.projectors.pjlinkcommands, 'log')
     def test_process_pjlink_normal_pin_set_error(self, mock_log):
@@ -224,7 +224,7 @@ class TestPJLinkCommands(TestCase):
         mock_log.error.assert_has_calls(log_error_calls)
         mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)
-        assert (chk == E_NO_AUTHENTICATION), \
+        assert chk == E_NO_AUTHENTICATION, \
             'Should have returned {data}'.format(data=STATUS_CODE[E_NO_AUTHENTICATION])
 
     @patch.object(openlp.core.projectors.pjlinkcommands, 'log')
@@ -249,5 +249,5 @@ class TestPJLinkCommands(TestCase):
         mock_log.error.assert_has_calls(log_error_calls)
         mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)
-        assert (chk == E_NO_AUTHENTICATION), \
+        assert chk == E_NO_AUTHENTICATION, \
             'Should have returned {data}'.format(data=STATUS_CODE[E_NO_AUTHENTICATION])

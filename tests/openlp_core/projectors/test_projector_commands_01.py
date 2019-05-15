@@ -92,7 +92,7 @@ class TestPJLinkCommands(TestCase):
         # THEN: Shutter should be closed and mute should be True
         assert self.pjlink.shutter, 'Shutter should changed'
         assert self.pjlink.mute, 'Audio should not have changed'
-        assert (not mock_UpdateIcons.emit.called), 'Update icons should NOT have been called'
+        assert not mock_UpdateIcons.emit.called, 'Update icons should NOT have been called'
         mock_log.warning.assert_has_calls(log_warning_text)
         mock_log.debug.assert_has_calls(log_debug_text)
 
@@ -140,8 +140,8 @@ class TestPJLinkCommands(TestCase):
         process_command(projector=self.pjlink, cmd='AVMT', data='30')
 
         # THEN: Shutter should be closed and mute should be True
-        assert (not self.pjlink.shutter), 'Shutter should have been set to off'
-        assert (not self.pjlink.mute), 'Audio should be on'
+        assert not self.pjlink.shutter, 'Shutter should have been set to off'
+        assert not self.pjlink.mute, 'Audio should be on'
         assert mock_UpdateIcons.emit.called, 'Update icons should have been called'
         mock_log.warning.assert_has_calls(log_warning_text)
         mock_log.debug.assert_has_calls(log_debug_text)
@@ -193,7 +193,7 @@ class TestPJLinkCommands(TestCase):
             assert self.pjlink.shutter, 'Shutter should have been set to closed'
             assert self.pjlink.mute, 'Audio should not have changed'
             assert mock_UpdateIcons.emit.called, 'Update icons should have been called'
-            assert ('AVMT' not in self.pjlink.status_timer_checks), 'Status timer list should not have AVMT callback'
+            assert 'AVMT' not in self.pjlink.status_timer_checks, 'Status timer list should not have AVMT callback'
             assert mock_status_timer.stop.called, 'Projector status_timer.stop() should have been called'
             mock_log.warning.assert_has_calls(log_warning_text)
             mock_log.debug.assert_has_calls(log_debug_text)
@@ -214,7 +214,7 @@ class TestPJLinkCommands(TestCase):
         process_command(projector=self.pjlink, cmd='CLSS', data='1')
 
         # THEN: Projector class should be set with proper value
-        assert ('1' == self.pjlink.pjlink_class), 'Should have set class=1'
+        assert '1' == self.pjlink.pjlink_class, 'Should have set class=1'
         mock_log.error.assert_has_calls(log_error_calls)
         mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)
@@ -235,7 +235,7 @@ class TestPJLinkCommands(TestCase):
         process_command(projector=self.pjlink, cmd='CLSS', data='2')
 
         # THEN: Projector class should be set with proper value
-        assert ('2' == self.pjlink.pjlink_class), 'Should have set class=2'
+        assert '2' == self.pjlink.pjlink_class, 'Should have set class=2'
         mock_log.error.assert_has_calls(log_error_calls)
         mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)
@@ -256,7 +256,7 @@ class TestPJLinkCommands(TestCase):
         process_command(projector=self.pjlink, cmd='CLSS', data='Z')
 
         # THEN: Projector class should be set with default value
-        assert (self.pjlink.pjlink_class == '1'), 'Invalid NaN class reply should have set class=1'
+        assert self.pjlink.pjlink_class == '1', 'Invalid NaN class reply should have set class=1'
         mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)
 
@@ -276,7 +276,7 @@ class TestPJLinkCommands(TestCase):
         process_command(projector=self.pjlink, cmd='CLSS', data='Invalid')
 
         # THEN: Projector class should be set with default value
-        assert (self.pjlink.pjlink_class == '1'), 'Invalid class reply should have set class=1'
+        assert self.pjlink.pjlink_class == '1', 'Invalid class reply should have set class=1'
         mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)
 
@@ -296,7 +296,7 @@ class TestPJLinkCommands(TestCase):
         process_command(projector=self.pjlink, cmd='CLSS', data='Class 1')
 
         # THEN: Projector class should be set with proper value
-        assert ('1' == self.pjlink.pjlink_class), 'Non-standard class reply should have set class=1'
+        assert '1' == self.pjlink.pjlink_class, 'Non-standard class reply should have set class=1'
         mock_log.error.assert_has_calls(log_error_calls)
         mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)
@@ -316,7 +316,7 @@ class TestPJLinkCommands(TestCase):
         process_command(projector=self.pjlink, cmd='CLSS', data='Version2')
 
         # THEN: Projector class should be set with proper value
-        assert ('2' == self.pjlink.pjlink_class), 'Non-standard class reply should have set class=1'
+        assert '2' == self.pjlink.pjlink_class, 'Non-standard class reply should have set class=1'
         mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)
 
@@ -348,7 +348,7 @@ class TestPJLinkCommands(TestCase):
         process_command(projector=self.pjlink, cmd='ERST', data=chk_data)
 
         # THEN: PJLink instance errors should match chk_value
-        assert (self.pjlink.projector_errors == chk_test), 'Projector errors should be all E_ERROR'
+        assert self.pjlink.projector_errors == chk_test, 'Projector errors should be all E_ERROR'
         mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)
 
@@ -368,7 +368,7 @@ class TestPJLinkCommands(TestCase):
         process_command(projector=self.pjlink, cmd='ERST', data=chk_data)
 
         # THEN: PJLink instance errors should be None
-        assert (self.pjlink.projector_errors is None), 'projector_errors should have been set to None'
+        assert self.pjlink.projector_errors is None, 'projector_errors should have been set to None'
         mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)
 
@@ -400,7 +400,7 @@ class TestPJLinkCommands(TestCase):
         process_command(projector=self.pjlink, cmd='ERST', data=chk_data)
 
         # THEN: PJLink instance errors should match chk_value
-        assert (self.pjlink.projector_errors == chk_test), 'Projector errors should be all E_WARN'
+        assert self.pjlink.projector_errors == chk_test, 'Projector errors should be all E_WARN'
         mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)
 
@@ -423,7 +423,7 @@ class TestPJLinkCommands(TestCase):
         process_command(self.pjlink, cmd='ERST', data=chk_data)
 
         # THEN: pjlink.projector_errors should be empty and warning logged
-        assert (not self.pjlink.projector_errors), 'There should be no errors'
+        assert not self.pjlink.projector_errors, 'There should be no errors'
         mock_log.warning.assert_has_calls(log_warn_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)
 
@@ -445,7 +445,7 @@ class TestPJLinkCommands(TestCase):
         process_command(self.pjlink, cmd='ERST', data=chk_data)
 
         # THEN: pjlink.projector_errors should be empty and warning logged
-        assert (not self.pjlink.projector_errors), 'There should be no errors'
+        assert not self.pjlink.projector_errors, 'There should be no errors'
         mock_log.warning.assert_has_calls(log_warn_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)
 
@@ -472,10 +472,10 @@ class TestPJLinkCommands(TestCase):
         process_command(projector=self.pjlink, cmd='ERST', data=chk_data)
 
         # THEN: PJLink instance errors should match only cover warning
-        assert (1 == len(self.pjlink.projector_errors)), 'There should only be 1 error listed in projector_errors'
-        assert ('Cover' in self.pjlink.projector_errors), '"Cover" should be the only error listed'
-        assert (self.pjlink.projector_errors['Cover'] == E_WARN), '"Cover" should have E_WARN listed as error'
-        assert (chk_test == self.pjlink.projector_errors), 'projector_errors should match test errors'
+        assert 1 == len(self.pjlink.projector_errors), 'There should only be 1 error listed in projector_errors'
+        assert 'Cover' in self.pjlink.projector_errors, '"Cover" should be the only error listed'
+        assert self.pjlink.projector_errors['Cover'] == E_WARN, '"Cover" should have E_WARN listed as error'
+        assert chk_test == self.pjlink.projector_errors, 'projector_errors should match test errors'
         mock_log.warning.assert_has_calls(log_warn_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)
 
@@ -498,7 +498,7 @@ class TestPJLinkCommands(TestCase):
         process_command(projector=self.pjlink, cmd='INF1', data=chk_data)
 
         # THEN: Data should be saved
-        assert (self.pjlink.manufacturer == chk_data), 'Test data should have been saved'
+        assert self.pjlink.manufacturer == chk_data, 'Test data should have been saved'
         mock_log.warning.assert_has_calls(log_warn_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)
 
@@ -521,7 +521,7 @@ class TestPJLinkCommands(TestCase):
         process_command(projector=self.pjlink, cmd='INF2', data=chk_data)
 
         # THEN: Data should be saved
-        assert (self.pjlink.model == chk_data), 'Test data should have been saved'
+        assert self.pjlink.model == chk_data, 'Test data should have been saved'
         mock_log.warning.assert_has_calls(log_warn_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)
 
@@ -544,6 +544,6 @@ class TestPJLinkCommands(TestCase):
         process_command(projector=self.pjlink, cmd='INFO', data=chk_data)
 
         # THEN: Data should be saved
-        assert (self.pjlink.other_info == chk_data), 'Test data should have been saved'
+        assert self.pjlink.other_info == chk_data, 'Test data should have been saved'
         mock_log.warning.assert_has_calls(log_warn_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)
