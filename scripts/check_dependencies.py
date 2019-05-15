@@ -106,7 +106,6 @@ OPTIONAL_MODULES = [
     # development/testing modules
     ('jenkins', '(access jenkins api)'),
     ('launchpadlib', '(launchpad script support)'),
-    ('nose2', '(testing framework)'),
     ('pylint', '(linter)')
 ]
 

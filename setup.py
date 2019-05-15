@@ -200,13 +200,12 @@ using a computer and a data projector.""",
         'launchpad': ['launchpadlib']
     },
     tests_require=[
-        'nose2',
         'pylint',
         'PyMuPDF',
         'pyodbc',
         'pysword',
         'python-xlib; platform_system=="Linux"'
     ],
-    test_suite='nose2.collector.collector',
+    test_suite='tests',
     entry_points={'gui_scripts': ['openlp = run_openlp:start']}
 )
