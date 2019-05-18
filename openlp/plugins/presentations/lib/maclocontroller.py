@@ -129,7 +129,7 @@ class MacLODocument(PresentationDocument):
         Tell the LibreOfficeServer to start the presentation.
         """
         log.debug('Load Presentation LibreOffice')
-        if not self.client.load_presentation(str(self.file_path), ScreenList().current['number'] + 1):
+        if not self.client.load_presentation(str(self.file_path), ScreenList().current.number + 1):
             return False
         self.create_thumbnails()
         self.create_titles_and_notes()
@@ -214,7 +214,7 @@ class MacLODocument(PresentationDocument):
         log.debug('start presentation LibreOffice')
         self.client.start_presentation()
         # Make sure impress doesn't steal focus, unless we're on a single screen setup
-        if len(ScreenList().screen_list) > 1:
+        if len(ScreenList()) > 1:
             Registry().get('main_window').activateWindow()
 
     def get_slide_number(self):
