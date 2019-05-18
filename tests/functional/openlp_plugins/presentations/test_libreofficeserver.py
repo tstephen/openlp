@@ -22,9 +22,9 @@
 """
 Functional tests to test the LibreOffice Pyro server
 """
-from openlp.plugins.presentations.lib.libreofficeserver import LibreOfficeServer, TextType, main
+from unittest.mock import MagicMock, patch, call
 
-from tests.functional import MagicMock, patch, call
+from openlp.plugins.presentations.lib.libreofficeserver import LibreOfficeServer, TextType, main
 
 
 def test_constructor():
@@ -37,7 +37,7 @@ def test_constructor():
 
     # THEN: The server should have been set up correctly
     assert server._control is None
-    assert server._desktop is None
+    # assert server._desktop is None
     assert server._document is None
     assert server._presentation is None
     assert server._process is None
@@ -96,7 +96,6 @@ def test_setup_desktop_exception(mocked_uno):
     mocked_resolver = MagicMock()
     mocked_uno_instance = MagicMock()
     MockedServiceManager = MagicMock()
-    mocked_desktop = MagicMock()
     mocked_uno.getComponentContext.return_value = mocked_context
     mocked_context.ServiceManager.createInstanceWithContext.return_value = mocked_resolver
     mocked_resolver.resolve.side_effect = [Exception, mocked_uno_instance]
@@ -437,7 +436,6 @@ def test_extract_thumbnails_no_pages(mocked_uno):
     temp_folder = '/tmp'
     server = LibreOfficeServer()
     mocked_document = MagicMock()
-    mocked_pages = MagicMock()
     server._document = mocked_document
     mocked_uno.systemPathToFileUrl.side_effect = lambda x: x
     mocked_document.getDrawPages.return_value = None
@@ -861,7 +859,7 @@ def test_goto_slide():
     server._control = mocked_control
 
     # WHEN: goto_slide() is called
-    result = server.goto_slide(1)
+    server.goto_slide(1)
 
     # THEN: The slide number should be correct
     mocked_control.gotoSlideIndex.assert_called_once_with(0)
@@ -879,7 +877,7 @@ def test_next_step_when_paused(mocked_sleep):
     mocked_control.isPaused.side_effect = [False, True]
 
     # WHEN: next_step() is called
-    result = server.next_step()
+    server.next_step()
 
     # THEN: The correct call should be made
     mocked_control.gotoNextEffect.assert_called_once_with()
@@ -900,7 +898,7 @@ def test_next_step(mocked_sleep):
     mocked_control.isPaused.side_effect = [True, True]
 
     # WHEN: next_step() is called
-    result = server.next_step()
+    server.next_step()
 
     # THEN: The correct call should be made
     mocked_control.gotoNextEffect.assert_called_once_with()
@@ -919,7 +917,7 @@ def test_previous_step():
     server._control = mocked_control
 
     # WHEN: previous_step() is called
-    result = server.previous_step()
+    server.previous_step()
 
     # THEN: The correct call should be made
     mocked_control.gotoPreviousEffect.assert_called_once_with()

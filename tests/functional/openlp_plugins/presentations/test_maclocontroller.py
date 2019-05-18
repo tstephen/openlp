@@ -22,19 +22,18 @@
 """
 Functional tests to test the Mac LibreOffice class and related methods.
 """
-from unittest import TestCase
-import os
 import shutil
 from tempfile import mkdtemp
+from unittest import TestCase
+from unittest.mock import MagicMock, patch, call
 
-from openlp.core.common import Settings
-from openlp.plugins.presentations.lib.maclocontroller import \
-    MacLOController, MacLODocument, TextType
+from openlp.core.common.settings import Settings
+from openlp.core.common.path import Path
+from openlp.plugins.presentations.lib.maclocontroller import MacLOController, MacLODocument
 from openlp.plugins.presentations.presentationplugin import __default_settings__
 
-from tests.functional import MagicMock, patch, call
-from tests.utils.constants import TEST_RESOURCES_PATH
 from tests.helpers.testmixin import TestMixin
+from tests.utils.constants import TEST_RESOURCES_PATH
 
 
 class TestMacLOController(TestCase, TestMixin):
@@ -59,21 +58,13 @@ class TestMacLOController(TestCase, TestMixin):
         self.destroy_settings()
         shutil.rmtree(self.temp_folder)
 
-    @patch('openlp.plugins.presentations.lib.maclocontroller.AppLocation.get_directory')
-    @patch('openlp.plugins.presentations.lib.maclocontroller.os')
-    @patch('openlp.plugins.presentations.lib.maclocontroller.Popen')
-    def test_constructor(self, MockedPopen, mocked_os, mocked_get_directory):
+    @patch('openlp.plugins.presentations.lib.maclocontroller.MacLOController._start_server')
+    def test_constructor(self, mocked_start_server):
         """
         Test the Constructor from the MacLOController
         """
         # GIVEN: No presentation controller
         controller = None
-        mocked_process = MagicMock()
-        mocked_get_directory.return_value = 'plugins'
-        mocked_os.path.join.side_effect = lambda *x: '/'.join(x)
-        mocked_os.path.dirname.return_value = ''
-        mocked_os.path.exists.return_value = True
-        MockedPopen.return_value = mocked_process
 
         # WHEN: The presentation controller object is created
         controller = MacLOController(plugin=self.mock_plugin)
@@ -83,9 +74,7 @@ class TestMacLOController(TestCase, TestMixin):
             'The name of the presentation controller should be correct'
         assert controller.display_name == 'Impress on macOS', \
             'The display name of the presentation controller should be correct'
-        MockedPopen.assert_called_once_with(['/Applications/LibreOffice.app/Contents/Resources/python',
-                                             'plugins/presentations/lib/libreofficeserver.py'])
-        assert controller.server_process == mocked_process
+        mocked_start_server.assert_called_once_with()
 
     @patch('openlp.plugins.presentations.lib.maclocontroller.MacLOController._start_server')
     @patch('openlp.plugins.presentations.lib.maclocontroller.Proxy')
@@ -164,7 +153,7 @@ class TestMacLODocument(TestCase):
         mocked_plugin = MagicMock()
         mocked_plugin.settings_section = 'presentations'
         Settings().extend_default_settings(__default_settings__)
-        self.file_name = os.path.join(TEST_RESOURCES_PATH, 'presentations', 'test.odp')
+        self.file_name = Path(TEST_RESOURCES_PATH) / 'presentations' / 'test.odp'
         self.mocked_client = MagicMock()
         with patch('openlp.plugins.presentations.lib.maclocontroller.MacLOController._start_server'):
             self.controller = MacLOController(mocked_plugin)

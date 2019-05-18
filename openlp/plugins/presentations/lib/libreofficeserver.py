@@ -37,7 +37,6 @@ if sys.platform.startswith('darwin'):
 
 
 # Add the vendor directory to sys.path so that we can load Pyro4
-sys.path.append(os.path.join(os.path.dirname(__file__)))
 sys.path.append(os.path.join(os.path.dirname(__file__), 'vendor'))
 
 from serializers import register_classes
@@ -48,12 +47,12 @@ try:
     import uno
     from com.sun.star.beans import PropertyValue
     from com.sun.star.task import ErrorCodeIOException
-except ImportError as e:
+except ImportError:
     # But they need to be defined for mocking
-    print(e)
     uno = None
     PropertyValue = None
     ErrorCodeIOException = Exception
+
 
 log = logging.getLogger(__name__)
 register_classes()
@@ -201,8 +200,9 @@ class LibreOfficeServer(object):
         """
         Load a presentation
         """
+        self._file_path = file_path
         url = uno.systemPathToFileUrl(file_path)
-        properties = [self._create_property('Hidden', True)]
+        properties = (self._create_property('Hidden', True),)
         self._document = None
         loop_count = 0
         while loop_count < 3:

@@ -243,7 +243,18 @@ class TestPath(TestCase):
         # WHEN: Calling `path_to_str` with an invalid Type
         # THEN: A TypeError should have been raised
         with self.assertRaises(TypeError):
-            path_to_str(str())
+            path_to_str(57)
+
+    def test_path_to_str_wth_str(self):
+        """
+        Test that `path_to_str` just returns a str when given a str
+        """
+        # GIVEN: The `path_to_str` function
+        # WHEN: Calling `path_to_str` with a str
+        result = path_to_str('/usr/bin')
+
+        # THEN: The string should be returned
+        assert result == '/usr/bin'
 
     def test_path_to_str_none(self):
         """

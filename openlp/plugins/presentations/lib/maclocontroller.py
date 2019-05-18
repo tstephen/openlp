@@ -21,12 +21,11 @@
 ###############################################################################
 
 import logging
-import os
 from subprocess import Popen
 
 from Pyro4 import Proxy
 
-from openlp.core.common import is_macosx, delete_file
+from openlp.core.common import delete_file, is_macosx
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.path import Path
 from openlp.core.common.registry import Registry
@@ -34,7 +33,11 @@ from openlp.core.display.screens import ScreenList
 from openlp.plugins.presentations.lib.serializers import register_classes
 from openlp.plugins.presentations.lib.presentationcontroller import PresentationController, PresentationDocument
 
-if is_macosx() and os.path.exists('/Applications/LibreOffice.app'):
+
+LIBREOFFICE_PATH = Path('/Applications/LibreOffice.app')
+LIBREOFFICE_PYTHON = LIBREOFFICE_PATH / 'Contents' / 'Resources' / 'python'
+
+if is_macosx() and LIBREOFFICE_PATH.exists():
     macuno_available = True
 else:
     macuno_available = False
