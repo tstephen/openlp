@@ -21,6 +21,9 @@
 ###############################################################################
 """
 This module runs a Pyro4 server using LibreOffice's version of Python
+
+Please Note: This intentionally uses os.path over pathlib because we don't know which version of Python is shipped with
+the version of LibreOffice on the user's computer.
 """
 from subprocess import Popen
 import sys
@@ -36,6 +39,8 @@ if sys.platform.startswith('darwin'):
     logging.basicConfig(filename=logfile, level=logging.INFO)
 
 
+# Add the current directory to sys.path so that we can load the serializers
+sys.path.append(os.path.join(os.path.dirname(__file__)))
 # Add the vendor directory to sys.path so that we can load Pyro4
 sys.path.append(os.path.join(os.path.dirname(__file__), 'vendor'))
 

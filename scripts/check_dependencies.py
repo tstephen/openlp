@@ -89,7 +89,8 @@ MODULES = [
     'webob',
     'requests',
     'qtawesome',
-    'pymediainfo'
+    'pymediainfo',
+    'vlc'
 ]
 
 
@@ -158,6 +159,8 @@ def check_module(mod, text='', indent='  '):
         w('OK')
     except ImportError:
         w('FAIL')
+    except Exception:
+        w('ERROR')
     w(os.linesep)
 
 

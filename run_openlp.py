@@ -42,8 +42,12 @@ def set_up_fault_handling():
     """
     Set up the Python fault handler
     """
-    create_paths(AppLocation.get_directory(AppLocation.CacheDir))
-    faulthandler.enable((AppLocation.get_directory(AppLocation.CacheDir) / 'error.log').open('wb'))
+    # Create the cache directory if it doesn't exist, and enable the fault handler to log to an error log file
+    try:
+        create_paths(AppLocation.get_directory(AppLocation.CacheDir))
+        faulthandler.enable((AppLocation.get_directory(AppLocation.CacheDir) / 'error.log').open('wb'))
+    except OSError:
+        log.exception('An exception occurred when enabling the fault handler')
 
 
 def start():
