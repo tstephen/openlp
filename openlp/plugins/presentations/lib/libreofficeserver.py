@@ -30,9 +30,9 @@ import time
 
 
 if sys.platform.startswith('darwin'):
-    print('Setting up log file')
     # Only make the log file on OS X when running as a server
     logfile = os.path.join(str(os.getenv('HOME')), 'Library', 'Application Support', 'openlp', 'libreofficeserver.log')
+    print('Setting up log file: {logfile}'.format(logfile=logfile))
     logging.basicConfig(filename=logfile, level=logging.INFO)
 
 
