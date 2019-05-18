@@ -65,21 +65,6 @@ class TestVLCPlayer(TestCase, TestMixin):
         # THEN: The extra environment variable should be there
         assert 'openlp.core.ui.media.vendor.vlc' not in sys.modules
 
-    @patch('openlp.core.ui.media.vlcplayer.is_macosx')
-    def test_fix_vlc_22_plugin_path(self, mocked_is_macosx):
-        """
-        Test that on OS X we set the VLC plugin path to fix a bug in the VLC module
-        """
-        # GIVEN: We're on OS X and we don't have the VLC plugin path set
-        mocked_is_macosx.return_value = True
-
-        # WHEN: An checking if the player is available
-        get_vlc()
-
-        # THEN: The extra environment variable should be there
-        assert 'VLC_PLUGIN_PATH' in os.environ, 'The plugin path should be in the environment variables'
-        assert '/Applications/VLC.app/Contents/MacOS/plugins' == os.environ['VLC_PLUGIN_PATH']
-
     @patch.dict(os.environ)
     @patch('openlp.core.ui.media.vlcplayer.is_macosx')
     def test_not_osx_fix_vlc_22_plugin_path(self, mocked_is_macosx):

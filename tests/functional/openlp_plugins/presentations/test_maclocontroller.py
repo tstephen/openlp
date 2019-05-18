@@ -160,21 +160,6 @@ class TestMacLODocument(TestCase):
         self.controller._client = self.mocked_client
         self.document = MacLODocument(self.controller, self.file_name)
 
-    def test_load_presentation_no_desktop(self):
-        """
-        Test the load_presentation() method when there's no desktop yet
-        """
-        # GIVEN: A document and a mocked client
-        self.mocked_client.has_desktop.return_value = False
-
-        # WHEN: load_presentation() is called
-        result = self.document.load_presentation()
-
-        # THEN: Stuff should work right
-        self.mocked_client.setup_desktop.assert_called_once_with()
-        self.mocked_client.has_desktop.assert_called_once_with()
-        assert result is False
-
     @patch('openlp.plugins.presentations.lib.maclocontroller.ScreenList')
     def test_load_presentation_cannot_load(self, MockedScreenList):
         """
@@ -183,17 +168,14 @@ class TestMacLODocument(TestCase):
         # GIVEN: A document and a mocked client
         mocked_screen_list = MagicMock()
         MockedScreenList.return_value = mocked_screen_list
-        mocked_screen_list.current = {'number': 0}
-        self.mocked_client.has_desktop.return_value = True
+        mocked_screen_list.current.number = 0
         self.mocked_client.load_presentation.return_value = False
 
         # WHEN: load_presentation() is called
         result = self.document.load_presentation()
 
         # THEN: Stuff should work right
-        self.mocked_client.setup_desktop.assert_called_once_with()
-        self.mocked_client.has_desktop.assert_called_once_with()
-        self.mocked_client.load_presentation.assert_called_once_with(self.file_name, 1)
+        self.mocked_client.load_presentation.assert_called_once_with(str(self.file_name), 1)
         assert result is False
 
     @patch('openlp.plugins.presentations.lib.maclocontroller.ScreenList')
@@ -204,8 +186,7 @@ class TestMacLODocument(TestCase):
         # GIVEN: A document and a mocked client
         mocked_screen_list = MagicMock()
         MockedScreenList.return_value = mocked_screen_list
-        mocked_screen_list.current = {'number': 0}
-        self.mocked_client.has_desktop.return_value = True
+        mocked_screen_list.current.number = 0
         self.mocked_client.load_presentation.return_value = True
 
         # WHEN: load_presentation() is called
@@ -214,9 +195,7 @@ class TestMacLODocument(TestCase):
             result = self.document.load_presentation()
 
         # THEN: Stuff should work right
-        self.mocked_client.setup_desktop.assert_called_once_with()
-        self.mocked_client.has_desktop.assert_called_once_with()
-        self.mocked_client.load_presentation.assert_called_once_with(self.file_name, 1)
+        self.mocked_client.load_presentation.assert_called_once_with(str(self.file_name), 1)
         mocked_create_thumbnails.assert_called_once_with()
         mocked_create_titles_and_notes.assert_called_once_with()
         assert result is True
@@ -252,8 +231,8 @@ class TestMacLODocument(TestCase):
         # THEN: The method should complete successfully
         self.mocked_client.extract_thumbnails.assert_called_once_with('temp')
         assert mocked_convert_thumbnail.call_args_list == [
-            call('thumb1.png', 1), call('thumb2.png', 2)]
-        assert mocked_delete_file.call_args_list == [call('thumb1.png'), call('thumb2.png')]
+            call(Path('thumb1.png'), 1), call(Path('thumb2.png'), 2)]
+        assert mocked_delete_file.call_args_list == [call(Path('thumb1.png')), call(Path('thumb2.png'))]
 
     def test_create_titles_and_notes(self):
         """
@@ -370,6 +349,7 @@ class TestMacLODocument(TestCase):
         """
         # GIVEN: a mocked client, and multiple screens
         mocked_screen_list = MagicMock()
+        mocked_screen_list.__len__.return_value = 2
         mocked_registry = MagicMock()
         mocked_main_window = MagicMock()
         MockedScreenList.return_value = mocked_screen_list

@@ -162,9 +162,9 @@ class LibreOfficeServer(object):
                 log.exception('Unable to find running instance, retrying...')
                 loop += 1
         try:
-            manager = uno_instance.ServiceManager
+            self._manager = uno_instance.ServiceManager
             log.debug('get UNO Desktop Openoffice - createInstanceWithContext - Desktop')
-            desktop = manager.createInstanceWithContext('com.sun.star.frame.Desktop', uno_instance)
+            desktop = self._manager.createInstanceWithContext('com.sun.star.frame.Desktop', uno_instance)
             if not desktop:
                 raise Exception('Failed to get UNO desktop')
             self._desktop = desktop

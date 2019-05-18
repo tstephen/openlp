@@ -64,13 +64,13 @@ def test_start_process(MockedPopen):
         '--minimized',
         '--nodefault',
         '--nofirststartwizard',
-        '--accept=pipe,name=openlp_pipe;urp;'
+        '--accept=pipe,name=openlp_maclo;urp;StarOffice.ServiceManager'
     ])
     assert server._process is mocked_process
 
 
 @patch('openlp.plugins.presentations.lib.libreofficeserver.uno')
-def test_setup_desktop_already_has_desktop(mocked_uno):
+def test_desktop_already_has_desktop(mocked_uno):
     """
     Test that setup_desktop() exits early when there's already a desktop
     """
@@ -78,15 +78,16 @@ def test_setup_desktop_already_has_desktop(mocked_uno):
     server = LibreOfficeServer()
     server._desktop = MagicMock()
 
-    # WHEN: setup_desktop() is called
-    server.setup_desktop()
+    # WHEN: the desktop property is called
+    desktop = server.desktop
 
     # THEN: setup_desktop() exits early
+    assert desktop is server._desktop
     assert server._manager is None
 
 
 @patch('openlp.plugins.presentations.lib.libreofficeserver.uno')
-def test_setup_desktop_exception(mocked_uno):
+def test_desktop_exception(mocked_uno):
     """
     Test that setting up the desktop works correctly when an exception occurs
     """
@@ -102,16 +103,16 @@ def test_setup_desktop_exception(mocked_uno):
     mocked_uno_instance.ServiceManager = MockedServiceManager
     MockedServiceManager.createInstanceWithContext.side_effect = Exception()
 
-    # WHEN: setup_desktop() is called
-    server.setup_desktop()
+    # WHEN: the desktop property is called
+    server.desktop
 
     # THEN: A desktop object was created
     mocked_uno.getComponentContext.assert_called_once_with()
     mocked_context.ServiceManager.createInstanceWithContext.assert_called_once_with(
         'com.sun.star.bridge.UnoUrlResolver', mocked_context)
     expected_calls = [
-        call('uno:pipe,name=openlp_pipe;urp;StarOffice.ComponentContext'),
-        call('uno:pipe,name=openlp_pipe;urp;StarOffice.ComponentContext')
+        call('uno:pipe,name=openlp_maclo;urp;StarOffice.ComponentContext'),
+        call('uno:pipe,name=openlp_maclo;urp;StarOffice.ComponentContext')
     ]
     assert mocked_resolver.resolve.call_args_list == expected_calls
     MockedServiceManager.createInstanceWithContext.assert_called_once_with(
@@ -121,7 +122,7 @@ def test_setup_desktop_exception(mocked_uno):
 
 
 @patch('openlp.plugins.presentations.lib.libreofficeserver.uno')
-def test_setup_desktop(mocked_uno):
+def test_desktop(mocked_uno):
     """
     Test that setting up the desktop works correctly
     """
@@ -138,16 +139,16 @@ def test_setup_desktop(mocked_uno):
     mocked_uno_instance.ServiceManager = MockedServiceManager
     MockedServiceManager.createInstanceWithContext.return_value = mocked_desktop
 
-    # WHEN: setup_desktop() is called
-    server.setup_desktop()
+    # WHEN: the desktop property is called
+    server.desktop
 
     # THEN: A desktop object was created
     mocked_uno.getComponentContext.assert_called_once_with()
     mocked_context.ServiceManager.createInstanceWithContext.assert_called_once_with(
         'com.sun.star.bridge.UnoUrlResolver', mocked_context)
     expected_calls = [
-        call('uno:pipe,name=openlp_pipe;urp;StarOffice.ComponentContext'),
-        call('uno:pipe,name=openlp_pipe;urp;StarOffice.ComponentContext')
+        call('uno:pipe,name=openlp_maclo;urp;StarOffice.ComponentContext'),
+        call('uno:pipe,name=openlp_maclo;urp;StarOffice.ComponentContext')
     ]
     assert mocked_resolver.resolve.call_args_list == expected_calls
     MockedServiceManager.createInstanceWithContext.assert_called_once_with(
@@ -255,35 +256,6 @@ def test_get_text_from_page_notes():
 
     # THEN: The text should be correct
     assert text == 'Page Notes\n'
-
-
-def test_has_desktop_no_desktop():
-    """
-    Test the has_desktop() method when there's no desktop
-    """
-    # GIVEN: A LibreOfficeServer object
-    server = LibreOfficeServer()
-
-    # WHEN: has_desktop() is called
-    result = server.has_desktop()
-
-    # THEN: The result should be False
-    assert result is False
-
-
-def test_has_desktop():
-    """
-    Test the has_desktop() method
-    """
-    # GIVEN: A LibreOfficeServer object and a desktop
-    server = LibreOfficeServer()
-    server._desktop = MagicMock()
-
-    # WHEN: has_desktop() is called
-    result = server.has_desktop()
-
-    # THEN: The result should be True
-    assert result is True
 
 
 def test_shutdown_other_docs():
