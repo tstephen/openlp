@@ -281,6 +281,7 @@ class PJLink(QtNetwork.QTcpSocket):
         self.pjlink_class = copy(PJLINK_CLASS)
         self.pjlink_name = None  # NAME
         self.power = S_OFF  # POWR
+        self.projector_errors = {}  # Full ERST errors
         self.serial_no = None  # SNUM
         self.serial_no_received = None
         self.sw_version = None  # SVER
