@@ -493,9 +493,13 @@ class ImpressDocument(PresentationDocument):
         """
         Triggers the previous slide on the running presentation.
         """
+        # if we are at the presentations start don't go further back, just return True
+        if self.slide_ended_reverse and self.get_slide_number() == 1:
+            return True
         self.slide_ended = False
         self.slide_ended_reverse = False
         self.control.gotoPreviousEffect()
+        return False
 
     def get_slide_text(self, slide_no):
         """

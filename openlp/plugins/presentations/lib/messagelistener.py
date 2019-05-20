@@ -191,18 +191,18 @@ class Controller(object):
         """
         log.debug('Live = {live}, previous'.format(live=self.is_live))
         if not self.doc:
-            return
+            return False
         if not self.is_live:
-            return
+            return False
         if self.hide_mode:
             if not self.doc.is_active():
-                return
+                return False
             if self.doc.slidenumber > 1:
                 self.doc.slidenumber -= 1
                 self.poll()
-            return
+            return False
         if not self.activate():
-            return
+            return False
         ret = self.doc.previous_step()
         self.poll()
         print('previous returning: %d' % ret)
