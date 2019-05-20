@@ -65,21 +65,6 @@ class TestVLCPlayer(TestCase, TestMixin):
         # THEN: The extra environment variable should be there
         assert 'openlp.core.ui.media.vendor.vlc' not in sys.modules
 
-    @patch('openlp.core.ui.media.vlcplayer.is_macosx')
-    def test_fix_vlc_22_plugin_path(self, mocked_is_macosx):
-        """
-        Test that on OS X we set the VLC plugin path to fix a bug in the VLC module
-        """
-        # GIVEN: We're on OS X and we don't have the VLC plugin path set
-        mocked_is_macosx.return_value = True
-
-        # WHEN: An checking if the player is available
-        get_vlc()
-
-        # THEN: The extra environment variable should be there
-        assert 'VLC_PLUGIN_PATH' in os.environ, 'The plugin path should be in the environment variables'
-        assert '/Applications/VLC.app/Contents/MacOS/plugins' == os.environ['VLC_PLUGIN_PATH']
-
     @patch.dict(os.environ)
     @patch('openlp.core.ui.media.vlcplayer.is_macosx')
     def test_not_osx_fix_vlc_22_plugin_path(self, mocked_is_macosx):
@@ -126,7 +111,7 @@ class TestVLCPlayer(TestCase, TestMixin):
         mocked_is_macosx.return_value = False
         mocked_is_win.return_value = False
         mocked_settings = MagicMock()
-        mocked_settings.value.return_value = True
+        mocked_settings.value.return_value = ''
         MockedSettings.return_value = mocked_settings
         mocked_qframe = MagicMock()
         mocked_qframe.winId.return_value = 2
@@ -150,8 +135,9 @@ class TestVLCPlayer(TestCase, TestMixin):
         # THEN: The VLC widget should be set up correctly
         assert mocked_output_display.vlc_widget == mocked_qframe
         mocked_qframe.setFrameStyle.assert_called_with(1)
-        mocked_settings.value.assert_called_with('advanced/hide mouse')
-        mocked_vlc.Instance.assert_called_with('--no-video-title-show --mouse-hide-timeout=0')
+        mocked_settings.value.assert_any_call('advanced/hide mouse')
+        mocked_settings.value.assert_any_call('media/vlc arguments')
+        mocked_vlc.Instance.assert_called_with('--no-video-title-show ')
         assert mocked_output_display.vlc_instance == mocked_instance
         mocked_instance.media_player_new.assert_called_with()
         assert mocked_output_display.vlc_media_player == mocked_media_player_new
@@ -175,7 +161,7 @@ class TestVLCPlayer(TestCase, TestMixin):
         mocked_is_macosx.return_value = False
         mocked_is_win.return_value = False
         mocked_settings = MagicMock()
-        mocked_settings.value.return_value = True
+        mocked_settings.value.return_value = ''
         MockedSettings.return_value = mocked_settings
         mocked_qframe = MagicMock()
         mocked_qframe.winId.return_value = 2
@@ -197,7 +183,7 @@ class TestVLCPlayer(TestCase, TestMixin):
         vlc_player.setup(mocked_output_display, mocked_controller)
 
         # THEN: The VLC instance should be created with the correct options
-        mocked_vlc.Instance.assert_called_with('--no-video-title-show --mouse-hide-timeout=0')
+        mocked_vlc.Instance.assert_called_with('--no-video-title-show ')
 
     @patch('openlp.core.ui.media.vlcplayer.is_win')
     @patch('openlp.core.ui.media.vlcplayer.is_macosx')
@@ -213,7 +199,7 @@ class TestVLCPlayer(TestCase, TestMixin):
         mocked_is_macosx.return_value = False
         mocked_is_win.return_value = False
         mocked_settings = MagicMock()
-        mocked_settings.value.return_value = False
+        mocked_settings.value.return_value = ''
         MockedSettings.return_value = mocked_settings
         mocked_qframe = MagicMock()
         mocked_qframe.winId.return_value = 2
@@ -235,7 +221,7 @@ class TestVLCPlayer(TestCase, TestMixin):
         vlc_player.setup(mocked_output_display, mocked_controller)
 
         # THEN: The VLC instance should be created with the correct options
-        mocked_vlc.Instance.assert_called_with('--no-video-title-show')
+        mocked_vlc.Instance.assert_called_with('--no-video-title-show ')
 
     @patch('openlp.core.ui.media.vlcplayer.is_win')
     @patch('openlp.core.ui.media.vlcplayer.is_macosx')
@@ -863,7 +849,7 @@ class TestVLCPlayer(TestCase, TestMixin):
 
         # THEN: nothing should happen
         mocked_display.vlc_media_player.is_seekable.assert_called_with()
-        mocked_display.vlc_media_player.set_time.assert_called_with(5000)
+        mocked_display.vlc_media_player.set_time.assert_called_with(2000)
 
     def test_reset(self):
         """

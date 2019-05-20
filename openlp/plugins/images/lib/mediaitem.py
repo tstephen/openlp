@@ -401,10 +401,9 @@ class ImageMediaItem(MediaManagerItem):
         Process a list for files either from the File Dialog or from Drag and Drop.
         This method is overloaded from MediaManagerItem.
 
-        :param files: A List of strings containing the filenames of the files to be loaded
+        :param list[openlp.core.common.path.Path] file_paths: A List of paths  to be loaded
         :param target_group: The QTreeWidgetItem of the group that will be the parent of the added files
         """
-        file_paths = [Path(file) for file in file_paths]
         self.application.set_normal_cursor()
         self.load_list(file_paths, target_group)
         last_dir = file_paths[0].parent

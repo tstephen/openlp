@@ -83,18 +83,6 @@ class GeneralTab(SettingsTab):
         self.password_edit.setObjectName('password_edit')
         self.ccli_layout.addRow(self.password_label, self.password_edit)
         self.left_layout.addWidget(self.ccli_group_box)
-        # Background audio
-        self.audio_group_box = QtWidgets.QGroupBox(self.left_column)
-        self.audio_group_box.setObjectName('audio_group_box')
-        self.audio_layout = QtWidgets.QVBoxLayout(self.audio_group_box)
-        self.audio_layout.setObjectName('audio_layout')
-        self.start_paused_check_box = QtWidgets.QCheckBox(self.audio_group_box)
-        self.start_paused_check_box.setObjectName('start_paused_check_box')
-        self.audio_layout.addWidget(self.start_paused_check_box)
-        self.repeat_list_check_box = QtWidgets.QCheckBox(self.audio_group_box)
-        self.repeat_list_check_box.setObjectName('repeat_list_check_box')
-        self.audio_layout.addWidget(self.repeat_list_check_box)
-        self.left_layout.addWidget(self.audio_group_box)
         self.left_layout.addStretch()
         # Application Startup
         self.startup_group_box = QtWidgets.QGroupBox(self.right_column)
@@ -195,9 +183,7 @@ class GeneralTab(SettingsTab):
         self.number_label.setText(UiStrings().CCLINumberLabel)
         self.username_label.setText(translate('OpenLP.GeneralTab', 'SongSelect username:'))
         self.password_label.setText(translate('OpenLP.GeneralTab', 'SongSelect password:'))
-        self.audio_group_box.setTitle(translate('OpenLP.GeneralTab', 'Background Audio'))
-        self.start_paused_check_box.setText(translate('OpenLP.GeneralTab', 'Start background audio paused'))
-        self.repeat_list_check_box.setText(translate('OpenLP.GeneralTab', 'Repeat track list'))
+        self.logo_file_path_edit.dialog_caption = translate('OpenLP.AdvancedTab', 'Select Logo File')
         self.logo_file_path_edit.dialog_caption = translate('OpenLP.AdvancedTab', 'Select Logo File')
         self.logo_file_path_edit.filters = '{text};;{names} (*)'.format(
             text=get_images_filter(), names=UiStrings().AllFiles)
@@ -224,8 +210,6 @@ class GeneralTab(SettingsTab):
         self.check_for_updates_check_box.setChecked(settings.value('update check'))
         self.auto_preview_check_box.setChecked(settings.value('auto preview'))
         self.timeout_spin_box.setValue(settings.value('loop delay'))
-        self.start_paused_check_box.setChecked(settings.value('audio start paused'))
-        self.repeat_list_check_box.setChecked(settings.value('audio repeat list'))
         settings.endGroup()
 
     def save(self):
@@ -249,8 +233,6 @@ class GeneralTab(SettingsTab):
         settings.setValue('ccli number', self.number_edit.displayText())
         settings.setValue('songselect username', self.username_edit.displayText())
         settings.setValue('songselect password', self.password_edit.displayText())
-        settings.setValue('audio start paused', self.start_paused_check_box.isChecked())
-        settings.setValue('audio repeat list', self.repeat_list_check_box.isChecked())
         settings.endGroup()
         self.post_set_up()
 

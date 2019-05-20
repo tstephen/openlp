@@ -88,7 +88,7 @@ class TestCommonFunctions(TestCase):
             extension_loader('glob')
 
             # THEN: The `ImportError` should be caught and logged
-            assert mocked_logger.warning.called
+            assert mocked_logger.exception.called
 
     def test_extension_loader_os_error(self):
         """
@@ -106,7 +106,7 @@ class TestCommonFunctions(TestCase):
             extension_loader('glob')
 
             # THEN: The `OSError` should be caught and logged
-            assert mocked_logger.warning.called
+            assert mocked_logger.exception.called
 
     def test_de_hump_conversion(self):
         """

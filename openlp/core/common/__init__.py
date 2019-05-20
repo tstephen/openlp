@@ -134,8 +134,8 @@ def extension_loader(glob_pattern, excluded_files=[]):
             importlib.import_module(module_name)
         except (ImportError, OSError):
             # On some platforms importing vlc.py might cause OSError exceptions. (e.g. Mac OS X)
-            log.warning('Failed to import {module_name} on path {extension_path}'
-                        .format(module_name=module_name, extension_path=extension_path))
+            log.exception('Failed to import {module_name} on path {extension_path}'
+                          .format(module_name=module_name, extension_path=extension_path))
 
 
 def path_to_module(path):
@@ -463,8 +463,8 @@ def get_file_encoding(file_path):
     Utility function to incrementally detect the file encoding.
 
     :param openlp.core.common.path.Path file_path: Filename for the file to determine the encoding for.
-    :return: A dict with the keys 'encoding' and 'confidence'
-    :rtype: dict[str, float]
+    :return: The name of the encoding detected
+    :rtype: str
     """
     detector = UniversalDetector()
     try:
@@ -477,7 +477,7 @@ def get_file_encoding(file_path):
     except OSError:
         log.exception('Error detecting file encoding')
     finally:
-        return detector.close()
+        return detector.close()['encoding']
 
 
 def normalize_str(irregular_string):

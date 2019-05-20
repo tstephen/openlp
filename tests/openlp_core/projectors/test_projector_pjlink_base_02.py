@@ -20,7 +20,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>. #
 ##########################################################################
 """
-Package to test the openlp.core.projectors.pjlink base package.
+Package to test the openlp.core.projectors.pjlink base package part 2.
 """
 from unittest import TestCase
 from unittest.mock import call, patch
@@ -96,10 +96,10 @@ class TestPJLinkBase(TestCase):
             mock_log.warning.assert_has_calls(log_warning_calls)
             mock_log.debug.assert_has_calls(log_debug_calls)
             mock_change_status.called_with(E_NETWORK, 'Error while sending data to projector')
-            assert (not self.pjlink.send_queue), 'Send queue should be empty'
-            assert (not self.pjlink.priority_queue), 'Priority queue should be empty'
+            assert not self.pjlink.send_queue, 'Send queue should be empty'
+            assert not self.pjlink.priority_queue, 'Priority queue should be empty'
             assert mock_timer.start.called, 'Timer should have been called'
-            assert (not mock_reset.called), 'reset_information() should not should have been called'
+            assert not mock_reset.called, 'reset_information() should not should have been called'
             assert mock_disconnect.called, 'disconnect_from_host() should have been called'
             assert self.pjlink.send_busy, 'send_busy should be True'
 
@@ -127,41 +127,10 @@ class TestPJLinkBase(TestCase):
             mock_log.error.assert_has_calls(log_error_calls)
             mock_log.warning.assert_has_calls(log_warning_calls)
             mock_log.debug.assert_has_calls(log_debug_calls)
-            assert (not self.pjlink.send_queue), 'Send queue should be empty'
-            assert (not self.pjlink.priority_queue), 'Priority queue should be empty'
-            assert (not mock_timer.called), 'Timer should not have been called'
-            assert (not mock_reset.called), 'reset_information() should not have been called'
-
-    @patch.object(openlp.core.projectors.pjlink.PJLink, 'state')
-    @patch.object(openlp.core.projectors.pjlink.PJLink, 'reset_information')
-    @patch.object(openlp.core.projectors.pjlink, 'log')
-    def test_local_send_command_no_data_queue_check(self, mock_log, mock_reset, mock_state):
-        """
-        Test _underscore_send_command last queue length check
-        """
-        # GIVEN: Test object
-        log_error_calls = []
-        log_warning_calls = [call('({ip}) _send_command(): No data to send'.format(ip=self.pjlink.name))]
-        log_debug_calls = []
-        mock_state.return_value = QSOCKET_STATE[S_CONNECTED]
-        self.pjlink.priority_queue = []
-
-        # WHEN: _send_command called with no data and queue's emtpy
-        # Patch some attributes here since they are not available until after instantiation
-        with patch.object(self.pjlink, 'socket_timer') as mock_timer, \
-                patch.object(self.pjlink, 'send_queue') as mock_queue:
-            # Unlikely case of send_queue not really empty, but len(send_queue) returns 0
-            mock_queue.return_value = ['test']
-            mock_queue.__len__.return_value = 0
-            self.pjlink._send_command(data=None)
-
-            # THEN:
-            mock_log.error.assert_has_calls(log_error_calls)
-            mock_log.warning.assert_has_calls(log_warning_calls)
-            mock_log.debug.assert_has_calls(log_debug_calls)
-            assert (not self.pjlink.priority_queue), 'Priority queue should be empty'
-            assert (not mock_timer.called), 'Timer should not have been called'
-            assert (not mock_reset.called), 'reset_information() should not have been called'
+            assert not self.pjlink.send_queue, 'Send queue should be empty'
+            assert not self.pjlink.priority_queue, 'Priority queue should be empty'
+            assert not mock_timer.called, 'Timer should not have been called'
+            assert not mock_reset.called, 'reset_information() should not have been called'
 
     @patch.object(openlp.core.projectors.pjlink.PJLink, 'write')
     @patch.object(openlp.core.projectors.pjlink.PJLink, 'disconnect_from_host')
@@ -204,11 +173,11 @@ class TestPJLinkBase(TestCase):
             mock_log.error.assert_has_calls(log_error_calls)
             mock_log.warning.assert_has_calls(log_warning_calls)
             mock_log.debug.assert_has_calls(log_debug_calls)
-            assert (not self.pjlink.send_queue), 'Send queue should be empty'
-            assert (not self.pjlink.priority_queue), 'Priority queue should be empty'
+            assert not self.pjlink.send_queue, 'Send queue should be empty'
+            assert not self.pjlink.priority_queue, 'Priority queue should be empty'
             assert mock_timer.start.called, 'Timer should have been called'
-            assert (not mock_reset.called), 'reset_information() should not have been called'
-            assert (not mock_disconnect.called), 'disconnect_from_host() should not have been called'
+            assert not mock_reset.called, 'reset_information() should not have been called'
+            assert not mock_disconnect.called, 'disconnect_from_host() should not have been called'
             assert self.pjlink.send_busy, 'send_busy flag should be True'
 
     @patch.object(openlp.core.projectors.pjlink.PJLink, 'disconnect_from_host')
@@ -242,12 +211,12 @@ class TestPJLinkBase(TestCase):
             mock_log.error.assert_has_calls(log_error_calls)
             mock_log.warning.assert_has_calls(log_warning_calls)
             mock_log.debug.assert_has_calls(log_debug_calls)
-            assert (self.pjlink.send_queue == [test_command]), 'Send queue should have one entry'
-            assert (not self.pjlink.priority_queue), 'Priority queue should be empty'
-            assert (not mock_timer.called), 'Timer should not have been called'
-            assert (not mock_reset.called), 'reset_information() should not have been called'
+            assert self.pjlink.send_queue == [test_command], 'Send queue should have one entry'
+            assert not self.pjlink.priority_queue, 'Priority queue should be empty'
+            assert not mock_timer.called, 'Timer should not have been called'
+            assert not mock_reset.called, 'reset_information() should not have been called'
             assert mock_disconnect.called, 'disconnect_from_host() should have been called'
-            assert (not self.pjlink.send_busy), 'send_busy flag should be False'
+            assert not self.pjlink.send_busy, 'send_busy flag should be False'
 
     @patch.object(openlp.core.projectors.pjlink.PJLink, 'write')
     @patch.object(openlp.core.projectors.pjlink.PJLink, 'disconnect_from_host')
@@ -292,11 +261,11 @@ class TestPJLinkBase(TestCase):
             mock_log.error.assert_has_calls(log_error_calls)
             mock_log.warning.assert_has_calls(log_warning_calls)
             mock_log.debug.assert_has_calls(log_debug_calls)
-            assert (not self.pjlink.send_queue), 'Send queue should be empty'
-            assert (not self.pjlink.priority_queue), 'Priority queue should be empty'
+            assert not self.pjlink.send_queue, 'Send queue should be empty'
+            assert not self.pjlink.priority_queue, 'Priority queue should be empty'
             assert mock_timer.start.called, 'Timer should have been called'
-            assert (not mock_reset.called), 'reset_information() should not have been called'
-            assert (not mock_disconnect.called), 'disconnect_from_host() should not have been called'
+            assert not mock_reset.called, 'reset_information() should not have been called'
+            assert not mock_disconnect.called, 'disconnect_from_host() should not have been called'
             assert self.pjlink.send_busy, 'send_busy flag should be True'
 
     @patch.object(openlp.core.projectors.pjlink.PJLink, 'write')
@@ -345,10 +314,10 @@ class TestPJLinkBase(TestCase):
             mock_log.warning.assert_has_calls(log_warning_calls)
             mock_log.debug.assert_has_calls(log_debug_calls)
             assert self.pjlink.send_queue, 'Send queue should have one entry'
-            assert (not self.pjlink.priority_queue), 'Priority queue should be empty'
+            assert not self.pjlink.priority_queue, 'Priority queue should be empty'
             assert mock_timer.start.called, 'Timer should have been called'
-            assert (not mock_reset.called), 'reset_information() should not have been called'
-            assert (not mock_disconnect.called), 'disconnect_from_host() should not have been called'
+            assert not mock_reset.called, 'reset_information() should not have been called'
+            assert not mock_disconnect.called, 'disconnect_from_host() should not have been called'
             assert self.pjlink.send_busy, 'send_busy flag should be True'
 
     @patch.object(openlp.core.projectors.pjlink.PJLink, 'state')
@@ -389,9 +358,9 @@ class TestPJLinkBase(TestCase):
             mock_log.warning.assert_has_calls(log_warning_calls)
             mock_log.debug.assert_has_calls(log_debug_calls)
             assert self.pjlink.send_queue, 'Send queue should have one entry'
-            assert (not self.pjlink.priority_queue), 'Priority queue should be empty'
-            assert (not mock_timer.start.called), 'Timer should not have been called'
-            assert (not mock_reset.called), 'reset_information() should not have been called'
+            assert not self.pjlink.priority_queue, 'Priority queue should be empty'
+            assert not mock_timer.start.called, 'Timer should not have been called'
+            assert not mock_reset.called, 'reset_information() should not have been called'
             assert self.pjlink.send_busy, 'send_busy flag should be True'
 
     @patch.object(openlp.core.projectors.pjlink.PJLink, 'state')
@@ -433,10 +402,10 @@ class TestPJLinkBase(TestCase):
             mock_log.error.assert_has_calls(log_error_calls)
             mock_log.warning.assert_has_calls(log_warning_calls)
             mock_log.debug.assert_has_calls(log_debug_calls)
-            assert (not self.pjlink.send_queue), 'Send queue should be empty'
+            assert not self.pjlink.send_queue, 'Send queue should be empty'
             assert self.pjlink.priority_queue, 'Priority queue should have one entry'
-            assert (not mock_timer.start.called), 'Timer should not have been called'
-            assert (not mock_reset.called), 'reset_information() should not have been called'
+            assert not mock_timer.start.called, 'Timer should not have been called'
+            assert not mock_reset.called, 'reset_information() should not have been called'
             assert self.pjlink.send_busy, 'send_busy flag should be True'
 
     # ------------ Test PJLink.send_command ----------
@@ -471,7 +440,7 @@ class TestPJLinkBase(TestCase):
             mock_log.debug.assert_has_calls(log_debug_calls)
             mock_log.warning.assert_has_calls(log_warning_calls)
             mock_log.error.assert_has_calls(log_error_calls)
-            assert (not mock_reset.called), 'reset_information() should not have been called'
+            assert not mock_reset.called, 'reset_information() should not have been called'
             assert mock_send_command.called, '_underscore_send_command() should have been called'
 
     @patch.object(openlp.core.projectors.pjlink.PJLink, 'state')
@@ -504,8 +473,8 @@ class TestPJLinkBase(TestCase):
             mock_log.warning.assert_has_calls(log_warning_calls)
             mock_log.error.assert_has_calls(log_error_calls)
             mock_priority.append.assert_called_with(test_command)
-            assert (not mock_send.append.called), 'send_queue should not have changed'
-            assert (not mock_reset.called), 'reset_information() should not have been called'
+            assert not mock_send.append.called, 'send_queue should not have changed'
+            assert not mock_reset.called, 'reset_information() should not have been called'
             assert mock_send_command.called, '_underscore_send_command() should have been called'
 
     @patch.object(openlp.core.projectors.pjlink.PJLink, 'state')
@@ -537,9 +506,9 @@ class TestPJLinkBase(TestCase):
         mock_log.debug.assert_has_calls(log_debug_calls)
         mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.error.assert_has_calls(log_error_calls)
-        assert (self.pjlink.send_queue == [test_command]), 'Send queue should have one entry'
-        assert (not self.pjlink.priority_queue), 'Priority queue should be empty'
-        assert (not mock_reset.called), 'reset_information() should not have been called'
+        assert self.pjlink.send_queue == [test_command], 'Send queue should have one entry'
+        assert not self.pjlink.priority_queue, 'Priority queue should be empty'
+        assert not mock_reset.called, 'reset_information() should not have been called'
         assert mock_send_command.called, '_underscore_send_command() should have been called'
 
     @patch.object(openlp.core.projectors.pjlink.PJLink, 'state')
@@ -571,9 +540,9 @@ class TestPJLinkBase(TestCase):
         mock_log.debug.assert_has_calls(log_debug_calls)
         mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.error.assert_has_calls(log_error_calls)
-        assert (not self.pjlink.send_queue), 'Send queue should be empty'
-        assert (self.pjlink.priority_queue == [test_command]), 'Priority queue should have one entry'
-        assert (not mock_reset.called), 'reset_information() should not have been called'
+        assert not self.pjlink.send_queue, 'Send queue should be empty'
+        assert self.pjlink.priority_queue == [test_command], 'Priority queue should have one entry'
+        assert not mock_reset.called, 'reset_information() should not have been called'
         assert mock_send_command.called, '_underscore_send_command() should have been called'
 
     @patch.object(openlp.core.projectors.pjlink.PJLink, 'state')
@@ -600,10 +569,10 @@ class TestPJLinkBase(TestCase):
         mock_log.debug.assert_has_calls(log_debug_calls)
         mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.error.assert_has_calls(log_error_calls)
-        assert (not self.pjlink.send_queue), 'Send queue should be empty'
-        assert (not self.pjlink.priority_queue), 'Priority queue should be empty'
-        assert (not mock_reset.called), 'reset_information() should not have been called'
-        assert (not mock_send_command.called), '_underscore_send_command() should not have been called'
+        assert not self.pjlink.send_queue, 'Send queue should be empty'
+        assert not self.pjlink.priority_queue, 'Priority queue should be empty'
+        assert not mock_reset.called, 'reset_information() should not have been called'
+        assert not mock_send_command.called, '_underscore_send_command() should not have been called'
 
     @patch.object(openlp.core.projectors.pjlink.PJLink, 'state')
     @patch.object(openlp.core.projectors.pjlink.PJLink, 'reset_information')
@@ -633,8 +602,8 @@ class TestPJLinkBase(TestCase):
         mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.error.assert_has_calls(log_error_calls)
         assert self.pjlink.send_queue, 'Send queue should have one entry'
-        assert (not self.pjlink.priority_queue), 'Priority queue should be empty'
-        assert (not mock_reset.called), 'reset_information() should not have been called'
+        assert not self.pjlink.priority_queue, 'Priority queue should be empty'
+        assert not mock_reset.called, 'reset_information() should not have been called'
         assert mock_send_command.called, '_underscore_send_command() should have been called'
 
     @patch.object(openlp.core.projectors.pjlink.PJLink, 'state')
@@ -664,9 +633,9 @@ class TestPJLinkBase(TestCase):
         mock_log.debug.assert_has_calls(log_debug_calls)
         mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.error.assert_has_calls(log_error_calls)
-        assert (not self.pjlink.send_queue), 'Send queue should be empty'
+        assert not self.pjlink.send_queue, 'Send queue should be empty'
         assert self.pjlink.priority_queue, 'Priority queue should have one entry'
-        assert (not mock_reset.called), 'reset_information() should not have been called'
+        assert not mock_reset.called, 'reset_information() should not have been called'
         assert mock_send_command.called, '_underscore_send_command() should have been called'
 
     @patch.object(openlp.core.projectors.pjlink.PJLink, 'state')
@@ -692,7 +661,7 @@ class TestPJLinkBase(TestCase):
         mock_log.debug.assert_has_calls(log_debug_calls)
         mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.error.assert_has_calls(log_error_calls)
-        assert (not self.pjlink.send_queue), 'Send queue should be empty'
-        assert (not self.pjlink.priority_queue), 'Priority queue should be empty'
+        assert not self.pjlink.send_queue, 'Send queue should be empty'
+        assert not self.pjlink.priority_queue, 'Priority queue should be empty'
         assert mock_reset.called, 'reset_information() should have been called'
-        assert (not mock_send_command.called), '_underscore_send_command() should not have been called'
+        assert not mock_send_command.called, '_underscore_send_command() should not have been called'

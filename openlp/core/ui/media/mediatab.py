@@ -20,11 +20,12 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>. #
 ##########################################################################
 """
-The :mod:`~openlp.core.ui.media.playertab` module holds the configuration tab for the media stuff.
+The :mod:`~openlp.core.ui.media.mediatab` module holds the configuration tab for the media stuff.
 """
+import logging
 
 from PyQt5 import QtWidgets
-# from PyQt5.QtMultimedia import QCameraInfo, QAudioDeviceInfo, QAudio
+from PyQt5.QtMultimedia import QCameraInfo, QAudioDeviceInfo, QAudio
 
 from openlp.core.common import is_linux, is_win
 from openlp.core.common.i18n import translate
@@ -32,8 +33,11 @@ from openlp.core.common.settings import Settings
 from openlp.core.lib.settingstab import SettingsTab
 from openlp.core.ui.icons import UiIcons
 
-LINUX_STREAM = 'v4l2:///dev/video0'
-WIN_STREAM = 'dshow:// :dshow-vdev='
+LINUX_STREAM = 'v4l2://{video} :v4l2-standard= :input-slave={audio} :live-caching=300'
+WIN_STREAM = 'dshow://:dshow-vdev={video} :dshow-adev={audio} :live-caching=300'
+OSX_STREAM = 'avcapture://{video} :qtsound://{audio} :live-caching=300'
+
+log = logging.getLogger(__name__)
 
 
 class MediaTab(SettingsTab):
@@ -44,8 +48,6 @@ class MediaTab(SettingsTab):
         """
         Constructor
         """
-        # self.media_players = Registry().get('media_controller').media_players
-        # self.saved_used_players = None
         self.icon_path = UiIcons().video
         player_translated = translate('OpenLP.MediaTab', 'Media')
         super(MediaTab, self).__init__(parent, 'Media', player_translated)
@@ -67,39 +69,52 @@ class MediaTab(SettingsTab):
         self.stream_media_group_box = QtWidgets.QGroupBox(self.left_column)
         self.stream_media_group_box.setObjectName('stream_media_group_box')
         self.stream_media_layout = QtWidgets.QHBoxLayout(self.stream_media_group_box)
-        self.stream_media_layout.setObjectName('live_media_layout')
+        self.stream_media_layout.setObjectName('stream_media_layout')
         self.stream_media_layout.setContentsMargins(0, 0, 0, 0)
-        self.stream_edit = QtWidgets.QPlainTextEdit(self)
+        self.stream_edit = QtWidgets.QLabel(self)
         self.stream_media_layout.addWidget(self.stream_edit)
-        self.browse_button = QtWidgets.QToolButton(self)
-        self.browse_button.setIcon(UiIcons().undo)
-        self.stream_media_layout.addWidget(self.browse_button)
         self.left_layout.addWidget(self.stream_media_group_box)
-        self.left_layout.addWidget(self.stream_media_group_box)
+        self.vlc_arguments_group_box = QtWidgets.QGroupBox(self.left_column)
+        self.vlc_arguments_group_box.setObjectName('vlc_arguments_group_box')
+        self.vlc_arguments_layout = QtWidgets.QHBoxLayout(self.vlc_arguments_group_box)
+        self.vlc_arguments_layout.setObjectName('vlc_arguments_layout')
+        self.vlc_arguments_layout.setContentsMargins(0, 0, 0, 0)
+        self.vlc_arguments_edit = QtWidgets.QPlainTextEdit(self)
+        self.vlc_arguments_layout.addWidget(self.vlc_arguments_edit)
+        self.left_layout.addWidget(self.vlc_arguments_group_box)
         self.left_layout.addStretch()
         self.right_layout.addStretch()
         # # Signals and slots
-        self.browse_button.clicked.connect(self.on_revert)
 
-    def retranslateUi(self):
+    def retranslate_ui(self):
         """
         Translate the UI on the fly
         """
         self.live_media_group_box.setTitle(translate('MediaPlugin.MediaTab', 'Live Media'))
         self.stream_media_group_box.setTitle(translate('MediaPlugin.MediaTab', 'Stream Media Command'))
-        self.auto_start_check_box.setText(translate('MediaPlugin.MediaTab', 'Start automatically'))
+        self.vlc_arguments_group_box.setTitle(translate('MediaPlugin.MediaTab', 'VLC arguments'))
+        self.auto_start_check_box.setText(translate('MediaPlugin.MediaTab', 'Start Live items automatically'))
 
     def load(self):
         """
         Load the settings
         """
         self.auto_start_check_box.setChecked(Settings().value(self.settings_section + '/media auto start'))
-        self.stream_edit.setPlainText(Settings().value(self.settings_section + '/stream command'))
-        if not self.stream_edit.toPlainText():
+        self.stream_edit.setText(Settings().value(self.settings_section + '/stream command'))
+        if not self.stream_edit.text():
             if is_linux:
-                self.stream_edit.setPlainText(LINUX_STREAM)
+                self.stream_edit.setText(LINUX_STREAM)
             elif is_win:
-                self.stream_edit.setPlainText(WIN_STREAM)
+                self.stream_edit.setText(WIN_STREAM)
+            else:
+                self.stream_edit.setText(OSX_STREAM)
+        self.vlc_arguments_edit.setPlainText(Settings().value(self.settings_section + '/vlc arguments'))
+        if Settings().value('advanced/experimental'):
+            for cam in QCameraInfo.availableCameras():
+                log.debug(cam.deviceName())
+                log.debug(cam.description())
+            for au in QAudioDeviceInfo.availableDevices(QAudio.AudioInput):
+                log.debug(au.deviceName())
 
     def save(self):
         """
@@ -108,17 +123,8 @@ class MediaTab(SettingsTab):
         setting_key = self.settings_section + '/media auto start'
         if Settings().value(setting_key) != self.auto_start_check_box.checkState():
             Settings().setValue(setting_key, self.auto_start_check_box.checkState())
-        # settings = Settings()
-        # settings.beginGroup(self.settings_section)
-        # settings.setValue('background color', self.background_color)
-        # settings.endGroup()
-        # old_players, override_player = get_media_players()
-        # if self.used_players != old_players:
-        #     # clean old Media stuff
-        #     set_media_players(self.used_players, override_player)
-        #     self.settings_form.register_post_process('mediaitem_suffix_reset')
-        #     self.settings_form.register_post_process('mediaitem_media_rebuild')
-        #     self.settings_form.register_post_process('config_screen_changed')
+        Settings().setValue(self.settings_section + '/stream command', self.stream_edit.text())
+        Settings().setValue(self.settings_section + '/vlc arguments', self.vlc_arguments_edit.toPlainText())
 
     def post_set_up(self, post_update=False):
         """
@@ -127,22 +133,6 @@ class MediaTab(SettingsTab):
         :param post_update: Indicates if called before or after updates.
         """
         pass
-        # for key, player in self.media_players.items():
-        #     player = self.media_players[key]
-        #     checkbox = MediaQCheckBox(self.media_player_group_box)
-        #     checkbox.setEnabled(player.available)
-        #     checkbox.setObjectName(player.name + '_check_box')
-        #     checkbox.setToolTip(player.get_info())
-        #     checkbox.set_player_name(player.name)
-        #     self.player_check_boxes[player.name] = checkbox
-        #     checkbox.stateChanged.connect(self.on_player_check_box_changed)
-        #     self.media_player_layout.addWidget(checkbox)
-        #     if player.available and player.name in self.used_players:
-        #         checkbox.setChecked(True)
-        #     else:
-        #         checkbox.setChecked(False)
-        # self.update_player_list()
-        # self.retranslate_players()
 
     def on_revert(self):
         pass

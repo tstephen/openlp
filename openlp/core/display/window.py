@@ -180,7 +180,7 @@ class DisplayWindow(QtWidgets.QWidget):
         """
         Set the URL of the webview
 
-        :param str url: The URL to set
+        :param QtCore.QUrl | str url: The URL to set
         """
         if not isinstance(url, QtCore.QUrl):
             url = QtCore.QUrl(url)

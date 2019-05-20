@@ -28,7 +28,8 @@ from unittest.mock import call, patch
 
 import openlp.core.projectors.pjlink
 from openlp.core.projectors.pjlinkcommands import process_command
-from openlp.core.projectors.constants import E_UNDEFINED, S_DATA_OK
+from openlp.core.projectors.constants import E_AUTHENTICATION, E_PARAMETER, E_PROJECTOR, E_UNAVAILABLE, E_UNDEFINED, \
+    S_DATA_OK, PJLINK_ERRORS, STATUS_MSG
 from openlp.core.projectors.db import Projector
 from openlp.core.projectors.pjlink import PJLink
 from tests.resources.projector.data import TEST1_DATA
@@ -114,19 +115,111 @@ class TestPJLinkRouting(TestCase):
         assert (chk == S_DATA_OK), 'Should have returned S_DATA_OK'
 
     @patch.object(openlp.core.projectors.pjlinkcommands, 'log')
-    def test_routing_pjink_errors(self, mock_log):
+    def test_routing_pjink_err1(self, mock_log):
         """
-        Test rouing when PJLink error received (err1, err2, err3, err4, erra)
+        Test rouing when PJLink ERR1 received
         """
         # GIVEN: Test setup
-        log_error_text = [call('({ip}) CLSS: PJLink returned "ERR1: Undefined Command"'.format(ip=self.pjlink.name))]
-        log_debug_text = [call('({ip}) Processing command "CLSS" with data "ERR1"'.format(ip=self.pjlink.name))]
         err_code = E_UNDEFINED
+        err_msg = STATUS_MSG[err_code]
+        err_str = PJLINK_ERRORS[err_code]
+
+        log_error_text = [call('({ip}) CLSS: {err}'.format(ip=self.pjlink.name, err=err_msg))]
+        log_debug_text = [call('({ip}) Processing command "CLSS" with data "{err}"'.format(ip=self.pjlink.name,
+                                                                                           err=err_str))]
 
         # WHEN: routing called
-        chk = process_command(projector=self.pjlink, cmd='CLSS', data='ERR1')
+        chk = process_command(projector=self.pjlink, cmd='CLSS', data=err_str)
 
         # THEN: Appropriate log entries should have been made and methods called/not called
         mock_log.error.assert_has_calls(log_error_text)
         mock_log.debug.assert_has_calls(log_debug_text)
-        assert (chk == err_code), 'Should have returned E_UNDEFINED'
+        assert (chk == err_code), 'Should have returned {err}'.format(err=PJLINK_ERRORS[err_code])
+
+    @patch.object(openlp.core.projectors.pjlinkcommands, 'log')
+    def test_routing_pjink_err2(self, mock_log):
+        """
+        Test rouing when PJLink ERR2 received
+        """
+        # GIVEN: Test setup
+        err_code = E_PARAMETER
+        err_msg = STATUS_MSG[err_code]
+        err_str = PJLINK_ERRORS[err_code]
+
+        log_error_text = [call('({ip}) CLSS: {err}'.format(ip=self.pjlink.name, err=err_msg))]
+        log_debug_text = [call('({ip}) Processing command "CLSS" with data "{err}"'.format(ip=self.pjlink.name,
+                                                                                           err=err_str))]
+
+        # WHEN: routing called
+        chk = process_command(projector=self.pjlink, cmd='CLSS', data=err_str)
+
+        # THEN: Appropriate log entries should have been made and methods called/not called
+        mock_log.error.assert_has_calls(log_error_text)
+        mock_log.debug.assert_has_calls(log_debug_text)
+        assert (chk == err_code), 'Should have returned {err}'.format(err=PJLINK_ERRORS[err_code])
+
+    @patch.object(openlp.core.projectors.pjlinkcommands, 'log')
+    def test_routing_pjink_err3(self, mock_log):
+        """
+        Test rouing when PJLink ERR3 received
+        """
+        # GIVEN: Test setup
+        err_code = E_UNAVAILABLE
+        err_msg = STATUS_MSG[err_code]
+        err_str = PJLINK_ERRORS[err_code]
+
+        log_error_text = [call('({ip}) CLSS: {err}'.format(ip=self.pjlink.name, err=err_msg))]
+        log_debug_text = [call('({ip}) Processing command "CLSS" with data "{err}"'.format(ip=self.pjlink.name,
+                                                                                           err=err_str))]
+
+        # WHEN: routing called
+        chk = process_command(projector=self.pjlink, cmd='CLSS', data=err_str)
+
+        # THEN: Appropriate log entries should have been made and methods called/not called
+        mock_log.error.assert_has_calls(log_error_text)
+        mock_log.debug.assert_has_calls(log_debug_text)
+        assert (chk == err_code), 'Should have returned {err}'.format(err=PJLINK_ERRORS[err_code])
+
+    @patch.object(openlp.core.projectors.pjlinkcommands, 'log')
+    def test_routing_pjink_err4(self, mock_log):
+        """
+        Test rouing when PJLink ERR4 received
+        """
+        # GIVEN: Test setup
+        err_code = E_PROJECTOR
+        err_msg = STATUS_MSG[err_code]
+        err_str = PJLINK_ERRORS[err_code]
+
+        log_error_text = [call('({ip}) CLSS: {err}'.format(ip=self.pjlink.name, err=err_msg))]
+        log_debug_text = [call('({ip}) Processing command "CLSS" with data "{err}"'.format(ip=self.pjlink.name,
+                                                                                           err=err_str))]
+
+        # WHEN: routing called
+        chk = process_command(projector=self.pjlink, cmd='CLSS', data=err_str)
+
+        # THEN: Appropriate log entries should have been made and methods called/not called
+        mock_log.error.assert_has_calls(log_error_text)
+        mock_log.debug.assert_has_calls(log_debug_text)
+        assert (chk == err_code), 'Should have returned {err}'.format(err=PJLINK_ERRORS[err_code])
+
+    @patch.object(openlp.core.projectors.pjlinkcommands, 'log')
+    def test_routing_pjink_errA(self, mock_log):
+        """
+        Test rouing when PJLink ERRA received
+        """
+        # GIVEN: Test setup
+        err_code = E_AUTHENTICATION
+        err_msg = STATUS_MSG[err_code]
+        err_str = PJLINK_ERRORS[err_code]
+
+        log_error_text = [call('({ip}) CLSS: {err}'.format(ip=self.pjlink.name, err=err_msg))]
+        log_debug_text = [call('({ip}) Processing command "CLSS" with data "{err}"'.format(ip=self.pjlink.name,
+                                                                                           err=err_str))]
+
+        # WHEN: routing called
+        chk = process_command(projector=self.pjlink, cmd='CLSS', data=err_str)
+
+        # THEN: Appropriate log entries should have been made and methods called/not called
+        mock_log.error.assert_has_calls(log_error_text)
+        mock_log.debug.assert_has_calls(log_debug_text)
+        assert (chk == err_code), 'Should have returned {err}'.format(err=PJLINK_ERRORS[err_code])

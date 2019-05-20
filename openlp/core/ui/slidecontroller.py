@@ -112,7 +112,7 @@ class MediaSlider(QtWidgets.QSlider):
 
 class InfoLabel(QtWidgets.QLabel):
     """
-    InfoLabel is a subclassed QLabel. Created to provide the ablilty to add a ellipsis if the text is cut off. Original
+    InfoLabel is a subclassed QLabel. Created to provide the ability to add a ellipsis if the text is cut off. Original
     source: https://stackoverflow.com/questions/11446478/pyside-pyqt-truncate-text-in-qlabel-based-on-minimumsize
     """
 
@@ -177,7 +177,6 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
             if screen.is_display:
                 display = DisplayWindow(self, screen)
                 self.displays.append(display)
-        #    display.media_watcher.progress.connect(self.on_audio_time_remaining)
 
     @property
     def display(self):
@@ -381,7 +380,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         self.position_label.setMinimumSize(90, 0)
         self.position_label.setObjectName('position_label')
         self.mediabar.add_toolbar_widget(self.position_label)
-        # Build the seek_slider.
+        # Build the media seek_slider.
         self.seek_slider = MediaSlider(QtCore.Qt.Horizontal, self, self)
         self.seek_slider.setMaximum(1000)
         self.seek_slider.setTracking(True)
@@ -398,7 +397,6 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         self.volume_slider.setMaximum(100)
         self.volume_slider.setTracking(True)
         self.volume_slider.setToolTip(translate('OpenLP.SlideController', 'Audio Volume.'))
-        # self.volume_slider.setValue(self.media_info.volume)
         self.volume_slider.setGeometry(QtCore.QRect(90, 160, 221, 24))
         self.volume_slider.setObjectName('volume_slider')
         self.mediabar.add_toolbar_widget(self.volume_slider)

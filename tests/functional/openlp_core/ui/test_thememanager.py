@@ -143,7 +143,7 @@ class TestThemeManager(TestCase):
         mocked_theme.export_theme.return_value = "{}"
 
         # WHEN: Calling _write_theme with a theme with a name with special characters in it
-        theme_manager._write_theme(mocked_theme, None, None)
+        theme_manager._write_theme(mocked_theme)
 
         # THEN: It should have been created
         assert os.path.exists(os.path.join(self.temp_folder, 'theme 愛 name', 'theme 愛 name.json')) is True, \
@@ -224,7 +224,7 @@ class TestThemeManager(TestCase):
             theme_manager = ThemeManager(None)
 
             # WHEN: unzip_theme is called
-            theme_manager.unzip_theme('theme.file', 'folder')
+            theme_manager.unzip_theme(Path('theme.file'), Path('folder'))
 
             # THEN: The critical_error_message_box should have been called
             assert mocked_critical_error_message_box.call_count == 1, 'Should have been called once'
