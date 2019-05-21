@@ -170,14 +170,17 @@ class PowerpointDocument(PresentationDocument):
         However, for the moment, we want a physical file since it makes life easier elsewhere.
         """
         log.debug('create_thumbnails')
+        generate_thumbs = True
         if self.check_thumbnails():
-            return
+            # No need for thumbnails but we still need the index
+            generate_thumbs = False
         key = 1
         for num in range(self.presentation.Slides.Count):
             if not self.presentation.Slides(num + 1).SlideShowTransition.Hidden:
                 self.index_map[key] = num + 1
-                self.presentation.Slides(num + 1).Export(
-                    str(self.get_thumbnail_folder() / 'slide{key:d}.png'.format(key=key)), 'png', 320, 240)
+                if generate_thumbs:
+                    self.presentation.Slides(num + 1).Export(
+                        str(self.get_thumbnail_folder() / 'slide{key:d}.png'.format(key=key)), 'png', 320, 240)
                 key += 1
         self.slide_count = key - 1
 
