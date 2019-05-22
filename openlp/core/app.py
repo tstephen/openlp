@@ -31,7 +31,6 @@ import logging
 import os
 import sys
 import time
-import os
 from datetime import datetime
 from traceback import format_exception
 
@@ -347,9 +346,6 @@ def main():
     # Bug #1018855: Set the WM_CLASS property in X11
     if not is_win() and not is_macosx():
         qt_args.append('OpenLP')
-    # Set the libvlc environment variable if we're frozen
-    if getattr(sys, 'frozen', False):
-        os.environ['PYTHON_VLC_LIB_PATH'] = str(AppLocation.get_directory(AppLocation.AppDir))
     # Initialise the resources
     qInitResources()
     # Now create and actually run the application.
