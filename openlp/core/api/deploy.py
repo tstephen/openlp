@@ -34,7 +34,7 @@ def deploy_zipfile(app_root_path, zip_name):
     Process the downloaded zip file and add to the correct directory
 
     :param str zip_name: the zip file name to be processed
-    :param openlp.core.common.path.Path app_root_path: The directory to expand the zip to
+    :param pathlib.Path app_root_path: The directory to expand the zip to
 
     :return: None
     """

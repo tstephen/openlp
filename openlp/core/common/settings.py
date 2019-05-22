@@ -27,13 +27,14 @@ import json
 import logging
 import os
 from enum import IntEnum
+from pathlib import Path
 from tempfile import gettempdir
 
 from PyQt5 import QtCore, QtGui
 
 from openlp.core.common import SlideLimits, ThemeLevel, is_linux, is_win
-from openlp.core.common.json import OpenLPJsonDecoder, OpenLPJsonEncoder
-from openlp.core.common.path import Path, files_to_paths, str_to_path
+from openlp.core.common.json import OpenLPJSONDecoder, OpenLPJSONEncoder, is_serializable
+from openlp.core.common.path import files_to_paths, str_to_path
 
 
 log = logging.getLogger(__name__)
@@ -337,7 +338,7 @@ class Settings(QtCore.QSettings):
 
         Does not affect existing Settings objects.
 
-        :param openlp.core.common.path.Path ini_path: ini file path
+        :param Path ini_path: ini file path
         :rtype: None
         """
         Settings.__file_path__ = str(ini_path)
@@ -584,8 +585,8 @@ class Settings(QtCore.QSettings):
         :param value: The value to save
         :rtype: None
         """
-        if isinstance(value, (Path, dict)) or (isinstance(value, list) and value and isinstance(value[0], Path)):
-            value = json.dumps(value, cls=OpenLPJsonEncoder)
+        if is_serializable(value):  # TODO: doesnt handle list off path objects
+            value = json.dumps(value, cls=OpenLPJSONEncoder)
         super().setValue(key, value)
 
     def _convert_value(self, setting, default_value):
@@ -611,8 +612,8 @@ class Settings(QtCore.QSettings):
             elif isinstance(default_value, dict):
                 return {}
         elif isinstance(setting, str):
-            if '__Path__' in setting or setting.startswith('{'):
-                return json.loads(setting, cls=OpenLPJsonDecoder)
+            if 'json_meta' in setting or setting.startswith('{'):  # TODO: Appears screeen settings is using this, subcass from jsonmixin
+                return json.loads(setting, cls=OpenLPJSONDecoder)
         # Convert the setting to the correct type.
         if isinstance(default_value, bool):
             if isinstance(setting, bool):
@@ -629,7 +630,7 @@ class Settings(QtCore.QSettings):
         """
         Export the settings to file.
 
-        :param openlp.core.common.path.Path dest_path: The file path to create the export file.
+        :param Path dest_path: The file path to create the export file.
         :return: Success
         :rtype: bool
         """

@@ -277,7 +277,8 @@ class TestSettings(TestCase, TestMixin):
         """Test the Settings._convert_value() method when a setting is JSON and represents a Path object"""
         # GIVEN: A settings object
         # WHEN: _convert_value() is run
-        result = Settings()._convert_value('{"__Path__": ["openlp", "core"]}', None)
+        result = Settings()._convert_value(
+            '{"parts": ["openlp", "core"], "json_meta": {"class": "Path", "version": 1}}', None)
 
         # THEN: The result should be a Path object
         assert isinstance(result, Path), 'The result should be a Path object'

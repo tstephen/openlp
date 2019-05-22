@@ -24,12 +24,12 @@ Package to test the openlp.core.ui.firsttimeform package.
 """
 import os
 import tempfile
+from pathlib import Path
 from unittest import TestCase
 from unittest.mock import MagicMock, call, patch, DEFAULT
 
 from PyQt5 import QtWidgets
 
-from openlp.core.common.path import Path
 from openlp.core.common.registry import Registry
 from openlp.core.ui.firsttimeform import FirstTimeForm, ThemeListWidgetItem
 from tests.helpers.testmixin import TestMixin

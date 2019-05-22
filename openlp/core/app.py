@@ -32,6 +32,8 @@ import sys
 import time
 import os
 from datetime import datetime
+from pathlib import Path
+from shutil import copytree
 from traceback import format_exception
 
 from PyQt5 import QtCore, QtWebEngineWidgets, QtWidgets  # noqa
@@ -41,7 +43,7 @@ from openlp.core.common import is_macosx, is_win
 from openlp.core.common.applocation import AppLocation
 from openlp.core.loader import loader
 from openlp.core.common.i18n import LanguageManager, UiStrings, translate
-from openlp.core.common.path import copytree, create_paths, Path
+from openlp.core.common.path import create_paths
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.display.screens import ScreenList
@@ -316,7 +318,7 @@ def set_up_logging(log_path):
     """
     Setup our logging using log_path
 
-    :param openlp.core.common.path.Path log_path: The file to save the log to.
+    :param Path log_path: The file to save the log to.
     :rtype: None
     """
     create_paths(log_path, do_not_log=True)

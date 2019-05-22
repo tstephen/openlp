@@ -20,8 +20,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>. #
 ##########################################################################
 import os
-
-from openlp.core.common.path import Path
+from pathlib import Path
 
 
 OPENLP_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))

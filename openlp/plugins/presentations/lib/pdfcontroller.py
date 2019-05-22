@@ -21,11 +21,11 @@
 ##########################################################################
 import logging
 import re
+from shutil import which
 from subprocess import CalledProcessError, check_output
 
 from openlp.core.common import check_binary_exists, is_win
 from openlp.core.common.applocation import AppLocation
-from openlp.core.common.path import which
 from openlp.core.common.settings import Settings
 from openlp.core.display.screens import ScreenList
 from openlp.plugins.presentations.lib.presentationcontroller import PresentationController, PresentationDocument
@@ -71,7 +71,7 @@ class PdfController(PresentationController):
         Function that checks whether a binary is either ghostscript or mudraw or neither.
         Is also used from presentationtab.py
 
-        :param openlp.core.common.path.Path program_path: The full path to the binary to check.
+        :param pathlib.Path program_path: The full path to the binary to check.
         :return: Type of the binary, 'gs' if ghostscript, 'mudraw' if mudraw, None if invalid.
         :rtype: str | None
         """
@@ -182,7 +182,7 @@ class PdfDocument(PresentationDocument):
         """
         Constructor, store information about the file and initialise.
 
-        :param openlp.core.common.path.Path document_path: Path to the document to load
+        :param pathlib.Path document_path: Path to the document to load
         :rtype: None
         """
         log.debug('Init Presentation Pdf')

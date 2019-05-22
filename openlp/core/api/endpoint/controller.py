@@ -24,11 +24,11 @@ import logging
 import os
 import urllib.error
 import urllib.request
+from pathlib import Path
 
 from openlp.core.api.http import requires_auth
 from openlp.core.api.http.endpoint import Endpoint
 from openlp.core.common.applocation import AppLocation
-from openlp.core.common.path import Path
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.lib import create_thumb

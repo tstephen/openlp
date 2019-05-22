@@ -29,7 +29,7 @@ from lxml import etree, objectify
 
 from openlp.core.common import de_hump
 from openlp.core.common.applocation import AppLocation
-from openlp.core.common.json import OpenLPJsonDecoder, OpenLPJsonEncoder
+from openlp.core.common.json import OpenLPJSONDecoder, OpenLPJSONEncoder
 from openlp.core.display.screens import ScreenList
 from openlp.core.lib import get_text_file_string, str_to_bool
 
@@ -190,7 +190,7 @@ class Theme(object):
         """
         Add the path name to the image name so the background can be rendered.
 
-        :param openlp.core.common.path.Path path: The path name to be added.
+        :param pathlib.Path path: The path name to be added.
         :rtype: None
         """
         if self.background_type == 'image' or self.background_type == 'video':
@@ -216,13 +216,13 @@ class Theme(object):
         Convert the JSON file and expand it.
 
         :param theme: the theme string
-        :param openlp.core.common.path.Path theme_path: The path to the theme
+        :param pathlib.Path theme_path: The path to the theme
         :rtype: None
         """
         if theme_path:
-            jsn = json.loads(theme, cls=OpenLPJsonDecoder, base_path=theme_path)
+            jsn = json.loads(theme, cls=OpenLPJSONDecoder, base_path=theme_path)
         else:
-            jsn = json.loads(theme, cls=OpenLPJsonDecoder)
+            jsn = json.loads(theme, cls=OpenLPJSONDecoder)
         self.expand_json(jsn)
 
     def export_theme(self, theme_path=None):
@@ -234,8 +234,8 @@ class Theme(object):
         for attr, value in self.__dict__.items():
             theme_data["{attr}".format(attr=attr)] = value
         if theme_path:
-            return json.dumps(theme_data, cls=OpenLPJsonEncoder, base_path=theme_path)
-        return json.dumps(theme_data, cls=OpenLPJsonEncoder)
+            return json.dumps(theme_data, cls=OpenLPJSONEncoder, base_path=theme_path)
+        return json.dumps(theme_data, cls=OpenLPJSONEncoder)
 
     def parse(self, xml):
         """

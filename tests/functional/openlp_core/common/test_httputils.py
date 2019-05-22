@@ -24,12 +24,12 @@ Functional tests to test the AppLocation class and related methods.
 """
 import os
 import tempfile
+from pathlib import Path
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
 from openlp.core.common.httputils import ProxyMode, download_file, get_proxy_settings, get_url_file_size, \
     get_user_agent, get_web_page
-from openlp.core.common.path import Path
 from openlp.core.common.settings import Settings
 from tests.helpers.testmixin import TestMixin
 

@@ -23,12 +23,13 @@
 The :mod:`listpreviewwidget` is a widget that lists the slides in the slide controller.
 It is based on a QTableWidget but represents its contents in list form.
 """
+from pathlib import Path
+
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from openlp.core.common import is_win
 from openlp.core.common.i18n import UiStrings
 from openlp.core.common.mixins import RegistryProperties
-from openlp.core.common.path import Path
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.lib.serviceitem import ItemCapabilities, ServiceItem
@@ -41,7 +42,7 @@ def handle_mime_data_urls(mime_data):
 
     :param QtCore.QMimeData mime_data: The mime data from the drag and drop opperation.
     :return: A list of file paths that were dropped
-    :rtype: list[openlp.core.common.path.Path]
+    :rtype: list[Path]
     """
     file_paths = []
     for url in mime_data.urls():

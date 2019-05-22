@@ -23,10 +23,10 @@
 Functional tests to test the PresentationController and PresentationDocument
 classes and related methods.
 """
+from pathlib import Path
 from unittest import TestCase
 from unittest.mock import MagicMock, call, patch
 
-from openlp.core.common.path import Path
 from openlp.plugins.presentations.lib.presentationcontroller import PresentationController, PresentationDocument
 
 

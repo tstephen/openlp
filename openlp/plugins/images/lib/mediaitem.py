@@ -21,13 +21,14 @@
 ##########################################################################
 
 import logging
+from pathlib import Path
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from openlp.core.common import delete_file, get_images_filter
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.i18n import UiStrings, get_natural_key, translate
-from openlp.core.common.path import Path, create_paths
+from openlp.core.common.path import create_paths
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.lib import ServiceItemContext, build_icon, check_item_selected, create_thumb, validate_thumb
@@ -343,7 +344,7 @@ class ImageMediaItem(MediaManagerItem):
 
         :param openlp.plugins.images.lib.db.ImageFilenames image: The image to generate the thumbnail path for.
         :return: A path to the thumbnail
-        :rtype: openlp.core.common.path.Path
+        :rtype: Path
         """
         ext = image.file_path.suffix.lower()
         return self.service_path / '{name:d}{ext}'.format(name=image.id, ext=ext)
@@ -401,7 +402,7 @@ class ImageMediaItem(MediaManagerItem):
         Process a list for files either from the File Dialog or from Drag and Drop.
         This method is overloaded from MediaManagerItem.
 
-        :param list[openlp.core.common.path.Path] file_paths: A List of paths  to be loaded
+        :param list[Path] file_paths: A List of paths  to be loaded
         :param target_group: The QTreeWidgetItem of the group that will be the parent of the added files
         """
         self.application.set_normal_cursor()
@@ -413,7 +414,7 @@ class ImageMediaItem(MediaManagerItem):
         """
         Add new images to the database. This method is called when adding images using the Add button or DnD.
 
-        :param list[openlp.core.common.Path] image_paths: A list of file paths to the images to be loaded
+        :param list[Path] image_paths: A list of file paths to the images to be loaded
         :param target_group: The QTreeWidgetItem of the group that will be the parent of the added files
         :param initial_load: When set to False, the busy cursor and progressbar will be shown while loading images
         """

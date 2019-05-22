@@ -40,7 +40,7 @@ from sqlalchemy.pool import NullPool
 from openlp.core.common import delete_file
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.i18n import translate
-from openlp.core.common.json import OpenLPJsonDecoder, OpenLPJsonEncoder
+from openlp.core.common.json import OpenLPJSONDecoder, OpenLPJSONEncoder
 from openlp.core.common.settings import Settings
 from openlp.core.lib.ui import critical_error_message_box
 
@@ -132,7 +132,7 @@ def get_db_path(plugin_name, db_file_name=None):
     Create a path to a database from the plugin name and database name
 
     :param plugin_name: Name of plugin
-    :param openlp.core.common.path.Path | str | None db_file_name: File name of database
+    :param pathlib.Path | str | None db_file_name: File name of database
     :return: The path to the database
     :rtype: str
     """
@@ -150,7 +150,7 @@ def handle_db_error(plugin_name, db_file_path):
     Log and report to the user that a database cannot be loaded
 
     :param plugin_name: Name of plugin
-    :param openlp.core.common.path.Path db_file_path: File name of database
+    :param pathlib.Path db_file_path: File name of database
     :return: None
     """
     db_path = get_db_path(plugin_name, db_file_path)
@@ -165,7 +165,7 @@ def init_url(plugin_name, db_file_name=None):
     Construct the connection string for a database.
 
     :param plugin_name: The name of the plugin for the database creation.
-    :param openlp.core.common.path.Path | str | None db_file_name: The database file name. Defaults to None resulting
+    :param pathlib.Path | str | None db_file_name: The database file name. Defaults to None resulting
                                                                    in the plugin_name being used.
     :return: The database URL
     :rtype: str
@@ -215,8 +215,7 @@ class PathType(types.TypeDecorator):
     Create a PathType for storing Path objects with SQLAlchemy. Behind the scenes we convert the Path object to a JSON
     representation and store it as a Unicode type
     """
-    impl = types.UnicodeText
-
+    impl = types.Unicode
     def coerce_compared_value(self, op, value):
         """
         Some times it make sense to compare a PathType with a string. In the case a string is used coerce the the
@@ -224,7 +223,7 @@ class PathType(types.TypeDecorator):
 
         :param op: The operation being carried out. Not used, as we only care about the type that is being used with the
             operation.
-        :param openlp.core.common.path.Path | str value: The value being used for the comparison. Most likely a Path
+        :param psthlib.Path | str value: The value being used for the comparison. Most likely a Path
             Object or str.
         :return: The coerced value stored in the db
         :rtype: PathType or UnicodeText
@@ -238,13 +237,13 @@ class PathType(types.TypeDecorator):
         """
         Convert the Path object to a JSON representation
 
-        :param openlp.core.common.path.Path value: The value to convert
+        :param psthlib.Path value: The value to convert
         :param dialect: Not used
         :return: The Path object as a JSON string
         :rtype: str
         """
         data_path = AppLocation.get_data_path()
-        return json.dumps(value, cls=OpenLPJsonEncoder, base_path=data_path)
+        return json.dumps(value, cls=OpenLPJSONEncoder, base_path=data_path)
 
     def process_result_value(self, value, dialect):
         """
@@ -253,10 +252,10 @@ class PathType(types.TypeDecorator):
         :param types.UnicodeText value: The value to convert
         :param dialect: Not used
         :return: The JSON object converted Python object (in this case it should be a Path object)
-        :rtype: openlp.core.common.path.Path
+        :rtype: psthlib.Path
         """
         data_path = AppLocation.get_data_path()
-        return json.loads(value, cls=OpenLPJsonDecoder, base_path=data_path)
+        return json.loads(value, cls=OpenLPJSONDecoder, base_path=data_path)
 
 
 def upgrade_db(url, upgrade):
@@ -351,7 +350,7 @@ class Manager(object):
 
         :param plugin_name: The name to setup paths and settings section names
         :param init_schema: The init_schema function for this database
-        :param openlp.core.common.path.Path db_file_path: The file name to use for this database. Defaults to None
+        :param pathlib.Path db_file_path: The file name to use for this database. Defaults to None
             resulting in the plugin_name being used.
         :param upgrade_mod: The upgrade_schema function for this database
         """

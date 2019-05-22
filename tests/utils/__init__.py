@@ -44,6 +44,6 @@ def load_external_result_data(file_path):
     """
     A method to load and return an object containing the song data from an external file.
 
-    :param openlp.core.common.path.Path file_path: The path of the file to load
+    :param pathlib.Path file_path: The path of the file to load
     """
     return json.loads(file_path.read_bytes().decode())

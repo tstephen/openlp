@@ -156,7 +156,7 @@ class PresentationMediaItem(MediaManagerItem):
         Add presentations into the media manager. This is called both on initial load of the plugin to populate with
         existing files, and when the user adds new files via the media manager.
 
-        :param list[openlp.core.common.path.Path] file_paths: List of file paths to add to the media manager.
+        :param list[pathlib.Path] file_paths: List of file paths to add to the media manager.
         """
         current_paths = self.get_file_list()
         titles = [file_path.name for file_path in current_paths]
@@ -241,7 +241,7 @@ class PresentationMediaItem(MediaManagerItem):
         """
         Clean up the files created such as thumbnails
 
-        :param openlp.core.common.path.Path file_path: File path of the presentation to clean up after
+        :param pathlib.Path file_path: File path of the presentation to clean up after
         :param bool clean_for_update: Only clean thumbnails if update is needed
         :rtype: None
         """
@@ -385,7 +385,7 @@ class PresentationMediaItem(MediaManagerItem):
         set as the preferred controller. Find the first (alphabetic) enabled controller which "supports" the extension.
         If none found, then look for a controller which "also supports" it instead.
 
-        :param openlp.core.common.path.Path file_path: The file path
+        :param pathlib.Path file_path: The file path
         :return: The default application controller for this file type, or None if not supported
         :rtype: PresentationController
         """
