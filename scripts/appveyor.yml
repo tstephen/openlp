@@ -46,12 +46,10 @@ after_test:
   # Install VLC
   - choco install %CHOCO_VLC%
   # Get the packaging code
-  #- appveyor DownloadFile http://bazaar.launchpad.net/~openlp-core/openlp/packaging/tarball -FileName packaging.tar.gz
-  - appveyor DownloadFile http://bazaar.launchpad.net/~raoul-snyman/openlp/wix-packaging/tarball -FileName packaging.tar.gz
+  - appveyor DownloadFile http://bazaar.launchpad.net/~openlp-core/openlp/packaging/tarball -FileName packaging.tar.gz
   - 7z e packaging.tar.gz
   - 7z x packaging.tar
-  #- mv ~openlp-core/openlp/packaging packaging
-  - mv ~raoul-snyman/openlp/wix-packaging packaging
+  - mv ~openlp-core/openlp/packaging packaging
   # If this is trunk we should also build the manual
   - ps: >-
       If (BUILD_DOCS) {
