@@ -585,7 +585,8 @@ class Settings(QtCore.QSettings):
         :param value: The value to save
         :rtype: None
         """
-        if is_serializable(value):  # TODO: doesnt handle list off path objects
+        if is_serializable(value) or isinstance(value, dict) or \
+                (isinstance(value, list) and value and is_serializable(value[0])):
             value = json.dumps(value, cls=OpenLPJSONEncoder)
         super().setValue(key, value)
 
@@ -612,7 +613,7 @@ class Settings(QtCore.QSettings):
             elif isinstance(default_value, dict):
                 return {}
         elif isinstance(setting, str):
-            if 'json_meta' in setting or setting.startswith('{'):  # TODO: Appears screeen settings is using this, subcass from jsonmixin
+            if 'json_meta' in setting or setting.startswith('{'):
                 return json.loads(setting, cls=OpenLPJSONDecoder)
         # Convert the setting to the correct type.
         if isinstance(default_value, bool):

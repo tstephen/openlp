@@ -165,8 +165,8 @@ def init_url(plugin_name, db_file_name=None):
     Construct the connection string for a database.
 
     :param plugin_name: The name of the plugin for the database creation.
-    :param pathlib.Path | str | None db_file_name: The database file name. Defaults to None resulting
-                                                                   in the plugin_name being used.
+    :param pathlib.Path | str | None db_file_name: The database file name. Defaults to None resulting in the plugin_name
+                                                   being used.
     :return: The database URL
     :rtype: str
     """
@@ -216,6 +216,7 @@ class PathType(types.TypeDecorator):
     representation and store it as a Unicode type
     """
     impl = types.Unicode
+
     def coerce_compared_value(self, op, value):
         """
         Some times it make sense to compare a PathType with a string. In the case a string is used coerce the the
@@ -223,10 +224,8 @@ class PathType(types.TypeDecorator):
 
         :param op: The operation being carried out. Not used, as we only care about the type that is being used with the
             operation.
-        :param psthlib.Path | str value: The value being used for the comparison. Most likely a Path
-            Object or str.
-        :return: The coerced value stored in the db
-        :rtype: PathType or UnicodeText
+        :param pathlib.Path | str value: The value being used for the comparison. Most likely a Path Object or str.
+        :return PathType | UnicodeText: The coerced value stored in the db
         """
         if isinstance(value, str):
             return UnicodeText()
@@ -237,10 +236,9 @@ class PathType(types.TypeDecorator):
         """
         Convert the Path object to a JSON representation
 
-        :param psthlib.Path value: The value to convert
+        :param pathlib.Path value: The value to convert
         :param dialect: Not used
-        :return: The Path object as a JSON string
-        :rtype: str
+        :return str: The Path object as a JSON string
         """
         data_path = AppLocation.get_data_path()
         return json.dumps(value, cls=OpenLPJSONEncoder, base_path=data_path)
@@ -252,7 +250,7 @@ class PathType(types.TypeDecorator):
         :param types.UnicodeText value: The value to convert
         :param dialect: Not used
         :return: The JSON object converted Python object (in this case it should be a Path object)
-        :rtype: psthlib.Path
+        :rtype: pathlib.Path
         """
         data_path = AppLocation.get_data_path()
         return json.loads(value, cls=OpenLPJSONDecoder, base_path=data_path)
@@ -350,8 +348,8 @@ class Manager(object):
 
         :param plugin_name: The name to setup paths and settings section names
         :param init_schema: The init_schema function for this database
-        :param pathlib.Path db_file_path: The file name to use for this database. Defaults to None
-            resulting in the plugin_name being used.
+        :param pathlib.Path | None db_file_path: The file name to use for this database. Defaults to None resulting in
+            the plugin_name being used.
         :param upgrade_mod: The upgrade_schema function for this database
         """
         super().__init__()
