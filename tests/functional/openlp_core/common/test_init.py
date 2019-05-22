@@ -322,7 +322,7 @@ class TestInit(TestCase, TestMixin):
             mocked_open.assert_called_once_with('rb')
             assert mocked_universal_detector_inst.feed.mock_calls == [call(b'data' * 256)]
             mocked_universal_detector_inst.close.assert_called_once_with()
-            assert result == encoding_result
+            assert result == 'UTF-8'
 
     def test_get_file_encoding_eof(self):
         """
@@ -344,7 +344,7 @@ class TestInit(TestCase, TestMixin):
             mocked_open.assert_called_once_with('rb')
             assert mocked_universal_detector_inst.feed.mock_calls == [call(b'data' * 256), call(b'data' * 4)]
             mocked_universal_detector_inst.close.assert_called_once_with()
-            assert result == encoding_result
+            assert result == 'UTF-8'
 
     def test_get_file_encoding_oserror(self):
         """
@@ -367,4 +367,4 @@ class TestInit(TestCase, TestMixin):
             mocked_log.exception.assert_called_once_with('Error detecting file encoding')
             mocked_universal_detector_inst.feed.assert_not_called()
             mocked_universal_detector_inst.close.assert_called_once_with()
-            assert result == encoding_result
+            assert result == 'UTF-8'

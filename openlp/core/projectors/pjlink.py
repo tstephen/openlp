@@ -281,6 +281,7 @@ class PJLink(QtNetwork.QTcpSocket):
         self.pjlink_class = copy(PJLINK_CLASS)
         self.pjlink_name = None  # NAME
         self.power = S_OFF  # POWR
+        self.projector_errors = {}  # Full ERST errors
         self.serial_no = None  # SNUM
         self.serial_no_received = None
         self.sw_version = None  # SVER
@@ -520,14 +521,23 @@ class PJLink(QtNetwork.QTcpSocket):
             self.send_busy = False
             return
         # Although we have a packet length limit, go ahead and use a larger buffer
-        read = self.readLine(1024)
-        log.debug('({ip}) get_socket(): "{buff}"'.format(ip=self.entry.name, buff=read))
-        if read == -1:
+        self.socket_timer.start()
+        while self.bytesAvailable() >= 1:
+            data = self.readLine(1024)
+            data = data.strip()
+            if not data:
+                log.warning('({ip}) get_socket(): Ignoring empty packet'.format(ip=self.entry.name))
+                if self.bytesAvailable() < 1:
+                    break
+
+        self.socket_timer.stop()
+        if data:
+            log.debug('({ip}) get_socket(): "{buff}"'.format(ip=self.entry.name, buff=data))
+        if data == -1:
             # No data available
             log.debug('({ip}) get_socket(): No data available (-1)'.format(ip=self.entry.name))
-            return self.receive_data_signal()
-        self.socket_timer.stop()
-        return self.get_data(buff=read)
+            return
+        return self.get_data(buff=data)
 
     def get_data(self, buff, *args, **kwargs):
         """
@@ -540,21 +550,22 @@ class PJLink(QtNetwork.QTcpSocket):
         # NOTE: Class2 has changed to some values being UTF-8
         data_in = decode(buff, 'utf-8') if isinstance(buff, bytes) else buff
         data = data_in.strip()
+        self.receive_data_signal()
         # Initial packet checks
         if (len(data) < 7):
             self._trash_buffer(msg='get_data(): Invalid packet - length')
-            return self.receive_data_signal()
+            return
         elif len(data) > self.max_size:
             self._trash_buffer(msg='get_data(): Invalid packet - too long ({length} bytes)'.format(length=len(data)))
-            return self.receive_data_signal()
+            return
         elif not data.startswith(PJLINK_PREFIX):
             self._trash_buffer(msg='get_data(): Invalid packet - PJLink prefix missing')
-            return self.receive_data_signal()
+            return
         elif data[6] != '=' and data[8] != '=':
             # data[6] = standard command packet
             # data[8] = initial PJLink connection (after mangling)
             self._trash_buffer(msg='get_data(): Invalid reply - Does not have "="')
-            return self.receive_data_signal()
+            return
         log.debug('({ip}) get_data(): Checking new data "{data}"'.format(ip=self.entry.name, data=data))
         header, data = data.split('=')
         log.debug('({ip}) get_data() header="{header}" data="{data}"'.format(ip=self.entry.name,
@@ -572,20 +583,20 @@ class PJLink(QtNetwork.QTcpSocket):
                                                                                            data=data))
         if cmd not in PJLINK_VALID_CMD:
             self._trash_buffer('get_data(): Invalid packet - unknown command "{data}"'.format(data=cmd))
-            return self.receive_data_signal()
+            return
         elif version not in PJLINK_VALID_CMD[cmd]['version']:
             self._trash_buffer(msg='get_data() Command reply version does not match a valid command version')
-            return self.receive_data_signal()
+            return
         elif int(self.pjlink_class) < int(version):
             if not ignore_class:
                 log.warning('({ip}) get_data(): Projector returned class reply higher '
                             'than projector stated class'.format(ip=self.entry.name))
-                return self.receive_data_signal()
+                return
 
         chk = process_command(self, cmd, data)
         if chk is None:
             # Command processed normally and not initial connection, so skip other checks
-            return self.receive_data_signal()
+            return
         # PJLink initial connection checks
         elif chk == S_DATA_OK:
             # Previous command returned OK
@@ -612,7 +623,7 @@ class PJLink(QtNetwork.QTcpSocket):
             self.projectorAuthentication.emit(self.entry.name)
             self.change_status(status=E_AUTHENTICATION)
 
-        return self.receive_data_signal()
+        return
 
     @QtCore.pyqtSlot(QtNetwork.QAbstractSocket.SocketError)
     def get_error(self, err):
@@ -728,17 +739,17 @@ class PJLink(QtNetwork.QTcpSocket):
             log.debug('({ip}) _send_command(): Normal queue = {data}'.format(ip=self.entry.name, data=self.send_queue))
             return
 
-        if len(self.priority_queue) != 0:
-            out = self.priority_queue.pop(0)
-            log.debug('({ip}) _send_command(): Getting priority queued packet'.format(ip=self.entry.name))
-        elif len(self.send_queue) != 0:
-            out = self.send_queue.pop(0)
-            log.debug('({ip}) _send_command(): Getting normal queued packet'.format(ip=self.entry.name))
-        else:
+        if not self.priority_queue and not self.send_queue:
             # No data to send
             log.warning('({ip}) _send_command(): No data to send'.format(ip=self.entry.name))
             self.send_busy = False
             return
+        elif self.priority_queue:
+            out = self.priority_queue.pop(0)
+            log.debug('({ip}) _send_command(): Getting priority queued packet'.format(ip=self.entry.name))
+        elif self.send_queue:
+            out = self.send_queue.pop(0)
+            log.debug('({ip}) _send_command(): Getting normal queued packet'.format(ip=self.entry.name))
         self.send_busy = True
         log.debug('({ip}) _send_command(): Sending "{data}"'.format(ip=self.entry.name, data=out.strip()))
         self.socket_timer.start()
@@ -861,6 +872,24 @@ class PJLink(QtNetwork.QTcpSocket):
         log.debug('({ip}) Sending POWR command'.format(ip=self.entry.name))
         return self.send_command(cmd='POWR', priority=priority)
 
+    def set_audio_mute(self, priority=False):
+        """
+        Send command to set audio to muted
+        """
+        log.debug('({ip}) Setting AVMT to 21 (audio mute)'.format(ip=self.entry.name))
+        self.send_command(cmd='AVMT', opts='21', priority=True)
+        self.status_timer_add(cmd='AVMT', callback=self.get_av_mute_status)
+        self.poll_loop()
+
+    def set_audio_normal(self, priority=False):
+        """
+        Send command to set audio to normal
+        """
+        log.debug('({ip}) Setting AVMT to 20 (audio normal)'.format(ip=self.entry.name))
+        self.send_command(cmd='AVMT', opts='20', priority=True)
+        self.status_timer_add(cmd='AVMT', callback=self.get_av_mute_status)
+        self.poll_loop()
+
     def set_input_source(self, src=None):
         """
         Verify input source available as listed in 'INST' command,
@@ -924,9 +953,9 @@ class PJLink(QtNetwork.QTcpSocket):
             log.warning('({ip}) "{cmd}" already in checks - returning'.format(ip=self.entry.name, cmd=cmd))
             return
         log.debug('({ip}) Adding "{cmd}" callback for status timer'.format(ip=self.entry.name, cmd=cmd))
+        self.status_timer_checks[cmd] = callback
         if not self.status_timer.isActive():
             self.status_timer.start()
-        self.status_timer_checks[cmd] = callback
 
     def status_timer_delete(self, cmd):
         """

@@ -78,7 +78,7 @@ class ThemeListWidget(QtWidgets.QListWidget):
         """
         nominal_width = 141  # Icon width of 133 + 4 each side
         max_items_per_row = self.viewport().width() // nominal_width or 1  # or 1 to avoid divide by 0 errors
-        col_size = (self.viewport().width() - 1) / max_items_per_row
+        col_size = (self.viewport().width() - 1) // max_items_per_row
         self.setGridSize(QtCore.QSize(col_size, 140))
 
 

@@ -37,7 +37,7 @@ class AspectRatioLayout(QtWidgets.QLayout):
         """
         Create a layout.
 
-        :param PyQt5.QtWidgets.QWidget parent: The parent widget, can be None.
+        :param QtWidgets.QWidget | None parent: The parent widget
         :param float aspect_ratio: The aspect ratio as a float (e.g. 16.0/9.0)
         """
         super().__init__(parent)

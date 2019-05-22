@@ -1338,7 +1338,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
                 self.application.set_normal_cursor()
                 self.log_exception('Data copy failed {err}'.format(err=str(why)))
                 err_text = translate('OpenLP.MainWindow',
-                                     'OpenLP Data directory copy failed\n\n{err}').format(err=str(why)),
+                                     'OpenLP Data directory copy failed\n\n{err}').format(err=str(why))
                 QtWidgets.QMessageBox.critical(self, translate('OpenLP.MainWindow', 'New Data Directory Error'),
                                                err_text,
                                                QtWidgets.QMessageBox.StandardButtons(QtWidgets.QMessageBox.Ok))
@@ -1356,6 +1356,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
     def open_cmd_line_files(self, args):
         """
         Open files passed in through command line arguments
+
+        :param list[str] args: List of remaining positionall arguments
         """
         for arg in args:
             file_name = os.path.expanduser(arg)

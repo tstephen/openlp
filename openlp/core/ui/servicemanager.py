@@ -38,7 +38,7 @@ from openlp.core.common.applocation import AppLocation
 from openlp.core.common.i18n import UiStrings, format_time, translate
 from openlp.core.common.json import OpenLPJsonDecoder, OpenLPJsonEncoder
 from openlp.core.common.mixins import LogMixin, RegistryProperties
-from openlp.core.common.path import Path, str_to_path
+from openlp.core.common.path import Path
 from openlp.core.common.registry import Registry, RegistryBase
 from openlp.core.common.settings import Settings
 from openlp.core.lib import build_icon
@@ -433,8 +433,8 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
     def on_load_service_clicked(self, checked):
         """
         Handle the `fileOpenItem` action
-        
-        :param bool checked: Not used. 
+
+        :param bool checked: Not used.
         :rtype: None
         """
         self.load_service()
