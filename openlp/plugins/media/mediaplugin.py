@@ -1,43 +1,37 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 The Media plugin
 """
 import logging
-import re
 
-from PyQt5 import QtCore
-
+from openlp.core.state import State
 from openlp.core.api.http import register_endpoint
-from openlp.core.common import check_binary_exists
-from openlp.core.common.applocation import AppLocation
 from openlp.core.common.i18n import translate
-from openlp.core.common.path import Path
+from openlp.core.ui.icons import UiIcons
 from openlp.core.lib import build_icon
 from openlp.core.lib.plugin import Plugin, StringContent
-from openlp.core.ui.icons import UiIcons
 from openlp.plugins.media.endpoint import api_media_endpoint, media_endpoint
 from openlp.plugins.media.lib.mediaitem import MediaMediaItem
-from openlp.plugins.media.lib.mediatab import MediaTab
 
 
 log = logging.getLogger(__name__)
@@ -45,7 +39,6 @@ log = logging.getLogger(__name__)
 
 # Some settings starting with "media" are in core, because they are needed for core functionality.
 __default_settings__ = {
-    'media/media auto start': QtCore.Qt.Unchecked,
     'media/media files': [],
     'media/last directory': None
 }
@@ -66,6 +59,8 @@ class MediaPlugin(Plugin):
         self.dnd_id = 'Media'
         register_endpoint(media_endpoint)
         register_endpoint(api_media_endpoint)
+        State().add_service(self.name, self.weight, requires='mediacontroller', is_plugin=True)
+        State().update_pre_conditions(self.name, self.check_pre_conditions())
 
     def initialise(self):
         """
@@ -73,33 +68,11 @@ class MediaPlugin(Plugin):
         """
         super().initialise()
 
-    def check_pre_conditions(self):
-        """
-        Check it we have a valid environment.
-        :return: true or false
-        """
-        log.debug('check_installed Mediainfo')
-        # Try to find mediainfo in the path
-        exists = process_check_binary(Path('mediainfo'))
-        # If mediainfo is not in the path, try to find it in the application folder
-        if not exists:
-            exists = process_check_binary(AppLocation.get_directory(AppLocation.AppDir) / 'mediainfo')
-        return exists
-
     def app_startup(self):
         """
         Override app_startup() in order to do nothing
         """
         pass
-
-    def create_settings_tab(self, parent):
-        """
-        Create the settings Tab
-
-        :param parent:
-        """
-        visible_name = self.get_string(StringContent.VisibleName)
-        self.settings_tab = MediaTab(parent, self.name, visible_name['title'], self.icon_path)
 
     @staticmethod
     def about():
@@ -143,38 +116,3 @@ class MediaPlugin(Plugin):
         log.info('Media Finalising')
         self.media_controller.finalise()
         Plugin.finalise(self)
-
-    def get_display_css(self):
-        """
-        Add css style sheets to htmlbuilder.
-        """
-        return self.media_controller.get_media_display_css()
-
-    def get_display_javascript(self):
-        """
-        Add javascript functions to htmlbuilder.
-        """
-        return self.media_controller.get_media_display_javascript()
-
-    def get_display_html(self):
-        """
-        Add html code to htmlbuilder.
-        """
-        return self.media_controller.get_media_display_html()
-
-
-def process_check_binary(program_path):
-    """
-    Function that checks whether a binary MediaInfo is present
-
-    :param openlp.core.common.path.Path program_path:The full path to the binary to check.
-    :return: If exists or not
-    :rtype: bool
-    """
-    runlog = check_binary_exists(program_path)
-    # Analyse the output to see it the program is mediainfo
-    for line in runlog.splitlines():
-        decoded_line = line.decode()
-        if re.search('MediaInfo Command line', decoded_line, re.IGNORECASE):
-            return True
-    return False

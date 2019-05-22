@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 The :mod:`serviceitem` provides the service item functionality including the
 type and capability of an item.
@@ -32,6 +32,7 @@ from copy import deepcopy
 
 from PyQt5 import QtGui
 
+from openlp.core.state import State
 from openlp.core.common import md5_hash
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.i18n import translate
@@ -80,7 +81,8 @@ class ServiceItem(RegistryProperties):
         self.items = []
         self.icon = UiIcons().default
         self.raw_footer = []
-        self.foot_text = ''
+        # Plugins can set footer_html themselves. If they don't, it will be generated from raw_footer.
+        self.footer_html = ''
         self.theme = None
         self.service_item_type = None
         self.unique_identifier = 0
@@ -163,25 +165,31 @@ class ServiceItem(RegistryProperties):
         # Save rendered pages to this dict. In the case that a slide is used twice we can use the pages saved to
         # the dict instead of rendering them again.
         previous_pages = {}
-        for index, raw_slide in enumerate(self.slides):
+        index = 0
+        if not self.footer_html:
+            self.footer_html = '<br>'.join([_f for _f in self.raw_footer if _f])
+        for raw_slide in self.slides:
             verse_tag = raw_slide['verse']
-            if verse_tag in previous_pages and previous_pages[verse_tag][1] == raw_slide:
-                page = previous_pages[verse_tag][1]
+            if verse_tag in previous_pages and previous_pages[verse_tag][0] == raw_slide:
+                pages = previous_pages[verse_tag][1]
             else:
-                page = render_tags(raw_slide['text'], self)
-                previous_pages[verse_tag] = (raw_slide, page)
-            rendered_slide = {
-                'title': raw_slide['title'],
-                'text': page,
-                'verse': index,
-            }
-            self._rendered_slides.append(rendered_slide)
-            display_slide = {
-                'title': raw_slide['title'],
-                'text': remove_tags(page),
-                'verse': verse_tag,
-            }
-            self._display_slides.append(display_slide)
+                pages = self.renderer.format_slide(raw_slide['text'], self)
+                previous_pages[verse_tag] = (raw_slide, pages)
+            for page in pages:
+                rendered_slide = {
+                    'title': raw_slide['title'],
+                    'text': render_tags(page),
+                    'verse': index,
+                    'footer': self.footer_html,
+                }
+                self._rendered_slides.append(rendered_slide)
+                display_slide = {
+                    'title': raw_slide['title'],
+                    'text': remove_tags(page),
+                    'verse': verse_tag,
+                }
+                self._display_slides.append(display_slide)
+                index += 1
 
     @property
     def rendered_slides(self):
@@ -257,7 +265,7 @@ class ServiceItem(RegistryProperties):
             file_location = os.path.join(path, file_name)
             file_location_hash = md5_hash(file_location.encode('utf-8'))
             image = os.path.join(str(AppLocation.get_section_data_path(self.name)), 'thumbnails',
-                                 file_location_hash, ntpath.basename(image))
+                                 file_location_hash, ntpath.basename(image))  # TODO: Pathlib
         self.slides.append({'title': file_name, 'image': image, 'path': path, 'display_title': display_title,
                             'notes': notes, 'thumbnail': image})
         # if self.is_capable(ItemCapabilities.HasThumbnails):
@@ -348,14 +356,14 @@ class ServiceItem(RegistryProperties):
         self.processor = header.get('processor', None)
         self.has_original_files = True
         self.metadata = header.get('item_meta_data', [])
-        if 'background_audio' in header:
+        if 'background_audio' in header and State().check_preconditions('media'):
             self.background_audio = []
             for file_path in header['background_audio']:
                 # In OpenLP 3.0 we switched to storing Path objects in JSON files
                 if isinstance(file_path, str):
                     # Handle service files prior to OpenLP 3.0
                     # Windows can handle both forward and backward slashes, so we use ntpath to get the basename
-                    file_path = Path(path, ntpath.basename(file_path))
+                    file_path = path / ntpath.basename(file_path)
                 self.background_audio.append(file_path)
         self.theme_overwritten = header.get('theme_overwritten', False)
         if self.service_item_type == ServiceItemType.Text:
@@ -368,7 +376,7 @@ class ServiceItem(RegistryProperties):
             if path:
                 self.has_original_files = False
                 for text_image in service_item['serviceitem']['data']:
-                    file_path = os.path.join(path, text_image)
+                    file_path = path / text_image
                     self.add_from_image(file_path, text_image, background)
             else:
                 for text_image in service_item['serviceitem']['data']:
@@ -415,7 +423,6 @@ class ServiceItem(RegistryProperties):
         if other.theme is not None:
             self.theme = other.theme
             self._new_item()
-        self.render()
         if self.is_capable(ItemCapabilities.HasBackgroundAudio):
             log.debug(self.background_audio)
 
@@ -525,6 +532,10 @@ class ServiceItem(RegistryProperties):
             path_from = frame['path']
         else:
             path_from = os.path.join(frame['path'], frame['title'])
+        if isinstance(path_from, str):
+            # Handle service files prior to OpenLP 3.0
+            # Windows can handle both forward and backward slashes, so we use ntpath to get the basename
+            path_from = Path(path_from)
         return path_from
 
     def remove_frame(self, frame):
@@ -566,7 +577,6 @@ class ServiceItem(RegistryProperties):
         self.theme_overwritten = (theme is None)
         self.theme = theme
         self._new_item()
-        self.render()
 
     def remove_invalid_frames(self, invalid_paths=None):
         """
@@ -593,7 +603,7 @@ class ServiceItem(RegistryProperties):
                 self.is_valid = False
                 break
             elif self.is_command():
-                if self.is_capable(ItemCapabilities.IsOptical):
+                if self.is_capable(ItemCapabilities.IsOptical) and State().check_preconditions('media'):
                     if not os.path.exists(slide['title']):
                         self.is_valid = False
                         break

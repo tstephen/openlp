@@ -2,24 +2,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 This script helps to trigger builds of branches. To use it you have to install the python-jenkins module. On Fedora
 and Ubuntu/Debian, it is available as the ``python3-jenkins`` package::
@@ -62,7 +62,7 @@ class OpenLPJobs(object):
     Branch_macOS_Tests = 'Branch-02b-macOS-Tests'
     Branch_Build_Source = 'Branch-03a-Build-Source'
     Branch_Build_macOS = 'Branch-03b-Build-macOS'
-    Branch_Code_Analysis = 'Branch-04a-Code-Analysis'
+    Branch_Code_Analysis = 'Branch-04a-Code-Lint'
     Branch_Test_Coverage = 'Branch-04b-Test-Coverage'
     Branch_Lint_Check = 'Branch-04c-Lint-Check'
     Branch_AppVeyor_Tests = 'Branch-05-AppVeyor-Tests'
@@ -84,8 +84,6 @@ class Colour(object):
 class JenkinsTrigger(object):
     """
     A class to trigger builds on Jenkins and print the results.
-
-    :param token: The token we need to trigger the build. If you do not have this token, ask in IRC.
     """
 
     def __init__(self, username, password, can_use_colour):
@@ -102,9 +100,12 @@ class JenkinsTrigger(object):
         Get the job info for all the jobs
         """
         for job_name in OpenLPJobs.Jobs:
-            job_info = self.server.get_job_info(job_name)
-            self.jobs[job_name] = job_info
-            self.jobs[job_name]['nextBuildUrl'] = '{url}{nextBuildNumber}/'.format(**job_info)
+            try:
+                job_info = self.server.get_job_info(job_name)
+                self.jobs[job_name] = job_info
+                self.jobs[job_name]['nextBuildUrl'] = '{url}{nextBuildNumber}/'.format(**job_info)
+            except Exception:
+                pass
 
     def trigger_build(self):
         """

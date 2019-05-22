@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 The :mod:`advancedtab` provides an advanced settings facility.
 """
@@ -117,6 +117,9 @@ class AdvancedTab(SettingsTab):
         self.enable_auto_close_check_box = QtWidgets.QCheckBox(self.ui_group_box)
         self.enable_auto_close_check_box.setObjectName('enable_auto_close_check_box')
         self.ui_layout.addRow(self.enable_auto_close_check_box)
+        self.experimental_check_box = QtWidgets.QCheckBox(self.ui_group_box)
+        self.experimental_check_box.setObjectName('experimental_check_box')
+        self.ui_layout.addRow(self.experimental_check_box)
         self.left_layout.addWidget(self.ui_group_box)
         if HAS_DARK_STYLE:
             self.use_dark_style_checkbox = QtWidgets.QCheckBox(self.ui_group_box)
@@ -291,6 +294,8 @@ class AdvancedTab(SettingsTab):
                                                             'Auto-scroll the next slide to bottom'))
         self.enable_auto_close_check_box.setText(translate('OpenLP.AdvancedTab',
                                                            'Enable application exit confirmation'))
+        self.experimental_check_box.setText(translate('OpenLP.GeneralTab',
+                                                      'Experimental features (use at your own risk)'))
         if HAS_DARK_STYLE:
             self.use_dark_style_checkbox.setText(translate('OpenLP.AdvancedTab', 'Use dark style (needs restart)'))
         self.service_name_group_box.setTitle(translate('OpenLP.AdvancedTab', 'Default Service Name'))
@@ -360,6 +365,7 @@ class AdvancedTab(SettingsTab):
             if self.autoscroll_map[i] == autoscroll_value and i < self.autoscroll_combo_box.count():
                 self.autoscroll_combo_box.setCurrentIndex(i)
         self.enable_auto_close_check_box.setChecked(settings.value('enable exit confirmation'))
+        self.experimental_check_box.setChecked(settings.value('experimental'))
         if HAS_DARK_STYLE:
             self.use_dark_style_checkbox.setChecked(settings.value('use_dark_style'))
         self.hide_mouse_check_box.setChecked(settings.value('hide mouse'))
@@ -423,6 +429,7 @@ class AdvancedTab(SettingsTab):
         slide_max_height_value = self.slide_max_height_combo_box.itemData(slide_max_height_index)
         settings.setValue('slide max height', slide_max_height_value)
         settings.setValue('autoscrolling', self.autoscroll_map[self.autoscroll_combo_box.currentIndex()])
+        settings.setValue('experimental', self.experimental_check_box.isChecked())
         settings.setValue('enable exit confirmation', self.enable_auto_close_check_box.isChecked())
         settings.setValue('hide mouse', self.hide_mouse_check_box.isChecked())
         settings.setValue('alternate rows', self.alternate_rows_check_box.isChecked())
@@ -455,7 +462,7 @@ class AdvancedTab(SettingsTab):
         Service Name options changed
         """
         self.service_name_day.setEnabled(default_service_enabled)
-        time_enabled = default_service_enabled and self.service_name_day.currentIndex() is not 7
+        time_enabled = default_service_enabled and self.service_name_day.currentIndex() != 7
         self.service_name_time.setEnabled(time_enabled)
         self.service_name_edit.setEnabled(default_service_enabled)
         self.service_name_revert_button.setEnabled(default_service_enabled)
@@ -478,7 +485,7 @@ class AdvancedTab(SettingsTab):
                 minute=self.service_name_time.time().minute()
             )
         try:
-            service_name_example = format_time(str(self.service_name_edit.text()), local_time)
+            service_name_example = format_time(self.service_name_edit.text(), local_time)
         except ValueError:
             preset_is_valid = False
             service_name_example = translate('OpenLP.AdvancedTab', 'Syntax error.')
@@ -497,7 +504,7 @@ class AdvancedTab(SettingsTab):
         """
         React to the day of the service name changing.
         """
-        self.service_name_time.setEnabled(service_day is not 7)
+        self.service_name_time.setEnabled(service_day != 7)
         self.update_service_name_example(None)
 
     def on_service_name_revert_button_clicked(self):

@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 Package to test the openlp.core.lib package.
 """
@@ -26,6 +26,7 @@ import os
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
+from openlp.core.state import State
 from openlp.core.common import md5_hash
 from openlp.core.common.path import Path
 from openlp.core.common.registry import Registry
@@ -76,8 +77,13 @@ class TestServiceItem(TestCase, TestMixin):
         self.build_settings()
         Settings().extend_default_settings(__default_settings__)
         Registry.create()
+        # Mock the renderer and its format_slide method
         mocked_renderer = MagicMock()
-        mocked_renderer.format_slide.return_value = [VERSE]
+
+        def side_effect_return_arg(arg1, arg2):
+            return [arg1]
+        mocked_slide_formater = MagicMock(side_effect=side_effect_return_arg)
+        mocked_renderer.format_slide = mocked_slide_formater
         Registry().register('renderer', mocked_renderer)
         Registry().register('image_manager', MagicMock())
 
@@ -109,8 +115,11 @@ class TestServiceItem(TestCase, TestMixin):
         service_item.add_icon = MagicMock()
         FormattingTags.load_tags()
 
-        # WHEN: We add a custom from a saved service
+        # WHEN: We add a custom from a saved serviceand set the media state
         line = convert_file_service_item(TEST_PATH, 'serviceitem_custom_1.osj')
+        State().add_service("media", 0)
+        State().update_pre_conditions("media", True)
+        State().flush_preconditions()
         service_item.set_from_service(line)
 
         # THEN: We should get back a valid service item
@@ -120,11 +129,11 @@ class TestServiceItem(TestCase, TestMixin):
 
         # THEN: The frames should also be valid
         assert 'Test Custom' == service_item.get_display_title(), 'The title should be "Test Custom"'
-        assert service_item.get_frames()[0]['text'] == 'Slide 1'
-        assert service_item.get_frames()[1]['text'] == 'Slide 2'
-        assert service_item.get_frame_title(0) == 'Slide 1', '"Slide 1" has been returned as the title'
-        assert service_item.get_frame_title(1) == 'Slide 2', '"Slide 2" has been returned as the title'
-        assert service_item.get_frame_title(2) == '', 'Blank has been returned as the title of slide 3'
+        assert 'Slide 1' == service_item.get_frames()[0]['text']
+        assert 'Slide 2' == service_item.get_rendered_frame(1)
+        assert 'Slide 1' == service_item.get_frame_title(0), '"Slide 1" has been returned as the title'
+        assert 'Slide 2' == service_item.get_frame_title(1), '"Slide 2" has been returned as the title'
+        assert '' == service_item.get_frame_title(2), 'Blank has been returned as the title of slide 3'
 
     def test_service_item_load_image_from_service(self):
         """
@@ -132,7 +141,7 @@ class TestServiceItem(TestCase, TestMixin):
         """
         # GIVEN: A new service item and a mocked add icon function
         image_name = 'image_1.jpg'
-        test_file = os.path.join(str(TEST_PATH), image_name)
+        test_file = TEST_PATH / image_name
         frame_array = {'path': test_file, 'title': image_name}
 
         service_item = ServiceItem(None)
@@ -145,13 +154,14 @@ class TestServiceItem(TestCase, TestMixin):
                 mocked_get_section_data_path:
             mocked_exists.return_value = True
             mocked_get_section_data_path.return_value = Path('/path/')
-            service_item.set_from_service(line, str(TEST_PATH))
+            service_item.set_from_service(line, TEST_PATH)
 
         # THEN: We should get back a valid service item
         assert service_item.is_valid is True, 'The new service item should be valid'
         assert test_file == service_item.get_rendered_frame(0), 'The first frame should match the path to the image'
         assert frame_array == service_item.get_frames()[0], 'The return should match frame array1'
-        assert test_file == service_item.get_frame_path(0), 'The frame path should match the full path to the image'
+        assert test_file == service_item.get_frame_path(0), \
+            'The frame path should match the full path to the image'
         assert image_name == service_item.get_frame_title(0), 'The frame title should match the image name'
         assert image_name == service_item.get_display_title(), 'The display title should match the first image name'
         assert service_item.is_image() is True, 'This service item should be of an "image" type'
@@ -193,12 +203,18 @@ class TestServiceItem(TestCase, TestMixin):
         # THEN: We should get back a valid service item
         assert service_item.is_valid is True, 'The first service item should be valid'
         assert service_item2.is_valid is True, 'The second service item should be valid'
-        assert test_file1 == service_item.get_rendered_frame(0), 'The first frame should match the path to the image'
-        assert test_file2 == service_item2.get_rendered_frame(0), 'The Second frame should match the path to the image'
-        assert frame_array1 == service_item.get_frames()[0], 'The return should match the frame array1'
-        assert frame_array2 == service_item2.get_frames()[0], 'The return should match the frame array2'
-        assert test_file1 == service_item.get_frame_path(0), 'The frame path should match the full path to the image'
-        assert test_file2 == service_item2.get_frame_path(0), 'The frame path should match the full path to the image'
+        # These test will fail on windows due to the difference in folder seperators
+        if os.name != 'nt':
+            assert test_file1 == service_item.get_rendered_frame(0), \
+                'The first frame should match the path to the image'
+            assert test_file2 == service_item2.get_rendered_frame(0), \
+                'The Second frame should match the path to the image'
+            assert frame_array1 == service_item.get_frames()[0], 'The return should match the frame array1'
+            assert frame_array2 == service_item2.get_frames()[0], 'The return should match the frame array2'
+            assert test_file1 == str(service_item.get_frame_path(0)), \
+                'The frame path should match the full path to the image'
+            assert test_file2 == str(service_item2.get_frame_path(0)), \
+                'The frame path should match the full path to the image'
         assert image_name1 == service_item.get_frame_title(0), 'The 1st frame title should match the image name'
         assert image_name2 == service_item2.get_frame_title(0), 'The 2nd frame title should match the image name'
         assert service_item.name == service_item.title.lower(), \
@@ -312,7 +328,7 @@ class TestServiceItem(TestCase, TestMixin):
 
         # WHEN: We add a custom from a saved service
         line = convert_file_service_item(TEST_PATH, 'serviceitem-song-linked-audio.osj')
-        service_item.set_from_service(line, '/test/')
+        service_item.set_from_service(line, Path('/test/'))
 
         # THEN: We should get back a valid service item
         assert service_item.is_valid is True, 'The new service item should be valid'

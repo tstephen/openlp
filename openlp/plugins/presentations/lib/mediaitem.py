@@ -1,30 +1,30 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 import logging
 
 from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.common.i18n import UiStrings, get_natural_key, translate
-from openlp.core.common.path import path_to_str, str_to_path
+from openlp.core.common.path import path_to_str
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.lib import ServiceItemContext, build_icon, check_item_selected, create_thumb, validate_thumb
@@ -127,7 +127,7 @@ class PresentationMediaItem(MediaManagerItem):
         """
         self.list_view.setIconSize(QtCore.QSize(88, 50))
         file_paths = Settings().value(self.settings_section + '/presentations files')
-        self.load_list([path_to_str(path) for path in file_paths], initial_load=True)
+        self.load_list(file_paths, initial_load=True)
         self.populate_display_types()
 
     def populate_display_types(self):
@@ -158,7 +158,6 @@ class PresentationMediaItem(MediaManagerItem):
 
         :param list[openlp.core.common.path.Path] file_paths: List of file paths to add to the media manager.
         """
-        file_paths = [str_to_path(filename) for filename in file_paths]
         current_paths = self.get_file_list()
         titles = [file_path.name for file_path in current_paths]
         self.application.set_busy_cursor()
@@ -175,7 +174,7 @@ class PresentationMediaItem(MediaManagerItem):
             if not file_path.exists():
                 item_name = QtWidgets.QListWidgetItem(file_name)
                 item_name.setIcon(UiIcons().delete)
-                item_name.setData(QtCore.Qt.UserRole, path_to_str(file_path))
+                item_name.setData(QtCore.Qt.UserRole, file_path)
                 item_name.setToolTip(str(file_path))
                 self.list_view.addItem(item_name)
             else:
@@ -211,7 +210,7 @@ class PresentationMediaItem(MediaManagerItem):
                                                              'This type of presentation is not supported.'))
                         continue
                 item_name = QtWidgets.QListWidgetItem(file_name)
-                item_name.setData(QtCore.Qt.UserRole, path_to_str(file_path))
+                item_name.setData(QtCore.Qt.UserRole, file_path)
                 item_name.setIcon(icon)
                 item_name.setToolTip(str(file_path))
                 self.list_view.addItem(item_name)
@@ -230,8 +229,7 @@ class PresentationMediaItem(MediaManagerItem):
             self.application.set_busy_cursor()
             self.main_window.display_progress_bar(len(row_list))
             for item in items:
-                file_path = str_to_path(item.data(QtCore.Qt.UserRole))
-                self.clean_up_thumbnails(file_path)
+                self.clean_up_thumbnails(item.data(QtCore.Qt.UserRole))
                 self.main_window.increment_progress_bar()
             self.main_window.finished_progress_bar()
             for row in row_list:
@@ -260,16 +258,16 @@ class PresentationMediaItem(MediaManagerItem):
                     doc.presentation_deleted()
                 doc.close_presentation()
 
-    def generate_slide_data(self, service_item, item=None, xml_version=False, remote=False,
-                            context=ServiceItemContext.Service, file_path=None):
+    def generate_slide_data(self, service_item, *, item=None, remote=False, context=ServiceItemContext.Service,
+                            file_path=None, **kwargs):
         """
         Generate the slide data. Needs to be implemented by the plugin.
 
         :param service_item: The service item to be built on
         :param item: The Song item to be used
-        :param xml_version: The xml version (not used)
         :param remote: Triggered from remote
         :param context: Why is it being generated
+        :param kwargs: Consume other unused args specified by the base implementation, but not use by this one.
         """
         if item:
             items = [item]
@@ -278,7 +276,7 @@ class PresentationMediaItem(MediaManagerItem):
             if len(items) > 1:
                 return False
         if file_path is None:
-            file_path = str_to_path(items[0].data(QtCore.Qt.UserRole))
+            file_path = items[0].data(QtCore.Qt.UserRole)
         file_type = file_path.suffix.lower()[1:]
         if not self.display_type_combo_box.currentText():
             return False
@@ -293,7 +291,7 @@ class PresentationMediaItem(MediaManagerItem):
             service_item.theme = -1
             for bitem in items:
                 if file_path is None:
-                    file_path = str_to_path(bitem.data(QtCore.Qt.UserRole))
+                    file_path = bitem.data(QtCore.Qt.UserRole)
                 path, file_name = file_path.parent, file_path.name
                 service_item.title = file_name
                 if file_path.exists():
@@ -329,7 +327,7 @@ class PresentationMediaItem(MediaManagerItem):
             service_item.processor = self.display_type_combo_box.currentText()
             service_item.add_capability(ItemCapabilities.ProvidesOwnDisplay)
             for bitem in items:
-                file_path = str_to_path(bitem.data(QtCore.Qt.UserRole))
+                file_path = bitem.data(QtCore.Qt.UserRole)
                 path, file_name = file_path.parent, file_path.name
                 service_item.title = file_name
                 if file_path.exists():

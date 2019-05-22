@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 :mod:`openlp.core.lib.projector.db` module
 
@@ -47,7 +47,6 @@ from openlp.core.projectors.constants import PJLINK_DEFAULT_CODES
 
 log = logging.getLogger(__name__)
 log.debug('projector.lib.db module loaded')
-
 
 
 Base = declarative_base(MetaData())
@@ -418,11 +417,17 @@ class ProjectorDB(Manager):
                   value: (str) From ProjectorSource, Sources tables or PJLink default code list
         """
         source_dict = {}
+        # Apparently, there was a change to the projector object. Test for which object has db id
+        if hasattr(projector, "id"):
+            chk = projector.id
+        elif hasattr(projector.entry, "id"):
+            chk = projector.entry.id
+
         # Get default list first
         for key in projector.source_available:
             item = self.get_object_filtered(ProjectorSource,
                                             and_(ProjectorSource.code == key,
-                                                 ProjectorSource.projector_id == projector.id))
+                                                 ProjectorSource.projector_id == chk))
             if item is None:
                 source_dict[key] = PJLINK_DEFAULT_CODES[key]
             else:

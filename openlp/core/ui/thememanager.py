@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 The Theme Manager manages adding, deleteing and modifying of themes.
 """
@@ -26,19 +26,18 @@ import os
 import zipfile
 from xml.etree.ElementTree import XML, ElementTree
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.common import delete_file
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.i18n import UiStrings, get_locale_key, translate
 from openlp.core.common.mixins import LogMixin, RegistryProperties
-from openlp.core.common.path import Path, copyfile, create_paths, path_to_str
+from openlp.core.common.path import Path, copyfile, create_paths
 from openlp.core.common.registry import Registry, RegistryBase
 from openlp.core.common.settings import Settings
-from openlp.core.lib import ImageSource, build_icon, check_item_selected, create_thumb, get_text_file_string, \
-    validate_thumb
+from openlp.core.lib import build_icon, check_item_selected, create_thumb, get_text_file_string, validate_thumb
 from openlp.core.lib.exceptions import ValidationError
-from openlp.core.lib.theme import BackgroundType, Theme
+from openlp.core.lib.theme import Theme
 from openlp.core.lib.ui import create_widget_action, critical_error_message_box
 from openlp.core.ui.filerenameform import FileRenameForm
 from openlp.core.ui.icons import UiIcons
@@ -150,7 +149,7 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
         self.global_theme = Settings().value(self.settings_section + '/global theme')
         self.build_theme_path()
         self.load_first_time_themes()
-        self.upgrade_themes()
+        self.upgrade_themes()  # TODO: Can be removed when upgrade path from OpenLP 2.4 no longer needed
 
     def bootstrap_post_set_up(self):
         """
@@ -295,7 +294,7 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
                     for plugin in self.plugin_manager.plugins:
                         if plugin.uses_theme(old_theme_name):
                             plugin.rename_theme(old_theme_name, new_theme_name)
-                    #self.renderer.update_theme(new_theme_name, old_theme_name)
+                    self.renderer.set_theme(self.get_theme_data(new_theme_name))
                     self.load_themes()
 
     def on_copy_theme(self, field=None):
@@ -347,7 +346,7 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
             self.theme_form.theme = theme
             self.theme_form.exec(True)
             self.old_background_image_path = None
-            #self.renderer.update_theme(theme.theme_name)
+            self.renderer.set_theme(theme)
             self.load_themes()
 
     def on_delete_theme(self, field=None):
@@ -363,7 +362,7 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
             row = self.theme_list_widget.row(item)
             self.theme_list_widget.takeItem(row)
             self.delete_theme(theme)
-            #self.renderer.update_theme(theme, only_delete=True)
+            self.renderer.set_theme(item.data(QtCore.Qt.UserRole))
             # As we do not reload the themes, push out the change. Reload the
             # list as the internal lists and events need to be triggered.
             self._push_themes()
@@ -422,10 +421,10 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
         :rtype: bool
         """
         try:
-            with zipfile.ZipFile(str(theme_path), 'w') as theme_zip:
+            with zipfile.ZipFile(theme_path, 'w') as theme_zip:
                 source_path = self.theme_path / theme_name
                 for file_path in source_path.iterdir():
-                    theme_zip.write(str(file_path), os.path.join(theme_name, file_path.name))
+                    theme_zip.write(file_path, Path(theme_name, file_path.name))
             return True
         except OSError as ose:
             self.log_exception('Export Theme Failed')
@@ -567,10 +566,10 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
         json_theme = False
         theme_name = ""
         try:
-            with zipfile.ZipFile(str(file_path)) as theme_zip:
+            with zipfile.ZipFile(file_path) as theme_zip:
                 json_file = [name for name in theme_zip.namelist() if os.path.splitext(name)[1].lower() == '.json']
                 if len(json_file) != 1:
-                    # TODO: remove XML handling after the 2.6 release.
+                    # TODO: remove XML handling after once the upgrade path from 2.4 is no longer required
                     xml_file = [name for name in theme_zip.namelist() if os.path.splitext(name)[1].lower() == '.xml']
                     if len(xml_file) != 1:
                         self.log_error('Theme contains "{val:d}" theme files'.format(val=len(xml_file)))
@@ -607,12 +606,12 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
                     else:
                         with full_name.open('wb') as out_file:
                             out_file.write(theme_zip.read(zipped_file))
-        except (OSError, zipfile.BadZipFile):
+        except (OSError, ValidationError, zipfile.BadZipFile):
             self.log_exception('Importing theme from zip failed {name}'.format(name=file_path))
-            raise ValidationError
-        except ValidationError:
-            critical_error_message_box(translate('OpenLP.ThemeManager', 'Validation Error'),
-                                       translate('OpenLP.ThemeManager', 'File is not a valid theme.'))
+            critical_error_message_box(
+                translate('OpenLP.ThemeManager', 'Import Error'),
+                translate('OpenLP.ThemeManager', 'There was a problem imoorting {file_name}.\n\nIt is corrupt,'
+                                                 'inaccessible or not a valid theme.').format(file_name=file_path))
         finally:
             if not abort_import:
                 # As all files are closed, we can create the Theme.
@@ -648,11 +647,6 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
         :rtype: None
         """
         self._write_theme(theme, image_source_path, image_destination_path)
-        if theme.background_type == BackgroundType.to_string(BackgroundType.Image):
-            self.image_manager.update_image_border(path_to_str(theme.background_filename),
-                                                   ImageSource.Theme,
-                                                   QtGui.QColor(theme.background_border_color))
-            self.image_manager.process_updates()
 
     def _write_theme(self, theme, image_source_path=None, image_destination_path=None):
         """
@@ -669,7 +663,7 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
         create_paths(theme_dir)
         theme_path = theme_dir / '{file_name}.json'.format(file_name=name)
         try:
-                theme_path.write_text(theme_pretty)
+            theme_path.write_text(theme_pretty)
         except OSError:
             self.log_exception('Saving theme to file failed')
         if image_source_path and image_destination_path:

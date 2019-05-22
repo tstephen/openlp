@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 
 import logging
 
@@ -28,7 +28,7 @@ from sqlalchemy.sql import and_, func, or_
 from openlp.core.common.i18n import UiStrings, translate
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
-from openlp.core.lib import ServiceItemContext, check_item_selected
+from openlp.core.lib import check_item_selected
 from openlp.core.lib.mediamanageritem import MediaManagerItem
 from openlp.core.lib.plugin import PluginStatus
 from openlp.core.lib.serviceitem import ItemCapabilities
@@ -219,15 +219,12 @@ class CustomMediaItem(MediaManagerItem):
         self.search_text_edit.setFocus()
         self.search_text_edit.selectAll()
 
-    def generate_slide_data(self, service_item, item=None, xml_version=False,
-                            remote=False, context=ServiceItemContext.Service):
+    def generate_slide_data(self, service_item, *, item=None, **kwargs):
         """
         Generate the slide data. Needs to be implemented by the plugin.
         :param service_item: To be updated
         :param item: The custom database item to be used
-        :param xml_version: No used
-        :param remote: Is this triggered by the Preview Controller or Service Manager.
-        :param context: Why is this item required to be build (Default Service).
+        :param kwargs: Consume other unused args specified by the base implementation, but not use by this one.
         """
         item_id = self._get_id_of_item_to_generate(item, self.remote_custom)
         service_item.add_capability(ItemCapabilities.CanEdit)

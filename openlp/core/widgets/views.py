@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 The :mod:`listpreviewwidget` is a widget that lists the slides in the slide controller.
 It is based on a QTableWidget but represents its contents in list form.
@@ -39,7 +39,7 @@ def handle_mime_data_urls(mime_data):
     """
     Process the data from a drag and drop operation.
 
-    :param PyQt5.QtCore.QMimeData mime_data: The mime data from the drag and drop opperation.
+    :param QtCore.QMimeData mime_data: The mime data from the drag and drop opperation.
     :return: A list of file paths that were dropped
     :rtype: list[openlp.core.common.path.Path]
     """
@@ -203,7 +203,10 @@ class ListPreviewWidget(QtWidgets.QTableWidget, RegistryProperties):
                     if self.service_item.is_capable(ItemCapabilities.HasThumbnails):
                         pixmap = QtGui.QPixmap(remove_url_prefix(slide['thumbnail']))
                     else:
-                        pixmap = QtGui.QPixmap(remove_url_prefix(slide['image']))
+                        if isinstance(slide['image'], QtGui.QIcon):
+                            pixmap = slide['image'].pixmap(QtCore.QSize(32, 32))
+                        else:
+                            pixmap = QtGui.QPixmap(remove_url_prefix(slide['image']))
                 else:
                     pixmap = QtGui.QPixmap(remove_url_prefix(slide['path']))
                 label.setPixmap(pixmap)
@@ -227,6 +230,9 @@ class ListPreviewWidget(QtWidgets.QTableWidget, RegistryProperties):
             text.append(str(row))
             self.setItem(slide_index, 0, item)
             if slide_height:
+                # First set the height to 1 and then to the right height. This makes the item display correctly.
+                # If this is not done, sometimes the image item is displayed as blank.
+                self.setRowHeight(slide_index, 1)
                 self.setRowHeight(slide_index, slide_height)
         self.setVerticalHeaderLabels(text)
         if self.service_item.is_text():
@@ -291,7 +297,7 @@ class ListWidgetWithDnD(QtWidgets.QListWidget):
         """
         self.setAcceptDrops(True)
         self.setDragDropMode(QtWidgets.QAbstractItemView.DragDrop)
-        Registry().register_function(('%s_dnd' % self.mime_data_text), self.parent().load_file)
+        Registry().register_function(('%s_dnd' % self.mime_data_text), self.parent().handle_mime_data)
 
     def clear(self, search_while_typing=False):
         """
@@ -406,7 +412,7 @@ class TreeWidgetWithDnD(QtWidgets.QTreeWidget):
         """
         self.setAcceptDrops(True)
         self.setDragDropMode(QtWidgets.QAbstractItemView.DragDrop)
-        Registry().register_function(('%s_dnd' % self.mime_data_text), self.parent().load_file)
+        Registry().register_function(('%s_dnd' % self.mime_data_text), self.parent().handle_mime_data)
         Registry().register_function(('%s_dnd_internal' % self.mime_data_text), self.parent().dnd_move_internal)
 
     def mouseMoveEvent(self, event):

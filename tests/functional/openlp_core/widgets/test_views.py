@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 Package to test the openlp.core.widgets.views package.
 """
@@ -30,8 +30,11 @@ from unittest.mock import MagicMock, call, patch
 from PyQt5 import QtGui
 
 from openlp.core.common.i18n import UiStrings
-from openlp.core.lib import ImageSource
+# from openlp.core.lib import ImageSource
 from openlp.core.widgets.views import ListPreviewWidget, ListWidgetWithDnD, TreeWidgetWithDnD, handle_mime_data_urls
+from openlp.core.ui.icons import UiIcons
+
+CLAPPERBOARD = UiIcons().clapperboard
 
 
 class TestHandleMimeDataUrls(TestCase):
@@ -167,7 +170,6 @@ class TestListPreviewWidget(TestCase):
         # WHEN: replace_service_item is called
         list_preview_widget.replace_service_item(mocked_img_service_item, 200, 0)
         list_preview_widget.replace_service_item(mocked_cmd_service_item, 200, 0)
-
         # THEN: The ImageManager should be called in the appriopriate manner for each service item.
         # assert mocked_image_manager.get_image.call_count == 4, 'Should be called once for each slide'
         # calls = [call('TEST1', ImageSource.ImagePlugin), call('TEST2', ImageSource.ImagePlugin),
@@ -223,8 +225,8 @@ class TestListPreviewWidget(TestCase):
         service_item = MagicMock()
         service_item.is_text.return_value = False
         service_item.is_capable.return_value = False
-        service_item.get_frames.return_value = [{'title': None, 'path': None, 'image': None},
-                                                {'title': None, 'path': None, 'image': None}]
+        service_item.get_frames.return_value = [{'title': None, 'path': None, 'image': CLAPPERBOARD},
+                                                {'title': None, 'path': None, 'image': CLAPPERBOARD}]
         # init ListPreviewWidget and load service item
         list_preview_widget = ListPreviewWidget(None, 1)
         list_preview_widget.replace_service_item(service_item, 200, 0)
@@ -260,8 +262,8 @@ class TestListPreviewWidget(TestCase):
         service_item = MagicMock()
         service_item.is_text.return_value = False
         service_item.is_capable.return_value = False
-        service_item.get_frames.return_value = [{'title': None, 'path': None, 'image': None},
-                                                {'title': None, 'path': None, 'image': None}]
+        service_item.get_frames.return_value = [{'title': None, 'path': None, 'image': CLAPPERBOARD},
+                                                {'title': None, 'path': None, 'image': CLAPPERBOARD}]
         # init ListPreviewWidget and load service item
         list_preview_widget = ListPreviewWidget(None, 1)
         list_preview_widget.replace_service_item(service_item, 200, 0)
@@ -296,8 +298,8 @@ class TestListPreviewWidget(TestCase):
         service_item = MagicMock()
         service_item.is_text.return_value = False
         service_item.is_capable.return_value = False
-        service_item.get_frames.return_value = [{'title': None, 'path': None, 'image': None},
-                                                {'title': None, 'path': None, 'image': None}]
+        service_item.get_frames.return_value = [{'title': None, 'path': None, 'image': CLAPPERBOARD},
+                                                {'title': None, 'path': None, 'image': CLAPPERBOARD}]
         # init ListPreviewWidget and load service item
         list_preview_widget = ListPreviewWidget(None, 1)
         list_preview_widget.replace_service_item(service_item, 200, 0)
@@ -368,8 +370,8 @@ class TestListPreviewWidget(TestCase):
         service_item = MagicMock()
         service_item.is_text.return_value = False
         service_item.is_capable.return_value = False
-        service_item.get_frames.return_value = [{'title': None, 'path': None, 'image': None},
-                                                {'title': None, 'path': None, 'image': None}]
+        service_item.get_frames.return_value = [{'title': None, 'path': None, 'image': CLAPPERBOARD},
+                                                {'title': None, 'path': None, 'image': CLAPPERBOARD}]
         # Mock self.cellWidget().children().setMaximumWidth()
         mocked_cellWidget_child = MagicMock()
         mocked_cellWidget_obj = MagicMock()
@@ -405,8 +407,8 @@ class TestListPreviewWidget(TestCase):
         service_item = MagicMock()
         service_item.is_text.return_value = False
         service_item.is_capable.return_value = False
-        service_item.get_frames.return_value = [{'title': None, 'path': None, 'image': None},
-                                                {'title': None, 'path': None, 'image': None}]
+        service_item.get_frames.return_value = [{'title': None, 'path': None, 'image': CLAPPERBOARD},
+                                                {'title': None, 'path': None, 'image': CLAPPERBOARD}]
         # Mock self.cellWidget().children().setMaximumWidth()
         mocked_cellWidget_child = MagicMock()
         mocked_cellWidget_obj = MagicMock()
@@ -440,8 +442,8 @@ class TestListPreviewWidget(TestCase):
         service_item = MagicMock()
         service_item.is_text.return_value = False
         service_item.is_capable.return_value = False
-        service_item.get_frames.return_value = [{'title': None, 'path': None, 'image': None},
-                                                {'title': None, 'path': None, 'image': None}]
+        service_item.get_frames.return_value = [{'title': None, 'path': None, 'image': CLAPPERBOARD},
+                                                {'title': None, 'path': None, 'image': CLAPPERBOARD}]
         # Mock self.cellWidget().children()
         mocked_cellWidget_obj = MagicMock()
         mocked_cellWidget_obj.children.return_value = None

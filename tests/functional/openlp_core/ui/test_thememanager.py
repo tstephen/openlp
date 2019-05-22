@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 Package to test the openlp.core.ui.thememanager package.
 """
@@ -66,9 +66,9 @@ class TestThemeManager(TestCase):
         theme_manager._export_theme(Path('some', 'path', 'Default.otz'), 'Default')
 
         # THEN: The zipfile should be created at the given path
-        mocked_zipfile_init.assert_called_with(os.path.join('some', 'path', 'Default.otz'), 'w')
-        mocked_zipfile_write.assert_called_with(str(RESOURCE_PATH / 'themes' / 'Default' / 'Default.xml'),
-                                                os.path.join('Default', 'Default.xml'))
+        mocked_zipfile_init.assert_called_with(Path('some', 'path', 'Default.otz'), 'w')
+        mocked_zipfile_write.assert_called_with(RESOURCE_PATH / 'themes' / 'Default' / 'Default.xml',
+                                                Path('Default', 'Default.xml'))
 
     def test_initial_theme_manager(self):
         """
@@ -143,7 +143,7 @@ class TestThemeManager(TestCase):
         mocked_theme.export_theme.return_value = "{}"
 
         # WHEN: Calling _write_theme with a theme with a name with special characters in it
-        theme_manager._write_theme(mocked_theme, None, None)
+        theme_manager._write_theme(mocked_theme)
 
         # THEN: It should have been created
         assert os.path.exists(os.path.join(self.temp_folder, 'theme 愛 name', 'theme 愛 name.json')) is True, \
@@ -224,7 +224,7 @@ class TestThemeManager(TestCase):
             theme_manager = ThemeManager(None)
 
             # WHEN: unzip_theme is called
-            theme_manager.unzip_theme('theme.file', 'folder')
+            theme_manager.unzip_theme(Path('theme.file'), Path('folder'))
 
             # THEN: The critical_error_message_box should have been called
             assert mocked_critical_error_message_box.call_count == 1, 'Should have been called once'

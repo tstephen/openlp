@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 import logging
 import re
 from subprocess import CalledProcessError, check_output
@@ -34,9 +34,15 @@ from openlp.plugins.presentations.lib.presentationcontroller import Presentation
 if is_win():
     from subprocess import STARTUPINFO, STARTF_USESHOWWINDOW
 
+try:
+    import fitz
+    PYMUPDF_AVAILABLE = True
+except ImportError:
+    PYMUPDF_AVAILABLE = False
+
 log = logging.getLogger(__name__)
 
-PDF_CONTROLLER_FILETYPES = ['pdf', 'xps', 'oxps']
+PDF_CONTROLLER_FILETYPES = ['pdf', 'xps', 'oxps', 'epub', 'cbz', 'fb2']
 
 
 class PdfController(PresentationController):
@@ -121,6 +127,9 @@ class PdfController(PresentationController):
                 self.mudrawbin = program_path
             elif program_type == 'mutool':
                 self.mutoolbin = program_path
+        elif PYMUPDF_AVAILABLE:
+            self.also_supports = ['xps', 'oxps', 'epub', 'cbz', 'fb2']
+            return True
         else:
             # Fallback to autodetection
             application_path = AppLocation.get_directory(AppLocation.AppDir)
@@ -147,12 +156,11 @@ class PdfController(PresentationController):
                     elif (application_path / 'mutool').is_file():
                         self.mutoolbin = application_path / 'mutool'
         if self.mudrawbin or self.mutoolbin:
-            self.also_supports = ['xps', 'oxps']
+            self.also_supports = ['xps', 'oxps', 'epub', 'cbz', 'fb2']
             return True
         elif self.gsbin:
             return True
-        else:
-            return False
+        return False
 
     def kill(self):
         """
@@ -276,6 +284,16 @@ class PdfDocument(PresentationDocument):
                                        '-r{res}'.format(res=resolution), '-dTextAlphaBits=4', '-dGraphicsAlphaBits=4',
                                        '-sOutputFile={output}'.format(output=temp_dir_path / 'mainslide%03d.png'),
                                        str(self.file_path)], startupinfo=self.startupinfo)
+            elif PYMUPDF_AVAILABLE:
+                log.debug('loading presentation using PyMuPDF')
+                pdf = fitz.open(str(self.file_path))
+                for i, page in enumerate(pdf, start=1):
+                    src_size = page.bound().round()
+                    # keep aspect ratio
+                    scale = min(size.width() / src_size.width, size.height() / src_size.height)
+                    m = fitz.Matrix(scale, scale)
+                    page.getPixmap(m, alpha=False).writeImage(str(temp_dir_path / 'mainslide{:03d}.png'.format(i)))
+                pdf.close()
             created_files = sorted(temp_dir_path.glob('*'))
             for image_path in created_files:
                 if image_path.is_file():

@@ -1,28 +1,28 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 This is the main window, where all the action happens.
 """
-import sys
+import os
 from datetime import datetime
 from distutils import dir_util
 from distutils.errors import DistutilsFileError
@@ -30,6 +30,7 @@ from tempfile import gettempdir
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+from openlp.core.state import State
 from openlp.core.api import websockets
 from openlp.core.api.http import server
 from openlp.core.common import add_actions, is_macosx, is_win
@@ -41,23 +42,18 @@ from openlp.core.common.path import Path, copyfile, create_paths
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.display.screens import ScreenList
-from openlp.core.lib.imagemanager import ImageManager
-from openlp.core.display.render import Renderer
 from openlp.core.lib.plugin import PluginStatus
-from openlp.core.lib.pluginmanager import PluginManager
 from openlp.core.lib.ui import create_action
 from openlp.core.projectors.manager import ProjectorManager
 from openlp.core.ui.aboutform import AboutForm
 from openlp.core.ui.firsttimeform import FirstTimeForm
 from openlp.core.ui.formattingtagform import FormattingTagForm
 from openlp.core.ui.icons import UiIcons
-from openlp.core.ui.media.mediacontroller import MediaController
 from openlp.core.ui.pluginform import PluginForm
 from openlp.core.ui.printserviceform import PrintServiceForm
 from openlp.core.ui.servicemanager import ServiceManager
 from openlp.core.ui.settingsform import SettingsForm
 from openlp.core.ui.shortcutlistform import ShortcutListForm
-from openlp.core.ui.slidecontroller import LiveController, PreviewController
 from openlp.core.ui.style import PROGRESSBAR_STYLE, get_library_stylesheet
 from openlp.core.ui.thememanager import ThemeManager
 from openlp.core.version import get_version
@@ -90,9 +86,6 @@ class Ui_MainWindow(object):
         self.control_splitter.setOrientation(QtCore.Qt.Horizontal)
         self.control_splitter.setObjectName('control_splitter')
         self.main_content_layout.addWidget(self.control_splitter)
-        # Create slide controllers
-        PreviewController(self)
-        LiveController(self)
         preview_visible = Settings().value('user interface/preview panel')
         live_visible = Settings().value('user interface/live panel')
         panel_locked = Settings().value('user interface/lock panel')
@@ -482,7 +475,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
         super(MainWindow, self).__init__()
         Registry().register('main_window', self)
         self.clipboard = self.application.clipboard()
-        self.arguments = ''.join(self.application.args)
         # Set up settings sections for the main application (not for use by plugins).
         self.ui_settings_section = 'user interface'
         self.general_settings_section = 'core'
@@ -501,16 +493,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
         self.copy_data = False
         Settings().set_up_default_values()
         self.about_form = AboutForm(self)
-        MediaController()
         self.ws_server = websockets.WebSocketServer()
         self.http_server = server.HttpServer(self)
         SettingsForm(self)
         self.formatting_tag_form = FormattingTagForm(self)
         self.shortcut_form = ShortcutListForm(self)
-        # Set up the path with plugins
-        PluginManager(self)
-        ImageManager()
-        Renderer()
         # Set up the interface
         self.setup_ui(self)
         # Define the media Dock Manager
@@ -644,8 +631,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
         # if self.live_controller.display.isVisible():
         #     self.live_controller.display.setFocus()
         self.activateWindow()
-        if self.arguments:
-            self.open_cmd_line_files(self.arguments)
+        if self.application.args:
+            self.open_cmd_line_files(self.application.args)
         elif Settings().value(self.general_settings_section + '/auto open'):
             self.service_manager_contents.load_last_file()
         # This will store currently used layout preset so it remains enabled on next startup.
@@ -660,22 +647,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
             self.set_view_mode(False, True, False, False, True, True)
             self.mode_live_item.setChecked(True)
 
-    def app_startup(self):
-        """
-        Give all the plugins a chance to perform some tasks at startup
-        """
-        self.application.process_events()
-        for plugin in self.plugin_manager.plugins:
-            if plugin.is_active():
-                plugin.app_startup()
-                self.application.process_events()
-
     def first_time(self):
         """
         Import themes if first time
         """
         self.application.process_events()
-        for plugin in self.plugin_manager.plugins:
+        for plugin in State().list_plugins():
             if hasattr(plugin, 'first_time'):
                 self.application.process_events()
                 plugin.first_time()
@@ -703,8 +680,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
             return
         first_run_wizard = FirstTimeForm(self)
         first_run_wizard.initialize(ScreenList())
-        first_run_wizard.exec()
-        if first_run_wizard.was_cancelled:
+        if first_run_wizard.exec() == QtWidgets.QDialog.Rejected:
             return
         self.application.set_busy_cursor()
         self.first_time()
@@ -713,7 +689,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
             self.projector_manager_dock.setVisible(True)
         else:
             self.projector_manager_dock.setVisible(False)
-        for plugin in self.plugin_manager.plugins:
+        for plugin in State().list_plugins():
             self.active_plugin = plugin
             old_status = self.active_plugin.status
             self.active_plugin.set_status()
@@ -880,7 +856,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
         setting_sections.extend([self.header_section])
         setting_sections.extend(['crashreport'])
         # Add plugin sections.
-        setting_sections.extend([plugin.name for plugin in self.plugin_manager.plugins])
+        setting_sections.extend([plugin.name for plugin in State().list_plugins()])
         # Copy the settings file to the tmp dir, because we do not want to change the original one.
         temp_dir_path = Path(gettempdir(), 'openlp')
         create_paths(temp_dir_path)
@@ -1356,13 +1332,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
                 self.show_status_message(
                     translate('OpenLP.MainWindow', 'Copying OpenLP data to new data directory location - {path} '
                               '- Please wait for copy to finish').format(path=self.new_data_path))
-                dir_util.copy_tree(str(old_data_path), str(self.new_data_path))
+                dir_util.copy_tree(old_data_path, self.new_data_path)
                 self.log_info('Copy successful')
             except (OSError, DistutilsFileError) as why:
                 self.application.set_normal_cursor()
                 self.log_exception('Data copy failed {err}'.format(err=str(why)))
                 err_text = translate('OpenLP.MainWindow',
-                                     'OpenLP Data directory copy failed\n\n{err}').format(err=str(why)),
+                                     'OpenLP Data directory copy failed\n\n{err}').format(err=str(why))
                 QtWidgets.QMessageBox.critical(self, translate('OpenLP.MainWindow', 'New Data Directory Error'),
                                                err_text,
                                                QtWidgets.QMessageBox.StandardButtons(QtWidgets.QMessageBox.Ok))
@@ -1377,11 +1353,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
             settings.remove('advanced/data path')
         self.application.set_normal_cursor()
 
-    def open_cmd_line_files(self, filename):
+    def open_cmd_line_files(self, args):
         """
         Open files passed in through command line arguments
+
+        :param list[str] args: List of remaining positionall arguments
         """
-        if not isinstance(filename, str):
-            filename = str(filename, sys.getfilesystemencoding())
-        if filename.endswith(('.osz', '.oszl')):
-            self.service_manager_contents.load_file(Path(filename))
+        for arg in args:
+            file_name = os.path.expanduser(arg)
+            if os.path.isfile(file_name):
+                self.service_manager_contents.load_file(Path(file_name))

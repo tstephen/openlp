@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 The :mod:`~openlp.display.render` module contains functions for rendering.
 """
@@ -31,20 +31,20 @@ import time
 
 from PyQt5 import QtWidgets, QtGui
 
-from openlp.core.lib.formattingtags import FormattingTags
 from openlp.core.common import ThemeLevel
-from openlp.core.common.registry import Registry, RegistryBase
 from openlp.core.common.mixins import LogMixin, RegistryProperties
+from openlp.core.common.registry import Registry, RegistryBase
 from openlp.core.display.screens import ScreenList
 from openlp.core.display.window import DisplayWindow
 from openlp.core.lib import ItemCapabilities
+from openlp.core.lib.formattingtags import FormattingTags
 
 
 log = logging.getLogger(__name__)
 
 SLIM_CHARS = 'fiíIÍjlĺľrtť.,;/ ()|"\'!:\\'
-CHORD_LINE_MATCH = re.compile(r'\[(.*?)\]([\u0080-\uFFFF,\w]*)'     # noqa
-                              '([\u0080-\uFFFF,\w,\s,\.,\,,\!,\?,\;,\:,\|,\",\',\-,\_]*)(\Z)?')
+CHORD_LINE_MATCH = re.compile(r'\[(.*?)\]([\u0080-\uFFFF,\w]*)'
+                              r'([\u0080-\uFFFF,\w,\s,\.,\,,\!,\?,\;,\:,\|,\",\',\-,\_]*)(\Z)?')
 CHORD_TEMPLATE = '<span class="chordline">{chord}</span>'
 FIRST_CHORD_TEMPLATE = '<span class="chordline firstchordline">{chord}</span>'
 CHORD_LINE_TEMPLATE = '<span class="chord"><span><strong>{chord}</strong></span></span>{tail}{whitespace}{remainder}'
@@ -437,14 +437,22 @@ class Renderer(RegistryBase, LogMixin, RegistryProperties, DisplayWindow):
         self.force_page = False
         for screen in ScreenList():
             if screen.is_display:
-                self.setGeometry(screen.geometry.x(), screen.geometry.y(),
-                                 screen.geometry.width(), screen.geometry.height())
+                self.setGeometry(screen.display_geometry.x(), screen.display_geometry.y(),
+                                 screen.display_geometry.width(), screen.display_geometry.height())
                 break
         # If the display is not show'ed and hidden like this webegine will not render
         self.show()
         self.hide()
         self.theme_height = 0
         self.theme_level = ThemeLevel.Global
+
+    def set_theme_level(self, theme_level):
+        """
+        Sets the theme level.
+
+        :param theme_level: The theme level to be used.
+        """
+        self.theme_level = theme_level
 
     def calculate_line_count(self):
         """
@@ -698,6 +706,7 @@ class Renderer(RegistryBase, LogMixin, RegistryProperties, DisplayWindow):
             else:
                 # The remaining elements do not fit, thus reset the indexes, create a new list and continue.
                 raw_list = raw_list[index + 1:]
+                log.debug(raw_list)
                 raw_list[0] = raw_tags + raw_list[0]
                 html_list = html_list[index + 1:]
                 html_list[0] = html_tags + html_list[0]
@@ -713,7 +722,7 @@ class Renderer(RegistryBase, LogMixin, RegistryProperties, DisplayWindow):
         :param text:  The text to check. It may contain HTML tags.
         """
         self.clear_slides()
-        self.run_javascript('Display.addTextSlide("v1", "{text}");'.format(text=text), is_sync=True)
+        self.run_javascript('Display.addTextSlide("v1", "{text}", "Dummy Footer");'.format(text=text), is_sync=True)
         does_text_fits = self.run_javascript('Display.doesContentFit();', is_sync=True)
         return does_text_fits
 

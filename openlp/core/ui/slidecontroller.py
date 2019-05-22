@@ -1,28 +1,29 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 The :mod:`slidecontroller` module contains the most important part of OpenLP - the slide controller
 """
 import copy
+import datetime
 from collections import deque
 from threading import Lock
 
@@ -49,13 +50,6 @@ from openlp.core.widgets.views import ListPreviewWidget
 
 # Threshold which has to be trespassed to toggle.
 HIDE_MENU_THRESHOLD = 27
-AUDIO_TIME_LABEL_STYLESHEET = 'background-color: palette(background); ' \
-    'border-top-color: palette(shadow); ' \
-    'border-left-color: palette(shadow); ' \
-    'border-bottom-color: palette(light); ' \
-    'border-right-color: palette(light); ' \
-    'border-radius: 3px; border-style: inset; ' \
-    'border-width: 1; font-family: monospace; margin: 2px;'
 
 NARROW_MENU = [
     'hide_menu'
@@ -64,10 +58,6 @@ LOOP_LIST = [
     'play_slides_menu',
     'loop_separator',
     'delay_spin_box'
-]
-AUDIO_LIST = [
-    'audioPauseItem',
-    'audio_time_label'
 ]
 WIDE_MENU = [
     'blank_screen_button',
@@ -81,9 +71,48 @@ NON_TEXT_MENU = [
 ]
 
 
+class MediaSlider(QtWidgets.QSlider):
+    """
+    Allows the mouse events of a slider to be overridden and extra functionality added
+    """
+    def __init__(self, direction, manager, controller):
+        """
+        Constructor
+        """
+        super(MediaSlider, self).__init__(direction)
+        self.manager = manager
+        self.controller = controller
+
+    def mouseMoveEvent(self, event):
+        """
+        Override event to allow hover time to be displayed.
+
+        :param event: The triggering event
+        """
+        time_value = QtWidgets.QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), event.x(), self.width())
+        self.setToolTip('%s' % datetime.timedelta(seconds=int(time_value / 1000)))
+        QtWidgets.QSlider.mouseMoveEvent(self, event)
+
+    def mousePressEvent(self, event):
+        """
+        Mouse Press event no new functionality
+        :param event: The triggering event
+        """
+        QtWidgets.QSlider.mousePressEvent(self, event)
+
+    def mouseReleaseEvent(self, event):
+        """
+        Set the slider position when the mouse is clicked and released on the slider.
+
+        :param event: The triggering event
+        """
+        self.setValue(QtWidgets.QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), event.x(), self.width()))
+        QtWidgets.QSlider.mouseReleaseEvent(self, event)
+
+
 class InfoLabel(QtWidgets.QLabel):
     """
-    InfoLabel is a subclassed QLabel. Created to provide the ablilty to add a ellipsis if the text is cut off. Original
+    InfoLabel is a subclassed QLabel. Created to provide the ability to add a ellipsis if the text is cut off. Original
     source: https://stackoverflow.com/questions/11446478/pyside-pyqt-truncate-text-in-qlabel-based-on-minimumsize
     """
 
@@ -114,6 +143,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
     SlideController is the slide controller widget. This widget is what the
     user uses to control the displaying of verses/slides/etc on the screen.
     """
+
     def __init__(self, *args, **kwargs):
         """
         Set up the Slide Controller.
@@ -147,7 +177,6 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
             if screen.is_display:
                 display = DisplayWindow(self, screen)
                 self.displays.append(display)
-        #    display.media_watcher.progress.connect(self.on_audio_time_remaining)
 
     @property
     def display(self):
@@ -326,8 +355,58 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
                                                               'Clear'),
                                             triggers=self.on_clear)
         self.controller_layout.addWidget(self.toolbar)
-        # Build the Media Toolbar
-        self.media_controller.register_controller(self)
+        # Build a Media ToolBar
+        self.mediabar = OpenLPToolbar(self)
+        self.mediabar.add_toolbar_action('playbackPlay', text='media_playback_play',
+                                         icon=UiIcons().play,
+                                         tooltip=translate('OpenLP.SlideController', 'Start playing media.'),
+                                         triggers=self.send_to_plugins)
+        self.mediabar.add_toolbar_action('playbackPause', text='media_playback_pause',
+                                         icon=UiIcons().pause,
+                                         tooltip=translate('OpenLP.SlideController', 'Pause playing media.'),
+                                         triggers=self.send_to_plugins)
+        self.mediabar.add_toolbar_action('playbackStop', text='media_playback_stop',
+                                         icon=UiIcons().stop,
+                                         tooltip=translate('OpenLP.SlideController', 'Stop playing media.'),
+                                         triggers=self.send_to_plugins)
+        self.mediabar.add_toolbar_action('playbackLoop', text='media_playback_loop',
+                                         icon=UiIcons().repeat, checked=False,
+                                         tooltip=translate('OpenLP.SlideController', 'Loop playing media.'),
+                                         triggers=self.send_to_plugins)
+        self.position_label = QtWidgets.QLabel()
+        self.position_label.setText(' 00:00 / 00:00')
+        self.position_label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        self.position_label.setToolTip(translate('OpenLP.SlideController', 'Video timer.'))
+        self.position_label.setMinimumSize(90, 0)
+        self.position_label.setObjectName('position_label')
+        self.mediabar.add_toolbar_widget(self.position_label)
+        # Build the media seek_slider.
+        self.seek_slider = MediaSlider(QtCore.Qt.Horizontal, self, self)
+        self.seek_slider.setMaximum(1000)
+        self.seek_slider.setTracking(True)
+        self.seek_slider.setMouseTracking(True)
+        self.seek_slider.setToolTip(translate('OpenLP.SlideController', 'Video position.'))
+        self.seek_slider.setGeometry(QtCore.QRect(90, 260, 221, 24))
+        self.seek_slider.setObjectName('seek_slider')
+        self.mediabar.add_toolbar_widget(self.seek_slider)
+        # Build the volume_slider.
+        self.volume_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
+        self.volume_slider.setTickInterval(10)
+        self.volume_slider.setTickPosition(QtWidgets.QSlider.TicksAbove)
+        self.volume_slider.setMinimum(0)
+        self.volume_slider.setMaximum(100)
+        self.volume_slider.setTracking(True)
+        self.volume_slider.setToolTip(translate('OpenLP.SlideController', 'Audio Volume.'))
+        self.volume_slider.setGeometry(QtCore.QRect(90, 160, 221, 24))
+        self.volume_slider.setObjectName('volume_slider')
+        self.mediabar.add_toolbar_widget(self.volume_slider)
+        self.controller_layout.addWidget(self.mediabar)
+        self.mediabar.setVisible(False)
+        if not self.is_live:
+            self.volume_slider.setEnabled(False)
+        # Signals
+        self.seek_slider.valueChanged.connect(self.send_to_plugins)
+        self.volume_slider.valueChanged.connect(self.send_to_plugins)
         if self.is_live:
             # Build the Song Toolbar
             self.song_menu = QtWidgets.QToolButton(self.toolbar)
@@ -336,33 +415,6 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
             self.song_menu.setPopupMode(QtWidgets.QToolButton.InstantPopup)
             self.song_menu.setMenu(QtWidgets.QMenu(translate('OpenLP.SlideController', 'Go To'), self.toolbar))
             self.toolbar.add_toolbar_widget(self.song_menu)
-            # Stuff for items with background audio.
-            # FIXME: object name should be changed. But this requires that we migrate the shortcut.
-            self.audio_pause_item = self.toolbar.add_toolbar_action(
-                'audioPauseItem',
-                icon=UiIcons().pause, text=translate('OpenLP.SlideController', 'Pause Audio'),
-                tooltip=translate('OpenLP.SlideController', 'Pause audio.'),
-                checked=False, visible=False, category=self.category, context=QtCore.Qt.WindowShortcut,
-                can_shortcuts=True, triggers=self.set_audio_pause_clicked)
-            self.audio_menu = QtWidgets.QMenu(translate('OpenLP.SlideController', 'Background Audio'), self.toolbar)
-            self.audio_pause_item.setMenu(self.audio_menu)
-            self.audio_pause_item.setParent(self.toolbar)
-            self.toolbar.widgetForAction(self.audio_pause_item).setPopupMode(QtWidgets.QToolButton.MenuButtonPopup)
-            self.next_track_item = create_action(self, 'nextTrackItem', text=UiStrings().NextTrack,
-                                                 icon=UiIcons().arrow_right,
-                                                 tooltip=translate('OpenLP.SlideController',
-                                                                   'Go to next audio track.'),
-                                                 category=self.category,
-                                                 can_shortcuts=True,
-                                                 triggers=self.on_next_track_clicked)
-            self.audio_menu.addAction(self.next_track_item)
-            self.track_menu = self.audio_menu.addMenu(translate('OpenLP.SlideController', 'Tracks'))
-            self.audio_time_label = QtWidgets.QLabel(' 00:00 ', self.toolbar)
-            self.audio_time_label.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignHCenter)
-            self.audio_time_label.setStyleSheet(AUDIO_TIME_LABEL_STYLESHEET)
-            self.audio_time_label.setObjectName('audio_time_label')
-            self.toolbar.add_toolbar_widget(self.audio_time_label)
-            self.toolbar.set_widget_visible(AUDIO_LIST, False)
             self.toolbar.set_widget_visible('song_menu', False)
         # Screen preview area
         self.preview_frame = QtWidgets.QFrame(self.splitter)
@@ -370,7 +422,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         self.preview_frame.setMinimumHeight(100)
         self.preview_frame.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored,
                                                                QtWidgets.QSizePolicy.Ignored,
-                                         QtWidgets.QSizePolicy.Label))
+                                                               QtWidgets.QSizePolicy.Label))
         self.preview_frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.preview_frame.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.preview_frame.setObjectName('preview_frame')
@@ -393,7 +445,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
                 {'key': 'C', 'configurable': True, 'text': translate('OpenLP.SlideController', 'Go to "Chorus"')},
                 {'key': 'B', 'configurable': True, 'text': translate('OpenLP.SlideController', 'Go to "Bridge"')},
                 {'key': 'P', 'configurable': True,
-                    'text': translate('OpenLP.SlideController', 'Go to "Pre-Chorus"')},
+                 'text': translate('OpenLP.SlideController', 'Go to "Pre-Chorus"')},
                 {'key': 'I', 'configurable': True, 'text': translate('OpenLP.SlideController', 'Go to "Intro"')},
                 {'key': 'E', 'configurable': True, 'text': translate('OpenLP.SlideController', 'Go to "Ending"')},
                 {'key': 'O', 'configurable': True, 'text': translate('OpenLP.SlideController', 'Go to "Other"')}
@@ -459,6 +511,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
                 This empty class is mostly just to satisfy Python, PEP8 and PyCharm
                 """
                 pass
+
             is_songs_plugin_available = False
         sender_name = self.sender().objectName()
         verse_type = sender_name[15:] if sender_name[:15] == 'shortcutAction_' else ''
@@ -591,7 +644,6 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         # if self.is_live:
         #     self.__add_actions_to_widget(self.display)
         # The SlidePreview's ratio.
-        # TODO: Need to basically update everything
 
     def __add_actions_to_widget(self, widget):
         """
@@ -695,7 +747,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
                 self.toolbar.set_widget_visible('song_menu', True)
         if item.is_capable(ItemCapabilities.CanLoop) and len(item.slides) > 1:
             self.toolbar.set_widget_visible(LOOP_LIST)
-        if item.is_media():
+        if item.is_media() or item.is_capable(ItemCapabilities.HasBackgroundAudio):
             self.mediabar.show()
         self.previous_item.setVisible(not item.is_media())
         self.next_item.setVisible(not item.is_media())
@@ -825,30 +877,12 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
             self._reset_blank(self.service_item.is_capable(ItemCapabilities.ProvidesOwnDisplay))
         self.info_label.setText(self.service_item.title)
         self.slide_list = {}
+        if old_item and old_item.is_capable(ItemCapabilities.HasBackgroundAudio):
+            self.on_media_close()
         if self.is_live:
             self.song_menu.menu().clear()
-            # if self.display.audio_player:
-            #     self.display.audio_player.reset()
-            #     self.set_audio_items_visibility(False)
-            #     self.audio_pause_item.setChecked(False)
-            #     # If the current item has background audio
-            #     if self.service_item.is_capable(ItemCapabilities.HasBackgroundAudio):
-            #         self.log_debug('Starting to play...')
-            #         self.display.audio_player.add_to_playlist(self.service_item.background_audio)
-            #         self.track_menu.clear()
-            #         for counter in range(len(self.service_item.background_audio)):
-            #             action = self.track_menu.addAction(
-            #                 os.path.basename(str(self.service_item.background_audio[counter])))
-            #             action.setData(counter)
-            #             action.triggered.connect(self.on_track_triggered)
-            #         self.display.audio_player.repeat = \
-            #             Settings().value(self.main_window.general_settings_section + '/audio repeat list')
-            #         if Settings().value(self.main_window.general_settings_section + '/audio start paused'):
-            #             self.audio_pause_item.setChecked(True)
-            #             self.display.audio_player.pause()
-            #         else:
-            #             self.display.audio_player.play()
-            #         self.set_audio_items_visibility(True)
+            if self.service_item.is_capable(ItemCapabilities.HasBackgroundAudio):
+                self.on_media_start(service_item)
         row = 0
         width = self.main_window.control_splitter.sizes()[self.split]
         if self.service_item.is_text():
@@ -1349,24 +1383,24 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
             self.play_slides_once.setText(UiStrings().PlaySlidesToEnd)
         self.on_toggle_loop()
 
-    def set_audio_items_visibility(self, visible):
-        """
-        Set the visibility of the audio stuff
-        """
-        self.toolbar.set_widget_visible(AUDIO_LIST, visible)
+    # def set_audio_items_visibility(self, visible):
+    #    """
+    #    Set the visibility of the audio stuff
+    #    """
+    #    self.toolbar.set_widget_visible(AUDIO_LIST, visible)
 
-    def set_audio_pause_clicked(self, checked):
-        """
-        Pause the audio player
+    # def set_audio_pause_clicked(self, checked):
+    #    """
+    #   Pause the audio player
 
-        :param checked: is the check box checked.
-        """
-        if not self.audio_pause_item.isVisible():
-            return
-        if checked:
-            self.display.audio_player.pause()
-        else:
-            self.display.audio_player.play()
+    #   :param checked: is the check box checked.
+    #   """
+    #   if not self.audio_pause_item.isVisible():
+    #       return
+    #   if checked:
+    #       self.display.audio_player.pause()
+    #   else:
+    #       self.display.audio_player.play()
 
     def timerEvent(self, event):
         """
@@ -1451,13 +1485,12 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         :param item: The service item to be processed
         """
         if self.is_live and self.hide_mode() == HideMode.Theme:
-            self.media_controller.video(self.controller_type, item, HideMode.Blank)
+            self.media_controller.load_video(self.controller_type, item, HideMode.Blank)
             self.on_blank_display(True)
         else:
-            self.media_controller.video(self.controller_type, item, self.hide_mode())
+            self.media_controller.load_video(self.controller_type, item, self.hide_mode())
         if not self.is_live:
             self.preview_display.show()
-            self.slide_preview.hide()
 
     def on_media_close(self):
         """
@@ -1465,7 +1498,6 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         """
         self.media_controller.media_reset(self)
         self.preview_display.hide()
-        self.slide_preview.show()
 
     def _reset_blank(self, no_theme):
         """
@@ -1503,29 +1535,29 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         else:
             return None
 
-    def on_next_track_clicked(self):
-        """
-        Go to the next track when next is clicked
-        """
-        self.display.audio_player.next()
-
-    def on_audio_time_remaining(self, time):
-        """
-        Update how much time is remaining
-
-        :param time: the time remaining
-        """
-        seconds = (self.display.audio_player.player.duration() - self.display.audio_player.player.position()) // 1000
-        minutes = seconds // 60
-        seconds %= 60
-        self.audio_time_label.setText(' %02d:%02d ' % (minutes, seconds))
-
-    def on_track_triggered(self, field=None):
-        """
-        Start playing a track
-        """
-        action = self.sender()
-        self.display.audio_player.go_to(action.data())
+    # def on_next_track_clicked(self):
+    #     """
+    #     Go to the next track when next is clicked
+    #     """
+    #     self.display.audio_player.next()
+    #
+    # def on_audio_time_remaining(self, time):
+    #     """
+    #     Update how much time is remaining
+    #
+    #     :param time: the time remaining
+    #     """
+    #     seconds = (self.display.audio_player.player.duration() - self.display.audio_player.player.position()) // 1000
+    #     minutes = seconds // 60
+    #     seconds %= 60
+    #     self.audio_time_label.setText(' %02d:%02d ' % (minutes, seconds))
+    #
+    # def on_track_triggered(self, field=None):
+    #     """
+    #     Start playing a track
+    #     """
+    #     action = self.sender()
+    #     self.display.audio_player.go_to(action.data())
 
 
 class PreviewController(RegistryBase, SlideController):
@@ -1546,7 +1578,7 @@ class PreviewController(RegistryBase, SlideController):
         self.type_prefix = 'preview'
         self.category = 'Preview Toolbar'
 
-    def bootstrap_post_set_up(self):
+    def bootstrap_initialise(self):
         """
         process the bootstrap post setup request
         """
@@ -1578,7 +1610,7 @@ class LiveController(RegistryBase, SlideController):
         self.category = UiStrings().LiveToolbar
         ActionList.get_instance().add_category(str(self.category), CategoryOrder.standard_toolbar)
 
-    def bootstrap_post_set_up(self):
+    def bootstrap_initialise(self):
         """
         process the bootstrap post setup request
         """

@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 The :mod:`~openlp.core.display.window` module contains the display window
 """
@@ -29,16 +29,14 @@ import copy
 
 from PyQt5 import QtCore, QtWebChannel, QtWidgets
 
-from openlp.core.common.path import Path, path_to_str
+from openlp.core.common.path import path_to_str
 from openlp.core.common.settings import Settings
 from openlp.core.common.registry import Registry
+from openlp.core.common.applocation import AppLocation
 from openlp.core.ui import HideMode
 from openlp.core.display.screens import ScreenList
 
 log = logging.getLogger(__name__)
-DISPLAY_PATH = Path(__file__).parent / 'html' / 'display.html'
-CHECKERBOARD_PATH = Path(__file__).parent / 'html' / 'checkerboard.png'
-OPENLP_SPLASH_SCREEN_PATH = Path(__file__).parent / 'html' / 'openlp-splash-screen.png'
 
 
 class MediaWatcher(QtCore.QObject):
@@ -126,7 +124,11 @@ class DisplayWindow(QtWidgets.QWidget):
         self.webview.page().setBackgroundColor(QtCore.Qt.transparent)
         self.layout.addWidget(self.webview)
         self.webview.loadFinished.connect(self.after_loaded)
-        self.set_url(QtCore.QUrl.fromLocalFile(path_to_str(DISPLAY_PATH)))
+        display_base_path = AppLocation.get_directory(AppLocation.AppDir) / 'core' / 'display' / 'html'
+        self.display_path = display_base_path / 'display.html'
+        self.checkerboard_path = display_base_path / 'checkerboard.png'
+        self.openlp_splash_screen_path = display_base_path / 'openlp-splash-screen.png'
+        self.set_url(QtCore.QUrl.fromLocalFile(path_to_str(self.display_path)))
         self.media_watcher = MediaWatcher(self)
         self.channel = QtWebChannel.QWebChannel(self)
         self.channel.registerObject('mediaWatcher', self.media_watcher)
@@ -154,10 +156,8 @@ class DisplayWindow(QtWidgets.QWidget):
 
     def set_single_image(self, bg_color, image_path):
         """
-        
-        :param str bg_color: 
-        :param Path image_path: 
-        :return: 
+        :param str bg_color: Background color
+        :param Path image_path: Path to the image
         """
         image_uri = image_path.as_uri()
         self.run_javascript('Display.setFullscreenImage("{bg_color}", "{image}");'.format(bg_color=bg_color,
@@ -171,7 +171,7 @@ class DisplayWindow(QtWidgets.QWidget):
         bg_color = Settings().value('core/logo background color')
         image = Settings().value('core/logo file')
         if path_to_str(image).startswith(':'):
-            image = OPENLP_SPLASH_SCREEN_PATH
+            image = self.openlp_splash_screen_path
         image_uri = image.as_uri()
         self.run_javascript('Display.setStartupSplashScreen("{bg_color}", "{image}");'.format(bg_color=bg_color,
                                                                                               image=image_uri))
@@ -180,7 +180,7 @@ class DisplayWindow(QtWidgets.QWidget):
         """
         Set the URL of the webview
 
-        :param str url: The URL to set
+        :param QtCore.QUrl | str url: The URL to set
         """
         if not isinstance(url, QtCore.QUrl):
             url = QtCore.QUrl(url)
@@ -291,7 +291,7 @@ class DisplayWindow(QtWidgets.QWidget):
 
         :param rate: A float indicating the playback rate.
         """
-        self.run_javascript('Display.setPlaybackRate({rate});'.format(rate))
+        self.run_javascript('Display.setPlaybackRate({rate});'.format(rate=rate))
 
     def set_video_volume(self, level):
         """
@@ -304,7 +304,7 @@ class DisplayWindow(QtWidgets.QWidget):
         """
         if level < 0 or level > 100:
             raise ValueError('Volume should be from 0 to 100, was "{}"'.format(level))
-        self.run_javascript('Display.setVideoVolume({level});'.format(level))
+        self.run_javascript('Display.setVideoVolume({level});'.format(level=level))
 
     def toggle_video_mute(self):
         """
@@ -331,7 +331,7 @@ class DisplayWindow(QtWidgets.QWidget):
         if theme.background_type == 'transparent' and not self.is_display:
             theme_copy = copy.deepcopy(theme)
             theme_copy.background_type = 'image'
-            theme_copy.background_filename = CHECKERBOARD_PATH
+            theme_copy.background_filename = self.checkerboard_path
             exported_theme = theme_copy.export_theme()
         else:
             exported_theme = theme.export_theme()

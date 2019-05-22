@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 The :mod:`~openlp.plugins.songs.lib.songselect` module contains the SongSelect importer itself.
 """
@@ -81,7 +81,7 @@ class SongSelectImport(object):
         :param username: SongSelect username
         :param password: SongSelect password
         :param callback: Method to notify of progress.
-        :return: True on success, False on failure.
+        :return: subscription level on success, None on failure.
         """
         if callback:
             callback()
@@ -115,11 +115,31 @@ class SongSelectImport(object):
             return False
         if callback:
             callback()
+        # Page if user is in an organization
         if posted_page.find('input', id='SearchText') is not None:
-            return True
+            self.subscription_level = self.find_subscription_level(posted_page)
+            return self.subscription_level
+        # Page if user is not in an organization
+        elif posted_page.find('div', id="select-organization") is not None:
+            try:
+                home_page = BeautifulSoup(self.opener.open(BASE_URL).read(), 'lxml')
+            except (TypeError, URLError) as error:
+                log.exception('Could not reach SongSelect, {error}'.format(error=error))
+            self.subscription_level = self.find_subscription_level(home_page)
+            return self.subscription_level
         else:
             log.debug(posted_page)
-            return False
+            return None
+
+    def find_subscription_level(self, page):
+        scripts = page.find_all('script')
+        for tag in scripts:
+            if tag.string:
+                match = re.search("'Subscription': '(?P<subscription_level>[^']+)", tag.string)
+                if match:
+                    return match.group('subscription_level')
+        log.error('Could not determine SongSelect subscription level')
+        return None
 
     def logout(self):
         """
@@ -128,7 +148,7 @@ class SongSelectImport(object):
         try:
             self.opener.open(LOGOUT_URL)
         except (TypeError, URLError) as error:
-            log.exception('Could not log of SongSelect, {error}'.format(error=error))
+            log.exception('Could not log out of SongSelect, {error}'.format(error=error))
 
     def search(self, search_text, max_results, callback=None):
         """
@@ -145,7 +165,7 @@ class SongSelectImport(object):
             'PrimaryLanguage': '',
             'Keys': '',
             'Themes': '',
-            'List': '',
+            'List': 'publicdomain' if self.subscription_level == 'Free' else '',
             'Sort': '',
             'SearchText': search_text
         }
@@ -172,6 +192,7 @@ class SongSelectImport(object):
                     callback(song)
                 songs.append(song)
                 if len(songs) >= max_results:
+                    self.run_search = False
                     break
             current_page += 1
         return songs

@@ -1,32 +1,28 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 The :mod:`~openlp.core.ui.media` module contains classes and objects for media player integration.
 """
 import logging
-
-from PyQt5 import QtCore
-
-from openlp.core.common.settings import Settings
 
 log = logging.getLogger(__name__ + '.__init__')
 
@@ -52,9 +48,10 @@ class MediaType(object):
     CD = 3
     DVD = 4
     Folder = 5
+    Stream = 6
 
 
-class MediaInfo(object):
+class ItemMediaInfo(object):
     """
     This class hold the media related info
     """
@@ -71,39 +68,6 @@ class MediaInfo(object):
     audio_track = 0
     subtitle_track = 0
     media_type = MediaType()
-
-
-def get_media_players():
-    """
-    This method extracts the configured media players and overridden player
-    from the settings.
-    """
-    log.debug('get_media_players')
-    saved_players = Settings().value('media/players')
-    reg_ex = QtCore.QRegExp(r'.*\[(.*)\].*')
-    if Settings().value('media/override player') == QtCore.Qt.Checked:
-        if reg_ex.exactMatch(saved_players):
-            overridden_player = '{text}'.format(text=reg_ex.cap(1))
-        else:
-            overridden_player = 'auto'
-    else:
-        overridden_player = ''
-    saved_players_list = saved_players.replace('[', '').replace(']', '').split(',') if saved_players else []
-    return saved_players_list, overridden_player
-
-
-def set_media_players(players_list, overridden_player='auto'):
-    """
-    This method saves the configured media players and overridden player to the settings
-
-    :param players_list: A list with all active media players.
-    :param overridden_player: Here an special media player is chosen for all media actions.
-    """
-    log.debug('set_media_players')
-    players = ','.join(players_list)
-    if Settings().value('media/override player') == QtCore.Qt.Checked and overridden_player != 'auto':
-        players = players.replace(overridden_player, '[{text}]'.format(text=overridden_player))
-    Settings().setValue('media/players', players)
 
 
 def parse_optical_path(input_string):

@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 The :mod:`openlp.core.lib.projector.constants` module provides the constants used for projector errors/status/defaults
 """
@@ -39,6 +39,7 @@ PJLINK_PREFIX = '%'
 PJLINK_PORT = 4352
 PJLINK_SUFFIX = CR
 PJLINK_TIMEOUT = 30.0
+PJLINK_TOKEN_SIZE = 8  # PJLINK 1 <token> : where <token> is 8 characters
 
 # Error and status codes
 S_OK = E_OK = 0  # E_OK included since I sometimes forget
@@ -106,6 +107,9 @@ S_WARMUP = 314
 S_ON = 315
 S_COOLDOWN = 316
 S_INFO = 317
+S_CONNECT = 318  # Initial connection, connected
+S_AUTHENTICATE = 319  # Initial connection, send pin hash
+S_DATA_OK = 320  # Previous command returned OK
 
 # Information that does not affect status
 S_NETWORK_IDLE = 400
@@ -369,11 +373,14 @@ STATUS_CODE = {
     E_UNKNOWN_SOCKET_ERROR: 'E_UNKNOWN_SOCKET_ERROR',
     E_UNSUPPORTED_SOCKET_OPERATION: 'E_UNSUPPORTED_SOCKET_OPERATION',
     E_WARN: 'E_WARN',
+    S_AUTHENTICATE: 'S_AUTHENTICATE',
     S_BOUND: 'S_BOUND',
+    S_CONNECT: 'S_CONNECT',
     S_COOLDOWN: 'S_COOLDOWN',
     S_CLOSING: 'S_CLOSING',
     S_CONNECTED: 'S_CONNECTED',
     S_CONNECTING: 'S_CONNECTING',
+    S_DATA_OK: 'S_DATA_OK',
     S_HOST_LOOKUP: 'S_HOST_LOOKUP',
     S_INFO: 'S_INFO',
     S_INITIALIZE: 'S_INITIALIZE',
@@ -387,7 +394,7 @@ STATUS_CODE = {
     S_ON: 'S_ON',
     S_STANDBY: 'S_STANDBY',
     S_STATUS: 'S_STATUS',
-    S_WARMUP: 'S_WARMUP',
+    S_WARMUP: 'S_WARMUP'
 }
 
 # Map status codes to message strings
@@ -459,11 +466,14 @@ STATUS_MSG = {
                                               'The requested socket operation is not supported by the local '
                                               'operating system (e.g., lack of IPv6 support)'),
     E_WARN: translate('OpenLP.ProjectorConstants', 'Warning condition detected'),
+    S_AUTHENTICATE: translate('OpenLP.ProjectorConstants', 'Connection initializing with pin'),
     S_BOUND: translate('OpenLP.ProjectorConstants', 'Socket is bount to an address or port'),
+    S_CONNECT: translate('OpenLP.ProjectorConstants', 'Connection initializing'),
     S_CLOSING: translate('OpenLP.ProjectorConstants', 'Socket is about to close'),
     S_CONNECTED: translate('OpenLP.ProjectorConstants', 'Connected'),
     S_CONNECTING: translate('OpenLP.ProjectorConstants', 'Connecting'),
     S_COOLDOWN: translate('OpenLP.ProjectorConstants', 'Cooldown in progress'),
+    S_DATA_OK: translate('OpenLP.ProjectorConstants', 'Command returned with OK'),
     S_HOST_LOOKUP: translate('OpenLP.ProjectorConstants', 'Performing a host name lookup'),
     S_INFO: translate('OpenLP.ProjectorConstants', 'Projector Information available'),
     S_INITIALIZE: translate('OpenLP.ProjectorConstants', 'Initialize in progress'),

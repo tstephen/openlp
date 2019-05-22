@@ -1,30 +1,31 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 # import sys
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
 from PyQt5 import QtCore
 
+from openlp.core.state import State
 # Mock QtWebEngineWidgets
 # sys.modules['PyQt5.QtWebEngineWidgets'] = MagicMock()
 
@@ -66,7 +67,15 @@ class TestController(TestCase):
                 MagicMock(**{'geometry.return_value': SCREEN['size']})
             ]
             self.screens = ScreenList.create(self.desktop)
+        # Mock the renderer and its format_slide method
+        self.mocked_renderer = MagicMock()
+
+        def side_effect_return_arg(arg1, arg2):
+            return [arg1]
+        self.mocked_slide_formater = MagicMock(side_effect=side_effect_return_arg)
+        self.mocked_renderer.format_slide = self.mocked_slide_formater
         Registry().register('live_controller', self.mocked_live_controller)
+        Registry().register('renderer', self.mocked_renderer)
 
     def test_controller_text_empty(self):
         """
@@ -92,10 +101,14 @@ class TestController(TestCase):
         # GIVEN: A mocked service with a dummy service item
         line = convert_file_service_item(TEST_PATH, 'serviceitem_custom_1.osj')
         self.mocked_live_controller.service_item = ServiceItem(None)
+        State().load_settings()
+        State().add_service("media", 0)
+        State().update_pre_conditions("media", True)
+        State().flush_preconditions()
         self.mocked_live_controller.service_item.set_from_service(line)
-
+        self.mocked_live_controller.service_item._create_slides()
         # WHEN: I trigger the method
-        ret = controller_text(MagicMock())
+        ret = controller_text("SomeText")
 
         # THEN: I get a basic set of results
         results = ret['results']

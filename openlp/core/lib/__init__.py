@@ -1,36 +1,34 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 The :mod:`lib` module contains most of the components and libraries that make
 OpenLP work.
 """
 import logging
-import re
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from openlp.core.common.i18n import translate
 from openlp.core.common.path import Path
-from openlp.core.lib.formattingtags import FormattingTags
 
 log = logging.getLogger(__name__ + '.__init__')
 
@@ -244,16 +242,16 @@ def image_to_byte(image, base_64=True):
     """
     Resize an image to fit on the current screen for the web and returns it as a byte stream.
 
-    :param image: The image to converted.
+    :param image: The image to be converted.
     :param base_64: If True returns the image as Base64 bytes, otherwise the image is returned as a byte array.
         To preserve original intention, this defaults to True
     """
     log.debug('image_to_byte - start')
     byte_array = QtCore.QByteArray()
     # use buffer to store pixmap into byteArray
-    buffie = QtCore.QBuffer(byte_array)
-    buffie.open(QtCore.QIODevice.WriteOnly)
-    image.save(buffie, "PNG")
+    buffer = QtCore.QBuffer(byte_array)
+    buffer.open(QtCore.QIODevice.WriteOnly)
+    image.save(buffer, "PNG")
     log.debug('image_to_byte - end')
     if not base_64:
         return byte_array
@@ -265,15 +263,13 @@ def create_thumb(image_path, thumb_path, return_icon=True, size=None):
     """
     Create a thumbnail from the given image path and depending on ``return_icon`` it returns an icon from this thumb.
 
-    :param image_path: The image file to create the icon from.
-    :param thumb_path: The filename to save the thumbnail to.
+    :param openlp.core.common.path.Path image_path: The image file to create the icon from.
+    :param openlp.core.common.path.Path thumb_path: The filename to save the thumbnail to.
     :param return_icon: States if an icon should be build and returned from the thumb. Defaults to ``True``.
     :param size: Allows to state a own size (QtCore.QSize) to use. Defaults to ``None``, which means that a default
      height of 88 is used.
     :return: The final icon.
     """
-    # TODO: To path object
-    thumb_path = Path(thumb_path)
     reader = QtGui.QImageReader(str(image_path))
     if size is None:
         # No size given; use default height of 88

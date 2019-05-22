@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2018 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 
 """
 The :mod:`core` module provides all core application functions
@@ -30,15 +30,18 @@ import argparse
 import logging
 import sys
 import time
+import os
 from datetime import datetime
 from traceback import format_exception
 
 from PyQt5 import QtCore, QtWebEngineWidgets, QtWidgets  # noqa
 
+from openlp.core.state import State
 from openlp.core.common import is_macosx, is_win
 from openlp.core.common.applocation import AppLocation
+from openlp.core.loader import loader
 from openlp.core.common.i18n import LanguageManager, UiStrings, translate
-from openlp.core.common.path import copytree, create_paths
+from openlp.core.common.path import copytree, create_paths, Path
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.display.screens import ScreenList
@@ -99,7 +102,7 @@ class OpenLP(QtWidgets.QApplication):
             ftw.initialize(screens)
             if ftw.exec() == QtWidgets.QDialog.Accepted:
                 Settings().setValue('core/has run wizard', True)
-            elif ftw.was_cancelled:
+            else:
                 QtCore.QCoreApplication.exit()
                 sys.exit()
         # Correct stylesheet bugs
@@ -115,8 +118,10 @@ class OpenLP(QtWidgets.QApplication):
         # Check if OpenLP has been upgrade and if a backup of data should be created
         self.backup_on_upgrade(has_run_wizard, can_show_splash)
         # start the main app window
+        loader()
         self.main_window = MainWindow()
         Registry().execute('bootstrap_initialise')
+        State().flush_preconditions()
         Registry().execute('bootstrap_post_set_up')
         Registry().initialise = False
         self.main_window.show()
@@ -134,7 +139,7 @@ class OpenLP(QtWidgets.QApplication):
         if Settings().value('core/update check'):
             check_for_update(self.main_window)
         self.main_window.is_display_blank()
-        self.main_window.app_startup()
+        Registry().execute('bootstrap_completion')
         return self.exec()
 
     @staticmethod
@@ -282,12 +287,12 @@ class OpenLP(QtWidgets.QApplication):
         return QtWidgets.QApplication.event(self, event)
 
 
-def parse_options(args=None):
+def parse_options():
     """
     Parse the command line arguments
 
-    :param args: list of command line arguments
-    :return: a tuple of parsed options of type optparse.Value and a list of remaining argsZ
+    :return: An :object:`argparse.Namespace` insatnce containing the parsed args.
+    :rtype: argparse.Namespace
     """
     # Set up command line options.
     parser = argparse.ArgumentParser(prog='openlp')
@@ -297,11 +302,14 @@ def parse_options(args=None):
                         help='Set logging to LEVEL level. Valid values are "debug", "info", "warning".')
     parser.add_argument('-p', '--portable', dest='portable', action='store_true',
                         help='Specify if this should be run as a portable app, ')
+    parser.add_argument('-pp', '--portable-path', dest='portablepath', default=None,
+                        help='Specify the path of the portable data, defaults to "{dir_name}".'.format(
+                            dir_name=os.path.join('<AppDir>', '..', '..')))
     parser.add_argument('-w', '--no-web-server', dest='no_web_server', action='store_true',
                         help='Turn off the Web and Socket Server ')
-    parser.add_argument('rargs', nargs='?', default=[])
-    # Parse command line options and deal with them. Use args supplied pragmatically if possible.
-    return parser.parse_args(args) if args else parser.parse_args()
+    parser.add_argument('rargs', nargs='*', default=[])
+    # Parse command line options and deal with them.
+    return parser.parse_args()
 
 
 def set_up_logging(log_path):
@@ -313,21 +321,18 @@ def set_up_logging(log_path):
     """
     create_paths(log_path, do_not_log=True)
     file_path = log_path / 'openlp.log'
-    # TODO: FileHandler accepts a Path object in Py3.6
-    logfile = logging.FileHandler(str(file_path), 'w', encoding='UTF-8')
+    logfile = logging.FileHandler(file_path, 'w', encoding='UTF-8')
     logfile.setFormatter(logging.Formatter('%(asctime)s %(threadName)s %(name)-55s %(levelname)-8s %(message)s'))
     log.addHandler(logfile)
     if log.isEnabledFor(logging.DEBUG):
         print('Logging to: {name}'.format(name=file_path))
 
 
-def main(args=None):
+def main():
     """
     The main function which parses command line options and then runs
-
-    :param args: Some args
     """
-    args = parse_options(args)
+    args = parse_options()
     qt_args = ['--disable-web-security']
     # qt_args = []
     if args and args.loglevel.lower() in ['d', 'debug']:
@@ -353,14 +358,21 @@ def main(args=None):
         application.setApplicationName('OpenLPPortable')
         Settings.setDefaultFormat(Settings.IniFormat)
         # Get location OpenLPPortable.ini
-        portable_path = (AppLocation.get_directory(AppLocation.AppDir) / '..' / '..').resolve()
+        if args.portablepath:
+            if os.path.isabs(args.portablepath):
+                portable_path = Path(args.portablepath)
+            else:
+                portable_path = AppLocation.get_directory(AppLocation.AppDir) / '..' / args.portablepath
+        else:
+            portable_path = AppLocation.get_directory(AppLocation.AppDir) / '..' / '..'
+        portable_path = portable_path.resolve()
         data_path = portable_path / 'Data'
         set_up_logging(portable_path / 'Other')
         log.info('Running portable')
         portable_settings_path = data_path / 'OpenLP.ini'
         # Make this our settings file
         log.info('INI file: {name}'.format(name=portable_settings_path))
-        Settings.set_filename(str(portable_settings_path))
+        Settings.set_filename(portable_settings_path)
         portable_settings = Settings()
         # Set our data path
         log.info('Data path: {name}'.format(name=data_path))
@@ -401,7 +413,12 @@ def main(args=None):
                 None, translate('OpenLP', 'Settings Upgrade'),
                 translate('OpenLP', 'Your settings are about to be upgraded. A backup will be created at '
                                     '{back_up_path}').format(back_up_path=back_up_path))
-            settings.export(back_up_path)
+            try:
+                settings.export(back_up_path)
+            except OSError:
+                QtWidgets.QMessageBox.warning(
+                    None, translate('OpenLP', 'Settings Upgrade'),
+                    translate('OpenLP', 'Settings back up failed.\n\nContinuining to upgrade.'))
         settings.upgrade_settings()
     # First time checks in settings
     if not Settings().value('core/has run wizard'):

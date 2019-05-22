@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 # vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
 
-###############################################################################
-# OpenLP - Open Source Lyrics Projection                                      #
-# --------------------------------------------------------------------------- #
-# Copyright (c) 2008-2017 OpenLP Developers                                   #
-# --------------------------------------------------------------------------- #
-# This program is free software; you can redistribute it and/or modify it     #
-# under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
-#                                                                             #
-# This program is distributed in the hope that it will be useful, but WITHOUT #
-# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
-# FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for    #
-# more details.                                                               #
-#                                                                             #
-# You should have received a copy of the GNU General Public License along     #
-# with this program; if not, write to the Free Software Foundation, Inc., 59  #
-# Temple Place, Suite 330, Boston, MA 02111-1307 USA                          #
-###############################################################################
+##########################################################################
+# OpenLP - Open Source Lyrics Projection                                 #
+# ---------------------------------------------------------------------- #
+# Copyright (c) 2008-2019 OpenLP Developers                              #
+# ---------------------------------------------------------------------- #
+# This program is free software: you can redistribute it and/or modify   #
+# it under the terms of the GNU General Public License as published by   #
+# the Free Software Foundation, either version 3 of the License, or      #
+# (at your option) any later version.                                    #
+#                                                                        #
+# This program is distributed in the hope that it will be useful,        #
+# but WITHOUT ANY WARRANTY; without even the implied warranty of         #
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          #
+# GNU General Public License for more details.                           #
+#                                                                        #
+# You should have received a copy of the GNU General Public License      #
+# along with this program.  If not, see <https://www.gnu.org/licenses/>. #
+##########################################################################
 """
 Package to test the openlp.core.lib.mediamanageritem package.
 """
@@ -52,6 +52,9 @@ class TestMediaManagerItem(TestCase, TestMixin):
         mocked_settings.value.return_value = False
         MockedSettings.return_value = mocked_settings
         mmi = MediaManagerItem(None)
+        mmi.can_preview = True
+        mmi.can_make_live = True
+        mmi.can_add_to_service = True
 
         # WHEN: on_double_clicked() is called
         mmi.on_double_clicked()
@@ -73,6 +76,9 @@ class TestMediaManagerItem(TestCase, TestMixin):
         assert mmi.has_file_icon is False, 'There should be no file icon by default'
         assert mmi.has_delete_icon is True, 'By default a delete icon should be present'
         assert mmi.add_to_service_item is False, 'There should be no add_to_service icon by default'
+        assert mmi.can_preview is True, 'There should be a preview icon by default'
+        assert mmi.can_make_live is True, 'There should be a make live by default'
+        assert mmi.can_add_to_service is True, 'There should be a add to service icon by default'
 
     @patch('openlp.core.lib.mediamanageritem.Settings')
     @patch('openlp.core.lib.mediamanageritem.MediaManagerItem.on_live_click')
@@ -85,6 +91,9 @@ class TestMediaManagerItem(TestCase, TestMixin):
         mocked_settings.value.side_effect = lambda x: x == 'advanced/double click live'
         MockedSettings.return_value = mocked_settings
         mmi = MediaManagerItem(None)
+        mmi.can_preview = True
+        mmi.can_make_live = True
+        mmi.can_add_to_service = True
 
         # WHEN: on_double_clicked() is called
         mmi.on_double_clicked()
@@ -105,6 +114,9 @@ class TestMediaManagerItem(TestCase, TestMixin):
         mocked_settings.value.side_effect = lambda x: x == 'advanced/single click preview'
         MockedSettings.return_value = mocked_settings
         mmi = MediaManagerItem(None)
+        mmi.can_preview = True
+        mmi.can_make_live = True
+        mmi.can_add_to_service = True
 
         # WHEN: on_double_clicked() is called
         mmi.on_double_clicked()
