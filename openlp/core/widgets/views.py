@@ -202,14 +202,14 @@ class ListPreviewWidget(QtWidgets.QTableWidget, RegistryProperties):
                     label.setScaledContents(True)
                 if self.service_item.is_command():
                     if self.service_item.is_capable(ItemCapabilities.HasThumbnails):
-                        pixmap = QtGui.QPixmap(remove_url_prefix(slide['thumbnail']))
+                        pixmap = QtGui.QPixmap(str(slide['thumbnail']))
                     else:
                         if isinstance(slide['image'], QtGui.QIcon):
                             pixmap = slide['image'].pixmap(QtCore.QSize(32, 32))
                         else:
-                            pixmap = QtGui.QPixmap(remove_url_prefix(slide['image']))
+                            pixmap = QtGui.QPixmap(str(slide['image']))
                 else:
-                    pixmap = QtGui.QPixmap(remove_url_prefix(slide['path']))
+                    pixmap = QtGui.QPixmap(str(slide['path']))
                 label.setPixmap(pixmap)
                 container = QtWidgets.QWidget()
                 layout = AspectRatioLayout(container, self.screen_ratio)

@@ -72,7 +72,7 @@ class JSONMixin(object):
         :param dict[str] j_dict: The dictionary to update with the meta data
         :return None:
         """
-        j_dict.update({'json_meta': {'class': cls.__name__ or cls._name, 'version': cls._version}})
+        j_dict.update({'json_meta': {'class': cls._name or cls.__name__, 'version': cls._version}})
 
     def json_object(self, **kwargs):
         """
@@ -195,5 +195,5 @@ class PathSerializer(JSONMixin, register_names=('Path', 'PosixPath', 'WindowsPat
             with suppress(ValueError):
                 path = path.relative_to(base_path)
         json_dict = {'parts': path.parts}
-        cls.attach_meta(path, json_dict)
+        cls.attach_meta(json_dict)
         return json_dict
