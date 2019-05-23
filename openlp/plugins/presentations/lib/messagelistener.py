@@ -205,7 +205,6 @@ class Controller(object):
             return False
         ret = self.doc.previous_step()
         self.poll()
-        print('previous returning: %d' % ret)
         return ret
 
     def shutdown(self):

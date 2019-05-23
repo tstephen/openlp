@@ -553,7 +553,7 @@ class ImpressDocument(PresentationDocument):
             titles.append(self.__get_text_from_page(slide_no, TextType.Title).replace('\r\n', ' ')
                                                                              .replace('\n', ' ').strip())
             note = self.__get_text_from_page(slide_no, TextType.Notes)
-            if not note:
+            if len(note) == 0:
                 note = ' '
             notes.append(note)
         self.save_titles_and_notes(titles, notes)

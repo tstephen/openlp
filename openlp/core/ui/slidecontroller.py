@@ -1303,7 +1303,6 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
                                               [self.service_item, self.is_live])
             # Check id we have tried to go before that start slide
             if self.is_live and before_start and before_start[0]:
-                print('detected before start!')
                 if self.slide_limits == SlideLimits.Wrap:
                     self.on_slide_selected_index([self.preview_widget.slide_count() - 1])
                 elif self.is_live and self.slide_limits == SlideLimits.Next:
