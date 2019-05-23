@@ -444,7 +444,8 @@ class PowerpointDocument(PresentationDocument):
         """
         log.debug('next_step')
         # if we are at the presentations end don't go further, just return True
-        if self.presentation.SlideShowWindow.View.GetClickCount() == self.presentation.SlideShowWindow.View.GetClickIndex()\
+        if self.presentation.SlideShowWindow.View.GetClickCount() == \
+                self.presentation.SlideShowWindow.View.GetClickIndex() \
                 and self.get_slide_number() == self.get_slide_count():
             return True
         past_end = False

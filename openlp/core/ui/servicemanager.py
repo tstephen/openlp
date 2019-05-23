@@ -987,7 +987,7 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
                     self.make_live()
                     self.service_manager_list.setCurrentItem(prev_item)
                 elif prev_item:
-                    # Go to the first slide of the previous service item 
+                    # Go to the first slide of the previous service item
                     self.service_manager_list.setCurrentItem(prev_item)
                     self.make_live()
                 return

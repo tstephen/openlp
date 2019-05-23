@@ -222,25 +222,28 @@ class ImpressController(PresentationController):
         # Create Instance of ConfigurationProvider
         if not self.conf_provider:
             if is_win():
-                self.conf_provider = self.manager.createInstance("com.sun.star.configuration.ConfigurationProvider")
+                self.conf_provider = self.manager.createInstance('com.sun.star.configuration.ConfigurationProvider')
             else:
-                self.conf_provider = self.manager.createInstanceWithContext("com.sun.star.configuration.ConfigurationProvider", uno.getComponentContext())
+                self.conf_provider = self.manager.createInstanceWithContext(
+                    'com.sun.star.configuration.ConfigurationProvider', uno.getComponentContext())
         # Setup lookup properties to get Impress settings
         properties = []
         properties.append(self.create_property('nodepath', 'org.openoffice.Office.Impress'))
         properties = tuple(properties)
         try:
             # Get an updateable configuration view
-            impress_conf_props = self.conf_provider.createInstanceWithArguments('com.sun.star.configuration.ConfigurationUpdateAccess', properties)
+            impress_conf_props = self.conf_provider.createInstanceWithArguments(
+                'com.sun.star.configuration.ConfigurationUpdateAccess', properties)
             # Get the specific setting for presentation screen
-            presenter_screen_enabled = impress_conf_props.getHierarchicalPropertyValue('Misc/Start/EnablePresenterScreen')
+            presenter_screen_enabled = impress_conf_props.getHierarchicalPropertyValue(
+                'Misc/Start/EnablePresenterScreen')
             # If the presentation screen is enabled we disable it
             if presenter_screen_enabled != target_value:
                 impress_conf_props.setHierarchicalPropertyValue('Misc/Start/EnablePresenterScreen', target_value)
                 impress_conf_props.commitChanges()
                 # if target_value is False this is an attempt to disable the Presenter Screen
                 # so we make a note that it has been disabled, so it can be enabled again on close.
-                if target_value == False:
+                if target_value is False:
                     self.presenter_screen_disabled_by_openlp = True
         except Exception as e:
             log.exception(e)
@@ -561,6 +564,7 @@ class ImpressDocument(PresentationDocument):
         if is_win():
             property_object = self.controller.manager.Bridge_GetStruct('com.sun.star.beans.PropertyValue')
 
+
 class SlideShowListener(SlideShowListenerImport):
     """
     Listener interface to receive global slide show events.
@@ -568,8 +572,9 @@ class SlideShowListener(SlideShowListenerImport):
 
     def __init__(self, document):
         """
+        Constructor
 
-        :param control: SlideShowController
+        :param document: The ImpressDocument being presented
         """
         self.document = document
 
@@ -602,7 +607,7 @@ class SlideShowListener(SlideShowListenerImport):
         Notify that the last animation from the main sequence of the current slide has ended.
         """
         log.debug('LibreOffice SlideShowListener event: slideAnimationsEnded')
-        #if not Registry().get('main_window').isActiveWindow():
+        # if not Registry().get('main_window').isActiveWindow():
         #    log.debug('main window is not in focus - should update slidecontroller')
         #    Registry().execute('slidecontroller_live_change', self.document.control.getCurrentSlideIndex() + 1)
 
