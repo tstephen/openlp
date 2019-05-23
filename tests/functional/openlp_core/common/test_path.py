@@ -28,7 +28,7 @@ from pathlib import Path
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
-from openlp.core.common.path import create_paths, files_to_paths, path_to_str,  replace_params, str_to_path, which
+from openlp.core.common.path import create_paths, files_to_paths, path_to_str, replace_params, str_to_path, which
 
 
 class TestShutil(TestCase):
