@@ -28,9 +28,9 @@ logging and a plugin framework are contained within the openlp.core module.
 """
 import argparse
 import logging
+import os
 import sys
 import time
-import os
 from datetime import datetime
 from pathlib import Path
 from shutil import copytree
@@ -385,6 +385,15 @@ def main():
     else:
         application.setApplicationName('OpenLP')
         set_up_logging(AppLocation.get_directory(AppLocation.CacheDir))
+    # Set the libvlc environment variable if we're frozen
+    if getattr(sys, 'frozen', False):
+        if is_macosx():
+            vlc_lib = 'libvlc.dylib'
+        elif is_win():
+            vlc_lib = 'libvlc.dll'
+        os.environ['PYTHON_VLC_LIB_PATH'] = str(AppLocation.get_directory(AppLocation.AppDir) / vlc_lib)
+        log.debug('VLC Path: {}'.format(os.environ['PYTHON_VLC_LIB_PATH']))
+    # Initialise the Registry
     Registry.create()
     Registry().register('application', application)
     Registry().set_flag('no_web_server', args.no_web_server)
