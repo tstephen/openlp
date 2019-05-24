@@ -104,17 +104,15 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         """
         suffix_list = []
         self.audio_extensions_list = []
-        if self.vlc_player.is_active:
-            for item in self.vlc_player.audio_extensions_list:
-                if item not in self.audio_extensions_list:
-                    self.audio_extensions_list.append(item)
-                    suffix_list.append(item[2:])
+        for item in self.vlc_player.audio_extensions_list:
+            if item not in self.audio_extensions_list:
+                self.audio_extensions_list.append(item)
+                suffix_list.append(item[2:])
         self.video_extensions_list = []
-        if self.vlc_player.is_active:
-            for item in self.vlc_player.video_extensions_list:
-                if item not in self.video_extensions_list:
-                    self.video_extensions_list.append(item)
-                    suffix_list.append(item[2:])
+        for item in self.vlc_player.video_extensions_list:
+            if item not in self.video_extensions_list:
+                self.video_extensions_list.append(item)
+                suffix_list.append(item[2:])
         self.service_manager.supported_suffixes(suffix_list)
 
     def bootstrap_initialise(self):

@@ -50,7 +50,6 @@ class TestMediaController(TestCase, TestMixin):
         # GIVEN: A MediaController and an active player with audio and video extensions
         media_controller = MediaController()
         media_controller.vlc_player = VlcPlayer(None)
-        media_controller.vlc_player.is_active = True
         media_controller.vlc_player.audio_extensions_list = ['*.mp3', '*.wav', '*.wma', '*.ogg']
         media_controller.vlc_player.video_extensions_list = ['*.mp4', '*.mov', '*.avi', '*.ogm']
 
