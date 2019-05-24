@@ -607,9 +607,9 @@ class SlideShowListener(SlideShowListenerImport):
         Notify that the last animation from the main sequence of the current slide has ended.
         """
         log.debug('LibreOffice SlideShowListener event: slideAnimationsEnded')
-        # if not Registry().get('main_window').isActiveWindow():
-        #    log.debug('main window is not in focus - should update slidecontroller')
-        #    Registry().execute('slidecontroller_live_change', self.document.control.getCurrentSlideIndex() + 1)
+        if not Registry().get('main_window').isActiveWindow():
+            log.debug('main window is not in focus - should update slidecontroller')
+            Registry().execute('slidecontroller_live_change', self.document.control.getCurrentSlideIndex() + 1)
 
     def slideEnded(self, reverse):
         """
