@@ -24,11 +24,11 @@ The :mod:`lib` module contains most of the components and libraries that make
 OpenLP work.
 """
 import logging
+from pathlib import Path
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from openlp.core.common.i18n import translate
-from openlp.core.common.path import Path
 
 log = logging.getLogger(__name__ + '.__init__')
 
@@ -181,7 +181,7 @@ def get_text_file_string(text_file_path):
     returns False. If there is an error loading the file or the content can't be decoded then the function will return
     None.
 
-    :param openlp.core.common.path.Path text_file_path: The path to the file.
+    :param Path text_file_path: The path to the file.
     :return: The contents of the file, False if the file does not exist, or None if there is an Error reading or
     decoding the file.
     :rtype: str | False | None
@@ -263,8 +263,8 @@ def create_thumb(image_path, thumb_path, return_icon=True, size=None):
     """
     Create a thumbnail from the given image path and depending on ``return_icon`` it returns an icon from this thumb.
 
-    :param openlp.core.common.path.Path image_path: The image file to create the icon from.
-    :param openlp.core.common.path.Path thumb_path: The filename to save the thumbnail to.
+    :param Path image_path: The image file to create the icon from.
+    :param Path thumb_path: The filename to save the thumbnail to.
     :param return_icon: States if an icon should be build and returned from the thumb. Defaults to ``True``.
     :param size: Allows to state a own size (QtCore.QSize) to use. Defaults to ``None``, which means that a default
      height of 88 is used.
@@ -311,8 +311,8 @@ def validate_thumb(file_path, thumb_path):
     Validates whether an file's thumb still exists and if is up to date. **Note**, you must **not** call this function,
     before checking the existence of the file.
 
-    :param openlp.core.common.path.Path file_path: The path to the file. The file **must** exist!
-    :param openlp.core.common.path.Path thumb_path: The path to the thumb.
+    :param Path file_path: The path to the file. The file **must** exist!
+    :param Path thumb_path: The path to the thumb.
     :return: Has the image changed since the thumb was created?
     :rtype: bool
     """

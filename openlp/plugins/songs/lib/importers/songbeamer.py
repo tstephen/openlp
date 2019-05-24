@@ -27,9 +27,9 @@ import logging
 import math
 import os
 import re
+from pathlib import Path
 
 from openlp.core.common import get_file_encoding, is_macosx, is_win
-from openlp.core.common.path import Path
 from openlp.core.common.settings import Settings
 from openlp.plugins.songs.lib import VerseType
 from openlp.plugins.songs.lib.importers.songimport import SongImport

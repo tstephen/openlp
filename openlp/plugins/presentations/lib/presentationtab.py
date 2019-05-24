@@ -221,7 +221,7 @@ class PresentationTab(SettingsTab):
         """
         Handle the `pathEditChanged` signal from program_path_edit
 
-        :param openlp.core.common.path.Path new_path: File path to the new program
+        :param pathlib.Path new_path: File path to the new program
         :rtype: None
         """
         if new_path:

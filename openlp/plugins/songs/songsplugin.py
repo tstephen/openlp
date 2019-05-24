@@ -432,7 +432,7 @@ class SongsPlugin(Plugin):
         """
         Provide a count of the songs in the database
 
-        :param openlp.core.common.path.Path db_path: The database to use
+        :param Path db_path: The database to use
         :return: The number of songs in the db.
         :rtype: int
         """

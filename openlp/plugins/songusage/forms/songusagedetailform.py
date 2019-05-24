@@ -70,7 +70,7 @@ class SongUsageDetailForm(QtWidgets.QDialog, Ui_SongUsageDetailDialog, RegistryP
         """
         Handle the `pathEditChanged` signal from report_path_edit
 
-        :param openlp.core.common.path.Path file_path: The new path.
+        :param pathlib.Path file_path: The new path.
         :rtype: None
         """
         Settings().setValue(self.plugin.settings_section + '/last directory export', file_path)

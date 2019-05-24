@@ -25,14 +25,14 @@ backend for the Songs plugin
 """
 import json
 import logging
+from pathlib import Path
 
 from sqlalchemy import Column, ForeignKey, Table, types
 from sqlalchemy.sql.expression import false, func, null, text
 
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.db import drop_columns
-from openlp.core.common.json import OpenLPJsonEncoder
-from openlp.core.common.path import Path
+from openlp.core.common.json import OpenLPJSONEncoder
 from openlp.core.lib.db import PathType, get_upgrade_op
 
 
@@ -182,7 +182,7 @@ def upgrade_7(session, metadata):
         results = conn.execute('SELECT * FROM media_files')
         data_path = AppLocation.get_data_path()
         for row in results.fetchall():
-            file_path_json = json.dumps(Path(row.file_name), cls=OpenLPJsonEncoder, base_path=data_path)
+            file_path_json = json.dumps(Path(row.file_name), cls=OpenLPJSONEncoder, base_path=data_path)
             sql = 'UPDATE media_files SET file_path = \'{file_path_json}\' WHERE id = {id}'.format(
                 file_path_json=file_path_json, id=row.id)
             conn.execute(sql)

@@ -22,10 +22,10 @@
 """
 Package to test the openlp.core.ui.firsttimeform package.
 """
+from pathlib import Path
 from unittest import TestCase
 from unittest.mock import MagicMock, call, patch
 
-from openlp.core.common.path import Path
 from openlp.core.common.registry import Registry
 from openlp.core.ui.firsttimeform import ThemeListWidgetItem
 from openlp.core.ui.icons import UiIcons

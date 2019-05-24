@@ -24,9 +24,9 @@ The :mod:`powersong` module provides the functionality for importing
 PowerSong songs into the OpenLP database.
 """
 import logging
+from pathlib import Path
 
 from openlp.core.common.i18n import translate
-from openlp.core.common.path import Path
 from openlp.plugins.songs.lib.importers.songimport import SongImport
 
 
@@ -73,7 +73,7 @@ class PowerSongImport(SongImport):
             * is a directory
             * contains at least one * .song file
 
-        :param openlp.core.common.path.Path import_source: Should be a Path object that fulfills the above criteria
+        :param Path import_source: Should be a Path object that fulfills the above criteria
         :return: If the source is valid
         :rtype: bool
         """

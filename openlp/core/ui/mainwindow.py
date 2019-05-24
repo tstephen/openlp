@@ -23,9 +23,11 @@
 This is the main window, where all the action happens.
 """
 import os
+import shutil
 from datetime import datetime
 from distutils import dir_util
 from distutils.errors import DistutilsFileError
+from pathlib import Path
 from tempfile import gettempdir
 
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -38,7 +40,7 @@ from openlp.core.common.actions import ActionList, CategoryOrder
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.i18n import LanguageManager, UiStrings, translate
 from openlp.core.common.mixins import LogMixin, RegistryProperties
-from openlp.core.common.path import Path, copyfile, create_paths
+from openlp.core.common.path import create_paths
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.display.screens import ScreenList
@@ -658,7 +660,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
                 plugin.first_time()
         self.application.process_events()
         temp_path = Path(gettempdir(), 'openlp')
-        temp_path.rmtree(True)
+        shutil.rmtree(temp_path, True)
 
     def on_first_time_wizard_clicked(self):
         """
@@ -861,7 +863,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
         temp_dir_path = Path(gettempdir(), 'openlp')
         create_paths(temp_dir_path)
         temp_config_path = temp_dir_path / import_file_path.name
-        copyfile(import_file_path, temp_config_path)
+        shutil.copyfile(import_file_path, temp_config_path)
         settings = Settings()
         import_settings = Settings(str(temp_config_path), Settings.IniFormat)
 

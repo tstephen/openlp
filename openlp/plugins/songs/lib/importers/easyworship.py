@@ -28,9 +28,9 @@ import re
 import sqlite3
 import struct
 import zlib
+from pathlib import Path
 
 from openlp.core.common.i18n import translate
-from openlp.core.common.path import Path
 from openlp.plugins.songs.lib import VerseType, retrieve_windows_encoding, strip_rtf
 
 from .songimport import SongImport

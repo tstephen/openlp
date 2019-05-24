@@ -22,12 +22,12 @@
 """
 This module contains tests for the lib submodule of the Images plugin.
 """
+from pathlib import Path
 from unittest import TestCase
 from unittest.mock import ANY, MagicMock, patch
 
 from PyQt5 import QtCore, QtWidgets
 
-from openlp.core.common.path import Path
 from openlp.core.common.registry import Registry
 from openlp.plugins.images.lib.db import ImageFilenames, ImageGroups
 from openlp.plugins.images.lib.mediaitem import ImageMediaItem

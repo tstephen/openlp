@@ -24,8 +24,8 @@ The :mod:`songpro` module provides the functionality for importing SongPro
 songs into the OpenLP database.
 """
 import re
+from pathlib import Path
 
-from openlp.core.common.path import Path
 from openlp.plugins.songs.lib import strip_rtf
 from openlp.plugins.songs.lib.importers.songimport import SongImport
 
