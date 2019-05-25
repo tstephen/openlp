@@ -561,9 +561,6 @@ class ImpressDocument(PresentationDocument):
             notes.append(note)
         self.save_titles_and_notes(titles, notes)
 
-        if is_win():
-            property_object = self.controller.manager.Bridge_GetStruct('com.sun.star.beans.PropertyValue')
-
 
 class SlideShowListener(SlideShowListenerImport):
     """
