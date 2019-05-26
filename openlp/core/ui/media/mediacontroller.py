@@ -106,8 +106,8 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         else:
             State().missing_text('media_live', translate('OpenLP.SlideController',
                                  'VLC or pymediainfo are missing, so you are unable to play any media'))
-        self.service_manager.supported_suffixes(ext[2:] for ext in AUDIO_EXT)
-        self.service_manager.supported_suffixes(ext[2:] for ext in VIDEO_EXT)
+        self.service_manager.supported_suffixes(AUDIO_EXT)
+        self.service_manager.supported_suffixes(VIDEO_EXT)
         return True
 
     def bootstrap_post_set_up(self):

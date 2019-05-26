@@ -163,12 +163,6 @@ class MediaPlayer(RegistryProperties):
         """
         return ''
 
-    def get_info(self):
-        """
-        Returns Information about the player
-        """
-        return ''
-
     def get_live_state(self):
         """
         Get the state of the live player

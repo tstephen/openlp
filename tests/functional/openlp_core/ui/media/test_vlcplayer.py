@@ -956,20 +956,3 @@ class TestVLCPlayer(TestCase, TestMixin):
         mocked_controller.seek_slider.setSliderPosition.assert_called_with(300)
         expected_calls = [call(True), call(False)]
         assert expected_calls == mocked_controller.seek_slider.blockSignals.call_args_list
-
-    @patch('openlp.core.ui.media.vlcplayer.translate')
-    def test_get_info(self, mocked_translate):
-        """
-        Test that get_info() returns some information about the VLC player
-        """
-        # GIVEN: A VlcPlayer
-        mocked_translate.side_effect = lambda *x: x[1]
-        vlc_player = VlcPlayer(None)
-
-        # WHEN: get_info() is run
-        info = vlc_player.get_info()
-
-        # THEN: The information should be correct
-        assert 'VLC is an external player which supports a number of different formats.<br/> ' \
-            '<strong>Audio</strong><br/>' + str(AUDIO_EXT) + '<br/><strong>Video</strong><br/>' + \
-               str(VIDEO_EXT) + '<br/>' == info
