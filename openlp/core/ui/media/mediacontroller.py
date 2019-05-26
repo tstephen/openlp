@@ -44,7 +44,7 @@ from openlp.core.lib.ui import critical_error_message_box
 from openlp.core.ui import DisplayControllerType
 from openlp.core.ui.media import MediaState, ItemMediaInfo, MediaType, parse_optical_path
 from openlp.core.ui.media.endpoint import media_endpoint
-from openlp.core.ui.media.vlcplayer import VlcPlayer, get_vlc
+from openlp.core.ui.media.vlcplayer import AUDIO_EXT, VIDEO_EXT, VlcPlayer, get_vlc
 
 
 log = logging.getLogger(__name__)
@@ -65,11 +65,6 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
     current_media_players is an array of player instances keyed on ControllerType.
 
     """
-    def __init__(self, parent=None):
-        """
-        Constructor
-        """
-        super(MediaController, self).__init__(parent)
 
     def setup(self):
         self.vlc_player = None
@@ -95,25 +90,7 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         Registry().register_function('songs_hide', self.media_hide)
         Registry().register_function('songs_blank', self.media_blank)
         Registry().register_function('songs_unblank', self.media_unblank)
-        Registry().register_function('mediaitem_suffixes', self._generate_extensions_lists)
         register_endpoint(media_endpoint)
-
-    def _generate_extensions_lists(self):
-        """
-        Set the active players and available media files
-        """
-        suffix_list = []
-        self.audio_extensions_list = []
-        for item in self.vlc_player.audio_extensions_list:
-            if item not in self.audio_extensions_list:
-                self.audio_extensions_list.append(item)
-                suffix_list.append(item[2:])
-        self.video_extensions_list = []
-        for item in self.vlc_player.video_extensions_list:
-            if item not in self.video_extensions_list:
-                self.video_extensions_list.append(item)
-                suffix_list.append(item[2:])
-        self.service_manager.supported_suffixes(suffix_list)
 
     def bootstrap_initialise(self):
         """
@@ -129,7 +106,8 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         else:
             State().missing_text('media_live', translate('OpenLP.SlideController',
                                  'VLC or pymediainfo are missing, so you are unable to play any media'))
-        self._generate_extensions_lists()
+        self.service_manager.supported_suffixes(ext[2:] for ext in AUDIO_EXT)
+        self.service_manager.supported_suffixes(ext[2:] for ext in VIDEO_EXT)
         return True
 
     def bootstrap_post_set_up(self):
@@ -379,7 +357,7 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
             if file.is_file:
                 suffix = '*%s' % file.suffix.lower()
                 file = str(file)
-                if suffix in self.vlc_player.video_extensions_list:
+                if suffix in VIDEO_EXT:
                     if not controller.media_info.is_background or controller.media_info.is_background and \
                             self.vlc_player.can_background:
                         self.resize(display, self.vlc_player)
@@ -387,7 +365,7 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
                             self.current_media_players[controller.controller_type] = self.vlc_player
                             controller.media_info.media_type = MediaType.Video
                             return True
-                if suffix in self.vlc_player.audio_extensions_list:
+                if suffix in AUDIO_EXT:
                     if self.vlc_player.load(display, file):
                         self.current_media_players[controller.controller_type] = self.vlc_player
                         controller.media_info.media_type = MediaType.Audio

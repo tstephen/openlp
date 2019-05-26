@@ -95,8 +95,6 @@ class TestVLCPlayer(TestCase, TestMixin):
         assert '&VLC' == vlc_player.display_name
         assert vlc_player.parent is None
         assert vlc_player.can_folder is True
-        assert AUDIO_EXT == vlc_player.audio_extensions_list
-        assert VIDEO_EXT == vlc_player.video_extensions_list
 
     @patch('openlp.core.ui.media.vlcplayer.is_win')
     @patch('openlp.core.ui.media.vlcplayer.is_macosx')

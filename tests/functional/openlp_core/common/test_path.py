@@ -22,7 +22,6 @@
 """
 Package to test the openlp.core.common.path package.
 """
-# TODO: fix patches
 import os
 from pathlib import Path
 from unittest import TestCase

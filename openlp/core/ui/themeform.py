@@ -32,7 +32,6 @@ from openlp.core.common.mixins import RegistryProperties
 from openlp.core.common.registry import Registry
 from openlp.core.lib.theme import BackgroundGradientType, BackgroundType
 from openlp.core.lib.ui import critical_error_message_box
-# TODO: Fix this. Use a "get_video_extensions" method which uses the current media player
 from openlp.core.ui.media.vlcplayer import VIDEO_EXT
 from openlp.core.ui.themelayoutform import ThemeLayoutForm
 from openlp.core.ui.themewizard import Ui_ThemeWizard

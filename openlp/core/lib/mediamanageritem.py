@@ -589,7 +589,7 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
         """
         Add this item to the current service.
 
-        :param item: Item to be processed
+        :param QtWidgets.QListWidgetItem | QtWidgets.QTreeWidgetItem | None item: Item to be processed
         :param replace: Replace the existing item
         :param remote: Triggered from remote
         :param position: Position to place item
@@ -627,7 +627,7 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
     def build_service_item(self, item=None, remote=False, context=ServiceItemContext.Live):
         """
         Common method for generating a service item
-        :param item: Service Item to be built.
+        :param QtWidgets.QListWidgetItem | QtWidgets.QTreeWidgetItem | None item: Service Item to be built.
         :param remote: Remote triggered (False)
         :param context: The context on which this is called
         """

@@ -43,7 +43,7 @@ class OpenLyricsExport(RegistryProperties):
     """
     def __init__(self, parent, songs, save_path):
         """
-        Initialise the export.
+        Initialise the export
 
         :param pathlib.Path save_path: The directory to save the exported songs in
         :rtype: None

@@ -109,8 +109,6 @@ class VlcPlayer(MediaPlayer):
         self.display_name = '&VLC'
         self.parent = parent
         self.can_folder = True
-        self.audio_extensions_list = AUDIO_EXT
-        self.video_extensions_list = VIDEO_EXT
 
     def setup(self, output_display, live_display):
         """
