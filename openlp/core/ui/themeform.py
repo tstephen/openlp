@@ -174,16 +174,12 @@ class ThemeForm(QtWidgets.QWizard, Ui_ThemeWizard, RegistryProperties):
         if not event:
             event = QtGui.QResizeEvent(self.size(), self.size())
         QtWidgets.QWizard.resizeEvent(self, event)
-        if hasattr(self, 'preview_page') and self.currentPage() == self.preview_page:
-            frame_width = self.preview_box_label.lineWidth()
-            pixmap_width = self.preview_area.width() - 2 * frame_width
-            pixmap_height = self.preview_area.height() - 2 * frame_width
-            aspect_ratio = float(pixmap_width) / pixmap_height
-            if aspect_ratio < self.display_aspect_ratio:
-                pixmap_height = int(pixmap_width / self.display_aspect_ratio + 0.5)
-            else:
-                pixmap_width = int(pixmap_height * self.display_aspect_ratio + 0.5)
-            self.preview_box_label.setFixedSize(pixmap_width + 2 * frame_width, pixmap_height + 2 * frame_width)
+        try:
+            self.display_aspect_ratio = self.renderer.width() / self.renderer.height()
+        except ZeroDivisionError:
+            self.display_aspect_ratio = 1
+        self.preview_area_layout.set_aspect_ratio(self.display_aspect_ratio)
+        self.preview_box.set_scale(float(self.preview_box.width()) / self.renderer.width())
 
     def validateCurrentPage(self):
         """
@@ -208,10 +204,16 @@ class ThemeForm(QtWidgets.QWizard, Ui_ThemeWizard, RegistryProperties):
         self.setOption(QtWidgets.QWizard.HaveCustomButton1, enabled)
         if self.page(page_id) == self.preview_page:
             self.update_theme()
-            frame = self.theme_manager.generate_image(self.theme)
-            frame.setDevicePixelRatio(self.devicePixelRatio())
-            self.preview_box_label.setPixmap(frame)
-            self.display_aspect_ratio = float(frame.width()) / frame.height()
+            self.preview_box.set_theme(self.theme)
+            self.preview_box.clear_slides()
+            self.preview_box.set_scale(float(self.preview_box.width()) / self.renderer.width())
+            try:
+                self.display_aspect_ratio = self.renderer.width() / self.renderer.height()
+            except ZeroDivisionError:
+                self.display_aspect_ratio = 1
+            self.preview_area_layout.set_aspect_ratio(self.display_aspect_ratio)
+            self.preview_box.generate_preview(self.theme, False, False)
+            self.preview_box.show()
             self.resizeEvent()
 
     def on_custom_1_button_clicked(self, number):
@@ -400,6 +402,7 @@ class ThemeForm(QtWidgets.QWizard, Ui_ThemeWizard, RegistryProperties):
         Handle the display and state of the Preview page.
         """
         self.setField('name', self.theme.theme_name)
+        self.preview_box.set_theme(self.theme)
 
     def on_background_combo_box_current_index_changed(self, index):
         """
@@ -560,5 +563,5 @@ class ThemeForm(QtWidgets.QWizard, Ui_ThemeWizard, RegistryProperties):
             source_path = self.theme.background_filename
         if not self.edit_mode and not self.theme_manager.check_if_theme_exists(self.theme.theme_name):
             return
-        self.theme_manager.save_theme(self.theme, source_path, destination_path)
+        self.theme_manager.save_theme(self.theme, source_path, destination_path, self.preview_box.save_screenshot())
         return QtWidgets.QDialog.accept(self)

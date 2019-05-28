@@ -425,7 +425,7 @@ def get_start_tags(raw_text):
     return raw_text + ''.join(end_tags), ''.join(start_tags), ''.join(html_tags)
 
 
-class Renderer(RegistryBase, LogMixin, RegistryProperties, DisplayWindow):
+class ThemePreviewRenderer(LogMixin, DisplayWindow):
     """
     A virtual display used for rendering thumbnails and other offscreen tasks
     """
@@ -435,24 +435,6 @@ class Renderer(RegistryBase, LogMixin, RegistryProperties, DisplayWindow):
         """
         super().__init__(*args, **kwargs)
         self.force_page = False
-        for screen in ScreenList():
-            if screen.is_display:
-                self.setGeometry(screen.display_geometry.x(), screen.display_geometry.y(),
-                                 screen.display_geometry.width(), screen.display_geometry.height())
-                break
-        # If the display is not show'ed and hidden like this webegine will not render
-        self.show()
-        self.hide()
-        self.theme_height = 0
-        self.theme_level = ThemeLevel.Global
-
-    def set_theme_level(self, theme_level):
-        """
-        Sets the theme level.
-
-        :param theme_level: The theme level to be used.
-        """
-        self.theme_level = theme_level
 
     def calculate_line_count(self):
         """
@@ -466,7 +448,7 @@ class Renderer(RegistryBase, LogMixin, RegistryProperties, DisplayWindow):
         """
         return self.run_javascript('Display.clearSlides();')
 
-    def generate_preview(self, theme_data, force_page=False):
+    def generate_preview(self, theme_data, force_page=False, generate_screenshot=True):
         """
         Generate a preview of a theme.
 
@@ -486,7 +468,8 @@ class Renderer(RegistryBase, LogMixin, RegistryProperties, DisplayWindow):
             verses['verse'] = 'V1'
             self.load_verses([verses])
             self.force_page = False
-            return self.save_screenshot()
+            if generate_screenshot:
+                return self.save_screenshot()
         self.force_page = False
         return None
 
@@ -745,3 +728,33 @@ class Renderer(RegistryBase, LogMixin, RegistryProperties, DisplayWindow):
             pixmap.save(fname, ext)
         else:
             return pixmap
+
+
+class Renderer(RegistryBase, RegistryProperties, ThemePreviewRenderer):
+    """
+    A virtual display used for rendering thumbnails and other offscreen tasks
+    """
+    def __init__(self, *args, **kwargs):
+        """
+        Constructor
+        """
+        super().__init__(*args, **kwargs)
+        self.force_page = False
+        for screen in ScreenList():
+            if screen.is_display:
+                self.setGeometry(screen.display_geometry.x(), screen.display_geometry.y(),
+                                 screen.display_geometry.width(), screen.display_geometry.height())
+                break
+        # If the display is not show'ed and hidden like this webegine will not render
+        self.show()
+        self.hide()
+        self.theme_height = 0
+        self.theme_level = ThemeLevel.Global
+
+    def set_theme_level(self, theme_level):
+        """
+        Sets the theme level.
+
+        :param theme_level: The theme level to be used.
+        """
+        self.theme_level = theme_level

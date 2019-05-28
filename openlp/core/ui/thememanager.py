@@ -639,24 +639,14 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
             return False
         return True
 
-    def save_theme(self, theme, image_source_path, image_destination_path):
-        """
-        Called by theme maintenance Dialog to save the theme and to trigger the reload of the theme list
-
-        :param Theme theme: The theme data object.
-        :param Path image_source_path: Where the theme image is currently located.
-        :param Path image_destination_path: Where the Theme Image is to be saved to
-        :rtype: None
-        """
-        self._write_theme(theme, image_source_path, image_destination_path)
-
-    def _write_theme(self, theme, image_source_path=None, image_destination_path=None):
+    def save_theme(self, theme, image_source_path, image_destination_path, image=None):
         """
         Writes the theme to the disk and handles the background image if necessary
 
         :param Theme theme: The theme data object.
         :param Path image_source_path: Where the theme image is currently located.
         :param Path image_destination_path: Where the Theme Image is to be saved to
+        :param image: The example image of the theme. Optionally.
         :rtype: None
         """
         name = theme.theme_name
@@ -676,7 +666,15 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
                     shutil.copyfile(image_source_path, image_destination_path)
                 except OSError:
                     self.log_exception('Failed to save theme image')
-        self.generate_and_save_image(name, theme)
+        if image:
+            sample_path_name = self.theme_path / '{file_name}.png'.format(file_name=name)
+            if sample_path_name.exists():
+                sample_path_name.unlink()
+            image.save(str(sample_path_name), 'png')
+            thumb_path = self.thumb_path / '{name}.png'.format(name=name)
+            create_thumb(sample_path_name, thumb_path, False)
+        else:
+            self.generate_and_save_image(name, theme)
 
     def generate_and_save_image(self, theme_name, theme):
         """
