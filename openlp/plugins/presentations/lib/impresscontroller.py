@@ -75,6 +75,7 @@ else:
         uno_available = True
     except ImportError:
         uno_available = False
+
         class SlideShowListenerImport():
             pass
 
