@@ -276,7 +276,7 @@ class ImpressDocument(PresentationDocument):
         """
         Constructor, store information about the file and initialise.
 
-        :param openlp.core.common.path.Path document_path: File path for the document to load
+        :param pathlib.Path document_path: File path for the document to load
         :rtype: None
         """
         log.debug('Init Presentation OpenOffice')

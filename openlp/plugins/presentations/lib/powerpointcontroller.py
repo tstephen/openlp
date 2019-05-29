@@ -124,7 +124,7 @@ class PowerpointDocument(PresentationDocument):
         Constructor, store information about the file and initialise.
 
         :param controller:
-        :param openlp.core.common.path.Path document_path: Path to the document to load
+        :param pathlib.Path document_path: Path to the document to load
         :rtype: None
         """
         log.debug('Init Presentation Powerpoint')

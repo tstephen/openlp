@@ -21,12 +21,12 @@
 ##########################################################################
 import logging
 import re
+from pathlib import Path
 from tempfile import TemporaryDirectory
 from zipfile import ZipFile
 
 from bs4 import BeautifulSoup, NavigableString, Tag
 
-from openlp.core.common.path import Path
 from openlp.plugins.bibles.lib.bibleimport import BibleImport
 
 

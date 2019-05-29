@@ -462,7 +462,7 @@ class ThemeForm(QtWidgets.QWizard, Ui_ThemeWizard, RegistryProperties):
         """
         Handle the `pathEditChanged` signal from image_path_edit
 
-        :param openlp.core.common.path.Path new_path: Path to the new image
+        :param pathlib.Path new_path: Path to the new image
         :rtype: None
         """
         self.theme.background_filename = new_path
@@ -472,7 +472,7 @@ class ThemeForm(QtWidgets.QWizard, Ui_ThemeWizard, RegistryProperties):
         """
         Handle the `pathEditChanged` signal from video_path_edit
 
-        :param openlp.core.common.path.Path new_path: Path to the new video
+        :param pathlib.Path new_path: Path to the new video
         :rtype: None
         """
         self.theme.background_filename = new_path

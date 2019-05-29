@@ -21,10 +21,10 @@
 ##########################################################################
 import copy
 import logging
+from pathlib import Path
 
 from PyQt5 import QtCore
 
-from openlp.core.common.path import Path
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.lib import ServiceItemContext

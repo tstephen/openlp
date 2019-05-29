@@ -96,7 +96,7 @@ class CSVBible(BibleImport):
         """
         Parse the supplied CSV file.
 
-        :param openlp.core.common.path.Path file_path: The name of the file to parse.
+        :param pathlib.Path file_path: The name of the file to parse.
         :param namedtuple results_tuple: The namedtuple to use to store the results.
         :return: An list of namedtuples of type results_tuple
         :rtype: list[namedtuple]

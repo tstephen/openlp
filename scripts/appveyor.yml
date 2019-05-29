@@ -12,11 +12,13 @@ clone_script:
 environment:
   matrix:
     - PYTHON: C:\\Python37-x64
+      CHOCO_VLC: vlc
     - PYTHON: C:\\Python37
+      CHOCO_VLC: vlc --forcex86
 
 install:
   # Install dependencies from pypi
-  - "%PYTHON%\\python.exe -m pip install sqlalchemy alembic appdirs chardet beautifulsoup4 lxml Mako mysql-connector-python pytest mock pyodbc psycopg2 pypiwin32 websockets asyncio waitress six webob requests QtAwesome PyQt5 PyQtWebEngine pymediainfo PyMuPDF"
+  - "%PYTHON%\\python.exe -m pip install sqlalchemy alembic appdirs chardet beautifulsoup4 lxml Mako mysql-connector-python pytest mock pyodbc psycopg2 pypiwin32 websockets asyncio waitress six webob requests QtAwesome PyQt5 PyQtWebEngine pymediainfo PyMuPDF QDarkStyle python-vlc"
 
 build: off
 
@@ -31,12 +33,6 @@ after_test:
   # This is where we create a package using PyInstaller
   # Install PyInstaller 
   - "%PYTHON%\\python.exe -m pip install pyinstaller"
-  # Download and install Inno Setup - used for packaging
-  - appveyor DownloadFile http://www.jrsoftware.org/download.php/is-unicode.exe
-  - is-unicode.exe /VERYSILENT /SUPPRESSMSGBOXES /SP-
-  # Download and unpack portable-bundle
-  - appveyor DownloadFile https://get.openlp.org/win-sdk/portable-setup.7z
-  - 7z x portable-setup.7z
   # Disabled portable installers - can't figure out how to make them silent
   # - curl -L -O http://downloads.sourceforge.net/project/portableapps/PortableApps.com%20Installer/PortableApps.comInstaller_3.4.4.paf.exe
   # - PortableApps.comInstaller_3.4.4.paf.exe /S
@@ -44,6 +40,11 @@ after_test:
   # - PortableApps.comLauncher_2.2.1.paf.exe /S
   # - curl -L -O http://downloads.sourceforge.net/project/portableapps/NSIS%20Portable/NSISPortable_3.0_English.paf.exe
   # - NSISPortable_3.0_English.paf.exe /S
+  # Download and unpack portable-bundle
+  - appveyor DownloadFile https://get.openlp.org/win-sdk/portable-setup.7z
+  - 7z x portable-setup.7z
+  # Install VLC
+  - choco install %CHOCO_VLC%
   # Get the packaging code
   - appveyor DownloadFile http://bazaar.launchpad.net/~openlp-core/openlp/packaging/tarball -FileName packaging.tar.gz
   - 7z e packaging.tar.gz
@@ -66,3 +67,6 @@ after_test:
 
 artifacts:
   - path: openlp-branch\dist\*.exe
+    name: Portable-installer
+  - path: openlp-branch\dist\*.msi
+    name: Installer

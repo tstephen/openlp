@@ -20,8 +20,9 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>. #
 ##########################################################################
 import logging
-import os
 import mako
+import os
+from shutil import copyfile
 
 from PyQt5 import QtCore, QtWidgets
 from sqlalchemy.sql import and_, or_
@@ -29,7 +30,7 @@ from sqlalchemy.sql import and_, or_
 from openlp.core.state import State
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.i18n import UiStrings, get_natural_key, translate
-from openlp.core.common.path import copyfile, create_paths
+from openlp.core.common.path import create_paths
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.lib import ServiceItemContext, check_item_selected, create_separated_list

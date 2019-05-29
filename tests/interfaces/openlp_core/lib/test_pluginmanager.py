@@ -22,7 +22,9 @@
 """
 Package to test the openlp.core.lib.pluginmanager package.
 """
+import shutil
 import sys
+from pathlib import Path
 from tempfile import mkdtemp
 from unittest import TestCase, skip
 from unittest.mock import MagicMock, patch
@@ -30,7 +32,6 @@ from unittest.mock import MagicMock, patch
 from PyQt5 import QtWidgets
 
 from openlp.core.common import is_win
-from openlp.core.common.path import Path
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.state import State
@@ -65,7 +66,7 @@ class TestPluginManager(TestCase, TestMixin):
         if is_win():
             import gc
             gc.collect()
-        self.temp_dir_path.rmtree()
+        shutil.rmtree(self.temp_dir_path)
 
     @skip
     # This test is broken but totally unable to debug it.

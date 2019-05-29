@@ -24,12 +24,12 @@ This module contains tests for the lib submodule of the Images plugin.
 """
 import os
 import shutil
+from pathlib import Path
 from tempfile import mkdtemp
 from unittest import TestCase, skip
 from unittest.mock import patch
 
 from openlp.core.common.applocation import AppLocation
-from openlp.core.common.path import Path
 from openlp.core.common.settings import Settings
 from openlp.core.lib.db import Manager
 from openlp.plugins.images.lib import upgrade

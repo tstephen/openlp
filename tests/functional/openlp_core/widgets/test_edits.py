@@ -23,10 +23,10 @@
 This module contains tests for the openlp.core.widgets.edits module
 """
 import os
+from pathlib import Path
 from unittest import TestCase
 from unittest.mock import MagicMock, PropertyMock, patch
 
-from openlp.core.common.path import Path
 from openlp.core.widgets.dialogs import FileDialog
 from openlp.core.widgets.edits import PathEdit
 from openlp.core.widgets.enums import PathEditType

@@ -48,7 +48,7 @@ class BibleImport(BibleDB, LogMixin, RegistryProperties):
         """
         Check if the supplied file is compressed
 
-        :param openlp.core.common.path.Path file_path: A path to the file to check
+        :param pathlib.Path file_path: A path to the file to check
         """
         if is_zipfile(file_path):
             critical_error_message_box(

@@ -55,7 +55,7 @@ class ProPresenterImport(SongImport):
     def process_song(self, root, file_path):
         """
         :param root:
-        :param openlp.core.common.path.Path file_path: Path to the file thats being imported
+        :param pathlib.Path file_path: Path to the file thats being imported
         :rtype: None
         """
         self.set_defaults()

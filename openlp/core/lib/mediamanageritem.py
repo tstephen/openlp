@@ -369,7 +369,7 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
         Process a list for files either from the File Dialog or from Drag and
         Drop
 
-        :param list[openlp.core.common.path.Path] file_paths: The files to be loaded.
+        :param list[pathlib.Path] file_paths: The files to be loaded.
         :param target_group: The QTreeWidgetItem of the group that will be the parent of the added files
         """
         full_list = []
@@ -410,7 +410,7 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
         """
         Return the current list of files
 
-        :rtype: list[openlp.core.common.path.Path]
+        :rtype: list[pathlib.Path]
         """
         file_paths = []
         for index in range(self.list_view.count()):
@@ -462,7 +462,7 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
         :param item: The database item to be used to build the service item
         :param remote: Was this remote triggered (False)
         :param context: The service context
-        :param openlp.core.common.path.Path file_path:
+        :param pathlib.Path file_path:
         """
         raise NotImplementedError('MediaManagerItem.generate_slide_data needs to be defined by the plugin')
 

@@ -20,12 +20,14 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>. #
 ##########################################################################
 import logging
+import shutil
+from pathlib import Path
 
 from PyQt5 import QtCore
 
 from openlp.core.common import md5_hash
 from openlp.core.common.applocation import AppLocation
-from openlp.core.common.path import Path, create_paths
+from openlp.core.common.path import create_paths
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.lib import create_thumb, validate_thumb
@@ -92,7 +94,7 @@ class PresentationDocument(object):
         Constructor for the PresentationController class
 
         :param controller:
-        :param openlp.core.common.path.Path document_path: Path to the document to load.
+        :param Path document_path: Path to the document to load.
         :rtype: None
         """
         self.controller = controller
@@ -102,7 +104,7 @@ class PresentationDocument(object):
         """
         Run some initial setup. This method is separate from __init__ in order to mock it out in tests.
 
-        :param openlp.core.common.path.Path document_path: Path to the document to load.
+        :param Path document_path: Path to the document to load.
         :rtype: None
         """
         self.slide_number = 0
@@ -129,7 +131,7 @@ class PresentationDocument(object):
             if thumbnail_folder_path.exists():
                 thumbnail_folder_path.rmtree()
             if temp_folder_path.exists():
-                temp_folder_path.rmtree()
+                shutil.rmtree(temp_folder_path)
         except OSError:
             log.exception('Failed to delete presentation controller files')
 
@@ -138,7 +140,7 @@ class PresentationDocument(object):
         The location where thumbnail images will be stored
 
         :return: The path to the thumbnail
-        :rtype: openlp.core.common.path.Path
+        :rtype: Path
         """
         # TODO: Can be removed when the upgrade path to OpenLP 3.0 is no longer needed, also ensure code in
         #       get_temp_folder and PresentationPluginapp_startup is removed
@@ -153,7 +155,7 @@ class PresentationDocument(object):
         The location where thumbnail images will be stored
 
         :return: The path to the temporary file folder
-        :rtype: openlp.core.common.path.Path
+        :rtype: Path
         """
         # TODO: Can be removed when the upgrade path to OpenLP 3.0 is no longer needed, also ensure code in
         #       get_thumbnail_folder and PresentationPluginapp_startup is removed
@@ -262,7 +264,7 @@ class PresentationDocument(object):
         """
         Convert the slide image the application made to a scaled 360px height .png image.
 
-        :param openlp.core.common.path.Path image_path: Path to the image to create a thumb nail of
+        :param Path image_path: Path to the image to create a thumbnail of
         :param int index: The index of the slide to create the thumbnail for.
         :rtype: None
         """
@@ -279,7 +281,7 @@ class PresentationDocument(object):
         :param int slide_no: The slide an image is required for, starting at 1
         :param bool check_exists: Check if the generated path exists
         :return: The path, or None if the :param:`check_exists` is True and the file does not exist
-        :rtype: openlp.core.common.path.Path | None
+        :rtype: Path | None
         """
         path = self.get_thumbnail_folder() / (self.controller.thumbnail_prefix + str(slide_no) + '.png')
         if path.is_file() or not check_exists:
@@ -475,7 +477,7 @@ class PresentationController(object):
         """
         Called when a new presentation document is opened.
 
-        :param openlp.core.common.path.Path document_path: Path to the document to load
+        :param Path document_path: Path to the document to load
         :return: The document
         :rtype: PresentationDocument
         """

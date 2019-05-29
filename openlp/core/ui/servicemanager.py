@@ -24,10 +24,12 @@ The service manager sets up, loads, saves and manages services.
 """
 import html
 import json
+import shutil
 import os
 import zipfile
 from contextlib import suppress
 from datetime import datetime, timedelta
+from pathlib import Path
 from tempfile import NamedTemporaryFile
 
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -36,9 +38,8 @@ from openlp.core.common import ThemeLevel, delete_file
 from openlp.core.common.actions import ActionList, CategoryOrder
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.i18n import UiStrings, format_time, translate
-from openlp.core.common.json import OpenLPJsonDecoder, OpenLPJsonEncoder
+from openlp.core.common.json import OpenLPJSONDecoder, OpenLPJSONEncoder
 from openlp.core.common.mixins import LogMixin, RegistryProperties
-from openlp.core.common.path import Path
 from openlp.core.common.registry import Registry, RegistryBase
 from openlp.core.common.settings import Settings
 from openlp.core.lib import build_icon
@@ -371,7 +372,7 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
         """
         Setter for service file.
 
-        :param openlp.core.common.path.Path file_path: The service file name
+        :param Path file_path: The service file name
         :rtype: None
         """
         self._service_path = file_path
@@ -386,7 +387,7 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
         """
         Return the current file name including path.
 
-        :rtype: openlp.core.common.path.Path
+        :rtype: Path
         """
         return self._service_path
 
@@ -443,7 +444,7 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
         """
         Loads the service file and saves the existing one it there is one unchanged.
 
-        :param openlp.core.common.path.Path | None file_path: The service file to the loaded.
+        :param Path | None file_path: The service file to the loaded.
         """
         if self.is_modified():
             result = self.save_modified_service()
@@ -518,7 +519,7 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
         Get a list of files used in the service and files that are missing.
 
         :return: A list of files used in the service that exist, and a list of files that don't.
-        :rtype: (list[openlp.core.common.path.Path], list[openlp.core.common.path.Path])
+        :rtype: (list[Path], list[Path])
         """
         write_list = []
         missing_list = []
@@ -581,7 +582,7 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
             # Add the service item to the service.
             service.append({'serviceitem': service_item})
         self.repaint_service_list(-1, -1)
-        service_content = json.dumps(service, cls=OpenLPJsonEncoder)
+        service_content = json.dumps(service, cls=OpenLPJSONEncoder)
         service_content_size = len(bytes(service_content, encoding='utf-8'))
         total_size = service_content_size
         for file_item in write_list:
@@ -679,7 +680,7 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
         """
         Load an existing service file.
 
-        :param openlp.core.common.path.Path file_path: The service file to load.
+        :param Path file_path: The service file to load.
         """
         if not file_path.exists():
             return False
@@ -702,7 +703,7 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
                         zip_file.extract(zip_info, self.service_path)
                     self.main_window.increment_progress_bar(zip_info.compress_size)
             if service_data:
-                items = json.loads(service_data, cls=OpenLPJsonDecoder)
+                items = json.loads(service_data, cls=OpenLPJSONDecoder)
                 self.new_file()
                 self.process_service_items(items)
                 self.set_file_name(file_path)
@@ -1256,7 +1257,7 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
             delete_file(file_path)
         audio_path = self.service_path / 'audio'
         if audio_path.exists():
-            audio_path.rmtree(True)
+            shutil.rmtree(audio_path, True)
 
     def on_theme_combo_box_selected(self, current_index):
         """

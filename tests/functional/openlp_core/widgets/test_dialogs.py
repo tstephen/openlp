@@ -20,12 +20,12 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>. #
 ##########################################################################
 import os
+from pathlib import Path
 from unittest import TestCase
 from unittest.mock import patch
 
 from PyQt5 import QtWidgets
 
-from openlp.core.common.path import Path
 from openlp.core.widgets.dialogs import FileDialog
 
 
