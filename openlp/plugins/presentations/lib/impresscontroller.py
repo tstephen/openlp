@@ -42,7 +42,7 @@ from openlp.core.display.screens import ScreenList
 from openlp.plugins.presentations.lib.presentationcontroller import PresentationController, PresentationDocument, \
     TextType
 
-
+# Load the XSlideShowListener class so we can inherit from it
 if is_win():
     from win32com.client import Dispatch
     import pywintypes
@@ -75,6 +75,8 @@ else:
         uno_available = True
     except ImportError:
         uno_available = False
+        class SlideShowListenerImport():
+            pass
 
 log = logging.getLogger(__name__)
 

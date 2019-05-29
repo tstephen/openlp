@@ -145,8 +145,8 @@ class PowerpointDocument(PresentationDocument):
         try:
             if not self.controller.process:
                 self.controller.start_process()
-            self.controller.process.Presentations.Open(str(self.file_path), False, False, False)
-            self.presentation = self.controller.process.Presentations(self.controller.process.Presentations.Count)
+            self.presentation = self.controller.process.Presentations.Open(str(self.file_path), False, False, False)
+            log.debug('Loaded presentation %s' % self.presentation.FullName)
             self.create_thumbnails()
             self.create_titles_and_notes()
             # Make sure powerpoint doesn't steal focus, unless we're on a single screen setup
