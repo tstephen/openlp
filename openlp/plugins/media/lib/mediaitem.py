@@ -232,9 +232,9 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
         """
         # self.populate_display_types()
         self.on_new_file_masks = translate('MediaPlugin.MediaItem',
-                                           'Videos ({video});;Audio ({audio});;{files} '
-                                           '(*)').format(video=' '.join(VIDEO_EXT),
-                                                         audio=' '.join(AUDIO_EXT),
+                                           'Videos (*.{video});;Audio (*.{audio});;{files} '
+                                           '(*)').format(video=' *.'.join(VIDEO_EXT),
+                                                         audio=' *.'.join(AUDIO_EXT),
                                                          files=UiStrings().AllFiles)
 
     def on_delete_click(self):
