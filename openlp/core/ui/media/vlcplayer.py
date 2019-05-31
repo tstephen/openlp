@@ -33,7 +33,6 @@ import vlc
 from PyQt5 import QtWidgets
 
 from openlp.core.common import is_linux, is_macosx, is_win
-from openlp.core.common.i18n import translate
 from openlp.core.common.settings import Settings
 from openlp.core.ui.media import MediaState, MediaType
 from openlp.core.ui.media.mediaplayer import MediaPlayer
@@ -49,8 +48,8 @@ AUDIO_EXT = ('3ga', '669', 'a52', 'aac', 'ac3', 'adt', 'adts', 'aif', 'aifc', 'a
 
 VIDEO_EXT = ('3g2', '3gp', '3gp2', '3gpp', 'amv', 'asf', 'avi', 'bik', 'divx', 'drc', 'dv', 'f4v', 'flv', 'gvi', 'gxf',
              'iso', 'm1v', 'm2v', 'm2t', 'm2ts', 'm4v', 'mkv', 'mov', 'mp2', 'mp2v', 'mp4', 'mp4v', 'mpe', 'mpeg',
-             'mpeg1', 'mpeg2', 'mpeg4', 'mpg',  'mpv2', 'mts', 'mtv', 'mxf', 'mxg', 'nsv', 'nuv', 'ogg', 'ogm', 'ogv',
-             'ogx', 'ps',  'rec', 'rm', 'rmvb', 'rpl', 'thp', 'tod', 'ts', 'tts', 'txd', 'vob', 'vro', 'webm', 'wm',
+             'mpeg1', 'mpeg2', 'mpeg4', 'mpg', 'mpv2', 'mts', 'mtv', 'mxf', 'mxg', 'nsv', 'nuv', 'ogg', 'ogm', 'ogv',
+             'ogx', 'ps', 'rec', 'rm', 'rmvb', 'rpl', 'thp', 'tod', 'ts', 'tts', 'txd', 'vob', 'vro', 'webm', 'wm',
              'wmv', 'wtv', 'xesc',
              # These extensions was not in the official list, added manually.
              'nut', 'rv', 'xvid')

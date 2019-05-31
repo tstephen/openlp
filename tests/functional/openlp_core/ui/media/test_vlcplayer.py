@@ -30,7 +30,7 @@ from unittest.mock import MagicMock, call, patch
 
 from openlp.core.common.registry import Registry
 from openlp.core.ui.media import MediaState, MediaType
-from openlp.core.ui.media.vlcplayer import AUDIO_EXT, VIDEO_EXT, VlcPlayer, get_vlc
+from openlp.core.ui.media.vlcplayer import VlcPlayer, get_vlc
 from tests.helpers import MockDateTime
 from tests.helpers.testmixin import TestMixin
 
