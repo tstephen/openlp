@@ -303,7 +303,7 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
         if media_type == MediaType.Audio:
             extension = AUDIO_EXT
         else:
-            extension = VIDEO_EXT  # TODO: Rename extension to extensions
+            extension = VIDEO_EXT
         extension = [x[1:] for x in extension]
         media = [x for x in media_file_paths if x.suffix in extension]
         return media
