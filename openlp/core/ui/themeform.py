@@ -32,7 +32,6 @@ from openlp.core.common.mixins import RegistryProperties
 from openlp.core.common.registry import Registry
 from openlp.core.lib.theme import BackgroundGradientType, BackgroundType
 from openlp.core.lib.ui import critical_error_message_box
-# TODO: Fix this. Use a "get_video_extensions" method which uses the current media player
 from openlp.core.ui.media.vlcplayer import VIDEO_EXT
 from openlp.core.ui.themelayoutform import ThemeLayoutForm
 from openlp.core.ui.themewizard import Ui_ThemeWizard
@@ -76,9 +75,8 @@ class ThemeForm(QtWidgets.QWizard, Ui_ThemeWizard, RegistryProperties):
         self.image_path_edit.filters = \
             '{name};;{text} (*)'.format(name=get_images_filter(), text=UiStrings().AllFiles)
         self.image_path_edit.pathChanged.connect(self.on_image_path_edit_path_changed)
-        # TODO: Should work
-        visible_formats = '({name})'.format(name='; '.join(VIDEO_EXT))
-        actual_formats = '({name})'.format(name=' '.join(VIDEO_EXT))
+        visible_formats = '(*.{name})'.format(name='; *.'.join(VIDEO_EXT))
+        actual_formats = '(*.{name})'.format(name=' *.'.join(VIDEO_EXT))
         video_filter = '{trans} {visible} {actual}'.format(trans=translate('OpenLP', 'Video Files'),
                                                            visible=visible_formats, actual=actual_formats)
         self.video_path_edit.filters = '{video};;{ui} (*)'.format(video=video_filter, ui=UiStrings().AllFiles)

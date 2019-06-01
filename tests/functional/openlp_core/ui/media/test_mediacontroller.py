@@ -27,7 +27,6 @@ from unittest.mock import MagicMock, patch
 
 from openlp.core.common.registry import Registry
 from openlp.core.ui.media.mediacontroller import MediaController
-from openlp.core.ui.media.vlcplayer import VlcPlayer
 from tests.helpers.testmixin import TestMixin
 
 from tests.utils.constants import RESOURCE_PATH
@@ -42,26 +41,6 @@ class TestMediaController(TestCase, TestMixin):
     def setUp(self):
         Registry.create()
         Registry().register('service_manager', MagicMock())
-
-    def test_generate_extensions_lists(self):
-        """
-        Test that the extensions are create correctly
-        """
-        # GIVEN: A MediaController and an active player with audio and video extensions
-        media_controller = MediaController()
-        media_controller.vlc_player = VlcPlayer(None)
-        media_controller.vlc_player.is_active = True
-        media_controller.vlc_player.audio_extensions_list = ['*.mp3', '*.wav', '*.wma', '*.ogg']
-        media_controller.vlc_player.video_extensions_list = ['*.mp4', '*.mov', '*.avi', '*.ogm']
-
-        # WHEN: calling _generate_extensions_lists
-        media_controller._generate_extensions_lists()
-
-        # THEN: extensions list should have been copied from the player to the mediacontroller
-        assert media_controller.video_extensions_list == media_controller.video_extensions_list, \
-            'Video extensions should be the same'
-        assert media_controller.audio_extensions_list == media_controller.audio_extensions_list, \
-            'Audio extensions should be the same'
 
     def test_resize(self):
         """
