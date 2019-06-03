@@ -24,6 +24,7 @@ The :mod:`~openlp.display.render` module contains functions for rendering.
 """
 import html
 import logging
+import mako
 import math
 import os
 import re
@@ -32,8 +33,10 @@ import time
 from PyQt5 import QtWidgets, QtGui
 
 from openlp.core.common import ThemeLevel
+from openlp.core.common.i18n import UiStrings, translate
 from openlp.core.common.mixins import LogMixin, RegistryProperties
 from openlp.core.common.registry import Registry, RegistryBase
+from openlp.core.common.settings import Settings
 from openlp.core.display.screens import ScreenList
 from openlp.core.display.window import DisplayWindow
 from openlp.core.lib import ItemCapabilities
@@ -58,8 +61,11 @@ VERSE = 'The Lord said to {r}Noah{/r}: \n' \
     '{r}C{/r}{b}h{/b}{bl}i{/bl}{y}l{/y}{g}d{/g}{pk}' \
     'r{/pk}{o}e{/o}{pp}n{/pp} of the Lord\n'
 VERSE_FOR_LINE_COUNT = '\n'.join(map(str, range(100)))
-TITLE = 'Arky Arky (Unknown)'
-FOOTER = ['Public Domain', 'CCLI 123456']
+TITLE = 'Arky Arky'
+AUTHOR = 'John Doe'
+FOOTER_COPYRIGHT = 'Public Domain'
+CCLI_NO = '123456'
+
 
 
 def remove_tags(text, can_remove_chords=False):
@@ -448,6 +454,28 @@ class ThemePreviewRenderer(LogMixin, DisplayWindow):
         """
         return self.run_javascript('Display.clearSlides();')
 
+    def generate_footer(self):
+        """
+        """
+        footer_template = Settings().value('songs/footer template')
+        # Keep this in sync with the list in songstab.py
+        vars = {
+            'title': TITLE,
+            'authors_none_label': translate('OpenLP.Ui', 'Written by'),
+            'authors_words_label': translate('SongsPlugin.AuthorType', 'Words', 'Author who wrote the lyrics of a song'),
+            'authors_words': AUTHOR,
+            'copyright': FOOTER_COPYRIGHT,
+            'ccli_license': Settings().value('core/ccli number'),
+            'ccli_license_label': translate('SongsPlugin.MediaItem', 'CCLI License'),
+            'ccli_number': CCLI_NO,
+        }
+        try:
+            footer_html = mako.template.Template(footer_template).render_unicode(**vars).replace('\n', '')
+        except mako.exceptions.SyntaxException:
+            log.error('Failed to render Song footer html:\n' + mako.exceptions.text_error_template().render())
+            footer_html = 'Dummy footer text'
+        return footer_html
+
     def generate_preview(self, theme_data, force_page=False, generate_screenshot=True):
         """
         Generate a preview of a theme.
@@ -466,6 +494,7 @@ class ThemePreviewRenderer(LogMixin, DisplayWindow):
             verses['title'] = TITLE
             verses['text'] = slides[0]
             verses['verse'] = 'V1'
+            verses['footer'] = self.generate_footer()
             self.load_verses([verses])
             self.force_page = False
             if generate_screenshot:
@@ -498,7 +527,7 @@ class ThemePreviewRenderer(LogMixin, DisplayWindow):
         if item and item.is_capable(ItemCapabilities.CanWordSplit):
             pages = self._paginate_slide_words(text.split('\n'), line_end)
         # Songs and Custom
-        elif item is None or item.is_capable(ItemCapabilities.CanSoftBreak):
+        elif item is None or (item and item.is_capable(ItemCapabilities.CanSoftBreak)):
             pages = []
             if '[---]' in text:
                 # Remove Overflow split if at start of the text
