@@ -188,7 +188,7 @@ class ImpressController(PresentationController):
         """
         log.debug('Kill OpenOffice')
         if self.presenter_screen_disabled_by_openlp:
-            self._toggle_presentation_screen(True)
+            self.toggle_presentation_screen(True)
         while self.docs:
             self.docs[0].close_presentation()
         desktop = None
@@ -218,9 +218,12 @@ class ImpressController(PresentationController):
             except Exception:
                 log.warning('Failed to terminate OpenOffice')
 
-    def toggle_presentation_screen(self, target_value):
+    def toggle_presentation_screen(self, set_visible):
         """
         Enable or disable the Presentation Screen/Console
+
+        :param bool set_visible: Should the presentation screen/console be set to be visible.
+        :rtype: None
         """
         # Create Instance of ConfigurationProvider
         if not self.conf_provider:
@@ -241,21 +244,24 @@ class ImpressController(PresentationController):
             presenter_screen_enabled = impress_conf_props.getHierarchicalPropertyValue(
                 'Misc/Start/EnablePresenterScreen')
             # If the presentation screen is enabled we disable it
-            if presenter_screen_enabled != target_value:
-                impress_conf_props.setHierarchicalPropertyValue('Misc/Start/EnablePresenterScreen', target_value)
+            if presenter_screen_enabled != set_visible:
+                impress_conf_props.setHierarchicalPropertyValue('Misc/Start/EnablePresenterScreen', set_visible)
                 impress_conf_props.commitChanges()
-                # if target_value is False this is an attempt to disable the Presenter Screen
+                # if set_visible is False this is an attempt to disable the Presenter Screen
                 # so we make a note that it has been disabled, so it can be enabled again on close.
-                if target_value is False:
+                if set_visible is False:
                     self.presenter_screen_disabled_by_openlp = True
         except Exception as e:
             log.exception(e)
             trace_error_handler(log)
-            return
 
     def create_property(self, name, value):
         """
         Create an OOo style property object which are passed into some Uno methods.
+
+        :param str name: The name of the property
+        :param str value: The value of the property
+        :rtype: com.sun.star.beans.PropertyValue
         """
         log.debug('create property OpenOffice')
         if is_win():
@@ -615,6 +621,9 @@ class SlideShowListener(SlideShowListenerImport):
         """
         Notify that the current slide has ended, e.g. the user has clicked on the slide. Calling displaySlide()
         twice will not issue this event.
+
+        :param bool reverse: Whether or not the direction of the "slide movement" is reversed/backwards.
+        :rtype: None
         """
         log.debug('LibreOffice SlideShowListener event: slideEnded %d' % reverse)
         if reverse:
