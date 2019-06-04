@@ -48,6 +48,7 @@ from openlp.core.lib.plugin import PluginStatus
 from openlp.core.lib.serviceitem import ItemCapabilities, ServiceItem
 from openlp.core.lib.ui import create_widget_action, critical_error_message_box, find_and_set_in_combo_box
 from openlp.core.ui.icons import UiIcons
+from openlp.core.ui.media.vlcplayer import AUDIO_EXT, VIDEO_EXT
 from openlp.core.ui.serviceitemeditform import ServiceItemEditForm
 from openlp.core.ui.servicenoteform import ServiceNoteForm
 from openlp.core.ui.starttimeform import StartTimeForm
@@ -320,7 +321,8 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
         """
         super().__init__(parent)
         self.service_items = []
-        self.suffixes = []
+        self.suffixes = set()
+        self.add_media_suffixes()
         self.drop_position = -1
         self.service_id = 0
         # is a new service and has not been saved
@@ -346,6 +348,13 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
         self.service_note_form = ServiceNoteForm()
         self.service_item_edit_form = ServiceItemEditForm()
         self.start_time_form = StartTimeForm()
+
+    def add_media_suffixes(self):
+        """
+        Add the suffixes supported by :mod:`openlp.core.ui.media.vlcplayer`
+        """
+        self.suffixes.update(AUDIO_EXT)
+        self.suffixes.update(VIDEO_EXT)
 
     def set_modified(self, modified=True):
         """
@@ -401,22 +410,19 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
     def reset_supported_suffixes(self):
         """
         Resets the Suffixes list.
-
         """
-        self.suffixes = []
+        self.suffixes.clear()
 
     def supported_suffixes(self, suffix_list):
         """
         Adds Suffixes supported to the master list. Called from Plugins.
 
-        :param suffix_list: New Suffix's to be supported
+        :param list[str] | str suffix_list: New suffix(s) to be supported
         """
         if isinstance(suffix_list, str):
-            self.suffixes.append(suffix_list)
+            self.suffixes.add(suffix_list)
         else:
-            for suffix in suffix_list:
-                if suffix not in self.suffixes:
-                    self.suffixes.append(suffix)
+            self.suffixes.update(suffix_list)
 
     def on_new_service_clicked(self):
         """
@@ -475,9 +481,11 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
                                               QtWidgets.QMessageBox.Save | QtWidgets.QMessageBox.Discard |
                                               QtWidgets.QMessageBox.Cancel, QtWidgets.QMessageBox.Save)
 
-    def on_recent_service_clicked(self):
+    def on_recent_service_clicked(self, checked):
         """
         Load a recent file as the service triggered by mainwindow recent service list.
+
+        :param bool checked: Not used
         """
         if self.is_modified():
             result = self.save_modified_service()

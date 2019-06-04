@@ -23,7 +23,6 @@ from contextlib import suppress
 from json import JSONDecoder, JSONEncoder
 from pathlib import Path
 
-
 _registered_classes = {}
 
 

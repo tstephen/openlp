@@ -593,9 +593,11 @@ class ServiceItem(RegistryProperties):
         """
         return not bool(self.slides)
 
-    def validate_item(self, suffix_list=None):
+    def validate_item(self, suffixes=None):
         """
         Validates a service item to make sure it is valid
+
+        :param set[str] suffixes: A set of vaild suffixes
         """
         self.is_valid = True
         for slide in self.slides:
@@ -612,8 +614,8 @@ class ServiceItem(RegistryProperties):
                     if not os.path.exists(file_name):
                         self.is_valid = False
                         break
-                    if suffix_list and not self.is_text():
+                    if suffixes and not self.is_text():
                         file_suffix = slide['title'].split('.')[-1]
-                        if file_suffix.lower() not in suffix_list:
+                        if file_suffix.lower() not in suffixes:
                             self.is_valid = False
                             break
