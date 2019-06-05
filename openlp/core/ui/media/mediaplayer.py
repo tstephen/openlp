@@ -38,13 +38,10 @@ class MediaPlayer(RegistryProperties):
         self.parent = parent
         self.name = name
         self.available = self.check_available()
-        self.is_active = False
         self.can_background = False
         self.can_folder = False
         self.state = {0: MediaState.Off, 1: MediaState.Off}
         self.has_own_widget = False
-        self.audio_extensions_list = []
-        self.video_extensions_list = []
 
     def check_available(self):
         """
@@ -163,12 +160,6 @@ class MediaPlayer(RegistryProperties):
     def get_media_display_html(self):
         """
         Add html code to htmlbuilder
-        """
-        return ''
-
-    def get_info(self):
-        """
-        Returns Information about the player
         """
         return ''
 

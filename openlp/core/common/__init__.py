@@ -142,7 +142,7 @@ def path_to_module(path):
     """
     Convert a path to a module name (i.e openlp.core.common)
 
-    :param openlp.core.common.path.Path path: The path to convert to a module name.
+    :param pathlib.Path path: The path to convert to a module name.
     :return: The module name.
     :rtype: str
     """
@@ -371,7 +371,7 @@ def delete_file(file_path):
     """
     Deletes a file from the system.
 
-    :param openlp.core.common.path.Path file_path: The file, including path, to delete.
+    :param pathlib.Path file_path: The file, including path, to delete.
     :return: True if the deletion was successful, or the file never existed. False otherwise.
     :rtype: bool
     """
@@ -407,7 +407,7 @@ def is_not_image_file(file_path):
     """
     Validate that the file is not an image file.
 
-    :param openlp.core.common.path.Path file_path: The file to be checked.
+    :param pathlib.Path file_path: The file to be checked.
     :return: If the file is not an image
     :rtype: bool
     """
@@ -435,7 +435,7 @@ def check_binary_exists(program_path):
     """
     Function that checks whether a binary exists.
 
-    :param openlp.core.common.path.Path program_path: The full path to the binary to check.
+    :param pathlib.Path program_path: The full path to the binary to check.
     :return: program output to be parsed
     :rtype: bytes
     """
@@ -462,7 +462,7 @@ def get_file_encoding(file_path):
     """
     Utility function to incrementally detect the file encoding.
 
-    :param openlp.core.common.path.Path file_path: Filename for the file to determine the encoding for.
+    :param pathlib.Path file_path: Filename for the file to determine the encoding for.
     :return: The name of the encoding detected
     :rtype: str
     """

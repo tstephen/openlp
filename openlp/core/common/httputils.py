@@ -26,6 +26,7 @@ import hashlib
 import logging
 import sys
 import time
+from pathlib import Path
 from random import randint
 from tempfile import gettempdir
 
@@ -33,7 +34,6 @@ import requests
 from PyQt5 import QtCore
 
 from openlp.core.common import trace_error_handler
-from openlp.core.common.path import Path
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import ProxyMode, Settings
 from openlp.core.threading import ThreadWorker

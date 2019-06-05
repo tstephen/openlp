@@ -78,7 +78,7 @@ class PresentationManagerImport(SongImport):
     def process_song(self, root, file_path):
         """
         :param root:
-        :param openlp.core.common.path.Path file_path: Path to the file to process
+        :param pathlib.Path file_path: Path to the file to process
         :rtype: None
         """
         self.set_defaults()

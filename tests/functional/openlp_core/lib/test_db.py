@@ -23,6 +23,7 @@
 Package to test the openlp.core.lib package.
 """
 import shutil
+from pathlib import Path
 from tempfile import mkdtemp
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
@@ -31,7 +32,6 @@ from sqlalchemy import MetaData
 from sqlalchemy.orm.scoping import ScopedSession
 from sqlalchemy.pool import NullPool
 
-from openlp.core.common.path import Path
 from openlp.core.lib.db import delete_database, get_upgrade_op, init_db, upgrade_db
 
 

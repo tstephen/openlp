@@ -35,7 +35,7 @@ from tests.resources.projector.data import TEST1_DATA
 
 class TestPJLinkCommands(TestCase):
     """
-    Tests PJLink get status commands part 2
+    Tests PJLink commands part 2
     """
     def setUp(self):
         """
@@ -67,7 +67,7 @@ class TestPJLinkCommands(TestCase):
         process_command(projector=self.pjlink, cmd='INPT', data='21')
 
         # THEN: Input selected should reflect current input
-        assert ('21' == self.pjlink.source), 'Input source should be set to "21"'
+        assert '21' == self.pjlink.source, 'Input source should be set to "21"'
         mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)
 
@@ -88,7 +88,7 @@ class TestPJLinkCommands(TestCase):
         process_command(projector=self.pjlink, cmd='INPT', data='91')
 
         # THEN: Input selected should reflect current input
-        assert (not self.pjlink.source), 'Input source should not have changed'
+        assert not self.pjlink.source, 'Input source should not have changed'
         mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)
 
@@ -110,7 +110,7 @@ class TestPJLinkCommands(TestCase):
         process_command(projector=self.pjlink, cmd='INPT', data='25')
 
         # THEN: Input selected should reflect current input
-        assert ('11' == self.pjlink.source), 'Input source should not have changed'
+        assert '11' == self.pjlink.source, 'Input source should not have changed'
         mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)
 
@@ -138,7 +138,7 @@ class TestPJLinkCommands(TestCase):
         # THEN: Data should have been sorted and saved properly
         mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)
-        assert (self.pjlink.source_available == chk_test), "Sources should have been sorted and saved"
+        assert self.pjlink.source_available == chk_test, "Sources should have been sorted and saved"
 
     @patch.object(openlp.core.projectors.pjlinkcommands, 'log')
     def test_projector_lamp_invalid_missing_data(self, mock_log):
@@ -158,7 +158,7 @@ class TestPJLinkCommands(TestCase):
         # THEN: Lamp should have been set with proper lamp status
         mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)
-        assert (not self.pjlink.lamp), 'Projector lamp info should not have changed'
+        assert not self.pjlink.lamp, 'Projector lamp info should not have changed'
 
     @patch.object(openlp.core.projectors.pjlinkcommands, 'log')
     def test_projector_lamp_invalid_nan(self, mock_log):
@@ -180,11 +180,11 @@ class TestPJLinkCommands(TestCase):
         # THEN: lamps should not have changed
         mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)
-        assert (2 == len(self.pjlink.lamp)), 'Projector lamp list should not have changed'
+        assert 2 == len(self.pjlink.lamp), 'Projector lamp list should not have changed'
         assert self.pjlink.lamp[0]['On'], 'Lamp 1 power status should not have changed'
-        assert (0 == self.pjlink.lamp[0]['Hours']), 'Lamp 1 hours should not have changed'
-        assert (not self.pjlink.lamp[1]['On']), 'Lamp 2 power status should not have changed'
-        assert (11111 == self.pjlink.lamp[1]['Hours']), 'Lamp 2 hours should not have changed'
+        assert 0 == self.pjlink.lamp[0]['Hours'], 'Lamp 1 hours should not have changed'
+        assert not self.pjlink.lamp[1]['On'], 'Lamp 2 power status should not have changed'
+        assert 11111 == self.pjlink.lamp[1]['Hours'], 'Lamp 2 hours should not have changed'
 
     @patch.object(openlp.core.projectors.pjlinkcommands, 'log')
     def test_projector_lamp_multiple(self, mock_log):
@@ -204,13 +204,13 @@ class TestPJLinkCommands(TestCase):
         # THEN: Lamp should have been set with proper lamp status
         mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)
-        assert (3 == len(self.pjlink.lamp)), 'Projector should have 3 lamps specified'
+        assert 3 == len(self.pjlink.lamp), 'Projector should have 3 lamps specified'
         assert self.pjlink.lamp[0]['On'], 'Lamp 1 power status should have been set to TRUE'
-        assert (11111 == self.pjlink.lamp[0]['Hours']), 'Lamp 1 hours should have been set to 11111'
-        assert (not self.pjlink.lamp[1]['On']), 'Lamp 2 power status should have been set to FALSE'
-        assert (22222 == self.pjlink.lamp[1]['Hours']), 'Lamp 2 hours should have been set to 22222'
+        assert 11111 == self.pjlink.lamp[0]['Hours'], 'Lamp 1 hours should have been set to 11111'
+        assert not self.pjlink.lamp[1]['On'], 'Lamp 2 power status should have been set to FALSE'
+        assert 22222 == self.pjlink.lamp[1]['Hours'], 'Lamp 2 hours should have been set to 22222'
         assert self.pjlink.lamp[2]['On'], 'Lamp 3 power status should have been set to TRUE'
-        assert (33333 == self.pjlink.lamp[2]['Hours']), 'Lamp 3 hours should have been set to 33333'
+        assert 33333 == self.pjlink.lamp[2]['Hours'], 'Lamp 3 hours should have been set to 33333'
 
     @patch.object(openlp.core.projectors.pjlinkcommands, 'log')
     def test_projector_lamp_single(self, mock_log):
@@ -229,9 +229,9 @@ class TestPJLinkCommands(TestCase):
         # THEN: Lamp should have been set with proper lamp status
         mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)
-        assert (1 == len(self.pjlink.lamp)), 'Projector should have 1 lamp specified'
+        assert 1 == len(self.pjlink.lamp), 'Projector should have 1 lamp specified'
         assert self.pjlink.lamp[0]['On'], 'Lamp 1 power status should have been set to TRUE'
-        assert (11111 == self.pjlink.lamp[0]['Hours']), 'Lamp 1 hours should have been set to 11111'
+        assert 11111 == self.pjlink.lamp[0]['Hours'], 'Lamp 1 hours should have been set to 11111'
 
     @patch.object(openlp.core.projectors.pjlinkcommands, 'log')
     def test_projector_name(self, mock_log):
@@ -253,7 +253,7 @@ class TestPJLinkCommands(TestCase):
         # THEN: name should be set and logged
         mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)
-        assert (self.pjlink.pjlink_name == chk_data), 'Name test data should have been saved'
+        assert self.pjlink.pjlink_name == chk_data, 'Name test data should have been saved'
 
     @patch.object(openlp.core.projectors.pjlink.PJLink, 'send_command')
     @patch.object(openlp.core.projectors.pjlink.PJLink, 'change_status')
@@ -276,7 +276,7 @@ class TestPJLinkCommands(TestCase):
         # THEN: Projector power should not have changed
         mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)
-        assert (S_STANDBY == self.pjlink.power), 'Power should not have changed'
+        assert S_STANDBY == self.pjlink.power, 'Power should not have changed'
         mock_UpdateIcons.emit.assert_not_called()
         mock_change_status.assert_not_called()
         mock_send_command.assert_not_called()
@@ -302,9 +302,9 @@ class TestPJLinkCommands(TestCase):
         # THEN: Power should be set to ON
         mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)
-        assert (S_STANDBY == self.pjlink.power), 'Power should have been set to OFF'
+        assert S_STANDBY == self.pjlink.power, 'Power should have been set to OFF'
         assert mock_UpdateIcons.emit.called, 'projectorUpdateIcons should have been called'
-        assert (not mock_send_command.called), 'send_command should not have been called'
+        assert not mock_send_command.called, 'send_command should not have been called'
         mock_change_status.assert_called_once_with(S_STANDBY)
 
     @patch.object(openlp.core.projectors.pjlink.PJLink, 'send_command')
@@ -328,7 +328,7 @@ class TestPJLinkCommands(TestCase):
         # THEN: Power should be set to ON
         mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)
-        assert (S_ON == self.pjlink.power), 'Power should have been set to ON'
+        assert S_ON == self.pjlink.power, 'Power should have been set to ON'
         assert mock_UpdateIcons.emit.called, 'projectorUpdateIcons should have been called'
         mock_send_command.assert_called_once_with('INST')
         mock_change_status.assert_called_once_with(S_ON)
@@ -352,7 +352,7 @@ class TestPJLinkCommands(TestCase):
         # THEN: Filter model number should be saved
         mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)
-        assert (self.pjlink.model_filter == new_data), 'Filter model should have been saved'
+        assert self.pjlink.model_filter == new_data, 'Filter model should have been saved'
 
     @patch.object(openlp.core.projectors.pjlinkcommands, 'log')
     def test_projector_rfil_nosave(self, mock_log):
@@ -374,7 +374,7 @@ class TestPJLinkCommands(TestCase):
         process_command(projector=self.pjlink, cmd='RFIL', data=new_data)
 
         # THEN: Filter model number should be saved
-        assert (self.pjlink.model_filter != new_data), 'Filter model should NOT have been saved'
+        assert self.pjlink.model_filter != new_data, 'Filter model should NOT have been saved'
         mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)
 
@@ -397,7 +397,7 @@ class TestPJLinkCommands(TestCase):
         # THEN: Filter model number should be saved
         mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)
-        assert (self.pjlink.model_lamp == new_data), 'Lamp model should have been saved'
+        assert self.pjlink.model_lamp == new_data, 'Lamp model should have been saved'
 
     @patch.object(openlp.core.projectors.pjlinkcommands, 'log')
     def test_projector_rlmp_nosave(self, mock_log):
@@ -419,7 +419,7 @@ class TestPJLinkCommands(TestCase):
         process_command(projector=self.pjlink, cmd='RLMP', data=new_data)
 
         # THEN: Filter model number should be saved
-        assert (self.pjlink.model_lamp != new_data), 'Lamp model should NOT have been saved'
+        assert self.pjlink.model_lamp != new_data, 'Lamp model should NOT have been saved'
         mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)
 
@@ -446,7 +446,7 @@ class TestPJLinkCommands(TestCase):
         process_command(projector=self.pjlink, cmd='SNUM', data=new_data)
 
         # THEN: Serial number should be set
-        assert (self.pjlink.serial_no != new_data), 'Projector serial number should NOT have been set'
+        assert self.pjlink.serial_no != new_data, 'Projector serial number should NOT have been set'
         mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)
 
@@ -469,7 +469,7 @@ class TestPJLinkCommands(TestCase):
         process_command(projector=self.pjlink, cmd='SNUM', data=new_data)
 
         # THEN: Serial number should be set
-        assert (self.pjlink.serial_no == new_data), 'Projector serial number should have been set'
+        assert self.pjlink.serial_no == new_data, 'Projector serial number should have been set'
         mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)
 
@@ -497,7 +497,7 @@ class TestPJLinkCommands(TestCase):
         process_command(self.pjlink, cmd='SVER', data=new_data)
 
         # THEN: Version information should change
-        assert (self.pjlink.sw_version == new_data), 'Software version should have changed'
+        assert self.pjlink.sw_version == new_data, 'Software version should have changed'
         mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)
 
@@ -519,8 +519,8 @@ class TestPJLinkCommands(TestCase):
         process_command(projector=self.pjlink, cmd='SVER', data=new_data)
 
         # THEN: Version information should not change
-        assert (not self.pjlink.sw_version), 'Software version should not have changed'
-        assert (not self.pjlink.sw_version_received), 'Received software version should not have changed'
+        assert not self.pjlink.sw_version, 'Software version should not have changed'
+        assert not self.pjlink.sw_version_received, 'Received software version should not have changed'
         mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)
 
@@ -544,7 +544,7 @@ class TestPJLinkCommands(TestCase):
         process_command(projector=self.pjlink, cmd='SVER', data=new_data)
 
         # THEN: Version information should not change
-        assert (self.pjlink.sw_version == new_data), 'Software version should have been updated'
-        assert (not self.pjlink.sw_version_received), 'Received version field should not have changed'
+        assert self.pjlink.sw_version == new_data, 'Software version should have been updated'
+        assert not self.pjlink.sw_version_received, 'Received version field should not have changed'
         mock_log.warning.assert_has_calls(log_warning_calls)
         mock_log.debug.assert_has_calls(log_debug_calls)

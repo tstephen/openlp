@@ -25,9 +25,9 @@ exported from Lyrix."""
 import json
 import logging
 import re
+from pathlib import Path
 
 from openlp.core.common.i18n import translate
-from openlp.core.common.path import Path
 from openlp.core.common.settings import Settings
 from openlp.plugins.songs.lib.db import AuthorType
 from openlp.plugins.songs.lib.importers.songimport import SongImport

@@ -20,12 +20,13 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>. #
 ##########################################################################
 import os
+import shutil
+from pathlib import Path
 from tempfile import mkdtemp
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
 from openlp.core.api.deploy import deploy_zipfile, download_and_check, download_sha256
-from openlp.core.common.path import Path
 
 
 CONFIG_FILE = '2c266badff1e3d140664c50fd1460a2b332b24d5ad8c267fa62e506b5eb6d894  deploy/site.zip\n2017_06_27'
@@ -46,7 +47,7 @@ class TestRemoteDeploy(TestCase):
         """
         Clean up after tests
         """
-        self.app_root_path.rmtree()
+        shutil.rmtree(self.app_root_path)
 
     @patch('openlp.core.api.deploy.ZipFile')
     def test_deploy_zipfile(self, MockZipFile):
