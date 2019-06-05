@@ -984,8 +984,10 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
         prev_item_last_slide = None
         service_iterator = QtWidgets.QTreeWidgetItemIterator(self.service_manager_list)
         while service_iterator.value():
+            # Found the selected/current service item
             if service_iterator.value() == selected:
                 if last_slide and prev_item_last_slide:
+                    # Go to the last slide of the previous service item
                     pos = prev_item.data(0, QtCore.Qt.UserRole)
                     check_expanded = self.service_items[pos - 1]['expanded']
                     self.service_manager_list.setCurrentItem(prev_item_last_slide)
@@ -994,13 +996,17 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
                     self.make_live()
                     self.service_manager_list.setCurrentItem(prev_item)
                 elif prev_item:
+                    # Go to the first slide of the previous service item
                     self.service_manager_list.setCurrentItem(prev_item)
                     self.make_live()
                 return
+            # Found the previous service item root
             if service_iterator.value().parent() is None:
                 prev_item = service_iterator.value()
+            # Found the last slide of the previous item
             if service_iterator.value().parent() is prev_item:
                 prev_item_last_slide = service_iterator.value()
+            # Go to next item in the tree
             service_iterator += 1
 
     def on_set_item(self, message):

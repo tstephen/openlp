@@ -146,7 +146,7 @@ class Registry(object):
                 try:
                     log.debug('Running function {} for {}'.format(function, event))
                     result = function(*args, **kwargs)
-                    if result:
+                    if result is not None:
                         results.append(result)
                 except TypeError:
                     # Who has called me can help in debugging
