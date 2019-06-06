@@ -259,35 +259,36 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
         # TODO needs to be fixed as no idea why this fails
         # media.sort(key=lambda file_path: get_natural_key(file_path.name))
         for track in media:
-            track_info = QtCore.QFileInfo(track)
+            track_str = str(track)
+            track_info = QtCore.QFileInfo(track_str)
             item_name = None
-            if track.startswith('optical:'):
+            if track_str.startswith('optical:'):
                 # Handle optical based item
-                (file_name, title, audio_track, subtitle_track, start, end, clip_name) = parse_optical_path(track)
+                (file_name, title, audio_track, subtitle_track, start, end, clip_name) = parse_optical_path(track_str)
                 item_name = QtWidgets.QListWidgetItem(clip_name)
                 item_name.setIcon(UiIcons().optical)
-                item_name.setData(QtCore.Qt.UserRole, track)
+                item_name.setData(QtCore.Qt.UserRole, track_str)
                 item_name.setToolTip('{name}@{start}-{end}'.format(name=file_name,
                                                                    start=format_milliseconds(start),
                                                                    end=format_milliseconds(end)))
             elif not os.path.exists(track):
                 # File doesn't exist, mark as error.
-                file_name = os.path.split(str(track))[1]
+                file_name = os.path.split(track_str)[1]
                 item_name = QtWidgets.QListWidgetItem(file_name)
                 item_name.setIcon(UiIcons().error)
-                item_name.setData(QtCore.Qt.UserRole, track)
-                item_name.setToolTip(track)
+                item_name.setData(QtCore.Qt.UserRole, track_str)
+                item_name.setToolTip(track_str)
             elif track_info.isFile():
                 # Normal media file handling.
-                file_name = os.path.split(str(track))[1]
+                file_name = os.path.split(track_str)[1]
                 item_name = QtWidgets.QListWidgetItem(file_name)
                 search = file_name.split('.')[-1].lower()
                 if '*.{text}'.format(text=search) in self.media_controller.audio_extensions_list:
                     item_name.setIcon(UiIcons().audio)
                 else:
                     item_name.setIcon(UiIcons().video)
-                item_name.setData(QtCore.Qt.UserRole, track)
-                item_name.setToolTip(track)
+                item_name.setData(QtCore.Qt.UserRole, track_str)
+                item_name.setToolTip(track_str)
             if item_name:
                 self.list_view.addItem(item_name)
 

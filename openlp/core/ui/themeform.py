@@ -178,8 +178,10 @@ class ThemeForm(QtWidgets.QWizard, Ui_ThemeWizard, RegistryProperties):
             self.display_aspect_ratio = self.renderer.width() / self.renderer.height()
         except ZeroDivisionError:
             self.display_aspect_ratio = 1
-        self.preview_area_layout.set_aspect_ratio(self.display_aspect_ratio)
-        self.preview_box.set_scale(float(self.preview_box.width()) / self.renderer.width())
+        # Make sure we don't resize before the widgets are actually created
+        if hasattr(self, 'preview_area_layout'):
+            self.preview_area_layout.set_aspect_ratio(self.display_aspect_ratio)
+            self.preview_box.set_scale(float(self.preview_box.width()) / self.renderer.width())
 
     def validateCurrentPage(self):
         """
@@ -212,9 +214,9 @@ class ThemeForm(QtWidgets.QWizard, Ui_ThemeWizard, RegistryProperties):
             except ZeroDivisionError:
                 self.display_aspect_ratio = 1
             self.preview_area_layout.set_aspect_ratio(self.display_aspect_ratio)
-            self.preview_box.generate_preview(self.theme, False, False)
-            self.preview_box.show()
             self.resizeEvent()
+            self.preview_box.show()
+            self.preview_box.generate_preview(self.theme, False, False)
 
     def on_custom_1_button_clicked(self, number):
         """

@@ -463,7 +463,7 @@ class ThemePreviewRenderer(LogMixin, DisplayWindow):
             'title': TITLE,
             'authors_none_label': translate('OpenLP.Ui', 'Written by'),
             'authors_words_label': translate('SongsPlugin.AuthorType', 'Words', 'Author who wrote the lyrics of a song'),
-            'authors_words': AUTHOR,
+            'authors_words': [AUTHOR],
             'copyright': FOOTER_COPYRIGHT,
             'ccli_license': Settings().value('core/ccli number'),
             'ccli_license_label': translate('SongsPlugin.MediaItem', 'CCLI License'),
@@ -489,10 +489,10 @@ class ThemePreviewRenderer(LogMixin, DisplayWindow):
         if not self.force_page:
             self.set_theme(theme_data)
             self.theme_height = theme_data.font_main_height
-            slides = self.format_slide(render_tags(VERSE), None)
+            slides = self.format_slide(VERSE, None)
             verses = dict()
             verses['title'] = TITLE
-            verses['text'] = slides[0]
+            verses['text'] = render_tags(slides[0])
             verses['verse'] = 'V1'
             verses['footer'] = self.generate_footer()
             self.load_verses([verses])
@@ -734,7 +734,7 @@ class ThemePreviewRenderer(LogMixin, DisplayWindow):
         :param text:  The text to check. It may contain HTML tags.
         """
         self.clear_slides()
-        self.run_javascript('Display.addTextSlide("v1", "{text}", "Dummy Footer");'.format(text=text), is_sync=True)
+        self.run_javascript('Display.addTextSlide("v1", "{text}", "Dummy Footer");'.format(text=text.replace('"', '\\"')), is_sync=True)
         does_text_fits = self.run_javascript('Display.doesContentFit();', is_sync=True)
         return does_text_fits
 

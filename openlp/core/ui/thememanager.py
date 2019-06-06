@@ -476,7 +476,7 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
         if not theme_paths:
             theme = Theme()
             theme.theme_name = UiStrings().Default
-            self._write_theme(theme)
+            self.save_theme(theme)
             Settings().setValue(self.settings_section + '/global theme', theme.theme_name)
         self.application.set_normal_cursor()
 
