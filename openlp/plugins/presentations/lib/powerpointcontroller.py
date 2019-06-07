@@ -145,8 +145,8 @@ class PowerpointDocument(PresentationDocument):
         try:
             if not self.controller.process:
                 self.controller.start_process()
-            self.controller.process.Presentations.Open(str(self.file_path), False, False, False)
-            self.presentation = self.controller.process.Presentations(self.controller.process.Presentations.Count)
+            self.presentation = self.controller.process.Presentations.Open(str(self.file_path), False, False, False)
+            log.debug('Loaded presentation %s' % self.presentation.FullName)
             self.create_thumbnails()
             self.create_titles_and_notes()
             # Make sure powerpoint doesn't steal focus, unless we're on a single screen setup
@@ -170,14 +170,17 @@ class PowerpointDocument(PresentationDocument):
         However, for the moment, we want a physical file since it makes life easier elsewhere.
         """
         log.debug('create_thumbnails')
+        generate_thumbs = True
         if self.check_thumbnails():
-            return
+            # No need for thumbnails but we still need the index
+            generate_thumbs = False
         key = 1
         for num in range(self.presentation.Slides.Count):
             if not self.presentation.Slides(num + 1).SlideShowTransition.Hidden:
                 self.index_map[key] = num + 1
-                self.presentation.Slides(num + 1).Export(
-                    str(self.get_thumbnail_folder() / 'slide{key:d}.png'.format(key=key)), 'png', 320, 240)
+                if generate_thumbs:
+                    self.presentation.Slides(num + 1).Export(
+                        str(self.get_thumbnail_folder() / 'slide{key:d}.png'.format(key=key)), 'png', 320, 240)
                 key += 1
         self.slide_count = key - 1
 
@@ -318,6 +321,9 @@ class PowerpointDocument(PresentationDocument):
             size = ScreenList().current.display_geometry
             ppt_window = None
             try:
+                # Disable the presentation console
+                self.presentation.SlideShowSettings.ShowPresenterView = 0
+                # Start the presentation
                 ppt_window = self.presentation.SlideShowSettings.Run()
             except (AttributeError, pywintypes.com_error):
                 log.exception('Caught exception while in start_presentation')
@@ -437,6 +443,12 @@ class PowerpointDocument(PresentationDocument):
         Triggers the next effect of slide on the running presentation.
         """
         log.debug('next_step')
+        # if we are at the presentations end don't go further, just return True
+        if self.presentation.SlideShowWindow.View.GetClickCount() == \
+                self.presentation.SlideShowWindow.View.GetClickIndex() \
+                and self.get_slide_number() == self.get_slide_count():
+            return True
+        past_end = False
         try:
             self.presentation.SlideShowWindow.Activate()
             self.presentation.SlideShowWindow.View.Next()
@@ -444,28 +456,35 @@ class PowerpointDocument(PresentationDocument):
             log.exception('Caught exception while in next_step')
             trace_error_handler(log)
             self.show_error_msg()
-            return
+            return past_end
+        # If for some reason the presentation end was not detected above, this will catch it.
         if self.get_slide_number() > self.get_slide_count():
             log.debug('past end, stepping back to previous')
             self.previous_step()
+            past_end = True
         # Stop powerpoint from flashing in the taskbar
         if self.presentation_hwnd:
             win32gui.FlashWindowEx(self.presentation_hwnd, win32con.FLASHW_STOP, 0, 0)
         # Make sure powerpoint doesn't steal focus, unless we're on a single screen setup
         if len(ScreenList()) > 1:
             Registry().get('main_window').activateWindow()
+        return past_end
 
     def previous_step(self):
         """
         Triggers the previous slide on the running presentation.
         """
         log.debug('previous_step')
+        # if we are at the presentations start we can't go further back, just return True
+        if self.presentation.SlideShowWindow.View.GetClickIndex() == 0 and self.get_slide_number() == 1:
+            return True
         try:
             self.presentation.SlideShowWindow.View.Previous()
         except (AttributeError, pywintypes.com_error):
             log.exception('Caught exception while in previous_step')
             trace_error_handler(log)
             self.show_error_msg()
+        return False
 
     def get_slide_text(self, slide_no):
         """

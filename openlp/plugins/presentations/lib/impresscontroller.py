@@ -36,30 +36,48 @@ import time
 
 from PyQt5 import QtCore
 
-from openlp.core.common import delete_file, get_uno_command, get_uno_instance, is_win
+from openlp.core.common import delete_file, get_uno_command, get_uno_instance, is_win, trace_error_handler
 from openlp.core.common.registry import Registry
 from openlp.core.display.screens import ScreenList
 from openlp.plugins.presentations.lib.presentationcontroller import PresentationController, PresentationDocument, \
     TextType
 
-
+# Load the XSlideShowListener class so we can inherit from it
 if is_win():
     from win32com.client import Dispatch
     import pywintypes
     uno_available = False
-    # Declare an empty exception to match the exception imported from UNO
+    try:
+        service_manager = Dispatch('com.sun.star.ServiceManager')
+        service_manager._FlagAsMethod('Bridge_GetStruct')
+        XSlideShowListenerObj = service_manager.Bridge_GetStruct('com.sun.star.presentation.XSlideShowListener')
 
+        class SlideShowListenerImport(XSlideShowListenerObj.__class__):
+            pass
+    except (AttributeError, pywintypes.com_error):
+        class SlideShowListenerImport():
+            pass
+
+    # Declare an empty exception to match the exception imported from UNO
     class ErrorCodeIOException(Exception):
         pass
 else:
     try:
         import uno
+        import unohelper
         from com.sun.star.beans import PropertyValue
         from com.sun.star.task import ErrorCodeIOException
+        from com.sun.star.presentation import XSlideShowListener
+
+        class SlideShowListenerImport(unohelper.Base, XSlideShowListener):
+            pass
 
         uno_available = True
     except ImportError:
         uno_available = False
+
+        class SlideShowListenerImport():
+            pass
 
 log = logging.getLogger(__name__)
 
@@ -82,6 +100,8 @@ class ImpressController(PresentationController):
         self.process = None
         self.desktop = None
         self.manager = None
+        self.conf_provider = None
+        self.presenter_screen_disabled_by_openlp = False
 
     def check_available(self):
         """
@@ -90,8 +110,7 @@ class ImpressController(PresentationController):
         log.debug('check_available')
         if is_win():
             return self.get_com_servicemanager() is not None
-        else:
-            return uno_available
+        return uno_available
 
     def start_process(self):
         """
@@ -131,6 +150,7 @@ class ImpressController(PresentationController):
             self.manager = uno_instance.ServiceManager
             log.debug('get UNO Desktop Openoffice - createInstanceWithContext - Desktop')
             desktop = self.manager.createInstanceWithContext("com.sun.star.frame.Desktop", uno_instance)
+            self.toggle_presentation_screen(False)
             return desktop
         except Exception:
             log.warning('Failed to get UNO desktop')
@@ -148,6 +168,7 @@ class ImpressController(PresentationController):
             desktop = self.manager.createInstance('com.sun.star.frame.Desktop')
         except (AttributeError, pywintypes.com_error):
             log.warning('Failure to find desktop - Impress may have closed')
+        self.toggle_presentation_screen(False)
         return desktop if desktop else None
 
     def get_com_servicemanager(self):
@@ -166,6 +187,8 @@ class ImpressController(PresentationController):
         Called at system exit to clean up any running presentations.
         """
         log.debug('Kill OpenOffice')
+        if self.presenter_screen_disabled_by_openlp:
+            self.toggle_presentation_screen(True)
         while self.docs:
             self.docs[0].close_presentation()
         desktop = None
@@ -195,6 +218,60 @@ class ImpressController(PresentationController):
             except Exception:
                 log.warning('Failed to terminate OpenOffice')
 
+    def toggle_presentation_screen(self, set_visible):
+        """
+        Enable or disable the Presentation Screen/Console
+
+        :param bool set_visible: Should the presentation screen/console be set to be visible.
+        :rtype: None
+        """
+        # Create Instance of ConfigurationProvider
+        if not self.conf_provider:
+            if is_win():
+                self.conf_provider = self.manager.createInstance('com.sun.star.configuration.ConfigurationProvider')
+            else:
+                self.conf_provider = self.manager.createInstanceWithContext(
+                    'com.sun.star.configuration.ConfigurationProvider', uno.getComponentContext())
+        # Setup lookup properties to get Impress settings
+        properties = []
+        properties.append(self.create_property('nodepath', 'org.openoffice.Office.Impress'))
+        properties = tuple(properties)
+        try:
+            # Get an updateable configuration view
+            impress_conf_props = self.conf_provider.createInstanceWithArguments(
+                'com.sun.star.configuration.ConfigurationUpdateAccess', properties)
+            # Get the specific setting for presentation screen
+            presenter_screen_enabled = impress_conf_props.getHierarchicalPropertyValue(
+                'Misc/Start/EnablePresenterScreen')
+            # If the presentation screen is enabled we disable it
+            if presenter_screen_enabled != set_visible:
+                impress_conf_props.setHierarchicalPropertyValue('Misc/Start/EnablePresenterScreen', set_visible)
+                impress_conf_props.commitChanges()
+                # if set_visible is False this is an attempt to disable the Presenter Screen
+                # so we make a note that it has been disabled, so it can be enabled again on close.
+                if set_visible is False:
+                    self.presenter_screen_disabled_by_openlp = True
+        except Exception as e:
+            log.exception(e)
+            trace_error_handler(log)
+
+    def create_property(self, name, value):
+        """
+        Create an OOo style property object which are passed into some Uno methods.
+
+        :param str name: The name of the property
+        :param str value: The value of the property
+        :rtype: com.sun.star.beans.PropertyValue
+        """
+        log.debug('create property OpenOffice')
+        if is_win():
+            property_object = self.manager.Bridge_GetStruct('com.sun.star.beans.PropertyValue')
+        else:
+            property_object = PropertyValue()
+        property_object.Name = name
+        property_object.Value = value
+        return property_object
+
 
 class ImpressDocument(PresentationDocument):
     """
@@ -213,6 +290,8 @@ class ImpressDocument(PresentationDocument):
         self.document = None
         self.presentation = None
         self.control = None
+        self.slide_ended = False
+        self.slide_ended_reverse = False
 
     def load_presentation(self):
         """
@@ -233,12 +312,15 @@ class ImpressDocument(PresentationDocument):
             return False
         self.desktop = desktop
         properties = []
-        properties.append(self.create_property('Hidden', True))
+        properties.append(self.controller.create_property('Hidden', True))
         properties = tuple(properties)
         try:
             self.document = desktop.loadComponentFromURL(url, '_blank', 0, properties)
         except Exception:
             log.warning('Failed to load presentation {url}'.format(url=url))
+            return False
+        if self.document is None:
+            log.warning('Presentation {url} could not be loaded'.format(url=url))
             return False
         self.presentation = self.document.getPresentation()
         self.presentation.Display = ScreenList().current.number + 1
@@ -257,7 +339,7 @@ class ImpressDocument(PresentationDocument):
         temp_folder_path = self.get_temp_folder()
         thumb_dir_url = temp_folder_path.as_uri()
         properties = []
-        properties.append(self.create_property('FilterName', 'impress_png_Export'))
+        properties.append(self.controller.create_property('FilterName', 'impress_png_Export'))
         properties = tuple(properties)
         doc = self.document
         pages = doc.getDrawPages()
@@ -278,19 +360,6 @@ class ImpressDocument(PresentationDocument):
                 log.exception('ERROR! ErrorCodeIOException {error:d}'.format(error=exception.ErrCode))
             except Exception:
                 log.exception('{path} - Unable to store openoffice preview'.format(path=path))
-
-    def create_property(self, name, value):
-        """
-        Create an OOo style property object which are passed into some Uno methods.
-        """
-        log.debug('create property OpenOffice')
-        if is_win():
-            property_object = self.controller.manager.Bridge_GetStruct('com.sun.star.beans.PropertyValue')
-        else:
-            property_object = PropertyValue()
-        property_object.Name = name
-        property_object.Value = value
-        return property_object
 
     def close_presentation(self):
         """
@@ -356,8 +425,7 @@ class ImpressDocument(PresentationDocument):
         log.debug('is blank OpenOffice')
         if self.control and self.control.isRunning():
             return self.control.isPaused()
-        else:
-            return False
+        return False
 
     def stop_presentation(self):
         """
@@ -384,6 +452,8 @@ class ImpressDocument(PresentationDocument):
                 sleep_count += 1
                 self.control = self.presentation.getController()
             window.setVisible(False)
+            listener = SlideShowListener(self)
+            self.control.getSlideShow().addSlideShowListener(listener)
         else:
             self.control.activate()
             self.goto_slide(1)
@@ -415,17 +485,33 @@ class ImpressDocument(PresentationDocument):
         """
         Triggers the next effect of slide on the running presentation.
         """
+        # if we are at the presentations end don't go further, just return True
+        if self.slide_ended and self.get_slide_count() == self.get_slide_number():
+            return True
+        self.slide_ended = False
+        self.slide_ended_reverse = False
+        past_end = False
         is_paused = self.control.isPaused()
         self.control.gotoNextEffect()
         time.sleep(0.1)
+        # If for some reason the presentation end was not detected above, this will catch it.
+        # The presentation is set to paused when going past the end.
         if not is_paused and self.control.isPaused():
             self.control.gotoPreviousEffect()
+            past_end = True
+        return past_end
 
     def previous_step(self):
         """
         Triggers the previous slide on the running presentation.
         """
+        # if we are at the presentations start don't go further back, just return True
+        if self.slide_ended_reverse and self.get_slide_number() == 1:
+            return True
+        self.slide_ended = False
+        self.slide_ended_reverse = False
         self.control.gotoPreviousEffect()
+        return False
 
     def get_slide_text(self, slide_no):
         """
@@ -483,3 +569,100 @@ class ImpressDocument(PresentationDocument):
                 note = ' '
             notes.append(note)
         self.save_titles_and_notes(titles, notes)
+
+
+class SlideShowListener(SlideShowListenerImport):
+    """
+    Listener interface to receive global slide show events.
+    """
+
+    def __init__(self, document):
+        """
+        Constructor
+
+        :param document: The ImpressDocument being presented
+        """
+        self.document = document
+
+    def paused(self):
+        """
+        Notify that the slide show is paused
+        """
+        log.debug('LibreOffice SlideShowListener event: paused')
+
+    def resumed(self):
+        """
+        Notify that the slide show is resumed from a paused state
+        """
+        log.debug('LibreOffice SlideShowListener event: resumed')
+
+    def slideTransitionStarted(self):
+        """
+        Notify that a new slide starts to become visible.
+        """
+        log.debug('LibreOffice SlideShowListener event: slideTransitionStarted')
+
+    def slideTransitionEnded(self):
+        """
+        Notify that the slide transtion of the current slide ended.
+        """
+        log.debug('LibreOffice SlideShowListener event: slideTransitionEnded')
+
+    def slideAnimationsEnded(self):
+        """
+        Notify that the last animation from the main sequence of the current slide has ended.
+        """
+        log.debug('LibreOffice SlideShowListener event: slideAnimationsEnded')
+        if not Registry().get('main_window').isActiveWindow():
+            log.debug('main window is not in focus - should update slidecontroller')
+            Registry().execute('slidecontroller_live_change', self.document.control.getCurrentSlideIndex() + 1)
+
+    def slideEnded(self, reverse):
+        """
+        Notify that the current slide has ended, e.g. the user has clicked on the slide. Calling displaySlide()
+        twice will not issue this event.
+
+        :param bool reverse: Whether or not the direction of the "slide movement" is reversed/backwards.
+        :rtype: None
+        """
+        log.debug('LibreOffice SlideShowListener event: slideEnded %d' % reverse)
+        if reverse:
+            self.document.slide_ended = False
+            self.document.slide_ended_reverse = True
+        else:
+            self.document.slide_ended = True
+            self.document.slide_ended_reverse = False
+
+    def hyperLinkClicked(self, hyperLink):
+        """
+        Notifies that a hyperlink has been clicked.
+        """
+        log.debug('LibreOffice SlideShowListener event: hyperLinkClicked %s' % hyperLink)
+
+    def disposing(self, source):
+        """
+        gets called when the broadcaster is about to be disposed.
+        :param source:
+        """
+        log.debug('LibreOffice SlideShowListener event: disposing')
+
+    def beginEvent(self, node):
+        """
+        This event is raised when the element local timeline begins to play.
+        :param node:
+        """
+        log.debug('LibreOffice SlideShowListener event: beginEvent')
+
+    def endEvent(self, node):
+        """
+        This event is raised at the active end of the element.
+        :param node:
+        """
+        log.debug('LibreOffice SlideShowListener event: endEvent')
+
+    def repeat(self, node):
+        """
+        This event is raised when the element local timeline repeats.
+        :param node:
+        """
+        log.debug('LibreOffice SlideShowListener event: repeat')

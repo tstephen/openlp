@@ -32,7 +32,6 @@ from datetime import datetime
 from PyQt5 import QtWidgets
 
 from openlp.core.common import is_linux, is_macosx, is_win
-from openlp.core.common.i18n import translate
 from openlp.core.common.settings import Settings
 from openlp.core.ui.media import MediaState, MediaType
 from openlp.core.ui.media.mediaplayer import MediaPlayer
@@ -41,20 +40,18 @@ from openlp.core.ui.media.mediaplayer import MediaPlayer
 log = logging.getLogger(__name__)
 
 # Audio and video extensions copied from 'include/vlc_interface.h' from vlc 2.2.0 source
-AUDIO_EXT = ['*.3ga', '*.669', '*.a52', '*.aac', '*.ac3', '*.adt', '*.adts', '*.aif', '*.aifc', '*.aiff', '*.amr',
-             '*.aob', '*.ape', '*.awb', '*.caf', '*.dts', '*.flac', '*.it', '*.kar', '*.m4a', '*.m4b', '*.m4p', '*.m5p',
-             '*.mid', '*.mka', '*.mlp', '*.mod', '*.mpa', '*.mp1', '*.mp2', '*.mp3', '*.mpc', '*.mpga', '*.mus',
-             '*.oga', '*.ogg', '*.oma', '*.opus', '*.qcp', '*.ra', '*.rmi', '*.s3m', '*.sid', '*.spx', '*.thd', '*.tta',
-             '*.voc', '*.vqf', '*.w64', '*.wav', '*.wma', '*.wv', '*.xa', '*.xm']
+AUDIO_EXT = ('3ga', '669', 'a52', 'aac', 'ac3', 'adt', 'adts', 'aif', 'aifc', 'aiff', 'amr', 'aob', 'ape', 'awb', 'caf',
+             'dts', 'flac', 'it', 'kar', 'm4a', 'm4b', 'm4p', 'm5p', 'mid', 'mka', 'mlp', 'mod', 'mpa', 'mp1', 'mp2',
+             'mp3', 'mpc', 'mpga', 'mus', 'oga', 'ogg', 'oma', 'opus', 'qcp', 'ra', 'rmi', 's3m', 'sid', 'spx', 'thd',
+             'tta', 'voc', 'vqf', 'w64', 'wav', 'wma', 'wv', 'xa', 'xm')
 
-VIDEO_EXT = ['*.3g2', '*.3gp', '*.3gp2', '*.3gpp', '*.amv', '*.asf', '*.avi', '*.bik', '*.divx', '*.drc', '*.dv',
-             '*.f4v', '*.flv', '*.gvi', '*.gxf', '*.iso', '*.m1v', '*.m2v', '*.m2t', '*.m2ts', '*.m4v', '*.mkv',
-             '*.mov', '*.mp2', '*.mp2v', '*.mp4', '*.mp4v', '*.mpe', '*.mpeg', '*.mpeg1', '*.mpeg2', '*.mpeg4', '*.mpg',
-             '*.mpv2', '*.mts', '*.mtv', '*.mxf', '*.mxg', '*.nsv', '*.nuv', '*.ogg', '*.ogm', '*.ogv', '*.ogx', '*.ps',
-             '*.rec', '*.rm', '*.rmvb', '*.rpl', '*.thp', '*.tod', '*.ts', '*.tts', '*.txd', '*.vob', '*.vro', '*.webm',
-             '*.wm', '*.wmv', '*.wtv', '*.xesc',
+VIDEO_EXT = ('3g2', '3gp', '3gp2', '3gpp', 'amv', 'asf', 'avi', 'bik', 'divx', 'drc', 'dv', 'f4v', 'flv', 'gvi', 'gxf',
+             'iso', 'm1v', 'm2v', 'm2t', 'm2ts', 'm4v', 'mkv', 'mov', 'mp2', 'mp2v', 'mp4', 'mp4v', 'mpe', 'mpeg',
+             'mpeg1', 'mpeg2', 'mpeg4', 'mpg', 'mpv2', 'mts', 'mtv', 'mxf', 'mxg', 'nsv', 'nuv', 'ogg', 'ogm', 'ogv',
+             'ogx', 'ps', 'rec', 'rm', 'rmvb', 'rpl', 'thp', 'tod', 'ts', 'tts', 'txd', 'vob', 'vro', 'webm', 'wm',
+             'wmv', 'wtv', 'xesc',
              # These extensions was not in the official list, added manually.
-             '*.nut', '*.rv', '*.xvid']
+             'nut', 'rv', 'xvid')
 
 
 def get_vlc():
@@ -110,8 +107,6 @@ class VlcPlayer(MediaPlayer):
         self.display_name = '&VLC'
         self.parent = parent
         self.can_folder = True
-        self.audio_extensions_list = AUDIO_EXT
-        self.video_extensions_list = VIDEO_EXT
 
     def setup(self, output_display, live_display):
         """
@@ -375,14 +370,3 @@ class VlcPlayer(MediaPlayer):
             else:
                 controller.seek_slider.setSliderPosition(output_display.vlc_media_player.get_time())
             controller.seek_slider.blockSignals(False)
-
-    def get_info(self):
-        """
-        Return some information about this player
-        """
-        return(translate('Media.player', 'VLC is an external player which '
-               'supports a number of different formats.') +
-               '<br/> <strong>' + translate('Media.player', 'Audio') +
-               '</strong><br/>' + str(AUDIO_EXT) + '<br/><strong>' +
-               translate('Media.player', 'Video') + '</strong><br/>' +
-               str(VIDEO_EXT) + '<br/>')

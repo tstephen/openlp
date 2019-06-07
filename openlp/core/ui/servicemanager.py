@@ -48,6 +48,7 @@ from openlp.core.lib.plugin import PluginStatus
 from openlp.core.lib.serviceitem import ItemCapabilities, ServiceItem
 from openlp.core.lib.ui import create_widget_action, critical_error_message_box, find_and_set_in_combo_box
 from openlp.core.ui.icons import UiIcons
+from openlp.core.ui.media.vlcplayer import AUDIO_EXT, VIDEO_EXT
 from openlp.core.ui.serviceitemeditform import ServiceItemEditForm
 from openlp.core.ui.servicenoteform import ServiceNoteForm
 from openlp.core.ui.starttimeform import StartTimeForm
@@ -320,7 +321,8 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
         """
         super().__init__(parent)
         self.service_items = []
-        self.suffixes = []
+        self.suffixes = set()
+        self.add_media_suffixes()
         self.drop_position = -1
         self.service_id = 0
         # is a new service and has not been saved
@@ -346,6 +348,13 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
         self.service_note_form = ServiceNoteForm()
         self.service_item_edit_form = ServiceItemEditForm()
         self.start_time_form = StartTimeForm()
+
+    def add_media_suffixes(self):
+        """
+        Add the suffixes supported by :mod:`openlp.core.ui.media.vlcplayer`
+        """
+        self.suffixes.update(AUDIO_EXT)
+        self.suffixes.update(VIDEO_EXT)
 
     def set_modified(self, modified=True):
         """
@@ -401,22 +410,19 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
     def reset_supported_suffixes(self):
         """
         Resets the Suffixes list.
-
         """
-        self.suffixes = []
+        self.suffixes.clear()
 
     def supported_suffixes(self, suffix_list):
         """
         Adds Suffixes supported to the master list. Called from Plugins.
 
-        :param suffix_list: New Suffix's to be supported
+        :param list[str] | str suffix_list: New suffix(s) to be supported
         """
         if isinstance(suffix_list, str):
-            self.suffixes.append(suffix_list)
+            self.suffixes.add(suffix_list)
         else:
-            for suffix in suffix_list:
-                if suffix not in self.suffixes:
-                    self.suffixes.append(suffix)
+            self.suffixes.update(suffix_list)
 
     def on_new_service_clicked(self):
         """
@@ -475,9 +481,11 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
                                               QtWidgets.QMessageBox.Save | QtWidgets.QMessageBox.Discard |
                                               QtWidgets.QMessageBox.Cancel, QtWidgets.QMessageBox.Save)
 
-    def on_recent_service_clicked(self):
+    def on_recent_service_clicked(self, checked):
         """
         Load a recent file as the service triggered by mainwindow recent service list.
+
+        :param bool checked: Not used
         """
         if self.is_modified():
             result = self.save_modified_service()
@@ -976,8 +984,10 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
         prev_item_last_slide = None
         service_iterator = QtWidgets.QTreeWidgetItemIterator(self.service_manager_list)
         while service_iterator.value():
+            # Found the selected/current service item
             if service_iterator.value() == selected:
                 if last_slide and prev_item_last_slide:
+                    # Go to the last slide of the previous service item
                     pos = prev_item.data(0, QtCore.Qt.UserRole)
                     check_expanded = self.service_items[pos - 1]['expanded']
                     self.service_manager_list.setCurrentItem(prev_item_last_slide)
@@ -986,13 +996,17 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
                     self.make_live()
                     self.service_manager_list.setCurrentItem(prev_item)
                 elif prev_item:
+                    # Go to the first slide of the previous service item
                     self.service_manager_list.setCurrentItem(prev_item)
                     self.make_live()
                 return
+            # Found the previous service item root
             if service_iterator.value().parent() is None:
                 prev_item = service_iterator.value()
+            # Found the last slide of the previous item
             if service_iterator.value().parent() is prev_item:
                 prev_item_last_slide = service_iterator.value()
+            # Go to next item in the tree
             service_iterator += 1
 
     def on_set_item(self, message):
