@@ -639,7 +639,7 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
             return False
         return True
 
-    def save_theme(self, theme, image_source_path, image_destination_path, image=None):
+    def save_theme(self, theme, image_source_path=None, image_destination_path=None, image=None):
         """
         Writes the theme to the disk and handles the background image if necessary
 
