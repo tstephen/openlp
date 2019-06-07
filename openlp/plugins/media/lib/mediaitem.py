@@ -173,7 +173,7 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
             item = self.list_view.currentItem()
             if item is None:
                 return False
-        filename = item.data(QtCore.Qt.UserRole)
+        filename = str(item.data(QtCore.Qt.UserRole))
         # Special handling if the filename is a optical clip
         if filename.startswith('optical:'):
             (name, title, audio_track, subtitle_track, start, end, clip_name) = parse_optical_path(filename)
@@ -267,7 +267,7 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
                 (file_name, title, audio_track, subtitle_track, start, end, clip_name) = parse_optical_path(track_str)
                 item_name = QtWidgets.QListWidgetItem(clip_name)
                 item_name.setIcon(UiIcons().optical)
-                item_name.setData(QtCore.Qt.UserRole, track_str)
+                item_name.setData(QtCore.Qt.UserRole, track)
                 item_name.setToolTip('{name}@{start}-{end}'.format(name=file_name,
                                                                    start=format_milliseconds(start),
                                                                    end=format_milliseconds(end)))
@@ -276,18 +276,18 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
                 file_name = os.path.split(track_str)[1]
                 item_name = QtWidgets.QListWidgetItem(file_name)
                 item_name.setIcon(UiIcons().error)
-                item_name.setData(QtCore.Qt.UserRole, track_str)
+                item_name.setData(QtCore.Qt.UserRole, track)
                 item_name.setToolTip(track_str)
             elif track_info.isFile():
                 # Normal media file handling.
                 file_name = os.path.split(track_str)[1]
                 item_name = QtWidgets.QListWidgetItem(file_name)
                 search = file_name.split('.')[-1].lower()
-                if '*.{text}'.format(text=search) in self.media_controller.audio_extensions_list:
+                if search in AUDIO_EXT:
                     item_name.setIcon(UiIcons().audio)
                 else:
                     item_name.setIcon(UiIcons().video)
-                item_name.setData(QtCore.Qt.UserRole, track_str)
+                item_name.setData(QtCore.Qt.UserRole, track)
                 item_name.setToolTip(track_str)
             if item_name:
                 self.list_view.addItem(item_name)
