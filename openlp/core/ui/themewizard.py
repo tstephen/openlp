@@ -34,6 +34,7 @@ from openlp.core.widgets.edits import PathEdit
 from openlp.core.widgets.layouts import AspectRatioLayout
 from openlp.core.display.render import ThemePreviewRenderer
 
+
 class Ui_ThemeWizard(object):
     """
     The Create/Edit theme wizard

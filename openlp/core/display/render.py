@@ -67,7 +67,6 @@ FOOTER_COPYRIGHT = 'Public Domain'
 CCLI_NO = '123456'
 
 
-
 def remove_tags(text, can_remove_chords=False):
     """
     Remove Tags from text for display
@@ -462,7 +461,8 @@ class ThemePreviewRenderer(LogMixin, DisplayWindow):
         vars = {
             'title': TITLE,
             'authors_none_label': translate('OpenLP.Ui', 'Written by'),
-            'authors_words_label': translate('SongsPlugin.AuthorType', 'Words', 'Author who wrote the lyrics of a song'),
+            'authors_words_label': translate('SongsPlugin.AuthorType', 'Words',
+                                             'Author who wrote the lyrics of a song'),
             'authors_words': [AUTHOR],
             'copyright': FOOTER_COPYRIGHT,
             'ccli_license': Settings().value('core/ccli number'),
@@ -734,7 +734,8 @@ class ThemePreviewRenderer(LogMixin, DisplayWindow):
         :param text:  The text to check. It may contain HTML tags.
         """
         self.clear_slides()
-        self.run_javascript('Display.addTextSlide("v1", "{text}", "Dummy Footer");'.format(text=text.replace('"', '\\"')), is_sync=True)
+        self.run_javascript('Display.addTextSlide("v1", "{text}", "Dummy Footer");'
+                            .format(text=text.replace('"', '\\"')), is_sync=True)
         does_text_fits = self.run_javascript('Display.doesContentFit();', is_sync=True)
         return does_text_fits
 
