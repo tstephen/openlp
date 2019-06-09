@@ -25,12 +25,13 @@ The :mod:`openlp.core.common.applocation` module provides an utility for OpenLP 
 import logging
 import os
 import sys
+from pathlib import Path
 
 import appdirs
 
 import openlp
 from openlp.core.common import get_frozen_path, is_macosx, is_win
-from openlp.core.common.path import Path, create_paths
+from openlp.core.common.path import create_paths
 from openlp.core.common.settings import Settings
 
 
@@ -58,7 +59,7 @@ class AppLocation(object):
 
         :param dir_type: The directory type you want, for instance the data directory. Default *AppLocation.AppDir*
         :return: The requested path
-        :rtype: openlp.core.common.path.Path
+        :rtype: Path
         """
         if dir_type == AppLocation.AppDir or dir_type == AppLocation.VersionDir:
             return get_frozen_path(FROZEN_APP_PATH, APP_PATH)
@@ -75,7 +76,7 @@ class AppLocation(object):
         Return the path OpenLP stores all its data under.
 
         :return: The data path to use.
-        :rtype: openlp.core.common.path.Path
+        :rtype: Path
         """
         # Check if we have a different data location.
         if Settings().contains('advanced/data path'):
@@ -95,7 +96,7 @@ class AppLocation(object):
         :param str extension: Defaults to ''. The extension to search for. For example::
             '.png'
         :return: List of files found.
-        :rtype: list[openlp.core.common.path.Path]
+        :rtype: list[Path]
         """
         path = AppLocation.get_data_path()
         if section:
@@ -112,7 +113,7 @@ class AppLocation(object):
         Return the path a particular module stores its data under.
 
         :param str section:
-        :rtype: openlp.core.common.path.Path
+        :rtype: Path
         """
         path = AppLocation.get_data_path() / section
         create_paths(path)
@@ -125,7 +126,7 @@ def _get_os_dir_path(dir_type):
 
     :param dir_type: AppLocation Enum of the requested path type
     :return: The requested path
-    :rtype: openlp.core.common.path.Path
+    :rtype: Path
     """
     # If running from source, return the language directory from the source directory
     if dir_type == AppLocation.LanguageDir:

@@ -21,10 +21,10 @@
 ##########################################################################
 import copy
 import logging
+from pathlib import Path
 
 from PyQt5 import QtCore
 
-from openlp.core.common.path import Path
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.lib import ServiceItemContext
@@ -169,24 +169,21 @@ class Controller(object):
         """
         log.debug('Live = {live}, next'.format(live=self.is_live))
         if not self.doc:
-            return
+            return False
         if not self.is_live:
-            return
+            return False
         if self.hide_mode:
             if not self.doc.is_active():
-                return
+                return False
             if self.doc.slidenumber < self.doc.get_slide_count():
                 self.doc.slidenumber += 1
                 self.poll()
-            return
+            return False
         if not self.activate():
-            return
-        # The "End of slideshow" screen is after the last slide. Note, we can't just stop on the last slide, since it
-        # may contain animations that need to be stepped through.
-        if self.doc.slidenumber > self.doc.get_slide_count():
-            return
-        self.doc.next_step()
+            return False
+        ret = self.doc.next_step()
         self.poll()
+        return ret
 
     def previous(self):
         """
@@ -194,20 +191,21 @@ class Controller(object):
         """
         log.debug('Live = {live}, previous'.format(live=self.is_live))
         if not self.doc:
-            return
+            return False
         if not self.is_live:
-            return
+            return False
         if self.hide_mode:
             if not self.doc.is_active():
-                return
+                return False
             if self.doc.slidenumber > 1:
                 self.doc.slidenumber -= 1
                 self.poll()
-            return
+            return False
         if not self.activate():
-            return
-        self.doc.previous_step()
+            return False
+        ret = self.doc.previous_step()
         self.poll()
+        return ret
 
     def shutdown(self):
         """
@@ -418,11 +416,12 @@ class MessageListener(object):
         """
         is_live = message[1]
         if is_live:
-            self.live_handler.next()
+            ret = self.live_handler.next()
             if Settings().value('core/click live slide to unblank'):
                 Registry().execute('slidecontroller_live_unblank')
+            return ret
         else:
-            self.preview_handler.next()
+            return self.preview_handler.next()
 
     def previous(self, message):
         """
@@ -432,11 +431,12 @@ class MessageListener(object):
         """
         is_live = message[1]
         if is_live:
-            self.live_handler.previous()
+            ret = self.live_handler.previous()
             if Settings().value('core/click live slide to unblank'):
                 Registry().execute('slidecontroller_live_unblank')
+            return ret
         else:
-            self.preview_handler.previous()
+            return self.preview_handler.previous()
 
     def shutdown(self, message):
         """

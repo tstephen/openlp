@@ -22,13 +22,14 @@
 
 import logging
 import re
+from shutil import copyfile
 
 from PyQt5 import QtCore
 
 from openlp.core.common import normalize_str
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.i18n import translate
-from openlp.core.common.path import copyfile, create_paths
+from openlp.core.common.path import create_paths
 from openlp.core.common.registry import Registry
 from openlp.core.widgets.wizard import WizardStrings
 from openlp.plugins.songs.lib import VerseType, clean_song
@@ -401,9 +402,9 @@ class SongImport(QtCore.QObject):
         the new file location.
 
         :param song_id:
-        :param openlp.core.common.path.Path file_path: The file to copy.
+        :param pathlib.Path file_path: The file to copy.
         :return: The new location of the file
-        :rtype: openlp.core.common.path.Path
+        :rtype: pathlib.Path
         """
         if not hasattr(self, 'save_path'):
             self.save_path = AppLocation.get_section_data_path(self.import_wizard.plugin.name) / 'audio' / str(song_id)

@@ -177,6 +177,7 @@ using a computer and a data projector.""",
         'pyobjc-framework-Cocoa; platform_system=="Darwin"',
         'PyQt5 >= 5.12',
         'PyQtWebEngine',
+        'python-vlc',
         'pywin32; platform_system=="Windows"',
         'QtAwesome',
         'requests',
@@ -198,13 +199,13 @@ using a computer and a data projector.""",
         'launchpad': ['launchpadlib']
     },
     tests_require=[
-        'nose2',
         'pylint',
         'PyMuPDF',
         'pyodbc',
         'pysword',
+        'pytest',
         'python-xlib; platform_system=="Linux"'
     ],
-    test_suite='nose2.collector.collector',
+    setup_requires=['pytest-runner'],
     entry_points={'gui_scripts': ['openlp = openlp.__main__:start']}
 )

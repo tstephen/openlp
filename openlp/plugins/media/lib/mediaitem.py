@@ -38,7 +38,7 @@ from openlp.core.lib.serviceitem import ItemCapabilities
 from openlp.core.lib.ui import critical_error_message_box
 from openlp.core.ui.icons import UiIcons
 from openlp.core.ui.media import parse_optical_path, format_milliseconds
-from openlp.core.ui.media.vlcplayer import get_vlc
+from openlp.core.ui.media.vlcplayer import AUDIO_EXT, VIDEO_EXT, get_vlc
 
 
 if get_vlc() is not None:
@@ -232,9 +232,9 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
         """
         # self.populate_display_types()
         self.on_new_file_masks = translate('MediaPlugin.MediaItem',
-                                           'Videos ({video});;Audio ({audio});;{files} '
-                                           '(*)').format(video=' '.join(self.media_controller.video_extensions_list),
-                                                         audio=' '.join(self.media_controller.audio_extensions_list),
+                                           'Videos (*.{video});;Audio (*.{audio});;{files} '
+                                           '(*)').format(video=' *.'.join(VIDEO_EXT),
+                                                         audio=' *.'.join(AUDIO_EXT),
                                                          files=UiStrings().AllFiles)
 
     def on_delete_click(self):
@@ -301,9 +301,9 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
         media_file_paths = Settings().value(self.settings_section + '/media files')
         media_file_paths.sort(key=lambda file_path: get_natural_key(file_path.name))
         if media_type == MediaType.Audio:
-            extension = self.media_controller.audio_extensions_list
+            extension = AUDIO_EXT
         else:
-            extension = self.media_controller.video_extensions_list
+            extension = VIDEO_EXT
         extension = [x[1:] for x in extension]
         media = [x for x in media_file_paths if x.suffix in extension]
         return media

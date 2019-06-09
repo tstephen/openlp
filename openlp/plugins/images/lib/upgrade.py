@@ -24,13 +24,13 @@ The :mod:`upgrade` module provides the migration path for the OLP Paths database
 """
 import json
 import logging
+from pathlib import Path
 
 from sqlalchemy import Column, Table
 
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.db import drop_columns
-from openlp.core.common.json import OpenLPJsonEncoder
-from openlp.core.common.path import Path
+from openlp.core.common.json import OpenLPJSONEncoder
 from openlp.core.lib.db import PathType, get_upgrade_op
 
 
@@ -58,7 +58,7 @@ def upgrade_2(session, metadata):
         results = conn.execute('SELECT * FROM image_filenames')
         data_path = AppLocation.get_data_path()
         for row in results.fetchall():
-            file_path_json = json.dumps(Path(row.filename), cls=OpenLPJsonEncoder, base_path=data_path)
+            file_path_json = json.dumps(Path(row.filename), cls=OpenLPJSONEncoder, base_path=data_path)
             sql = 'UPDATE image_filenames SET file_path = \'{file_path_json}\' WHERE id = {id}'.format(
                 file_path_json=file_path_json, id=row.id)
             conn.execute(sql)

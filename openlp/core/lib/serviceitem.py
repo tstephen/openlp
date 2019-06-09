@@ -29,6 +29,7 @@ import ntpath
 import os
 import uuid
 from copy import deepcopy
+from pathlib import Path
 
 from PyQt5 import QtGui
 
@@ -37,7 +38,6 @@ from openlp.core.common import md5_hash
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.i18n import translate
 from openlp.core.common.mixins import RegistryProperties
-from openlp.core.common.path import Path
 from openlp.core.common.settings import Settings
 from openlp.core.display.render import remove_tags, render_tags
 from openlp.core.lib import ItemCapabilities
@@ -264,8 +264,8 @@ class ServiceItem(RegistryProperties):
         if image and not self.has_original_files and self.name == 'presentations':
             file_location = os.path.join(path, file_name)
             file_location_hash = md5_hash(file_location.encode('utf-8'))
-            image = os.path.join(str(AppLocation.get_section_data_path(self.name)), 'thumbnails',
-                                 file_location_hash, ntpath.basename(image))  # TODO: Pathlib
+            image = os.path.join(AppLocation.get_section_data_path(self.name), 'thumbnails', file_location_hash,
+                                 ntpath.basename(image))  # TODO: Pathlib
         self.slides.append({'title': file_name, 'image': image, 'path': path, 'display_title': display_title,
                             'notes': notes, 'thumbnail': image})
         # if self.is_capable(ItemCapabilities.HasThumbnails):
@@ -593,9 +593,11 @@ class ServiceItem(RegistryProperties):
         """
         return not bool(self.slides)
 
-    def validate_item(self, suffix_list=None):
+    def validate_item(self, suffixes=None):
         """
         Validates a service item to make sure it is valid
+
+        :param set[str] suffixes: A set of vaild suffixes
         """
         self.is_valid = True
         for slide in self.slides:
@@ -612,8 +614,8 @@ class ServiceItem(RegistryProperties):
                     if not os.path.exists(file_name):
                         self.is_valid = False
                         break
-                    if suffix_list and not self.is_text():
+                    if suffixes and not self.is_text():
                         file_suffix = slide['title'].split('.')[-1]
-                        if file_suffix.lower() not in suffix_list:
+                        if file_suffix.lower() not in suffixes:
                             self.is_valid = False
                             break

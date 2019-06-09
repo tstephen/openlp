@@ -28,10 +28,12 @@ logging and a plugin framework are contained within the openlp.core module.
 """
 import argparse
 import logging
+import os
 import sys
 import time
-import os
 from datetime import datetime
+from pathlib import Path
+from shutil import copytree
 from traceback import format_exception
 
 from PyQt5 import QtCore, QtWebEngineWidgets, QtWidgets  # noqa
@@ -41,7 +43,7 @@ from openlp.core.common import is_macosx, is_win
 from openlp.core.common.applocation import AppLocation
 from openlp.core.loader import loader
 from openlp.core.common.i18n import LanguageManager, UiStrings, translate
-from openlp.core.common.path import copytree, create_paths, Path
+from openlp.core.common.path import create_paths
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.display.screens import ScreenList
@@ -316,7 +318,7 @@ def set_up_logging(log_path):
     """
     Setup our logging using log_path
 
-    :param openlp.core.common.path.Path log_path: The file to save the log to.
+    :param Path log_path: The file to save the log to.
     :rtype: None
     """
     create_paths(log_path, do_not_log=True)
@@ -383,6 +385,15 @@ def main():
     else:
         application.setApplicationName('OpenLP')
         set_up_logging(AppLocation.get_directory(AppLocation.CacheDir))
+    # Set the libvlc environment variable if we're frozen
+    if getattr(sys, 'frozen', False):
+        if is_macosx():
+            vlc_lib = 'libvlc.dylib'
+        elif is_win():
+            vlc_lib = 'libvlc.dll'
+        os.environ['PYTHON_VLC_LIB_PATH'] = str(AppLocation.get_directory(AppLocation.AppDir) / vlc_lib)
+        log.debug('VLC Path: {}'.format(os.environ['PYTHON_VLC_LIB_PATH']))
+    # Initialise the Registry
     Registry.create()
     Registry().register('application', application)
     Registry().set_flag('no_web_server', args.no_web_server)

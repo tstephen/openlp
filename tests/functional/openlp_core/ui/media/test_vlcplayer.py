@@ -30,7 +30,7 @@ from unittest.mock import MagicMock, call, patch
 
 from openlp.core.common.registry import Registry
 from openlp.core.ui.media import MediaState, MediaType
-from openlp.core.ui.media.vlcplayer import AUDIO_EXT, VIDEO_EXT, VlcPlayer, get_vlc
+from openlp.core.ui.media.vlcplayer import VlcPlayer, get_vlc
 from tests.helpers import MockDateTime
 from tests.helpers.testmixin import TestMixin
 
@@ -65,21 +65,6 @@ class TestVLCPlayer(TestCase, TestMixin):
         # THEN: The extra environment variable should be there
         assert 'openlp.core.ui.media.vendor.vlc' not in sys.modules
 
-    @patch('openlp.core.ui.media.vlcplayer.is_macosx')
-    def test_fix_vlc_22_plugin_path(self, mocked_is_macosx):
-        """
-        Test that on OS X we set the VLC plugin path to fix a bug in the VLC module
-        """
-        # GIVEN: We're on OS X and we don't have the VLC plugin path set
-        mocked_is_macosx.return_value = True
-
-        # WHEN: An checking if the player is available
-        get_vlc()
-
-        # THEN: The extra environment variable should be there
-        assert 'VLC_PLUGIN_PATH' in os.environ, 'The plugin path should be in the environment variables'
-        assert '/Applications/VLC.app/Contents/MacOS/plugins' == os.environ['VLC_PLUGIN_PATH']
-
     @patch.dict(os.environ)
     @patch('openlp.core.ui.media.vlcplayer.is_macosx')
     def test_not_osx_fix_vlc_22_plugin_path(self, mocked_is_macosx):
@@ -110,8 +95,6 @@ class TestVLCPlayer(TestCase, TestMixin):
         assert '&VLC' == vlc_player.display_name
         assert vlc_player.parent is None
         assert vlc_player.can_folder is True
-        assert AUDIO_EXT == vlc_player.audio_extensions_list
-        assert VIDEO_EXT == vlc_player.video_extensions_list
 
     @patch('openlp.core.ui.media.vlcplayer.is_win')
     @patch('openlp.core.ui.media.vlcplayer.is_macosx')
@@ -973,20 +956,3 @@ class TestVLCPlayer(TestCase, TestMixin):
         mocked_controller.seek_slider.setSliderPosition.assert_called_with(300)
         expected_calls = [call(True), call(False)]
         assert expected_calls == mocked_controller.seek_slider.blockSignals.call_args_list
-
-    @patch('openlp.core.ui.media.vlcplayer.translate')
-    def test_get_info(self, mocked_translate):
-        """
-        Test that get_info() returns some information about the VLC player
-        """
-        # GIVEN: A VlcPlayer
-        mocked_translate.side_effect = lambda *x: x[1]
-        vlc_player = VlcPlayer(None)
-
-        # WHEN: get_info() is run
-        info = vlc_player.get_info()
-
-        # THEN: The information should be correct
-        assert 'VLC is an external player which supports a number of different formats.<br/> ' \
-            '<strong>Audio</strong><br/>' + str(AUDIO_EXT) + '<br/><strong>Video</strong><br/>' + \
-               str(VIDEO_EXT) + '<br/>' == info

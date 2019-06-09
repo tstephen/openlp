@@ -22,12 +22,12 @@
 """
 Test the media plugin
 """
+from pathlib import Path
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
 from PyQt5 import QtCore
 
-from openlp.core.common.path import Path
 from openlp.core.common.settings import Settings
 from openlp.plugins.media.lib.mediaitem import MediaMediaItem
 from tests.helpers.testmixin import TestMixin

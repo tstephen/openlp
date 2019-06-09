@@ -45,7 +45,7 @@ class OpenLyricsExport(RegistryProperties):
         """
         Initialise the export.
 
-        :param openlp.core.common.path.Path save_path: The directory to save the exported songs in
+        :param pathlib.Path save_path: The directory to save the exported songs in
         :rtype: None
         """
         log.debug('initialise OpenLyricsExport')

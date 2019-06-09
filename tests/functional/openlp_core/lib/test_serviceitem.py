@@ -23,12 +23,12 @@
 Package to test the openlp.core.lib package.
 """
 import os
+from pathlib import Path
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
 from openlp.core.state import State
 from openlp.core.common import md5_hash
-from openlp.core.common.path import Path
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.lib.formattingtags import FormattingTags

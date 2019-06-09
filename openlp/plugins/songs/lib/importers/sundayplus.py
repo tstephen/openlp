@@ -65,7 +65,7 @@ class SundayPlusImport(SongImport):
         """
         Process the Sunday Plus song file
 
-        :param openlp.core.common.path.Path file_path: The song file to import
+        :param pathlib.Path file_path: The song file to import
         :rtype: None
         """
         with file_path.open('rb') as song_file:
@@ -180,7 +180,7 @@ class SundayPlusImport(SongImport):
         """
         Extract the title from the filename
 
-        :param openlp.core.common.path.Path file_path: File being imported
+        :param pathlib.Path file_path: File being imported
         :return: The song title
         :rtype: str
         """

@@ -23,6 +23,7 @@
 This module contains tests for the bibleimport module.
 """
 from io import BytesIO
+from pathlib import Path
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
@@ -30,7 +31,6 @@ from lxml import etree, objectify
 from PyQt5.QtWidgets import QDialog
 
 from openlp.core.common.i18n import Language
-from openlp.core.common.path import Path
 from openlp.core.lib.exceptions import ValidationError
 from openlp.plugins.bibles.lib.bibleimport import BibleImport
 from openlp.plugins.bibles.lib.db import BibleDB

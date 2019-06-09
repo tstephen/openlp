@@ -24,10 +24,10 @@ This module contains tests for the CSV Bible importer.
 """
 import csv
 from collections import namedtuple
+from pathlib import Path
 from unittest import TestCase
 from unittest.mock import MagicMock, PropertyMock, call, patch
 
-from openlp.core.common.path import Path
 from openlp.core.lib.exceptions import ValidationError
 from openlp.plugins.bibles.lib.bibleimport import BibleImport
 from openlp.plugins.bibles.lib.importers.csvbible import Book, CSVBible, Verse

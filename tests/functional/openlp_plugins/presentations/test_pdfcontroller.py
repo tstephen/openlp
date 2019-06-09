@@ -23,7 +23,8 @@
 This module contains tests for the PdfController
 """
 import os
-from shutil import which
+from pathlib import Path
+from shutil import rmtree, which
 from tempfile import mkdtemp
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
@@ -31,7 +32,6 @@ from unittest.mock import MagicMock, patch
 from PyQt5 import QtCore, QtGui
 
 from openlp.core.common import is_macosx, is_linux, is_win
-from openlp.core.common.path import Path
 from openlp.core.common.settings import Settings
 from openlp.core.display.screens import ScreenList
 from openlp.plugins.presentations.lib.pdfcontroller import PdfController, PdfDocument
@@ -99,8 +99,8 @@ class TestPdfController(TestCase, TestMixin):
         """
         del self.screens
         self.destroy_settings()
-        self.thumbnail_folder_path.rmtree()
-        self.temp_folder_path.rmtree()
+        rmtree(self.thumbnail_folder_path)
+        rmtree(self.temp_folder_path)
 
     def test_constructor(self):
         """
