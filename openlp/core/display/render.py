@@ -33,7 +33,7 @@ import time
 from PyQt5 import QtWidgets, QtGui
 
 from openlp.core.common import ThemeLevel
-from openlp.core.common.i18n import UiStrings, translate
+from openlp.core.common.i18n import translate
 from openlp.core.common.mixins import LogMixin, RegistryProperties
 from openlp.core.common.registry import Registry, RegistryBase
 from openlp.core.common.settings import Settings

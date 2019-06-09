@@ -64,7 +64,7 @@ def get_vlc():
     # Import the VLC module if not already done
     if 'vlc' not in sys.modules:
         try:
-            import vlc
+            import vlc  # noqa module is not used directly, but is used via sys.modules['vlc']
         except ImportError:
             return None
     # Verify that VLC is also loadable
