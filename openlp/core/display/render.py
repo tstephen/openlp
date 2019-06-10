@@ -24,6 +24,7 @@ The :mod:`~openlp.display.render` module contains functions for rendering.
 """
 import html
 import logging
+import mako
 import math
 import os
 import re
@@ -32,8 +33,10 @@ import time
 from PyQt5 import QtWidgets, QtGui
 
 from openlp.core.common import ThemeLevel
+from openlp.core.common.i18n import translate
 from openlp.core.common.mixins import LogMixin, RegistryProperties
 from openlp.core.common.registry import Registry, RegistryBase
+from openlp.core.common.settings import Settings
 from openlp.core.display.screens import ScreenList
 from openlp.core.display.window import DisplayWindow
 from openlp.core.lib import ItemCapabilities
@@ -58,8 +61,10 @@ VERSE = 'The Lord said to {r}Noah{/r}: \n' \
     '{r}C{/r}{b}h{/b}{bl}i{/bl}{y}l{/y}{g}d{/g}{pk}' \
     'r{/pk}{o}e{/o}{pp}n{/pp} of the Lord\n'
 VERSE_FOR_LINE_COUNT = '\n'.join(map(str, range(100)))
-TITLE = 'Arky Arky (Unknown)'
-FOOTER = ['Public Domain', 'CCLI 123456']
+TITLE = 'Arky Arky'
+AUTHOR = 'John Doe'
+FOOTER_COPYRIGHT = 'Public Domain'
+CCLI_NO = '123456'
 
 
 def remove_tags(text, can_remove_chords=False):
@@ -425,7 +430,7 @@ def get_start_tags(raw_text):
     return raw_text + ''.join(end_tags), ''.join(start_tags), ''.join(html_tags)
 
 
-class Renderer(RegistryBase, LogMixin, RegistryProperties, DisplayWindow):
+class ThemePreviewRenderer(LogMixin, DisplayWindow):
     """
     A virtual display used for rendering thumbnails and other offscreen tasks
     """
@@ -435,24 +440,6 @@ class Renderer(RegistryBase, LogMixin, RegistryProperties, DisplayWindow):
         """
         super().__init__(*args, **kwargs)
         self.force_page = False
-        for screen in ScreenList():
-            if screen.is_display:
-                self.setGeometry(screen.display_geometry.x(), screen.display_geometry.y(),
-                                 screen.display_geometry.width(), screen.display_geometry.height())
-                break
-        # If the display is not show'ed and hidden like this webegine will not render
-        self.show()
-        self.hide()
-        self.theme_height = 0
-        self.theme_level = ThemeLevel.Global
-
-    def set_theme_level(self, theme_level):
-        """
-        Sets the theme level.
-
-        :param theme_level: The theme level to be used.
-        """
-        self.theme_level = theme_level
 
     def calculate_line_count(self):
         """
@@ -466,7 +453,30 @@ class Renderer(RegistryBase, LogMixin, RegistryProperties, DisplayWindow):
         """
         return self.run_javascript('Display.clearSlides();')
 
-    def generate_preview(self, theme_data, force_page=False):
+    def generate_footer(self):
+        """
+        """
+        footer_template = Settings().value('songs/footer template')
+        # Keep this in sync with the list in songstab.py
+        vars = {
+            'title': TITLE,
+            'authors_none_label': translate('OpenLP.Ui', 'Written by'),
+            'authors_words_label': translate('SongsPlugin.AuthorType', 'Words',
+                                             'Author who wrote the lyrics of a song'),
+            'authors_words': [AUTHOR],
+            'copyright': FOOTER_COPYRIGHT,
+            'ccli_license': Settings().value('core/ccli number'),
+            'ccli_license_label': translate('SongsPlugin.MediaItem', 'CCLI License'),
+            'ccli_number': CCLI_NO,
+        }
+        try:
+            footer_html = mako.template.Template(footer_template).render_unicode(**vars).replace('\n', '')
+        except mako.exceptions.SyntaxException:
+            log.error('Failed to render Song footer html:\n' + mako.exceptions.text_error_template().render())
+            footer_html = 'Dummy footer text'
+        return footer_html
+
+    def generate_preview(self, theme_data, force_page=False, generate_screenshot=True):
         """
         Generate a preview of a theme.
 
@@ -479,14 +489,16 @@ class Renderer(RegistryBase, LogMixin, RegistryProperties, DisplayWindow):
         if not self.force_page:
             self.set_theme(theme_data)
             self.theme_height = theme_data.font_main_height
-            slides = self.format_slide(render_tags(VERSE), None)
+            slides = self.format_slide(VERSE, None)
             verses = dict()
             verses['title'] = TITLE
-            verses['text'] = slides[0]
+            verses['text'] = render_tags(slides[0])
             verses['verse'] = 'V1'
+            verses['footer'] = self.generate_footer()
             self.load_verses([verses])
             self.force_page = False
-            return self.save_screenshot()
+            if generate_screenshot:
+                return self.save_screenshot()
         self.force_page = False
         return None
 
@@ -515,7 +527,7 @@ class Renderer(RegistryBase, LogMixin, RegistryProperties, DisplayWindow):
         if item and item.is_capable(ItemCapabilities.CanWordSplit):
             pages = self._paginate_slide_words(text.split('\n'), line_end)
         # Songs and Custom
-        elif item is None or item.is_capable(ItemCapabilities.CanSoftBreak):
+        elif item is None or (item and item.is_capable(ItemCapabilities.CanSoftBreak)):
             pages = []
             if '[---]' in text:
                 # Remove Overflow split if at start of the text
@@ -722,7 +734,8 @@ class Renderer(RegistryBase, LogMixin, RegistryProperties, DisplayWindow):
         :param text:  The text to check. It may contain HTML tags.
         """
         self.clear_slides()
-        self.run_javascript('Display.addTextSlide("v1", "{text}", "Dummy Footer");'.format(text=text), is_sync=True)
+        self.run_javascript('Display.addTextSlide("v1", "{text}", "Dummy Footer");'
+                            .format(text=text.replace('"', '\\"')), is_sync=True)
         does_text_fits = self.run_javascript('Display.doesContentFit();', is_sync=True)
         return does_text_fits
 
@@ -745,3 +758,33 @@ class Renderer(RegistryBase, LogMixin, RegistryProperties, DisplayWindow):
             pixmap.save(fname, ext)
         else:
             return pixmap
+
+
+class Renderer(RegistryBase, RegistryProperties, ThemePreviewRenderer):
+    """
+    A virtual display used for rendering thumbnails and other offscreen tasks
+    """
+    def __init__(self, *args, **kwargs):
+        """
+        Constructor
+        """
+        super().__init__(*args, **kwargs)
+        self.force_page = False
+        for screen in ScreenList():
+            if screen.is_display:
+                self.setGeometry(screen.display_geometry.x(), screen.display_geometry.y(),
+                                 screen.display_geometry.width(), screen.display_geometry.height())
+                break
+        # If the display is not show'ed and hidden like this webegine will not render
+        self.show()
+        self.hide()
+        self.theme_height = 0
+        self.theme_level = ThemeLevel.Global
+
+    def set_theme_level(self, theme_level):
+        """
+        Sets the theme level.
+
+        :param theme_level: The theme level to be used.
+        """
+        self.theme_level = theme_level
