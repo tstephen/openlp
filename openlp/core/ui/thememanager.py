@@ -173,7 +173,7 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
         for xml_file_path in xml_file_paths:
             theme_data = get_text_file_string(xml_file_path)
             theme = self._create_theme_from_xml(theme_data, self.theme_path)
-            self._write_theme(theme)
+            self.save_theme(theme)
             xml_file_path.unlink()
 
     def build_theme_path(self):
