@@ -23,7 +23,7 @@
 Interface tests to test the ThemeWizard class and related methods.
 """
 from unittest import TestCase
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 from openlp.core.common.registry import Registry
 from openlp.core.ui.themeform import ThemeForm
@@ -39,6 +39,8 @@ class TestThemeManager(TestCase, TestMixin):
         Create the UI
         """
         Registry.create()
+        mocked_renderer = MagicMock()
+        Registry().register('renderer', mocked_renderer)
 
     @patch('openlp.core.display.window.QtWidgets.QVBoxLayout')
     def test_create_theme_wizard(self, mocked_qvboxlayout):
