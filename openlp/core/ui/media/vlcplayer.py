@@ -28,7 +28,6 @@ import os
 import sys
 import threading
 from datetime import datetime
-import vlc
 
 from PyQt5 import QtWidgets
 
@@ -62,25 +61,27 @@ def get_vlc():
 
     :return: The "vlc" module, or None
     """
-    if 'vlc' in sys.modules:
-        # If VLC has already been imported, no need to do all the stuff below again
-        is_vlc_available = False
+    # Import the VLC module if not already done
+    if 'vlc' not in sys.modules:
         try:
-            is_vlc_available = bool(sys.modules['vlc'].get_default_instance())
-        except Exception:
-            pass
-        if is_vlc_available:
-            return sys.modules['vlc']
-        else:
+            import vlc  # noqa module is not used directly, but is used via sys.modules['vlc']
+        except ImportError:
             return None
-    else:
-        return vlc
+    # Verify that VLC is also loadable
+    is_vlc_available = False
+    try:
+        is_vlc_available = bool(sys.modules['vlc'].get_default_instance())
+    except Exception:
+        pass
+    if is_vlc_available:
+        return sys.modules['vlc']
+    return None
 
 
 # On linux we need to initialise X threads, but not when running tests.
 # This needs to happen on module load and not in get_vlc(), otherwise it can cause crashes on some DE on some setups
 # (reported on Gnome3, Unity, Cinnamon, all GTK+ based) when using native filedialogs...
-if is_linux() and 'nose' not in sys.argv[0] and get_vlc():
+if is_linux() and 'pytest' not in sys.argv[0] and get_vlc():
     try:
         try:
             x11 = ctypes.cdll.LoadLibrary('libX11.so.6')

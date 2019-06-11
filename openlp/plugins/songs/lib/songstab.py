@@ -88,7 +88,7 @@ class SongsTab(SettingsTab):
         self.footer_group_box = QtWidgets.QGroupBox(self.left_column)
         self.footer_group_box.setObjectName('footer_group_box')
         self.footer_layout = QtWidgets.QVBoxLayout(self.footer_group_box)
-        self.footer_layout.setObjectName('chords_layout')
+        self.footer_layout.setObjectName('footer_layout')
         self.footer_info_label = QtWidgets.QLabel(self.footer_group_box)
         self.footer_layout.addWidget(self.footer_info_label)
         self.footer_placeholder_info = QtWidgets.QTextEdit(self.footer_group_box)

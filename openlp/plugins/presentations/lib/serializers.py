@@ -20,32 +20,33 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>. #
 ##########################################################################
 """
-Interface tests to test the ThemeWizard class and related methods.
+This module contains some helpers for serializing Path objects in Pyro4
 """
-from unittest import TestCase
-from unittest.mock import patch
+try:
+    from openlp.core.common.path import Path
+except ImportError:
+    from pathlib import Path
 
-from openlp.core.common.registry import Registry
-from openlp.core.ui.themeform import ThemeForm
-from tests.helpers.testmixin import TestMixin
+from Pyro4.util import SerializerBase
 
 
-class TestThemeManager(TestCase, TestMixin):
+def path_class_to_dict(obj):
     """
-    Test the functions in the ThemeManager module
+    Serialize a Path object for Pyro4
     """
-    def setUp(self):
-        """
-        Create the UI
-        """
-        Registry.create()
+    return {
+        '__class__': 'Path',
+        'parts': obj.parts
+    }
 
-    @patch('openlp.core.display.window.QtWidgets.QVBoxLayout')
-    def test_create_theme_wizard(self, mocked_qvboxlayout):
-        """
-        Test creating a ThemeForm instance
-        """
-        # GIVEN: A ThemeForm class
-        # WHEN: An object is created
-        # THEN: There should be no problems
-        ThemeForm(None)
+
+def path_dict_to_class(classname, d):
+    return Path(d['parts'])
+
+
+def register_classes():
+    """
+    Register the serializers
+    """
+    SerializerBase.register_class_to_dict(Path, path_class_to_dict)
+    SerializerBase.register_dict_to_class('Path', path_dict_to_class)

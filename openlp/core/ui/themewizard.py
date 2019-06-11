@@ -31,6 +31,8 @@ from openlp.core.lib.ui import add_welcome_page, create_valign_selection_widgets
 from openlp.core.ui.icons import UiIcons
 from openlp.core.widgets.buttons import ColorButton
 from openlp.core.widgets.edits import PathEdit
+from openlp.core.widgets.layouts import AspectRatioLayout
+from openlp.core.display.render import ThemePreviewRenderer
 
 
 class Ui_ThemeWizard(object):
@@ -363,16 +365,13 @@ class Ui_ThemeWizard(object):
         self.preview_layout.addLayout(self.theme_name_layout)
         self.preview_area = QtWidgets.QWidget(self.preview_page)
         self.preview_area.setObjectName('PreviewArea')
-        self.preview_area_layout = QtWidgets.QGridLayout(self.preview_area)
-        self.preview_area_layout.setContentsMargins(0, 0, 0, 0)
-        self.preview_area_layout.setColumnStretch(0, 1)
-        self.preview_area_layout.setRowStretch(0, 1)
-        self.preview_area_layout.setObjectName('preview_area_layout')
-        self.preview_box_label = QtWidgets.QLabel(self.preview_area)
-        self.preview_box_label.setFrameShape(QtWidgets.QFrame.Box)
-        self.preview_box_label.setScaledContents(True)
-        self.preview_box_label.setObjectName('preview_box_label')
-        self.preview_area_layout.addWidget(self.preview_box_label)
+        self.preview_area_layout = AspectRatioLayout(self.preview_area, 0.75)  # Dummy ratio, will be update
+        self.preview_area_layout.margin = 8
+        self.preview_area_layout.setSpacing(0)
+        self.preview_area_layout.setObjectName('preview_web_layout')
+        self.preview_box = ThemePreviewRenderer(self)
+        self.preview_box.setObjectName('preview_box')
+        self.preview_area_layout.addWidget(self.preview_box)
         self.preview_layout.addWidget(self.preview_area)
         theme_wizard.addPage(self.preview_page)
         self.retranslate_ui(theme_wizard)
