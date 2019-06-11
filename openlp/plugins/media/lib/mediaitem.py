@@ -175,7 +175,11 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
                 return False
         filename = str(item.data(QtCore.Qt.UserRole))
         # Special handling if the filename is a optical clip
-        if filename.startswith('optical:'):
+        if filename == 'live':
+            service_item.processor = 'vlc'
+            service_item.title = filename
+            service_item.add_capability(ItemCapabilities.CanStream)
+        elif filename.startswith('optical:'):
             (name, title, audio_track, subtitle_track, start, end, clip_name) = parse_optical_path(filename)
             if not os.path.exists(name):
                 if not remote:
@@ -258,11 +262,11 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
         """
         # TODO needs to be fixed as no idea why this fails
         # media.sort(key=lambda file_path: get_natural_key(file_path.name))
-        file_name = "Live Stream"
+        file_name = translate('MediaPlugin.MediaItem', 'Live Stream')
         item_name = QtWidgets.QListWidgetItem(file_name)
         item_name.setIcon(UiIcons().video)
-        item_name.setData(QtCore.Qt.UserRole, 0)
-        item_name.setToolTip("Live Stream feed")
+        item_name.setData(QtCore.Qt.UserRole, 'live')
+        item_name.setToolTip(translate('MediaPlugin.MediaItem', 'Show Live Stream'))
         self.list_view.addItem(item_name)
         for track in media:
             track_str = str(track)

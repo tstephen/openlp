@@ -147,14 +147,15 @@ class VlcPlayer(MediaPlayer):
         Load a video into VLC
 
         :param output_display: The display where the media is
-        :param file: file to be played
+        :param file: file to be played or None for live streaming
         :return:
         """
         vlc = get_vlc()
         log.debug('load vid in Vlc Controller')
         controller = output_display
         volume = controller.media_info.volume
-        path = os.path.normcase(file)
+        if file:
+            path = os.path.normcase(file)
         # create the media
         if controller.media_info.media_type == MediaType.CD:
             if is_win():
