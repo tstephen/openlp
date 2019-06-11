@@ -42,9 +42,9 @@ from openlp.core.common.settings import Settings
 from openlp.core.lib.serviceitem import ItemCapabilities
 from openlp.core.lib.ui import critical_error_message_box
 from openlp.core.ui import DisplayControllerType
-from openlp.core.ui.media import MediaState, ItemMediaInfo, MediaType, parse_optical_path
+from openlp.core.ui.media import MediaState, ItemMediaInfo, MediaType, parse_optical_path, VIDEO_EXT, AUDIO_EXT
 from openlp.core.ui.media.endpoint import media_endpoint
-from openlp.core.ui.media.vlcplayer import AUDIO_EXT, VIDEO_EXT, VlcPlayer, get_vlc
+from openlp.core.ui.media.vlcplayer import VlcPlayer, get_vlc
 
 
 log = logging.getLogger(__name__)
