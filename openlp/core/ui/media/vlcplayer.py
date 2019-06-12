@@ -152,12 +152,10 @@ class VlcPlayer(MediaPlayer):
         """
         vlc = get_vlc()
         log.debug('load vid in Vlc Controller')
-        controller = output_display
-        volume = controller.media_info.volume
         if file:
             path = os.path.normcase(file)
         # create the media
-        if controller.media_info.media_type == MediaType.CD:
+        if output_display.media_info.media_type == MediaType.CD:
             if is_win():
                 path = '/' + path
             output_display.vlc_media = output_display.vlc_instance.media_new_location('cdda://' + path)
@@ -169,8 +167,8 @@ class VlcPlayer(MediaPlayer):
             audio_cd_tracks = output_display.vlc_media.subitems()
             if not audio_cd_tracks or audio_cd_tracks.count() < 1:
                 return False
-            output_display.vlc_media = audio_cd_tracks.item_at_index(controller.media_info.title_track)
-        elif controller.media_info.media_type == MediaType.Stream:
+            output_display.vlc_media = audio_cd_tracks.item_at_index(output_display.media_info.title_track)
+        elif output_display.media_info.media_type == MediaType.Stream:
             stream_cmd = Settings().value('media/stream command')
             output_display.vlc_media = output_display.vlc_instance.media_new_location(stream_cmd)
         else:
@@ -179,7 +177,7 @@ class VlcPlayer(MediaPlayer):
         output_display.vlc_media_player.set_media(output_display.vlc_media)
         # parse the metadata of the file
         output_display.vlc_media.parse()
-        self.volume(output_display, volume)
+        self.volume(output_display, output_display.media_info.volume)
         return True
 
     def media_state_wait(self, output_display, media_state):

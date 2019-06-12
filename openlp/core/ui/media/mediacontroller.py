@@ -230,7 +230,7 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         if controller.is_live:
             # if this is an optical device use special handling
             if service_item.is_capable(ItemCapabilities.CanStream):
-                is_valid = self._check_file_type(controller, display)
+                is_valid = self._check_file_type(controller, display, True)
                 controller.media_info.media_type = MediaType.Stream
             elif service_item.is_capable(ItemCapabilities.IsOptical):
                 log.debug('video is optical and live')
@@ -253,8 +253,8 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
                 controller.media_info.end_time = service_item.end_time
         elif controller.preview_display:
             if service_item.is_capable(ItemCapabilities.CanStream):
-                is_valid = self._check_file_type(controller, display)
                 controller.media_info.media_type = MediaType.Stream
+                is_valid = self._check_file_type(controller, display, True)
             elif service_item.is_capable(ItemCapabilities.IsOptical):
                 log.debug('video is optical and preview')
                 path = service_item.get_frame_path()
@@ -352,19 +352,21 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
             controller.media_info.media_type = MediaType.DVD
         return True
 
-    def _check_file_type(self, controller, display):
+    def _check_file_type(self, controller, display, stream=False):
         """
         Select the correct media Player type from the prioritized Player list
 
         :param controller: First element is the controller which should be used
         :param display: Which display to use
+        :param stream: Are we streaming or not
         """
-        if controller.media_info.media_type == MediaType.Stream:
+        if stream:
             self.resize(display, self.vlc_player)
+            display.media_info.media_type = MediaType.Stream
             if self.vlc_player.load(display, None):
                 self.current_media_players[controller.controller_type] = self.vlc_player
-                controller.media_info.media_type = MediaType.Video
                 return True
+            return True
         for file in controller.media_info.file_info:
             if file.is_file:
                 suffix = '*%s' % file.suffix.lower()

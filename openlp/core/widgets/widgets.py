@@ -103,8 +103,8 @@ class ProxyWidget(QtWidgets.QGroupBox):
         :param QtWidgets.QRadioButton button: The button that has toggled
         :param bool checked: The buttons new state
         """
-        id = self.radio_group.id(button)  # The work around (see above comment)
-        enable_manual_edits = id == ProxyMode.MANUAL_PROXY and checked
+        group_id = self.radio_group.id(button)  # The work around (see above comment)
+        enable_manual_edits = group_id == ProxyMode.MANUAL_PROXY and checked
         self.http_edit.setEnabled(enable_manual_edits)
         self.https_edit.setEnabled(enable_manual_edits)
         self.username_edit.setEnabled(enable_manual_edits)
