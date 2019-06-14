@@ -32,10 +32,10 @@ from openlp.core.common.i18n import translate
 from openlp.core.common.settings import Settings
 from openlp.core.lib.settingstab import SettingsTab
 from openlp.core.ui.icons import UiIcons
-#vlc             v4l2:///dev/video0:v4l2-standard= :input-slave=alsa://hw:0,0 :live-caching=300
+
 LINUX_STREAM = 'v4l2://{video}:v4l2-standard= :input-slave=alsa://{audio} :live-caching=300'
 WIN_STREAM = 'dshow://:dshow-vdev={video} :dshow-adev={audio} :live-caching=300'
-OSX_STREAM = 'avcapture://{video}:qtsound://{audio}:live-caching=300'
+OSX_STREAM = 'avcapture://{video}:qtsound://{audio} :live-caching=300'
 
 log = logging.getLogger(__name__)
 
