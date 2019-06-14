@@ -74,7 +74,7 @@ class MediaTab(SettingsTab):
         self.video_edit = QtWidgets.QLineEdit(self)
         self.stream_media_layout.addRow(translate('MediaPlugin.MediaTab', 'Video:'), self.video_edit)
         self.audio_edit = QtWidgets.QLineEdit(self)
-        self.stream_media_layout.addRow(translate('MediaPlugin.MediaTab', 'Audio'), self.audio_edit)
+        self.stream_media_layout.addRow(translate('MediaPlugin.MediaTab', 'Audio:'), self.audio_edit)
         self.stream_cmd = QtWidgets.QLabel(self)
         self.stream_media_layout.addWidget(self.stream_cmd)
         self.left_layout.addWidget(self.stream_media_group_box)
