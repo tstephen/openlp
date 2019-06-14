@@ -184,7 +184,8 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
             display.has_audio = False
         self.vlc_player.setup(display, preview)
 
-    def set_controls_visible(self, controller, value):
+    @staticmethod
+    def set_controls_visible(controller, value):
         """
         After a new display is configured, all media related widget will be created too
 
@@ -276,6 +277,8 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         #    display.frame.runJavaScript('show_video("setBackBoard", null, null,"visible");')
         # now start playing - Preview is autoplay!
         autoplay = False
+        if service_item.is_capable(ItemCapabilities.CanStream):
+            autoplay = True
         # Preview requested
         if not controller.is_live:
             autoplay = True

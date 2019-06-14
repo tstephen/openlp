@@ -88,9 +88,6 @@ class MediaTab(SettingsTab):
         self.left_layout.addWidget(self.vlc_arguments_group_box)
         self.left_layout.addStretch()
         self.right_layout.addStretch()
-        self.video_edit.editingFinished.connect(self.on_field_changed)
-        self.audio_edit.editingFinished.connect(self.on_field_changed)
-        # # Signals and slots
 
     def retranslate_ui(self):
         """
@@ -107,10 +104,13 @@ class MediaTab(SettingsTab):
         """
         self.auto_start_check_box.setChecked(Settings().value(self.settings_section + '/media auto start'))
         self.stream_cmd.setText(Settings().value(self.settings_section + '/stream command'))
+        self.audio_edit.setText(Settings().value(self.settings_section + '/audio'))
+        self.video_edit.setText(Settings().value(self.settings_section + '/video'))
         if not self.stream_cmd.text():
             self.set_base_stream()
         self.vlc_arguments_edit.setPlainText(Settings().value(self.settings_section + '/vlc arguments'))
         if Settings().value('advanced/experimental'):
+            # vlc.MediaPlayer().audio_output_device_enum()
             for cam in QCameraInfo.availableCameras():
                 log.debug(cam.deviceName())
                 log.debug(cam.description())
@@ -134,9 +134,8 @@ class MediaTab(SettingsTab):
             Settings().setValue(setting_key, self.auto_start_check_box.checkState())
         Settings().setValue(self.settings_section + '/stream command', self.stream_cmd.text())
         Settings().setValue(self.settings_section + '/vlc arguments', self.vlc_arguments_edit.toPlainText())
-
-    def on_field_changed(self):
-        self.set_base_stream()
+        Settings().setValue(self.settings_section + '/video', self.video_edit.text())
+        Settings().setValue(self.settings_section + '/audio', self.audio_edit.text())
         self.stream_cmd.setText(self.stream_cmd.text().format(video=self.video_edit.text(),
                                                               audio=self.audio_edit.text()))
 
