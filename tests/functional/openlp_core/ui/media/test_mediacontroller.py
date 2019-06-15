@@ -27,6 +27,7 @@ from unittest.mock import MagicMock, patch
 
 from openlp.core.common.registry import Registry
 from openlp.core.ui.media.mediacontroller import MediaController
+from openlp.core.ui.media import ItemMediaInfo
 from tests.helpers.testmixin import TestMixin
 
 from tests.utils.constants import RESOURCE_PATH
@@ -57,7 +58,7 @@ class TestMediaController(TestCase, TestMixin):
         # THEN: The player's resize method should be called correctly
         mocked_player.resize.assert_called_with(mocked_display)
 
-    def test_check_file_type(self):
+    def test_check_file_type_null(self):
         """
         Test that we don't try to play media when no players available
         """
@@ -71,7 +72,47 @@ class TestMediaController(TestCase, TestMixin):
         ret = media_controller._check_file_type(mocked_controller, mocked_display)
 
         # THEN: it should return False
-        assert ret is False, '_check_file_type should return False when no mediaplayers are available.'
+        assert ret is False, '_check_file_type should return False when no media file matches.'
+
+    def test_check_file_video(self):
+        """
+        Test that we process a file that is valid
+        """
+        # GIVEN: A mocked UiStrings, get_used_players, controller, display and service_item
+        media_controller = MediaController()
+        mocked_controller = MagicMock()
+        mocked_display = MagicMock()
+        media_controller.media_players = MagicMock()
+        mocked_controller.media_info = ItemMediaInfo()
+        mocked_controller.media_info.file_info = [TEST_PATH / 'mp3_file.mp3']
+        media_controller.current_media_players = {}
+        media_controller.vlc_player = MagicMock()
+
+        # WHEN: calling _check_file_type when no players exists
+        ret = media_controller._check_file_type(mocked_controller, mocked_display)
+
+        # THEN: it should return False
+        assert ret is True, '_check_file_type should return True when audio file is present and matches.'
+
+    def test_check_file_audio(self):
+        """
+        Test that we process a file that is valid
+        """
+        # GIVEN: A mocked UiStrings, get_used_players, controller, display and service_item
+        media_controller = MediaController()
+        mocked_controller = MagicMock()
+        mocked_display = MagicMock()
+        media_controller.media_players = MagicMock()
+        mocked_controller.media_info = ItemMediaInfo()
+        mocked_controller.media_info.file_info = [TEST_PATH / 'mp4_file.mp4']
+        media_controller.current_media_players = {}
+        media_controller.vlc_player = MagicMock()
+
+        # WHEN: calling _check_file_type when no players exists
+        ret = media_controller._check_file_type(mocked_controller, mocked_display)
+
+        # THEN: it should return False
+        assert ret is True, '_check_file_type should return True when media file is present and matches.'
 
     def test_media_play_msg(self):
         """

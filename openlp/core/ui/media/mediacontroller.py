@@ -42,9 +42,9 @@ from openlp.core.common.settings import Settings
 from openlp.core.lib.serviceitem import ItemCapabilities
 from openlp.core.lib.ui import critical_error_message_box
 from openlp.core.ui import DisplayControllerType
-from openlp.core.ui.media import MediaState, ItemMediaInfo, MediaType, parse_optical_path
+from openlp.core.ui.media import MediaState, ItemMediaInfo, MediaType, parse_optical_path, VIDEO_EXT, AUDIO_EXT
 from openlp.core.ui.media.endpoint import media_endpoint
-from openlp.core.ui.media.vlcplayer import AUDIO_EXT, VIDEO_EXT, VlcPlayer, get_vlc
+from openlp.core.ui.media.vlcplayer import VlcPlayer, get_vlc
 
 
 log = logging.getLogger(__name__)
@@ -184,7 +184,8 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
             display.has_audio = False
         self.vlc_player.setup(display, preview)
 
-    def set_controls_visible(self, controller, value):
+    @staticmethod
+    def set_controls_visible(controller, value):
         """
         After a new display is configured, all media related widget will be created too
 
@@ -229,7 +230,10 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         display = self._define_display(controller)
         if controller.is_live:
             # if this is an optical device use special handling
-            if service_item.is_capable(ItemCapabilities.IsOptical):
+            if service_item.is_capable(ItemCapabilities.CanStream):
+                is_valid = self._check_file_type(controller, display, True)
+                controller.media_info.media_type = MediaType.Stream
+            elif service_item.is_capable(ItemCapabilities.IsOptical):
                 log.debug('video is optical and live')
                 path = service_item.get_frame_path()
                 (name, title, audio_track, subtitle_track, start, end, clip_name) = parse_optical_path(path)
@@ -249,7 +253,10 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
                 controller.media_info.start_time = service_item.start_time
                 controller.media_info.end_time = service_item.end_time
         elif controller.preview_display:
-            if service_item.is_capable(ItemCapabilities.IsOptical):
+            if service_item.is_capable(ItemCapabilities.CanStream):
+                controller.media_info.media_type = MediaType.Stream
+                is_valid = self._check_file_type(controller, display, True)
+            elif service_item.is_capable(ItemCapabilities.IsOptical):
                 log.debug('video is optical and preview')
                 path = service_item.get_frame_path()
                 (name, title, audio_track, subtitle_track, start, end, clip_name) = parse_optical_path(path)
@@ -270,6 +277,8 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         #    display.frame.runJavaScript('show_video("setBackBoard", null, null,"visible");')
         # now start playing - Preview is autoplay!
         autoplay = False
+        if service_item.is_capable(ItemCapabilities.CanStream):
+            autoplay = True
         # Preview requested
         if not controller.is_live:
             autoplay = True
@@ -346,13 +355,21 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
             controller.media_info.media_type = MediaType.DVD
         return True
 
-    def _check_file_type(self, controller, display):
+    def _check_file_type(self, controller, display, stream=False):
         """
         Select the correct media Player type from the prioritized Player list
 
         :param controller: First element is the controller which should be used
         :param display: Which display to use
+        :param stream: Are we streaming or not
         """
+        if stream:
+            self.resize(display, self.vlc_player)
+            display.media_info.media_type = MediaType.Stream
+            if self.vlc_player.load(display, None):
+                self.current_media_players[controller.controller_type] = self.vlc_player
+                return True
+            return True
         for file in controller.media_info.file_info:
             if file.is_file:
                 suffix = '*%s' % file.suffix.lower()

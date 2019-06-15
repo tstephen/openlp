@@ -48,7 +48,7 @@ from openlp.core.lib.plugin import PluginStatus
 from openlp.core.lib.serviceitem import ItemCapabilities, ServiceItem
 from openlp.core.lib.ui import create_widget_action, critical_error_message_box, find_and_set_in_combo_box
 from openlp.core.ui.icons import UiIcons
-from openlp.core.ui.media.vlcplayer import AUDIO_EXT, VIDEO_EXT
+from openlp.core.ui.media import AUDIO_EXT, VIDEO_EXT
 from openlp.core.ui.serviceitemeditform import ServiceItemEditForm
 from openlp.core.ui.servicenoteform import ServiceNoteForm
 from openlp.core.ui.starttimeform import StartTimeForm
