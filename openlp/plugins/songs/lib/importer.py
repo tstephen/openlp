@@ -42,6 +42,7 @@ from .importers.powerpraise import PowerPraiseImport
 from .importers.powersong import PowerSongImport
 from .importers.presentationmanager import PresentationManagerImport
 from .importers.propresenter import ProPresenterImport
+from .importers.singingthefaith import SingingTheFaithImport
 from .importers.songbeamer import SongBeamerImport
 from .importers.songpro import SongProImport
 from .importers.songshowplus import SongShowPlusImport
@@ -173,16 +174,17 @@ class SongFormat(object):
     PowerSong = 16
     PresentationManager = 17
     ProPresenter = 18
-    SongBeamer = 19
-    SongPro = 20
-    SongShowPlus = 21
-    SongsOfFellowship = 22
-    SundayPlus = 23
-    VideoPsalm = 24
-    WordsOfWorship = 25
-    WorshipAssistant = 26
-    WorshipCenterPro = 27
-    ZionWorx = 28
+    SingingTheFaith = 19
+    SongBeamer = 20
+    SongPro = 21
+    SongShowPlus = 22
+    SongsOfFellowship = 23
+    SundayPlus = 24
+    VideoPsalm = 25
+    WordsOfWorship = 26
+    WorshipAssistant = 27
+    WorshipCenterPro = 28
+    ZionWorx = 29
 
     # Set optional attribute defaults
     __defaults__ = {
@@ -343,6 +345,15 @@ class SongFormat(object):
             'filter': '{text} (*.pro4 *.pro5 *.pro6)'.format(text=translate('SongsPlugin.ImportWizardForm',
                                                                             'ProPresenter Song Files'))
         },
+       SingingTheFaith: {
+            'class': SingingTheFaithImport,
+            'name': 'SingingTheFaith',
+            'prefix': 'singingTheFaith',
+            'filter': '%s (*.txt)' % translate('SongsPlugin.ImportWizardForm', 'Singing The Faith Exported Files'),
+            'descriptionText': translate('SongsPlugin.ImportWizardForm',
+                                         'First use Singing The Faith Electonic edition to export '
+                                         'the song(s) in Text format.')
+        },
         SongBeamer: {
             'class': SongBeamerImport,
             'name': 'SongBeamer',
@@ -462,6 +473,7 @@ class SongFormat(object):
             SongFormat.PowerSong,
             SongFormat.PresentationManager,
             SongFormat.ProPresenter,
+            SongFormat.SingingTheFaith,
             SongFormat.SongBeamer,
             SongFormat.SongPro,
             SongFormat.SongShowPlus,
