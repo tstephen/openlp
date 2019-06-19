@@ -25,9 +25,8 @@ A widget representing a song in the duplicate song removal wizard review page.
 from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.ui.icons import UiIcons
-from openlp.plugins.songs.lib import VerseType, db
+from openlp.plugins.songs.lib import VerseType
 from openlp.plugins.songs.lib.openlyricsxml import SongXML
-
 
 
 class SongReviewWidget(QtWidgets.QWidget):
