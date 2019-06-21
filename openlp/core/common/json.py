@@ -186,12 +186,12 @@ class PathSerializer(JSONMixin, register_names=('Path', 'PosixPath', 'WindowsPat
         return path
 
     @classmethod
-    def json_object(cls, obj, base_path=None, js_use=False, **kwargs):
+    def json_object(cls, obj, base_path=None, is_js=False, **kwargs):
         """
         Create a dictionary that can be JSON decoded.
 
         :param Path base_path: If specified, an absolute path to make a relative path from.
-        :param bool js_use: Encode the path as a uri. For example for use in the js rendering code.
+        :param bool is_js: Encode the path as a uri. For example for use in the js rendering code.
         :param kwargs: Contains any extra parameters. Not used!
         :return: The dictionary representation of this Path object.
         :rtype: dict[tuple]
@@ -200,7 +200,7 @@ class PathSerializer(JSONMixin, register_names=('Path', 'PosixPath', 'WindowsPat
         if base_path:
             with suppress(ValueError):
                 path = path.relative_to(base_path)
-        if js_use is True:
+        if is_js is True:
             return path.as_uri()
         json_dict = {'parts': path.parts}
         cls.attach_meta(json_dict)

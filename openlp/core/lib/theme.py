@@ -225,18 +225,18 @@ class Theme(object):
             jsn = json.loads(theme, cls=OpenLPJSONDecoder)
         self.expand_json(jsn)
 
-    def export_theme(self, theme_path=None, js_use=False):
+    def export_theme(self, theme_path=None, is_js=False):
         """
         Loop through the fields and build a dictionary of them
 
         :param pathlib.Path | None theme_path:
-        :param bool js_use: For internal use, for example with the theme js code.
+        :param bool is_js: For internal use, for example with the theme js code.
         :return str: The json encoded theme object
         """
         theme_data = {}
         for attr, value in self.__dict__.items():
             theme_data["{attr}".format(attr=attr)] = value
-        return json.dumps(theme_data, cls=OpenLPJSONEncoder, base_path=theme_path, js_use=js_use)
+        return json.dumps(theme_data, cls=OpenLPJSONEncoder, base_path=theme_path, is_js=is_js)
 
     def parse(self, xml):
         """
