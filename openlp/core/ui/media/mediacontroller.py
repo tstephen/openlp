@@ -372,7 +372,7 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
             return True
         for file in controller.media_info.file_info:
             if file.is_file:
-                suffix = '*%s' % file.suffix.lower()
+                suffix = file.suffix.lower()[1:]
                 file = str(file)
                 if suffix in VIDEO_EXT:
                     if not controller.media_info.is_background or controller.media_info.is_background and \

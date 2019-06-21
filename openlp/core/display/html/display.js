@@ -118,20 +118,6 @@ function _prepareText(text) {
 }
 
 /**
- * The paths we get are JSON versions of Python Path objects, so let's just fix that.
- * @private
- * @param {object} path - The Path object
- * @returns {string} The actual file path
- */
-function _pathToString(path) {
-    var filename = path.__Path__.join("/").replace("//", "/");
-    if (!filename.startsWith("/")) {
-        filename = "/" + filename;
-    }
-    return filename;
-}
-
-/**
  * An audio player with a play list
  */
 var AudioPlayer = function (audioElement) {
@@ -676,13 +662,13 @@ var Display = {
         }
         break;
       case BackgroundType.Image:
-        background_filename = _pathToString(theme.background_filename);
-        backgroundStyle["background-image"] = "url('file://" + background_filename + "')";
+        backgroundStyle["background-image"] = "url('" + theme.background_filename + "')";
+        console.warn(backgroundStyle["background-image"]);
         break;
       case BackgroundType.Video:
-        background_filename = _pathToString(theme.background_filename);
         backgroundStyle["background-color"] = theme.background_border_color;
-        backgroundHtml = "<video loop autoplay muted><source src='file://" + background_filename + "'></video>";
+        backgroundHtml = "<video loop autoplay muted><source src='" + theme.background_filename + "'></video>";
+        console.warn(backgroundHtml);
         break;
       default:
         backgroundStyle["background"] = "#000";

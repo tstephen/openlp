@@ -111,6 +111,8 @@ class OpenLPJSONDecoder(JSONDecoder):
         :param dict obj: A decoded JSON object
         :return: The custom object from the serialized data if the custom object is registered, else obj
         """
+        if '__Path__' in obj:
+            return PathSerializer.encode_json(obj, **self.kwargs)
         try:
             key = obj['json_meta']['class']
         except KeyError:
@@ -150,8 +152,8 @@ class OpenLPJSONEncoder(JSONEncoder):
         if isinstance(obj, JSONMixin):
             return obj.json_object()
         elif obj.__class__.__name__ in _registered_classes:
-            return _registered_classes[obj.__class__.__name__].json_object(obj)
-        return super().default(obj)
+            return _registered_classes[obj.__class__.__name__].json_object(obj, **self.kwargs)
+        return super().default(obj, **self.kwargs)
 
 
 def is_serializable(obj):
@@ -174,17 +176,22 @@ class PathSerializer(JSONMixin, register_names=('Path', 'PosixPath', 'WindowsPat
         :param kwargs: Contains any extra parameters. Not used!
         :return Path: The deserialized Path object
         """
-        path = Path(*obj['parts'])
+        if '__Path__' in obj:
+            parts = obj['__Path__']
+        else:
+            parts = obj['parts']
+        path = Path(*parts)
         if base_path and not path.is_absolute():
             return base_path / path
         return path
 
     @classmethod
-    def json_object(cls, obj, base_path=None, **kwargs):
+    def json_object(cls, obj, base_path=None, js_use=False, **kwargs):
         """
         Create a dictionary that can be JSON decoded.
 
         :param Path base_path: If specified, an absolute path to make a relative path from.
+        :param bool js_use: Encode the path as a uri. For example for use in the js rendering code.
         :param kwargs: Contains any extra parameters. Not used!
         :return: The dictionary representation of this Path object.
         :rtype: dict[tuple]
@@ -193,6 +200,8 @@ class PathSerializer(JSONMixin, register_names=('Path', 'PosixPath', 'WindowsPat
         if base_path:
             with suppress(ValueError):
                 path = path.relative_to(base_path)
+        if js_use is True:
+            return path.as_uri()
         json_dict = {'parts': path.parts}
         cls.attach_meta(json_dict)
         return json_dict

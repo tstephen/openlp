@@ -612,7 +612,7 @@ class Settings(QtCore.QSettings):
             elif isinstance(default_value, dict):
                 return {}
         elif isinstance(setting, str):
-            if 'json_meta' in setting or setting.startswith('{'):
+            if 'json_meta' in setting or '__Path__' in setting or setting.startswith('{'):
                 return json.loads(setting, cls=OpenLPJSONDecoder)
         # Convert the setting to the correct type.
         if isinstance(default_value, bool):
