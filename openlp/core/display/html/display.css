@@ -1,14 +1,7 @@
-/* Animation key frames for horizontal scrolling of alert */
-/* @keyframes alert-scrolling-text {
-  from { margin-left: 100%; }
-  to {  margin-left: -300% }
-} */
-
-.horizontal-scroll-animation {
-  animation-duration: 10s;
-  animation-iteration-count: 2;
-  animation-timing-function: linear;
-  animation-name: alert-scrolling-text;
+@keyframes alert-scrolling-text {
+  0% { transform: translateX(100%); opacity: 1; }
+  99% { opacity: 1; }
+  100% { transform: translateX(-105%); opacity: 0;}
 }
 
 /* ALERT BACKGROUND STYLING */
@@ -24,10 +17,16 @@
   overflow: hidden;
   transform: translate(0,0);
   transition: min-height 1s ease-out .5s;
+  white-space: nowrap;
   display: flex;
   flex-direction: row;  
   align-items: center;
-  align-content: center;
+  /* align-content: center; */
+}
+
+.bg-default span {
+  display: inline-block;
+  padding-left: 100%;
 }
 
 .show-bg {
@@ -59,14 +58,12 @@
 /* ALERT TEXT STYLING */
 #alert {  
   z-index: 100;  
-  overflow: visible;
-  white-space: nowrap;
+  overflow: visible;  
   color: #ffffff;
   font-size: 40pt;    
   padding: 0;
   margin: 0;
-  opacity: 0;
-  transform: translateX(120%);  
+  opacity: 0; 
   transition: opacity .5s linear;   
 }
 

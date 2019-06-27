@@ -437,10 +437,7 @@ var Display = {
     var settings = JSON.parse(alert_settings);
     this._alertSettings = settings;    
     Display.setAlertText(text);
-    Display.setAlertLocation(settings.location);
-    if (settings.scroll === true) {
-      Display.setAlertKeyframes(alertText.scrollWidth);  
-    }
+    Display.setAlertLocation(settings.location, settings.font_color, settings.font_face, settings.font_size);    
     /* Check if the alert is a queued alert */
     if (Display._alertState !== AlertState.DisplayingFromQueue) {
       Display._alertState = AlertState.Displaying;
@@ -465,24 +462,13 @@ var Display = {
    * Set Alert Text
    * @param {string} text - The alert text to display
    */
-  setAlertText: function (text) {
+  setAlertText: function (text, color, font_face, font_size) {
     var alertText = $("#alert")[0];
     alertText.textContent = text;
-  },
-  /**
-   * Set the keyframe styles for the scrolling text
-   * @param {int} scrollWidth - The length of the paragraph with the alert text 
-   */
-  setAlertKeyframes: function (scrollWidth) {
-    var keyframeStyle = $('#keyframeStyles')[0];
-    var scrollWidthPercentage = Math.ceil((((scrollWidth / screen.width) * 100) + 1) / 10) * 10;
-    scrollWidthPercentage += 110; // Scroll the full text length
-    var keyframes = "@keyframes alert-scrolling-text {" +
-                              "from { transform: translateX(110%); } " +
-                              "to { transform: translateX(-" + scrollWidthPercentage + "%);}";    
-    keyframeStyle.innerHTML = keyframes;    
-    return keyframes;
-  },    
+    alertText.style.color = color;
+    alertText.style.fontFamily = font_face;
+    alertText.style.fontSize = font_size + "pt";
+  },      
   /**
    * The alertTransitionEndEvent called after a transition has ended
    */
@@ -577,11 +563,7 @@ var Display = {
    * @param {json} settings object - The settings to use for the animation
    */
   showAlertText: function (settings) {        
-    var alertText = $("#alert")[0];    
-    alertText.style.opacity = 1;
-    alertText.style.color = settings.font_color;
-    alertText.style.fontFamily = settings.font_face;
-    alertText.style.fontSize = settings.font_size + "pt";
+    var alertText = $("#alert")[0];        
             
     if (settings.scroll) {      
       var animationSettings = "alert-scrolling-text " + settings.timeout +
@@ -606,7 +588,7 @@ var Display = {
   hideAlertText: function () {
     var alertText = $('#alert')[0];            
     Display._animationState = AnimationState.NoAnimation;
-    alertText.classList.add("hide-text");
+    alertText.style.animation = "";    
     Display.hideAlertBackground();
     Display.resetAlertKeyframes();                                         
   },
@@ -622,13 +604,6 @@ var Display = {
     else {
       return null;
     }
-  },  
-  /**
-   * Reset animation keyframes after displaying alert
-   */
-  resetAlertKeyframes: function () {
-    var keyframeStyle = document.getElementById('keyframeStyles');    
-    keyframeStyle.innerHTML = "";
   },
   /**
    * Clears the alert settings after displaying an alert 
