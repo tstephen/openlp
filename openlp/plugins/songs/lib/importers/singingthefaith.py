@@ -150,7 +150,7 @@ class SingingTheFaithImport(SongImport):
                         this_verse = self.verses[int(hintverse)-1]
                         this_verse_str = this_verse[1]
                         new_verse = this_verse_str
-#                       There might be multiple replace pairs separated by |
+                        # There might be multiple replace pairs separated by |
                         replaces=replace.split("|")
                         for rep in replaces:
                             (source_str,dest_str)=rep.split("/")
@@ -189,7 +189,6 @@ class SingingTheFaithImport(SongImport):
                 else:
                     line = line.rstrip()
 ##                print("Read line",line_number,"(",indent,")",line)
-#                line_number += 1   # Now read earlier
                 if line_number == 2:
                     # note that songs seem to start with a blank line
                     song_title = line
@@ -214,14 +213,13 @@ class SingingTheFaithImport(SongImport):
                 elif (indent == 0) and (line.startswith('From Common ')):
                     self.add_comment(line)
                     continue
-                # If indent is 0 it may well be the author (but not if it was the Reproduced line)
+                # If indent is 0 it may be the author, unless it was one of the cases covered above
                 elif (indent == 0) and len(line)>0 :
 ##                    print ("Possible author ",line)
 #                   May have more than one author, separated by ' and '
                     authors = line.split(' and ')
                     for a in authors:
                         self.parse_author(a)
-#                    author = line
                     continue
                 if line == '':
 ##                    print("Starting a new verse")
@@ -271,11 +269,12 @@ class SingingTheFaithImport(SongImport):
         self.title = check_flag+"STF"+song_number.zfill(3)+" - "+song_title
         self.song_book_name="Singing The Faith"
         self.song_number = song_number
- #       self.parse_author(author)
         self.ccli_number = ccli
         self.add_copyright(copyright)
-# If we have a chorus then the generated Verse order will not be useful, so clear the verse_order_list
-        if has_chorus:
+# If we have a chorus then the generated Verse order can not be used directly, but we can generate
+#  one for two special cases - Verse followed by one chorus (to be repeated after every verse)
+#  of Chorus, followed by verses. If hints for ManualCheck or VerseOrder are supplied ignore this
+        if has_chorus and not self.hint_verseOrder and not self.checks_needed:
 ##            print ("Has chorus - verse order list is ",self.verse_order_list)
             auto_verse_order_ok = False
             # Popular case V1 C2 V2 ...
@@ -284,35 +283,24 @@ class SingingTheFaithImport(SongImport):
                     new_verse_order_list = ['v1','c1']
                     i = 2
                     auto_verse_order_ok = True
-                    while i < len(self.verse_order_list):
-                        # Should maybe check for vn
-                        if self.verse_order_list[i].startswith('v'):
-                            new_verse_order_list.append(self.verse_order_list[i])
-                            new_verse_order_list.append("c1")
-                        else:
-###   Fix this
-###                            self.log_error(translate('SongsPlugin.SingingTheFaithImport', 'File %s' % file.name),
-###                                translate('SongsPlugin.SingingTheFaithImport', 'Error: %s'",self.verse_order_list[i]," in ",str(self.song_number))
-##   Should be a logged error
-##                            print("Found strange verseorder entry ",self.verse_order_list[i]," in ",file.name)
-                            auto_verse_order_ok = False
-                        i += 1
-##                    print(" new verse_order_list is ",new_verse_order_list)
-                    self.verse_order_list = new_verse_order_list
                 elif (self.verse_order_list[0] == "c1") and (self.verse_order_list[1] == "v1"):
                     new_verse_order_list = ['c1','v1','c1']
                     i = 2
-                    while i < len(self.verse_order_list):
-                        # Should maybe check for vn
+                    auto_verse_order_ok = True
+                # if we are in a case we can deal with
+                if auto_verse_order_ok:
+                   while i < len(self.verse_order_list):
                         if self.verse_order_list[i].startswith('v'):
                             new_verse_order_list.append(self.verse_order_list[i])
                             new_verse_order_list.append("c1")
                         else:
+                            self.log_error(translate('SongsPlugin.SingingTheFaithImport', 'File %s' % file.name),
+                                'Error: Strange verse order entry '+self.verse_order_list[i])
 ##                            print("Found strange verseorder entry ",self.verse_order_list[i]," in ",file.name)
                             auto_verse_order_ok = False
                         i += 1
 ##                    print(" new verse_order_list (Chorus first is ",new_verse_order_list)
-                    self.verse_order_list = new_verse_order_list                    
+                   self.verse_order_list = new_verse_order_list 
             else:
                 if not auto_verse_order_ok:
                     print ("setting verse_order_list to empty")
