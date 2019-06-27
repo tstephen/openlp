@@ -332,9 +332,9 @@ class DisplayWindow(QtWidgets.QWidget):
             theme_copy = copy.deepcopy(theme)
             theme_copy.background_type = 'image'
             theme_copy.background_filename = self.checkerboard_path
-            exported_theme = theme_copy.export_theme()
+            exported_theme = theme_copy.export_theme(is_js=True)
         else:
-            exported_theme = theme.export_theme()
+            exported_theme = theme.export_theme(is_js=True)
         self.run_javascript('Display.setTheme({theme});'.format(theme=exported_theme))
 
     def get_video_types(self):

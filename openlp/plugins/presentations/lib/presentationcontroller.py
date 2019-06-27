@@ -129,7 +129,7 @@ class PresentationDocument(object):
             thumbnail_folder_path = self.get_thumbnail_folder()
             temp_folder_path = self.get_temp_folder()
             if thumbnail_folder_path.exists():
-                thumbnail_folder_path.rmtree()
+                shutil.rmtree(thumbnail_folder_path)
             if temp_folder_path.exists():
                 shutil.rmtree(temp_folder_path)
         except OSError:

@@ -173,6 +173,7 @@ class ItemCapabilities(object):
     HasNotes = 20
     HasThumbnails = 21
     HasMetaData = 22
+    CanStream = 23
 
 
 def get_text_file_string(text_file_path):
