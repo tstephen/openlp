@@ -64,7 +64,6 @@ class TestWordsOfWorshipFileImport(SongImportTestHelper):
         self.file_import([TEST_PATH / 'Test_Song_v2_0_0.wsg'],
                          self.load_external_result_data(TEST_PATH / 'Test_Song_v2_0_0.json'))
 
-
     def test_test_song_song_import(self):
         """
         Test that loading a Words of Worship file v2.1.2 works correctly

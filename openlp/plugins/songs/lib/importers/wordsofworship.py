@@ -176,9 +176,9 @@ class WordsOfWorshipImport(SongImport):
             err_text = data
         if err_text:
             self.log_error(file_path,
-                          translate('SongsPlugin.WordsofWorshipSongImport',
-                                    'Invalid Words of Worship song file. Missing {text!r} header.'
-                                    ).format(text=err_text))
+                           translate('SongsPlugin.WordsofWorshipSongImport',
+                                     'Invalid Words of Worship song file. Missing {text!r} header.'
+                                     ).format(text=err_text))
             return False
         return True
 
