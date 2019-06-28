@@ -93,7 +93,7 @@ class WordsOfWorshipImport(SongImport):
         * 0x00 = Normal
         * 0x01 = Minor
 
-        It looks like this may have been introduced in Words of Worship song version 1.2.2, though this is an educated
+        It looks like this may have been introduced in Words of Worship song version 2.1.0, though this is an educated
         guess.
 
     Footer:
@@ -152,7 +152,7 @@ class WordsOfWorshipImport(SongImport):
         lines_to_read = read_int(song_data, DataType.U32, 'little')
         for line_no in range(0, lines_to_read):
             line_text = self.parse_string(song_data)
-            if self.read_version >= (1, 2, 2):
+            if self.read_version >= (2, 1, 0):
                 if read_or_fail(song_data, DataType.U8) == b'\x01':
                     line_text = '{{minor}}{text}{{/minor}}'.format(text=line_text)
             lines.append(line_text)
@@ -199,7 +199,7 @@ class WordsOfWorshipImport(SongImport):
                     with file_path.open('rb') as song_data:
                         if not self.vaildate(file_path, song_data):
                             continue
-                        seek_or_fail(song_data, 24)
+                        seek_or_fail(song_data, 20)
                         self.read_version = self.parse_version(song_data)
                         # Seek to byte which stores number of blocks in the song
                         seek_or_fail(song_data, 56)

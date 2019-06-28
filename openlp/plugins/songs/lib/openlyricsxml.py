@@ -336,7 +336,7 @@ class OpenLyrics(object):
         :return: the lyrics with the converted chords
         """
         # Process chords.
-        new_text = re.sub(r'\[(?!CDATA)(\w.*?)\]', r'<chord name="\1"/>', text)
+        new_text = re.sub(r'\[(\w.*?)\]', r'<chord name="\1"/>', text)
         return new_text
 
     def _get_missing_tags(self, text):
