@@ -82,6 +82,7 @@ class SingingTheFaithImport(SongImport):
         current_verse_number = 1
         has_chorus = False
         chorus_written = False
+        auto_verse_order_ok = False
         verses = []
         author = ''
         copyright = ''
