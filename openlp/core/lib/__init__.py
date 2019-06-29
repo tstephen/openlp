@@ -24,13 +24,21 @@ The :mod:`lib` module contains most of the components and libraries that make
 OpenLP work.
 """
 import logging
+import os
+from enum import IntEnum
 from pathlib import Path
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from openlp.core.common.i18n import translate
+from openlp.core.common.i18n import UiStrings, translate
 
 log = logging.getLogger(__name__ + '.__init__')
+
+
+class DataType(IntEnum):
+    U8 = 1
+    U16 = 2
+    U32 = 4
 
 
 class ServiceItemContext(object):
@@ -397,3 +405,48 @@ def create_separated_list(string_list):
     else:
         list_to_string = ''
     return list_to_string
+
+
+def read_or_fail(file_object, length):
+    """
+    Ensure that the data read is as the exact length requested. Otherwise raise an OSError.
+
+    :param io.IOBase file_object: The file-lke object ot read from.
+    :param int length: The length of the data to read.
+    :return: The data read.
+    """
+    data = file_object.read(length)
+    if len(data) != length:
+        raise OSError(UiStrings().FileCorrupt)
+    return data
+
+
+def read_int(file_object, data_type, endian='big'):
+    """
+    Read the correct amount of data from a file-like object to decode it to the specified type.
+
+    :param io.IOBase file_object: The file-like object to read from.
+    :param DataType data_type: A member from the :enum:`DataType`
+    :param endian: The endianess of the data to be read
+    :return int: The decoded int
+    """
+    data = read_or_fail(file_object, data_type)
+    return int.from_bytes(data, endian)
+
+
+def seek_or_fail(file_object, offset, how=os.SEEK_SET):
+    """
+    See to a set position and return an error if the cursor has not moved to that position.
+
+    :param io.IOBase file_object: The file-like object to attempt to seek.
+    :param int offset: The offset / position to seek by / to.
+    :param [os.SEEK_CUR | os.SEEK_SET how: Currently only supports os.SEEK_CUR (0) or os.SEEK_SET (1)
+    :return int: The new position in the file.
+    """
+    if how not in (os.SEEK_CUR, os.SEEK_SET):
+        raise NotImplementedError
+    prev_pos = file_object.tell()
+    new_pos = file_object.seek(offset, how)
+    if how == os.SEEK_SET and new_pos != offset or how == os.SEEK_CUR and new_pos != prev_pos + offset:
+        raise OSError(UiStrings().FileCorrupt)
+    return new_pos
