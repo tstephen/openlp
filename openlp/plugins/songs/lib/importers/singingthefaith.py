@@ -27,8 +27,8 @@ Great Britain."""
 
 import logging
 import re
-
 import os
+from pathlib import Path
 
 from openlp.core.common.i18n import translate
 from openlp.plugins.songs.lib.importers.songimport import SongImport
@@ -50,11 +50,6 @@ class SingingTheFaithImport(SongImport):
     hint_comments = ''
     hint_ignoreIndent = False
 
-    def __init__(self, manager, **kwargs):
-        """
-        Initialise the class.
-        """
-        super(SingingTheFaithImport, self).__init__(manager, **kwargs)
 
     def do_import(self):
         """
@@ -63,12 +58,11 @@ class SingingTheFaithImport(SongImport):
         if not isinstance(self.import_source, list):
             return
         self.import_wizard.progress_bar.setMaximum(len(self.import_source))
-        for filename in self.import_source:
+        for file_path in self.import_source:
             if self.stop_import_flag:
                 return
-            song_file = open(filename, 'rt', encoding='cp1251')
-            self.do_import_file(song_file)
-            song_file.close()
+            with file_path.open('rt', encoding='cp1251') as song_file:
+                self.do_import_file(song_file)
 
     def do_import_file(self, file):
         """
@@ -93,27 +87,24 @@ class SingingTheFaithImport(SongImport):
         copyright = ''
         check_flag = 'z'            # Prepended to title, remove if we think import should be OK
 
-
         self.add_comment("Imported with Singing The Faith Importer v "+str(singingTheFaithVersion))
 
 # Get the file_song_number - so we can use it for hints
-        filename = file.name
-        song_number_file = os.path.splitext(os.path.basename(filename))[0]
+        filename = Path(file.name)
+        song_number_file = filename.stem
         song_number_match = re.search('\d+',song_number_file)
         if song_number_match:
             song_number_file=song_number_match.group()
 
 # See if there are hints available at all
             # See if there is a hints file in the same location as the file
-        dir_path = os.path.dirname(os.path.realpath(filename))
-##            print("Pathname is ",dir_path)
-        hints_file_name = os.path.join(dir_path,"hints.tag")
+        dir_path = filename.parent
+        hints_file_path = dir_path / 'hints.tag'
         try:
-            hints_file=open(hints_file_name,"r")
-            hints_available = self.read_hints(hints_file,song_number_file)
+            with hints_file_path.open('r') as hints_file:
+                hints_available = self.read_hints(hints_file,song_number_file)
         except FileNotFoundError:
             hints_available = False
-
 
         try:
             # Read the file
@@ -122,29 +113,29 @@ class SingingTheFaithImport(SongImport):
 
 ##                print("Read line",line_number,"-",line)
 
-                if (hints_available and (str(line_number) in self.hintline)):
+                if hints_available and (str(line_number) in self.hintline):
 ##                    print("Found hint for line ",line_number)
                     hint = self.hintline[str(line_number)]
 ##                    print("Hint is ",hint)
-                    if (hint == "Comment"):
+                    if hint == "Comment":
                         line.strip()
 ##                        print("Comment hint for line ",line_number," line is ",line)
                         self.add_comment(line)
                         line_number += 1
                         next(file)
                         continue
-                    elif (hint == "Ignore"):
+                    elif hint == "Ignore":
                         line_number += 1
                         next(file)
                         continue
-                    elif (hint == "Author"):
+                    elif hint == "Author":
                         # add as a raw author - do not split and make them a words author
                         line.strip()
                         self.add_author(line,'words')
                         line_number += 1
                         next(file)
                         continue
-                    elif (hint.startswith("VariantVerse")):
+                    elif hint.startswith("VariantVerse"):
  ##                       print("VariantVerse found - hint is ",hint)
                         (vv,hintverse,replace)=hint.split(" ",2)
                         this_verse = self.verses[int(hintverse)-1]
@@ -227,7 +218,7 @@ class SingingTheFaithImport(SongImport):
 ##                        print("About to add a verse - type ",current_verse_type," ** ",current_verse)
                         self.add_verse(current_verse, current_verse_type)
                         self.verse_order_list.append(current_verse_type+str(current_verse_number))
-                        if (current_verse_type == 'c'):
+                        if current_verse_type == 'c':
                             chorus_written = True
                         else:
                             current_verse_number += 1
@@ -311,11 +302,11 @@ class SingingTheFaithImport(SongImport):
         if self.hint_comments:
             self.add_comment(self.hint_comments)
 # Write the title last as by now we will know if we need checks
-        if ( hints_available and not self.checks_needed):
+        if hints_available and not self.checks_needed:
             check_flag=''
-        elif ( not hints_available and not has_chorus):
+        elif not hints_available and not has_chorus:
             check_flag=''
-        elif ( not hints_available and has_chorus and auto_verse_order_ok):
+        elif not hints_available and has_chorus and auto_verse_order_ok:
             check_flag=''
         self.title = check_flag+"STF"+song_number.zfill(3)+" - "+song_title
         if not self.finish():
@@ -352,32 +343,32 @@ class SingingTheFaithImport(SongImport):
                     tagval = tl.split(':')
                     tag = tagval[0].strip()
                     val = tagval[1].strip()
-                    if (tag == "End"):
+                    if tag == "End":
                         return hintfound
-                    elif (tag == "CommentsLine"):
+                    elif tag == "CommentsLine":
                         vals = val.split(',')
                         for v in vals:
                             self.hintline[v] = "Comment"
-                    elif (tag == "IgnoreLine"):
+                    elif tag == "IgnoreLine":
                         vals = val.split(',')
                         for v in vals:
                             self.hintline[v] = "Ignore"
-                    elif (tag == "AuthorLine"):
+                    elif tag == "AuthorLine":
                         vals = val.split(',')
                         for v in vals:
                             self.hintline[v] = "Author"  
-                    elif (tag == "VerseOrder"):
+                    elif tag == "VerseOrder":
                         self.hint_verseOrder = val
-                    elif (tag == "ManualCheck"):
+                    elif tag == "ManualCheck":
                         self.checks_needed = True
-                    elif (tag == "IgnoreIndent"):
+                    elif tag == "IgnoreIndent":
                         self.hint_ignoreIndent = True
-                    elif (tag == "VariantVerse"):
+                    elif tag == "VariantVerse":
                         vvline = val.split(' ',1)
                         self.hintline[vvline[0].strip()] = "VariantVerse "+vvline[1].strip()
-                    elif (tag == "SongTitle"):
+                    elif tag == "SongTitle":
                         self.hint_songtitle = val
-                    elif (tag == "AddComment"):
+                    elif tag == "AddComment":
                         self.hint_comments += '\n' + val
                     else:
                         print("Unknown tag ",tag," value ",val)
