@@ -345,7 +345,7 @@ class SongFormat(object):
             'filter': '{text} (*.pro4 *.pro5 *.pro6)'.format(text=translate('SongsPlugin.ImportWizardForm',
                                                                             'ProPresenter Song Files'))
         },
-       SingingTheFaith: {
+        SingingTheFaith: {
             'class': SingingTheFaithImport,
             'name': 'SingingTheFaith',
             'prefix': 'singingTheFaith',

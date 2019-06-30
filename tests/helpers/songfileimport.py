@@ -123,7 +123,8 @@ class SongImportTestHelper(TestCase):
         log.debug("Song copyright imported: %s" % importer.song_number)
         log.debug("Topics imported: %s" % importer.topics)
 
-        assert importer.title == title, 'title for %s should be "%s" and is "%s"' % (source_file_name, title, importer.title)
+        assert importer.title == title, \
+            'title for %s should be "%s" and is "%s"' % (source_file_name, title, importer.title)
         for author in author_calls:
             if isinstance(author, str):
                 self.mocked_add_author.assert_any_call(author)
