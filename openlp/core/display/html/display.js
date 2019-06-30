@@ -436,8 +436,8 @@ var Display = {
     }
     var settings = JSON.parse(alert_settings);
     this._alertSettings = settings;    
-    Display.setAlertText(text);
-    Display.setAlertLocation(settings.location, settings.font_color, settings.font_face, settings.font_size);    
+    Display.setAlertText(text, settings.font_color, settings.font_face, settings.font_size);
+    Display.setAlertLocation(settings.location);    
     /* Check if the alert is a queued alert */
     if (Display._alertState !== AlertState.DisplayingFromQueue) {
       Display._alertState = AlertState.Displaying;
@@ -524,8 +524,7 @@ var Display = {
       default:
         alertContainer.classList.add("bottom");                       
         break;
-    }
-    console.debug("The classname set location is: " + alertContainer.className);
+    }    
   },
   /**
    * Remove the location class set after displaying the alert
@@ -546,8 +545,7 @@ var Display = {
       default:
         alertContainer.classList.remove("bottom");                       
         break;
-    }
-    console.debug("The classname after removal is: " + alertContainer.className);
+    }    
   },
   /**
    * Hide the alert background after the alert has been shown
@@ -567,7 +565,7 @@ var Display = {
             
     if (settings.scroll) {      
       var animationSettings = "alert-scrolling-text " + settings.timeout +
-                              "s linear 0s " + settings.repeat + " normal";       
+                              "s linear 0.6s " + settings.repeat + " normal";       
       alertText.style.animation = animationSettings;
       Display._animationState = AnimationState.ScrollingText;
     }
@@ -589,8 +587,7 @@ var Display = {
     var alertText = $('#alert')[0];            
     Display._animationState = AnimationState.NoAnimation;
     alertText.style.animation = "";    
-    Display.hideAlertBackground();
-    Display.resetAlertKeyframes();                                         
+    Display.hideAlertBackground();                                            
   },
   /** 
   * Display the next alert in the queue

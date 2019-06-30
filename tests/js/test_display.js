@@ -158,10 +158,13 @@ describe("Display.alert", function () {
 
   beforeEach(function () {
     document.body.innerHTML = "";
+    alertContainer = document.createElement("div");
+    alertContainer.setAttribute("class", "alert-container");
+    document.body.appendChild(alertContainer);
     alertBackground = document.createElement("div");
     alertBackground.setAttribute("id", "alert-background");
-    document.body.appendChild(alertBackground);
-    alertText = document.createElement("p");
+    alertContainer.appendChild(alertBackground);
+    alertText = document.createElement("span");
     alertText.setAttribute("id","alert");
     alertBackground.appendChild(alertText);
     settings = '{ \
@@ -175,16 +178,17 @@ describe("Display.alert", function () {
     expect(Display.alert("",settings)).toBeNull();
   });
 
-  it("should set the correct alert text", function () { 
-    spyOn(Display, "setAlertKeyframes");    
+  it("should set the correct alert text", function () {
+    spyOn(Display, "setAlertText");
+    spyOn(Display, "setAlertLocation");     
     Display.alert("OPEN-LP-3.0 Alert Test", settings);
-    
-    expect(alertText.innerHTML).toEqual("OPEN-LP-3.0 Alert Test");
+        
+    expect(Display.setAlertText).toHaveBeenCalled();
+    expect(Display.setAlertLocation).toHaveBeenCalled();
   });
 
   it("should call the addAlertToQueue method if an alert is displaying", function () {
-    spyOn(Display, "addAlertToQueue");
-    spyOn(Display, "setAlertKeyframes");
+    spyOn(Display, "addAlertToQueue");    
     Display._alerts = [];
     Display._alertState = AlertState.Displaying;
     var text = "Testing alert queue";
@@ -194,8 +198,7 @@ describe("Display.alert", function () {
     expect(Display.addAlertToQueue).toHaveBeenCalledWith(text, settings);
   });
 
-  it("should set the alert settings correctly", function() {
-    spyOn(Display, "setAlertKeyframes");
+  it("should set the alert settings correctly", function() {    
     Display.alert("Testing settings", settings);
         
     expect(Display._alertSettings).toEqual(JSON.parse(settings));
@@ -223,7 +226,7 @@ describe("Display.showAlertBackground", function () {
     Display.showAlertBackground(bg_color);    
          
     expect(alertBackground.style.backgroundColor).toEqual(bg_color);      
-    expect(alertBackground.className).toEqual("bg-default show");                     
+    expect(alertBackground.className).toEqual("bg-default show-bg");                     
   });  
 });
 
@@ -233,7 +236,7 @@ describe("Display.hideAlertBackground", function () {
     document.body.innerHTML = "";
     alertBackground = document.createElement("div");
     alertBackground.setAttribute("id", "alert-background"); 
-    alertBackground.setAttribute("class", "bg-default show");     
+    alertBackground.setAttribute("class", "bg-default show-bg");     
     document.body.appendChild(alertBackground);    
   });
   
@@ -250,71 +253,72 @@ describe("Display.setAlertText", function() {
   var alertText;
   beforeEach( function() {
     document.body.innerHTML = "";
-    alertText = document.createElement("p");
+    alertText = document.createElement("span");
     alertText.setAttribute("id", "alert");      
-    document.body.appendChild(alertText);    
+    document.body.appendChild(alertText);      
   });
   it("should set the alert text correctly", function () {    
-    Display.setAlertText("OpenLP Alert Text");
-
+    Display.setAlertText("OpenLP Alert Text", "#ffffff", "Tahoma", 40);
+    
     expect(alertText.textContent).toEqual("OpenLP Alert Text");
+    expect(alertText.style.color).toEqual("rgb(255, 255, 255)");
+    expect(alertText.style.fontFamily).toEqual("Tahoma");
+    expect(alertText.style.fontSize).toEqual("40pt");
   });
 });
 
 describe("Display.setAlertLocation", function() {
   beforeEach(function() {
     document.body.innerHTML = "";    
-    alertBackground = document.createElement("p");
-    alertBackground.setAttribute("id","alert-background");
-    alertBackground.setAttribute("class","bg-default");
-    document.body.appendChild(alertBackground);
+    alertContainer = document.createElement("div");
+    alertContainer.setAttribute("class", "alert-container");
+    document.body.appendChild(alertContainer);    
   });
   it("should set the correct class when location is top of the page", function () {    
     Display.setAlertLocation(0);
 
-    expect(alertBackground.className).toEqual("bg-default top");
+    expect(alertContainer.className).toEqual("alert-container top");
   });
 
   it("should set the correct class when location is middle of the page", function () {    
     Display.setAlertLocation(1);
     
-    expect(alertBackground.className).toEqual("bg-default middle");       
+    expect(alertContainer.className).toEqual("alert-container middle");       
   });
 
   it("should set the correct class when location is bottom of the page", function () {
     Display.setAlertLocation(2);
 
-    expect(alertBackground.className).toEqual("bg-default bottom");
+    expect(alertContainer.className).toEqual("alert-container bottom");
   });
 });
 
 describe("Display.removeAlertLocation", function () {
   beforeEach(function() {
     document.body.innerHTML = "";    
-    alertBackground = document.createElement("p");
-    alertBackground.setAttribute("id", "alert-background");
-    alertBackground.setAttribute("class", "bg-default");
-    document.body.appendChild(alertBackground);
+    alertContainer = document.createElement("div");
+    alertContainer.setAttribute("class", "alert-container");
+    document.body.appendChild(alertContainer);
   });
   it("should remove the correct class when location is top of the page", function () {
-    alertBackground.classList.add("top");
+    alertContainer.classList.add("top");
     Display.removeAlertLocation(0);
 
-    expect(alertBackground.className).toEqual("bg-default");
+    expect(alertContainer.className).toEqual("alert-container");
   });
 
   it("should remove the correct class when location is middle of the page", function () {
-    alertBackground.classList.add("middle");
+    alertContainer.classList.add("middle");
     Display.removeAlertLocation(1);
     
-    expect(alertBackground.className).toEqual("bg-default");       
+    expect(alertContainer.className).toEqual("alert-container");       
   });
 
   it("should remove the correct class when location is bottom of the page", function () {
-    alertBackground.classList.add("bottom");
+    alertContainer.classList.add("bottom");
     Display.removeAlertLocation(2);
 
-    expect(alertBackground.className).toEqual("bg-default");
+    expect(alertContainer.className).toEqual("alert-container");
   });
 });
 
@@ -322,8 +326,8 @@ describe("Display.showAlertText", function () {
   var alertText, settings;
   beforeEach(function () {
     document.body.innerHTML = "";    
-    alertText = document.createElement("p");
-    alertText.setAttribute("id","alert");
+    alertText = document.createElement("span");
+    alertText.setAttribute("id", "alert");
     document.body.appendChild(alertText);
     settings = {
       "location": 2, "font_face": "Tahoma", "font_size": 40, 
@@ -331,21 +335,12 @@ describe("Display.showAlertText", function () {
       "timeout": 0.01, "repeat": 1, "scroll": true
     };
     Display._transitionState = TransitionState.EntranceTransition;
-  });
-
-  it("should set the correct styles on the text", function() {    
-    Display.showAlertText(settings);    
-
-    expect(alertText.style.opacity).toEqual('1');
-    expect(alertText.style.color).toEqual("rgb(255, 255, 255)");
-    expect(alertText.style.fontFamily).toEqual("Tahoma");
-    expect(alertText.style.fontSize).toEqual("40pt");    
-  });
+  });  
 
   it("should set the correct animation when text is set to scroll)", function () {              
     Display.showAlertText(settings);
 
-    expect(alertText.style.animation).toEqual("alert-scrolling-text " + settings.timeout + "s linear 0s 1 normal");
+    expect(alertText.style.animation).toEqual("alert-scrolling-text " + settings.timeout + "s linear 0.6s 1 normal");
     expect(Display._animationState).toEqual(AnimationState.ScrollingText);    
   });
 
@@ -354,12 +349,11 @@ describe("Display.showAlertText", function () {
     Display._transitionState = TransitionState.EntranceTransition;   
     spyOn(Display, "hideAlertText");    
     Display.showAlertText(settings);
-
-    expect(alertText.style.opacity).toEqual('1');
-    expect(alertText.style.animation).toEqual("");
-    expect(Display._animationState).toEqual(AnimationState.NonScrollingText);    
-    setTimeout (function () {
-      expect(alertText.className).toEqual("no-scroll");
+   
+    // expect(alertText.style.animation).toEqual("");
+    expect(Display._animationState).toEqual(AnimationState.NonScrollingText);
+    expect(alertText.classList.contains('show-text')).toBe(true);
+    setTimeout (function () {      
       expect(Display._animationState).toEqual(AnimationState.NoAnimation);
       expect(Display.hideAlertText).toHaveBeenCalled();      
       done();
@@ -371,39 +365,32 @@ describe("Display.hideAlertText", function() {
   var alertBackground, alertText, keyframeStyle;
   beforeEach(function () {
     document.body.innerHTML = "";
-    // keyframeStyle = document.createElement("style");
-    // keyframeStyle.setAttribute("id", "keyframeStyles");    
-    // document.head.appendChild(keyframeStyle);
-    // alertBackground = document.createElement("div");
-    // alertBackground.setAttribute("id", "alert-background");
-    // document.body.appendChild(alertBackground);
-    alertText = document.createElement("p");
+    alertBackground = document.createElement("div");
+    alertBackground.setAttribute("id", "alert-background"); 
+    alertBackground.setAttribute("class", "bg-default show-bg");     
+    document.body.appendChild(alertBackground);    
+    alertText = document.createElement("span");
     alertText.setAttribute("id", "alert");
     alertText.style.opacity = 1;
     alertText.style.animation = "alert-scrolling-text 5s linear 0s 1 bg-default";
-    document.body.appendChild(alertText);    
+    alertBackground.appendChild(alertText);        
     Display._animationState = AnimationState.ScrollingText;
   });
 
-  it("should reset the text styles and animation state after the text has scrolled", function() {
-    spyOn(Display, "resetAlertKeyframes");
+  it("should reset the text styles and animation state after the text has scrolled", function() {    
     spyOn(Display, "hideAlertBackground");    
     Display.hideAlertText();
 
-    expect(alertText.style.animation).toEqual("");
-    expect(alertText.style.opacity).toEqual('0');
-    expect(alertText.style.color).toEqual("rgb(255, 255, 255)");
-    expect(alertText.style.fontSize).toEqual("40pt");    
+    expect(alertText.style.animation).toEqual("");        
     expect(Display._animationState).toEqual(AnimationState.NoAnimation);
   });
 
-  it("should call the hideAlertBackground and resetAlertKeyframes methods", function() {
+  it("should call the hideAlertBackground method", function() {          
     spyOn(Display, "hideAlertBackground");
-    spyOn(Display, "resetAlertKeyframes");    
     Display.hideAlertText();
 
-    expect(Display.hideAlertBackground).toHaveBeenCalled();
-    expect(Display.resetAlertKeyframes).toHaveBeenCalled();
+
+    expect(Display.hideAlertBackground).toHaveBeenCalled();    
   });  
 });
 
@@ -453,8 +440,13 @@ describe("Display.showNextAlert", function () {
 });
 
 describe("Display.alertTransitionEndEvent", function() {
+  beforeEach( function() {
+    
+  });
+
   it("should set the correct state and call showAlertText after the alert entrance transition", function() {    
-    var fake_settings = {test: "fake_settings"};  
+    var fake_settings = {test: "fake_settings"};
+    var e = jasmine.createSpyObj('e', ['stopPropagation']);  
     Display._alertSettings = fake_settings;
     spyOn(Display, "showAlertText");    
     Display._transitionState = TransitionState.EntranceTransition;    
@@ -480,45 +472,6 @@ describe("Display.alertAnimationEndEvent", function () {
     Display.alertAnimationEndEvent();
 
     expect(Display.hideAlertText).toHaveBeenCalled();
-  });
-});
-
-describe("Display.setAlertKeyframes", function () {
-  var keyframeStyle;
-  beforeEach( function () {
-    document.head.innerHTML = "";
-    keyframeStyle = document.createElement("style");
-    keyframeStyle.setAttribute("id", "keyframeStyles");
-    document.head.appendChild(keyframeStyle);    
-  });
-
-  it("should set the correct keyframes", function () {
-    var scrollWidth = 3200;
-    var scrollWidthPercentage = (Math.ceil((((scrollWidth / screen.width) * 100) + 1) / 10) * 10) + 110;
-    var keyframeHtml = "@keyframes alert-scrolling-text {" +
-      "from { transform: translateX(110%); } " +
-      "to { transform: translateX(-" + scrollWidthPercentage +"%);}";        
-        
-    expect(Display.setAlertKeyframes(scrollWidth)).toEqual(keyframeHtml);
-    expect(keyframeStyle.innerHTML).toEqual(keyframeHtml);
-  });
-});
-
-describe("Display.resetAlertKeyframes", function () {
-  var keyframeStyle;
-  beforeEach( function () {
-    document.head.innerHTML = "";  
-    keyframeStyle = document.createElement("style");
-    keyframeStyle.setAttribute("id", "keyframeStyles");
-    document.head.appendChild(keyframeStyle);
-    keyframeStyle.innerHTML = "@keyframes alert-scrolling-text {" + 
-                                "from { margin-left: 110%; } to { margin-left: -220;}";    
-  });
-
-  it("shoud reset the key frames after scrolling the text", function () {        
-    Display.resetAlertKeyframes();
-
-    expect(keyframeStyle.innerHTML).toEqual("");
   });
 });
 
