@@ -24,10 +24,8 @@ The :mod:`singingthefaith` module provides the functionality for importing songs
 exported from Singing The Faith - an Authorised songbook for the Methodist Church of
 Great Britain."""
 
-
 import logging
 import re
-import os
 from pathlib import Path
 
 from openlp.core.common.i18n import translate
@@ -49,7 +47,6 @@ class SingingTheFaithImport(SongImport):
     hint_songtitle = ''
     hint_comments = ''
     hint_ignoreIndent = False
-
 
     def do_import(self):
         """
@@ -73,54 +70,52 @@ class SingingTheFaithImport(SongImport):
         # Setup variables
         line_number = 0
         old_indent = 0
-        chorus_indent = 5           # It might be 6, but we test for >=
+        # The chorus indent is how many spaces the chorus is indented - it might be 6,
+        # but we test for >= and I do not know how consistent to formatting of the
+        # exported songs is.
+        chorus_indent = 5
         song_title = 'STF000 -'
         song_number = '0'
         ccli = '0'
         current_verse = ''
         current_verse_type = 'v'
         current_verse_number = 1
+        # Potentially we could try to track current chorus number to automatically handle
+        # more than 1 chorus, currently unused.
+        # current_chorus_number = 1
         has_chorus = False
         chorus_written = False
         auto_verse_order_ok = False
-        verses = []
-        author = ''
         copyright = ''
-        check_flag = 'z'            # Prepended to title, remove if we think import should be OK
+        # the check_flag is prepended to the title, removed if the import should be OK
+        # all the songs which need manual editing should sort below all the OK songs
+        check_flag = 'z'
 
-        self.add_comment("Imported with Singing The Faith Importer v "+str(singingTheFaithVersion))
+        self.add_comment("Imported with Singing The Faith Importer v " + str(singingTheFaithVersion))
 
-# Get the file_song_number - so we can use it for hints
+        # Get the file_song_number - so we can use it for hints
         filename = Path(file.name)
         song_number_file = filename.stem
-        song_number_match = re.search('\d+',song_number_file)
+        song_number_match = re.search(r'\d+', song_number_file)
         if song_number_match:
-            song_number_file=song_number_match.group()
+            song_number_file = song_number_match.group()
 
-# See if there are hints available at all
-            # See if there is a hints file in the same location as the file
+        # See if there is a hints file in the same location as the file
         dir_path = filename.parent
         hints_file_path = dir_path / 'hints.tag'
         try:
             with hints_file_path.open('r') as hints_file:
-                hints_available = self.read_hints(hints_file,song_number_file)
+                hints_available = self.read_hints(hints_file, song_number_file)
         except FileNotFoundError:
             hints_available = False
 
         try:
-            # Read the file
             for line in file:
                 line_number += 1
-
-##                print("Read line",line_number,"-",line)
-
                 if hints_available and (str(line_number) in self.hintline):
-##                    print("Found hint for line ",line_number)
                     hint = self.hintline[str(line_number)]
-##                    print("Hint is ",hint)
                     if hint == "Comment":
                         line.strip()
-##                        print("Comment hint for line ",line_number," line is ",line)
                         self.add_comment(line)
                         line_number += 1
                         next(file)
@@ -132,68 +127,61 @@ class SingingTheFaithImport(SongImport):
                     elif hint == "Author":
                         # add as a raw author - do not split and make them a words author
                         line.strip()
-                        self.add_author(line,'words')
+                        self.add_author(line, 'words')
                         line_number += 1
                         next(file)
                         continue
                     elif hint.startswith("VariantVerse"):
- ##                       print("VariantVerse found - hint is ",hint)
-                        (vv,hintverse,replace)=hint.split(" ",2)
-                        this_verse = self.verses[int(hintverse)-1]
+                        (vv, hintverse, replace) = hint.split(" ", 2)
+                        this_verse = self.verses[int(hintverse) - 1]
                         this_verse_str = this_verse[1]
                         new_verse = this_verse_str
                         # There might be multiple replace pairs separated by |
-                        replaces=replace.split("|")
+                        replaces = replace.split("|")
                         for rep in replaces:
-                            (source_str,dest_str)=rep.split("/")
-                            new_verse = new_verse.replace(source_str,dest_str)
-                        self.add_verse(new_verse,'v')
-                        self.verse_order_list.append('v'+str(current_verse_number))
+                            (source_str, dest_str) = rep.split("/")
+                            new_verse = new_verse.replace(source_str, dest_str)
+                        self.add_verse(new_verse, 'v')
+                        self.verse_order_list.append('v' + str(current_verse_number))
                         current_verse_number += 1
                         line_number += 1
                         next(file)
                         continue
                     else:
                         self.log_error(translate('SongsPlugin.SingingTheFaithImport', 'File %s' % file.name),
-                            translate('SongsPlugin.SingingTheFaithImport', 'Unknown hint %s' % hint))
+                                       translate('SongsPlugin.SingingTheFaithImport', 'Unknown hint %s' % hint))
                     return
-                        
-
                 # STF exported lines have a leading verse number at the start of each verse.
                 #  remove them - note that we want to track the indent as that shows a chorus
-                # so will deal with that before stipping all leading spaces.                
+                # so will deal with that before stipping all leading spaces.
                 indent = 0
                 if line.strip():
-##                    print("Dealing non empty line ",line)
-                    verse_num_match = re.search('^\d+',line)
+                    verse_num_match = re.search(r'^\d+', line)
                     if verse_num_match:
-                        verse_num = verse_num_match.group()
-##                        print("Verse num is ",verse_num)
+                        # Could extract the verse number and check it against the calculated
+                        # verse number - TODO
+                        # verse_num = verse_num_match.group()
                         line = line.lstrip("0123456789")
-                    indent_match = re.search('^\s+',line)
+                    indent_match = re.search(r'^\s+', line)
                     if indent_match:
-                       indent=len(indent_match.group())
-##                       print("indent is ",indent)
-
-                # Assuming we have sorted out what is verse and what is chorus, strip lines, unless ignoreIndent
-                if not self.hint_ignoreIndent:
-                    line = line.strip()
-                else:
+                        indent = len(indent_match.group())
+                # Assuming we have sorted out what is verse and what is chorus, strip lines,
+                # unless ignoreIndent
+                if self.hint_ignoreIndent:
                     line = line.rstrip()
-##                print("Read line",line_number,"(",indent,")",line)
+                else:
+                    line = line.strip()
                 if line_number == 2:
                     # note that songs seem to start with a blank line
                     song_title = line
-##                    print("Set song title to "+song_title)
                 # Detect the 'Reproduced from Singing the Faith Electronic Words Edition' line
                 if line.startswith('Reproduced from Singing the Faith Electronic Words Edition'):
-                    song_number_match = re.search('\d+',line)
+                    song_number_match = re.search(r'\d+', line)
                     if song_number_match:
-                        song_number=song_number_match.group()
-##                        print("Found Reproduced - song is ",song_number)
+                        song_number = song_number_match.group()
                         continue
                 # If the indent is 0 and it contains '(c)' then it is a Copyright line
-                elif (indent == 0) and ( "(c)" in line):
+                elif (indent == 0) and ("(c)" in line):
                     copyright = line
                     continue
                 elif (indent == 0) and (line.startswith('Liturgical ')):
@@ -206,43 +194,35 @@ class SingingTheFaithImport(SongImport):
                     self.add_comment(line)
                     continue
                 # If indent is 0 it may be the author, unless it was one of the cases covered above
-                elif (indent == 0) and len(line)>0 :
-##                    print ("Possible author ",line)
-#                   May have more than one author, separated by ' and '
+                elif (indent == 0) and len(line) > 0:
+                    # May have more than one author, separated by ' and '
                     authors = line.split(' and ')
                     for a in authors:
                         self.parse_author(a)
                     continue
                 if line == '':
-##                    print("Starting a new verse")
                     if current_verse != '':
-##                        print("About to add a verse - type ",current_verse_type," ** ",current_verse)
                         self.add_verse(current_verse, current_verse_type)
-                        self.verse_order_list.append(current_verse_type+str(current_verse_number))
+                        self.verse_order_list.append(current_verse_type + str(current_verse_number))
                         if current_verse_type == 'c':
                             chorus_written = True
                         else:
                             current_verse_number += 1
                     current_verse = ''
                     if chorus_written:
-##                        print("Setting current_verse_type to v")
                         current_verse_type = 'v'
                 else:
                     # If the line is indented more than or equal chorus_indent then assume it is a chorus
-                    # If then indent has just changed then start a new verse just like hitting a blank line
-
+                    # If the indent has just changed then start a new verse just like hitting a blank line
                     if not self.hint_ignoreIndent and ((indent >= chorus_indent) and (old_indent < indent)):
-##                        print("Change of indent - close off old verse")
                         if current_verse != '':
-##                            print("About to add a verse (indent change) - type ",current_verse_type," ** ",current_verse)
                             self.add_verse(current_verse, current_verse_type)
-                            self.verse_order_list.append(current_verse_type+str(current_verse_number))
+                            self.verse_order_list.append(current_verse_type + str(current_verse_number))
                             if current_verse_type == 'v':
                                 current_verse_number += 1
                         current_verse = line
-##                        print("Setting current_verse_type to c");
                         current_verse_type = 'c'
-                        old_indent=indent
+                        old_indent = indent
                         chorus_written = False
                         has_chorus = True
                         continue
@@ -258,8 +238,8 @@ class SingingTheFaithImport(SongImport):
 
         if self.hint_songtitle:
             song_title = self.hint_songtitle
-        self.title = check_flag+"STF"+song_number.zfill(3)+" - "+song_title
-        self.song_book_name="Singing The Faith"
+        self.title = check_flag + "STF" + song_number.zfill(3) + " - " + song_title
+        self.song_book_name = "Singing The Faith"
         self.song_number = song_number
         self.ccli_number = ccli
         self.add_copyright(copyright)
@@ -267,78 +247,69 @@ class SingingTheFaithImport(SongImport):
 #  one for two special cases - Verse followed by one chorus (to be repeated after every verse)
 #  of Chorus, followed by verses. If hints for ManualCheck or VerseOrder are supplied ignore this
         if has_chorus and not self.hint_verseOrder and not self.checks_needed:
-##            print ("Has chorus - verse order list is ",self.verse_order_list)
             auto_verse_order_ok = False
             # Popular case V1 C2 V2 ...
             if len(self.verse_order_list) >= 1:         # protect against odd cases
                 if (self.verse_order_list[0] == "v1") and (self.verse_order_list[1] == "c2"):
-                    new_verse_order_list = ['v1','c1']
+                    new_verse_order_list = ['v1', 'c1']
                     i = 2
                     auto_verse_order_ok = True
                 elif (self.verse_order_list[0] == "c1") and (self.verse_order_list[1] == "v1"):
-                    new_verse_order_list = ['c1','v1','c1']
+                    new_verse_order_list = ['c1', 'v1', 'c1']
                     i = 2
                     auto_verse_order_ok = True
                 # if we are in a case we can deal with
                 if auto_verse_order_ok:
-                   while i < len(self.verse_order_list):
+                    while i < len(self.verse_order_list):
                         if self.verse_order_list[i].startswith('v'):
                             new_verse_order_list.append(self.verse_order_list[i])
                             new_verse_order_list.append("c1")
                         else:
-                            self.log_error(translate('SongsPlugin.SingingTheFaithImport', 'File %s' % file.name),
-                                'Error: Strange verse order entry '+self.verse_order_list[i])
-##                            print("Found strange verseorder entry ",self.verse_order_list[i]," in ",file.name)
+                            # Would like to notify, but want a warning, which we will do via the
+                            # Check_needed mechanism, as log_error aborts input of that song.
+                            # self.log_error(translate('SongsPlugin.SingingTheFaithImport', 'File %s' % file.name),
+                            #               'Error: Strange verse order entry ' + self.verse_order_list[i])
                             auto_verse_order_ok = False
                         i += 1
-##                    print(" new verse_order_list (Chorus first is ",new_verse_order_list)
-                   self.verse_order_list = new_verse_order_list 
+                    self.verse_order_list = new_verse_order_list
             else:
                 if not auto_verse_order_ok:
-                    print ("setting verse_order_list to empty")
                     self.verse_order_list = []
-            # If it is a simple case, 
         if self.hint_verseOrder:
             self.verse_order_list = self.hint_verseOrder.split(',')
         if self.hint_comments:
             self.add_comment(self.hint_comments)
-# Write the title last as by now we will know if we need checks
+        # Write the title last as by now we will know if we need checks
         if hints_available and not self.checks_needed:
-            check_flag=''
+            check_flag = ''
         elif not hints_available and not has_chorus:
-            check_flag=''
+            check_flag = ''
         elif not hints_available and has_chorus and auto_verse_order_ok:
-            check_flag=''
-        self.title = check_flag+"STF"+song_number.zfill(3)+" - "+song_title
+            check_flag = ''
+        self.title = check_flag + "STF" + song_number.zfill(3) + " - " + song_title
         if not self.finish():
             self.log_error(file.name)
 
-
-    def read_hints(self, file, song_number ):
+    def read_hints(self, file, song_number):
         hintfound = False
-#   clear hints
         self.hint_verseOrder = ''
         self.hintline.clear()
         self.hint_comments = ''
         self.hint_songtitle = ''
         self.hint_ignoreIndent = False
-
-##        print("Reading the hints file for ",song_number)
         for tl in file:
-#   if the line is empty then return
             if not tl.strip():
                 return hintfound
             tagval = tl.split(':')
             tag = tagval[0].strip()
             val = tagval[1].strip()
-            if (tag == "Version") :
+            if tag == "Version":
                 self.hintfile_version = val
                 continue
             if (tag == "Hymn") and (val == song_number):
-##                print ("Found song ",song_number," in hints")
-                self.add_comment("Using hints version "+str(self.hintfile_version))
+                self.add_comment("Using hints version " + str(self.hintfile_version))
                 hintfound = True
-#   Assume, unless the hints has ManualCheck that if hinted all will be OK
+                # Assume, unless the hints has ManualCheck that if hinted all will be OK
                 self.checks_needed = False
                 for tl in file:
                     tagval = tl.split(':')
@@ -357,7 +328,7 @@ class SingingTheFaithImport(SongImport):
                     elif tag == "AuthorLine":
                         vals = val.split(',')
                         for v in vals:
-                            self.hintline[v] = "Author"  
+                            self.hintline[v] = "Author"
                     elif tag == "VerseOrder":
                         self.hint_verseOrder = val
                     elif tag == "ManualCheck":
@@ -365,17 +336,12 @@ class SingingTheFaithImport(SongImport):
                     elif tag == "IgnoreIndent":
                         self.hint_ignoreIndent = True
                     elif tag == "VariantVerse":
-                        vvline = val.split(' ',1)
-                        self.hintline[vvline[0].strip()] = "VariantVerse "+vvline[1].strip()
+                        vvline = val.split(' ', 1)
+                        self.hintline[vvline[0].strip()] = "VariantVerse " + vvline[1].strip()
                     elif tag == "SongTitle":
                         self.hint_songtitle = val
                     elif tag == "AddComment":
                         self.hint_comments += '\n' + val
                     else:
-                        print("Unknown tag ",tag," value ",val)
-
-
-
-        return hintfound        
- 
-      
+                        self.log_error(file.name, "Unknown tag " + tag + " value " + val)
+        return hintfound
