@@ -22,14 +22,16 @@
 """
 Package to test the openlp.core.lib package.
 """
+import io
+import os
+from pathlib import Path
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
 from PyQt5 import QtCore, QtGui
 
-from openlp.core.common.path import Path
-from openlp.core.lib import build_icon, check_item_selected, create_separated_list, create_thumb, \
-    get_text_file_string, image_to_byte, resize_image, str_to_bool, validate_thumb
+from openlp.core.lib import DataType, build_icon, check_item_selected, create_separated_list, create_thumb, \
+    get_text_file_string, image_to_byte, read_or_fail, read_int, resize_image, seek_or_fail, str_to_bool, validate_thumb
 from tests.utils.constants import RESOURCE_PATH
 
 
@@ -680,3 +682,179 @@ class TestLib(TestCase):
         # THEN: We should have "Author 1, Author 2 and Author 3"
         assert string_result == 'Author 1, Author 2 and Author 3', \
             'The string should be "Author 1, Author 2, and Author 3".'
+
+    def test_read_or_fail_fail(self):
+        """
+        Test the :func:`read_or_fail` function when attempting to read more data than the buffer contains.
+        """
+        # GIVEN: Some test data
+        test_data = io.BytesIO(b'test data')
+
+        # WHEN: Attempting to read past the end of the buffer
+        # THEN: An OSError should be raised.
+        with self.assertRaises(OSError):
+            read_or_fail(test_data, 15)
+
+    def test_read_or_fail_success(self):
+        """
+        Test the :func:`read_or_fail` function when reading data that is in the buffer.
+        """
+        # GIVEN: Some test data
+        test_data = io.BytesIO(b'test data')
+
+        # WHEN: Attempting to read data that should exist.
+        result = read_or_fail(test_data, 4)
+
+        # THEN: The data of the requested length should be returned
+        assert result == b'test'
+
+    def test_read_int_u8_big(self):
+        """
+        Test the :func:`read_int` function when reading an unsigned 8-bit int using 'big' endianness.
+        """
+        # GIVEN: Some test data
+        test_data = io.BytesIO(b'\x0f\xf0\x0f\xf0')
+
+        # WHEN: Reading a an unsigned 8-bit int
+        result = read_int(test_data, DataType.U8, 'big')
+
+        # THEN: The an int should have been returned of the expected value
+        assert result == 15
+
+    def test_read_int_u8_little(self):
+        """
+        Test the :func:`read_int` function when reading an unsigned 8-bit int using 'little' endianness.
+        """
+        # GIVEN: Some test data
+        test_data = io.BytesIO(b'\x0f\xf0\x0f\xf0')
+
+        # WHEN: Reading a an unsigned 8-bit int
+        result = read_int(test_data, DataType.U8, 'little')
+
+        # THEN: The an int should have been returned of the expected value
+        assert result == 15
+
+    def test_read_int_u16_big(self):
+        """
+        Test the :func:`read_int` function when reading an unsigned 16-bit int using 'big' endianness.
+        """
+        # GIVEN: Some test data
+        test_data = io.BytesIO(b'\x0f\xf0\x0f\xf0')
+
+        # WHEN: Reading a an unsigned 16-bit int
+        result = read_int(test_data, DataType.U16, 'big')
+
+        # THEN: The an int should have been returned of the expected value
+        assert result == 4080
+
+    def test_read_int_u16_little(self):
+        """
+        Test the :func:`read_int` function when reading an unsigned 16-bit int using 'little' endianness.
+        """
+        # GIVEN: Some test data
+        test_data = io.BytesIO(b'\x0f\xf0\x0f\xf0')
+
+        # WHEN: Reading a an unsigned 16-bit int
+        result = read_int(test_data, DataType.U16, 'little')
+
+        # THEN: The an int should have been returned of the expected value
+        assert result == 61455
+
+    def test_read_int_u32_big(self):
+        """
+        Test the :func:`read_int` function when reading an unsigned 32-bit int using 'big' endianness.
+        """
+        # GIVEN: Some test data
+        test_data = io.BytesIO(b'\x0f\xf0\x0f\xf0')
+
+        # WHEN: Reading a an unsigned 32-bit int
+        result = read_int(test_data, DataType.U32, 'big')
+
+        # THEN: The an int should have been returned of the expected value
+        assert result == 267390960
+
+    def test_read_int_u32_little(self):
+        """
+        Test the :func:`read_int` function when reading an unsigned 32-bit int using 'little' endianness.
+        """
+        # GIVEN: Some test data
+        test_data = io.BytesIO(b'\x0f\xf0\x0f\xf0')
+
+        # WHEN: Reading a an unsigned 32-bit int
+        result = read_int(test_data, DataType.U32, 'little')
+
+        # THEN: The an int should have been returned of the expected value
+        assert result == 4027576335
+
+    def test_seek_or_fail_default_method(self):
+        """
+        Test the :func:`seek_or_fail` function when using the default value for the :arg:`how`
+        """
+        # GIVEN: A mocked_file_like_object
+        mocked_file_like_object = MagicMock(**{'seek.return_value': 5, 'tell.return_value': 0})
+
+        # WHEN: Calling seek_or_fail with out the how arg set
+        seek_or_fail(mocked_file_like_object, 5)
+
+        # THEN: seek should be called using the os.SEEK_SET constant
+        mocked_file_like_object.seek.assert_called_once_with(5, os.SEEK_SET)
+
+    def test_seek_or_fail_os_end(self):
+        """
+        Test the :func:`seek_or_fail` function when called with an unsupported seek operation.
+        """
+        # GIVEN: A Mocked object
+        # WHEN: Attempting to seek relative to the end
+        # THEN: An NotImplementedError should have been raised
+        with self.assertRaises(NotImplementedError):
+            seek_or_fail(MagicMock(), 1, os.SEEK_END)
+
+    def test_seek_or_fail_valid_seek_set(self):
+        """
+        Test that :func:`seek_or_fail` successfully seeks to the correct position.
+        """
+        # GIVEN: A mocked file-like object
+        mocked_file_like_object = MagicMock(**{'tell.return_value': 3, 'seek.return_value': 5})
+
+        # WHEN: Attempting to seek from the beginning
+        result = seek_or_fail(mocked_file_like_object, 5, os.SEEK_SET)
+
+        # THEN: The new position should be 5 from the beginning
+        assert result == 5
+
+    def test_seek_or_fail_invalid_seek_set(self):
+        """
+        Test that :func:`seek_or_fail` raises an exception when seeking past the end.
+        """
+        # GIVEN: A Mocked file-like object
+        mocked_file_like_object = MagicMock(**{'tell.return_value': 3, 'seek.return_value': 10})
+
+        # WHEN: Attempting to seek from the beginning past the end
+        # THEN: An OSError should have been raised
+        with self.assertRaises(OSError):
+            seek_or_fail(mocked_file_like_object, 15, os.SEEK_SET)
+
+    def test_seek_or_fail_valid_seek_cur(self):
+        """
+        Test that :func:`seek_or_fail` successfully seeks to the correct position.
+        """
+        # GIVEN: A mocked file_like object
+        mocked_file_like_object = MagicMock(**{'tell.return_value': 3, 'seek.return_value': 8})
+
+        # WHEN: Attempting to seek from the current position
+        result = seek_or_fail(mocked_file_like_object, 5, os.SEEK_CUR)
+
+        # THEN: The new position should be 8 (5 from its starting position)
+        assert result == 8
+
+    def test_seek_or_fail_invalid_seek_cur(self):
+        """
+        Test that :func:`seek_or_fail` raises an exception when seeking past the end.
+        """
+        # GIVEN: A mocked file_like object
+        mocked_file_like_object = MagicMock(**{'tell.return_value': 3, 'seek.return_value': 10})
+
+        # WHEN: Attempting to seek from the current position pas the end.
+        # THEN: An OSError should have been raised
+        with self.assertRaises(OSError):
+            seek_or_fail(mocked_file_like_object, 15, os.SEEK_CUR)

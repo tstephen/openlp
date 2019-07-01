@@ -19,10 +19,10 @@
 # You should have received a copy of the GNU General Public License      #
 # along with this program.  If not, see <https://www.gnu.org/licenses/>. #
 ##########################################################################
+from pathlib import Path
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
-from openlp.core.common.path import Path
 from openlp.core.common.registry import Registry
 from openlp.core.server import Server
 from tests.helpers.testmixin import TestMixin

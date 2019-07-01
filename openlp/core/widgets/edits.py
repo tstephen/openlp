@@ -24,12 +24,13 @@ The :mod:`~openlp.core.widgets.edits` module contains all the customised edit wi
 """
 import logging
 import re
+from pathlib import Path
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from openlp.core.common import CONTROL_CHARS
 from openlp.core.common.i18n import UiStrings, translate
-from openlp.core.common.path import Path, path_to_str, str_to_path
+from openlp.core.common.path import path_to_str, str_to_path
 from openlp.core.common.settings import Settings
 from openlp.core.lib.formattingtags import FormattingTags
 from openlp.core.lib.ui import create_action, create_widget_action
@@ -207,7 +208,7 @@ class PathEdit(QtWidgets.QWidget):
 
         :param QtWidget.QWidget | None: The parent of the widget. This is just passed to the super method.
         :param str dialog_caption: Used to customise the caption in the QFileDialog.
-        :param openlp.core.common.path.Path default_path: The default path. This is set as the path when the revert
+        :param Path default_path: The default path. This is set as the path when the revert
             button is clicked
         :param bool show_revert: Used to determine if the 'revert button' should be visible.
         :rtype: None
@@ -250,7 +251,7 @@ class PathEdit(QtWidgets.QWidget):
         A property getter method to return the selected path.
 
         :return: The selected path
-        :rtype: openlp.core.common.path.Path
+        :rtype: Path
         """
         return self._path
 
@@ -259,7 +260,7 @@ class PathEdit(QtWidgets.QWidget):
         """
         A Property setter method to set the selected path
 
-        :param openlp.core.common.path.Path path: The path to set the widget to
+        :param Path path: The path to set the widget to
         :rtype: None
         """
         self._path = path
@@ -348,11 +349,11 @@ class PathEdit(QtWidgets.QWidget):
 
         Emits the pathChanged Signal
 
-        :param openlp.core.common.path.Path path: The new path
+        :param Path path: The new path
         :rtype: None
         """
         if self._path != path:
-            self._path = path
+            self.path = path
             self.pathChanged.emit(path)
 
 

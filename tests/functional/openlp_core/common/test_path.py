@@ -23,11 +23,11 @@
 Package to test the openlp.core.common.path package.
 """
 import os
+from pathlib import Path
 from unittest import TestCase
-from unittest.mock import ANY, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
-from openlp.core.common.path import Path, copy, copyfile, copytree, create_paths, files_to_paths, path_to_str, \
-    replace_params, str_to_path, which
+from openlp.core.common.path import create_paths, files_to_paths, path_to_str, replace_params, str_to_path, which
 
 
 class TestShutil(TestCase):
@@ -65,139 +65,6 @@ class TestShutil(TestCase):
         # THEN: The positional and keyword args should have have changed
         assert result_args == (1, '2')
         assert result_kwargs == {'arg3': '3', 'arg4': 4}
-
-    def test_copy(self):
-        """
-        Test :func:`openlp.core.common.path.copy`
-        """
-        # GIVEN: A mocked `shutil.copy` which returns a test path as a string
-        with patch('openlp.core.common.path.shutil.copy', return_value=os.path.join('destination', 'test', 'path')) \
-                as mocked_shutil_copy:
-
-            # WHEN: Calling :func:`openlp.core.common.path.copy` with the src and dst parameters as Path object types
-            result = copy(Path('source', 'test', 'path'), Path('destination', 'test', 'path'))
-
-            # THEN: :func:`shutil.copy` should have been called with the str equivalents of the Path objects.
-            #       :func:`openlp.core.common.path.copy` should return the str type result of calling
-            #       :func:`shutil.copy` as a Path object.
-            mocked_shutil_copy.assert_called_once_with(os.path.join('source', 'test', 'path'),
-                                                       os.path.join('destination', 'test', 'path'))
-            assert result == Path('destination', 'test', 'path')
-
-    def test_copy_follow_optional_params(self):
-        """
-        Test :func:`openlp.core.common.path.copy` when follow_symlinks is set to false
-        """
-        # GIVEN: A mocked `shutil.copy`
-        with patch('openlp.core.common.path.shutil.copy', return_value='') as mocked_shutil_copy:
-
-            # WHEN: Calling :func:`openlp.core.common.path.copy` with :param:`follow_symlinks` set to False
-            copy(Path('source', 'test', 'path'), Path('destination', 'test', 'path'), follow_symlinks=False)
-
-            # THEN: :func:`shutil.copy` should have been called with :param:`follow_symlinks` set to false
-            mocked_shutil_copy.assert_called_once_with(ANY, ANY, follow_symlinks=False)
-
-    def test_copyfile(self):
-        """
-        Test :func:`openlp.core.common.path.copyfile`
-        """
-        # GIVEN: A mocked :func:`shutil.copyfile` which returns a test path as a string
-        with patch('openlp.core.common.path.shutil.copyfile',
-                   return_value=os.path.join('destination', 'test', 'path')) as mocked_shutil_copyfile:
-
-            # WHEN: Calling :func:`openlp.core.common.path.copyfile` with the src and dst parameters as Path object
-            #       types
-            result = copyfile(Path('source', 'test', 'path'), Path('destination', 'test', 'path'))
-
-            # THEN: :func:`shutil.copyfile` should have been called with the str equivalents of the Path objects.
-            #       :func:`openlp.core.common.path.copyfile` should return the str type result of calling
-            #       :func:`shutil.copyfile` as a Path object.
-            mocked_shutil_copyfile.assert_called_once_with(os.path.join('source', 'test', 'path'),
-                                                           os.path.join('destination', 'test', 'path'))
-            assert result == Path('destination', 'test', 'path')
-
-    def test_copyfile_optional_params(self):
-        """
-        Test :func:`openlp.core.common.path.copyfile` when follow_symlinks is set to false
-        """
-        # GIVEN: A mocked :func:`shutil.copyfile`
-        with patch('openlp.core.common.path.shutil.copyfile', return_value='') as mocked_shutil_copyfile:
-
-            # WHEN: Calling :func:`openlp.core.common.path.copyfile` with :param:`follow_symlinks` set to False
-            copyfile(Path('source', 'test', 'path'), Path('destination', 'test', 'path'), follow_symlinks=False)
-
-            # THEN: :func:`shutil.copyfile` should have been called with the optional parameters, with out any of the
-            #       values being modified
-            mocked_shutil_copyfile.assert_called_once_with(ANY, ANY, follow_symlinks=False)
-
-    def test_copytree(self):
-        """
-        Test :func:`openlp.core.common.path.copytree`
-        """
-        # GIVEN: A mocked :func:`shutil.copytree` which returns a test path as a string
-        with patch('openlp.core.common.path.shutil.copytree',
-                   return_value=os.path.join('destination', 'test', 'path')) as mocked_shutil_copytree:
-
-            # WHEN: Calling :func:`openlp.core.common.path.copytree` with the src and dst parameters as Path object
-            #       types
-            result = copytree(Path('source', 'test', 'path'), Path('destination', 'test', 'path'))
-
-            # THEN: :func:`shutil.copytree` should have been called with the str equivalents of the Path objects.
-            #       :func:`openlp.core.common.path.copytree` should return the str type result of calling
-            #       :func:`shutil.copytree` as a Path object.
-            mocked_shutil_copytree.assert_called_once_with(os.path.join('source', 'test', 'path'),
-                                                           os.path.join('destination', 'test', 'path'))
-            assert result == Path('destination', 'test', 'path')
-
-    def test_copytree_optional_params(self):
-        """
-        Test :func:`openlp.core.common.path.copytree` when optional parameters are passed
-        """
-        # GIVEN: A mocked :func:`shutil.copytree`
-        with patch('openlp.core.common.path.shutil.copytree', return_value='') as mocked_shutil_copytree:
-            mocked_ignore = MagicMock()
-            mocked_copy_function = MagicMock()
-
-            # WHEN: Calling :func:`openlp.core.common.path.copytree` with the optional parameters set
-            copytree(Path('source', 'test', 'path'), Path('destination', 'test', 'path'), symlinks=True,
-                     ignore=mocked_ignore, copy_function=mocked_copy_function, ignore_dangling_symlinks=True)
-
-            # THEN: :func:`shutil.copytree` should have been called with the optional parameters, with out any of the
-            #       values being modified
-            mocked_shutil_copytree.assert_called_once_with(ANY, ANY, symlinks=True, ignore=mocked_ignore,
-                                                           copy_function=mocked_copy_function,
-                                                           ignore_dangling_symlinks=True)
-
-    def test_rmtree(self):
-        """
-        Test :func:`rmtree`
-        """
-        # GIVEN: A mocked :func:`shutil.rmtree` and a test Path object
-        with patch('openlp.core.common.path.shutil.rmtree', return_value=None) as mocked_shutil_rmtree:
-            path = Path('test', 'path')
-
-            # WHEN: Calling :func:`openlp.core.common.path.rmtree` with the path parameter as Path object type
-            path.rmtree()
-
-            # THEN: :func:`shutil.rmtree` should have been called with the the Path object.
-            mocked_shutil_rmtree.assert_called_once_with(Path('test', 'path'), False, None)
-
-    def test_rmtree_optional_params(self):
-        """
-        Test :func:`openlp.core.common.path.rmtree` when optional parameters are passed
-        """
-        # GIVEN: A mocked :func:`shutil.rmtree` and a test Path object.
-        with patch('openlp.core.common.path.shutil.rmtree', return_value=None) as mocked_shutil_rmtree:
-            path = Path('test', 'path')
-            mocked_on_error = MagicMock()
-
-            # WHEN: Calling :func:`openlp.core.common.path.rmtree` with :param:`ignore_errors` set to True and
-            #       :param:`onerror` set to a mocked object
-            path.rmtree(ignore_errors=True, onerror=mocked_on_error)
-
-            # THEN: :func:`shutil.rmtree` should have been called with the optional parameters, with out any of the
-            #       values being modified
-            mocked_shutil_rmtree.assert_called_once_with(path, True, mocked_on_error)
 
     def test_which_no_command(self):
         """
@@ -243,7 +110,18 @@ class TestPath(TestCase):
         # WHEN: Calling `path_to_str` with an invalid Type
         # THEN: A TypeError should have been raised
         with self.assertRaises(TypeError):
-            path_to_str(str())
+            path_to_str(57)
+
+    def test_path_to_str_wth_str(self):
+        """
+        Test that `path_to_str` just returns a str when given a str
+        """
+        # GIVEN: The `path_to_str` function
+        # WHEN: Calling `path_to_str` with a str
+        result = path_to_str('/usr/bin')
+
+        # THEN: The string should be returned
+        assert result == '/usr/bin'
 
     def test_path_to_str_none(self):
         """
@@ -286,57 +164,6 @@ class TestPath(TestCase):
 
         # THEN: `path_to_str` should return None
         assert result is None
-
-    def test_path_encode_json(self):
-        """
-        Test that `Path.encode_json` returns a Path object from a dictionary representation of a Path object decoded
-        from JSON
-        """
-        # GIVEN: A Path object from openlp.core.common.path
-        # WHEN: Calling encode_json, with a dictionary representation
-        path = Path.encode_json({'__Path__': ['path', 'to', 'fi.le']}, extra=1, args=2)
-
-        # THEN: A Path object should have been returned
-        assert path == Path('path', 'to', 'fi.le')
-
-    def test_path_encode_json_base_path(self):
-        """
-        Test that `Path.encode_json` returns a Path object from a dictionary representation of a Path object decoded
-        from JSON when the base_path arg is supplied.
-        """
-        # GIVEN: A Path object from openlp.core.common.path
-        # WHEN: Calling encode_json, with a dictionary representation
-        path = Path.encode_json({'__Path__': ['path', 'to', 'fi.le']}, base_path=Path('/base'))
-
-        # THEN: A Path object should have been returned with an absolute path
-        assert path == Path('/', 'base', 'path', 'to', 'fi.le')
-
-    def test_path_json_object(self):
-        """
-        Test that `Path.json_object` creates a JSON decode-able object from a Path object
-        """
-        # GIVEN: A Path object from openlp.core.common.path
-        path = Path('/base', 'path', 'to', 'fi.le')
-
-        # WHEN: Calling json_object
-        obj = path.json_object(extra=1, args=2)
-
-        # THEN: A JSON decodable object should have been returned.
-        assert obj == {'__Path__': (os.sep, 'base', 'path', 'to', 'fi.le')}
-
-    def test_path_json_object_base_path(self):
-        """
-        Test that `Path.json_object` creates a JSON decode-able object from a Path object, that is relative to the
-        base_path
-        """
-        # GIVEN: A Path object from openlp.core.common.path
-        path = Path('/base', 'path', 'to', 'fi.le')
-
-        # WHEN: Calling json_object with a base_path
-        obj = path.json_object(base_path=Path('/', 'base'))
-
-        # THEN: A JSON decodable object should have been returned.
-        assert obj == {'__Path__': ('path', 'to', 'fi.le')}
 
     def test_create_paths_dir_exists(self):
         """

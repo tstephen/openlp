@@ -24,13 +24,13 @@ Package to test the openlp.core.ui.thememanager package.
 """
 import os
 import shutil
+from pathlib import Path
 from tempfile import mkdtemp
 from unittest import TestCase
 from unittest.mock import ANY, MagicMock, patch
 
 from PyQt5 import QtWidgets
 
-from openlp.core.common.path import Path
 from openlp.core.common.registry import Registry
 from openlp.core.ui.thememanager import ThemeManager
 from tests.utils.constants import RESOURCE_PATH
@@ -81,9 +81,9 @@ class TestThemeManager(TestCase):
         # THEN: The the controller should be registered in the registry.
         assert Registry().get('theme_manager') is not None, 'The base theme manager should be registered'
 
-    @patch('openlp.core.ui.thememanager.copyfile')
+    @patch('openlp.core.ui.thememanager.shutil')
     @patch('openlp.core.ui.thememanager.create_paths')
-    def test_write_theme_same_image(self, mocked_create_paths, mocked_copyfile):
+    def test_save_theme_same_image(self, mocked_create_paths, mocked_shutil):
         """
         Test that we don't try to overwrite a theme background image with itself
         """
@@ -98,16 +98,16 @@ class TestThemeManager(TestCase):
         mocked_theme.extract_formatted_xml = MagicMock()
         mocked_theme.extract_formatted_xml.return_value = 'fake_theme_xml'.encode()
 
-        # WHEN: Calling _write_theme with path to the same image, but the path written slightly different
+        # WHEN: Calling save_theme with path to the same image, but the path written slightly different
         file_path_1 = RESOURCE_PATH / 'church.jpg'
-        theme_manager._write_theme(mocked_theme, file_path_1, file_path_1)
+        theme_manager.save_theme(mocked_theme, file_path_1, file_path_1)
 
         # THEN: The mocked_copyfile should not have been called
-        assert mocked_copyfile.called is False, 'copyfile should not be called'
+        assert mocked_shutil.copyfile.called is False, 'copyfile should not be called'
 
-    @patch('openlp.core.ui.thememanager.copyfile')
+    @patch('openlp.core.ui.thememanager.shutil')
     @patch('openlp.core.ui.thememanager.create_paths')
-    def test_write_theme_diff_images(self, mocked_create_paths, mocked_copyfile):
+    def test_save_theme_diff_images(self, mocked_create_paths, mocked_shutil):
         """
         Test that we do overwrite a theme background image when a new is submitted
         """
@@ -121,15 +121,15 @@ class TestThemeManager(TestCase):
         mocked_theme.theme_name = 'themename'
         mocked_theme.filename = "filename"
 
-        # WHEN: Calling _write_theme with path to different images
+        # WHEN: Calling save_theme with path to different images
         file_path_1 = RESOURCE_PATH / 'church.jpg'
         file_path_2 = RESOURCE_PATH / 'church2.jpg'
-        theme_manager._write_theme(mocked_theme, file_path_1, file_path_2)
+        theme_manager.save_theme(mocked_theme, file_path_1, file_path_2)
 
         # THEN: The mocked_copyfile should not have been called
-        assert mocked_copyfile.called is True, 'copyfile should be called'
+        assert mocked_shutil.copyfile.called is True, 'copyfile should be called'
 
-    def test_write_theme_special_char_name(self):
+    def test_save_theme_special_char_name(self):
         """
         Test that we can save themes with special characters in the name
         """
@@ -142,8 +142,8 @@ class TestThemeManager(TestCase):
         mocked_theme.theme_name = 'theme 愛 name'
         mocked_theme.export_theme.return_value = "{}"
 
-        # WHEN: Calling _write_theme with a theme with a name with special characters in it
-        theme_manager._write_theme(mocked_theme)
+        # WHEN: Calling save_theme with a theme with a name with special characters in it
+        theme_manager.save_theme(mocked_theme)
 
         # THEN: It should have been created
         assert os.path.exists(os.path.join(self.temp_folder, 'theme 愛 name', 'theme 愛 name.json')) is True, \
@@ -207,7 +207,7 @@ class TestThemeManager(TestCase):
             # THEN: Files should be unpacked
             assert (folder_path / 'Moss on tree' / 'Moss on tree.xml').exists() is True
             assert mocked_critical_error_message_box.call_count == 0, 'No errors should have happened'
-            folder_path.rmtree()
+            shutil.rmtree(folder_path)
 
     def test_unzip_theme_invalid_version(self):
         """

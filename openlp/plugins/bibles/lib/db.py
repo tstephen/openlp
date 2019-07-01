@@ -24,6 +24,7 @@ import logging
 import re
 import sqlite3
 import time
+from pathlib import Path
 
 import chardet
 from PyQt5 import QtCore
@@ -35,7 +36,6 @@ from sqlalchemy.orm.exc import UnmappedClassError
 from openlp.core.common import clean_filename
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.i18n import translate
-from openlp.core.common.path import Path
 from openlp.core.lib.db import BaseModel, Manager, init_db
 from openlp.core.lib.ui import critical_error_message_box
 from openlp.plugins.bibles.lib import BibleStrings, LanguageSelection, upgrade
@@ -130,13 +130,13 @@ class BibleDB(Manager):
         :param parent:
         :param kwargs:
             ``path``
-                The path to the bible database file. Type: openlp.core.common.path.Path
+                The path to the bible database file. Type: Path
 
             ``name``
                 The name of the database. This is also used as the file name for SQLite databases.
 
             ``file``
-                Type: openlp.core.common.path.Path
+                Type: Path
 
         :rtype: None
         """

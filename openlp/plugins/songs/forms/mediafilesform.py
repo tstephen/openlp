@@ -43,7 +43,7 @@ class MediaFilesForm(QtWidgets.QDialog, Ui_MediaFilesDialog):
 
     def populate_files(self, file_paths):
         """
-        :param list[openlp.core.common.path.Path] file_paths:
+        :param list[pathlib.Path] file_paths:
         :return:
         """
         self.file_list_widget.clear()
@@ -54,6 +54,6 @@ class MediaFilesForm(QtWidgets.QDialog, Ui_MediaFilesDialog):
 
     def get_selected_files(self):
         """
-        :rtype: list[openlp.core.common.path.Path]
+        :rtype: list[pathlib.Path]
         """
         return [item.data(QtCore.Qt.UserRole) for item in self.file_list_widget.selectedItems()]

@@ -25,6 +25,7 @@ The :mod:`slidecontroller` module contains the most important part of OpenLP - t
 import copy
 import datetime
 from collections import deque
+from pathlib import Path
 from threading import Lock
 
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -33,7 +34,6 @@ from openlp.core.common import SlideLimits
 from openlp.core.common.actions import ActionList, CategoryOrder
 from openlp.core.common.i18n import UiStrings, translate
 from openlp.core.common.mixins import LogMixin, RegistryProperties
-from openlp.core.common.path import Path
 from openlp.core.common.registry import Registry, RegistryBase
 from openlp.core.common.settings import Settings
 from openlp.core.display.screens import ScreenList
@@ -1261,9 +1261,18 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         if not self.service_item:
             return
         if self.service_item.is_command():
-            Registry().execute('{text}_next'.format(text=self.service_item.name.lower()),
-                               [self.service_item, self.is_live])
-            if self.is_live:
+            past_end = Registry().execute('{text}_next'.format(text=self.service_item.name.lower()),
+                                          [self.service_item, self.is_live])
+            # Check if we have gone past the end of the last slide
+            if self.is_live and past_end and past_end[0]:
+                if wrap is None:
+                    if self.slide_limits == SlideLimits.Wrap:
+                        self.on_slide_selected_index([0])
+                    elif self.is_live and self.slide_limits == SlideLimits.Next:
+                        self.service_next()
+                elif wrap:
+                    self.on_slide_selected_index([0])
+            elif self.is_live:
                 self.update_preview()
         else:
             row = self.preview_widget.current_slide_number() + 1
@@ -1290,9 +1299,16 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         if not self.service_item:
             return
         if self.service_item.is_command():
-            Registry().execute('{text}_previous'.format(text=self.service_item.name.lower()),
-                               [self.service_item, self.is_live])
-            if self.is_live:
+            before_start = Registry().execute('{text}_previous'.format(text=self.service_item.name.lower()),
+                                              [self.service_item, self.is_live])
+            # Check id we have tried to go before that start slide
+            if self.is_live and before_start and before_start[0]:
+                if self.slide_limits == SlideLimits.Wrap:
+                    self.on_slide_selected_index([self.preview_widget.slide_count() - 1])
+                elif self.is_live and self.slide_limits == SlideLimits.Next:
+                    self.keypress_queue.append(ServiceItemAction.PreviousLastSlide)
+                    self._process_queue()
+            elif self.is_live:
                 self.update_preview()
         else:
             row = self.preview_widget.current_slide_number() - 1

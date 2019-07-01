@@ -37,7 +37,7 @@ from openlp.core.lib.mediamanageritem import MediaManagerItem
 from openlp.core.lib.serviceitem import ItemCapabilities
 from openlp.core.lib.ui import critical_error_message_box
 from openlp.core.ui.icons import UiIcons
-from openlp.core.ui.media import parse_optical_path, format_milliseconds
+from openlp.core.ui.media import parse_optical_path, format_milliseconds, AUDIO_EXT, VIDEO_EXT
 from openlp.core.ui.media.vlcplayer import get_vlc
 
 
@@ -173,9 +173,13 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
             item = self.list_view.currentItem()
             if item is None:
                 return False
-        filename = item.data(QtCore.Qt.UserRole)
+        filename = str(item.data(QtCore.Qt.UserRole))
         # Special handling if the filename is a optical clip
-        if filename.startswith('optical:'):
+        if filename == 'live':
+            service_item.processor = 'vlc'
+            service_item.title = filename
+            service_item.add_capability(ItemCapabilities.CanStream)
+        elif filename.startswith('optical:'):
             (name, title, audio_track, subtitle_track, start, end, clip_name) = parse_optical_path(filename)
             if not os.path.exists(name):
                 if not remote:
@@ -233,8 +237,8 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
         # self.populate_display_types()
         self.on_new_file_masks = translate('MediaPlugin.MediaItem',
                                            'Videos ({video});;Audio ({audio});;{files} '
-                                           '(*)').format(video=' '.join(self.media_controller.video_extensions_list),
-                                                         audio=' '.join(self.media_controller.audio_extensions_list),
+                                           '(*)').format(video=' '.join(VIDEO_EXT),
+                                                         audio=' '.join(AUDIO_EXT),
                                                          files=UiStrings().AllFiles)
 
     def on_delete_click(self):
@@ -258,12 +262,19 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
         """
         # TODO needs to be fixed as no idea why this fails
         # media.sort(key=lambda file_path: get_natural_key(file_path.name))
+        file_name = translate('MediaPlugin.MediaItem', 'Live Stream')
+        item_name = QtWidgets.QListWidgetItem(file_name)
+        item_name.setIcon(UiIcons().video)
+        item_name.setData(QtCore.Qt.UserRole, 'live')
+        item_name.setToolTip(translate('MediaPlugin.MediaItem', 'Show Live Stream'))
+        self.list_view.addItem(item_name)
         for track in media:
-            track_info = QtCore.QFileInfo(track)
+            track_str = str(track)
+            track_info = QtCore.QFileInfo(track_str)
             item_name = None
-            if track.startswith('optical:'):
+            if track_str.startswith('optical:'):
                 # Handle optical based item
-                (file_name, title, audio_track, subtitle_track, start, end, clip_name) = parse_optical_path(track)
+                (file_name, title, audio_track, subtitle_track, start, end, clip_name) = parse_optical_path(track_str)
                 item_name = QtWidgets.QListWidgetItem(clip_name)
                 item_name.setIcon(UiIcons().optical)
                 item_name.setData(QtCore.Qt.UserRole, track)
@@ -272,22 +283,22 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
                                                                    end=format_milliseconds(end)))
             elif not os.path.exists(track):
                 # File doesn't exist, mark as error.
-                file_name = os.path.split(str(track))[1]
+                file_name = os.path.split(track_str)[1]
                 item_name = QtWidgets.QListWidgetItem(file_name)
                 item_name.setIcon(UiIcons().error)
                 item_name.setData(QtCore.Qt.UserRole, track)
-                item_name.setToolTip(track)
+                item_name.setToolTip(track_str)
             elif track_info.isFile():
                 # Normal media file handling.
-                file_name = os.path.split(str(track))[1]
+                file_name = os.path.split(track_str)[1]
                 item_name = QtWidgets.QListWidgetItem(file_name)
                 search = file_name.split('.')[-1].lower()
-                if '*.{text}'.format(text=search) in self.media_controller.audio_extensions_list:
+                if search in AUDIO_EXT:
                     item_name.setIcon(UiIcons().audio)
                 else:
                     item_name.setIcon(UiIcons().video)
                 item_name.setData(QtCore.Qt.UserRole, track)
-                item_name.setToolTip(track)
+                item_name.setToolTip(track_str)
             if item_name:
                 self.list_view.addItem(item_name)
 
@@ -301,9 +312,9 @@ class MediaMediaItem(MediaManagerItem, RegistryProperties):
         media_file_paths = Settings().value(self.settings_section + '/media files')
         media_file_paths.sort(key=lambda file_path: get_natural_key(file_path.name))
         if media_type == MediaType.Audio:
-            extension = self.media_controller.audio_extensions_list
+            extension = AUDIO_EXT
         else:
-            extension = self.media_controller.video_extensions_list
+            extension = VIDEO_EXT
         extension = [x[1:] for x in extension]
         media = [x for x in media_file_paths if x.suffix in extension]
         return media

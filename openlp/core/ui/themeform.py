@@ -32,8 +32,7 @@ from openlp.core.common.mixins import RegistryProperties
 from openlp.core.common.registry import Registry
 from openlp.core.lib.theme import BackgroundGradientType, BackgroundType
 from openlp.core.lib.ui import critical_error_message_box
-# TODO: Fix this. Use a "get_video_extensions" method which uses the current media player
-from openlp.core.ui.media.vlcplayer import VIDEO_EXT
+from openlp.core.ui.media import VIDEO_EXT
 from openlp.core.ui.themelayoutform import ThemeLayoutForm
 from openlp.core.ui.themewizard import Ui_ThemeWizard
 
@@ -76,9 +75,8 @@ class ThemeForm(QtWidgets.QWizard, Ui_ThemeWizard, RegistryProperties):
         self.image_path_edit.filters = \
             '{name};;{text} (*)'.format(name=get_images_filter(), text=UiStrings().AllFiles)
         self.image_path_edit.pathChanged.connect(self.on_image_path_edit_path_changed)
-        # TODO: Should work
-        visible_formats = '({name})'.format(name='; '.join(VIDEO_EXT))
-        actual_formats = '({name})'.format(name=' '.join(VIDEO_EXT))
+        visible_formats = '(*.{name})'.format(name='; *.'.join(VIDEO_EXT))
+        actual_formats = '(*.{name})'.format(name=' *.'.join(VIDEO_EXT))
         video_filter = '{trans} {visible} {actual}'.format(trans=translate('OpenLP', 'Video Files'),
                                                            visible=visible_formats, actual=actual_formats)
         self.video_path_edit.filters = '{video};;{ui} (*)'.format(video=video_filter, ui=UiStrings().AllFiles)
@@ -174,16 +172,14 @@ class ThemeForm(QtWidgets.QWizard, Ui_ThemeWizard, RegistryProperties):
         if not event:
             event = QtGui.QResizeEvent(self.size(), self.size())
         QtWidgets.QWizard.resizeEvent(self, event)
-        if hasattr(self, 'preview_page') and self.currentPage() == self.preview_page:
-            frame_width = self.preview_box_label.lineWidth()
-            pixmap_width = self.preview_area.width() - 2 * frame_width
-            pixmap_height = self.preview_area.height() - 2 * frame_width
-            aspect_ratio = float(pixmap_width) / pixmap_height
-            if aspect_ratio < self.display_aspect_ratio:
-                pixmap_height = int(pixmap_width / self.display_aspect_ratio + 0.5)
-            else:
-                pixmap_width = int(pixmap_height * self.display_aspect_ratio + 0.5)
-            self.preview_box_label.setFixedSize(pixmap_width + 2 * frame_width, pixmap_height + 2 * frame_width)
+        try:
+            self.display_aspect_ratio = self.renderer.width() / self.renderer.height()
+        except ZeroDivisionError:
+            self.display_aspect_ratio = 1
+        # Make sure we don't resize before the widgets are actually created
+        if hasattr(self, 'preview_area_layout'):
+            self.preview_area_layout.set_aspect_ratio(self.display_aspect_ratio)
+            self.preview_box.set_scale(float(self.preview_box.width()) / self.renderer.width())
 
     def validateCurrentPage(self):
         """
@@ -208,11 +204,17 @@ class ThemeForm(QtWidgets.QWizard, Ui_ThemeWizard, RegistryProperties):
         self.setOption(QtWidgets.QWizard.HaveCustomButton1, enabled)
         if self.page(page_id) == self.preview_page:
             self.update_theme()
-            frame = self.theme_manager.generate_image(self.theme)
-            frame.setDevicePixelRatio(self.devicePixelRatio())
-            self.preview_box_label.setPixmap(frame)
-            self.display_aspect_ratio = float(frame.width()) / frame.height()
+            self.preview_box.set_theme(self.theme)
+            self.preview_box.clear_slides()
+            self.preview_box.set_scale(float(self.preview_box.width()) / self.renderer.width())
+            try:
+                self.display_aspect_ratio = self.renderer.width() / self.renderer.height()
+            except ZeroDivisionError:
+                self.display_aspect_ratio = 1
+            self.preview_area_layout.set_aspect_ratio(self.display_aspect_ratio)
             self.resizeEvent()
+            self.preview_box.show()
+            self.preview_box.generate_preview(self.theme, False, False)
 
     def on_custom_1_button_clicked(self, number):
         """
@@ -400,6 +402,7 @@ class ThemeForm(QtWidgets.QWizard, Ui_ThemeWizard, RegistryProperties):
         Handle the display and state of the Preview page.
         """
         self.setField('name', self.theme.theme_name)
+        self.preview_box.set_theme(self.theme)
 
     def on_background_combo_box_current_index_changed(self, index):
         """
@@ -462,7 +465,7 @@ class ThemeForm(QtWidgets.QWizard, Ui_ThemeWizard, RegistryProperties):
         """
         Handle the `pathEditChanged` signal from image_path_edit
 
-        :param openlp.core.common.path.Path new_path: Path to the new image
+        :param pathlib.Path new_path: Path to the new image
         :rtype: None
         """
         self.theme.background_filename = new_path
@@ -472,7 +475,7 @@ class ThemeForm(QtWidgets.QWizard, Ui_ThemeWizard, RegistryProperties):
         """
         Handle the `pathEditChanged` signal from video_path_edit
 
-        :param openlp.core.common.path.Path new_path: Path to the new video
+        :param pathlib.Path new_path: Path to the new video
         :rtype: None
         """
         self.theme.background_filename = new_path
@@ -560,5 +563,5 @@ class ThemeForm(QtWidgets.QWizard, Ui_ThemeWizard, RegistryProperties):
             source_path = self.theme.background_filename
         if not self.edit_mode and not self.theme_manager.check_if_theme_exists(self.theme.theme_name):
             return
-        self.theme_manager.save_theme(self.theme, source_path, destination_path)
+        self.theme_manager.save_theme(self.theme, source_path, destination_path, self.preview_box.save_screenshot())
         return QtWidgets.QDialog.accept(self)

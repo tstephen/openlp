@@ -23,11 +23,11 @@
 Functional tests to test the AppLocation class and related methods.
 """
 import os
+from pathlib import Path
 from unittest.mock import patch
 
 from openlp.core.common import get_frozen_path
 from openlp.core.common.applocation import AppLocation
-from openlp.core.common.path import Path
 
 
 FILE_LIST = ['file1', 'file2', 'file3.txt', 'file4.txt', 'file5.mp3', 'file6.mp3']

@@ -42,7 +42,7 @@ from openlp.core.common.settings import Settings
 from openlp.core.lib.serviceitem import ItemCapabilities
 from openlp.core.lib.ui import critical_error_message_box
 from openlp.core.ui import DisplayControllerType
-from openlp.core.ui.media import MediaState, ItemMediaInfo, MediaType, parse_optical_path
+from openlp.core.ui.media import MediaState, ItemMediaInfo, MediaType, parse_optical_path, VIDEO_EXT, AUDIO_EXT
 from openlp.core.ui.media.endpoint import media_endpoint
 from openlp.core.ui.media.vlcplayer import VlcPlayer, get_vlc
 
@@ -65,11 +65,6 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
     current_media_players is an array of player instances keyed on ControllerType.
 
     """
-    def __init__(self, parent=None):
-        """
-        Constructor
-        """
-        super(MediaController, self).__init__(parent)
 
     def setup(self):
         self.vlc_player = None
@@ -95,27 +90,7 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         Registry().register_function('songs_hide', self.media_hide)
         Registry().register_function('songs_blank', self.media_blank)
         Registry().register_function('songs_unblank', self.media_unblank)
-        Registry().register_function('mediaitem_suffixes', self._generate_extensions_lists)
         register_endpoint(media_endpoint)
-
-    def _generate_extensions_lists(self):
-        """
-        Set the active players and available media files
-        """
-        suffix_list = []
-        self.audio_extensions_list = []
-        if self.vlc_player.is_active:
-            for item in self.vlc_player.audio_extensions_list:
-                if item not in self.audio_extensions_list:
-                    self.audio_extensions_list.append(item)
-                    suffix_list.append(item[2:])
-        self.video_extensions_list = []
-        if self.vlc_player.is_active:
-            for item in self.vlc_player.video_extensions_list:
-                if item not in self.video_extensions_list:
-                    self.video_extensions_list.append(item)
-                    suffix_list.append(item[2:])
-        self.service_manager.supported_suffixes(suffix_list)
 
     def bootstrap_initialise(self):
         """
@@ -129,9 +104,10 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
             State().update_pre_conditions('mediacontroller', True)
             State().update_pre_conditions('media_live', True)
         else:
+            if hasattr(self.main_window, 'splash') and self.main_window.splash.isVisible():
+                self.main_window.splash.hide()
             State().missing_text('media_live', translate('OpenLP.SlideController',
                                  'VLC or pymediainfo are missing, so you are unable to play any media'))
-        self._generate_extensions_lists()
         return True
 
     def bootstrap_post_set_up(self):
@@ -208,7 +184,8 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
             display.has_audio = False
         self.vlc_player.setup(display, preview)
 
-    def set_controls_visible(self, controller, value):
+    @staticmethod
+    def set_controls_visible(controller, value):
         """
         After a new display is configured, all media related widget will be created too
 
@@ -253,7 +230,10 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         display = self._define_display(controller)
         if controller.is_live:
             # if this is an optical device use special handling
-            if service_item.is_capable(ItemCapabilities.IsOptical):
+            if service_item.is_capable(ItemCapabilities.CanStream):
+                is_valid = self._check_file_type(controller, display, True)
+                controller.media_info.media_type = MediaType.Stream
+            elif service_item.is_capable(ItemCapabilities.IsOptical):
                 log.debug('video is optical and live')
                 path = service_item.get_frame_path()
                 (name, title, audio_track, subtitle_track, start, end, clip_name) = parse_optical_path(path)
@@ -273,7 +253,10 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
                 controller.media_info.start_time = service_item.start_time
                 controller.media_info.end_time = service_item.end_time
         elif controller.preview_display:
-            if service_item.is_capable(ItemCapabilities.IsOptical):
+            if service_item.is_capable(ItemCapabilities.CanStream):
+                controller.media_info.media_type = MediaType.Stream
+                is_valid = self._check_file_type(controller, display, True)
+            elif service_item.is_capable(ItemCapabilities.IsOptical):
                 log.debug('video is optical and preview')
                 path = service_item.get_frame_path()
                 (name, title, audio_track, subtitle_track, start, end, clip_name) = parse_optical_path(path)
@@ -294,6 +277,8 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         #    display.frame.runJavaScript('show_video("setBackBoard", null, null,"visible");')
         # now start playing - Preview is autoplay!
         autoplay = False
+        if service_item.is_capable(ItemCapabilities.CanStream):
+            autoplay = True
         # Preview requested
         if not controller.is_live:
             autoplay = True
@@ -370,18 +355,26 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
             controller.media_info.media_type = MediaType.DVD
         return True
 
-    def _check_file_type(self, controller, display):
+    def _check_file_type(self, controller, display, stream=False):
         """
         Select the correct media Player type from the prioritized Player list
 
         :param controller: First element is the controller which should be used
         :param display: Which display to use
+        :param stream: Are we streaming or not
         """
+        if stream:
+            self.resize(display, self.vlc_player)
+            display.media_info.media_type = MediaType.Stream
+            if self.vlc_player.load(display, None):
+                self.current_media_players[controller.controller_type] = self.vlc_player
+                return True
+            return True
         for file in controller.media_info.file_info:
             if file.is_file:
                 suffix = '*%s' % file.suffix.lower()
                 file = str(file)
-                if suffix in self.vlc_player.video_extensions_list:
+                if suffix in VIDEO_EXT:
                     if not controller.media_info.is_background or controller.media_info.is_background and \
                             self.vlc_player.can_background:
                         self.resize(display, self.vlc_player)
@@ -389,7 +382,7 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
                             self.current_media_players[controller.controller_type] = self.vlc_player
                             controller.media_info.media_type = MediaType.Video
                             return True
-                if suffix in self.vlc_player.audio_extensions_list:
+                if suffix in AUDIO_EXT:
                     if self.vlc_player.load(display, file):
                         self.current_media_players[controller.controller_type] = self.vlc_player
                         controller.media_info.media_type = MediaType.Audio

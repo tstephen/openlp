@@ -28,6 +28,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+from pathlib import Path
 from tempfile import gettempdir
 
 from PyQt5 import QtCore, QtWidgets
@@ -37,7 +38,7 @@ from openlp.core.common.applocation import AppLocation
 from openlp.core.common.httputils import DownloadWorker, download_file, get_url_file_size, get_web_page
 from openlp.core.common.i18n import translate
 from openlp.core.common.mixins import RegistryProperties
-from openlp.core.common.path import Path, create_paths
+from openlp.core.common.path import create_paths
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.lib import build_icon

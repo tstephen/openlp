@@ -23,7 +23,9 @@
 The Theme Manager manages adding, deleteing and modifying of themes.
 """
 import os
+import shutil
 import zipfile
+from pathlib import Path
 from xml.etree.ElementTree import XML, ElementTree
 
 from PyQt5 import QtCore, QtWidgets
@@ -32,7 +34,7 @@ from openlp.core.common import delete_file
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.i18n import UiStrings, get_locale_key, translate
 from openlp.core.common.mixins import LogMixin, RegistryProperties
-from openlp.core.common.path import Path, copyfile, create_paths
+from openlp.core.common.path import create_paths
 from openlp.core.common.registry import Registry, RegistryBase
 from openlp.core.common.settings import Settings
 from openlp.core.lib import build_icon, check_item_selected, create_thumb, get_text_file_string, validate_thumb
@@ -171,7 +173,7 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
         for xml_file_path in xml_file_paths:
             theme_data = get_text_file_string(xml_file_path)
             theme = self._create_theme_from_xml(theme_data, self.theme_path)
-            self._write_theme(theme)
+            self.save_theme(theme)
             xml_file_path.unlink()
 
     def build_theme_path(self):
@@ -378,7 +380,7 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
         delete_file(self.theme_path / thumb)
         delete_file(self.thumb_path / thumb)
         try:
-            (self.theme_path / theme).rmtree()
+            shutil.rmtree(self.theme_path / theme)
         except OSError:
             self.log_exception('Error deleting theme {name}'.format(name=theme))
 
@@ -415,7 +417,7 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
         """
         Create the zipfile with the theme contents.
 
-        :param openlp.core.common.path.Path theme_path: Location where the zip file will be placed
+        :param Path theme_path: Location where the zip file will be placed
         :param str theme_name: The name of the theme to be exported
         :return: The success of creating the zip file
         :rtype: bool
@@ -433,7 +435,7 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
                                                  'The {theme_name} export failed because this error occurred: {err}')
                                        .format(theme_name=theme_name, err=ose.strerror))
             if theme_path.exists():
-                theme_path.rmtree(ignore_errors=True)
+                shutil.rmtree(theme_path, ignore_errors=True)
             return False
 
     def on_import_theme(self, checked=None):
@@ -474,7 +476,7 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
         if not theme_paths:
             theme = Theme()
             theme.theme_name = UiStrings().Default
-            self._write_theme(theme)
+            self.save_theme(theme)
             Settings().setValue(self.settings_section + '/global theme', theme.theme_name)
         self.application.set_normal_cursor()
 
@@ -557,8 +559,8 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
         """
         Unzip the theme, remove the preview file if stored. Generate a new preview file. Check the XML theme version
         and upgrade if necessary.
-        :param openlp.core.common.path.Path file_path:
-        :param openlp.core.common.path.Path directory_path:
+        :param Path file_path:
+        :param Path directory_path:
         """
         self.log_debug('Unzipping theme {name}'.format(name=file_path))
         file_xml = None
@@ -637,24 +639,14 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
             return False
         return True
 
-    def save_theme(self, theme, image_source_path, image_destination_path):
-        """
-        Called by theme maintenance Dialog to save the theme and to trigger the reload of the theme list
-
-        :param Theme theme: The theme data object.
-        :param openlp.core.common.path.Path image_source_path: Where the theme image is currently located.
-        :param openlp.core.common.path.Path image_destination_path: Where the Theme Image is to be saved to
-        :rtype: None
-        """
-        self._write_theme(theme, image_source_path, image_destination_path)
-
-    def _write_theme(self, theme, image_source_path=None, image_destination_path=None):
+    def save_theme(self, theme, image_source_path=None, image_destination_path=None, image=None):
         """
         Writes the theme to the disk and handles the background image if necessary
 
         :param Theme theme: The theme data object.
-        :param openlp.core.common.path.Path image_source_path: Where the theme image is currently located.
-        :param openlp.core.common.path.Path image_destination_path: Where the Theme Image is to be saved to
+        :param Path image_source_path: Where the theme image is currently located.
+        :param Path image_destination_path: Where the Theme Image is to be saved to
+        :param image: The example image of the theme. Optionally.
         :rtype: None
         """
         name = theme.theme_name
@@ -671,10 +663,18 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
                 delete_file(self.old_background_image_path)
             if image_source_path != image_destination_path:
                 try:
-                    copyfile(image_source_path, image_destination_path)
+                    shutil.copyfile(image_source_path, image_destination_path)
                 except OSError:
                     self.log_exception('Failed to save theme image')
-        self.generate_and_save_image(name, theme)
+        if image:
+            sample_path_name = self.theme_path / '{file_name}.png'.format(file_name=name)
+            if sample_path_name.exists():
+                sample_path_name.unlink()
+            image.save(str(sample_path_name), 'png')
+            thumb_path = self.thumb_path / '{name}.png'.format(name=name)
+            create_thumb(sample_path_name, thumb_path, False)
+        else:
+            self.generate_and_save_image(name, theme)
 
     def generate_and_save_image(self, theme_name, theme):
         """
@@ -718,7 +718,7 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
         Return a theme object using information parsed from XML
 
         :param theme_xml: The Theme data object.
-        :param openlp.core.common.path.Path image_path: Where the theme image is stored
+        :param Path image_path: Where the theme image is stored
         :return: Theme data.
         :rtype: Theme
         """
@@ -732,7 +732,7 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
         Return a theme object using information parsed from JSON
 
         :param theme_json: The Theme data object.
-        :param openlp.core.common.path.Path image_path: Where the theme image is stored
+        :param Path image_path: Where the theme image is stored
         :return: Theme data.
         :rtype: Theme
         """

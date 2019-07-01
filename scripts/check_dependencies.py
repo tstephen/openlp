@@ -100,12 +100,13 @@ OPTIONAL_MODULES = [
     ('pyodbc', '(ODBC support)'),
     ('psycopg2', '(PostgreSQL support)'),
     ('enchant', '(spell checker)'),
+    ('fitz', '(executable-independent PDF support)'),
     ('pysword', '(import SWORD bibles)'),
     ('uno', '(LibreOffice/OpenOffice support)'),
     # development/testing modules
     ('jenkins', '(access jenkins api)'),
     ('launchpadlib', '(launchpad script support)'),
-    ('nose2', '(testing framework)'),
+    ('pytest', '(testing framework)'),
     ('pylint', '(linter)')
 ]
 
@@ -159,6 +160,8 @@ def check_module(mod, text='', indent='  '):
         w('OK')
     except ImportError:
         w('FAIL')
+    except Exception:
+        w('ERROR')
     w(os.linesep)
 
 

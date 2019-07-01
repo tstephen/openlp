@@ -22,11 +22,12 @@
 """
 This module contains tests for the OpenLyrics song importer.
 """
+import shutil
+from pathlib import Path
 from tempfile import mkdtemp
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
-from openlp.core.common.path import Path
 from openlp.core.common.registry import Registry
 from openlp.plugins.songs.lib.openlyricsexport import OpenLyricsExport
 from tests.helpers.testmixin import TestMixin
@@ -47,7 +48,7 @@ class TestOpenLyricsExport(TestCase, TestMixin):
         """
         Cleanup
         """
-        self.temp_folder.rmtree()
+        shutil.rmtree(self.temp_folder)
 
     def test_export_same_filename(self):
         """

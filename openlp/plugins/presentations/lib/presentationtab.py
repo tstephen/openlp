@@ -127,10 +127,10 @@ class PresentationTab(SettingsTab):
 
     def set_controller_text(self, checkbox, controller):
         if checkbox.isEnabled():
-            checkbox.setText(controller.name)
+            checkbox.setText(controller.display_name)
         else:
             checkbox.setText(translate('PresentationPlugin.PresentationTab',
-                                       '{name} (unavailable)').format(name=controller.name))
+                                       '{name} (unavailable)').format(name=controller.display_name))
 
     def load(self):
         """
@@ -221,7 +221,7 @@ class PresentationTab(SettingsTab):
         """
         Handle the `pathEditChanged` signal from program_path_edit
 
-        :param openlp.core.common.path.Path new_path: File path to the new program
+        :param pathlib.Path new_path: File path to the new program
         :rtype: None
         """
         if new_path:

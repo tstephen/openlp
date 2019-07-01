@@ -27,13 +27,14 @@ import json
 import logging
 import os
 from enum import IntEnum
+from pathlib import Path
 from tempfile import gettempdir
 
 from PyQt5 import QtCore, QtGui
 
 from openlp.core.common import SlideLimits, ThemeLevel, is_linux, is_win
-from openlp.core.common.json import OpenLPJsonDecoder, OpenLPJsonEncoder
-from openlp.core.common.path import Path, files_to_paths, str_to_path
+from openlp.core.common.json import OpenLPJSONDecoder, OpenLPJSONEncoder, is_serializable
+from openlp.core.common.path import files_to_paths, str_to_path
 
 
 log = logging.getLogger(__name__)
@@ -129,9 +130,6 @@ class Settings(QtCore.QSettings):
         ``advanced/slide limits`` to ``SlideLimits.Wrap``. **NOTE**, this means that the rules have to cover all cases!
         So, if the type of the old value is bool, then there must be two rules.
     """
-    on_monitor_default = True
-    if log.isEnabledFor(logging.DEBUG):
-        on_monitor_default = False
     __default_settings__ = {
         'settings/version': 0,
         'advanced/add page break': False,
@@ -204,7 +202,7 @@ class Settings(QtCore.QSettings):
         'core/view mode': 'default',
         # The other display settings (display position and dimensions) are defined in the ScreenList class due to a
         # circular dependency.
-        'core/display on monitor': on_monitor_default,
+        'core/display on monitor': False,
         'core/override position': False,
         'core/monitor': {},
         'core/application version': '0.0',
@@ -212,6 +210,8 @@ class Settings(QtCore.QSettings):
         'media/media auto start': QtCore.Qt.Unchecked,
         'media/stream command': '',
         'media/vlc arguments': '',
+        'media/video': '',
+        'media/audio': '',
         'remotes/download version': '0.0',
         'players/background color': '#000000',
         'servicemanager/last directory': None,
@@ -337,7 +337,7 @@ class Settings(QtCore.QSettings):
 
         Does not affect existing Settings objects.
 
-        :param openlp.core.common.path.Path ini_path: ini file path
+        :param Path ini_path: ini file path
         :rtype: None
         """
         Settings.__file_path__ = str(ini_path)
@@ -584,8 +584,9 @@ class Settings(QtCore.QSettings):
         :param value: The value to save
         :rtype: None
         """
-        if isinstance(value, (Path, dict)) or (isinstance(value, list) and value and isinstance(value[0], Path)):
-            value = json.dumps(value, cls=OpenLPJsonEncoder)
+        if is_serializable(value) or isinstance(value, dict) or \
+                (isinstance(value, list) and value and is_serializable(value[0])):
+            value = json.dumps(value, cls=OpenLPJSONEncoder)
         super().setValue(key, value)
 
     def _convert_value(self, setting, default_value):
@@ -611,8 +612,8 @@ class Settings(QtCore.QSettings):
             elif isinstance(default_value, dict):
                 return {}
         elif isinstance(setting, str):
-            if '__Path__' in setting or setting.startswith('{'):
-                return json.loads(setting, cls=OpenLPJsonDecoder)
+            if 'json_meta' in setting or '__Path__' in setting or setting.startswith('{'):
+                return json.loads(setting, cls=OpenLPJSONDecoder)
         # Convert the setting to the correct type.
         if isinstance(default_value, bool):
             if isinstance(setting, bool):
@@ -629,7 +630,7 @@ class Settings(QtCore.QSettings):
         """
         Export the settings to file.
 
-        :param openlp.core.common.path.Path dest_path: The file path to create the export file.
+        :param Path dest_path: The file path to create the export file.
         :return: Success
         :rtype: bool
         """

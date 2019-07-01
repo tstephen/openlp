@@ -66,8 +66,8 @@ __default_settings__ = {
     'songs/add song from service': True,
     'songs/add songbook slide': False,
     'songs/display songbar': True,
-    'songs/last directory import': '',
-    'songs/last directory export': '',
+    'songs/last directory import': None,
+    'songs/last directory export': None,
     'songs/songselect username': '',
     'songs/songselect password': '',
     'songs/songselect searches': '',
@@ -423,7 +423,7 @@ class SongsPlugin(Plugin):
         """
         Remove temporary songs from the database
         """
-        songs = self.manager.get_all_objects(Song, Song.temporary is True)
+        songs = self.manager.get_all_objects(Song, Song.temporary == True)  # noqa: E712
         for song in songs:
             self.manager.delete_object(Song, song.id)
 
@@ -432,7 +432,7 @@ class SongsPlugin(Plugin):
         """
         Provide a count of the songs in the database
 
-        :param openlp.core.common.path.Path db_path: The database to use
+        :param Path db_path: The database to use
         :return: The number of songs in the db.
         :rtype: int
         """

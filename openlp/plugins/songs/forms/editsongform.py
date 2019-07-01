@@ -25,13 +25,14 @@ used to edit songs.
 """
 import logging
 import re
+from shutil import copyfile
 
 from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.i18n import UiStrings, get_natural_key, translate
 from openlp.core.common.mixins import RegistryProperties
-from openlp.core.common.path import copyfile, create_paths
+from openlp.core.common.path import create_paths
 from openlp.core.common.registry import Registry
 from openlp.core.lib import MediaType, create_separated_list
 from openlp.core.lib.plugin import PluginStatus
