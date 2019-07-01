@@ -92,11 +92,11 @@ class AlertsManager(QtCore.QObject, RegistryBase, LogMixin, RegistryProperties):
 
         # Put alert settings together in dict that will be passed to Display in Javascript
         alert_settings = {
-            'background_color': rgb_background_color,
+            'backgroundColor': rgb_background_color,
             'location': Settings().value('alerts/location'),
-            'font_face': Settings().value('alerts/font face'),
-            'font_size': Settings().value('alerts/font size'),
-            'font_color': rgb_font_color,
+            'fontFace': Settings().value('alerts/font face'),
+            'fontSize': Settings().value('alerts/font size'),
+            'fontColor': rgb_font_color,
             'timeout': Settings().value('alerts/timeout'),
             'repeat': Settings().value('alerts/repeat'),
             'scroll': Settings().value('alerts/scroll')

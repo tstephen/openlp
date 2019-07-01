@@ -168,14 +168,14 @@ describe("Display.alert", function () {
     alertText.setAttribute("id","alert");
     alertBackground.appendChild(alertText);
     settings = '{ \
-      "location": 1, "font_face": "Segoe UI, Tahoma, Geneva, Verdana, sans-serif", \
-      "font_size": 40, "font_color": "#ffffff", "background_color": "#660000", \
+      "location": 1, "fontFace": "Segoe UI, Tahoma, Geneva, Verdana, sans-serif", \
+      "fontSize": 40, "fontColor": "#ffffff", "backgroundColor": "#660000", \
       "timeout": 5, "repeat": 1, "scroll": true \
     }';
   });
 
   it("should return null if called without any text", function () {
-    expect(Display.alert("",settings)).toBeNull();
+    expect(Display.alert("", settings)).toBeNull();
   });
 
   it("should set the correct alert text", function () {
@@ -330,8 +330,8 @@ describe("Display.showAlertText", function () {
     alertText.setAttribute("id", "alert");
     document.body.appendChild(alertText);
     settings = {
-      "location": 2, "font_face": "Tahoma", "font_size": 40, 
-      "font_color": "rgb(255, 255, 255)", "background_color": "rgb(102, 0, 0)",
+      "location": 2, "fontFace": "Tahoma", "fontSize": 40, 
+      "fontColor": "rgb(255, 255, 255)", "backgroundColor": "rgb(102, 0, 0)",
       "timeout": 0.01, "repeat": 1, "scroll": true
     };
     Display._transitionState = TransitionState.EntranceTransition;
@@ -399,8 +399,8 @@ describe("Display.addAlertToQueue", function () {
     Display._alerts = [];
     Display._alertState = AlertState.Displaying;
     settings = '{ \
-      "location": 1, "font_face": "Segoe UI, Tahoma, Geneva, Verdana, sans-serif", \
-      "font_size": 40, "font_color": "#ffffff", "background_color": "#660000", \
+      "location": 1, "fontFace": "Segoe UI, Tahoma, Geneva, Verdana, sans-serif", \
+      "fontSize": 40, "fontColor": "#ffffff", "backgroundColor": "#660000", \
       "timeout": 5, "repeat": 1, "scrolling_text": true \
     }';
     var alertObject = {text: "Testing alert queue", settings: settings};
@@ -425,8 +425,8 @@ describe("Display.showNextAlert", function () {
 
   it("should call the alert function correctly if there is an alert in the queue", function () {    
     var settings = {
-      "location": 2, "font_face": "Tahoma", "font_size": 40, 
-      "font_color": "rgb(255, 255, 255)", "background_color": "rgb(102, 0, 0)",
+      "location": 2, "fontFace": "Tahoma", "fontSize": 40, 
+      "fontColor": "rgb(255, 255, 255)", "backgroundColor": "rgb(102, 0, 0)",
       "timeout": 5, "repeat": 1, "scrolling_text": true
     };
     var alertObject = {text: "Queued Alert", settings: settings};

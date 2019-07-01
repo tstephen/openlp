@@ -405,11 +405,11 @@ var Display = {
   /**
    * Display an alert
    * @param {string} text - The alert text
-   * @param {string} JSON object - The settings for the alert object e.g '{"background_color": "rgb(255, 85, 0)", 
-   * "location": 1, "font_face": "Open Sans Condensed", "font_size": 90, "font_color": "rgb(255, 255, 255)", 
+   * @param {string} JSON object - The settings for the alert object e.g '{"backgroundColor": "rgb(255, 85, 0)", 
+   * "location": 1, "fontFace": "Open Sans Condensed", "fontSize": 90, "fontColor": "rgb(255, 255, 255)", 
    * "timeout": 10, "repeat": 2, "scroll": true}'
   */
-  alert: function (text, alert_settings) {
+  alert: function (text, alertSettings) {
     var alertBackground = $('#alert-background')[0];
     var alertText = $('#alert')[0];
     if (text == "") {
@@ -420,9 +420,9 @@ var Display = {
         Display.addAlertToQueue(text, alert_settings);
       }
     }
-    var settings = JSON.parse(alert_settings);
+    var settings = JSON.parse(alertSettings);
     this._alertSettings = settings;    
-    Display.setAlertText(text, settings.font_color, settings.font_face, settings.font_size);
+    Display.setAlertText(text, settings.fontColor, settings.fontFace, settings.fontSize);
     Display.setAlertLocation(settings.location);    
     /* Check if the alert is a queued alert */
     if (Display._alertState !== AlertState.DisplayingFromQueue) {
@@ -432,7 +432,7 @@ var Display = {
     alertBackground.addEventListener('transitionend', Display.alertTransitionEndEvent, false);            
     alertText.addEventListener('animationend', Display.alertAnimationEndEvent, false);                          
     
-    Display.showAlertBackground(settings.background_color);                
+    Display.showAlertBackground(settings.backgroundColor);                
   },  
   /**
    * Add an alert to the alert queue 
@@ -448,12 +448,12 @@ var Display = {
    * Set Alert Text
    * @param {string} text - The alert text to display
    */
-  setAlertText: function (text, color, font_face, font_size) {
+  setAlertText: function (text, color, fontFace, fontSize) {
     var alertText = $("#alert")[0];
     alertText.textContent = text;
     alertText.style.color = color;
-    alertText.style.fontFamily = font_face;
-    alertText.style.fontSize = font_size + "pt";
+    alertText.style.fontFamily = fontFace;
+    alertText.style.fontSize = fontSize + "pt";
   },      
   /**
    * The alertTransitionEndEvent called after a transition has ended
