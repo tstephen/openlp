@@ -92,6 +92,19 @@ class ZeroconfWorker(ThreadWorker):
         self._can_run = False
 
 
+def filter_interfaces():
+    """
+    Return a list of interfaces filtered down to valid interfaces
+    """
+    all_interfaces = get_local_ip4()
+    interfaces = {}
+    for name, interface in all_interfaces.items():
+        log.debug('Interface {name}: {interface}'.format(name=name, interface=interface))
+        if not INTERFACE_FILTER.search(name):
+            interfaces[name] = interface
+    return interfaces
+
+
 def start_zeroconf():
     """
     Start the Zeroconf service
@@ -101,9 +114,6 @@ def start_zeroconf():
         return
     http_port = Settings().value('api/port')
     ws_port = Settings().value('api/websocket port')
-    for name, interface in get_local_ip4().items():
-        log.debug('Interface {name}: {interface}'.format(name=name, interface=interface))
-        if not INTERFACE_FILTER.search(name):
-            # Only advertise on real interfaces
-            worker = ZeroconfWorker(interface['ip'], http_port, ws_port)
-            run_thread(worker, 'api_zeroconf_{name}'.format(name=name))
+    for name, interface in filter_interfaces().items():
+        worker = ZeroconfWorker(interface['ip'], http_port, ws_port)
+        run_thread(worker, 'api_zeroconf_{name}'.format(name=name))
