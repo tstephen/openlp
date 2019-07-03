@@ -24,7 +24,7 @@ This module contains tests for the lib submodule of the Presentations plugin.
 """
 from pathlib import Path
 from unittest import TestCase
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import MagicMock, PropertyMock, call, patch
 
 from openlp.core.common.registry import Registry
 from openlp.plugins.presentations.lib.mediaitem import PresentationMediaItem
@@ -94,17 +94,23 @@ class TestMediaItem(TestCase, TestMixin):
         Test that the clean_up_thumbnails method works as expected when files exists.
         """
         # GIVEN: A mocked controller, and mocked os.path.getmtime
-        mocked_controller = MagicMock()
+        mocked_disabled_controller = MagicMock()
+        mocked_disabled_controller.enabled.return_value = False
+        mocked_disabled_supports = PropertyMock()
+        type(mocked_disabled_controller).supports = mocked_disabled_supports
+        mocked_enabled_controller = MagicMock()
+        mocked_enabled_controller.enabled.return_value = True
         mocked_doc = MagicMock(**{'get_thumbnail_path.return_value': Path()})
-        mocked_controller.add_document.return_value = mocked_doc
-        mocked_controller.supports = ['tmp']
+        mocked_enabled_controller.add_document.return_value = mocked_doc
+        mocked_enabled_controller.supports = ['tmp']
         self.media_item.controllers = {
-            'Mocked': mocked_controller
+            'Enabled': mocked_enabled_controller,
+            'Disabled': mocked_disabled_controller
         }
 
-        thmub_path = MagicMock(st_mtime=100)
+        thumb_path = MagicMock(st_mtime=100)
         file_path = MagicMock(st_mtime=400)
-        with patch.object(Path, 'stat', side_effect=[thmub_path, file_path]), \
+        with patch.object(Path, 'stat', side_effect=[thumb_path, file_path]), \
                 patch.object(Path, 'exists', return_value=True):
             presentation_file = Path('file.tmp')
 
@@ -114,6 +120,7 @@ class TestMediaItem(TestCase, TestMixin):
         # THEN: doc.presentation_deleted should have been called since the thumbnails mtime will be greater than
         #       the presentation_file's mtime.
         mocked_doc.assert_has_calls([call.get_thumbnail_path(1, True), call.presentation_deleted()], True)
+        assert mocked_disabled_supports.call_count == 0
 
     def test_clean_up_thumbnails_missing_file(self):
         """

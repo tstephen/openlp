@@ -246,6 +246,9 @@ class PresentationMediaItem(MediaManagerItem):
         :rtype: None
         """
         for cidx in self.controllers:
+            if not self.controllers[cidx].enabled():
+                # skip presentation controllers that are not enabled
+                continue
             file_ext = file_path.suffix[1:]
             if file_ext in self.controllers[cidx].supports or file_ext in self.controllers[cidx].also_supports:
                 doc = self.controllers[cidx].add_document(file_path)
