@@ -194,11 +194,11 @@ class ScreenButton(QtWidgets.QPushButton):
 
 
 class ScreenSelectionWidget(QtWidgets.QWidget):
-    def __init__(self, parent=None, screens=[]):
+    def __init__(self, parent=None, screens=None):
         super().__init__(parent)
         self.current_screen = None
         self.identify_labels = []
-        self.screens = screens
+        self.screens = screens or []
         self.timer = QtCore.QTimer()
         self.timer.setSingleShot(True)
         self.timer.setInterval(3000)

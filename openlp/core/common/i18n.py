@@ -338,8 +338,8 @@ class UiStrings(object):
         Override the default object creation method to return a single instance.
         """
         if not cls.__instance__:
-            cls.__instance__ = object.__new__(cls)
-            cls.load(cls)
+            cls.__instance__ = super().__new__(cls)
+            cls.__instance__.load()
         return cls.__instance__
 
     def load(self):
@@ -503,7 +503,7 @@ def format_time(text, local_time):
         """
         return local_time.strftime(match.group())
 
-    return re.sub(r'\%[a-zA-Z]', match_formatting, text)
+    return re.sub(r'%[a-zA-Z]', match_formatting, text)
 
 
 def get_locale_key(string, numeric=False):

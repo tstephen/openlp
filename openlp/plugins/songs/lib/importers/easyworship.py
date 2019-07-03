@@ -118,8 +118,8 @@ class EasyWorshipSongImport(SongImport):
         # 40/48/56 Entry count        int32le           4    Number of items in the schedule
         # 44/52/60 Entry length       int16le           2    Length of schedule entries: 0x0718 = 1816
         # Get file version
-        type, = struct.unpack('<38s', self.ews_file.read(38))
-        version = type.decode()[-3:]
+        file_type, = struct.unpack('<38s', self.ews_file.read(38))
+        version = file_type.decode()[-3:]
         # Set fileposition based on filetype/version
         file_pos = 0
         if version == '  5':

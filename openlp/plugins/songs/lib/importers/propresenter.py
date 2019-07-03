@@ -80,7 +80,7 @@ class ProPresenterImport(SongImport):
                 self.parse_author(author)
 
         # ProPresenter 4
-        if(self.version >= 400 and self.version < 500):
+        if 400 <= self.version < 500:
             self.copyright = root.get('CCLICopyrightInfo')
             self.ccli_number = root.get('CCLILicenseNumber')
             count = 0
@@ -95,7 +95,7 @@ class ProPresenterImport(SongImport):
                 self.add_verse(words, "v{count}".format(count=count))
 
         # ProPresenter 5
-        elif(self.version >= 500 and self.version < 600):
+        elif 500 <= self.version < 600:
             self.copyright = root.get('CCLICopyrightInfo')
             self.ccli_number = root.get('CCLILicenseNumber')
             count = 0
@@ -111,7 +111,7 @@ class ProPresenterImport(SongImport):
                     self.add_verse(words, "v{count:d}".format(count=count))
 
         # ProPresenter 6
-        elif(self.version >= 600 and self.version < 700):
+        elif 600 <= self.version < 700:
             self.copyright = root.get('CCLICopyrightYear')
             self.ccli_number = root.get('CCLISongNumber')
             count = 0
@@ -128,7 +128,7 @@ class ProPresenterImport(SongImport):
                             b64Data = contents.text
                             data = base64.standard_b64decode(b64Data)
                             words = None
-                            if(contents.get('rvXMLIvarName') == "RTFData"):
+                            if contents.get('rvXMLIvarName') == "RTFData":
                                 words, encoding = strip_rtf(data.decode())
                                 break
                         if words:

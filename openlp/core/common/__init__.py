@@ -45,7 +45,7 @@ log = logging.getLogger(__name__ + '.__init__')
 FIRST_CAMEL_REGEX = re.compile('(.)([A-Z][a-z]+)')
 SECOND_CAMEL_REGEX = re.compile('([a-z0-9])([A-Z])')
 CONTROL_CHARS = re.compile(r'[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]')
-INVALID_FILE_CHARS = re.compile(r'[\\/:\*\?"<>\|\+\[\]%]')
+INVALID_FILE_CHARS = re.compile(r'[\\/:*?"<>|+\[\]%]')
 IMAGES_FILTER = None
 REPLACMENT_CHARS_MAP = str.maketrans({'\u2018': '\'', '\u2019': '\'', '\u201c': '"', '\u201d': '"', '\u2026': '...',
                                       '\u2013': '-', '\u2014': '-', '\v': '\n\n', '\f': '\n\n'})
@@ -112,21 +112,21 @@ def trace_error_handler(logger):
     logger.error(log_string)
 
 
-def extension_loader(glob_pattern, excluded_files=[]):
+def extension_loader(glob_pattern, excluded_files=None):
     """
     A utility function to find and load OpenLP extensions, such as plugins, presentation and media controllers and
     importers.
 
     :param str glob_pattern: A glob pattern used to find the extension(s) to be imported. Should be relative to the
         application directory. i.e. plugins/*/*plugin.py
-    :param list[str] excluded_files: A list of file names to exclude that the glob pattern may find.
+    :param list[str] | None excluded_files: A list of file names to exclude that the glob pattern may find.
     :rtype: None
     """
     from openlp.core.common.applocation import AppLocation
     app_dir = AppLocation.get_directory(AppLocation.AppDir)
     for extension_path in app_dir.glob(glob_pattern):
         extension_path = extension_path.relative_to(app_dir)
-        if extension_path.name in excluded_files:
+        if extension_path.name in (excluded_files or []):
             continue
         log.debug('Attempting to import %s', extension_path)
         module_name = path_to_module(extension_path)

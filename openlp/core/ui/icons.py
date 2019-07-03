@@ -45,8 +45,8 @@ class UiIcons(object):
         Override the default object creation method to return a single instance.
         """
         if not cls.__instance__:
-            cls.__instance__ = object.__new__(cls)
-            cls.load(cls)
+            cls.__instance__ = super().__new__(cls)
+            cls.__instance__.load()
         return cls.__instance__
 
     def load(self):
@@ -164,7 +164,7 @@ class UiIcons(object):
             'video': {'icon': 'fa.file-video-o'},
             'volunteer': {'icon': 'fa.group'}
         }
-        self.load_icons(self, icon_list)
+        self.load_icons(icon_list)
 
     def load_icons(self, icon_list):
         """

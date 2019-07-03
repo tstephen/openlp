@@ -615,14 +615,16 @@ def transpose_chord(chord, transpose_value, notation):
     :return: The transposed chord.
     """
     # See https://en.wikipedia.org/wiki/Musical_note#12-tone_chromatic_scale
-    notes_sharp_notation = {}
-    notes_flat_notation = {}
-    notes_sharp_notation['german'] = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'H']
-    notes_flat_notation['german'] = ['C', 'Db', 'D', 'Eb', 'Fb', 'F', 'Gb', 'G', 'Ab', 'A', 'B', 'H']
-    notes_sharp_notation['english'] = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
-    notes_flat_notation['english'] = ['C', 'Db', 'D', 'Eb', 'Fb', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B']
-    notes_sharp_notation['neo-latin'] = ['Do', 'Do#', 'Re', 'Re#', 'Mi', 'Fa', 'Fa#', 'Sol', 'Sol#', 'La', 'La#', 'Si']
-    notes_flat_notation['neo-latin'] = ['Do', 'Reb', 'Re', 'Mib', 'Fab', 'Fa', 'Solb', 'Sol', 'Lab', 'La', 'Sib', 'Si']
+    notes_sharp_notation = {
+        'german': ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'H'],
+        'english': ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'],
+        'neo-latin': ['Do', 'Do#', 'Re', 'Re#', 'Mi', 'Fa', 'Fa#', 'Sol', 'Sol#', 'La', 'La#', 'Si']
+    }
+    notes_flat_notation = {
+        'german': ['C', 'Db', 'D', 'Eb', 'Fb', 'F', 'Gb', 'G', 'Ab', 'A', 'B', 'H'],
+        'english': ['C', 'Db', 'D', 'Eb', 'Fb', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'],
+        'neo-latin': ['Do', 'Reb', 'Re', 'Mib', 'Fab', 'Fa', 'Solb', 'Sol', 'Lab', 'La', 'Sib', 'Si']
+    }
     chord_split = chord.replace('♭', 'b').split('/')
     transposed_chord = ''
     last_chord = ''

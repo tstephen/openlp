@@ -80,7 +80,7 @@ class ListPreviewWidget(QtWidgets.QTableWidget, RegistryProperties):
         An empty ``ServiceItem`` is used by default. replace_service_manager_item() needs to be called to make this
         widget display something.
         """
-        super(QtWidgets.QTableWidget, self).__init__(parent)
+        super().__init__(parent)
         self._setup(screen_ratio)
 
     def _setup(self, screen_ratio):
@@ -124,7 +124,7 @@ class ListPreviewWidget(QtWidgets.QTableWidget, RegistryProperties):
                 max_img_row_height = Settings().value('advanced/slide max height')
                 # Adjust for row height cap if in use.
                 if isinstance(max_img_row_height, int):
-                    if max_img_row_height > 0 and height > max_img_row_height:
+                    if 0 < max_img_row_height < height:
                         height = max_img_row_height
                     elif max_img_row_height < 0:
                         # If auto setting, show that number of slides, or if the resulting slides too small, 100px.
@@ -219,7 +219,7 @@ class ListPreviewWidget(QtWidgets.QTableWidget, RegistryProperties):
                 slide_height = width // self.screen_ratio
                 max_img_row_height = Settings().value('advanced/slide max height')
                 if isinstance(max_img_row_height, int):
-                    if max_img_row_height > 0 and slide_height > max_img_row_height:
+                    if 0 < max_img_row_height < slide_height:
                         slide_height = max_img_row_height
                     elif max_img_row_height < 0:
                         # If auto setting, show that number of slides, or if the resulting slides too small, 100px.

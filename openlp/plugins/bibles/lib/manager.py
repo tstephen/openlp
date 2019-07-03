@@ -401,4 +401,4 @@ class BibleManager(LogMixin, RegistryProperties):
             self.db_cache[bible].finalise()
 
 
-__all__ = ['BibleFormat']
+__all__ = ['BibleFormat', 'BibleManager']
