@@ -82,14 +82,24 @@ def test_zeroconf_worker_stop():
     assert worker._can_run is False
 
 
-# @patch('openlp.core.api.zeroconf.get_local_ip4')
+@patch('openlp.core.api.zeroconf.get_network_interfaces')
 @patch('openlp.core.api.zeroconf.Registry')
 @patch('openlp.core.api.zeroconf.Settings')
 @patch('openlp.core.api.zeroconf.ZeroconfWorker')
 @patch('openlp.core.api.zeroconf.run_thread')
-def test_start_zeroconf(mocked_run_thread, MockedZeroconfWorker, MockedSettings, MockedRegistry):
+def test_start_zeroconf(mocked_run_thread, MockedZeroconfWorker, MockedSettings, MockedRegistry,
+                        mocked_get_network_interfaces):
     """Test the start_zeroconf() function"""
     # GIVEN: A whole bunch of stuff that's mocked out
+    mocked_get_network_interfaces.return_value = {
+        'eth0': {
+            'ip': '192.168.1.191',
+            'broadcast': '192.168.1.255',
+            'netmask': '255.255.255.0',
+            'prefix': 24,
+            'localnet': '192.168.1.0'
+        }
+    }
     MockedRegistry.return_value.get_flag.return_value = False
     MockedSettings.return_value.value.side_effect = [8000, 8001]
     mocked_worker = MagicMock()
@@ -99,4 +109,4 @@ def test_start_zeroconf(mocked_run_thread, MockedZeroconfWorker, MockedSettings,
     start_zeroconf()
 
     # THEN: A worker is added to the list of threads
-    mocked_run_thread.assert_called_once_with(mocked_worker, 'api_zeroconf')
+    mocked_run_thread.assert_called_once_with(mocked_worker, 'api_zeroconf_eth0')

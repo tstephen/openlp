@@ -28,7 +28,7 @@ from PyQt5.QtCore import QObject
 from PyQt5.QtNetwork import QHostAddress, QNetworkAddressEntry, QNetworkInterface
 
 import openlp.core.common
-from openlp.core.common import get_local_ip4
+from openlp.core.common import get_network_interfaces
 from tests.helpers.testmixin import TestMixin
 
 
@@ -112,12 +112,12 @@ class TestInterfaces(TestCase, TestMixin):
         # WHEN: get_local_ip4 is called
         with patch('openlp.core.common.QNetworkInterface') as mock_network_interface:
             mock_network_interface.allInterfaces.return_value = []
-            ifaces = get_local_ip4()
+            interfaces = get_network_interfaces()
 
         # THEN: There should not be any interfaces detected
         mock_log.debug.assert_has_calls(call_debug)
         mock_log.warning.assert_has_calls(call_warning)
-        assert not ifaces, 'There should have been no active interfaces listed'
+        assert not interfaces, 'There should have been no active interfaces listed'
 
     @patch.object(openlp.core.common, 'log')
     def test_ip4_lo(self, mock_log):
@@ -136,12 +136,12 @@ class TestInterfaces(TestCase, TestMixin):
         # WHEN: get_local_ip4 is called
         with patch('openlp.core.common.QNetworkInterface') as mock_network_interface:
             mock_network_interface.allInterfaces.return_value = [self.fake_lo]
-            ifaces = get_local_ip4()
+            interfaces = get_network_interfaces()
 
         # THEN: There should be a fake 'lo' interface
         mock_log.debug.assert_has_calls(call_debug)
         mock_log.warning.assert_has_calls(call_warning)
-        assert ifaces == self.fake_lo.fake_data, "There should have been an 'lo' interface listed"
+        assert interfaces == self.fake_lo.fake_data, "There should have been an 'lo' interface listed"
 
     @patch.object(openlp.core.common, 'log')
     def test_ip4_localhost(self, mock_log):
@@ -149,24 +149,25 @@ class TestInterfaces(TestCase, TestMixin):
         Test get_local_ip4 returns proper dictionary with 'lo' if interface is 'localhost'
         """
         # GIVEN: Test environment
-        call_debug = [call('Getting local IPv4 interface(es) information'),
-                      call('Checking for isValid and flags == IsUP | IsRunning'),
-                      call('Checking address(es) protocol'),
-                      call('Checking for protocol == IPv4Protocol'),
-                      call('Getting interface information'),
-                      call('Adding localhost to active list'),
-                      call('Renaming windows localhost to lo')]
+        call_debug = [
+            call('Getting local IPv4 interface(es) information'),
+            call('Checking for isValid and flags == IsUP | IsRunning'),
+            call('Checking address(es) protocol'),
+            call('Checking for protocol == IPv4Protocol'),
+            call('Getting interface information'),
+            call('Adding localhost to active list')
+        ]
         call_warning = [call('No active IPv4 interfaces found except localhost')]
 
         # WHEN: get_local_ip4 is called
         with patch('openlp.core.common.QNetworkInterface') as mock_network_interface:
             mock_network_interface.allInterfaces.return_value = [self.fake_localhost]
-            ifaces = get_local_ip4()
+            interfaces = get_network_interfaces()
 
         # THEN: There should be a fake 'lo' interface
         mock_log.debug.assert_has_calls(call_debug)
         mock_log.warning.assert_has_calls(call_warning)
-        assert ifaces == self.fake_lo.fake_data, "There should have been an 'lo' interface listed"
+        assert interfaces == self.fake_lo.fake_data, "There should have been an 'lo' interface listed"
 
     @patch.object(openlp.core.common, 'log')
     def test_ip4_eth25(self, mock_log):
@@ -185,12 +186,12 @@ class TestInterfaces(TestCase, TestMixin):
         # WHEN: get_local_ip4 is called
         with patch('openlp.core.common.QNetworkInterface') as mock_network_interface:
             mock_network_interface.allInterfaces.return_value = [self.fake_address]
-            ifaces = get_local_ip4()
+            interfaces = get_network_interfaces()
 
         # THEN: There should be a fake 'eth25' interface
         mock_log.debug.assert_has_calls(call_debug)
         mock_log.warning.assert_has_calls(call_warning)
-        assert ifaces == self.fake_address.fake_data
+        assert interfaces == self.fake_address.fake_data
 
     @patch.object(openlp.core.common, 'log')
     def test_ip4_lo_eth25(self, mock_log):
@@ -215,9 +216,9 @@ class TestInterfaces(TestCase, TestMixin):
         # WHEN: get_local_ip4 is called
         with patch('openlp.core.common.QNetworkInterface') as mock_network_interface:
             mock_network_interface.allInterfaces.return_value = [self.fake_lo, self.fake_address]
-            ifaces = get_local_ip4()
+            interfaces = get_network_interfaces()
 
         # THEN: There should be a fake 'eth25' interface
         mock_log.debug.assert_has_calls(call_debug)
         mock_log.warning.assert_has_calls(call_warning)
-        assert ifaces == self.fake_address.fake_data, "There should have been only 'eth25' interface listed"
+        assert interfaces == self.fake_address.fake_data, "There should have been only 'eth25' interface listed"

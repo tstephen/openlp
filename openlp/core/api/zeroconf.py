@@ -23,22 +23,15 @@
 The :mod:`~openlp.core.api.zeroconf` module runs a Zerconf server so that OpenLP can advertise the
 RESTful API for devices on the network to discover.
 """
-import logging
-import re
 import socket
 from time import sleep
 
 from zeroconf import ServiceInfo, Zeroconf
 
-from openlp.core.common import get_local_ip4
+from openlp.core.common import get_network_interfaces
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.threading import ThreadWorker, run_thread
-
-# Skip names like "docker0", "tun0", "loopback_0", etc
-INTERFACE_FILTER = re.compile('loopback|docker|tun', re.IGNORECASE)
-
-log = logging.getLogger(__name__)
 
 
 class ZeroconfWorker(ThreadWorker):
@@ -92,19 +85,6 @@ class ZeroconfWorker(ThreadWorker):
         self._can_run = False
 
 
-def filter_interfaces():
-    """
-    Return a list of interfaces filtered down to valid interfaces
-    """
-    all_interfaces = get_local_ip4()
-    interfaces = {}
-    for name, interface in all_interfaces.items():
-        log.debug('Interface {name}: {interface}'.format(name=name, interface=interface))
-        if not INTERFACE_FILTER.search(name):
-            interfaces[name] = interface
-    return interfaces
-
-
 def start_zeroconf():
     """
     Start the Zeroconf service
@@ -114,6 +94,6 @@ def start_zeroconf():
         return
     http_port = Settings().value('api/port')
     ws_port = Settings().value('api/websocket port')
-    for name, interface in filter_interfaces().items():
+    for name, interface in get_network_interfaces().items():
         worker = ZeroconfWorker(interface['ip'], http_port, ws_port)
         run_thread(worker, 'api_zeroconf_{name}'.format(name=name))
