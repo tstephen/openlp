@@ -65,7 +65,7 @@ def get_network_interfaces():
     interfaces = {}
     for interface in QNetworkInterface.allInterfaces():
         interface_name = interface.name()
-        if not INTERFACE_FILTER.search(interface_name):
+        if INTERFACE_FILTER.search(interface_name):
             log.debug('Filtering out interfaces we don\'t care about: {name}'.format(name=interface_name))
             continue
         log.debug('Checking for isValid and flags == IsUP | IsRunning')
