@@ -185,7 +185,8 @@ using a computer and a data projector.""",
         'SQLAlchemy >= 0.5',
         'waitress',
         'WebOb',
-        'websockets'
+        'websockets',
+        'zeroconf'
     ],
     extras_require={
         'agpl-pdf': ['PyMuPDF'],
