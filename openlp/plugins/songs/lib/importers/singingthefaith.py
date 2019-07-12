@@ -117,7 +117,7 @@ class SingingTheFaithImport(SongImport):
         try:
             for line in file:
                 line_number += 1
-                if hints_available and (str(line_number) in self.hint_line):
+                if hints_available and str(line_number) in self.hint_line:
                     hint = self.hint_line[str(line_number)]
                     if hint == 'Comment':
                         line.strip()
@@ -137,24 +137,26 @@ class SingingTheFaithImport(SongImport):
                         next(file)
                         continue
                     elif hint.startswith('VariantVerse'):
-                        (vv, hintverse, replace) = hint.split(' ', 2)
+                        vv, hintverse, replace = hint.split(' ', 2)
                         this_verse = self.verses[int(hintverse) - 1]
                         this_verse_str = this_verse[1]
                         new_verse = this_verse_str
                         # There might be multiple replace pairs separated by |
                         replaces = replace.split('|')
                         for rep in replaces:
-                            (source_str, dest_str) = rep.split('/')
+                            source_str, dest_str = rep.split('/')
                             new_verse = new_verse.replace(source_str, dest_str)
                         self.add_verse(new_verse, 'v')
-                        self.verse_order_list.append('v' + str(current_verse_number))
+                        self.verse_order_list.append('v{}'.format(str(current_verse_number)))
                         current_verse_number += 1
                         line_number += 1
                         next(file)
                         continue
                     else:
-                        self.log_error(translate('SongsPlugin.SingingTheFaithImport', 'File %s' % file.name),
-                                       translate('SongsPlugin.SingingTheFaithImport', 'Unknown hint %s' % hint))
+                        self.log_error(translate('SongsPlugin.SingingTheFaithImport',
+                                       'File {file})'.format(file=file.name)),
+                                       translate('SongsPlugin.SingingTheFaithImport',
+                                       'Unknown hint {hint}').format(hint=hint))
                     return
                 # STF exported lines have a leading verse number at the start of each verse.
                 #  remove them - note that we want to track the indent as that shows a chorus
@@ -185,26 +187,22 @@ class SingingTheFaithImport(SongImport):
                     if song_number_match:
                         song_number = song_number_match.group()
                         continue
-                # If the indent is 0 and it contains '(c)' then it is a Copyright line
-                elif (indent == 0) and ('(c)' in line):
-                    copyright = line
-                    continue
-                elif (indent == 0) and (line.startswith('Liturgical ')):
-                    self.add_comment(line)
-                    continue
-                elif (indent == 0) and (line.startswith('From The ')):
-                    self.add_comment(line)
-                    continue
-                elif (indent == 0) and (line.startswith('From Common ')):
-                    self.add_comment(line)
-                    continue
-                # If indent is 0 it may be the author, unless it was one of the cases covered above
-                elif (indent == 0) and len(line) > 0:
-                    # May have more than one author, separated by ' and '
-                    authors = line.split(' and ')
-                    for a in authors:
-                        self.parse_author(a)
-                    continue
+                elif indent == 0:
+                    # If the indent is 0 and it contains '(c)' then it is a Copyright line
+                    if '(c)' in line:
+                        copyright = line
+                        continue
+                    elif (line.startswith('Liturgical ') or line.startswith('From The ') or
+                          line.startswith('From Common ')):
+                        self.add_comment(line)
+                        continue
+                    # If indent is 0 it may be the author, unless it was one of the cases covered above
+                    elif len(line) > 0:
+                        # May have more than one author, separated by ' and '
+                        authors = line.split(' and ')
+                        for a in authors:
+                            self.parse_author(a)
+                        continue
                 if line == '':
                     if current_verse != '':
                         self.add_verse(current_verse, current_verse_type)
@@ -237,13 +235,13 @@ class SingingTheFaithImport(SongImport):
                         current_verse += '\n' + line
                 old_indent = indent
         except Exception as e:
-            self.log_error(translate('SongsPlugin.SingingTheFaithImport', 'File %s' % file.name),
-                           translate('SongsPlugin.SingingTheFaithImport', 'Error: %s') % e)
+            self.log_error(translate('SongsPlugin.SingingTheFaithImport', 'File {file}').format(file=file.name),
+                           translate('SongsPlugin.SingingTheFaithImport', 'Error: {error}').format(error=e))
             return
 
         if self.hint_song_title:
             song_title = self.hint_song_title
-        self.title = check_flag + 'STF' + song_number.zfill(3) + ' - ' + song_title
+        self.title = '{}STF{} - {title}'.format(check_flag, song_number.zfill(3), title=song_title)
         self.song_book_name = 'Singing The Faith'
         self.song_number = song_number
         self.ccli_number = ccli
@@ -254,7 +252,7 @@ class SingingTheFaithImport(SongImport):
         if has_chorus and not self.hint_verse_order and not self.checks_needed:
             auto_verse_order_ok = False
             # Popular case V1 C2 V2 ...
-            if len(self.verse_order_list) >= 1:         # protect against odd cases
+            if self.verse_order_list:         # protect against odd cases
                 if (self.verse_order_list[0] == 'v1') and (self.verse_order_list[1] == 'c2'):
                     new_verse_order_list = ['v1', 'c1']
                     i = 2
@@ -291,7 +289,7 @@ class SingingTheFaithImport(SongImport):
             check_flag = ''
         elif not hints_available and has_chorus and auto_verse_order_ok:
             check_flag = ''
-        self.title = check_flag + 'STF' + song_number.zfill(3) + ' - ' + song_title
+        self.title = '{}STF{} - {title}'.format(check_flag, song_number.zfill(3), title=song_title)
         if not self.finish():
             self.log_error(file.name)
 
@@ -312,7 +310,7 @@ class SingingTheFaithImport(SongImport):
                 self.hint_file_version = val
                 continue
             if (tag == 'Hymn') and (val == song_number):
-                self.add_comment('Using hints version ' + str(self.hint_file_version))
+                self.add_comment('Using hints version {}'.format(str(self.hint_file_version)))
                 hintfound = True
                 # Assume, unless the hints has ManualCheck that if hinted all will be OK
                 self.checks_needed = False
@@ -342,11 +340,11 @@ class SingingTheFaithImport(SongImport):
                         self.hint_ignore_indent = True
                     elif tag == 'VariantVerse':
                         vvline = val.split(' ', 1)
-                        self.hint_line[vvline[0].strip()] = 'VariantVerse ' + vvline[1].strip()
+                        self.hint_line[vvline[0].strip()] = 'VariantVerse {}'.format(vvline[1].strip())
                     elif tag == 'SongTitle':
                         self.hint_song_title = val
                     elif tag == 'AddComment':
                         self.hint_comments += '\n' + val
                     else:
-                        self.log_error(file.name, 'Unknown tag ' + tag + ' value ' + val)
+                        self.log_error(file.name, 'Unknown tag {} value {}'.format(tag, val))
         return hintfound
