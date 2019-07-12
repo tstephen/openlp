@@ -58,8 +58,13 @@ class SingingTheFaithImport(SongImport):
         for file_path in self.import_source:
             if self.stop_import_flag:
                 return
-            with file_path.open('rt', encoding='cp1251') as song_file:
+            if isinstance(file_path, str):
+                song_file = open(file_path, 'rt', encoding='cp1251')
                 self.do_import_file(song_file)
+                song_file.close()
+            else:
+                with file_path.open('rt', encoding='cp1251') as song_file:
+                    self.do_import_file(song_file)
 
     def do_import_file(self, file):
         """
