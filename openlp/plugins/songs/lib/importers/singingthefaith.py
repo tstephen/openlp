@@ -46,6 +46,7 @@ class SingingTheFaithImport(SongImport):
     hint_verse_order = ''
     hint_song_title = ''
     hint_comments = ''
+    hint_ccli = ''
     hint_ignore_indent = False
 
     def do_import(self):
@@ -119,15 +120,13 @@ class SingingTheFaithImport(SongImport):
                 line_number += 1
                 if hints_available and str(line_number) in self.hint_line:
                     hint = self.hint_line[str(line_number)]
+                    # Set to false if this hint does not replace the line
+                    line_replaced = True
                     if hint == 'Comment':
                         line.strip()
                         self.add_comment(line)
-                        line_number += 1
-                        next(file)
                         continue
                     elif hint == 'Ignore':
-                        line_number += 1
-                        next(file)
                         continue
                     elif hint == 'Author':
                         # add as a raw author - do not split and make them a words author
@@ -152,12 +151,17 @@ class SingingTheFaithImport(SongImport):
                         line_number += 1
                         next(file)
                         continue
+                    elif hint == 'AddSpaceAfterSemi':
+                        line = line.replace(';', '; ')
+                        line_replaced = False
+                        # note - do not use contine here as the line should now be processed as normal.
                     else:
                         self.log_error(translate('SongsPlugin.SingingTheFaithImport',
                                        'File {file})'.format(file=file.name)),
                                        translate('SongsPlugin.SingingTheFaithImport',
                                        'Unknown hint {hint}').format(hint=hint))
-                    return
+                    if line_replaced:
+                        return
                 # STF exported lines have a leading verse number at the start of each verse.
                 #  remove them - note that we want to track the indent as that shows a chorus
                 # so will deal with that before stipping all leading spaces.
@@ -179,8 +183,9 @@ class SingingTheFaithImport(SongImport):
                 else:
                     line = line.strip()
                 if line_number == 2:
-                    # note that songs seem to start with a blank line
-                    song_title = line
+                    # note that songs seem to start with a blank line so the title is line 2
+                    # Also we strip blanks from the title, even if ignoring indent.
+                    song_title = line.strip()
                 # Detect the 'Reproduced from Singing the Faith Electronic Words Edition' line
                 if line.startswith('Reproduced from Singing the Faith Electronic Words Edition'):
                     song_number_match = re.search(r'\d+', line)
@@ -282,6 +287,8 @@ class SingingTheFaithImport(SongImport):
             self.verse_order_list = self.hint_verse_order.split(',')
         if self.hint_comments:
             self.add_comment(self.hint_comments)
+        if self.hint_ccli:
+            self.ccli_number = self.hint_ccli
         # Write the title last as by now we will know if we need checks
         if hints_available and not self.checks_needed:
             check_flag = ''
@@ -300,6 +307,7 @@ class SingingTheFaithImport(SongImport):
         self.hint_comments = ''
         self.hint_song_title = ''
         self.hint_ignore_indent = False
+        self.hint_ccli = ''
         for tl in file:
             if not tl.strip():
                 return hintfound
@@ -332,6 +340,10 @@ class SingingTheFaithImport(SongImport):
                         vals = val.split(',')
                         for v in vals:
                             self.hint_line[v] = 'Author'
+                    elif tag == 'AddSpaceAfterSemi':
+                        vals = val.split(',')
+                        for v in vals:
+                            self.hint_line[v] = 'AddSpaceAfterSemi'
                     elif tag == 'VerseOrder':
                         self.hint_verse_order = val
                     elif tag == 'ManualCheck':
@@ -345,6 +357,10 @@ class SingingTheFaithImport(SongImport):
                         self.hint_song_title = val
                     elif tag == 'AddComment':
                         self.hint_comments += '\n' + val
+                    elif tag == 'CCLI':
+                        self.hint_ccli = val
+                    elif tag == 'Hymn':
+                        self.log_error(file.name, 'Missing End tag in hint for Hymn: {}'.format(song_number))
                     else:
                         self.log_error(file.name, 'Unknown tag {} value {}'.format(tag, val))
         return hintfound
