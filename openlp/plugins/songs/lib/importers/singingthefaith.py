@@ -8,7 +8,7 @@
 # --------------------------------------------------------------------------- #
 # This program is free software; you can redistribute it and/or modify it     #
 # under the terms of the GNU General Public License as published by the Free  #
-# Software Foundation; version 2 of the License.                              #
+# Software Foundation; version 3 of the License.                              #
 #                                                                             #
 # This program is distributed in the hope that it will be useful, but WITHOUT #
 # ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or       #
@@ -39,15 +39,20 @@ class SingingTheFaithImport(SongImport):
     Import songs exported from SingingTheFaith
     """
 
-    hints_available = False
-    checks_needed = True
-    hint_line = {}
-    hint_file_version = '0'
-    hint_verse_order = ''
-    hint_song_title = ''
-    hint_comments = ''
-    hint_ccli = ''
-    hint_ignore_indent = False
+    def __init__(self, manager, **kwargs):
+        """
+        Initialise the class.
+        """
+        super(SingingTheFaithImport, self).__init__(manager, **kwargs)
+        self.hints_available = False
+        self.checks_needed = True
+        self.hint_line = {}
+        self.hint_file_version = '0'
+        self.hint_verse_order = ''
+        self.hint_song_title = ''
+        self.hint_comments = ''
+        self.hint_ccli = ''
+        self.hint_ignore_indent = False
 
     def do_import(self):
         """
@@ -251,9 +256,9 @@ class SingingTheFaithImport(SongImport):
         self.song_number = song_number
         self.ccli_number = ccli
         self.add_copyright(copyright)
-# If we have a chorus then the generated Verse order can not be used directly, but we can generate
-#  one for two special cases - Verse followed by one chorus (to be repeated after every verse)
-#  of Chorus, followed by verses. If hints for ManualCheck or VerseOrder are supplied ignore this
+        # If we have a chorus then the generated Verse order can not be used directly, but we can generate
+        #  one for two special cases - Verse followed by one chorus (to be repeated after every verse)
+        #  of Chorus, followed by verses. If hints for ManualCheck or VerseOrder are supplied ignore this
         if has_chorus and not self.hint_verse_order and not self.checks_needed:
             auto_verse_order_ok = False
             # Popular case V1 C2 V2 ...
@@ -273,11 +278,9 @@ class SingingTheFaithImport(SongImport):
                             new_verse_order_list.append(self.verse_order_list[i])
                             new_verse_order_list.append('c1')
                         else:
-                            # Would like to notify, but want a warning, which we will do via the
-                            # Check_needed mechanism, as log_error aborts input of that song.
-                            # self.log_error(translate('SongsPlugin.SingingTheFaithImport', 'File %s' % file.name),
-                            #               'Error: Strange verse order entry ' + self.verse_order_list[i])
                             auto_verse_order_ok = False
+                            self.add_comment('Importer detected unexpected verse order entry {}'.format(
+                                self.verse_order_list[i]))
                         i += 1
                     self.verse_order_list = new_verse_order_list
             else:
@@ -301,6 +304,11 @@ class SingingTheFaithImport(SongImport):
             self.log_error(file.name)
 
     def read_hints(self, file, song_number):
+        """
+        Read the hints used to transform a particular song into version which can be projected,
+        or improve the transformation process beyond the standard heuristics. Not every song will
+        have, or need, hints.
+        """
         hintfound = False
         self.hint_verse_order = ''
         self.hint_line.clear()
