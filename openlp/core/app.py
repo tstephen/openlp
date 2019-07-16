@@ -391,7 +391,11 @@ def main():
             vlc_lib = 'libvlc.dylib'
         elif is_win():
             vlc_lib = 'libvlc.dll'
-        os.environ['PYTHON_VLC_LIB_PATH'] = str(AppLocation.get_directory(AppLocation.AppDir) / vlc_lib)
+        # Path to libvlc
+        os.environ['PYTHON_VLC_LIB_PATH'] = str(AppLocation.get_directory(AppLocation.AppDir) / 'vlc' / vlc_lib)
+        log.debug('VLC Path: {}'.format(os.environ['PYTHON_VLC_LIB_PATH']))
+        # Path to VLC directory containing VLC's "plugins" directory
+        os.environ['PYTHON_VLC_MODULE_PATH'] = str(AppLocation.get_directory(AppLocation.AppDir) / 'vlc')
         log.debug('VLC Path: {}'.format(os.environ['PYTHON_VLC_LIB_PATH']))
     # Initialise the Registry
     Registry.create()
