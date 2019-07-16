@@ -160,6 +160,9 @@ class SingingTheFaithImport(SongImport):
                         line = line.replace(';', '; ')
                         line_replaced = False
                         # note - do not use contine here as the line should now be processed as normal.
+                    elif hint == 'AddSpaceAfterColon':
+                        line = line.replace(':', ': ')
+                        line_replaced = False
                     else:
                         self.log_error(translate('SongsPlugin.SingingTheFaithImport',
                                        'File {file})'.format(file=file.name)),
@@ -169,7 +172,7 @@ class SingingTheFaithImport(SongImport):
                         return
                 # STF exported lines have a leading verse number at the start of each verse.
                 #  remove them - note that we want to track the indent as that shows a chorus
-                # so will deal with that before stipping all leading spaces.
+                # so will deal with that before stripping all leading spaces.
                 indent = 0
                 if line.strip():
                     verse_num_match = re.search(r'^\d+', line)
@@ -352,6 +355,10 @@ class SingingTheFaithImport(SongImport):
                         vals = val.split(',')
                         for v in vals:
                             self.hint_line[v] = 'AddSpaceAfterSemi'
+                    elif tag == 'AddSpaceAfterColon':
+                        vals = val.split(',')
+                        for v in vals:
+                            self.hint_line[v] = 'AddSpaceAfterColon'
                     elif tag == 'VerseOrder':
                         self.hint_verse_order = val
                     elif tag == 'ManualCheck':
