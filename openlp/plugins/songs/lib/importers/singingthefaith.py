@@ -163,6 +163,9 @@ class SingingTheFaithImport(SongImport):
                     elif hint == 'AddSpaceAfterColon':
                         line = line.replace(':', ': ')
                         line_replaced = False
+                    elif hint == 'BlankLine':
+                        line = ' *Blank*'
+                        line_replaced = False
                     else:
                         self.log_error(translate('SongsPlugin.SingingTheFaithImport',
                                        'File {file})'.format(file=file.name)),
@@ -175,6 +178,10 @@ class SingingTheFaithImport(SongImport):
                 # so will deal with that before stripping all leading spaces.
                 indent = 0
                 if line.strip():
+                    # One hymn has one line which starts '* 6' at the start of a verse
+                    # Strip this out
+                    if line.startswith('* 6'):
+                        line = line.lstrip('* ')
                     verse_num_match = re.search(r'^\d+', line)
                     if verse_num_match:
                         # Could extract the verse number and check it against the calculated
@@ -216,6 +223,10 @@ class SingingTheFaithImport(SongImport):
                         for a in authors:
                             self.parse_author(a)
                         continue
+                # If a blank line has bee replaced by *Blank* then put it back to being
+                # a simple space since this is past stripping blanks
+                if '*Blank*' in line:
+                    line = ' '
                 if line == '':
                     if current_verse != '':
                         self.add_verse(current_verse, current_verse_type)
@@ -359,6 +370,10 @@ class SingingTheFaithImport(SongImport):
                         vals = val.split(',')
                         for v in vals:
                             self.hint_line[v] = 'AddSpaceAfterColon'
+                    elif tag == 'BlankLine':
+                        vals = val.split(',')
+                        for v in vals:
+                            self.hint_line[v] = 'BlankLine'
                     elif tag == 'VerseOrder':
                         self.hint_verse_order = val
                     elif tag == 'ManualCheck':
