@@ -32,7 +32,7 @@ from PyQt5 import QtGui
 
 from openlp.core.common.registry import Registry
 from openlp.core.display.screens import ScreenList
-from openlp.core.lib.imagemanager import Image, ImageManager, ImageWorker, Priority, PriorityQueue
+from openlp.core.lib.imagemanager import ImageManager, ImageWorker, Priority, PriorityQueue
 from tests.helpers.testmixin import TestMixin
 from tests.utils.constants import RESOURCE_PATH
 
