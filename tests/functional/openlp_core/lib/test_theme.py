@@ -25,7 +25,7 @@ Package to test the openlp.core.lib.theme package.
 from pathlib import Path
 from unittest import TestCase
 
-from openlp.core.lib.theme import BackgroundType
+from openlp.core.lib.theme import BackgroundType, Theme
 
 
 class TestBackgroundType(TestCase):
