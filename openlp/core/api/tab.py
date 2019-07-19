@@ -24,7 +24,7 @@ The :mod:`~openlp.core.api.tab` module contains the settings tab for the API
 """
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from openlp.core.common import get_local_ip4
+from openlp.core.common import get_network_interfaces
 from openlp.core.common.i18n import UiStrings, translate
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
@@ -194,8 +194,7 @@ class ApiTab(SettingsTab):
         http_url_temp = http_url + 'main'
         self.live_url.setText('<a href="{url}">{url}</a>'.format(url=http_url_temp))
 
-    @staticmethod
-    def get_ip_address(ip_address):
+    def get_ip_address(self, ip_address):
         """
         returns the IP address in dependency of the passed address
         ip_address == 0.0.0.0: return the IP address of the first valid interface
@@ -203,9 +202,8 @@ class ApiTab(SettingsTab):
         """
         if ip_address == ZERO_URL:
             # In case we have more than one interface
-            ifaces = get_local_ip4()
-            for key in iter(ifaces):
-                ip_address = ifaces.get(key)['ip']
+            for _, interface in get_network_interfaces().items():
+                ip_address = interface['ip']
                 # We only want the first interface returned
                 break
         return ip_address

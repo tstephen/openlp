@@ -23,6 +23,7 @@
 """
 The entrypoint for OpenLP
 """
+import atexit
 import faulthandler
 import logging
 import multiprocessing
@@ -36,18 +37,33 @@ from openlp.core.common.applocation import AppLocation
 from openlp.core.common.path import create_paths
 
 log = logging.getLogger(__name__)
+error_log_file = None
+
+
+def tear_down_fault_handling():
+    """
+    When Python exits, close the file we were using for the faulthandler
+    """
+    global error_log_file
+    error_log_file.close()
 
 
 def set_up_fault_handling():
     """
     Set up the Python fault handler
     """
+    global error_log_file
     # Create the cache directory if it doesn't exist, and enable the fault handler to log to an error log file
     try:
         create_paths(AppLocation.get_directory(AppLocation.CacheDir))
-        faulthandler.enable((AppLocation.get_directory(AppLocation.CacheDir) / 'error.log').open('wb'))
+        error_log_file = (AppLocation.get_directory(AppLocation.CacheDir) / 'error.log').open('wb')
+        atexit.register(tear_down_fault_handling)
+        faulthandler.enable(error_log_file)
     except OSError:
         log.exception('An exception occurred when enabling the fault handler')
+        atexit.unregister(tear_down_fault_handling)
+        if error_log_file:
+            error_log_file.close()
 
 
 def start():

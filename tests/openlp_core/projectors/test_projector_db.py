@@ -153,8 +153,9 @@ class TestProjectorDB(TestCase, TestMixin):
                 patch('openlp.core.ui.mainwindow.ServiceManager'), \
                 patch('openlp.core.ui.mainwindow.ThemeManager'), \
                 patch('openlp.core.ui.mainwindow.ProjectorManager'), \
-                patch('openlp.core.ui.mainwindow.websockets.WebSocketServer'), \
-                patch('openlp.core.ui.mainwindow.server.HttpServer'), \
+                patch('openlp.core.ui.mainwindow.WebSocketServer'), \
+                patch('openlp.core.ui.mainwindow.HttpServer'), \
+                patch('openlp.core.ui.mainwindow.start_zeroconf'), \
                 patch('openlp.core.state.State.list_plugins') as mock_plugins:
             mock_plugins.return_value = []
             self.main_window = MainWindow()

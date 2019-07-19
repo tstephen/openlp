@@ -33,8 +33,9 @@ from tempfile import gettempdir
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from openlp.core.state import State
-from openlp.core.api import websockets
-from openlp.core.api.http import server
+from openlp.core.api.websockets import WebSocketServer
+from openlp.core.api.http.server import HttpServer
+from openlp.core.api.zeroconf import start_zeroconf
 from openlp.core.common import add_actions, is_macosx, is_win
 from openlp.core.common.actions import ActionList, CategoryOrder
 from openlp.core.common.applocation import AppLocation
@@ -495,8 +496,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
         self.copy_data = False
         Settings().set_up_default_values()
         self.about_form = AboutForm(self)
-        self.ws_server = websockets.WebSocketServer()
-        self.http_server = server.HttpServer(self)
+        self.ws_server = WebSocketServer()
+        self.http_server = HttpServer(self)
+        start_zeroconf()
         SettingsForm(self)
         self.formatting_tag_form = FormattingTagForm(self)
         self.shortcut_form = ShortcutListForm(self)

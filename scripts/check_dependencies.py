@@ -90,7 +90,8 @@ MODULES = [
     'requests',
     'qtawesome',
     'pymediainfo',
-    'vlc'
+    'vlc',
+    'zeroconf'
 ]
 
 

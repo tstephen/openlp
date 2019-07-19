@@ -31,7 +31,7 @@ from unittest.mock import patch
 from openlp.core.common.json import JSONMixin, OpenLPJSONDecoder, OpenLPJSONEncoder, PathSerializer, _registered_classes
 
 
-class TestClassBase(object):
+class BaseTestClass(object):
     """
     Simple class to avoid repetition
     """
@@ -81,7 +81,7 @@ class TestJSONMixin(TestCase):
         Test that an instance of a JSONMixin subclass is properly serialized to a JSON string
         """
         # GIVEN: A instance of a subclass of the JSONMixin class
-        class TestClass(TestClassBase, JSONMixin):
+        class TestClass(BaseTestClass, JSONMixin):
             _json_keys = ['a', 'b']
 
         instance = TestClass(a=1, c=2)
@@ -97,7 +97,7 @@ class TestJSONMixin(TestCase):
         Test that an instance of a JSONMixin subclass is properly deserialized from a JSON string
         """
         # GIVEN: A subclass of the JSONMixin class
-        class TestClass(TestClassBase, JSONMixin):
+        class TestClass(BaseTestClass, JSONMixin):
             _json_keys = ['a', 'b']
 
         # WHEN: Deserializing a JSON representation of the TestClass
@@ -115,7 +115,7 @@ class TestJSONMixin(TestCase):
         Test that an instance of a JSONMixin subclass is properly serialized to a JSON string when using a custom name
         """
         # GIVEN: A instance of a subclass of the JSONMixin class with a custom name
-        class TestClass(TestClassBase, JSONMixin, register_names=('AltName', )):
+        class TestClass(BaseTestClass, JSONMixin, register_names=('AltName', )):
             _json_keys = ['a', 'b']
             _name = 'AltName'
             _version = 2
@@ -134,7 +134,7 @@ class TestJSONMixin(TestCase):
         name
         """
         # GIVEN: A instance of a subclass of the JSONMixin class with a custom name
-        class TestClass(TestClassBase, JSONMixin, register_names=('AltName', )):
+        class TestClass(BaseTestClass, JSONMixin, register_names=('AltName', )):
             _json_keys = ['a', 'b']
             _name = 'AltName'
             _version = 2
