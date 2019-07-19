@@ -75,7 +75,7 @@ class VideoPsalmImport(SongImport):
                         c = next(file_content_it)
                     processed_content += '"' + c
                 # Remove control characters
-                elif (c < chr(32)):
+                elif c < chr(32):
                     processed_content += ' '
                 # Handle escaped characters
                 elif c == '\\':

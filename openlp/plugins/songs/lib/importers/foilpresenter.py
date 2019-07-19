@@ -302,7 +302,7 @@ class FoilPresenter(object):
                     break
             author_temp = []
             for author in strings:
-                temp = re.split(r',(?=\D{2})|(?<=\D),|\/(?=\D{3,})|(?<=\D);', author)
+                temp = re.split(r',(?=\D{2})|(?<=\D),|/(?=\D{3,})|(?<=\D);', author)
                 for tempx in temp:
                     author_temp.append(tempx)
                 for author in author_temp:

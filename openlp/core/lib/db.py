@@ -265,7 +265,7 @@ def upgrade_db(url, upgrade):
     """
     if not database_exists(url):
         log.warning("Database {db} doesn't exist - skipping upgrade checks".format(db=url))
-        return (0, 0)
+        return 0, 0
 
     log.debug('Checking upgrades for DB {db}'.format(db=url))
 

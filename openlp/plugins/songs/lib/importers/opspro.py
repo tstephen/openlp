@@ -136,8 +136,8 @@ class OPSProImport(SongImport):
                     verse_text = re.sub(r'^\d+\r\n', '', verse_text)
                     verse_def = 'v' + verse_number.group(1)
                 # Detect verse tags
-                elif re.match(r'^.+?\:\r\n', verse_text):
-                    tag_match = re.match(r'^(.+?)\:\r\n(.*)', verse_text, flags=re.DOTALL)
+                elif re.match(r'^.+?:\r\n', verse_text):
+                    tag_match = re.match(r'^(.+?):\r\n(.*)', verse_text, flags=re.DOTALL)
                     tag = tag_match.group(1).lower()
                     tag = tag.split(' ')[0]
                     verse_text = tag_match.group(2)

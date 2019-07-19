@@ -40,7 +40,7 @@ class FormattingTagController(object):
         """
         self.html_tag_regex = re.compile(
             r'<(?:(?P<close>/(?=[^\s/>]+>))?'
-            r'(?P<tag>[^\s/!\?>]+)(?:\s+[^\s=]+="[^"]*")*\s*(?P<empty>/)?'
+            r'(?P<tag>[^\s/!?>]+)(?:\s+[^\s=]+="[^"]*")*\s*(?P<empty>/)?'
             r'|(?P<cdata>!\[CDATA\[(?:(?!\]\]>).)*\]\])'
             r'|(?P<procinst>\?(?:(?!\?>).)*\?)'
             r'|(?P<comment>!--(?:(?!-->).)*--))>')

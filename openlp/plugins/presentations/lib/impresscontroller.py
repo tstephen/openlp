@@ -55,7 +55,7 @@ if is_win():
         class SlideShowListenerImport(XSlideShowListenerObj.__class__):
             pass
     except (AttributeError, pywintypes.com_error):
-        class SlideShowListenerImport():
+        class SlideShowListenerImport(object):
             pass
 
     # Declare an empty exception to match the exception imported from UNO
@@ -76,7 +76,7 @@ else:
     except ImportError:
         uno_available = False
 
-        class SlideShowListenerImport():
+        class SlideShowListenerImport(object):
             pass
 
 log = logging.getLogger(__name__)
@@ -233,9 +233,7 @@ class ImpressController(PresentationController):
                 self.conf_provider = self.manager.createInstanceWithContext(
                     'com.sun.star.configuration.ConfigurationProvider', uno.getComponentContext())
         # Setup lookup properties to get Impress settings
-        properties = []
-        properties.append(self.create_property('nodepath', 'org.openoffice.Office.Impress'))
-        properties = tuple(properties)
+        properties = tuple(self.create_property('nodepath', 'org.openoffice.Office.Impress'))
         try:
             # Get an updateable configuration view
             impress_conf_props = self.conf_provider.createInstanceWithArguments(
@@ -311,9 +309,7 @@ class ImpressDocument(PresentationDocument):
         if desktop is None:
             return False
         self.desktop = desktop
-        properties = []
-        properties.append(self.controller.create_property('Hidden', True))
-        properties = tuple(properties)
+        properties = tuple(self.controller.create_property('Hidden', True))
         try:
             self.document = desktop.loadComponentFromURL(url, '_blank', 0, properties)
         except Exception:
@@ -338,9 +334,7 @@ class ImpressDocument(PresentationDocument):
             return
         temp_folder_path = self.get_temp_folder()
         thumb_dir_url = temp_folder_path.as_uri()
-        properties = []
-        properties.append(self.controller.create_property('FilterName', 'impress_png_Export'))
-        properties = tuple(properties)
+        properties = tuple(self.controller.create_property('FilterName', 'impress_png_Export'))
         doc = self.document
         pages = doc.getDrawPages()
         if not pages:

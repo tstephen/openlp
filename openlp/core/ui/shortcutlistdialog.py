@@ -101,7 +101,7 @@ class Ui_ShortcutListDialog(object):
         self.primary_push_button = CaptureShortcutButton(shortcutListDialog)
         self.primary_push_button.setObjectName('primary_push_button')
         self.primary_push_button.setMinimumSize(QtCore.QSize(84, 0))
-        self.primary_push_button.setIcon(UiIcons.shortcuts)
+        self.primary_push_button.setIcon(UiIcons().shortcuts)
         self.primary_layout.addWidget(self.primary_push_button)
         self.clear_primary_button = QtWidgets.QToolButton(shortcutListDialog)
         self.clear_primary_button.setObjectName('clear_primary_button')

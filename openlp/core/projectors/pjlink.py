@@ -552,7 +552,7 @@ class PJLink(QtNetwork.QTcpSocket):
         data = data_in.strip()
         self.receive_data_signal()
         # Initial packet checks
-        if (len(data) < 7):
+        if len(data) < 7:
             self._trash_buffer(msg='get_data(): Invalid packet - length')
             return
         elif len(data) > self.max_size:

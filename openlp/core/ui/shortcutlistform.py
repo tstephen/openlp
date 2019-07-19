@@ -34,7 +34,7 @@ from openlp.core.common.settings import Settings
 from openlp.core.ui.shortcutlistdialog import Ui_ShortcutListDialog
 
 
-REMOVE_AMPERSAND = re.compile(r'&{1}')
+REMOVE_AMPERSAND = re.compile(r'&')
 
 log = logging.getLogger(__name__)
 
