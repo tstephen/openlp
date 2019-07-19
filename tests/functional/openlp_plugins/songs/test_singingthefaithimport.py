@@ -43,6 +43,6 @@ class TestSingingTheFaithFileImport(SongImportTestHelper):
         # Single verse
         self.file_import([TEST_PATH / 'H1.txt'],
                          self.load_external_result_data(TEST_PATH / 'STF001.json'))
-        # Whole song - currently not working - test needs debugging.
-        #        self.file_import([TEST_PATH / 'H2.txt'],
-        #                         self.load_external_result_data(TEST_PATH / 'STF002.json'))
+        # Whole song
+        self.file_import([TEST_PATH / 'H2.txt'],
+                         self.load_external_result_data(TEST_PATH / 'STF002.json'))
