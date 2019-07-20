@@ -26,6 +26,7 @@ plugin.
 import logging
 import re
 
+from openlp.core.common import Singleton
 from openlp.core.common.i18n import translate
 from openlp.core.common.settings import Settings
 
@@ -64,20 +65,10 @@ class LanguageSelection(object):
     English = 2
 
 
-class BibleStrings(object):
+class BibleStrings(metaclass=Singleton):
     """
     Provide standard strings for objects to use.
     """
-    __instance__ = None
-
-    def __new__(cls):
-        """
-        Override the default object creation method to return a single instance.
-        """
-        if not cls.__instance__:
-            cls.__instance__ = object.__new__(cls)
-        return cls.__instance__
-
     def __init__(self):
         """
         These strings should need a good reason to be retranslated elsewhere.

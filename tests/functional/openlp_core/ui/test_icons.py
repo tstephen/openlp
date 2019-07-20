@@ -33,7 +33,7 @@ from tests.helpers.testmixin import TestMixin
 
 class TestIcons(TestCase, TestMixin):
 
-    @patch('openlp.core.ui.icons.UiIcons.load')
+    @patch('openlp.core.ui.icons.UiIcons.__init__', return_value=None)
     def test_simple_icon(self, _):
         # GIVEN: an basic set of icons
         icons = UiIcons()

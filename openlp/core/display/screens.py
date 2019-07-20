@@ -28,6 +28,7 @@ from functools import cmp_to_key
 
 from PyQt5 import QtCore, QtWidgets
 
+from openlp.core.common import Singleton
 from openlp.core.common.i18n import translate
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
@@ -142,23 +143,14 @@ class Screen(object):
                                                 screen_dict['custom_geometry']['height'])
 
 
-class ScreenList(object):
+class ScreenList(metaclass=Singleton):
     """
     Wrapper to handle the parameters of the display screen.
 
     To get access to the screen list call ``ScreenList()``.
     """
     log.info('Screen loaded')
-    __instance__ = None
     screens = []
-
-    def __new__(cls):
-        """
-        Re-implement __new__ to create a true singleton.
-        """
-        if not cls.__instance__:
-            cls.__instance__ = object.__new__(cls)
-        return cls.__instance__
 
     def __iter__(self):
         """

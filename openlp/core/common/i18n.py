@@ -29,7 +29,7 @@ from collections import namedtuple
 
 from PyQt5 import QtCore, QtWidgets
 
-from openlp.core.common import is_macosx, is_win
+from openlp.core.common import Singleton, is_macosx, is_win
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.settings import Settings
 
@@ -327,22 +327,11 @@ class LanguageManager(object):
         return LanguageManager.__qm_list__
 
 
-class UiStrings(object):
+class UiStrings(metaclass=Singleton):
     """
     Provide standard strings for objects to use.
     """
-    __instance__ = None
-
-    def __new__(cls):
-        """
-        Override the default object creation method to return a single instance.
-        """
-        if not cls.__instance__:
-            cls.__instance__ = super().__new__(cls)
-            cls.__instance__.load()
-        return cls.__instance__
-
-    def load(self):
+    def __init__(self):
         """
         These strings should need a good reason to be retranslated elsewhere.
         Should some/more/less of these have an &amp; attached?

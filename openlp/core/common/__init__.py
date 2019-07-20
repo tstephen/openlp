@@ -172,6 +172,21 @@ class SlideLimits(object):
     Next = 3
 
 
+class Singleton(type):
+    """
+    Provide a `Singleton` metaclass https://stackoverflow.com/questions/6760685/creating-a-singleton-in-python
+    """
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        """
+        Create a new instance if one does not already exist.
+        """
+        if cls not in cls._instances:
+            cls._instances[cls] = super().__call__(*args, **kwargs)
+        return cls._instances[cls]
+
+
 def de_hump(name):
     """
     Change any Camel Case string to python string
