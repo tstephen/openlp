@@ -123,6 +123,9 @@ class SingingTheFaithImport(SongImport):
         try:
             for line in file:
                 line_number += 1
+                # Strip out leftover formatting (\i and \b)
+                line = line.replace('\\i', '')
+                line = line.replace('\\b', '')
                 if hints_available and str(line_number) in self.hint_line:
                     hint = self.hint_line[str(line_number)]
                     # Set to false if this hint does not replace the line
