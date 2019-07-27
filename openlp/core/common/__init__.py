@@ -400,7 +400,7 @@ def get_images_filter():
     global IMAGES_FILTER
     if not IMAGES_FILTER:
         log.debug('Generating images filter.')
-        formats = list(map(bytes.decode, list(map(bytes, QtGui.QImageReader.supportedImageFormats()))))
+        formats = list(map(bytes.decode, map(bytes, QtGui.QImageReader.supportedImageFormats())))
         visible_formats = '(*.{text})'.format(text='; *.'.join(formats))
         actual_formats = '(*.{text})'.format(text=' *.'.join(formats))
         IMAGES_FILTER = '{text} {visible} {actual}'.format(text=translate('OpenLP', 'Image Files'),

@@ -137,9 +137,11 @@ class EasySlidesImport(SongImport):
         except UnicodeDecodeError:
             log.exception('Unicode decode error while decoding Contents')
             self._success = False
+            return
         except AttributeError:
             log.exception('no Contents')
             self._success = False
+            return
         lines = lyrics.split('\n')
         # we go over all lines first, to determine information,
         # which tells us how to parse verses later

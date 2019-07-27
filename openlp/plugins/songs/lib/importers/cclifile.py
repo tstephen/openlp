@@ -146,7 +146,9 @@ class CCLIFileImport(SongImport):
         """
         log.debug('USR file text: {text}'.format(text=text_list))
         song_author = ''
+        song_fields = ''
         song_topics = ''
+        song_words = ''
         for line in text_list:
             if line.startswith('[S '):
                 ccli, line = line.split(']', 1)
