@@ -635,7 +635,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
         # if self.live_controller.display.isVisible():
         #     self.live_controller.display.setFocus()
         self.activateWindow()
-        # We will aloways have 1 but more need to be processed
+        # We will always have 1 but more need to be processed
         if self.application.args and len(self.application.args) > 1:
             self.open_cmd_line_files(self.application.args)
         elif Settings().value(self.general_settings_section + '/auto open'):
