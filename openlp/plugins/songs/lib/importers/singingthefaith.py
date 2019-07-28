@@ -222,7 +222,7 @@ class SingingTheFaithImport(SongImport):
                         copyright = line
                         continue
                     elif (line.startswith('Liturgical ') or line.startswith('From The ') or
-                          line.startswith('From Common ') or line.startsith('Based on Psalm ')):
+                          line.startswith('From Common ') or line.startswith('Based on Psalm ')):
                         self.add_comment(line)
                         continue
                     # If indent is 0 it may be the author, unless it was one of the cases covered above
