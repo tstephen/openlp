@@ -137,9 +137,9 @@ class SingingTheFaithImport(SongImport):
                     elif hint == 'Ignore':
                         continue
                     elif hint == 'Author':
-                        # add as a raw author - do not split and make them a words author
+                        # add as a raw author - do not split
                         line.strip()
-                        self.add_author(line, 'words')
+                        self.add_author(line)
                         line_number += 1
                         next(file)
                         continue
@@ -222,7 +222,7 @@ class SingingTheFaithImport(SongImport):
                         copyright = line
                         continue
                     elif (line.startswith('Liturgical ') or line.startswith('From The ') or
-                          line.startswith('From Common ')):
+                          line.startswith('From Common ') or line.startsith('Based on Psalm ')):
                         self.add_comment(line)
                         continue
                     # If indent is 0 it may be the author, unless it was one of the cases covered above
