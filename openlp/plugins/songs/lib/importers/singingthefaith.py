@@ -169,6 +169,9 @@ class SingingTheFaithImport(SongImport):
                     elif hint == 'BlankLine':
                         line = ' *Blank*'
                         line_replaced = False
+                    elif hint == 'BoldLine':
+                        # processing of the hint is deferred, but pick it up as a known hint here
+                        line_replaced = False
                     else:
                         self.log_error(translate('SongsPlugin.SingingTheFaithImport',
                                        'File {file})'.format(file=file.name)),
@@ -204,6 +207,9 @@ class SingingTheFaithImport(SongImport):
                     # note that songs seem to start with a blank line so the title is line 2
                     # Also we strip blanks from the title, even if ignoring indent.
                     song_title = line.strip()
+                # Process possible line formatting hints after the verse number has been removed
+                if hints_available and str(line_number) in self.hint_line and hint == 'BoldLine':
+                    line = '{{st}}{0}{{/st}}'.format(line)
                 # Detect the 'Reproduced from Singing the Faith Electronic Words Edition' line
                 if line.startswith('Reproduced from Singing the Faith Electronic Words Edition'):
                     song_number_match = re.search(r'\d+', line)
@@ -377,6 +383,10 @@ class SingingTheFaithImport(SongImport):
                         vals = val.split(',')
                         for v in vals:
                             self.hint_line[v] = 'BlankLine'
+                    elif tag == 'BoldLine':
+                        vals = val.split(',')
+                        for v in vals:
+                            self.hint_line[v] = 'BoldLine'
                     elif tag == 'VerseOrder':
                         self.hint_verse_order = val
                     elif tag == 'ManualCheck':
