@@ -327,11 +327,11 @@ def parse_reference(reference, bible, language_selection, book_ref_id=False):
         log.debug('Matched reference {text}'.format(text=reference))
         book = match.group('book')
         if not book_ref_id:
-            book_ref_id = bible.get_book_ref_id_by_localised_name(book, language_selection)
+            book_ref_ids = bible.get_book_ref_id_by_localised_name(book, language_selection)
         elif not bible.get_book_by_book_ref_id(book_ref_id):
             return []
         # We have not found the book so do not continue
-        if not book_ref_id:
+        if not book_ref_ids:
             return []
         ranges = match.group('ranges')
         range_list = get_reference_match('range_separator').split(ranges)
@@ -372,22 +372,23 @@ def parse_reference(reference, bible, language_selection, book_ref_id=False):
                     to_chapter = to_verse
                     to_verse = None
             # Append references to the list
-            if has_range:
-                if not from_verse:
-                    from_verse = 1
-                if not to_verse:
-                    to_verse = -1
-                if to_chapter and to_chapter > from_chapter:
-                    ref_list.append((book_ref_id, from_chapter, from_verse, -1))
-                    for i in range(from_chapter + 1, to_chapter):
-                        ref_list.append((book_ref_id, i, 1, -1))
-                    ref_list.append((book_ref_id, to_chapter, 1, to_verse))
-                elif to_verse >= from_verse or to_verse == -1:
-                    ref_list.append((book_ref_id, from_chapter, from_verse, to_verse))
-            elif from_verse:
-                ref_list.append((book_ref_id, from_chapter, from_verse, from_verse))
-            else:
-                ref_list.append((book_ref_id, from_chapter, 1, -1))
+            for book_ref_id in book_ref_ids:
+                if has_range:
+                    if not from_verse:
+                        from_verse = 1
+                    if not to_verse:
+                        to_verse = -1
+                    if to_chapter and to_chapter > from_chapter:
+                        ref_list.append((book_ref_id, from_chapter, from_verse, -1))
+                        for i in range(from_chapter + 1, to_chapter):
+                            ref_list.append((book_ref_id, i, 1, -1))
+                        ref_list.append((book_ref_id, to_chapter, 1, to_verse))
+                    elif to_verse >= from_verse or to_verse == -1:
+                        ref_list.append((book_ref_id, from_chapter, from_verse, to_verse))
+                elif from_verse:
+                    ref_list.append((book_ref_id, from_chapter, from_verse, from_verse))
+                else:
+                    ref_list.append((book_ref_id, from_chapter, 1, -1))
         return ref_list
     else:
         log.debug('Invalid reference: {text}'.format(text=reference))
