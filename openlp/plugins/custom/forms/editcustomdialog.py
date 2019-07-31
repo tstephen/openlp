@@ -97,6 +97,7 @@ class Ui_CustomEditDialog(object):
         self.preview_button = QtWidgets.QPushButton()
         self.button_box = create_button_box(custom_edit_dialog, 'button_box', ['cancel', 'save'],
                                             [self.preview_button])
+        self.save_button = self.button_box.button(QtWidgets.QDialogButtonBox.Save)
         self.dialog_layout.addWidget(self.button_box)
         self.retranslate_ui(custom_edit_dialog)
 
@@ -112,3 +113,4 @@ class Ui_CustomEditDialog(object):
         self.theme_label.setText(translate('CustomPlugin.EditCustomForm', 'The&me:'))
         self.credit_label.setText(translate('CustomPlugin.EditCustomForm', '&Credits:'))
         self.preview_button.setText(UiStrings().SaveAndPreview)
+        self.save_button.setText(UiStrings().SaveAndClose)

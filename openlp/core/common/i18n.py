@@ -425,6 +425,7 @@ class UiStrings(metaclass=Singleton):
         self.ResetLiveBG = translate('OpenLP.Ui', 'Reset live background.')
         self.RequiredShowInFooter = translate('OpenLP.Ui', 'Required, this will be displayed in footer.')
         self.Seconds = translate('OpenLP.Ui', 's', 'The abbreviated unit for seconds')
+        self.SaveAndClose = translate('OpenLP.ui', translate('SongsPlugin.EditSongForm', '&Save && Close'))
         self.SaveAndPreview = translate('OpenLP.Ui', 'Save && Preview')
         self.Search = translate('OpenLP.Ui', 'Search')
         self.SearchThemes = translate('OpenLP.Ui', 'Search Themes...', 'Search bar place holder text ')
