@@ -34,6 +34,7 @@ from tempfile import NamedTemporaryFile
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+from openlp.core.state import State
 from openlp.core.common import ThemeLevel, delete_file
 from openlp.core.common.actions import ActionList, CategoryOrder
 from openlp.core.common.applocation import AppLocation
@@ -828,7 +829,7 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
                 self.auto_start_action.setIcon(UiIcons().inactive)
                 self.auto_start_action.setText(translate('OpenLP.ServiceManager', '&Auto Start - inactive'))
         if service_item['service_item'].is_text():
-            for plugin in self.plugin_manager.plugins:
+            for plugin in  State().list_plugins():
                 if plugin.name == 'custom' and plugin.status == PluginStatus.Active:
                     self.create_custom_action.setVisible(True)
                     break

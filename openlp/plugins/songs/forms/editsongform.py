@@ -29,6 +29,7 @@ from shutil import copyfile
 
 from PyQt5 import QtCore, QtWidgets
 
+from openlp.core.state import State
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.i18n import UiStrings, get_natural_key, translate
 from openlp.core.common.mixins import RegistryProperties
@@ -416,7 +417,7 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
         Load the media files into a combobox.
         """
         self.from_media_button.setVisible(False)
-        for plugin in self.plugin_manager.plugins:
+        for plugin in  State().list_plugins():
             if plugin.name == 'media' and plugin.status == PluginStatus.Active:
                 self.from_media_button.setVisible(True)
                 self.media_form.populate_files(plugin.media_item.get_list(MediaType.Audio))
