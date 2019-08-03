@@ -97,7 +97,7 @@ MODULES = [
 
 OPTIONAL_MODULES = [
     ('qdarkstyle', '(dark style support)'),
-    ('mysql.connector', '(MySQL support)'),
+    ('pymysql', '(MySQL support)'),
     ('pyodbc', '(ODBC support)'),
     ('psycopg2', '(PostgreSQL support)'),
     ('enchant', '(spell checker)'),
