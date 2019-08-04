@@ -96,7 +96,7 @@ def upgrade_screens(number, x_position, y_position, height, width, can_override,
                 'width': int(width)
             },
             'is_display': is_display_screen,
-            'is_primary': number
+            'is_primary': can_override
         }
     }
 
