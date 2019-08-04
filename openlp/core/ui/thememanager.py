@@ -30,6 +30,7 @@ from xml.etree.ElementTree import XML, ElementTree
 
 from PyQt5 import QtCore, QtWidgets
 
+from openlp.core.state import State
 from openlp.core.common import delete_file
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.i18n import UiStrings, get_locale_key, translate
@@ -293,7 +294,7 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
                     old_theme_data = self.get_theme_data(old_theme_name)
                     self.clone_theme_data(old_theme_data, new_theme_name)
                     self.delete_theme(old_theme_name)
-                    for plugin in self.plugin_manager.plugins:
+                    for plugin in State().list_plugins():
                         if plugin.uses_theme(old_theme_name):
                             plugin.rename_theme(old_theme_name, new_theme_name)
                     self.renderer.set_theme(self.get_theme_data(new_theme_name))
@@ -771,7 +772,7 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
             # check for use in the system else where.
             if test_plugin:
                 plugin_usage = ""
-                for plugin in self.plugin_manager.plugins:
+                for plugin in State().list_plugins():
                     used_count = plugin.uses_theme(theme)
                     if used_count:
                         plugin_usage = "{plug}{text}".format(plug=plugin_usage,
