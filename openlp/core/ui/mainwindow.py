@@ -635,7 +635,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
         # if self.live_controller.display.isVisible():
         #     self.live_controller.display.setFocus()
         self.activateWindow()
-        # We will always have 1 but more need to be processed
+        # We have -disable-web-security added by our code.
+        # If a file is passed in we will have that as well so count of 2
+        # If not we need to see if we want to use the previous file.so count of 1
         if self.application.args and len(self.application.args) > 1:
             self.open_cmd_line_files(self.application.args)
         elif Settings().value(self.general_settings_section + '/auto open'):

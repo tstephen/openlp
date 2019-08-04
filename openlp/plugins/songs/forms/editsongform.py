@@ -417,7 +417,7 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
         Load the media files into a combobox.
         """
         self.from_media_button.setVisible(False)
-        for plugin in  State().list_plugins():
+        for plugin in State().list_plugins():
             if plugin.name == 'media' and plugin.status == PluginStatus.Active:
                 self.from_media_button.setVisible(True)
                 self.media_form.populate_files(plugin.media_item.get_list(MediaType.Audio))
