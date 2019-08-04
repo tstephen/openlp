@@ -136,7 +136,7 @@ class Screen(object):
         try:
             self.geometry = QtCore.QRect(screen_dict['geometry']['x'], screen_dict['geometry']['y'],
                                          screen_dict['geometry']['width'], screen_dict['geometry']['height'])
-        except:
+        except KeyError:
             # Preserve the current values as this has come from the settings update which does not have
             # the geometry information
             pass
