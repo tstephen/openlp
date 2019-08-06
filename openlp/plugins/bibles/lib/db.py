@@ -318,6 +318,7 @@ class BibleDB(Manager):
             db_books = self.get_books(book)
             return [db_book.book_reference_id for db_book in db_books]
         else:
+            book_list = []
             if language_selection == LanguageSelection.Application:
                 books = [key for key in list(book_names.keys()) if regex_book.match(book_names[key])]
                 book_list = [_f for _f in map(BiblesResourcesDB.get_book, books) if _f]

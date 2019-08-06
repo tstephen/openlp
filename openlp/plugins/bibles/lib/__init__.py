@@ -330,6 +330,8 @@ def parse_reference(reference, bible, language_selection, book_ref_id=False):
             book_ref_ids = bible.get_book_ref_id_by_localised_name(book, language_selection)
         elif not bible.get_book_by_book_ref_id(book_ref_id):
             return []
+        else:
+            book_ref_ids = [book_ref_id]
         # We have not found the book so do not continue
         if not book_ref_ids:
             return []
