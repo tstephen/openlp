@@ -134,8 +134,13 @@ class Screen(object):
         self.number = int(screen_dict['number'])
         self.is_display = screen_dict['is_display']
         self.is_primary = screen_dict['is_primary']
-        self.geometry = QtCore.QRect(screen_dict['geometry']['x'], screen_dict['geometry']['y'],
-                                     screen_dict['geometry']['width'], screen_dict['geometry']['height'])
+        try:
+            self.geometry = QtCore.QRect(screen_dict['geometry']['x'], screen_dict['geometry']['y'],
+                                         screen_dict['geometry']['width'], screen_dict['geometry']['height'])
+        except KeyError:
+            # Preserve the current values as this has come from the settings update which does not have
+            # the geometry information
+            pass
         if 'custom_geometry' in screen_dict:
             self.custom_geometry = QtCore.QRect(screen_dict['custom_geometry']['x'],
                                                 screen_dict['custom_geometry']['y'],

@@ -349,7 +349,7 @@ class CustomMediaItem(MediaManagerItem):
             custom.credits = ''
         custom_xml = CustomXMLBuilder()
         for (idx, slide) in enumerate(item.slides):
-            custom_xml.add_verse_to_lyrics('custom', str(idx + 1), slide['raw_slide'])
+            custom_xml.add_verse_to_lyrics('custom', str(idx + 1), slide['text'])
         custom.text = str(custom_xml.extract_xml(), 'utf-8')
         self.plugin.db_manager.save_object(custom)
         self.on_search_text_button_clicked()

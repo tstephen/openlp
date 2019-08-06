@@ -482,6 +482,7 @@ class ThemePreviewRenderer(LogMixin, DisplayWindow):
 
         :param theme_data:  The theme to generated a preview for.
         :param force_page: Flag to tell message lines per page need to be generated.
+        :param generate_screenshot: Do I need to generate a screen shot?
         :rtype: QtGui.QPixmap
         """
         # save value for use in format_slide

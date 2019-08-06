@@ -90,12 +90,13 @@ def upgrade_screens(number, x_position, y_position, height, width, can_override,
         number: {
             'number': number,
             geometry_key: {
-                'x': x_position,
-                'y': y_position,
-                'height': height,
-                'width': width
+                'x': int(x_position),
+                'y': int(y_position),
+                'height': int(height),
+                'width': int(width)
             },
-            'is_display': is_display_screen
+            'is_display': is_display_screen,
+            'is_primary': can_override
         }
     }
 
@@ -309,7 +310,7 @@ class Settings(QtCore.QSettings):
         ('songuasge/db hostname', 'songusage/db hostname', []),
         ('songuasge/db database', 'songusage/db database', []),
         ('presentations / Powerpoint Viewer', '', []),
-        (['core/monitor', 'core/x position', 'core/y position', 'core/height', 'core/width', 'core/override',
+        (['core/monitor', 'core/x position', 'core/y position', 'core/height', 'core/width', 'core/override position',
           'core/display on monitor'], 'core/screens', [(upgrade_screens, [1, 0, 0, None, None, False, False])]),
         ('bibles/proxy name', '', []),  # Just remove these bible proxy settings. They weren't used in 2.4!
         ('bibles/proxy address', '', []),
