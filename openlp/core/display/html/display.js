@@ -478,7 +478,7 @@ var Display = {
   playVideo: function () {
     var videoElem = $("#video");
     if (videoElem.length == 1) {
-      $("#video")[0].play();
+      videoElem[0].play();
     }
   },
   /**
@@ -486,7 +486,7 @@ var Display = {
    */
   pauseVideo: function () {
     var videoElem = $("#video");
-    if ($videoElem.length == 1) {
+    if (videoElem.length == 1) {
       videoElem[0].pause();
     }
   },
@@ -728,7 +728,6 @@ var Display = {
     for (var key in mainStyle) {
       if (mainStyle.hasOwnProperty(key)) {
         slidesDiv.style.setProperty(key, mainStyle[key]);
-        console.log(slidesDiv.style.getPropertyValue("font-family"));
       }
     }
     // Set up the footer
