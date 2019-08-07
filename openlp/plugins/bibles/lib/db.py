@@ -281,13 +281,14 @@ class BibleDB(Manager):
         log.debug('BibleDB.get_book("{book}")'.format(book=book))
         return self.get_object_filtered(Book, Book.name.like(book + '%'))
 
-    def get_books(self):
+    def get_books(self, book=None):
         """
         A wrapper so both local and web bibles have a get_books() method that
         manager can call. Used in the media manager advanced search tab.
         """
-        log.debug('BibleDB.get_books()')
-        return self.get_all_objects(Book, order_by_ref=Book.id)
+        log.debug('BibleDB.get_books("{book}")'.format(book=book))
+        filter = Book.name.like(book + '%') if book else None
+        return self.get_all_objects(Book, filter_clause=filter, order_by_ref=Book.id)
 
     def get_book_by_book_ref_id(self, ref_id):
         """
@@ -300,39 +301,35 @@ class BibleDB(Manager):
 
     def get_book_ref_id_by_localised_name(self, book, language_selection):
         """
-        Return the id of a named book.
+        Return the ids of a matching named book.
 
         :param book: The name of the book, according to the selected language.
         :param language_selection:  The language selection the user has chosen in the settings section of the Bible.
+        :rtype: list[int]
         """
         log.debug('get_book_ref_id_by_localised_name("{book}", "{lang}")'.format(book=book, lang=language_selection))
         from openlp.plugins.bibles.lib import LanguageSelection, BibleStrings
         book_names = BibleStrings().BookNames
         # escape reserved characters
-        book_escaped = book
         for character in RESERVED_CHARACTERS:
-            book_escaped = book_escaped.replace(character, '\\' + character)
+            book_escaped = book.replace(character, '\\' + character)
         regex_book = re.compile('\\s*{book}\\s*'.format(book='\\s*'.join(book_escaped.split())), re.IGNORECASE)
         if language_selection == LanguageSelection.Bible:
-            db_book = self.get_book(book)
-            if db_book:
-                return db_book.book_reference_id
-        elif language_selection == LanguageSelection.Application:
-            books = [key for key in list(book_names.keys()) if regex_book.match(str(book_names[key]))]
-            books = [_f for _f in map(BiblesResourcesDB.get_book, books) if _f]
-            for value in books:
-                if self.get_book_by_book_ref_id(value['id']):
-                    return value['id']
-        elif language_selection == LanguageSelection.English:
-            books = BiblesResourcesDB.get_books_like(book)
-            if books:
-                book_list = [value for value in books if regex_book.match(value['name'])]
-                if not book_list:
-                    book_list = books
-                for value in book_list:
-                    if self.get_book_by_book_ref_id(value['id']):
-                        return value['id']
-        return False
+            db_books = self.get_books(book)
+            return [db_book.book_reference_id for db_book in db_books]
+        else:
+            book_list = []
+            if language_selection == LanguageSelection.Application:
+                books = [key for key in list(book_names.keys()) if regex_book.match(book_names[key])]
+                book_list = [_f for _f in map(BiblesResourcesDB.get_book, books) if _f]
+            elif language_selection == LanguageSelection.English:
+                books = BiblesResourcesDB.get_books_like(book)
+                if books:
+                    book_list = [value for value in books if regex_book.match(value['name'])]
+                    if not book_list:
+                        book_list = books
+            return [value['id'] for value in book_list if self.get_book_by_book_ref_id(value['id'])]
+        return []
 
     def get_verses(self, reference_list, show_error=True):
         """

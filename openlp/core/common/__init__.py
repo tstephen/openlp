@@ -172,6 +172,21 @@ class SlideLimits(object):
     Next = 3
 
 
+class Singleton(type):
+    """
+    Provide a `Singleton` metaclass https://stackoverflow.com/questions/6760685/creating-a-singleton-in-python
+    """
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        """
+        Create a new instance if one does not already exist.
+        """
+        if cls not in cls._instances:
+            cls._instances[cls] = super().__call__(*args, **kwargs)
+        return cls._instances[cls]
+
+
 def de_hump(name):
     """
     Change any Camel Case string to python string
@@ -385,7 +400,7 @@ def get_images_filter():
     global IMAGES_FILTER
     if not IMAGES_FILTER:
         log.debug('Generating images filter.')
-        formats = list(map(bytes.decode, list(map(bytes, QtGui.QImageReader.supportedImageFormats()))))
+        formats = list(map(bytes.decode, map(bytes, QtGui.QImageReader.supportedImageFormats())))
         visible_formats = '(*.{text})'.format(text='; *.'.join(formats))
         actual_formats = '(*.{text})'.format(text=' *.'.join(formats))
         IMAGES_FILTER = '{text} {visible} {actual}'.format(text=translate('OpenLP', 'Image Files'),

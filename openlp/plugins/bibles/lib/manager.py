@@ -240,8 +240,10 @@ class BibleManager(LogMixin, RegistryProperties):
                                                                                         book=book,
                                                                                         chapter=chapter))
         language_selection = self.get_language_selection(bible)
-        book_ref_id = self.db_cache[bible].get_book_ref_id_by_localised_name(book, language_selection)
-        return self.db_cache[bible].get_verse_count(book_ref_id, chapter)
+        book_ref_ids = self.db_cache[bible].get_book_ref_id_by_localised_name(book, language_selection)
+        if book_ref_ids:
+            return self.db_cache[bible].get_verse_count(book_ref_ids[0], chapter)
+        return 0
 
     def get_verse_count_by_book_ref_id(self, bible, book_ref_id, chapter):
         """
