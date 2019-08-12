@@ -221,7 +221,7 @@ class OpenLyrics(object):
     """
     IMPLEMENTED_VERSION = '0.8'
     START_TAGS_REGEX = re.compile(r'\{(\w+)\}')
-    END_TAGS_REGEX = re.compile(r'\{\/(\w+)\}')
+    END_TAGS_REGEX = re.compile(r'\{/(\w+)\}')
     VERSE_TAG_SPLITTER = re.compile('([a-zA-Z]+)([0-9]*)([a-zA-Z]?)')
 
     def __init__(self, manager):

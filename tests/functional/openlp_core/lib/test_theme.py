@@ -25,7 +25,78 @@ Package to test the openlp.core.lib.theme package.
 from pathlib import Path
 from unittest import TestCase
 
-from openlp.core.lib.theme import Theme
+from openlp.core.lib.theme import BackgroundType, Theme
+
+
+class TestBackgroundType(TestCase):
+    """
+    Test the BackgroundType enum methods.
+    """
+    def test_solid_to_string(self):
+        """
+        Test the to_string method of :class:`BackgroundType`
+        """
+        # GIVEN: A BackgroundType member
+        background_type = BackgroundType.Solid
+
+        # WHEN: Calling BackgroundType.to_string
+        # THEN: The string equivalent should have been returned
+        assert BackgroundType.to_string(background_type) == 'solid'
+
+    def test_gradient_to_string(self):
+        """
+        Test the to_string method of :class:`BackgroundType`
+        """
+        # GIVEN: A BackgroundType member
+        background_type = BackgroundType.Gradient
+
+        # WHEN: Calling BackgroundType.to_string
+        # THEN: The string equivalent should have been returned
+        assert BackgroundType.to_string(background_type) == 'gradient'
+
+    def test_image_to_string(self):
+        """
+        Test the to_string method of :class:`BackgroundType`
+        """
+        # GIVEN: A BackgroundType member
+        background_type = BackgroundType.Image
+
+        # WHEN: Calling BackgroundType.to_string
+        # THEN: The string equivalent should have been returned
+        assert BackgroundType.to_string(background_type) == 'image'
+
+    def test_transparent_to_string(self):
+        """
+        Test the to_string method of :class:`BackgroundType`
+        """
+        # GIVEN: A BackgroundType member
+        background_type = BackgroundType.Transparent
+
+        # WHEN: Calling BackgroundType.to_string
+        # THEN: The string equivalent should have been returned
+        assert BackgroundType.to_string(background_type) == 'transparent'
+
+    def test_video_to_string(self):
+        """
+        Test the to_string method of :class:`BackgroundType`
+        """
+        # GIVEN: A BackgroundType member
+        background_type = BackgroundType.Video
+
+        # WHEN: Calling BackgroundType.to_string
+        # THEN: The string equivalent should have been returned
+        assert BackgroundType.to_string(background_type) == 'video'
+
+    def test_stream_to_string(self):
+        """
+        Test the to_string method of :class:`BackgroundType`
+        """
+        # GIVEN: A BackgroundType member
+        background_type = BackgroundType.Stream
+
+        # WHEN: Calling BackgroundType.to_string
+        # THEN: The string equivalent should have been returned
+        assert BackgroundType.to_string(background_type) == 'stream'
 
 
 class TestTheme(TestCase):
@@ -111,4 +182,4 @@ class TestTheme(TestCase):
         assert 0 == theme.display_vertical_align, 'display_vertical_align should be 0'
         assert theme.font_footer_bold is False, 'font_footer_bold should be False'
         assert 'Arial' == theme.font_main_name, 'font_main_name should be "Arial"'
-        assert 47 == len(theme.__dict__), 'The theme should have 47 attributes'
+        assert 48 == len(theme.__dict__), 'The theme should have 48 attributes'

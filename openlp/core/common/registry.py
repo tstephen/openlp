@@ -23,29 +23,19 @@
 Provide Registry Services
 """
 import logging
-import sys
 
-from openlp.core.common import de_hump, trace_error_handler
+from openlp.core.common import Singleton, de_hump, trace_error_handler
 
 
 log = logging.getLogger(__name__)
 
 
-class Registry(object):
+class Registry(metaclass=Singleton):
     """
     This is the Component Registry.  It is a singleton object and is used to provide a look up service for common
     objects.
     """
     log.info('Registry loaded')
-    __instance__ = None
-
-    def __new__(cls):
-        """
-        Re-implement the __new__ method to make sure we create a true singleton.
-        """
-        if not cls.__instance__:
-            cls.__instance__ = object.__new__(cls)
-        return cls.__instance__
 
     @classmethod
     def create(cls):
@@ -57,19 +47,8 @@ class Registry(object):
         registry.service_list = {}
         registry.functions_list = {}
         registry.working_flags = {}
-        # Allow the tests to remove Registry entries but not the live system
-        registry.running_under_test = 'nose' in sys.argv[0] or 'pytest' in sys.argv[0]
         registry.initialising = True
         return registry
-
-    @classmethod
-    def destroy(cls):
-        """
-        Destroy the Registry.
-        """
-        if cls.__instance__.running_under_test:
-            del cls.__instance__
-            cls.__instance__ = None
 
     def get(self, key):
         """

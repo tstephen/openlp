@@ -344,14 +344,14 @@ class ProjectorManager(QtWidgets.QWidget, RegistryBase, UiProjectorManager, LogM
         """
         log.debug('Checking for UDP port {port} listener deletion'.format(port=port))
         if port not in self.pjlink_udp:
-            log.warn('UDP listener for port {port} not there - skipping delete'.format(port=port))
+            log.warning('UDP listener for port {port} not there - skipping delete'.format(port=port))
             return
         keep_port = False
         for item in self.projector_list:
             if port == item.link.port:
                 keep_port = True
         if keep_port:
-            log.warn('UDP listener for port {port} needed for other projectors - skipping delete'.format(port=port))
+            log.warning('UDP listener for port {port} needed for other projectors - skipping delete'.format(port=port))
             return
         Registry().execute('udp_broadcast_remove', port=port)
         del self.pjlink_udp[port]
