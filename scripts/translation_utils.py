@@ -61,7 +61,7 @@ from lxml import objectify
 from PyQt5 import QtCore
 
 SERVER_URL = 'http://www.transifex.com/api/2/project/openlp/resource/openlp-26x/'
-IGNORED_PATHS = ['scripts']
+IGNORED_PATHS = ['scripts', 'tests']
 IGNORED_FILES = ['setup.py']
 
 verbose_mode = False
@@ -252,10 +252,7 @@ def prepare_project():
                     line = file
                 print_verbose('Parsing "%s"' % line)
                 lines.append('SOURCES      += %s' % line)
-            elif file.endswith('.ts'):
-                line = '%s/%s' % (path, file)
-                print_verbose('Parsing "%s"' % line)
-                lines.append('TRANSLATIONS += %s' % line)
+    lines.append('TRANSLATIONS += resources/i18n/en.ts')
     lines.sort()
     file = open(os.path.join(start_dir, 'openlp.pro'), 'w')
     file.write('\n'.join(lines))
