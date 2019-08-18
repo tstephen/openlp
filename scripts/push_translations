@@ -46,7 +46,7 @@ cd scripts
 echo Check of invalid characters in push file
 grep -axv '.*' ../resources/i18n/en.ts
 
-#tx push -s
+tx push -s
 
 echo New translation file pushed.
 
