@@ -428,7 +428,8 @@ var Display = {
       section.setAttribute("data-background", "#000");
       var img = document.createElement('img');
       img.src = slide["path"];
-      img.setAttribute("style", "height: 100%; width: 100%;");
+      //img.setAttribute("style", "height: 100%; width: 100%;");
+      img.setAttribute("style", "max-width: 100%; height: auto; vertical-align: middle");
       section.appendChild(img);
       slidesDiv.appendChild(section);
       Display._slides[index.toString()] = index;
