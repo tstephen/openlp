@@ -43,13 +43,4 @@ echo Downloading the translated files
 echo
 tx pull -a --minimum-perc=45
 
-echo
-echo Converting files to QT translated files
-echo
-cd ../resources/i18n
-rm *.qm
-for file in *.ts;
-    do lconvert-qt5 -i $file -o ${file%%ts}qm ;
-    done
-
 echo Translation update complete
