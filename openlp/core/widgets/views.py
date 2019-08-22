@@ -210,9 +210,13 @@ class ListPreviewWidget(QtWidgets.QTableWidget, RegistryProperties):
                             pixmap = QtGui.QPixmap(str(slide['image']))
                 else:
                     pixmap = QtGui.QPixmap(str(slide['path']))
+                if pixmap.height() > 0:
+                    pixmap_ratio = pixmap.width() / pixmap.height()
+                else:
+                    pixmap_ratio = 1
                 label.setPixmap(pixmap)
                 container = QtWidgets.QWidget()
-                layout = AspectRatioLayout(container, self.screen_ratio)
+                layout = AspectRatioLayout(container, pixmap_ratio)
                 layout.setContentsMargins(0, 0, 0, 0)
                 layout.addWidget(label)
                 container.setLayout(layout)

@@ -260,7 +260,7 @@ class ActionList(object):
             return
         # We have to do this to ensure that the loaded shortcut list e. g. STRG+O (German) is converted to CTRL+O,
         # which is only done when we convert the strings in this way (QKeySequencet -> uncode).
-        shortcuts = list(map(QtGui.QKeySequence.toString, list(map(QtGui.QKeySequence, shortcuts))))
+        shortcuts = list(map(QtGui.QKeySequence.toString, map(QtGui.QKeySequence, shortcuts)))
         # Check the alternate shortcut first, to avoid problems when the alternate shortcut becomes the primary shortcut
         #  after removing the (initial) primary shortcut due to conflicts.
         if len(shortcuts) == 2:

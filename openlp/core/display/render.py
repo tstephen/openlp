@@ -47,7 +47,7 @@ log = logging.getLogger(__name__)
 
 SLIM_CHARS = 'fiíIÍjlĺľrtť.,;/ ()|"\'!:\\'
 CHORD_LINE_MATCH = re.compile(r'\[(.*?)\]([\u0080-\uFFFF,\w]*)'
-                              r'([\u0080-\uFFFF,\w,\s,\.,\,,\!,\?,\;,\:,\|,\",\',\-,\_]*)(\Z)?')
+                              r'([\u0080-\uFFFF\w\s\.\,\!\?\;\:\|\"\'\-\_]*)(\Z)?')
 CHORD_TEMPLATE = '<span class="chordline">{chord}</span>'
 FIRST_CHORD_TEMPLATE = '<span class="chordline firstchordline">{chord}</span>'
 CHORD_LINE_TEMPLATE = '<span class="chord"><span><strong>{chord}</strong></span></span>{tail}{whitespace}{remainder}'
@@ -482,6 +482,7 @@ class ThemePreviewRenderer(LogMixin, DisplayWindow):
 
         :param theme_data:  The theme to generated a preview for.
         :param force_page: Flag to tell message lines per page need to be generated.
+        :param generate_screenshot: Do I need to generate a screen shot?
         :rtype: QtGui.QPixmap
         """
         # save value for use in format_slide

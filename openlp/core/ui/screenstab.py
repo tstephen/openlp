@@ -53,7 +53,6 @@ class ScreensTab(SettingsTab):
         self.setObjectName('self')
         self.tab_layout = QtWidgets.QVBoxLayout(self)
         self.tab_layout.setObjectName('tab_layout')
-
         self.screen_selection_widget = ScreenSelectionWidget(self, ScreenList())
         self.tab_layout.addWidget(self.screen_selection_widget)
         self.generic_group_box = QtWidgets.QGroupBox(self)
@@ -63,13 +62,11 @@ class ScreensTab(SettingsTab):
         self.display_on_monitor_check.setObjectName('monitor_combo_box')
         self.generic_group_layout.addWidget(self.display_on_monitor_check)
         self.tab_layout.addWidget(self.generic_group_box)
-
         Registry().register_function('config_screen_changed', self.screen_selection_widget.load)
 
         self.retranslate_ui()
 
     def retranslate_ui(self):
-        self.setWindowTitle(translate('self', 'self'))  # TODO: ???
         self.generic_group_box.setTitle(translate('OpenLP.ScreensTab', 'Generic screen settings'))
         self.display_on_monitor_check.setText(translate('OpenLP.ScreensTab', 'Display if a single screen'))
 
