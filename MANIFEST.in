@@ -16,3 +16,4 @@ include copyright.txt
 include LICENSE
 include README.txt
 include openlp/.version
+include package.json
