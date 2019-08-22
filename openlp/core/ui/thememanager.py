@@ -613,7 +613,7 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
             self.log_exception('Importing theme from zip failed {name}'.format(name=file_path))
             critical_error_message_box(
                 translate('OpenLP.ThemeManager', 'Import Error'),
-                translate('OpenLP.ThemeManager', 'There was a problem imoorting {file_name}.\n\nIt is corrupt,'
+                translate('OpenLP.ThemeManager', 'There was a problem importing {file_name}.\n\nIt is corrupt, '
                                                  'inaccessible or not a valid theme.').format(file_name=file_path))
         finally:
             if not abort_import:

@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-# vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
-
 ##########################################################################
 # OpenLP - Open Source Lyrics Projection                                 #
 # ---------------------------------------------------------------------- #
@@ -19,26 +16,37 @@
 # You should have received a copy of the GNU General Public License      #
 # along with this program.  If not, see <https://www.gnu.org/licenses/>. #
 ##########################################################################
-"""
-The :mod:`openlp.plugins.songs.lib.ui` module provides standard UI components
-for the songs plugin.
-"""
-from openlp.core.common.i18n import translate
+#
+# This script automates the update of the translations on OpenLP.
+#
+# It uses the tx client from Transifex for all the heavy lifting
+# All download *.ts files are converted to *.qm files which are used by
+# OpenLP.
+#
+###############################################################################
+pwd=`pwd`
+result=${PWD##*/}; echo $result
 
+if [ $result != 'scripts' ] ; then
+	echo 'This script must be run from the scripts directory'
+	exit
+fi
 
-class SongStrings(object):
-    """
-    Provide standard strings for use throughout the songs plugin.
-    """
-    # These strings should need a good reason to be retranslated elsewhere.
-    Author = translate('OpenLP.Ui', 'Author', 'Singular')
-    Authors = translate('OpenLP.Ui', 'Authors', 'Plural')
-    AuthorUnknown = translate('OpenLP.Ui', 'Author Unknown')  # Used to populate the database.
-    CopyrightSymbol = '\xa9'
-    SongBook = translate('OpenLP.Ui', 'Songbook', 'Singular')
-    SongBooks = translate('OpenLP.Ui', 'Songbooks', 'Plural')
-    SongIncomplete = translate('OpenLP.Ui', 'Title and/or verses not found')
-    SongMaintenance = translate('OpenLP.Ui', 'Song Maintenance')
-    Topic = translate('OpenLP.Ui', 'Topic', 'Singular')
-    Topics = translate('OpenLP.Ui', 'Topics', 'Plural')
-    XMLSyntaxError = translate('OpenLP.Ui', 'XML syntax error')
+echo
+echo Generation translation control file
+echo
+rm ../resources/i18n/*.ts
+python3 $pwd/translation_utils.py -p 
+
+echo Creating base translation file
+cd ..
+pylupdate5 -verbose -noobsolete openlp.pro
+cd scripts
+
+echo Check of invalid characters in push file
+grep -axv '.*' ../resources/i18n/en.ts
+
+tx push -s
+
+echo New translation file pushed.
+

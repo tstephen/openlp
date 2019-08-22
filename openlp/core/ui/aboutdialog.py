@@ -179,7 +179,7 @@ class UiAboutDialog(object):
         hu = translate('OpenLP.AboutForm', 'Hungarian (hu)')
         ind = translate('OpenLP.AboutForm', 'Indonesian (id)')
         ja = translate('OpenLP.AboutForm', 'Japanese (ja)')
-        nb = translate('OpenLP.AboutForm', 'Norwegian Bokm\xe5l (nb)')
+        nb = translate('OpenLP.AboutForm', 'Norwegian Bokmal (nb)')
         nl = translate('OpenLP.AboutForm', 'Dutch (nl)')
         pl = translate('OpenLP.AboutForm', 'Polish (pl)')
         ptbr = translate('OpenLP.AboutForm', 'Portuguese, Brazil (pt_BR)')
