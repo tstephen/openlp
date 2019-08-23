@@ -349,7 +349,8 @@ class SongFormat(object):
             'class': SingingTheFaithImport,
             'name': 'SingingTheFaith',
             'prefix': 'singingTheFaith',
-            'filter': '%s (*.txt)' % translate('SongsPlugin.ImportWizardForm', 'Singing The Faith Exported Files'),
+            'filter': '{text} (*.txt)'.format(text=translate('SongsPlugin.ImportWizardForm',
+                                                             'Singing The Faith Exported Files')),
             'descriptionText': translate('SongsPlugin.ImportWizardForm',
                                          'First use Singing The Faith Electonic edition to export '
                                          'the song(s) in Text format.')
