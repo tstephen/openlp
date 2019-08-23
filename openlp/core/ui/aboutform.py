@@ -50,18 +50,19 @@ class AboutForm(QtWidgets.QDialog, UiAboutDialog):
         Set up the dialog. This method is mocked out in tests.
         """
         self.setup_ui(self)
+        self.button_box.buttons()[0].setFocus()
         application_version = get_version()
         about_text = self.about_text_edit.toHtml()
-        about_text = about_text.replace('{{version}}', application_version['version'])
+        about_text = about_text.replace('{version}', application_version['version'])
         if application_version['build']:
             build_text = translate('OpenLP.AboutForm', ' build {version}').format(version=application_version['build'])
         else:
             build_text = ''
-        about_text = about_text.replace('{{revision}}', build_text)
+        about_text = about_text.replace('{revision}', build_text)
         self.about_text_edit.setHtml(about_text)
-        self.volunteer_button.clicked.connect(self.on_volunteer_button_clicked)
+        self.contribute_button.clicked.connect(self.on_contribute_button_clicked)
 
-    def on_volunteer_button_clicked(self):
+    def on_contribute_button_clicked(self):
         """
         Launch a web browser and go to the contribute page on the site.
         """

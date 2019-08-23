@@ -41,13 +41,26 @@ class UiAboutDialog(object):
         """
         about_dialog.setObjectName('about_dialog')
         about_dialog.setWindowIcon(UiIcons().main_icon)
-        self.about_dialog_layout = QtWidgets.QVBoxLayout(about_dialog)
-        self.about_dialog_layout.setContentsMargins(8, 8, 8, 8)
-        self.about_dialog_layout.setObjectName('about_dialog_layout')
+        self.base_layout = QtWidgets.QVBoxLayout(about_dialog)
+        self.base_layout.setContentsMargins(0, 0, 0, 0)
+        self.base_layout.setSpacing(0)
+        self.base_layout.setObjectName('base_layout')
         self.logo_label = QtWidgets.QLabel(about_dialog)
         self.logo_label.setPixmap(QtGui.QPixmap(':/graphics/openlp-about-logo.png'))
+        self.logo_label.setStyleSheet('background-color: #fff')
+        self.logo_label.setMargin(8)
         self.logo_label.setObjectName('logo_label')
-        self.about_dialog_layout.addWidget(self.logo_label)
+        self.base_layout.addWidget(self.logo_label)
+        self.line = QtWidgets.QFrame(about_dialog)
+        self.line.setFrameShape(QtWidgets.QFrame.HLine)
+        self.line.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.line.setObjectName('line')
+        self.base_layout.addWidget(self.line)
+        self.about_dialog_layout = QtWidgets.QVBoxLayout()
+        self.about_dialog_layout.setContentsMargins(8, 8, 8, 8)
+        self.about_dialog_layout.setSpacing(8)
+        self.about_dialog_layout.setObjectName('about_dialog_layout')
+        self.base_layout.addLayout(self.about_dialog_layout)
         self.about_notebook = QtWidgets.QTabWidget(about_dialog)
         self.about_notebook.setObjectName('about_notebook')
         self.about_tab = QtWidgets.QWidget()
@@ -55,7 +68,6 @@ class UiAboutDialog(object):
         self.about_tab_layout = QtWidgets.QVBoxLayout(self.about_tab)
         self.about_tab_layout.setObjectName('about_tab_layout')
         self.about_text_edit = QtWidgets.QTextBrowser(self.about_tab)
-        # self.about_text_edit.setReadOnly(True)
         self.about_text_edit.setObjectName('about_text_edit')
         self.about_tab_layout.addWidget(self.about_text_edit)
         self.about_notebook.addTab(self.about_tab, '')
@@ -64,7 +76,6 @@ class UiAboutDialog(object):
         self.credits_tab_layout = QtWidgets.QVBoxLayout(self.credits_tab)
         self.credits_tab_layout.setObjectName('credits_tab_layout')
         self.credits_text_edit = QtWidgets.QTextBrowser(self.credits_tab)
-        # self.credits_text_edit.setReadOnly(True)
         self.credits_text_edit.setObjectName('credits_text_edit')
         self.credits_tab_layout.addWidget(self.credits_text_edit)
         self.about_notebook.addTab(self.credits_tab, '')
@@ -73,13 +84,12 @@ class UiAboutDialog(object):
         self.license_tab_layout = QtWidgets.QVBoxLayout(self.license_tab)
         self.license_tab_layout.setObjectName('license_tab_layout')
         self.license_text_edit = QtWidgets.QTextBrowser(self.license_tab)
-        # self.license_text_edit.setReadOnly(True)
         self.license_text_edit.setObjectName('license_text_edit')
         self.license_tab_layout.addWidget(self.license_text_edit)
         self.about_notebook.addTab(self.license_tab, '')
         self.about_dialog_layout.addWidget(self.about_notebook)
-        self.volunteer_button = create_button(None, 'volunteer_button', icon=UiIcons().volunteer)
-        self.button_box = create_button_box(about_dialog, 'button_box', ['close'], [self.volunteer_button])
+        self.contribute_button = create_button(None, 'contribute_button', icon=UiIcons().volunteer)
+        self.button_box = create_button_box(about_dialog, 'button_box', ['close'], [self.contribute_button])
         self.about_dialog_layout.addWidget(self.button_box)
         self.retranslate_ui(about_dialog)
         self.about_notebook.setCurrentIndex(0)
@@ -93,14 +103,9 @@ class UiAboutDialog(object):
         about_dialog.setWindowTitle('{about} OpenLP'.format(about=UiStrings().About))
         self.about_text_edit.setHtml(
             translate('OpenLP.AboutForm',
-                      '<p>OpenLP {{version}}{{revision}} - Open Source Lyrics Projection</p>'
-                      '<p>Copyright {crs} 2004-{yr} OpenLP Developers</p>'
-                      '<p>OpenLP is free church presentation software, or lyrics projection software, used to display '
-                      'slides of songs, Bible verses, videos, images, and even presentations (if Impress or PowerPoint '
-                      'is installed) for church worship using a computer and a data projector.</p>'
+                      '<p>OpenLP {{version}}{{revision}} - Open Source Lyrics Projection<br>'
+                      'Copyright {crs} 2004-{yr} OpenLP Developers</p>'
                       '<p>Find out more about OpenLP: <a href="https://openlp.org/">https://openlp.org/</a></p>'
-                      '<p>OpenLP is written and maintained by volunteers. If you would like to see more free Christian '
-                      'software being written, please consider volunteering by using the button below.</p>'
                       '<p>This program is free software: you can redistribute it and/or modify it under the terms of '
                       'the GNU General Public License as published by the Free Software Foundation, either version 3 '
                       'of the License, or (at your option) any later version.</p>'
@@ -111,8 +116,12 @@ class UiAboutDialog(object):
                       'along with this program.  If not, see <a href="https://www.gnu.org/licenses/">'
                       'https://www.gnu.org/licenses/</a>.</p>').format(crs='\xa9', yr=datetime.date.today().year))
         self.about_notebook.setTabText(self.about_notebook.indexOf(self.about_tab), UiStrings().About)
-        developers = translate('OpenLP.AboutForm', 'Built by brothers and sisters in Christ all over the world')
-        built_with = translate('OpenLP.AboutForm', 'Built with:')
+        developers = translate('OpenLP.AboutForm',
+                               'OpenLP is written and maintained by volunteers all over the world in their spare '
+                               'time. If you would like to see this project succeed, please consider contributing to '
+                               'it by clicking the "contribute" button below.')
+        built_with = translate('OpenLP.AboutForm', 'OpenLP would not be possible without the following software '
+                               'libraries:')
         build_tech = ('<ul>'
                       '<li><a href="https://www.python.org/">Python</a></li>'
                       '<li><a href="https://www.qt.io">Qt5</a></li>'
@@ -737,4 +746,4 @@ class UiAboutDialog(object):
         self.license_text_edit.setHtml(license)
         self.about_notebook.setTabText(self.about_notebook.indexOf(self.license_tab),
                                        translate('OpenLP.AboutForm', 'License'))
-        self.volunteer_button.setText(translate('OpenLP.AboutForm', 'Volunteer'))
+        self.contribute_button.setText(translate('OpenLP.AboutForm', 'Contribute'))
