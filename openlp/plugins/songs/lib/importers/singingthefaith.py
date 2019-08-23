@@ -53,6 +53,7 @@ class SingingTheFaithImport(SongImport):
         self.hint_comments = ''
         self.hint_ccli = ''
         self.hint_ignore_indent = False
+        self.hint_songbook_number_in_title = False
 
     def do_import(self):
         """
@@ -64,6 +65,9 @@ class SingingTheFaithImport(SongImport):
         for file_path in self.import_source:
             if self.stop_import_flag:
                 return
+            # If this is backported to version 2.4 then do_import is called with a filename
+            #  rather than a path object if called from the development version.
+            # Check here to minimise differences between versions.
             if isinstance(file_path, str):
                 song_file = open(file_path, 'rt', encoding='cp1251')
                 self.do_import_file(song_file)
@@ -85,6 +89,8 @@ class SingingTheFaithImport(SongImport):
         # but we test for >= and I do not know how consistent to formatting of the
         # exported songs is.
         chorus_indent = 5
+        # Initialise the song title - the format of the title finally produced can be affected
+        #  by the SongbookNumberInTitle option in the hints file
         song_title = 'STF000 -'
         song_number = '0'
         ccli = '0'
@@ -102,7 +108,8 @@ class SingingTheFaithImport(SongImport):
         # all the songs which need manual editing should sort below all the OK songs
         check_flag = 'z'
 
-        self.add_comment('Imported with Singing The Faith Importer v ' + str(singing_the_faith_version))
+        self.add_comment(
+            'Imported with Singing The Faith Importer  v{no}'.format(no=singing_the_faith_version))
 
         # Get the file_song_number - so we can use it for hints
         filename = Path(file.name)
@@ -286,11 +293,11 @@ class SingingTheFaithImport(SongImport):
             auto_verse_order_ok = False
             # Popular case V1 C2 V2 ...
             if self.verse_order_list:         # protect against odd cases
-                if (self.verse_order_list[0] == 'v1') and (self.verse_order_list[1] == 'c2'):
+                if self.verse_order_list[0] == 'v1' and self.verse_order_list[1] == 'c2':
                     new_verse_order_list = ['v1', 'c1']
                     i = 2
                     auto_verse_order_ok = True
-                elif (self.verse_order_list[0] == 'c1') and (self.verse_order_list[1] == 'v1'):
+                elif self.verse_order_list[0] == 'c1' and self.verse_order_list[1] == 'v1':
                     new_verse_order_list = ['c1', 'v1', 'c1']
                     i = 2
                     auto_verse_order_ok = True
@@ -322,7 +329,10 @@ class SingingTheFaithImport(SongImport):
             check_flag = ''
         elif not hints_available and has_chorus and auto_verse_order_ok:
             check_flag = ''
-        self.title = '{}STF{} - {title}'.format(check_flag, song_number.zfill(3), title=song_title)
+        if self.hint_songbook_number_in_title:
+            self.title = '{}STF{} - {title}'.format(check_flag, song_number.zfill(3), title=song_title)
+        else:
+            self.title = '{}{title}'.format(check_flag, title=song_title)
         if not self.finish():
             self.log_error(file.name)
 
@@ -347,6 +357,14 @@ class SingingTheFaithImport(SongImport):
             val = tagval[1].strip()
             if tag == 'Version':
                 self.hint_file_version = val
+                continue
+            elif tag == 'SongbookNumberInTitle':
+                if val == 'False':
+                    self.hint_songbook_number_in_title = False
+                else:
+                    self.hint_songbook_number_in_title = True
+                continue
+            elif tag == 'Comment':
                 continue
             if (tag == 'Hymn') and (val == song_number):
                 self.add_comment('Using hints version {}'.format(str(self.hint_file_version)))
