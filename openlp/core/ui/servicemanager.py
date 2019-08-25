@@ -1617,8 +1617,6 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
             theme_group.addAction(create_widget_action(self.theme_menu, theme, text=theme, checked=False,
                                   triggers=self.on_theme_change_action))
         find_and_set_in_combo_box(self.theme_combo_box, self.service_theme)
-        # TODO: Sort this out
-        # self.renderer.set_service_theme(self.service_theme)
         self.regenerate_service_items()
 
     def on_theme_change_action(self):
