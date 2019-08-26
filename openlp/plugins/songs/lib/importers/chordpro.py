@@ -28,6 +28,7 @@ import re
 
 from openlp.core.common.settings import Settings
 from openlp.plugins.songs.lib.importers.songimport import SongImport
+from openlp.plugins.songs.lib.db import AuthorType
 
 
 log = logging.getLogger(__name__)
@@ -39,6 +40,7 @@ class ChordProImport(SongImport):
 
     This importer is based on the information available on these webpages:
 
+    - https://www.chordpro.org
     - http://webchord.sourceforge.net/tech.html
     - http://www.vromans.org/johan/projects/Chordii/chordpro/
     - http://www.tenbyten.com/software/songsgen/help/HtmlHelp/files_reference.htm
@@ -73,6 +75,24 @@ class ChordProImport(SongImport):
                     self.title = tag_value
                 elif tag_name in ['subtitle', 'su', 'st']:
                     self.alternate_title = tag_value
+                elif tag_name == 'composer':
+                    self.parse_author(tag_value, AuthorType.Music)
+                elif tag_name == 'lyricist':
+                    self.parse_author(tag_value, AuthorType.Words)
+                elif tag_name == 'meta':
+                    meta_tag_name, meta_tag_value = tag_value.split(' ', 1)
+                    # Skip, if no value
+                    if not meta_tag_value:
+                        continue
+                    # The meta-tag can contain anything. We check for title, subtitle, composer, lyricist
+                    if meta_tag_name in ['title', 't']:
+                        self.title = meta_tag_value
+                    elif meta_tag_name in ['subtitle', 'su', 'st']:
+                        self.alternate_title = meta_tag_value
+                    elif meta_tag_name == 'composer':
+                        self.parse_author(meta_tag_value, AuthorType.Music)
+                    elif meta_tag_name == 'lyricist':
+                        self.parse_author(meta_tag_value, AuthorType.Words)
                 elif tag_name in ['comment', 'c', 'comment_italic', 'ci', 'comment_box', 'cb']:
                     # Detect if the comment is used as a chorus repeat marker
                     if tag_value.lower().startswith('chorus'):
@@ -156,6 +176,10 @@ class ChordProImport(SongImport):
                     'songs/disable chords import'):
                 current_verse = re.sub(r'\[.*?\]', '', current_verse)
             self.add_verse(current_verse.rstrip(), current_verse_type)
+        # if no title was in directives, get it from the first line
+        if not self.title:
+            (verse_def, verse_text, lang) = self.verses[0]
+            self.title = verse_text.split_lines()[0]
         if not self.finish():
             self.log_error(song_file.name)
 
