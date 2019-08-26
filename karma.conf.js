@@ -26,7 +26,7 @@ module.exports = function(config) {
       // source files, that you wanna generate coverage for 
       // do not include tests or libraries 
       // (these files will be instrumented by Istanbul) 
-      "display.js": ["coverage"]
+      // "display.js": ["coverage"]
     },
 
     // test results reporter to use
@@ -35,10 +35,10 @@ module.exports = function(config) {
     reporters: ["progress", "coverage"],
 
     // configure the coverateReporter 
-    coverageReporter: {
+    /* coverageReporter: {
       type : "html",
       dir : "htmlcov/"
-    },
+    }, */
 
     // web server port
     port: 9876,
@@ -64,7 +64,7 @@ module.exports = function(config) {
 
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits
-    singleRun: false,
+    singleRun: true,
 
     // Concurrency level
     // how many browser should be started simultaneous
