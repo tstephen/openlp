@@ -13,6 +13,7 @@
     "karma-coverage": "^1.1.2",
     "karma-firefox-launcher": "^1.2.0",
     "karma-jasmine": "^1.1.0",
+    "karma-junit-reporter": "^1.2.0",
     "karma-log-reporter": "0.0.4"
   },
   "scripts": {

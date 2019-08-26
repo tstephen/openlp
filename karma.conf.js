@@ -41,7 +41,7 @@ module.exports = function(config) {
     }, */
     junitReporter: {
       outputFile: "test-results.xml"
-    }
+    },
 
     // web server port
     port: 9876,
