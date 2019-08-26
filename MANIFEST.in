@@ -17,3 +17,4 @@ include LICENSE
 include README.txt
 include openlp/.version
 include package.json
+include karma.conf.js
