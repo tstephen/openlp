@@ -28,6 +28,7 @@ contained within the openlp.core module.
 """
 import logging
 
+from openlp.core.common import Singleton
 from openlp.core.common.registry import Registry
 from openlp.core.common.mixins import LogMixin
 from openlp.core.lib.plugin import PluginStatus
@@ -52,17 +53,7 @@ class StateModule(LogMixin):
         self.text = None
 
 
-class State(LogMixin):
-
-    __instance__ = None
-
-    def __new__(cls):
-        """
-        Re-implement the __new__ method to make sure we create a true singleton.
-        """
-        if not cls.__instance__:
-            cls.__instance__ = object.__new__(cls)
-        return cls.__instance__
+class State(LogMixin, metaclass=Singleton):
 
     def load_settings(self):
         self.modules = {}

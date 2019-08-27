@@ -374,7 +374,9 @@ def init_schema(url):
     mapper(SongBookEntry, songs_songbooks_table, properties={
         'songbook': relation(Book)
     })
-    mapper(Book, song_books_table)
+    mapper(Book, song_books_table, properties={
+        'songs': relation(Song, secondary=songs_songbooks_table)
+    })
     mapper(MediaFile, media_files_table)
     mapper(Song, songs_table, properties={
         # Use the authors_songs relation when you need access to the 'author_type' attribute

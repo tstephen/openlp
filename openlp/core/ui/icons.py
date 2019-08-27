@@ -27,6 +27,7 @@ import logging
 import qtawesome as qta
 from PyQt5 import QtGui, QtWidgets
 
+from openlp.core.common import Singleton
 from openlp.core.common.applocation import AppLocation
 from openlp.core.lib import build_icon
 
@@ -34,22 +35,11 @@ from openlp.core.lib import build_icon
 log = logging.getLogger(__name__)
 
 
-class UiIcons(object):
+class UiIcons(metaclass=Singleton):
     """
     Provide standard icons for objects to use.
     """
-    __instance__ = None
-
-    def __new__(cls):
-        """
-        Override the default object creation method to return a single instance.
-        """
-        if not cls.__instance__:
-            cls.__instance__ = super().__new__(cls)
-            cls.__instance__.load()
-        return cls.__instance__
-
-    def load(self):
+    def __init__(self):
         """
         These are the font icons used in the code.
         """
@@ -165,6 +155,7 @@ class UiIcons(object):
             'volunteer': {'icon': 'fa.group'}
         }
         self.load_icons(icon_list)
+        self.main_icon = build_icon(':/icon/openlp-logo.svg')
 
     def load_icons(self, icon_list):
         """
@@ -184,7 +175,6 @@ class UiIcons(object):
                     setattr(self, key, qta.icon('fa.plus-circle', color='red'))
             except Exception:
                 setattr(self, key, qta.icon('fa.plus-circle', color='red'))
-        self.main_icon = build_icon(':/icon/openlp-logo.svg')
 
     @staticmethod
     def _print_icons():

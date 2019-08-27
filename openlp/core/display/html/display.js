@@ -281,8 +281,9 @@ var Display = {
    * Checks if the present slide content fits within the slide
   */
   doesContentFit: function () {
-    console.debug("scrollHeight: " + $(".slides")[0].scrollHeight + ", clientHeight: " + $(".slides")[0].clientHeight);
-    return $(".slides")[0].clientHeight >= $(".slides")[0].scrollHeight;
+    var currSlide = $(".slides")[0];
+    console.debug("scrollHeight: " + currSlide.scrollHeight + ", clientHeight: " + currSlide.clientHeight);
+    return currSlide.clientHeight >= currSlide.scrollHeight;
   },
   /**
    * Generate the OpenLP startup splashscreen
@@ -333,7 +334,7 @@ var Display = {
   /**
    * Set fullscreen image from base64 data
    * @param {string} bg_color - The background color
-   * @param {string} image - Path to the image
+   * @param {string} image_data - base64 encoded image data
    */
   setFullscreenImageFromData: function(bg_color, image_data) {
     Display.clearSlides();
@@ -372,9 +373,8 @@ var Display = {
    * @param {string} verse - The verse number, e.g. "v1"
    * @param {string} text - The HTML for the verse, e.g. "line1<br>line2"
    * @param {string} footer_text - The HTML for the footer"
-   * @param {bool} [reinit=true] - Re-initialize Reveal. Defaults to true.
    */
-  addTextSlide: function (verse, text, footer_text) {
+  addTextSlide: function (verse, text, footerText) {
     var html = _prepareText(text);
     if (this._slides.hasOwnProperty(verse)) {
       var slide = $("#" + verse)[0];
@@ -390,11 +390,9 @@ var Display = {
       slidesDiv.appendChild(slide);
       var slides = $(".slides > section");
       this._slides[verse] = slides.length - 1;
-
-      console.debug(" footer_text: " + footer_text);
-
-      var footerDiv = $(".footer")[0];
-      footerDiv.innerHTML = footer_text;
+      if (footerText) {
+        $(".footer")[0].innerHTML = footerText;
+      }
     }
     if ((arguments.length > 3) && (arguments[3] === true)) {
       this.reinit();
@@ -426,9 +424,10 @@ var Display = {
       var section = document.createElement("section");
       section.setAttribute("id", index);
       section.setAttribute("data-background", "#000");
+      section.setAttribute("style", "height: 100%; width: 100%;");
       var img = document.createElement('img');
       img.src = slide["path"];
-      img.setAttribute("style", "height: 100%; width: 100%;");
+      img.setAttribute("style", "max-width: 100%; max-height: 100%; margin: 0; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);");
       section.appendChild(img);
       slidesDiv.appendChild(section);
       Display._slides[index.toString()] = index;
@@ -476,25 +475,28 @@ var Display = {
    * Play a video
    */
   playVideo: function () {
-    if ($("#video").length == 1) {
-      $("#video")[0].play();
+    var videoElem = $("#video");
+    if (videoElem.length == 1) {
+      videoElem[0].play();
     }
   },
   /**
    * Pause a video
    */
   pauseVideo: function () {
-    if ($("#video").length == 1) {
-      $("#video")[0].pause();
+    var videoElem = $("#video");
+    if (videoElem.length == 1) {
+      videoElem[0].pause();
     }
   },
   /**
    * Stop a video
    */
   stopVideo: function () {
-    if ($("#video").length == 1) {
-      $("#video")[0].pause();
-      $("#video")[0].currentTime = 0.0;
+    var videoElem = $("#video");
+    if (videoElem.length == 1) {
+      videoElem[0].pause();
+      videoElem[0].currentTime = 0.0;
     }
   },
   /**
@@ -502,8 +504,9 @@ var Display = {
    * @param seconds The position in seconds to seek to
    */
   seekVideo: function (seconds) {
-    if ($("#video").length == 1) {
-      $("#video")[0].currentTime = seconds;
+    var videoElem = $("#video");
+    if (videoElem.length == 1) {
+      videoElem[0].currentTime = seconds;
     }
   },
   /**
@@ -511,8 +514,9 @@ var Display = {
    * @param rate A Double of the rate. 1.0 => 100% speed, 0.75 => 75% speed, 1.25 => 125% speed, etc.
    */
   setPlaybackRate: function (rate) {
-    if ($("#video").length == 1) {
-      $("#video")[0].playbackRate = rate;
+    var videoElem = $("#video");
+    if (videoElem.length == 1) {
+      videoElem[0].playbackRate = rate;
     }
   },
   /**
@@ -520,24 +524,27 @@ var Display = {
    * @param level The volume level from 0 to 100.
    */
   setVideoVolume: function (level) {
-    if ($("#video").length == 1) {
-      $("#video")[0].volume = level / 100.0;
+    var videoElem = $("#video");
+    if (videoElem.length == 1) {
+      videoElem[0].volume = level / 100.0;
     }
   },
   /**
    * Mute the volume
    */
   toggleVideoMute: function () {
-    if ($("#video").length == 1) {
-      $("#video")[0].muted = !$("#video")[0].muted;
+    var videoElem = $("#video");
+    if (videoElem.length == 1) {
+      videoElem[0].muted = !videoElem[0].muted;
     }
   },
   /**
    * Clear the background audio playlist
    */
   clearPlaylist: function () {
-    if ($("#background-audio").length == 1) {
-      var audio = $("#background-audio")[0];
+    var backgroundAudoElem = $("#background-audio");
+    if (backgroundAudoElem.length == 1) {
+      var audio = backgroundAudoElem[0];
       /* audio.playList */
     }
   },
@@ -619,7 +626,6 @@ var Display = {
   },
   setTheme: function (theme) {
     this._theme = theme;
-    var slidesDiv = $(".slides")
     // Set the background
     var globalBackground = $("#global-background")[0];
     var backgroundStyle = {};
