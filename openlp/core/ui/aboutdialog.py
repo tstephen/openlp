@@ -123,7 +123,7 @@ class UiAboutDialog(object):
         built_with = translate('OpenLP.AboutForm', 'OpenLP would not be possible without the following software '
                                'libraries:')
         build_tech = ('<ul>'
-                      '<li><a href="https://www.python.org/">Python</a> (PSF)</li>'
+                      '<li><a href="https://www.python.org/">Python</a> (PSFL)</li>'
                       '<li><a href="https://www.qt.io">Qt5</a> (GPL3/LGPL3)</li>'
                       '<li><a href="https://www.riverbankcomputing.co.uk/software/pyqt/intro">PyQt5</a> (GPL3)</li>'
                       '<li><a href="https://github.com/ActiveState/appdirs">appdirs</a> (MIT)</li>'
