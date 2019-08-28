@@ -191,7 +191,7 @@ using a computer and a data projector.""",
     extras_require={
         'agpl-pdf': ['PyMuPDF'],
         'darkstyle': ['QDarkStyle'],
-        'mysql': ['mysql-connector-python'],
+        'mysql': ['pymysql'],
         'odbc': ['pyodbc'],
         'postgresql': ['psycopg2'],
         'spellcheck': ['pyenchant >= 1.6'],
