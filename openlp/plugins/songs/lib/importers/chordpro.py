@@ -77,7 +77,7 @@ class ChordProImport(SongImport):
                     self.alternate_title = tag_value
                 elif tag_name == 'composer':
                     self.parse_author(tag_value, AuthorType.Music)
-                elif tag_name == 'lyricist':
+                elif tag_name in ['lyricist', 'author']:
                     self.parse_author(tag_value, AuthorType.Words)
                 elif tag_name == 'meta':
                     meta_tag_name, meta_tag_value = tag_value.split(' ', 1)
@@ -91,8 +91,13 @@ class ChordProImport(SongImport):
                         self.alternate_title = meta_tag_value
                     elif meta_tag_name == 'composer':
                         self.parse_author(meta_tag_value, AuthorType.Music)
-                    elif meta_tag_name == 'lyricist':
+                    elif meta_tag_name in ['lyricist', 'author']:
                         self.parse_author(meta_tag_value, AuthorType.Words)
+                    elif meta_tag_name in ['topic', 'topics']:
+                        for topic in meta_tag_value.split(','):
+                            self.topics.append(topic.strip())
+                    elif 'ccli' in meta_tag_name:
+                        self.ccli_number = meta_tag_value
                 elif tag_name in ['comment', 'c', 'comment_italic', 'ci', 'comment_box', 'cb']:
                     # Detect if the comment is used as a chorus repeat marker
                     if tag_value.lower().startswith('chorus'):
@@ -179,7 +184,10 @@ class ChordProImport(SongImport):
         # if no title was in directives, get it from the first line
         if not self.title:
             (verse_def, verse_text, lang) = self.verses[0]
-            self.title = verse_text.split_lines()[0]
+            # strip any chords from the title
+            self.title = re.sub(r'\[.*?\]', '', verse_text.split('\n')[0])
+            # strip the last char if it a punctuation
+            self.title = re.sub(r'[^\w\s]$', '', self.title)
         if not self.finish():
             self.log_error(song_file.name)
 
