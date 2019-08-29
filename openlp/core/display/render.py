@@ -67,6 +67,15 @@ FOOTER_COPYRIGHT = 'Public Domain'
 CCLI_NO = '123456'
 
 
+def remove_chords(text):
+    """
+    Remove chords from the text
+
+    :param text: Text to be cleaned
+    """
+    return re.sub(r'\[.+?\]', r'', text)
+
+
 def remove_tags(text, can_remove_chords=False):
     """
     Remove Tags from text for display
@@ -82,7 +91,7 @@ def remove_tags(text, can_remove_chords=False):
         text = text.replace(tag['end tag'], '')
     # Remove ChordPro tags
     if can_remove_chords:
-        text = re.sub(r'\[.+?\]', r'', text)
+        text = remove_chords(text)
     return text
 
 
@@ -377,6 +386,8 @@ def render_tags(text, can_render_chords=False, is_printing=False):
             text = render_chords_for_printing(text, '{br}')
         else:
             text = render_chords(text)
+    else:
+        text = remove_chords(text)
     for tag in FormattingTags.get_html_tags():
         text = text.replace(tag['start tag'], tag['start html'])
         text = text.replace(tag['end tag'], tag['end html'])

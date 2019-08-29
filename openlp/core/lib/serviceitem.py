@@ -185,7 +185,7 @@ class ServiceItem(RegistryProperties):
                 self._rendered_slides.append(rendered_slide)
                 display_slide = {
                     'title': raw_slide['title'],
-                    'text': remove_tags(page),
+                    'text': remove_tags(page, can_remove_chords=True),
                     'verse': verse_tag,
                 }
                 self._display_slides.append(display_slide)
