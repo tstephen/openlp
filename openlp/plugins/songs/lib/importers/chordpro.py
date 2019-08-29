@@ -77,21 +77,21 @@ class ChordProImport(SongImport):
                     self.alternate_title = tag_value
                 elif tag_name == 'composer':
                     self.parse_author(tag_value, AuthorType.Music)
-                elif tag_name in ['lyricist', 'author']:
+                elif tag_name in ['lyricist', 'artist', 'author']:  # author is not an official directive
                     self.parse_author(tag_value, AuthorType.Words)
                 elif tag_name == 'meta':
                     meta_tag_name, meta_tag_value = tag_value.split(' ', 1)
                     # Skip, if no value
                     if not meta_tag_value:
                         continue
-                    # The meta-tag can contain anything. We check for title, subtitle, composer, lyricist
+                    # The meta-tag can contain anything. We check for the ones above and a few more
                     if meta_tag_name in ['title', 't']:
                         self.title = meta_tag_value
                     elif meta_tag_name in ['subtitle', 'su', 'st']:
                         self.alternate_title = meta_tag_value
                     elif meta_tag_name == 'composer':
                         self.parse_author(meta_tag_value, AuthorType.Music)
-                    elif meta_tag_name in ['lyricist', 'author']:
+                    elif meta_tag_name in ['lyricist', 'artist', 'author']:
                         self.parse_author(meta_tag_value, AuthorType.Words)
                     elif meta_tag_name in ['topic', 'topics']:
                         for topic in meta_tag_value.split(','):
