@@ -218,7 +218,7 @@ class PrintServiceForm(QtWidgets.QDialog, Ui_PrintServiceDialog, RegistryPropert
             if item.is_text():
                 verse_def = None
                 verse_html = None
-                for slide in item.get_frames():
+                for slide in item.print_slides:
                     if not verse_def or verse_def != slide['verse'] or verse_html == slide['text']:
                         text_div = self._add_element('div', parent=div, class_id='itemText')
                     elif 'chordspacing' not in slide['text']:
