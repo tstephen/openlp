@@ -516,11 +516,12 @@ class ThemePreviewRenderer(LogMixin, DisplayWindow):
         # theme.
         if self.theme_level != ThemeLevel.Global:
             # When the theme level is at Service and we actually have a service theme then use it.
-            if self.theme_level != ThemeLevel.Service:
+            if self.theme_level == ThemeLevel.Service:
                 theme_name = Registry().get('service_manager').service_theme
         # If we have Item level and have an item theme then use it.
         if self.theme_level == ThemeLevel.Song and item.theme:
             theme_name = item.theme
+        print(theme_name)
         return theme_name
 
     def format_slide(self, text, item):
