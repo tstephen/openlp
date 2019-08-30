@@ -74,6 +74,7 @@ class ServiceItem(RegistryProperties):
             self.name = plugin.name
         self._rendered_slides = None
         self._display_slides = None
+        self._print_slides = None
         self.title = ''
         self.slides = []
         self.processor = None
@@ -208,6 +209,36 @@ class ServiceItem(RegistryProperties):
         if not self._display_slides:
             self._create_slides()
         return self._display_slides
+
+    @property
+    def print_slides(self):
+        """
+        Render the frames for printing and return them
+
+        :param can_render_chords: bool Whether or not to render the chords
+        """
+        if not self._print_slides:
+            self._print_slides = []
+            previous_pages = {}
+            index = 0
+            if not self.footer_html:
+                self.footer_html = '<br>'.join([_f for _f in self.raw_footer if _f])
+            for raw_slide in self.slides:
+                verse_tag = raw_slide['verse']
+                if verse_tag in previous_pages and previous_pages[verse_tag][0] == raw_slide:
+                    pages = previous_pages[verse_tag][1]
+                else:
+                    pages = self.renderer.format_slide(raw_slide['text'], self)
+                    previous_pages[verse_tag] = (raw_slide, pages)
+                for page in pages:
+                    slide = {
+                        'title': raw_slide['title'],
+                        'text': render_tags(page, can_render_chords=True, is_printing=True),
+                        'verse': index,
+                        'footer': self.footer_html,
+                    }
+                    self._print_slides.append(slide)
+        return self._print_slides
 
     def add_from_image(self, path, title, background=None, thumbnail=None):
         """
