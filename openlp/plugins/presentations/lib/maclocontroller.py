@@ -27,6 +27,7 @@ from Pyro4 import Proxy
 
 from openlp.core.common import delete_file, is_macosx
 from openlp.core.common.applocation import AppLocation
+from openlp.core.common.mixins import LogMixin
 from openlp.core.common.path import Path
 from openlp.core.common.registry import Registry
 from openlp.core.display.screens import ScreenList
@@ -47,7 +48,7 @@ log = logging.getLogger(__name__)
 register_classes()
 
 
-class MacLOController(PresentationController):
+class MacLOController(PresentationController, LogMixin):
     """
     Class to control interactions with MacLO presentations on Mac OS X via Pyro4. It starts the Pyro4 nameserver,
     starts the LibreOfficeServer, and then controls MacLO via Pyro4.

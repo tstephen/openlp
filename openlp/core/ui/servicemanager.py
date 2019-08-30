@@ -46,7 +46,7 @@ from openlp.core.common.settings import Settings
 from openlp.core.lib import build_icon
 from openlp.core.lib.exceptions import ValidationError
 from openlp.core.lib.plugin import PluginStatus
-from openlp.core.lib.serviceitem import ItemCapabilities, ServiceItem
+from openlp.core.lib.serviceitem import ItemCapabilities, ServiceItem, ServiceItemType
 from openlp.core.lib.ui import create_widget_action, critical_error_message_box, find_and_set_in_combo_box
 from openlp.core.ui.icons import UiIcons
 from openlp.core.ui.media import AUDIO_EXT, VIDEO_EXT
@@ -749,9 +749,7 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
                 if theme:
                     find_and_set_in_combo_box(self.theme_combo_box, theme, set_missing=False)
                     if theme == self.theme_combo_box.currentText():
-                        # TODO: Use a local display widget
-                        # self.preview_display.set_theme(get_theme_from_name(theme))
-                        pass
+                        self.service_theme = theme
             else:
                 if self._save_lite:
                     service_item.set_from_service(item)
@@ -1197,9 +1195,9 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
             service_item_from_item = item['service_item']
             tree_widget_item = QtWidgets.QTreeWidgetItem(self.service_manager_list)
             if service_item_from_item.is_valid:
+                icon = service_item_from_item.icon.pixmap(80, 80).toImage()
+                icon = icon.scaled(80, 80, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
                 if service_item_from_item.notes:
-                    icon = service_item_from_item.icon.pixmap(80, 80).toImage()
-                    icon = icon.scaled(80, 80, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
                     overlay = UiIcons().notes.pixmap(40, 40).toImage()
                     overlay = overlay.scaled(40, 40, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
                     painter = QtGui.QPainter(icon)
@@ -1207,8 +1205,6 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
                     painter.end()
                     tree_widget_item.setIcon(0, build_icon(icon))
                 elif service_item_from_item.temporary_edit:
-                    icon = service_item_from_item.icon.pixmap(80, 80).toImage()
-                    icon = icon.scaled(80, 80, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
                     overlay = QtGui.QImage(UiIcons().upload)
                     overlay = overlay.scaled(40, 40, QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
                     painter = QtGui.QPainter(icon)
@@ -1242,13 +1238,14 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
             tree_widget_item.setData(0, QtCore.Qt.UserRole, item['order'])
             tree_widget_item.setSelected(item['selected'])
             # Add the children to their parent tree_widget_item.
-            for slide_index, slide in enumerate(service_item_from_item.slides):
+            for slide_index, slide in enumerate(service_item_from_item.get_frames()):
                 child = QtWidgets.QTreeWidgetItem(tree_widget_item)
                 # prefer to use a display_title
-                if service_item_from_item.is_capable(ItemCapabilities.HasDisplayTitle):
-                    text = slide['display_title'].replace('\n', ' ')
-                else:
+                if service_item_from_item.is_capable(ItemCapabilities.HasDisplayTitle) or \
+                        service_item_from_item.service_item_type == ServiceItemType.Image:
                     text = slide['title'].replace('\n', ' ')
+                else:
+                    text = service_item_from_item.get_rendered_frame(slide_index)
                 child.setText(0, text[:40])
                 child.setData(0, QtCore.Qt.UserRole, slide_index)
                 if service_item == item_index:
@@ -1275,8 +1272,6 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
         :param current_index: The combo box index for the selected item
         """
         self.service_theme = self.theme_combo_box.currentText()
-        # TODO: Use a local display widget
-        # self.preview_display.set_theme(get_theme_from_name(theme))
         Settings().setValue(self.main_window.service_manager_settings_section + '/service theme', self.service_theme)
         self.regenerate_service_items(True)
 
@@ -1335,7 +1330,7 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
         """
         for item_count, item in enumerate(self.service_items):
             if item['service_item'].edit_id == new_item.edit_id and item['service_item'].name == new_item.name:
-                new_item.render()
+                new_item.create_slides()
                 new_item.merge(item['service_item'])
                 item['service_item'] = new_item
                 self.repaint_service_list(item_count + 1, 0)
@@ -1368,7 +1363,7 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
             self.repaint_service_list(s_item, child)
             self.live_controller.replace_service_manager_item(item)
         else:
-            # item.render()
+            item.render_text_items()
             # nothing selected for dnd
             if self.drop_position == -1:
                 if isinstance(item, list):

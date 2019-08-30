@@ -321,6 +321,13 @@ class ServiceItem(RegistryProperties):
                                      'display_title': slide['display_title'], 'notes': slide['notes']})
         return {'header': service_header, 'data': service_data}
 
+    def render_text_items(self):
+        """
+        This method forces the display to be regenerated
+        """
+        self._display_slides = []
+        self._rendered_slides = []
+
     def set_from_service(self, service_item, path=None):
         """
         This method takes a service item from a saved service file (passed from the ServiceManager) and extracts the
@@ -503,7 +510,6 @@ class ServiceItem(RegistryProperties):
         :param row: The service item slide to be returned
         """
         if self.service_item_type == ServiceItemType.Text:
-            # return self.display_frames[row]['html'].split('\n')[0]
             return self.rendered_slides[row]['text']
         elif self.service_item_type == ServiceItemType.Image:
             return self.slides[row]['path']

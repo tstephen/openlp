@@ -521,7 +521,6 @@ class ThemePreviewRenderer(LogMixin, DisplayWindow):
         # If we have Item level and have an item theme then use it.
         if self.theme_level == ThemeLevel.Song and item.theme:
             theme_name = item.theme
-        print(theme_name)
         return theme_name
 
     def format_slide(self, text, item):
