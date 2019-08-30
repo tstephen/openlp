@@ -39,7 +39,7 @@ from openlp.core.common.applocation import AppLocation
 from openlp.core.common.i18n import translate
 from openlp.core.common.mixins import RegistryProperties
 from openlp.core.common.settings import Settings
-from openlp.core.display.render import remove_tags, render_tags
+from openlp.core.display.render import remove_tags, render_tags, render_chords_for_printing
 from openlp.core.lib import ItemCapabilities
 from openlp.core.ui.icons import UiIcons
 
@@ -221,8 +221,6 @@ class ServiceItem(RegistryProperties):
             self._print_slides = []
             previous_pages = {}
             index = 0
-            if not self.footer_html:
-                self.footer_html = '<br>'.join([_f for _f in self.raw_footer if _f])
             for raw_slide in self.slides:
                 verse_tag = raw_slide['verse']
                 if verse_tag in previous_pages and previous_pages[verse_tag][0] == raw_slide:
@@ -233,9 +231,9 @@ class ServiceItem(RegistryProperties):
                 for page in pages:
                     slide = {
                         'title': raw_slide['title'],
-                        'text': render_tags(page, can_render_chords=True, is_printing=True),
+                        'text': render_chords_for_printing(remove_tags(page), '\n'),
                         'verse': index,
-                        'footer': self.footer_html,
+                        'footer': self.raw_footer,
                     }
                     self._print_slides.append(slide)
         return self._print_slides
