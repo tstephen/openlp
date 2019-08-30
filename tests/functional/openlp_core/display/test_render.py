@@ -232,13 +232,6 @@ class TestThemePreviewRenderer(TestMixin, TestCase):
         self.application.setOrganizationName('OpenLP-tests')
         self.application.setOrganizationDomain('openlp.org')
 
-    def tearDown(self):
-        """
-        Delete QApplication.
-        """
-        pass
-        #self.destroy_settings()
-
     def test_get_theme_global(self):
         """
         Test the return of the global theme if set to Global level
@@ -247,8 +240,8 @@ class TestThemePreviewRenderer(TestMixin, TestCase):
         mocked_theme_manager = MagicMock()
         mocked_theme_manager.global_theme = 'my_global_theme'
         Registry().register('theme_manager', mocked_theme_manager)
-        with patch('openlp.core.display.webengine.WebEngineView') as mocked_display, \
-                patch('PyQt5.QtWidgets.QVBoxLayout') as mocked_box:
+        with patch('openlp.core.display.webengine.WebEngineView'), \
+                patch('PyQt5.QtWidgets.QVBoxLayout'):
             tpr = ThemePreviewRenderer()
             tpr.theme_level = ThemeLevel.Global
         # WHEN: I Request the theme to Use
@@ -268,8 +261,8 @@ class TestThemePreviewRenderer(TestMixin, TestCase):
         mocked_service_manager.service_theme = 'my_service_theme'
         Registry().register('theme_manager', mocked_theme_manager)
         Registry().register('service_manager', mocked_service_manager)
-        with patch('openlp.core.display.webengine.WebEngineView') as mocked_display, \
-                patch('PyQt5.QtWidgets.QVBoxLayout') as mocked_box:
+        with patch('openlp.core.display.webengine.WebEngineView'), \
+                patch('PyQt5.QtWidgets.QVBoxLayout'):
             tpr = ThemePreviewRenderer()
             tpr.theme_level = ThemeLevel.Service
         # WHEN: I Request the theme to Use
@@ -291,8 +284,8 @@ class TestThemePreviewRenderer(TestMixin, TestCase):
         mocked_item.theme = None
         Registry().register('theme_manager', mocked_theme_manager)
         Registry().register('service_manager', mocked_service_manager)
-        with patch('openlp.core.display.webengine.WebEngineView') as mocked_display, \
-                patch('PyQt5.QtWidgets.QVBoxLayout') as mocked_box:
+        with patch('openlp.core.display.webengine.WebEngineView'), \
+                patch('PyQt5.QtWidgets.QVBoxLayout'):
             tpr = ThemePreviewRenderer()
             tpr.theme_level = ThemeLevel.Song
         # WHEN: I Request the theme to Use
@@ -314,8 +307,8 @@ class TestThemePreviewRenderer(TestMixin, TestCase):
         mocked_item.theme = "my_item_theme"
         Registry().register('theme_manager', mocked_theme_manager)
         Registry().register('service_manager', mocked_service_manager)
-        with patch('openlp.core.display.webengine.WebEngineView') as mocked_display, \
-                patch('PyQt5.QtWidgets.QVBoxLayout') as mocked_box:
+        with patch('openlp.core.display.webengine.WebEngineView'), \
+                patch('PyQt5.QtWidgets.QVBoxLayout'):
             tpr = ThemePreviewRenderer()
             tpr.theme_level = ThemeLevel.Song
         # WHEN: I Request the theme to Use
