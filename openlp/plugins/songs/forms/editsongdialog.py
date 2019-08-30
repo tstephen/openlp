@@ -291,7 +291,6 @@ class Ui_EditSongDialog(object):
         self.warning_label.setObjectName('warning_label')
         self.bottom_layout.addWidget(self.warning_label)
         self.button_box = create_button_box(edit_song_dialog, 'button_box', ['cancel', 'save'])
-        self.save_button = self.button_box.button(QtWidgets.QDialogButtonBox.Save)
         self.bottom_layout.addWidget(self.button_box)
         self.dialog_layout.addLayout(self.bottom_layout)
         self.retranslate_ui(edit_song_dialog)
@@ -342,7 +341,6 @@ class Ui_EditSongDialog(object):
             translate('SongsPlugin.EditSongForm', '<strong>Warning:</strong> Not all of the verses are in use.')
         self.no_verse_order_entered_warning =  \
             translate('SongsPlugin.EditSongForm', '<strong>Warning:</strong> You have not entered a verse order.')
-        self.save_button.setText(UiStrings().SaveAndPreview)
 
 
 def create_combo_box(parent, name, editable=True):

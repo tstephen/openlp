@@ -514,6 +514,26 @@ class ThemePreviewRenderer(LogMixin, DisplayWindow):
         self.force_page = False
         return None
 
+    def get_theme(self, item):
+        """
+        :param item: The :class:`~openlp.core.lib.serviceitem.ServiceItem` item object
+        :return string: The name of the theme to be used
+
+        """
+        # Just assume we use the global theme.
+        theme_name = Registry().get('theme_manager').global_theme
+        # The theme level is either set to Service or Item. Use the service theme if one is set. We also have to use the
+        # service theme, even when the theme level is set to Item, because the item does not necessarily have to have a
+        # theme.
+        if self.theme_level != ThemeLevel.Global:
+            # When the theme level is at Service and we actually have a service theme then use it.
+            if self.theme_level == ThemeLevel.Service:
+                theme_name = Registry().get('service_manager').service_theme
+        # If we have Item level and have an item theme then use it.
+        if self.theme_level == ThemeLevel.Song and item.theme:
+            theme_name = item.theme
+        return theme_name
+
     def format_slide(self, text, item):
         """
         Calculate how much text can fit on a slide.
@@ -526,7 +546,7 @@ class ThemePreviewRenderer(LogMixin, DisplayWindow):
             QtWidgets.QApplication.instance().processEvents()
         self.log_debug('format slide')
         if item:
-            theme_name = item.theme if item.theme else Registry().get('theme_manager').global_theme
+            theme_name = self.get_theme(item)
             theme_data = Registry().get('theme_manager').get_theme_data(theme_name)
             self.theme_height = theme_data.font_main_height
             # Set theme for preview
