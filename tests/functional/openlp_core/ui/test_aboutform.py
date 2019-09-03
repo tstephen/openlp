@@ -30,10 +30,10 @@ from openlp.core.ui.aboutform import AboutForm
 from tests.helpers.testmixin import TestMixin
 
 
-class TestFirstTimeForm(TestCase, TestMixin):
+class TestAboutForm(TestCase, TestMixin):
 
     @patch('openlp.core.ui.aboutform.webbrowser')
-    def test_on_volunteer_button_clicked(self, mocked_webbrowser):
+    def test_on_contribute_button_clicked(self, mocked_webbrowser):
         """
         Test that clicking on the "Volunteer" button opens a web page.
         """
@@ -41,10 +41,10 @@ class TestFirstTimeForm(TestCase, TestMixin):
         about_form = AboutForm(None)
 
         # WHEN: The "Volunteer" button is "clicked"
-        about_form.on_volunteer_button_clicked()
+        about_form.on_contribute_button_clicked()
 
         # THEN: A web browser is opened
-        mocked_webbrowser.open_new.assert_called_with('http://openlp.org/en/contribute')
+        mocked_webbrowser.open_new.assert_called_with('http://openlp.org/contribute')
 
     @patch('openlp.core.ui.aboutform.get_version')
     def test_about_form_build_number(self, mocked_get_version):
@@ -66,11 +66,11 @@ class TestFirstTimeForm(TestCase, TestMixin):
         Test that the copyright date is included correctly
         """
         # GIVEN: A correct application date
-        date_string = "2004-%s" % datetime.date.today().year
+        date_string = '2004-{year}'.format(year=datetime.date.today().year)
 
         # WHEN: The about form is created
         about_form = AboutForm(None)
-        license_text = about_form.license_text_edit.toPlainText()
+        about_text = about_form.about_text_edit.toPlainText()
 
         # THEN: The date should be in the text twice.
-        assert license_text.count(date_string, 0) == 2, "The text string should be added twice to the license string"
+        assert about_text.count(date_string, 0) == 1, "The text string should be added twice to the license string"

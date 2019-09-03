@@ -8,7 +8,7 @@
 *.nja
 *.orig
 *.pyc
-*.qm
+resources/i18n/*.ts
 *.rej
 *.ropeproject
 *.~\?~

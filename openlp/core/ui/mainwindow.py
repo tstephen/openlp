@@ -546,7 +546,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
         Wait for the threads
         """
         # Sometimes the threads haven't finished, let's wait for them
-        wait_dialog = QtWidgets.QProgressDialog('Waiting for some things to finish...', '', 0, 0, self)
+        wait_dialog = QtWidgets.QProgressDialog(translate('OpenLP.MainWindow', 'Waiting for some things to finish...'),
+                                                '', 0, 0, self)
         wait_dialog.setWindowModality(QtCore.Qt.WindowModal)
         wait_dialog.setAutoClose(False)
         wait_dialog.setCancelButton(None)
