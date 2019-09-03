@@ -58,6 +58,3 @@ class TestSingingTheFaithFileImport(SongImportTestHelper):
         # Whole song
         self.file_import([TEST_PATH / 'hints' / 'H2.txt'],
                          self.load_external_result_data(TEST_PATH / 'hints' / 'STF002.json'))
-
-
-
