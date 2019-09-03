@@ -46,3 +46,18 @@ class TestSingingTheFaithFileImport(SongImportTestHelper):
         # Whole song
         self.file_import([TEST_PATH / 'H2.txt'],
                          self.load_external_result_data(TEST_PATH / 'STF002.json'))
+
+        # Tests with hints - note that the hints directory has a hints.tag which specifies
+        # SongbookNumberInTitle: True
+        # The default is false, so the unhinted tests will not have the title, but the hinted
+        # song tests will need it
+
+        # Single verse
+        self.file_import([TEST_PATH / 'hints' / 'H1.txt'],
+                         self.load_external_result_data(TEST_PATH / 'hints' / 'STF001.json'))
+        # Whole song
+        self.file_import([TEST_PATH / 'hints' / 'H2.txt'],
+                         self.load_external_result_data(TEST_PATH / 'hints' / 'STF002.json'))
+
+
+
