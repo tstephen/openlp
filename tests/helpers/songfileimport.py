@@ -153,7 +153,8 @@ class SongImportTestHelper(TestCase):
                 'song_number for %s should be %s' % (source_file_name, song_number)
         if verse_order_list:
             assert importer.verse_order_list == verse_order_list, \
-                'verse_order_list for %s should be %s' % (source_file_name, verse_order_list)
+                'verse_order_list for %s should be %s and is %s' % (source_file_name,
+                                                                    verse_order_list, importer.verse_order_list)
         self.mocked_finish.assert_called_with()
 
     def _get_data(self, data, key):

@@ -30,6 +30,8 @@ from pathlib import Path
 
 from openlp.core.common.i18n import translate
 from openlp.plugins.songs.lib.importers.songimport import SongImport
+from openlp.core.common.applocation import AppLocation
+
 
 log = logging.getLogger(__name__)
 
@@ -80,6 +82,7 @@ class SingingTheFaithImport(SongImport):
         """
         Process the SingingTheFaith file - pass in a file-like object, not a file path.
         """
+        hints_file_name = 'singingthefaith-hints.tag'
         singing_the_faith_version = 1
         self.set_defaults()
         # Setup variables
@@ -120,12 +123,19 @@ class SingingTheFaithImport(SongImport):
 
         # See if there is a hints file in the same location as the file
         dir_path = filename.parent
-        hints_file_path = dir_path / 'hints.tag'
+        hints_file_path = dir_path / hints_file_name
         try:
             with hints_file_path.open('r') as hints_file:
                 hints_available = self.read_hints(hints_file, song_number_file)
         except FileNotFoundError:
-            hints_available = False
+            # Look for the hints file in the Plugins directory
+            hints_file_path = AppLocation.get_directory(AppLocation.PluginsDir) / 'songs' / 'lib' / \
+                'importers' / hints_file_name
+            try:
+                with hints_file_path.open('r') as hints_file:
+                    hints_available = self.read_hints(hints_file, song_number_file)
+            except FileNotFoundError:
+                hints_available = False
 
         try:
             for line in file:

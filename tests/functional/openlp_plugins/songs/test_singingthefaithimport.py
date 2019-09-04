@@ -40,12 +40,15 @@ class TestSingingTheFaithFileImport(SongImportTestHelper):
         """
         Test that loading a Singing The Faith file works correctly on various files
         """
+        # Note that the previous tests without hints no longer apply as there is always a
+        # hints file, which contains the hints for the real Singing The Faith Songs.
+        # Unhinted songs here must be numbered above any real Singing The Faith Song
         # Single verse
-        self.file_import([TEST_PATH / 'H1.txt'],
-                         self.load_external_result_data(TEST_PATH / 'STF001.json'))
+        self.file_import([TEST_PATH / 'H901.txt'],
+                         self.load_external_result_data(TEST_PATH / 'STF901.json'))
         # Whole song
-        self.file_import([TEST_PATH / 'H2.txt'],
-                         self.load_external_result_data(TEST_PATH / 'STF002.json'))
+        self.file_import([TEST_PATH / 'H902.txt'],
+                         self.load_external_result_data(TEST_PATH / 'STF902.json'))
 
         # Tests with hints - note that the hints directory has a hints.tag which specifies
         # SongbookNumberInTitle: True

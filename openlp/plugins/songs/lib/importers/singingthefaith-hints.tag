@@ -1,6 +1,6 @@
 Tag-STFHints-version: 1.0
 Version: 2
-SongbookNumberInTitle: True
+SongbookNumberInTitle: False
 End:
 Hymn: 2
 VerseOrder: V1,C1,V2,C1,V3,C1
