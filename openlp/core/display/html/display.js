@@ -417,22 +417,25 @@ var Display = {
     }
     else {
       if (this._alertState === AlertState.Displaying) {
-        Display.addAlertToQueue(text, alert_settings);
+        Display.addAlertToQueue(text, alertSettings);
+      }
+      else
+      {
+        var settings = JSON.parse(alertSettings);
+        this._alertSettings = settings;
+        Display.setAlertText(text, settings.fontColor, settings.fontFace, settings.fontSize);
+        Display.setAlertLocation(settings.location);    
+        /* Check if the alert is a queued alert */
+        if (Display._alertState !== AlertState.Displaying) {
+          Display._alertState = AlertState.Displaying;
+        }
+        
+        alertBackground.addEventListener('transitionend', Display.alertTransitionEndEvent, false);            
+        alertText.addEventListener('animationend', Display.alertAnimationEndEvent, false);                          
+        
+        Display.showAlertBackground(settings.backgroundColor);                
       }
     }
-    var settings = JSON.parse(alertSettings);
-    this._alertSettings = settings;    
-    Display.setAlertText(text, settings.fontColor, settings.fontFace, settings.fontSize);
-    Display.setAlertLocation(settings.location);    
-    /* Check if the alert is a queued alert */
-    if (Display._alertState !== AlertState.DisplayingFromQueue) {
-      Display._alertState = AlertState.Displaying;
-    }
-    
-    alertBackground.addEventListener('transitionend', Display.alertTransitionEndEvent, false);            
-    alertText.addEventListener('animationend', Display.alertAnimationEndEvent, false);                          
-    
-    Display.showAlertBackground(settings.backgroundColor);                
   },  
   /**
    * Add an alert to the alert queue 
@@ -460,7 +463,7 @@ var Display = {
    */
   alertTransitionEndEvent: function (e) {
     e.stopPropagation();
-    console.debug("Transition end event reached");    
+    console.debug("Transition end event reached: " + Display._transitionState);    
     if (Display._transitionState === TransitionState.EntranceTransition) {        
       Display._transitionState = TransitionState.NoTransition;
       Display.showAlertText(Display._alertSettings);      
@@ -469,10 +472,7 @@ var Display = {
       Display._transitionState = TransitionState.NoTransition;      
       Display.removeAlertLocation(Display._alertSettings.location);
       Display.clearAlertSettings();      
-      setTimeout(function () {        
-        Display.showNextAlert();
-      }, AlertDelay.OnePointFiveSeconds);
-              
+      Display.showNextAlert();
     }    
   },
   /**
