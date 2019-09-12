@@ -205,16 +205,6 @@ function _createStyle(selector, rules) {
   }
 }
 
-function _quote(text) {
-  return '"' + text + '"';
-}
-
-function _increaseSize(size) {
-  var number = size.match(/[\d]+/g);
-  var newNumber = parseInt(number) + 2;
-  return size.replace(number, newNumber.toString());
-}
-
 /**
  * An audio player with a play list
  */
@@ -486,7 +476,7 @@ var Display = {
     // create styles for the alerts from the settings
     _createStyle("#alert-background.settings", {
       backgroundColor: settings["backgroundColor"],
-      fontFamily: _quote(settings["fontFace"]),
+      fontFamily: "'" + settings["fontFace"] + "'",
       fontSize: settings["fontSize"].toString() + "pt",
       color: settings["fontColor"]
     });
@@ -534,7 +524,6 @@ var Display = {
    */
   addAlertToQueue: function (text, settings) {
     Display._alerts.push({text: text, settings: settings});
-    return null;
   },
   /**
    * The alertTransitionEndEvent called after a transition has ended
@@ -590,6 +579,10 @@ var Display = {
       var alertObject = Display._alerts.shift();
       Display._alertState = AlertState.DisplayingFromQueue;
       Display.showAlert(alertObject.text, alertObject.settings);
+    }
+    else {
+      // For the tests
+      return null;
     }
   },
   /**
