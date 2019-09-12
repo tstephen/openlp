@@ -81,7 +81,7 @@ class AdvancedTab(SettingsTab):
         self.ui_layout.addRow(self.media_plugin_check_box)
         self.hide_mouse_check_box = QtWidgets.QCheckBox(self.ui_group_box)
         self.hide_mouse_check_box.setObjectName('hide_mouse_check_box')
-        self.ui_layout.addWidget(self.hide_mouse_check_box)
+        self.ui_layout.addRow(self.hide_mouse_check_box)
         self.double_click_live_check_box = QtWidgets.QCheckBox(self.ui_group_box)
         self.double_click_live_check_box.setObjectName('double_click_live_check_box')
         self.ui_layout.addRow(self.double_click_live_check_box)

@@ -67,7 +67,7 @@ def database_exists(url):
         create_database(engine.url)
         database_exists(engine.url)  #=> True
 
-    Borrowed from SQLAlchemy_Utils (v0.32.14 )since we only need this one function.
+    Borrowed from SQLAlchemy_Utils (v0.32.14) since we only need this one function.
     """
 
     url = copy(make_url(url))
@@ -265,7 +265,7 @@ def upgrade_db(url, upgrade):
     """
     if not database_exists(url):
         log.warning("Database {db} doesn't exist - skipping upgrade checks".format(db=url))
-        return (0, 0)
+        return 0, 0
 
     log.debug('Checking upgrades for DB {db}'.format(db=url))
 

@@ -45,15 +45,16 @@ log = logging.getLogger(__name__ + '.__init__')
 FIRST_CAMEL_REGEX = re.compile('(.)([A-Z][a-z]+)')
 SECOND_CAMEL_REGEX = re.compile('([a-z0-9])([A-Z])')
 CONTROL_CHARS = re.compile(r'[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]')
-INVALID_FILE_CHARS = re.compile(r'[\\/:\*\?"<>\|\+\[\]%]')
+INVALID_FILE_CHARS = re.compile(r'[\\/:*?"<>|+\[\]%]')
 IMAGES_FILTER = None
 REPLACMENT_CHARS_MAP = str.maketrans({'\u2018': '\'', '\u2019': '\'', '\u201c': '"', '\u201d': '"', '\u2026': '...',
                                       '\u2013': '-', '\u2014': '-', '\v': '\n\n', '\f': '\n\n'})
 NEW_LINE_REGEX = re.compile(r' ?(\r\n?|\n) ?')
 WHITESPACE_REGEX = re.compile(r'[ \t]+')
+INTERFACE_FILTER = re.compile('lo|loopback|docker|tun', re.IGNORECASE)
 
 
-def get_local_ip4():
+def get_network_interfaces():
     """
     Creates a dictionary of local IPv4 interfaces on local machine.
     If no active interfaces available, returns a dict of localhost IPv4 information
@@ -61,43 +62,33 @@ def get_local_ip4():
     :returns: Dict of interfaces
     """
     log.debug('Getting local IPv4 interface(es) information')
-    my_ip4 = {}
-    for iface in QNetworkInterface.allInterfaces():
+    interfaces = {}
+    for interface in QNetworkInterface.allInterfaces():
+        interface_name = interface.name()
+        if INTERFACE_FILTER.search(interface_name):
+            log.debug('Filtering out interfaces we don\'t care about: {name}'.format(name=interface_name))
+            continue
         log.debug('Checking for isValid and flags == IsUP | IsRunning')
-        if not iface.isValid() or not (iface.flags() & (QNetworkInterface.IsUp | QNetworkInterface.IsRunning)):
+        if not interface.isValid() or not (interface.flags() & (QNetworkInterface.IsUp | QNetworkInterface.IsRunning)):
             continue
         log.debug('Checking address(es) protocol')
-        for address in iface.addressEntries():
+        for address in interface.addressEntries():
             ip = address.ip()
             log.debug('Checking for protocol == IPv4Protocol')
             if ip.protocol() == QAbstractSocket.IPv4Protocol:
                 log.debug('Getting interface information')
-                my_ip4[iface.name()] = {'ip': ip.toString(),
-                                        'broadcast': address.broadcast().toString(),
-                                        'netmask': address.netmask().toString(),
-                                        'prefix': address.prefixLength(),
-                                        'localnet': QHostAddress(address.netmask().toIPv4Address() &
-                                                                 ip.toIPv4Address()).toString()
-                                        }
-                log.debug('Adding {iface} to active list'.format(iface=iface.name()))
-    if len(my_ip4) == 0:
+                interfaces[interface_name] = {
+                    'ip': ip.toString(),
+                    'broadcast': address.broadcast().toString(),
+                    'netmask': address.netmask().toString(),
+                    'prefix': address.prefixLength(),
+                    'localnet': QHostAddress(address.netmask().toIPv4Address() &
+                                             ip.toIPv4Address()).toString()
+                }
+                log.debug('Adding {interface} to active list'.format(interface=interface.name()))
+    if len(interfaces) == 0:
         log.warning('No active IPv4 network interfaces detected')
-        return my_ip4
-    if 'localhost' in my_ip4:
-        log.debug('Renaming windows localhost to lo')
-        my_ip4['lo'] = my_ip4['localhost']
-        my_ip4.pop('localhost')
-    if len(my_ip4) == 1:
-        if 'lo' in my_ip4:
-            # No active interfaces - so leave localhost in there
-            log.warning('No active IPv4 interfaces found except localhost')
-    else:
-        # Since we have a valid IP4 interface, remove localhost
-        if 'lo' in my_ip4:
-            log.debug('Found at least one IPv4 interface, removing localhost')
-            my_ip4.pop('lo')
-
-    return my_ip4
+    return interfaces
 
 
 def trace_error_handler(logger):
@@ -112,21 +103,21 @@ def trace_error_handler(logger):
     logger.error(log_string)
 
 
-def extension_loader(glob_pattern, excluded_files=[]):
+def extension_loader(glob_pattern, excluded_files=None):
     """
     A utility function to find and load OpenLP extensions, such as plugins, presentation and media controllers and
     importers.
 
     :param str glob_pattern: A glob pattern used to find the extension(s) to be imported. Should be relative to the
         application directory. i.e. plugins/*/*plugin.py
-    :param list[str] excluded_files: A list of file names to exclude that the glob pattern may find.
+    :param list[str] | None excluded_files: A list of file names to exclude that the glob pattern may find.
     :rtype: None
     """
     from openlp.core.common.applocation import AppLocation
     app_dir = AppLocation.get_directory(AppLocation.AppDir)
     for extension_path in app_dir.glob(glob_pattern):
         extension_path = extension_path.relative_to(app_dir)
-        if extension_path.name in excluded_files:
+        if extension_path.name in (excluded_files or []):
             continue
         log.debug('Attempting to import %s', extension_path)
         module_name = path_to_module(extension_path)
@@ -179,6 +170,21 @@ class SlideLimits(object):
     End = 1
     Wrap = 2
     Next = 3
+
+
+class Singleton(type):
+    """
+    Provide a `Singleton` metaclass https://stackoverflow.com/questions/6760685/creating-a-singleton-in-python
+    """
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        """
+        Create a new instance if one does not already exist.
+        """
+        if cls not in cls._instances:
+            cls._instances[cls] = super().__call__(*args, **kwargs)
+        return cls._instances[cls]
 
 
 def de_hump(name):
@@ -394,7 +400,7 @@ def get_images_filter():
     global IMAGES_FILTER
     if not IMAGES_FILTER:
         log.debug('Generating images filter.')
-        formats = list(map(bytes.decode, list(map(bytes, QtGui.QImageReader.supportedImageFormats()))))
+        formats = list(map(bytes.decode, map(bytes, QtGui.QImageReader.supportedImageFormats())))
         visible_formats = '(*.{text})'.format(text='; *.'.join(formats))
         actual_formats = '(*.{text})'.format(text=' *.'.join(formats))
         IMAGES_FILTER = '{text} {visible} {actual}'.format(text=translate('OpenLP', 'Image Files'),

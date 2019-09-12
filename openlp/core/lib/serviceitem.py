@@ -39,7 +39,7 @@ from openlp.core.common.applocation import AppLocation
 from openlp.core.common.i18n import translate
 from openlp.core.common.mixins import RegistryProperties
 from openlp.core.common.settings import Settings
-from openlp.core.display.render import remove_tags, render_tags
+from openlp.core.display.render import remove_tags, render_tags, render_chords_for_printing
 from openlp.core.lib import ItemCapabilities
 from openlp.core.ui.icons import UiIcons
 
@@ -74,6 +74,7 @@ class ServiceItem(RegistryProperties):
             self.name = plugin.name
         self._rendered_slides = None
         self._display_slides = None
+        self._print_slides = None
         self.title = ''
         self.slides = []
         self.processor = None
@@ -185,7 +186,7 @@ class ServiceItem(RegistryProperties):
                 self._rendered_slides.append(rendered_slide)
                 display_slide = {
                     'title': raw_slide['title'],
-                    'text': remove_tags(page),
+                    'text': remove_tags(page, can_remove_chords=True),
                     'verse': verse_tag,
                 }
                 self._display_slides.append(display_slide)
@@ -208,6 +209,34 @@ class ServiceItem(RegistryProperties):
         if not self._display_slides:
             self._create_slides()
         return self._display_slides
+
+    @property
+    def print_slides(self):
+        """
+        Render the frames for printing and return them
+
+        :param can_render_chords: bool Whether or not to render the chords
+        """
+        if not self._print_slides:
+            self._print_slides = []
+            previous_pages = {}
+            index = 0
+            for raw_slide in self.slides:
+                verse_tag = raw_slide['verse']
+                if verse_tag in previous_pages and previous_pages[verse_tag][0] == raw_slide:
+                    pages = previous_pages[verse_tag][1]
+                else:
+                    pages = self.renderer.format_slide(raw_slide['text'], self)
+                    previous_pages[verse_tag] = (raw_slide, pages)
+                for page in pages:
+                    slide = {
+                        'title': raw_slide['title'],
+                        'text': render_chords_for_printing(remove_tags(page), '\n'),
+                        'verse': index,
+                        'footer': self.raw_footer,
+                    }
+                    self._print_slides.append(slide)
+        return self._print_slides
 
     def add_from_image(self, path, title, background=None, thumbnail=None):
         """
@@ -320,6 +349,13 @@ class ServiceItem(RegistryProperties):
                 service_data.append({'title': slide['title'], 'image': slide['image'], 'path': slide['path'],
                                      'display_title': slide['display_title'], 'notes': slide['notes']})
         return {'header': service_header, 'data': service_data}
+
+    def render_text_items(self):
+        """
+        This method forces the display to be regenerated
+        """
+        self._display_slides = []
+        self._rendered_slides = []
 
     def set_from_service(self, service_item, path=None):
         """
@@ -503,7 +539,6 @@ class ServiceItem(RegistryProperties):
         :param row: The service item slide to be returned
         """
         if self.service_item_type == ServiceItemType.Text:
-            # return self.display_frames[row]['html'].split('\n')[0]
             return self.rendered_slides[row]['text']
         elif self.service_item_type == ServiceItemType.Image:
             return self.slides[row]['path']

@@ -161,7 +161,6 @@ using a computer and a data projector.""",
     url='https://openlp.org/',
     license='GPL-3.0-or-later',
     packages=find_packages(exclude=['ez_setup', 'tests*']),
-    py_modules=['run_openlp'],
     include_package_data=True,
     zip_safe=False,
     python_requires='>=3.6',
@@ -185,12 +184,13 @@ using a computer and a data projector.""",
         'SQLAlchemy >= 0.5',
         'waitress',
         'WebOb',
-        'websockets'
+        'websockets',
+        'zeroconf'
     ],
     extras_require={
         'agpl-pdf': ['PyMuPDF'],
         'darkstyle': ['QDarkStyle'],
-        'mysql': ['mysql-connector-python'],
+        'mysql': ['pymysql'],
         'odbc': ['pyodbc'],
         'postgresql': ['psycopg2'],
         'spellcheck': ['pyenchant >= 1.6'],
@@ -208,5 +208,5 @@ using a computer and a data projector.""",
         'python-xlib; platform_system=="Linux"'
     ],
     setup_requires=['pytest-runner'],
-    entry_points={'gui_scripts': ['openlp = run_openlp:start']}
+    entry_points={'gui_scripts': ['openlp = openlp.__main__:start']}
 )

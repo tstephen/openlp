@@ -33,8 +33,9 @@ from tempfile import gettempdir
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from openlp.core.state import State
-from openlp.core.api import websockets
-from openlp.core.api.http import server
+from openlp.core.api.websockets import WebSocketServer
+from openlp.core.api.http.server import HttpServer
+from openlp.core.api.zeroconf import start_zeroconf
 from openlp.core.common import add_actions, is_macosx, is_win
 from openlp.core.common.actions import ActionList, CategoryOrder
 from openlp.core.common.applocation import AppLocation
@@ -495,8 +496,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
         self.copy_data = False
         Settings().set_up_default_values()
         self.about_form = AboutForm(self)
-        self.ws_server = websockets.WebSocketServer()
-        self.http_server = server.HttpServer(self)
+        self.ws_server = WebSocketServer()
+        self.http_server = HttpServer(self)
+        start_zeroconf()
         SettingsForm(self)
         self.formatting_tag_form = FormattingTagForm(self)
         self.shortcut_form = ShortcutListForm(self)
@@ -544,7 +546,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
         Wait for the threads
         """
         # Sometimes the threads haven't finished, let's wait for them
-        wait_dialog = QtWidgets.QProgressDialog('Waiting for some things to finish...', '', 0, 0, self)
+        wait_dialog = QtWidgets.QProgressDialog(translate('OpenLP.MainWindow', 'Waiting for some things to finish...'),
+                                                '', 0, 0, self)
         wait_dialog.setWindowModality(QtCore.Qt.WindowModal)
         wait_dialog.setAutoClose(False)
         wait_dialog.setCancelButton(None)
@@ -633,7 +636,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
         # if self.live_controller.display.isVisible():
         #     self.live_controller.display.setFocus()
         self.activateWindow()
-        if self.application.args:
+        # We have -disable-web-security added by our code.
+        # If a file is passed in we will have that as well so count of 2
+        # If not we need to see if we want to use the previous file.so count of 1
+        if self.application.args and len(self.application.args) > 1:
             self.open_cmd_line_files(self.application.args)
         elif Settings().value(self.general_settings_section + '/auto open'):
             self.service_manager_contents.load_last_file()

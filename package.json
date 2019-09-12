@@ -9,17 +9,16 @@
   "dependencies": {
     "jasmine-core": "^2.6.4",
     "karma": "^3.1.4",
+    "karma-chrome-launcher": "^3.1.0",
     "karma-coverage": "^1.1.2",
+    "karma-firefox-launcher": "^1.2.0",
     "karma-jasmine": "^1.1.0",
-    "karma-phantomjs-launcher": "^1.0.4",
-    "phantomjs-prebuilt": "^2.1.16"
+    "karma-junit-reporter": "^1.2.0",
+    "karma-log-reporter": "0.0.4"
   },
   "scripts": {
     "test": "karma start --single-run"
   },
   "author": "OpenLP Developers",
-  "license": "GPL-3.0-or-later",
-  "devDependencies": {
-    "karma-log-reporter": "0.0.4"
-  }
+  "license": "GPL-3.0-or-later"
 }

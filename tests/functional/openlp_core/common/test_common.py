@@ -26,7 +26,7 @@ from pathlib import Path
 from unittest import TestCase
 from unittest.mock import MagicMock, call, patch
 
-from openlp.core.common import clean_button_text, de_hump, extension_loader, is_linux, is_macosx, is_win, \
+from openlp.core.common import Singleton, clean_button_text, de_hump, extension_loader, is_linux, is_macosx, is_win, \
     normalize_str, path_to_module, trace_error_handler
 
 
@@ -162,6 +162,48 @@ class TestCommonFunctions(TestCase):
             # THEN: The mocked_logger.error() method should have been called with the correct parameters
             mocked_logger.error.assert_called_with(
                 'OpenLP Error trace\n   File openlp.fake at line 56 \n\t called trace_error_handler_test')
+
+    def test_singleton_metaclass_multiple_init(self):
+        """
+        Test that a class using the Singleton Metaclass is only initialised once despite being called several times and
+        that the same instance is returned each time..
+        """
+        # GIVEN: The Singleton Metaclass and a test class using it
+        class SingletonClass(metaclass=Singleton):
+            def __init__(self):
+                pass
+
+        with patch.object(SingletonClass, '__init__', return_value=None) as patched_init:
+
+            # WHEN: Initialising the class multiple times
+            inst_1 = SingletonClass()
+            inst_2 = SingletonClass()
+
+        # THEN: The __init__ method of the SingletonClass should have only been called once, and both returned values
+        #       should be the same instance.
+        assert inst_1 is inst_2
+        assert patched_init.call_count == 1
+
+    def test_singleton_metaclass_multiple_classes(self):
+        """
+        Test that multiple classes using the Singleton Metaclass return the different an appropriate instances.
+        """
+        # GIVEN: Two different classes using the Singleton Metaclass
+        class SingletonClass1(metaclass=Singleton):
+            def __init__(self):
+                pass
+
+        class SingletonClass2(metaclass=Singleton):
+            def __init__(self):
+                pass
+
+        # WHEN: Initialising both classes
+        s_c1 = SingletonClass1()
+        s_c2 = SingletonClass2()
+
+        # THEN: The instances  should be an instance of the appropriate class
+        assert isinstance(s_c1, SingletonClass1)
+        assert isinstance(s_c2, SingletonClass2)
 
     def test_is_win(self):
         """

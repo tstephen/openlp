@@ -118,8 +118,8 @@ class EasyWorshipSongImport(SongImport):
         # 40/48/56 Entry count        int32le           4    Number of items in the schedule
         # 44/52/60 Entry length       int16le           2    Length of schedule entries: 0x0718 = 1816
         # Get file version
-        type, = struct.unpack('<38s', self.ews_file.read(38))
-        version = type.decode()[-3:]
+        file_type, = struct.unpack('<38s', self.ews_file.read(38))
+        version = file_type.decode()[-3:]
         # Set fileposition based on filetype/version
         file_pos = 0
         if version == '  5':
@@ -268,13 +268,13 @@ class EasyWorshipSongImport(SongImport):
         self.db_set_record_struct(field_descriptions)
         # Pick out the field description indexes we will need
         try:
-            success = True
             fi_title = self.db_find_field(b'Title')
             fi_author = self.db_find_field(b'Author')
             fi_copy = self.db_find_field(b'Copyright')
             fi_admin = self.db_find_field(b'Administrator')
             fi_words = self.db_find_field(b'Words')
             fi_ccli = self.db_find_field(b'Song Number')
+            success = True
         except IndexError:
             # This is the wrong table
             success = False

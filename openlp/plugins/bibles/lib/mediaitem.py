@@ -109,7 +109,7 @@ class BibleMediaItem(MediaManagerItem):
         :param kwargs: Keyword arguments to pass to the super method. (dict)
         """
         self.clear_icon = UiIcons().square
-        self.save_results_icon = UiIcons.save
+        self.save_results_icon = UiIcons().save
         self.sort_icon = UiIcons().sort
         self.bible = None
         self.second_bible = None

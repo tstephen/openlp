@@ -87,6 +87,7 @@ class DreamBeamImport(SongImport):
                 if self.stop_import_flag:
                     return
                 self.set_defaults()
+                author_copyright = ''
                 parser = etree.XMLParser(remove_blank_text=True)
                 try:
                     with file_path.open('r') as xml_file:
@@ -142,7 +143,7 @@ class DreamBeamImport(SongImport):
                         author_copyright = song_xml.Text2.Text.text
                 if author_copyright:
                     author_copyright = str(author_copyright)
-                    if author_copyright.find(str(SongStrings.CopyrightSymbol)) >= 0:
+                    if author_copyright.find(SongStrings.CopyrightSymbol) >= 0:
                         self.add_copyright(author_copyright)
                     else:
                         self.parse_author(author_copyright)
