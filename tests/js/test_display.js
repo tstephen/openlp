@@ -165,13 +165,13 @@ describe("Display.alert", function () {
     alertBackground.setAttribute("id", "alert-background");
     alertContainer.appendChild(alertBackground);
     alertText = document.createElement("span");
-    alertText.setAttribute("id","alert");
+    alertText.setAttribute("id","alert-text");
     alertBackground.appendChild(alertText);
-    settings = '{ \
-      "location": 1, "fontFace": "Segoe UI, Tahoma, Geneva, Verdana, sans-serif", \
-      "fontSize": 40, "fontColor": "#ffffff", "backgroundColor": "#660000", \
-      "timeout": 5, "repeat": 1, "scroll": true \
-    }';
+    settings = {
+      "location": 1, "fontFace": "Segoe UI, Tahoma, Geneva, Verdana, sans-serif",
+      "fontSize": 40, "fontColor": "#ffffff", "backgroundColor": "#660000",
+      "timeout": 5, "repeat": 1, "scroll": true
+    };
   });
 
   it("should return null if called without any text", function () {
@@ -179,29 +179,23 @@ describe("Display.alert", function () {
   });
 
   it("should set the correct alert text", function () {
-    spyOn(Display, "setAlertText");
-    spyOn(Display, "setAlertLocation");     
+    spyOn(Display, "showAlert");
+
     Display.alert("OPEN-LP-3.0 Alert Test", settings);
-        
-    expect(Display.setAlertText).toHaveBeenCalled();
-    expect(Display.setAlertLocation).toHaveBeenCalled();
+    
+    expect(Display.showAlert).toHaveBeenCalled();
   });
 
   it("should call the addAlertToQueue method if an alert is displaying", function () {
+    var text = "Testing alert queue";
     spyOn(Display, "addAlertToQueue");    
     Display._alerts = [];
     Display._alertState = AlertState.Displaying;
-    var text = "Testing alert queue";
     
     Display.alert(text, settings);
     
     expect(Display.addAlertToQueue).toHaveBeenCalledWith(text, settings);
-  });
-
-  it("should set the alert settings correctly", function() {    
-    Display.alert("Testing settings", settings);
-        
-    expect(Display._alertSettings).toEqual(JSON.parse(settings));
+    expect(Display._alerts[0]).toBe({"alert": text, "settings": settings});
   });
 });
 
@@ -213,7 +207,6 @@ describe("Display.showAlertBackground", function () {
     bg_color = "rgb(102, 0, 0)";
     alertBackground = document.createElement("div");
     alertBackground.setAttribute("id", "alert-background");
-    alertBackground.setAttribute("class", "bg-default");    
     document.body.appendChild(alertBackground);           
   });
 
@@ -290,35 +283,6 @@ describe("Display.setAlertLocation", function() {
     Display.setAlertLocation(2);
 
     expect(alertContainer.className).toEqual("alert-container bottom");
-  });
-});
-
-describe("Display.removeAlertLocation", function () {
-  beforeEach(function() {
-    document.body.innerHTML = "";    
-    alertContainer = document.createElement("div");
-    alertContainer.setAttribute("class", "alert-container");
-    document.body.appendChild(alertContainer);
-  });
-  it("should remove the correct class when location is top of the page", function () {
-    alertContainer.classList.add("top");
-    Display.removeAlertLocation(0);
-
-    expect(alertContainer.className).toEqual("alert-container");
-  });
-
-  it("should remove the correct class when location is middle of the page", function () {
-    alertContainer.classList.add("middle");
-    Display.removeAlertLocation(1);
-    
-    expect(alertContainer.className).toEqual("alert-container");       
-  });
-
-  it("should remove the correct class when location is bottom of the page", function () {
-    alertContainer.classList.add("bottom");
-    Display.removeAlertLocation(2);
-
-    expect(alertContainer.className).toEqual("alert-container");
   });
 });
 

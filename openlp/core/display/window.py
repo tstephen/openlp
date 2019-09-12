@@ -401,5 +401,4 @@ class DisplayWindow(QtWidgets.QWidget):
         """
         Set an alert
         """
-        self.run_javascript('Display.alert("{text}", \'{settings}\');'.format(text=text, settings=settings))
-        # TODO: Add option to prevent scrolling
+        self.run_javascript('Display.alert("{text}", {settings});'.format(text=text, settings=settings))

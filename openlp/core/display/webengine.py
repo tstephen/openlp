@@ -27,6 +27,8 @@ import logging
 
 from PyQt5 import QtCore, QtWebEngineWidgets, QtWidgets
 
+from openlp.core.common.applocation import AppLocation
+
 
 LOG_LEVELS = {
     QtWebEngineWidgets.QWebEnginePage.InfoMessageLevel: logging.INFO,
@@ -46,6 +48,10 @@ class WebEnginePage(QtWebEngineWidgets.QWebEnginePage):
         """
         Override the parent method in order to log the messages in OpenLP
         """
+        # The JS log has the entire file location, which we don't really care about
+        app_dir = AppLocation.get_directory(AppLocation.AppDir).parent
+        source_id = source_id.replace('file://{app_dir}/'.format(app_dir=app_dir), '')
+        # Log the JS messages to the Python logger
         log.log(LOG_LEVELS[level], '{source_id}:{line_number} {message}'.format(source_id=source_id,
                                                                                 line_number=line_number,
                                                                                 message=message))
