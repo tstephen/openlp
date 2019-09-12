@@ -29,6 +29,7 @@ import copy
 
 from PyQt5 import QtCore, QtWebChannel, QtWidgets
 
+from openlp.core.common.i18n import translate
 from openlp.core.common.path import path_to_str
 from openlp.core.common.settings import Settings
 from openlp.core.common.registry import Registry
@@ -113,6 +114,7 @@ class DisplayWindow(QtWidgets.QWidget):
         from openlp.core.display.webengine import WebEngineView
         self._is_initialised = False
         self._fbo = None
+        self.setWindowTitle(translate('OpenLP.DisplayWindow', 'Display Window'))
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.Tool | QtCore.Qt.WindowStaysOnTopHint)
         self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
         self.setAutoFillBackground(True)
