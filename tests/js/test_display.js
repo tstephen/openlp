@@ -281,6 +281,7 @@ describe("Display.hideAlert", function () {
 
     Display.hideAlert();
 
+    expect(Display._transitionState).toEqual(TransitionState.ExitTransition);
     expect(alertBackground.classList.contains("hide")).toEqual(true);
     expect(alertBackground.classList.contains("show")).toEqual(false);
     expect(alertText.classList.contains("hide")).toEqual(true);

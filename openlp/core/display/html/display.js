@@ -484,6 +484,7 @@ var Display = {
     alertBackground.classList.replace("hide", "show");
     alertText.innerHTML = text;
     Display.setAlertLocation(settings.location);
+    Display._transitionState = TransitionState.EntranceTransition;
     /* Check if the alert is a queued alert */
     if (Display._alertState !== AlertState.Displaying) {
       Display._alertState = AlertState.Displaying;
@@ -512,6 +513,7 @@ var Display = {
   hideAlert: function () {
     var alertBackground = $('#alert-background')[0];
     var alertText = $('#alert-text')[0];
+    Display._transitionState = TransitionState.ExitTransition;
     alertText.classList.replace("show", "hide");
     alertBackground.classList.replace("show", "hide");
     alertText.style.animation = "";
@@ -575,7 +577,9 @@ var Display = {
   * Display the next alert in the queue
   */
   showNextAlert: function () {
+    console.log("showNextAlert");
     if (Display._alerts.length > 0) {
+      console.log("Showing next alert");
       var alertObject = Display._alerts.shift();
       Display._alertState = AlertState.DisplayingFromQueue;
       Display.showAlert(alertObject.text, alertObject.settings);
