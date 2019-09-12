@@ -65,7 +65,7 @@ class AlertsTab(SettingsTab):
         self.background_color_label.setObjectName('background_color_label')
         self.background_color_button = ColorButton(self.background_group_box)
         self.background_color_button.setObjectName('background_color_button')
-        self.background_layout.addRow(self.background_color_label,self.background_color_button)
+        self.background_layout.addRow(self.background_color_label, self.background_color_button)
         self.left_layout.addWidget(self.background_group_box)
         # Scroll Settings
         self.scroll_group_box = QtWidgets.QGroupBox(self.left_column)
