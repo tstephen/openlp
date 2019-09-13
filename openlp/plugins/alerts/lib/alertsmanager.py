@@ -102,9 +102,6 @@ class AlertsManager(QtCore.QObject, RegistryBase, LogMixin, RegistryProperties):
             'scroll': Settings().value('alerts/scroll')
         }
         self.live_controller.displays[0].alert(text, json.dumps(alert_settings))
-        # Check to see if we have a timer running.
-        # if self.timer_id == 0:
-        #    self.timer_id = self.startTimer(int(alert_tab.timeout) * 1000)
 
     def timerEvent(self, event):
         """
