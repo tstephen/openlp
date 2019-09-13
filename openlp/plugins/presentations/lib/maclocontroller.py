@@ -23,29 +23,35 @@
 import logging
 from subprocess import Popen
 
-from Pyro4 import Proxy
-
 from openlp.core.common import delete_file, is_macosx
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.mixins import LogMixin
 from openlp.core.common.path import Path
 from openlp.core.common.registry import Registry
 from openlp.core.display.screens import ScreenList
-from openlp.plugins.presentations.lib.serializers import register_classes
 from openlp.plugins.presentations.lib.presentationcontroller import PresentationController, PresentationDocument
 
 
 LIBREOFFICE_PATH = Path('/Applications/LibreOffice.app')
 LIBREOFFICE_PYTHON = LIBREOFFICE_PATH / 'Contents' / 'Resources' / 'python'
 
-if is_macosx() and LIBREOFFICE_PATH.exists():
-    macuno_available = True
-else:
+try:
+    from Pyro4 import Proxy
+    if is_macosx() and LIBREOFFICE_PATH.exists():
+        macuno_available = True
+    else:
+        macuno_available = False
+except ImportError:
     macuno_available = False
 
 
+if macuno_available:
+    # If this controller is good to go, register the serializer classes with Pyro4
+    from openlp.plugins.presentations.lib.serializers import register_classes
+    register_classes()
+
+
 log = logging.getLogger(__name__)
-register_classes()
 
 
 class MacLOController(PresentationController, LogMixin):

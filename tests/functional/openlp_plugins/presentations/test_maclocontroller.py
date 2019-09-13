@@ -24,9 +24,10 @@ Functional tests to test the Mac LibreOffice class and related methods.
 """
 import shutil
 from tempfile import mkdtemp
-from unittest import TestCase
+from unittest import TestCase, SkipTest
 from unittest.mock import MagicMock, patch, call
 
+from openlp.core.common import is_macosx
 from openlp.core.common.settings import Settings
 from openlp.core.common.path import Path
 from openlp.plugins.presentations.lib.maclocontroller import MacLOController, MacLODocument
@@ -34,6 +35,13 @@ from openlp.plugins.presentations.presentationplugin import __default_settings__
 
 from tests.helpers.testmixin import TestMixin
 from tests.utils.constants import TEST_RESOURCES_PATH
+
+try:
+    import Pyro4    # noqa: F401
+except ImportError:
+    raise SkipTest('Pyro4 is not installed, skipping testing the Mac LibreOffice controller')
+if not is_macosx():
+    raise SkipTest('Not on macOS, skipping testing the Mac LibreOffice controller')
 
 
 class TestMacLOController(TestCase, TestMixin):
