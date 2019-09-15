@@ -23,7 +23,9 @@
 The :mod:`~openlp.plugins.alerts.lib.alertsmanager` module contains the part of the plugin which manages storing and
 displaying of alerts.
 """
-from PyQt5 import QtCore
+import json
+
+from PyQt5 import QtCore, QtGui
 
 from openlp.core.common.i18n import translate
 from openlp.core.common.mixins import LogMixin, RegistryProperties
@@ -83,8 +85,23 @@ class AlertsManager(QtCore.QObject, RegistryBase, LogMixin, RegistryProperties):
                                    not Settings().value('core/display on monitor')):
             return
         text = self.alert_list.pop(0)
-        alert_tab = self.parent().settings_tab
-        self.live_controller.displays[0].alert(text, alert_tab.location)
+
+        # Get the rgb color format of the font & background hex colors from settings
+        rgb_font_color = self.hex_to_rgb(QtGui.QColor(Settings().value('alerts/font color')))
+        rgb_background_color = self.hex_to_rgb(QtGui.QColor(Settings().value('alerts/background color')))
+
+        # Put alert settings together in dict that will be passed to Display in Javascript
+        alert_settings = {
+            'backgroundColor': rgb_background_color,
+            'location': Settings().value('alerts/location'),
+            'fontFace': Settings().value('alerts/font face'),
+            'fontSize': Settings().value('alerts/font size'),
+            'fontColor': rgb_font_color,
+            'timeout': Settings().value('alerts/timeout'),
+            'repeat': Settings().value('alerts/repeat'),
+            'scroll': Settings().value('alerts/scroll')
+        }
+        self.live_controller.displays[0].alert(text, json.dumps(alert_settings))
 
     def timerEvent(self, event):
         """
@@ -98,3 +115,13 @@ class AlertsManager(QtCore.QObject, RegistryBase, LogMixin, RegistryProperties):
         self.killTimer(self.timer_id)
         self.timer_id = 0
         self.generate_alert()
+
+    def hex_to_rgb(self, rgb_values):
+        """
+        Converts rgb color values from QColor to rgb string
+
+        :param rgb_values:
+        :return: rgb color string
+        :rtype: string
+        """
+        return "rgb(" + str(rgb_values.red()) + ", " + str(rgb_values.green()) + ", " + str(rgb_values.blue()) + ")"

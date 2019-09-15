@@ -53,6 +53,50 @@ var AudioState = {
 };
 
 /**
+ * Transition state enumeration
+ */
+var TransitionState = {
+  EntranceTransition: "entranceTransition",
+  NoTransition: "noTransition",
+  ExitTransition: "exitTransition"
+};
+
+/**
+ * Animation state enumeration
+ */
+var AnimationState = {
+  NoAnimation: "noAnimation",
+  ScrollingText: "scrollingText",
+  NonScrollingText: "noScrollingText"
+};
+
+/**
+ * Alert location enumeration
+ */
+var AlertLocation = {
+  Top: 0,
+  Middle: 1,
+  Bottom: 2
+};
+
+/**
+ * Alert state enumeration
+ */
+var AlertState = {
+  Displaying: "displaying",
+  NotDisplaying: "notDisplaying"
+}
+
+/**
+ * Alert delay enumeration
+ */
+var AlertDelay = {
+  FiftyMilliseconds: 50,
+  OneSecond: 1000,
+  OnePointFiveSeconds: 1500
+}
+
+/**
  * Return an array of elements based on the selector query
  * @param {string} selector - The selector to find elements
  * @returns {array} An array of matching elements
@@ -115,6 +159,50 @@ function _nl2br(text) {
  */
 function _prepareText(text) {
   return "<p>" + _nl2br(text) + "</p>";
+}
+
+/**
+ * Change a camelCaseString to a camel-case-string
+ * @private
+ * @param {string} text
+ * @returns {string} the Un-camel-case-ified string
+ */
+function _fromCamelCase(text) {
+  return text.replace(/([A-Z])/g, function (match, submatch) {
+    return '-' + submatch.toLowerCase();
+  });
+}
+
+/**
+ * Create a CSS style
+ * @private
+ * @param {string} selector - The selector for this style
+ * @param {Object} rules - The rules to apply to the style
+ */
+function _createStyle(selector, rules) {
+  var id = selector.replace("#", "").replace(" .", "-").replace(".", "-").replace(" ", "_");
+  if ($("style#" + id).length != 0) {
+    var style = $("style#" + id)[0];
+  }
+  else {
+    var style = document.createElement("style");
+    document.getElementsByTagName("head")[0].appendChild(style);
+    style.type = "text/css";
+    style.id = id;
+  }
+  var rulesString = selector + " { ";
+  for (var key in rules) {
+    var ruleValue = rules[key];
+    var ruleKey = _fromCamelCase(key);
+    rulesString += "" + ruleKey + ": " + ruleValue + ";";
+  }
+  rulesString += " } ";
+  if (style.styleSheet) {
+    style.styleSheet.cssText = rulesString;
+  }
+  else {
+    style.appendChild(document.createTextNode(rulesString));
+  }
 }
 
 /**
@@ -234,7 +322,12 @@ AudioPlayer.prototype.stop = function () {
  * The Display object is what we use from OpenLP
  */
 var Display = {
+  _alerts: [],
   _slides: {},
+  _alertSettings: {},
+  _alertState: AlertState.NotDisplaying,
+  _transitionState: TransitionState.NoTransition,
+  _animationState: AnimationState.NoAnimation,
   _revealConfig: {
     margin: 0.0,
     minScale: 1.0,
@@ -355,21 +448,149 @@ var Display = {
     Display.reinit();
   },
   /**
-   * Display an alert
+   * Display an alert. If there's an alert already showing, add this one to the queue
    * @param {string} text - The alert text
-   * @param {int} location - The location of the text (top, middle or bottom)
+   * @param {Object} JSON object - The settings for the alert object
   */
- alert: function (text, location) {
-  console.debug(" alert text: " + text, ", location: " + location);
-  /*
-   * The implementation should show an alert.
-   * It should be able to handle receiving a new alert before a previous one is "finished", basically queueing it.
-   */
-  return;
-},
-
+  alert: function (text, settings) {
+    if (text == "") {
+      return null;
+    }
+    if (Display._alertState === AlertState.Displaying) {
+      console.debug("Adding to queue");
+      Display.addAlertToQueue(text, settings);
+    }
+    else {
+      console.debug("Displaying immediately");
+      Display.showAlert(text, settings);
+    }
+  },
   /**
-   * Add a slides. If the slide exists but the HTML is different, update the slide.
+   * Show the alert on the screen
+   * @param {string} text - The alert text
+   * @param {Object} JSON object - The settings for the alert
+  */
+  showAlert: function (text, settings) {
+    var alertBackground = $('#alert-background')[0];
+    var alertText = $('#alert-text')[0];
+    // create styles for the alerts from the settings
+    _createStyle("#alert-background.settings", {
+      backgroundColor: settings["backgroundColor"],
+      fontFamily: "'" + settings["fontFace"] + "'",
+      fontSize: settings["fontSize"].toString() + "pt",
+      color: settings["fontColor"]
+    });
+    alertBackground.classList.add("settings");
+    alertBackground.classList.replace("hide", "show");
+    alertText.innerHTML = text;
+    Display.setAlertLocation(settings.location);
+    Display._transitionState = TransitionState.EntranceTransition;
+    /* Check if the alert is a queued alert */
+    if (Display._alertState !== AlertState.Displaying) {
+      Display._alertState = AlertState.Displaying;
+    }
+    alertBackground.addEventListener('transitionend', Display.alertTransitionEndEvent, false);
+    alertText.addEventListener('animationend', Display.alertAnimationEndEvent, false);
+    /* Either scroll the alert, or make it disappear at the end of its time */
+    if (settings.scroll) {
+      Display._animationState = AnimationState.ScrollingText;
+      var animationSettings = "alert-scrolling-text " + settings.timeout +
+                              "s linear 0.6s " + settings.repeat + " normal";
+      alertText.style.animation = animationSettings;
+    }
+    else {
+      Display._animationState = AnimationState.NonScrollingText;
+      alertText.classList.replace("hide", "show");
+      setTimeout (function () {
+        Display._animationState = AnimationState.NoAnimation;
+        Display.hideAlert();
+      }, settings.timeout * AlertDelay.OneSecond);
+    }
+  },
+  /**
+   * Hide the alert at the end
+   */
+  hideAlert: function () {
+    var alertBackground = $('#alert-background')[0];
+    var alertText = $('#alert-text')[0];
+    Display._transitionState = TransitionState.ExitTransition;
+    alertText.classList.replace("show", "hide");
+    alertBackground.classList.replace("show", "hide");
+    alertText.style.animation = "";
+    Display._alertState = AlertState.NotDisplaying;
+  },
+  /**
+   * Add an alert to the alert queue
+   * @param {string} text - The alert text to be displayed
+   * @param {Object} setttings - JSON object containing the settings for the alert
+   */
+  addAlertToQueue: function (text, settings) {
+    Display._alerts.push({text: text, settings: settings});
+  },
+  /**
+   * The alertTransitionEndEvent called after a transition has ended
+   */
+  alertTransitionEndEvent: function (e) {
+    e.stopPropagation();
+    console.debug("Transition end event reached: " + Display._transitionState);
+    if (Display._transitionState === TransitionState.EntranceTransition) {
+      Display._transitionState = TransitionState.NoTransition;
+    }
+    else if (Display._transitionState === TransitionState.ExitTransition) {
+      Display._transitionState = TransitionState.NoTransition;
+      Display.hideAlert();
+      Display.showNextAlert();
+    }
+  },
+  /**
+   * The alertAnimationEndEvent called after an animation has ended
+   */
+  alertAnimationEndEvent: function (e) {
+    e.stopPropagation();
+    Display.hideAlert();
+  },
+  /**
+   * Set the location of the alert
+   * @param {int} location - Integer number with the location of the alert on screen
+   */
+  setAlertLocation: function (location) {
+    var alertContainer = $(".alert-container")[0];
+    // Remove an existing location classes
+    alertContainer.classList.remove("top");
+    alertContainer.classList.remove("middle");
+    alertContainer.classList.remove("bottom");
+    // Apply the location class we want
+    switch (location) {
+      case AlertLocation.Top:
+        alertContainer.classList.add("top");
+        break;
+      case AlertLocation.Middle:
+        alertContainer.classList.add("middle");
+        break;
+      case AlertLocation.Bottom:
+      default:
+        alertContainer.classList.add("bottom");
+        break;
+    }
+  },
+  /**
+  * Display the next alert in the queue
+  */
+  showNextAlert: function () {
+    console.log("showNextAlert");
+    if (Display._alerts.length > 0) {
+      console.log("Showing next alert");
+      var alertObject = Display._alerts.shift();
+      Display._alertState = AlertState.DisplayingFromQueue;
+      Display.showAlert(alertObject.text, alertObject.settings);
+    }
+    else {
+      // For the tests
+      return null;
+    }
+  },
+  /**
+   * Add a slide. If the slide exists but the HTML is different, update the slide.
    * @param {string} verse - The verse number, e.g. "v1"
    * @param {string} text - The HTML for the verse, e.g. "line1<br>line2"
    * @param {string} footer_text - The HTML for the footer"
@@ -770,7 +991,7 @@ var Display = {
     return videoTypes;
   },
   /**
-   * Sets the scale of the page - used to make preview widgets scale 
+   * Sets the scale of the page - used to make preview widgets scale
    */
   setScale: function(scale) {
     document.body.style.zoom = scale+"%";

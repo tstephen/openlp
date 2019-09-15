@@ -2,34 +2,16 @@
 <html>
   <head>
     <title>Display Window</title>
-    <link href="reveal.css" rel="stylesheet">
-    <style type="text/css">
-    body {
-      background: transparent !important;
-      color: rgb(255, 255, 255) !important;
-    }
-    sup {
-      vertical-align: super !important;
-      font-size: smaller !important;
-    }
-    .reveal .slides > section,
-    .reveal .slides > section > section {
-      padding: 0;
-    }
-    .reveal > .backgrounds > .present {
-      visibility: hidden !important;
-    }
-    #global-background {
-      display: block;
-      visibility: visible;
-      z-index: -1;
-    }
-    </style>
+    <link type="text/css" rel="stylesheet" href="reveal.css">
+    <link type="text/css" rel="stylesheet" href="display.css">
     <script type="text/javascript" src="qrc:///qtwebchannel/qwebchannel.js"></script>
     <script type="text/javascript" src="reveal.js"></script>
     <script type="text/javascript" src="display.js"></script>
   </head>
   <body>
+    <div class="alert-container">
+      <div id="alert-background" class="hide"><div id="alert-text" class="hide">Testing alerts</div></div>
+    </div>
     <div class="reveal">
       <div id="global-background" class="slide-background present" data-loaded="true"></div>
       <div class="slides"></div>

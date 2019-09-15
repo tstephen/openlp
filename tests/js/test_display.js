@@ -27,6 +27,14 @@ describe("The enumeration object", function () {
   it("AudioState should exist", function () {
     expect(AudioState).toBeDefined();
   });
+
+  it("TransitionState should exist", function(){
+    expect(TransitionState).toBeDefined();
+  });
+
+  it("AnimationState should exist", function(){
+    expect(AnimationState).toBeDefined();
+  });
 });
 
 describe("The function", function () {
@@ -141,6 +149,296 @@ describe("The Display object", function () {
     Display.goToSlide("v1");
     expect(Reveal.slide).toHaveBeenCalledWith(0);
   });
+
+  it("should have an alert() method", function () {
+    expect(Display.alert).toBeDefined();
+  });
+
+});
+
+describe("Display.alert", function () {
+  var alertContainer, alertBackground, alertText, settings, text;
+
+  beforeEach(function () {
+    document.body.innerHTML = "";
+    alertContainer = _createDiv({"class": "alert-container"});
+    alertBackground = _createDiv({"id": "alert-background", "class": "hide"});
+    alertText = _createDiv({"id": "alert-text", "class": "hide"});
+    settings = {
+      "location": 1,
+      "fontFace": "sans-serif",
+      "fontSize": 40,
+      "fontColor": "#ffffff",
+      "backgroundColor": "#660000",
+      "timeout": 5,
+      "repeat": 1,
+      "scroll": true
+    };
+    text = "Display.alert";
+  });
+
+  it("should return null if called without any text", function () {
+    expect(Display.alert("", settings)).toBeNull();
+  });
+
+  it("should set the correct alert text", function () {
+    spyOn(Display, "showAlert");
+
+    Display.alert(text, settings);
+
+    expect(Display.showAlert).toHaveBeenCalled();
+  });
+
+  it("should call the addAlertToQueue method if an alert is displaying", function () {
+    spyOn(Display, "addAlertToQueue");
+    Display._alerts = [];
+    Display._alertState = AlertState.Displaying;
+
+    Display.alert(text, settings);
+
+    expect(Display.addAlertToQueue).toHaveBeenCalledWith(text, settings);
+  });
+});
+
+describe("Display.showAlert", function () {
+  var alertContainer, alertBackground, alertText, settings;
+
+  beforeEach(function () {
+    document.body.innerHTML = "";
+    alertContainer = _createDiv({"class": "alert-container"});
+    alertBackground = _createDiv({"id": "alert-background", "class": "hide"});
+    alertText = _createDiv({"id": "alert-text", "class": "hide"});
+    settings = {
+      "location": 1,
+      "fontFace": "sans-serif",
+      "fontSize": 40,
+      "fontColor": "#ffffff",
+      "backgroundColor": "#660000",
+      "timeout": 5,
+      "repeat": 1,
+      "scroll": true
+    };
+  });
+
+  it("should create a stylesheet for the settings", function () {
+    spyOn(window, "_createStyle");
+    Display.showAlert("Test Display.showAlert - stylesheet", settings);
+
+    expect(_createStyle).toHaveBeenCalledWith("#alert-background.settings", {
+      backgroundColor: settings["backgroundColor"],
+      fontFamily: "'" + settings["fontFace"] + "'",
+      fontSize: settings["fontSize"] + 'pt',
+      color: settings["fontColor"]
+    });
+  });
+
+  it("should set the alert state to AlertState.Displaying", function () {
+    Display.showAlert("Test Display.showAlert - state", settings);
+
+    expect(Display._alertState).toEqual(AlertState.Displaying);
+  });
+
+  it("should remove the 'hide' classes and add the 'show' classes", function () {
+    Display.showAlert("Test Display.showAlert - classes", settings);
+
+    expect($("#alert-background")[0].classList.contains("hide")).toEqual(false);
+    expect($("#alert-background")[0].classList.contains("show")).toEqual(true);
+    //expect($("#alert-text")[0].classList.contains("hide")).toEqual(false);
+    //expect($("#alert-text")[0].classList.contains("show")).toEqual(true);
+  });
+});
+
+describe("Display.hideAlert", function () {
+  var alertContainer, alertBackground, alertText, settings;
+
+  beforeEach(function () {
+    document.body.innerHTML = "";
+    alertContainer = _createDiv({"class": "alert-container"});
+    alertBackground = _createDiv({"id": "alert-background", "class": "hide"});
+    alertText = _createDiv({"id": "alert-text", "class": "hide"});
+    settings = {
+      "location": 1,
+      "fontFace": "sans-serif",
+      "fontSize": 40,
+      "fontColor": "#ffffff",
+      "backgroundColor": "#660000",
+      "timeout": 5,
+      "repeat": 1,
+      "scroll": true
+    };
+  });
+
+  it("should set the alert state to AlertState.NotDisplaying", function () {
+    Display.showAlert("test", settings);
+
+    Display.hideAlert();
+
+    expect(Display._alertState).toEqual(AlertState.NotDisplaying);
+  });
+
+  it("should hide the alert divs when called", function() {
+    Display.showAlert("test", settings);
+
+    Display.hideAlert();
+
+    expect(Display._transitionState).toEqual(TransitionState.ExitTransition);
+    expect(alertBackground.classList.contains("hide")).toEqual(true);
+    expect(alertBackground.classList.contains("show")).toEqual(false);
+    expect(alertText.classList.contains("hide")).toEqual(true);
+    expect(alertText.classList.contains("show")).toEqual(false);
+  });
+});
+
+describe("Display.setAlertLocation", function() {
+  var alertContainer, alertBackground, alertText, settings;
+
+  beforeEach(function () {
+    document.body.innerHTML = "";
+    alertContainer = _createDiv({"class": "alert-container"});
+    alertBackground = _createDiv({"id": "alert-background", "class": "hide"});
+    alertText = _createDiv({"id": "alert-text", "class": "hide"});
+    settings = {
+      "location": 1,
+      "fontFace": "sans-serif",
+      "fontSize": 40,
+      "fontColor": "#ffffff",
+      "backgroundColor": "#660000",
+      "timeout": 5,
+      "repeat": 1,
+      "scroll": true
+    };
+  });
+
+  it("should set the correct class when location is top of the page", function () {
+    Display.setAlertLocation(0);
+
+    expect(alertContainer.className).toEqual("alert-container top");
+  });
+
+  it("should set the correct class when location is middle of the page", function () {
+    Display.setAlertLocation(1);
+
+    expect(alertContainer.className).toEqual("alert-container middle");
+  });
+
+  it("should set the correct class when location is bottom of the page", function () {
+    Display.setAlertLocation(2);
+
+    expect(alertContainer.className).toEqual("alert-container bottom");
+  });
+});
+
+describe("Display.addAlertToQueue", function () {
+  var alertContainer, alertBackground, alertText, settings;
+
+  beforeEach(function () {
+    document.body.innerHTML = "";
+    alertContainer = _createDiv({"class": "alert-container"});
+    alertBackground = _createDiv({"id": "alert-background", "class": "hide"});
+    alertText = _createDiv({"id": "alert-text", "class": "hide"});
+    settings = {
+      "location": 1,
+      "fontFace": "sans-serif",
+      "fontSize": 40,
+      "fontColor": "#ffffff",
+      "backgroundColor": "#660000",
+      "timeout": 5,
+      "repeat": 1,
+      "scroll": true
+    };
+  });
+
+  it("should add an alert to the queue if one is displaying already", function() {
+    Display._alerts = [];
+    Display._alertState = AlertState.Displaying;
+    var alertObject = {text: "Testing alert queue", settings: settings};
+
+    Display.addAlertToQueue("Testing alert queue", settings);
+
+    expect(Display._alerts.length).toEqual(1);
+    expect(Display._alerts[0]).toEqual(alertObject);
+  });
+});
+
+describe("Display.showNextAlert", function () {
+  var alertContainer, alertBackground, alertText, settings;
+
+  beforeEach(function () {
+    document.body.innerHTML = "";
+    alertContainer = _createDiv({"class": "alert-container"});
+    alertBackground = _createDiv({"id": "alert-background", "class": "hide"});
+    alertText = _createDiv({"id": "alert-text", "class": "hide"});
+    settings = {
+      "location": 1,
+      "fontFace": "sans-serif",
+      "fontSize": 40,
+      "fontColor": "#ffffff",
+      "backgroundColor": "#660000",
+      "timeout": 5,
+      "repeat": 1,
+      "scroll": true
+    };
+  });
+
+  it("should return null if there are no alerts in the queue", function () {
+    Display._alerts = [];
+    Display.showNextAlert();
+
+    expect(Display.showNextAlert()).toBeNull();
+  });
+
+  it("should call the alert function correctly if there is an alert in the queue", function () {
+    Display._alerts.push({text: "Queued Alert", settings: settings});
+    spyOn(Display, "showAlert");
+    Display.showNextAlert();
+
+    expect(Display.showAlert).toHaveBeenCalled();
+    expect(Display.showAlert).toHaveBeenCalledWith("Queued Alert", settings);
+  });
+});
+
+describe("Display.alertTransitionEndEvent", function() {
+  var e = { stopPropagation: function () { } };
+
+  it("should call event.stopPropagation()", function () {
+    spyOn(e, "stopPropagation");
+
+    Display.alertTransitionEndEvent(e);
+
+    expect(e.stopPropagation).toHaveBeenCalled();
+  });
+
+  it("should set the correct state after EntranceTransition", function() {
+    Display._transitionState = TransitionState.EntranceTransition;
+
+    Display.alertTransitionEndEvent(e);
+
+    expect(Display._transitionState).toEqual(TransitionState.NoTransition);
+  });
+
+  it("should set the correct state after ExitTransition, call hideAlert() and showNextAlert()", function() {
+    spyOn(Display, "hideAlert");
+    spyOn(Display, "showNextAlert");
+    Display._transitionState = TransitionState.ExitTransition;
+
+    Display.alertTransitionEndEvent(e);
+
+    expect(Display._transitionState).toEqual(TransitionState.NoTransition);
+    expect(Display.hideAlert).toHaveBeenCalled();
+    expect(Display.showNextAlert).toHaveBeenCalled();
+  });
+});
+
+describe("Display.alertAnimationEndEvent", function () {
+  var e = { stopPropagation: function () { } };
+
+  it("should call the hideAlert method", function() {
+    spyOn(Display, "hideAlert");
+
+    Display.alertAnimationEndEvent(e);
+
+    expect(Display.hideAlert).toHaveBeenCalled();
+  });
 });
 
 describe("Display.addTextSlide", function () {
@@ -181,7 +479,7 @@ describe("Display.addTextSlide", function () {
 
   it("should update an existing slide", function () {
     var verse = "v1",
-        text = "Amazing grace, how sweet the sound\nThat saved a wretch like me", 
+        text = "Amazing grace, how sweet the sound\nThat saved a wretch like me",
         footer = "Public Domain";
     Display.addTextSlide(verse, "Amazing grace,\nhow sweet the sound", footer, false);
     spyOn(Display, "reinit");
@@ -249,6 +547,7 @@ describe("Display.setTextSlides", function () {
       'font_main_outline_color': 'red'
     };
     spyOn(Display, "reinit");
+    spyOn(Reveal, "slide");
 
     Display.setTextSlides(slides);
     Display.setTheme(theme);
