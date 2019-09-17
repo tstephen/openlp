@@ -21,50 +21,12 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>. #
 ##########################################################################
 
-import re
 from subprocess import run
 
 from setuptools import setup, find_packages
 
 
 VERSION_FILE = 'openlp/.version'
-SPLIT_ALPHA_DIGITS = re.compile(r'(\d+|\D+)')
-
-
-def try_int(s):
-    """
-    Convert string s to an integer if possible. Fail silently and return
-    the string as-is if it isn't an integer.
-
-    :param s: The string to try to convert.
-    """
-    try:
-        return int(s)
-    except (TypeError, ValueError):
-        return s
-
-
-def natural_sort_key(s):
-    """
-    Return a tuple by which s is sorted.
-
-    :param s: A string value from the list we want to sort.
-    """
-    return list(map(try_int, SPLIT_ALPHA_DIGITS.findall(s)))
-
-
-def natural_sort(seq):
-    """
-    Returns a copy of seq, sorted by natural string sort.
-
-    :param seq: The sequence to sort.
-    :param compare: The comparison method to use
-    :return: The sorted sequence
-    """
-    import copy
-    temp = copy.copy(seq)
-    temp.sort(key=natural_sort_key)
-    return temp
 
 
 ver_file = None
