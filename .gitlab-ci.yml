@@ -26,6 +26,8 @@ test-fedora:
     - xvfb-run -s '-screen 0 1024x768x24' pytest-3 -Wignore
 
 test-macos:
+  only:
+    - master@openlp/openlp
   stage: test
   tags:
     - macos
