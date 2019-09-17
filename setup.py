@@ -22,7 +22,7 @@
 ##########################################################################
 
 import re
-from subprocess import Popen, PIPE
+from subprocess import run
 
 from setuptools import setup, find_packages
 
@@ -67,42 +67,12 @@ def natural_sort(seq):
     return temp
 
 
-# NOTE: The following code is a duplicate of the code in openlp/core/common/checkversion.py.
-# Any fix applied here should also be applied there.
 ver_file = None
 try:
     # Get the revision of this tree.
-    bzr = Popen(('bzr', 'revno'), stdout=PIPE)
-    tree_revision, error = bzr.communicate()
-    code = bzr.wait()
-    if code != 0:
-        raise Exception('Error running bzr log')
-
-    # Get all tags.
-    bzr = Popen(('bzr', 'tags'), stdout=PIPE)
-    output, error = bzr.communicate()
-    code = bzr.wait()
-    if code != 0:
-        raise Exception('Error running bzr tags')
-    tags = output.splitlines()
-    if not tags:
-        tag_version = '0.0.0'
-        tag_revision = '0'
-    else:
-        # Remove any tag that has "?" as revision number. A "?" as revision number indicates, that this tag is from
-        # another series.
-        tags = [tag for tag in tags if tag.split()[-1].strip() != '?']
-        # Get the last tag and split it in a revision and tag name.
-        tag_version, tag_revision = tags[-1].split()
-    # If they are equal, then this tree is tarball with the source for the release. We do not want the revision number
-    # in the version string.
-    tree_revision = tree_revision.strip()
-    tag_revision = tag_revision.strip()
-    if tree_revision == tag_revision:
-        version_string = tag_version.decode('utf-8')
-    else:
-        version_string = '{version}.dev{revision}'.format(version=tag_version.decode('utf-8'),
-                                                          revision=tree_revision.decode('utf-8'))
+    git_version = run(['git', 'describe', '--tags'], capture_output=True, check=True, universal_newlines=True).stdout
+    version_string = '+'.join(git_version.strip().rsplit('-g', 1))
+    version_string = '.dev'.join(version_string.rsplit('-', 1))
     ver_file = open(VERSION_FILE, 'w')
     ver_file.write(version_string)
 except Exception:
