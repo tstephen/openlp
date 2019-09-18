@@ -68,11 +68,11 @@ class TestGitTags(TestCase):
 
         # WHEN: getting the tags
         try:
-            git = Popen(('git', 'tags'), stdout=PIPE)
+            git = Popen(('git', 'tag'), stdout=PIPE)
         except Exception:
             raise SkipTest('git is not installed')
 
-        std_out = bzr.communicate()[0]
+        std_out = git.communicate()[0]
 
         count = len(TAGS1)
         tags = [line.decode('utf-8').split()[0] for line in std_out.splitlines()]
