@@ -32,21 +32,48 @@ TAGS1 = {'1.9.0', '1.9.1', '1.9.2', '1.9.3', '1.9.4', '1.9.5', '1.9.6', '1.9.7',
          '2.3.1', '2.3.2', '2.3.3', '2.4'}
 
 
-class TestBzrTags(TestCase):
+# class TestBzrTags(TestCase):
 
-    def test_bzr_tags(self):
+#     def test_bzr_tags(self):
+#         """
+#         Test for proper bzr tags
+#         """
+#         # GIVEN: A bzr branch
+#         path = os.path.dirname(__file__)
+
+#         # WHEN getting the branches tags
+#         try:
+#             bzr = Popen(('bzr', 'tags', '--directory=' + path), stdout=PIPE)
+#         except Exception:
+#             raise SkipTest('bzr is not installed')
+#         std_out = bzr.communicate()[0]
+#         count = len(TAGS1)
+#         tags = [line.decode('utf-8').split()[0] for line in std_out.splitlines()]
+#         count1 = 0
+#         for t in tags:
+#             if t in TAGS1:
+#                 count1 += 1
+
+#         # THEN the tags should match the accepted tags
+#         assert count == count1, 'List of tags should match'
+
+
+class TestGitTags(TestCase):
+    def test_git_tags(self):
         """
-        Test for proper bzr tags
+        Test for proper git tags
         """
-        # GIVEN: A bzr branch
+        # GIVEN: a git repo
         path = os.path.dirname(__file__)
 
-        # WHEN getting the branches tags
+        # WHEN: getting the tags
         try:
-            bzr = Popen(('bzr', 'tags', '--directory=' + path), stdout=PIPE)
+            git = Popen(('git', 'tags'), stdout=PIPE)
         except Exception:
-            raise SkipTest('bzr is not installed')
+            raise SkipTest('git is not installed')
+
         std_out = bzr.communicate()[0]
+
         count = len(TAGS1)
         tags = [line.decode('utf-8').split()[0] for line in std_out.splitlines()]
         count1 = 0
@@ -54,5 +81,5 @@ class TestBzrTags(TestCase):
             if t in TAGS1:
                 count1 += 1
 
-        # THEN the tags should match the accepted tags
-        assert count == count1, 'List of tags should match'
+        # THEN: the tags should match the accepted tags
+        assert count == count1
