@@ -113,20 +113,16 @@ describe("The Display object", function () {
     expect(Display.reinit).toBeDefined();
   });
 
-  it("should re-initialise Reveal when reinit is called", function () {
-    spyOn(Reveal, "reinitialize");
+  it("should sync Reveal and set to first slide when reinit is called", function () {
+    spyOn(Reveal, "sync");
+    spyOn(Reveal, "slide");
     Display.reinit();
-    expect(Reveal.reinitialize).toHaveBeenCalled();
+    expect(Reveal.sync).toHaveBeenCalled();
+    expect(Reveal.slide).toHaveBeenCalledWith(0);
   });
 
   it("should have a setTransition() method", function () {
     expect(Display.setTransition).toBeDefined();
-  });
-
-  it("should have a correctly functioning setTransition() method", function () {
-    spyOn(Reveal, "configure");
-    Display.setTransition("fade");
-    expect(Reveal.configure).toHaveBeenCalledWith({"transition": "fade"});
   });
 
   it("should have a correctly functioning clearSlides() method", function () {
@@ -152,6 +148,55 @@ describe("The Display object", function () {
 
   it("should have an alert() method", function () {
     expect(Display.alert).toBeDefined();
+  });
+
+});
+
+describe("Transitions", function () {
+  beforeEach(function() {
+    document.body.innerHTML = "";
+    _createDiv({"class": "slides"});
+    _createDiv({"class": "footer"});
+    _createDiv({"id": "global-background"});
+    Display._slides = {};
+  });
+  afterEach(function() {
+    // Reset theme
+    Display._theme = null;
+  });
+
+  it("should have a correctly functioning setTransition() method", function () {
+    spyOn(Reveal, "configure");
+    Display.setTransition("fade", "slow");
+    expect(Reveal.configure).toHaveBeenCalledWith({"transition": "fade", "transitionSpeed": "slow"});
+  });
+
+  it("should have enabled transitions when _doTransitions is true and setTheme is run", function () {
+    spyOn(Display, "setTransition");
+    Display._doTransitions = true;
+    var theme = {
+      "display_slide_transition": true,
+      "display_slide_transition_type": TransitionType.Slide,
+      "display_slide_transition_speed": TransitionSpeed.Fast
+    }
+
+    Display.setTheme(theme);
+
+    expect(Display.setTransition).toHaveBeenCalledWith("slide", "fast");
+  });
+
+  it("should have not enabled transitions when init() with no transitions and setTheme is run", function () {
+    spyOn(Display, "setTransition");
+    Display._doTransitions = false;
+    var theme = {
+      "display_slide_transition": true,
+      "display_slide_transition_type": TransitionType.Slide,
+      "display_slide_transition_speed": TransitionSpeed.Fast,
+    }
+
+    Display.setTheme(theme);
+
+    expect(Display.setTransition).toHaveBeenCalledWith("none", "default");
   });
 
 });
@@ -519,7 +564,6 @@ describe("Display.setTextSlides", function () {
     ];
     spyOn(Display, "clearSlides");
     spyOn(Display, "reinit");
-    spyOn(Reveal, "slide");
 
     Display.setTextSlides(slides);
 
@@ -528,7 +572,6 @@ describe("Display.setTextSlides", function () {
     expect(Display._slides["v2"]).toEqual(1);
     expect($(".slides > section > section").length).toEqual(2);
     expect(Display.reinit).toHaveBeenCalledTimes(1);
-    expect(Reveal.slide).toHaveBeenCalledWith(0, 0);
   });
 
   it("should correctly set outline width", function () {
@@ -581,6 +624,56 @@ describe("Display.setTextSlides", function () {
     const slidesDiv = $(".text-slides")[0];
     expect(slidesDiv.style['text-align-last']).toEqual('justify');
     expect(slidesDiv.style['justify-content']).toEqual('center');
+  })
+
+  it("should enable shadows", function () {
+    const slides = [
+      {
+        "verse": "v1",
+        "text": "Amazing grace, how sweet the sound\nThat saved a wretch like me\n" +
+                "I once was lost, but now I'm found\nWas blind but now I see",
+        "footer": "Public Domain"
+      }
+    ];
+    // 
+    const theme = {
+      'font_main_shadow': true,
+      'font_main_shadow_color': "#000",
+      'font_main_shadow_size': 5
+    };
+    spyOn(Display, "reinit");
+    spyOn(Reveal, "slide");
+
+    Display.setTheme(theme);
+    Display.setTextSlides(slides);
+
+    const slidesDiv = $(".text-slides")[0];
+    expect(slidesDiv.style['text-shadow']).not.toEqual('');
+  })
+
+  it("should not enable shadows", function () {
+    const slides = [
+      {
+        "verse": "v1",
+        "text": "Amazing grace, how sweet the sound\nThat saved a wretch like me\n" +
+                "I once was lost, but now I'm found\nWas blind but now I see",
+        "footer": "Public Domain"
+      }
+    ];
+    // 
+    const theme = {
+      'font_main_shadow': false,
+      'font_main_shadow_color': "#000",
+      'font_main_shadow_size': 5
+    };
+    spyOn(Display, "reinit");
+    spyOn(Reveal, "slide");
+
+    Display.setTheme(theme);
+    Display.setTextSlides(slides);
+
+    const slidesDiv = $(".text-slides")[0];
+    expect(slidesDiv.style['text-shadow']).toEqual('');
   })
 
   it("should correctly set slide size position to theme size when adding a text slide", function () {
