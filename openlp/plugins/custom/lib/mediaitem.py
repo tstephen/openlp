@@ -231,6 +231,7 @@ class CustomMediaItem(MediaManagerItem):
         service_item.add_capability(ItemCapabilities.CanLoop)
         service_item.add_capability(ItemCapabilities.CanSoftBreak)
         service_item.add_capability(ItemCapabilities.OnLoadUpdate)
+        service_item.add_capability(ItemCapabilities.CanWordSplit)
         custom_slide = self.plugin.db_manager.get_object(CustomSlide, item_id)
         title = custom_slide.title
         credit = custom_slide.credits

@@ -100,6 +100,7 @@ class UiIcons(metaclass=Singleton):
             'open': {'icon': 'fa.folder-open'},
             'optical': {'icon': 'fa.file-video-o'},
             'pause': {'icon': 'fa.pause'},
+            'planning_center': {'icon': 'fa.cloud-download'},
             'play': {'icon': 'fa.play'},
             'player': {'icon': 'fa.tablet'},
             'plugin_list': {'icon': 'fa.puzzle-piece'},
