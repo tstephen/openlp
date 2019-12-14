@@ -203,6 +203,34 @@ class TransitionSpeed(object):
             return TransitionSpeed.Slow
 
 
+class TransitionDirection(object):
+    """
+    Type enumeration for transition types.
+    """
+    Horizontal = 0
+    Vertical = 1
+
+    @staticmethod
+    def to_string(transition_direction):
+        """
+        Return a string representation of a transition type.
+        """
+        if transition_direction == TransitionDirection.Horizontal:
+            return 'horizontal'
+        elif transition_direction == TransitionDirection.Vertical:
+            return 'vertical'
+
+    @staticmethod
+    def from_string(type_string):
+        """
+        Return a transition type for the given string.
+        """
+        if type_string == 'horizontal':
+            return TransitionDirection.Horizontal
+        if type_string == 'vertical':
+            return TransitionDirection.Vertical
+
+
 class HorizontalType(object):
     """
     Type enumeration for horizontal alignment.
@@ -254,10 +282,11 @@ class VerticalType(object):
         return VerticalType.Names.index(align)
 
 
-BOOLEAN_LIST = ['bold', 'italics', 'override', 'outline', 'shadow', 'slide_transition']
+BOOLEAN_LIST = ['bold', 'italics', 'override', 'outline', 'shadow', 'slide_transition', 'slide_transition_reverse']
 
 INTEGER_LIST = ['size', 'line_adjustment', 'x', 'height', 'y', 'width', 'shadow_size', 'outline_size',
-                'horizontal_align', 'vertical_align', 'wrap_style', 'slide_transition_type', 'slide_transition_speed']
+                'horizontal_align', 'vertical_align', 'wrap_style', 'slide_transition_type', 'slide_transition_speed',
+                'slide_transition_direction']
 
 
 class Theme(object):

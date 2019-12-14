@@ -304,6 +304,8 @@ class ThemeForm(QtWidgets.QWizard, Ui_ThemeWizard, RegistryProperties):
         self.alignment_page.is_transition_enabled = self.theme.display_slide_transition
         self.alignment_page.transition_type = self.theme.display_slide_transition_type
         self.alignment_page.transition_speed = self.theme.display_slide_transition_speed
+        self.alignment_page.transition_direction = self.theme.display_slide_transition_direction
+        self.alignment_page.is_transition_reverse_enabled = self.theme.display_slide_transition_reverse
 
     def set_preview_page_values(self):
         """
@@ -371,6 +373,8 @@ class ThemeForm(QtWidgets.QWizard, Ui_ThemeWizard, RegistryProperties):
         self.theme.display_slide_transition = self.alignment_page.is_transition_enabled
         self.theme.display_slide_transition_type = self.alignment_page.transition_type
         self.theme.display_slide_transition_speed = self.alignment_page.transition_speed
+        self.theme.display_slide_transition_direction = self.alignment_page.transition_direction
+        self.theme.display_slide_transition_reverse = self.alignment_page.is_transition_reverse_enabled
 
     def accept(self):
         """

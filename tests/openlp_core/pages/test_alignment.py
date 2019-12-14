@@ -26,7 +26,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from openlp.core.lib.theme import HorizontalType, VerticalType, TransitionType, TransitionSpeed
+from openlp.core.lib.theme import HorizontalType, VerticalType, TransitionType, TransitionSpeed, TransitionDirection
 from openlp.core.pages.alignment import AlignmentTransitionsPage
 from tests.helpers.testmixin import TestMixin
 
@@ -66,6 +66,8 @@ class TestAlignmentTransitionsPage(TestCase, TestMixin):
         assert page.transition_effect_combo_box.isEnabled()
         assert page.transition_speed_label.isEnabled()
         assert page.transition_speed_combo_box.isEnabled()
+        assert page.transition_direction_combo_box.isEnabled()
+        assert page.transition_reverse_check_box.isEnabled()
 
     def test_get_horizontal_align(self):
         """
@@ -256,7 +258,7 @@ class TestAlignmentTransitionsPage(TestCase, TestMixin):
         """
         Test the transition_speed getter
         """
-        # GIVEN: A AlignmentTransitionsPage instance with the combobox set to index 1
+        # GIVEN: A AlignmentTransitionsPage instance with the combobox set to index 0
         page = AlignmentTransitionsPage()
         page.transition_speed_combo_box.setCurrentIndex(0)
 
@@ -303,3 +305,82 @@ class TestAlignmentTransitionsPage(TestCase, TestMixin):
         # THEN: An exception is raised
         with pytest.raises(TypeError, match='transition_speed must either be a string or an int'):
             page.transition_speed = []
+
+    def test_get_transition_direction(self):
+        """
+        Test the transition_direction getter
+        """
+        # GIVEN: A AlignmentTransitionsPage instance with the combobox set to index 0
+        page = AlignmentTransitionsPage()
+        page.transition_direction_combo_box.setCurrentIndex(0)
+
+        # WHEN: The property is accessed
+        result = page.transition_direction
+
+        # THEN: The result should be correct
+        assert result == TransitionDirection.Horizontal
+
+    def test_set_transition_direction_int(self):
+        """
+        Test the transition_direction setter with an int
+        """
+        # GIVEN: A AlignmentTransitionsPage instance
+        page = AlignmentTransitionsPage()
+
+        # WHEN: The property is set
+        page.transition_direction = TransitionDirection.Horizontal
+
+        # THEN: The combobox should be correct
+        assert page.transition_direction_combo_box.currentIndex() == 0
+
+    def test_set_transition_direction_str(self):
+        """
+        Test the transition_direction setter with a str
+        """
+        # GIVEN: A AlignmentTransitionsPage instance
+        page = AlignmentTransitionsPage()
+
+        # WHEN: The property is set
+        page.transition_direction = TransitionDirection.to_string(TransitionDirection.Vertical)
+
+        # THEN: The combobox should be correct
+        assert page.transition_direction_combo_box.currentIndex() == 1
+
+    def test_set_transition_direction_exception(self):
+        """
+        Test the transition_direction setter with something other than a str or int
+        """
+        # GIVEN: A AlignmentTransitionsPage instance
+        page = AlignmentTransitionsPage()
+
+        # WHEN: The property is set
+        # THEN: An exception is raised
+        with pytest.raises(TypeError, match='transition_direction must either be a string or an int'):
+            page.transition_direction = []
+
+    def test_on_transition_reverse_getter(self):
+        """
+        Test the is_transition_reverse_enabled getter
+        """
+        # GIVEN: And instance of AlignmentTransitionsPage and transition_reverse checked
+        page = AlignmentTransitionsPage()
+        page.transition_reverse_check_box.setChecked(True)
+
+        # WHEN: The property is accessed
+        result = page.is_transition_reverse_enabled
+
+        # THEN: The result should be correct
+        assert result is True
+
+    def test_on_transition_reverse_setter(self):
+        """
+        Test the is_transition_reverse_enabled setter
+        """
+        # GIVEN: And instance of AlignmentTransitionsPage and transition_reverse checked
+        page = AlignmentTransitionsPage()
+
+        # WHEN: The property is set
+        page.is_transition_reverse_enabled = True
+
+        # THEN: The checkbox should be correct
+        assert page.transition_reverse_check_box.isChecked() is True
