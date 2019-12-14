@@ -184,7 +184,7 @@ describe("Transitions", function () {
 
     Display.setTheme(theme);
 
-    expect(Display.setTransition).toHaveBeenCalledWith("slide", "fast");
+    expect(Display.setTransition).toHaveBeenCalledWith("slide-horizontal", "fast");
   });
 
   it("should have not enabled transitions when init() with no transitions and setTheme is run", function () {
@@ -199,6 +199,22 @@ describe("Transitions", function () {
     Display.setTheme(theme);
 
     expect(Display.setTransition).toHaveBeenCalledWith("none", "default");
+  });
+
+  it("should have enabled transitions in the correct direction", function () {
+    spyOn(Display, "setTransition");
+    Display._doTransitions = true;
+    var theme = {
+      "display_slide_transition": true,
+      "display_slide_transition_type": TransitionType.Convex,
+      "display_slide_transition_speed": TransitionSpeed.Slow,
+      "display_slide_transition_direction": TransitionDirection.Vertical,
+      "display_slide_transition_reverse": true,
+    }
+
+    Display.setTheme(theme);
+
+    expect(Display.setTransition).toHaveBeenCalledWith("convex-vertical-reverse", "slow");
   });
 
 });

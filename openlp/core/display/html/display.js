@@ -63,6 +63,15 @@ var TransitionSpeed = {
   Slow: 2
 };
 
+
+/**
+ * Transition direction enumeration
+ */
+var TransitionDirection = {
+  Horizontal: 0,
+  Vertical: 1
+};
+
 /**
  * Audio state enumeration
  */
@@ -931,7 +940,19 @@ var Display = {
         default:
           new_transition_speed = "default";
       }
+      switch (theme.display_slide_transition_direction) {
+        case TransitionDirection.Vertical:
+          new_transition_type += "-vertical";
+          break;
+        case TransitionDirection.Horizontal:
+        default:
+          new_transition_type += "-horizontal";
+      }
+      if (theme.display_slide_transition_reverse) {
+        new_transition_type += "-reverse";
+      }
     }
+
     Display.setTransition(new_transition_type, new_transition_speed);
     // Set the background
     var globalBackground = $("#global-background")[0];

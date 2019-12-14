@@ -13,6 +13,8 @@
         "slide_transition": false,
         "slide_transition_type": 0,
         "slide_transition_speed": 0,
+        "slide_transition_direction": 0,
+        "slide_transition_reverse": false,
         "vertical_align": 0
     },
     "font": {
