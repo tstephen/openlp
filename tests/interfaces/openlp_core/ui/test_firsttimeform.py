@@ -40,8 +40,10 @@ def mocked_set_icon(mock_settings):
     q_thread_patcher = patch('openlp.core.ui.firsttimeform.QtCore.QThread').start()
     mocked_app = MagicMock()
     mocked_app.worker_threads = {}
+    mocked_main_window = MagicMock()
     Registry().remove('application')
     Registry().register('application', mocked_app)
+    Registry().register('main_window', mocked_main_window)
     yield set_icon_patcher
     move_to_thread_patcher.stop()
     set_icon_patcher.stop()

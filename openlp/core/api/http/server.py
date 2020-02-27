@@ -23,16 +23,12 @@ The :mod:`http` module contains the API web server. This is a lightweight web se
 with OpenLP. It uses JSON to communicate with the remotes.
 """
 import logging
-import time
 from secrets import token_hex
 
-from PyQt5 import QtCore, QtWidgets
 from waitress.server import create_server
 
-from openlp.core.api.deploy import download_and_check, download_sha256
 from openlp.core.api.poll import Poller
 from openlp.core.common.applocation import AppLocation
-from openlp.core.common.i18n import UiStrings, translate
 from openlp.core.common.mixins import LogMixin, RegistryProperties
 from openlp.core.common.path import create_paths
 from openlp.core.common.registry import Registry, RegistryBase
@@ -86,9 +82,6 @@ class HttpServer(RegistryBase, RegistryProperties, LogMixin):
         if not Registry().get_flag('no_web_server'):
             worker = HttpWorker()
             run_thread(worker, 'http_server')
-            Registry().register_function('download_website', self.first_time)
-            Registry().register_function('get_website_version', self.website_version)
-        Registry().set_flag('website_version', '0.0')
 
     def bootstrap_post_set_up(self):
         """
@@ -97,66 +90,3 @@ class HttpServer(RegistryBase, RegistryProperties, LogMixin):
         create_paths(AppLocation.get_section_data_path('remotes'))
         self.poller = Poller()
         Registry().register('poller', self.poller)
-
-    def first_time(self):
-        """
-        Import web site code if active
-        """
-        self.application.process_events()
-        progress = DownloadProgressDialog(self)
-        progress.forceShow()
-        self.application.process_events()
-        time.sleep(1)
-        download_and_check(progress)
-        self.application.process_events()
-        time.sleep(1)
-        progress.close()
-        self.application.process_events()
-        self.settings.setValue('remotes/download version', self.version)
-
-    def website_version(self):
-        """
-        Download and save the website version and sha256
-        :return: None
-        """
-        sha256, self.version = download_sha256()
-        Registry().set_flag('website_sha256', sha256)
-        Registry().set_flag('website_version', self.version)
-
-
-class DownloadProgressDialog(QtWidgets.QProgressDialog):
-    """
-    Local class to handle download display based and supporting httputils:get_web_page
-    """
-    def __init__(self, parent):
-        super(DownloadProgressDialog, self).__init__(parent.main_window)
-        self.parent = parent
-        self.setWindowModality(QtCore.Qt.WindowModal)
-        self.setWindowTitle(translate('RemotePlugin', 'Importing Website'))
-        self.setLabelText(UiStrings().StartingImport)
-        self.setCancelButton(None)
-        self.setRange(0, 1)
-        self.setMinimumDuration(0)
-        self.was_cancelled = False
-        self.previous_size = 0
-
-    def update_progress(self, count, block_size):
-        """
-        Calculate and display the download progress.
-        """
-        increment = (count * block_size) - self.previous_size
-        self._increment_progress_bar(None, increment)
-        self.previous_size = count * block_size
-
-    def _increment_progress_bar(self, status_text, increment=1):
-        """
-        Update the wizard progress page.
-
-        :param status_text: Current status information to display.
-        :param increment: The value to increment the progress bar by.
-        """
-        if status_text:
-            self.setText(status_text)
-        if increment > 0:
-            self.setValue(self.value() + increment)
-        self.parent.application.process_events()

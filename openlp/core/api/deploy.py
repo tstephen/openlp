@@ -21,11 +21,16 @@
 """
 Download and "install" the remote web client
 """
+import json
+import logging
 from zipfile import ZipFile
-from PyQt5 import QtWidgets
 
 from openlp.core.common.applocation import AppLocation
-from openlp.core.common.httputils import download_file, get_url_file_size, get_web_page
+from openlp.core.common.httputils import download_file, get_web_page, get_openlp_user_agent
+
+REMOTE_URL = 'https://get.openlp.org/remote/'
+
+log = logging.getLogger(__name__)
 
 
 def deploy_zipfile(app_root_path, zip_name):
@@ -42,28 +47,32 @@ def deploy_zipfile(app_root_path, zip_name):
     web_zip.extractall(app_root_path)
 
 
-def download_sha256():
+def download_version_info():
     """
-    Download the config file to extract the sha256 and version number
+    Download the version information file
     """
-    user_agent = 'OpenLP/' + QtWidgets.QApplication.applicationVersion()
     try:
-        web_config = get_web_page('https://get.openlp.org/webclient/download.cfg', headers={'User-Agent': user_agent})
+        file_contents = get_web_page(REMOTE_URL + 'version.json', headers={'User-Agent': get_openlp_user_agent()})
     except ConnectionError:
         return False
-    if not web_config:
+    if not file_contents:
         return None
-    file_bits = web_config.split()
-    return file_bits[0], file_bits[2]
+    return json.loads(file_contents)
 
 
 def download_and_check(callback=None):
     """
     Download the web site and deploy it.
     """
-    sha256, version = download_sha256()
-    file_size = get_url_file_size('https://get.openlp.org/webclient/site.zip')
+    version_info = download_version_info()
+    if not version_info:
+        log.warning('Unable to access the version information, abandoning download')
+        # Show the user an error message
+        return None
+    file_size = version_info['latest']['size']
     callback.setRange(0, file_size)
-    if download_file(callback, 'https://get.openlp.org/webclient/site.zip',
-                     AppLocation.get_section_data_path('remotes') / 'site.zip'):
-        deploy_zipfile(AppLocation.get_section_data_path('remotes'), 'site.zip')
+    if download_file(callback, REMOTE_URL + '{version}/{filename}'.format(**version_info['latest']),
+                     AppLocation.get_section_data_path('remotes') / 'remote.zip'):
+        deploy_zipfile(AppLocation.get_section_data_path('remotes'), 'remote.zip')
+        return version_info['latest']['version']
+    return None
