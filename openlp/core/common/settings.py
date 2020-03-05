@@ -333,6 +333,7 @@ class Settings(QtCore.QSettings):
         'themes/last directory import': None,
         'themes/theme level': ThemeLevel.Global,
         'themes/wrap footer': False,
+        'themes/item transitions': False,
         'user interface/live panel': True,
         'user interface/live splitter geometry': QtCore.QByteArray(),
         'user interface/lock panel': True,

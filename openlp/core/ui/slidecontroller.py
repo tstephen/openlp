@@ -855,7 +855,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         self.preview_display.set_theme(theme_data, service_item_type=service_item.service_item_type)
         # Set theme for displays
         for display in self.displays:
-            display.set_theme(service_item.get_theme_data(), service_item_type=service_item.service_item_type)
+            display.set_theme(theme_data, service_item_type=service_item.service_item_type)
 
     def _process_item(self, service_item, slide_no):
         """
@@ -1168,20 +1168,9 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
                     Registry().execute('{text}_slide'.format(text=self.service_item.name.lower()),
                                        [self.service_item, self.is_live, row])
             else:
-                # to_display = self.service_item.get_rendered_frame(row)
-                if self.service_item.is_text():
-                    for display in self.displays:
-                        display.go_to_slide(row)
-                    # self.display.text(to_display, row != old_selected_row)
-                else:
-                    if start:
-                        for display in self.displays:
-                            display.load_images(self.service_item.slides)
-                        # self.display.build_html(self.service_item, to_display)
-                    else:
-                        for display in self.displays:
-                            display.go_to_slide(row)
-                        # self.display.image(to_display)
+                for display in self.displays:
+                    display.go_to_slide(row)
+                if not self.service_item.is_text():
                     # reset the store used to display first image
                     self.service_item.bg_image_bytes = None
             self.selected_row = row

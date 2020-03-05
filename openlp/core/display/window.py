@@ -244,7 +244,9 @@ class DisplayWindow(QtWidgets.QWidget, RegistryProperties):
         Add stuff after page initialisation
         """
         js_is_display = str(self.is_display).lower()
-        self.run_javascript('Display.init({do_transitions});'.format(do_transitions=js_is_display))
+        item_transitions = str(self.settings.value('themes/item transitions')).lower()
+        self.run_javascript('Display.init({do_transitions}, {do_item_transitions});'
+                            .format(do_transitions=js_is_display, do_item_transitions=item_transitions))
         wait_for(lambda: self._is_initialised)
         if self.scale != 1:
             self.set_scale(self.scale)
@@ -430,12 +432,6 @@ class DisplayWindow(QtWidgets.QWidget, RegistryProperties):
         if self.is_display:
             Registry().execute('live_display_active')
 
-    def blank_to_theme(self):
-        """
-        Blank to theme
-        """
-        self.run_javascript('Display.blankToTheme();')
-
     def hide_display(self, mode=HideMode.Screen):
         """
         Hide the display by making all layers transparent Store the images so they can be replaced when required
@@ -450,9 +446,11 @@ class DisplayWindow(QtWidgets.QWidget, RegistryProperties):
         if mode == HideMode.Screen:
             self.setVisible(False)
         elif mode == HideMode.Blank:
-            self.run_javascript('Display.blankToBlack();')
+            self.run_javascript('Display.toBlack();')
+        elif mode == HideMode.Theme:
+            self.run_javascript('Display.toTheme();')
         else:
-            self.run_javascript('Display.blankToTheme();')
+            self.run_javascript('Display.toTransparent();')
         if mode != HideMode.Screen:
             if self.isHidden():
                 self.setVisible(True)

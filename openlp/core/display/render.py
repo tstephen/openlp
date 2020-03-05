@@ -812,7 +812,7 @@ class ThemePreviewRenderer(LogMixin, DisplayWindow):
         """
         self.clear_slides()
         self.log_debug('_text_fits_on_slide: 1\n{text}'.format(text=text))
-        self.run_javascript('Display.addTextSlide("v1", "{text}", "Dummy Footer");'
+        self.run_javascript('Display.setTextSlide("{text}");'
                             .format(text=text.replace('"', '\\"')), is_sync=True)
         self.log_debug('_text_fits_on_slide: 2')
         does_text_fits = self.run_javascript('Display.doesContentFit();', is_sync=True)

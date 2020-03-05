@@ -40,7 +40,7 @@ from openlp.core.common.path import path_to_str
 from openlp.core.common.registry import Registry, RegistryBase
 from openlp.core.lib.serviceitem import ItemCapabilities
 from openlp.core.lib.ui import critical_error_message_box
-from openlp.core.ui import DisplayControllerType
+from openlp.core.ui import DisplayControllerType, HideMode
 from openlp.core.ui.media import MediaState, ItemMediaInfo, MediaType, parse_optical_path, parse_devicestream_path, \
     VIDEO_EXT, AUDIO_EXT
 from openlp.core.ui.media.remote import register_views
@@ -454,7 +454,9 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         controller.media_info.is_playing = True
         if not controller.media_info.is_background:
             display = self._define_display(controller)
-            display.setVisible(False)
+            display.hide_display(HideMode.Transparent)
+            controller._set_theme(controller.service_item)
+            display.load_verses([{"verse": "v1", "text": "", "footer": " "}])
         return True
 
     def tick(self, controller):
@@ -466,9 +468,14 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         start_again = False
         if controller.media_info.is_playing and controller.media_info.length > 0:
             if controller.media_info.timer > controller.media_info.length:
-                self.media_stop(controller)
                 if controller.media_info.is_looping_playback:
                     start_again = True
+                else:
+                    self.media_stop(controller)
+            elif controller.media_info.timer > controller.media_info.length - TICK_TIME * 4:
+                if not controller.media_info.is_looping_playback:
+                    display = self._define_display(controller)
+                    display.show_display()
             controller.media_info.timer += TICK_TIME
             seconds = controller.media_info.timer // 1000
             minutes = seconds // 60
@@ -479,7 +486,8 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
             controller.position_label.setText(' %02d:%02d / %02d:%02d' %
                                               (minutes, seconds, total_minutes, total_seconds))
         if start_again:
-            self.media_play(controller, True)
+            controller.seek_slider.setSliderPosition(0)
+            self.media_play(controller, False)
 
     def media_pause_msg(self, msg):
         """
@@ -560,6 +568,8 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
             controller.media_info.is_playing = False
             controller.media_info.timer = 1000
             controller.media_timer = 0
+            display = self._define_display(controller)
+            display.show_display()
 
     def media_volume_msg(self, msg):
         """
@@ -615,6 +625,8 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         """
         self.set_controls_visible(controller, False)
         if controller.controller_type in self.current_media_players:
+            display = self._define_display(controller)
+            display.show_display()
             self.current_media_players[controller.controller_type].reset(controller)
             self.current_media_players[controller.controller_type].set_visible(controller, False)
             del self.current_media_players[controller.controller_type]
