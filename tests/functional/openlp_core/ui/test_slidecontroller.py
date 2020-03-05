@@ -43,6 +43,29 @@ def test_initial_slide_controller(registry):
     assert slide_controller.is_live is False, 'The base slide controller should not be a live controller'
 
 
+def test_slide_selected(settings):
+    """
+    Test the slide selected method
+    """
+    # GIVEN: A new SlideController instance on slide 4 of 10, and is not a command
+    slide_controller = SlideController(None)
+    slide_controller.update_preview = MagicMock()
+    slide_controller.slide_selected_lock = MagicMock()
+    slide_controller.service_item = MagicMock()
+    slide_controller.service_item.is_command.return_value = False
+    slide_controller.preview_widget = MagicMock()
+    slide_controller.preview_widget.slide_count.return_value = 10
+    slide_controller.preview_widget.current_slide_number.return_value = 4
+    mocked_display = MagicMock()
+    slide_controller.displays = [mocked_display]
+
+    # WHEN: The slide_selected method is run
+    slide_controller.slide_selected(True)
+
+    # THEN: The display is updated with the slide number
+    mocked_display.go_to_slide.assert_called_once_with(4)
+
+
 def test_text_service_item_blank(settings):
     """
     Test that loading a text-based service item into the slide controller sets the correct blank menu

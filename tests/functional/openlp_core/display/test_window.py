@@ -32,6 +32,7 @@ from PyQt5 import QtCore
 sys.modules['PyQt5.QtWebEngineWidgets'] = MagicMock()
 
 from openlp.core.display.window import DisplayWindow
+from openlp.core.ui import HideMode
 
 
 @patch('PyQt5.QtWidgets.QVBoxLayout')
@@ -105,6 +106,31 @@ def test_set_scale_initialised(mocked_webengine, mocked_addWidget, mock_settings
 
 @patch('PyQt5.QtWidgets.QVBoxLayout')
 @patch('openlp.core.display.webengine.WebEngineView')
+def test_after_loaded(mocked_webengine, mocked_addWidget, mock_settings):
+    """
+    Test the correct steps are taken when the webview is loaded
+    """
+    # GIVEN: An initialised display window and settings for item transitions returns true
+    display_window = DisplayWindow()
+    display_window.is_display = True
+    mock_settings.value.return_value = True
+    display_window.scale = 2
+    display_window._is_initialised = True
+    display_window.run_javascript = MagicMock()
+    display_window.set_scale = MagicMock()
+    display_window.set_startup_screen = MagicMock()
+
+    # WHEN: after_loaded is run
+    display_window.after_loaded()
+
+    # THEN: The following functions should have been called
+    display_window.run_javascript.assert_called_once_with('Display.init(true, true);')
+    display_window.set_scale.assert_called_once_with(2)
+    display_window.set_startup_screen.assert_called_once()
+
+
+@patch('PyQt5.QtWidgets.QVBoxLayout')
+@patch('openlp.core.display.webengine.WebEngineView')
 @patch.object(time, 'time')
 def test_run_javascript_no_sync_no_wait(mock_time, mocked_webengine, mocked_addWidget, mock_settings):
     """
@@ -146,3 +172,75 @@ def test_run_javascript_sync_no_wait(mock_time, mocked_webengine, mocked_addWidg
     assert result == 1234
     webengine_page.runJavaScript.assert_called_once()
     mock_time.sleep.assert_not_called()
+
+
+@patch('PyQt5.QtWidgets.QVBoxLayout')
+@patch('openlp.core.display.webengine.WebEngineView')
+def test_hide_display_to_screen(mocked_webengine, mocked_addWidget, mock_settings):
+    """
+    Test hide to screen in the hide_display function
+    """
+    # GIVEN:
+    display_window = DisplayWindow()
+    display_window.setVisible = MagicMock()
+
+    # WHEN: Hide display is run with no mode (should default to Screen)
+    display_window.hide_display()
+
+    # THEN: Should hide the display and set the hide mode
+    display_window.setVisible.assert_called_once_with(False)
+    assert display_window.hide_mode == HideMode.Screen
+
+
+@patch('PyQt5.QtWidgets.QVBoxLayout')
+@patch('openlp.core.display.webengine.WebEngineView')
+def test_hide_display_to_blank(mocked_webengine, mocked_addWidget, mock_settings):
+    """
+    Test hide to screen in the hide_display function
+    """
+    # GIVEN:
+    display_window = DisplayWindow()
+    display_window.run_javascript = MagicMock()
+
+    # WHEN: Hide display is run with HideMode.Blank
+    display_window.hide_display(HideMode.Blank)
+
+    # THEN: Should run the correct javascript on the display and set the hide mode
+    display_window.run_javascript.assert_called_once_with('Display.toBlack();')
+    assert display_window.hide_mode == HideMode.Blank
+
+
+@patch('PyQt5.QtWidgets.QVBoxLayout')
+@patch('openlp.core.display.webengine.WebEngineView')
+def test_hide_display_to_theme(mocked_webengine, mocked_addWidget, mock_settings):
+    """
+    Test hide to screen in the hide_display function
+    """
+    # GIVEN:
+    display_window = DisplayWindow()
+    display_window.run_javascript = MagicMock()
+
+    # WHEN: Hide display is run with HideMode.Theme
+    display_window.hide_display(HideMode.Theme)
+
+    # THEN: Should run the correct javascript on the display and set the hide mode
+    display_window.run_javascript.assert_called_once_with('Display.toTheme();')
+    assert display_window.hide_mode == HideMode.Theme
+
+
+@patch('PyQt5.QtWidgets.QVBoxLayout')
+@patch('openlp.core.display.webengine.WebEngineView')
+def test_hide_display_to_transparent(mocked_webengine, mocked_addWidget, mock_settings):
+    """
+    Test hide to screen in the hide_display function
+    """
+    # GIVEN:
+    display_window = DisplayWindow()
+    display_window.run_javascript = MagicMock()
+
+    # WHEN: Hide display is run with HideMode.Transparent
+    display_window.hide_display(HideMode.Transparent)
+
+    # THEN: Should run the correct javascript on the display and set the hide mode
+    display_window.run_javascript.assert_called_once_with('Display.toTransparent();')
+    assert display_window.hide_mode == HideMode.Transparent

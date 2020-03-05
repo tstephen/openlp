@@ -69,6 +69,9 @@ class ThemesTab(SettingsTab):
         self.wrap_footer_check_box = QtWidgets.QCheckBox(self.universal_group_box)
         self.wrap_footer_check_box.setObjectName('wrap_footer_check_box')
         self.universal_group_box_layout.addWidget(self.wrap_footer_check_box)
+        self.item_transitions_check_box = QtWidgets.QCheckBox(self.universal_group_box)
+        self.item_transitions_check_box.setObjectName('item_transitions_check_box')
+        self.universal_group_box_layout.addWidget(self.item_transitions_check_box)
         self.left_layout.addWidget(self.universal_group_box)
         self.left_layout.addStretch()
         self.level_group_box = QtWidgets.QGroupBox(self.right_column)
@@ -115,6 +118,7 @@ class ThemesTab(SettingsTab):
         self.global_group_box.setTitle(translate('OpenLP.ThemesTab', 'Global Theme'))
         self.universal_group_box.setTitle(translate('OpenLP.ThemesTab', 'Universal Settings'))
         self.wrap_footer_check_box.setText(translate('OpenLP.ThemesTab', '&Wrap footer text'))
+        self.item_transitions_check_box.setText(translate('OpenLP.ThemesTab', '&Transition between service items'))
         self.level_group_box.setTitle(translate('OpenLP.ThemesTab', 'Theme Level'))
         self.song_level_radio_button.setText(translate('OpenLP.ThemesTab', 'S&ong Level'))
         self.song_level_label.setText(
@@ -139,6 +143,7 @@ class ThemesTab(SettingsTab):
         self.theme_level = self.settings.value('theme level')
         self.global_theme = self.settings.value('global theme')
         self.wrap_footer_check_box.setChecked(self.settings.value('wrap footer'))
+        self.item_transitions_check_box.setChecked(self.settings.value('item transitions'))
         self.settings.endGroup()
         if self.theme_level == ThemeLevel.Global:
             self.global_level_radio_button.setChecked(True)
@@ -155,6 +160,7 @@ class ThemesTab(SettingsTab):
         self.settings.setValue('theme level', self.theme_level)
         self.settings.setValue('global theme', self.global_theme)
         self.settings.setValue('wrap footer', self.wrap_footer_check_box.isChecked())
+        self.settings.setValue('item transitions', self.item_transitions_check_box.isChecked())
         self.settings.endGroup()
         self.renderer.set_theme_level(self.theme_level)
         if self.tab_visited:
