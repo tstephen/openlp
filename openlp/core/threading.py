@@ -32,6 +32,7 @@ class ThreadWorker(QtCore.QObject, LogMixin):
     The :class:`~openlp.core.threading.ThreadWorker` class provides a base class for all worker objects
     """
     quit = QtCore.pyqtSignal()
+    error = QtCore.pyqtSignal(str, str)
 
     def start(self):
         """
@@ -51,6 +52,7 @@ def run_thread(worker, thread_name, can_start=True):
     if not thread_name:
         raise ValueError('A thread_name is required when calling the "run_thread" function')
     application = Registry().get('application')
+    main_window = Registry().get('main_window')
     if thread_name in application.worker_threads:
         raise KeyError('A thread with the name "{}" has already been created, please use another'.format(thread_name))
     # Create the thread and add the thread and the worker to the parent
@@ -65,6 +67,7 @@ def run_thread(worker, thread_name, can_start=True):
     thread.started.connect(worker.start)
     worker.quit.connect(thread.quit)
     worker.quit.connect(worker.deleteLater)
+    worker.error.connect(main_window.error_message)
     thread.finished.connect(thread.deleteLater)
     thread.finished.connect(make_remove_thread(thread_name))
     if can_start:
