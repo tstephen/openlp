@@ -196,6 +196,8 @@ class Settings(QtCore.QSettings):
         'api/ip address': '0.0.0.0',
         'api/thumbnails': True,
         'api/download version': '0.0',
+        'api/last version test': '',
+        'api/update check': True,
         'bibles/db type': 'sqlite',
         'bibles/db username': '',
         'bibles/db password': '',

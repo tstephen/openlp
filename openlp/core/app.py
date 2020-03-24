@@ -37,18 +37,19 @@ from traceback import format_exception
 
 from PyQt5 import QtCore, QtWebEngineWidgets, QtWidgets  # noqa
 
-from openlp.core.state import State
+from openlp.core.api.deploy import check_for_remote_update
 from openlp.core.common import is_macosx, is_win
 from openlp.core.common.applocation import AppLocation
-from openlp.core.common.mixins import LogMixin
-from openlp.core.loader import loader
 from openlp.core.common.i18n import LanguageManager, UiStrings, translate
+from openlp.core.common.mixins import LogMixin
 from openlp.core.common.path import create_paths
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.display.screens import ScreenList
+from openlp.core.loader import loader
 from openlp.core.resources import qInitResources
 from openlp.core.server import Server
+from openlp.core.state import State
 from openlp.core.ui.exceptionform import ExceptionForm
 from openlp.core.ui.firsttimeform import FirstTimeForm
 from openlp.core.ui.firsttimelanguageform import FirstTimeLanguageForm
@@ -140,6 +141,8 @@ class OpenLP(QtCore.QObject, LogMixin):
             self.main_window.first_time()
         if self.settings.value('core/update check'):
             check_for_update(self.main_window)
+        if self.settings.value('api/update check'):
+            check_for_remote_update(self.main_window)
         self.main_window.is_display_blank()
         Registry().execute('bootstrap_completion')
         return self.exec()
