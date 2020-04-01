@@ -73,3 +73,53 @@ def test_controller_direction_calls_service_manager(flask_client, settings):
     res = flask_client.post('/api/v2/controller/progress', json=dict(action='next'))
     assert res.status_code == 204
     fake_live_controller.slidecontroller_live_next.emit.assert_called_once()
+
+
+# Themes tests
+def test_controller_get_theme_level_returns_valid_theme_level(flask_client, settings):
+    res = flask_client.get('/api/v2/controller/theme-level').get_json()
+    assert res == ('global' or 'service' or 'song')
+
+
+def test_controller_set_theme_level_aborts_if_no_theme_level(flask_client, settings):
+    res = flask_client.post('/api/v2/controller/theme-level')
+    assert res.status_code == 400
+
+
+def test_controller_set_theme_level_aborts_if_invalid_theme_level(flask_client, settings):
+    res = flask_client.post('/api/v2/controller/theme-level', json=dict(level='foo'))
+    assert res.status_code == 400
+
+
+def test_controller_set_theme_level_sets_theme_level(flask_client, settings):
+    res = flask_client.post('/api/v2/controller/theme-level', json=dict(level='service'))
+    assert res.status_code == 204
+    assert Registry().get('settings').value('themes/theme level') == 2
+
+
+def test_controller_get_themes_retrieves_themes_list(flask_client, settings):
+    Registry().register('theme_manager', MagicMock())
+    Registry().register('service_manager', MagicMock())
+    res = flask_client.get('api/v2/controller/themes').get_json()
+    assert type(res) is list
+
+
+def test_controller_set_theme_does_not_accept_get(flask_client):
+    res = flask_client.get('/api/v2/controller/theme')
+    assert res.status_code == 405
+
+
+def test_controller_set_theme_aborts_if_no_theme(flask_client, settings):
+    res = flask_client.post('/api/v2/controller/theme')
+    assert res.status_code == 400
+
+
+def test_controller_set_theme_sets_theme(flask_client, settings):
+    res = flask_client.post('/api/v2/controller/theme', json=dict(theme='test'))
+    assert res.status_code == 204
+
+
+def test_controller_set_theme_returns_song_exception(flask_client, settings):
+    Registry().get('settings').setValue('themes/theme level', 3)
+    res = flask_client.post('/api/v2/controller/theme', json=dict(theme='test'))
+    assert res.status_code == 501
