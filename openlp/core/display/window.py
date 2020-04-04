@@ -220,6 +220,9 @@ class DisplayWindow(QtWidgets.QWidget, RegistryProperties):
         if path_to_str(image).startswith(':'):
             image = self.openlp_splash_screen_path
         image_uri = image.as_uri()
+        # if set to hide logo on startup, do not send the logo
+        if self.settings.value('core/logo hide on startup'):
+            image_uri = ''
         self.run_javascript('Display.setStartupSplashScreen("{bg_color}", "{image}");'.format(bg_color=bg_color,
                                                                                               image=image_uri))
 
@@ -423,10 +426,9 @@ class DisplayWindow(QtWidgets.QWidget, RegistryProperties):
             if len(ScreenList()) == 1 and not self.settings.value('core/display on monitor'):
                 return
         self.run_javascript('Display.show();')
-        # Check if setting for hiding logo on startup is enabled.
-        # If it is, display should remain hidden, otherwise logo is shown. (from def setup)
-        if self.isHidden() and not self.settings.value('core/logo hide on startup'):
+        if self.isHidden():
             self.setVisible(True)
+            self.webview.setVisible(True)
         self.hide_mode = None
         # Trigger actions when display is active again.
         if self.is_display:
@@ -443,6 +445,10 @@ class DisplayWindow(QtWidgets.QWidget, RegistryProperties):
             # Only make visible on single monitor setup if setting enabled.
             if len(ScreenList()) == 1 and not self.settings.value('core/display on monitor'):
                 return
+        # Use Screen mode if Transparent is disallowed via setting
+        if self.settings.value('advanced/disable transparent display') and mode == HideMode.Transparent:
+            mode = HideMode.Screen
+        # Now update display to the selected mode
         if mode == HideMode.Screen:
             self.setVisible(False)
         elif mode == HideMode.Blank:
