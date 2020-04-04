@@ -176,13 +176,61 @@ def test_run_javascript_sync_no_wait(mock_time, mocked_webengine, mocked_addWidg
 
 @patch('PyQt5.QtWidgets.QVBoxLayout')
 @patch('openlp.core.display.webengine.WebEngineView')
+@patch('openlp.core.common.registry.Registry.execute')
+@patch('openlp.core.display.screens.ScreenList')
+def test_show_display(mocked_screenlist, mocked_registry_execute, mocked_webengine, mocked_addWidget, mock_settings):
+    """
+    Test show_display function
+    """
+    # GIVEN: Display window as the active display
+    display_window = DisplayWindow()
+    display_window.is_display = True
+    display_window.isHidden = MagicMock(return_value=True)
+    display_window.setVisible = MagicMock()
+    display_window.run_javascript = MagicMock()
+    mocked_screenlist.screens = [1, 2]
+
+    # WHEN: Show display is run
+    display_window.show_display()
+
+    # THEN: Should show the display and set the hide mode to none
+    display_window.setVisible.assert_called_once_with(True)
+    display_window.run_javascript.assert_called_once_with('Display.show();')
+    mocked_registry_execute.assert_called_once_with('live_display_active')
+    assert display_window.hide_mode is None
+
+
+@patch('PyQt5.QtWidgets.QVBoxLayout')
+@patch('openlp.core.display.webengine.WebEngineView')
+@patch('openlp.core.display.window.ScreenList')
+def test_show_display_no_display(mocked_screenlist, mocked_webengine, mocked_addWidget, mock_settings):
+    """
+    Test show_display function when no displays are available
+    """
+    # GIVEN: A Display window, one screen and core/display on monitor disabled
+    display_window = DisplayWindow()
+    display_window.hide_mode = HideMode.Screen
+    display_window.is_display = True
+    mocked_screenlist.return_value = [1]
+    mock_settings.value.return_value = False
+
+    # WHEN: Show display is run
+    display_window.show_display()
+
+    # THEN: Hide mode should still be screen
+    assert display_window.hide_mode == HideMode.Screen
+
+
+@patch('PyQt5.QtWidgets.QVBoxLayout')
+@patch('openlp.core.display.webengine.WebEngineView')
 def test_hide_display_to_screen(mocked_webengine, mocked_addWidget, mock_settings):
     """
     Test hide to screen in the hide_display function
     """
-    # GIVEN:
+    # GIVEN: Display window and setting advanced/disable transparent display = False
     display_window = DisplayWindow()
     display_window.setVisible = MagicMock()
+    mock_settings.value.return_value = False
 
     # WHEN: Hide display is run with no mode (should default to Screen)
     display_window.hide_display()
@@ -198,9 +246,10 @@ def test_hide_display_to_blank(mocked_webengine, mocked_addWidget, mock_settings
     """
     Test hide to screen in the hide_display function
     """
-    # GIVEN:
+    # GIVEN: Display window and setting advanced/disable transparent display = False
     display_window = DisplayWindow()
     display_window.run_javascript = MagicMock()
+    mock_settings.value.return_value = False
 
     # WHEN: Hide display is run with HideMode.Blank
     display_window.hide_display(HideMode.Blank)
@@ -216,9 +265,10 @@ def test_hide_display_to_theme(mocked_webengine, mocked_addWidget, mock_settings
     """
     Test hide to screen in the hide_display function
     """
-    # GIVEN:
+    # GIVEN: Display window and setting advanced/disable transparent display = False
     display_window = DisplayWindow()
     display_window.run_javascript = MagicMock()
+    mock_settings.value.return_value = False
 
     # WHEN: Hide display is run with HideMode.Theme
     display_window.hide_display(HideMode.Theme)
@@ -234,13 +284,55 @@ def test_hide_display_to_transparent(mocked_webengine, mocked_addWidget, mock_se
     """
     Test hide to screen in the hide_display function
     """
-    # GIVEN:
+    # GIVEN: Display window and setting advanced/disable transparent display = False
     display_window = DisplayWindow()
     display_window.run_javascript = MagicMock()
+    mock_settings.value.return_value = False
 
     # WHEN: Hide display is run with HideMode.Transparent
     display_window.hide_display(HideMode.Transparent)
 
     # THEN: Should run the correct javascript on the display and set the hide mode
-    display_window.run_javascript.assert_called_once_with('Display.toTransparent();')
     assert display_window.hide_mode == HideMode.Transparent
+    display_window.run_javascript.assert_called_once_with('Display.toTransparent();')
+
+
+@patch('PyQt5.QtWidgets.QVBoxLayout')
+@patch('openlp.core.display.webengine.WebEngineView')
+def test_hide_transparent_to_screen(mocked_webengine, mocked_addWidget, mock_settings):
+    """
+    Test that when going transparent, and the disable transparent setting is enabled,
+    the screen mode should be used.
+    """
+    # GIVEN: Display window and setting advanced/disable transparent display = True
+    display_window = DisplayWindow()
+    display_window.setVisible = MagicMock()
+    mock_settings.value.return_value = True
+
+    # WHEN: Hide display is run with HideMode.Transparent
+    display_window.hide_display(HideMode.Transparent)
+
+    # THEN: Should run the correct javascript on the display and set the hide mode
+    display_window.setVisible.assert_called_once_with(False)
+    assert display_window.hide_mode == HideMode.Screen
+
+
+@patch('PyQt5.QtWidgets.QVBoxLayout')
+@patch('openlp.core.display.webengine.WebEngineView')
+@patch('openlp.core.display.window.ScreenList')
+def test_hide_display_no_display(mocked_screenlist, mocked_webengine, mocked_addWidget, mock_settings):
+    """
+    Test show_display function when no displays are available
+    """
+    # GIVEN: A Display window, one screen and core/display on monitor disabled
+    display_window = DisplayWindow()
+    display_window.hide_mode = None
+    display_window.is_display = True
+    mocked_screenlist.return_value = [1]
+    mock_settings.value.return_value = False
+
+    # WHEN: Hide display is run
+    display_window.hide_display(HideMode.Screen)
+
+    # THEN: Hide mode should still be none
+    assert display_window.hide_mode is None

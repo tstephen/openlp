@@ -178,6 +178,9 @@ class AdvancedTab(SettingsTab):
         self.alternate_rows_check_box = QtWidgets.QCheckBox(self.display_workaround_group_box)
         self.alternate_rows_check_box.setObjectName('alternate_rows_check_box')
         self.display_workaround_layout.addWidget(self.alternate_rows_check_box)
+        self.allow_transparent_display_check_box = QtWidgets.QCheckBox(self.display_workaround_group_box)
+        self.allow_transparent_display_check_box.setObjectName('allow_transparent_display_check_box')
+        self.display_workaround_layout.addWidget(self.allow_transparent_display_check_box)
         self.right_layout.addWidget(self.display_workaround_group_box)
         # Default service name
         self.service_name_group_box = QtWidgets.QGroupBox(self.right_column)
@@ -324,6 +327,8 @@ class AdvancedTab(SettingsTab):
         self.ignore_aspect_ratio_check_box.setText(translate('OpenLP.AdvancedTab', 'Ignore Aspect Ratio'))
         self.x11_bypass_check_box.setText(translate('OpenLP.AdvancedTab', 'Bypass X11 Window Manager'))
         self.alternate_rows_check_box.setText(translate('OpenLP.AdvancedTab', 'Use alternating row colours in lists'))
+        self.allow_transparent_display_check_box.setText(
+            translate('OpenLP.AdvancedTab', 'Disable display transparency'))
         # Slide Limits
         self.slide_group_box.setTitle(translate('OpenLP.GeneralTab', 'Service Item Slide Limits'))
         self.slide_label.setText(translate('OpenLP.GeneralTab', 'Behavior of next/previous on the last/first slide:'))
@@ -377,6 +382,7 @@ class AdvancedTab(SettingsTab):
         self.alternate_rows_check_box.blockSignals(True)
         self.alternate_rows_check_box.setChecked(self.settings.value('alternate rows'))
         self.alternate_rows_check_box.blockSignals(False)
+        self.allow_transparent_display_check_box.setChecked(self.settings.value('disable transparent display'))
         if self.slide_limits == SlideLimits.End:
             self.end_slide_radio_button.setChecked(True)
         elif self.slide_limits == SlideLimits.Wrap:
@@ -422,6 +428,7 @@ class AdvancedTab(SettingsTab):
         self.settings.setValue('enable exit confirmation', self.enable_auto_close_check_box.isChecked())
         self.settings.setValue('hide mouse', self.hide_mouse_check_box.isChecked())
         self.settings.setValue('alternate rows', self.alternate_rows_check_box.isChecked())
+        self.settings.setValue('disable transparent display', self.allow_transparent_display_check_box.isChecked())
         self.settings.setValue('slide limits', self.slide_limits)
         self.settings.setValue('ignore aspect ratio', self.ignore_aspect_ratio_check_box.isChecked())
         if self.x11_bypass_check_box.isChecked() != self.settings.value('x11 bypass wm'):

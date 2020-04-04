@@ -137,6 +137,7 @@ class Settings(QtCore.QSettings):
     __default_settings__ = {
         'settings/version': 0,
         'advanced/add page break': False,
+        'advanced/disable transparent display': True,
         'advanced/alternate rows': not is_win(),
         'advanced/autoscrolling': {'dist': 1, 'pos': 0},
         'advanced/current media plugin': -1,
