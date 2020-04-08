@@ -44,7 +44,7 @@ class ApiTab(SettingsTab):
     def __init__(self, parent):
         self.icon_path = UiIcons().remote
         advanced_translated = translate('OpenLP.APITab', 'API')
-        self.master_version = None
+        self._master_version = None
         super(ApiTab, self).__init__(parent, 'api', advanced_translated)
 
     def setup_ui(self):
@@ -192,7 +192,37 @@ class ApiTab(SettingsTab):
         self.password_label.setText(translate('RemotePlugin.RemoteTab', 'Password:'))
         self.current_version_label.setText(translate('RemotePlugin.RemoteTab', 'Current version:'))
         self.master_version_label.setText(translate('RemotePlugin.RemoteTab', 'Latest version:'))
-        self.unknown_version = translate('RemotePlugin.RemoteTab', '(unknown)')
+        self._unknown_version = translate('RemotePlugin.RemoteTab', '(unknown)')
+
+    @property
+    def master_version(self):
+        """
+        Property getter for the remote master version
+        """
+        return self._master_version
+
+    @master_version.setter
+    def master_version(self, value):
+        """
+        Property setter for the remote master version
+        """
+        self._master_version = value
+        self.master_version_value.setText(self._master_version or self._unknown_version)
+        self.upgrade_button.setEnabled(self.can_enable_upgrade_button())
+
+    def can_enable_upgrade_button(self):
+        """
+        Do a couple checks to set the upgrade button state
+        """
+        return self.master_version_value.text() != self._unknown_version and \
+            self.master_version_value.text() != self.current_version_value.text()
+
+    def set_master_version(self):
+        """
+        Check if the master version is not set, and set it to None to invoke the "unknown version" label
+        """
+        if not self._master_version:
+            self.master_version = None
 
     def set_urls(self):
         """
@@ -222,13 +252,6 @@ class ApiTab(SettingsTab):
                 break
         return ip_address
 
-    def can_enable_upgrade_button(self):
-        """
-        Do a couple checks to set the upgrade button state
-        """
-        return self.master_version_value.text() != self.unknown_version and \
-            self.master_version_value.text() != self.current_version_value.text()
-
     def load(self):
         """
         Load the configuration and update the server configuration if necessary
@@ -243,8 +266,7 @@ class ApiTab(SettingsTab):
         self.user_id.setText(self.settings.value(self.settings_section + '/user id'))
         self.password.setText(self.settings.value(self.settings_section + '/password'))
         self.current_version_value.setText(self.settings.value(self.settings_section + '/download version'))
-        self.master_version_value.setText(self.master_version or self.unknown_version)
-        self.upgrade_button.setEnabled(self.can_enable_upgrade_button())
+        self.set_master_version()
         self.set_urls()
 
     def save(self):
@@ -287,8 +309,7 @@ class ApiTab(SettingsTab):
         app.process_events()
         version_info = download_version_info()
         app.process_events()
-        self.master_version_value.setText(version_info['latest']['version'])
-        self.upgrade_button.setEnabled(self.can_enable_upgrade_button())
+        self.master_version = version_info['latest']['version']
         app.process_events()
         app.set_normal_cursor()
         app.process_events()

@@ -32,6 +32,7 @@ from tempfile import gettempdir
 
 from PyQt5 import QtCore, QtWidgets
 
+from openlp.core.api.deploy import get_latest_size, download_and_check
 from openlp.core.common import trace_error_handler
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.httputils import DownloadWorker, download_file, get_url_file_size, get_web_page
@@ -113,13 +114,13 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
         """
         Returns the id of the next FirstTimePage to go to based on enabled plugins
         """
-        if FirstTimePage.Download < self.currentId() < FirstTimePage.Songs and self.songs_check_box.isChecked():
+        if FirstTimePage.Remote < self.currentId() < FirstTimePage.Songs and self.songs_check_box.isChecked():
             # If the songs plugin is enabled then go to the songs page
             return FirstTimePage.Songs
-        elif FirstTimePage.Download < self.currentId() < FirstTimePage.Bibles and self.bible_check_box.isChecked():
+        elif FirstTimePage.Remote < self.currentId() < FirstTimePage.Bibles and self.bible_check_box.isChecked():
             # Otherwise, if the Bibles plugin is enabled then go to the Bibles page
             return FirstTimePage.Bibles
-        elif FirstTimePage.Download < self.currentId() < FirstTimePage.Themes:
+        elif FirstTimePage.Remote < self.currentId() < FirstTimePage.Themes:
             # Otherwise, if the current page is somewhere between the Welcome and the Themes pages, go to the themes
             return FirstTimePage.Themes
         else:
@@ -135,7 +136,7 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
             if not self.has_web_access:
                 return FirstTimePage.NoInternet
             else:
-                return FirstTimePage.Songs
+                return FirstTimePage.Remote
         elif self.currentId() == FirstTimePage.Progress:
             return -1
         elif self.currentId() == FirstTimePage.NoInternet:
@@ -237,6 +238,7 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
         self.has_run_wizard = self.settings.value('core/has run wizard')
         create_paths(Path(gettempdir(), 'openlp'))
         self.theme_combo_box.clear()
+        self.remote_page.can_download_remote = False
         self.button(QtWidgets.QWizard.CustomButton1).setVisible(False)
         if self.has_run_wizard:
             self.songs_check_box.setChecked(self.plugin_manager.get_plugin_by_name('songs').is_active())
@@ -418,6 +420,9 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
             for item in self.themes_list_widget.selectedItems():
                 size = get_url_file_size('{url}{file}'.format(url=self.themes_url, file=item.file_name))
                 self.max_progress += size
+            # If we're downloading the remote, add it in here too
+            if self.remote_page.can_download_remote:
+                self.max_progress += get_latest_size()
         except urllib.error.URLError:
             trace_error_handler(log)
             critical_error_message_box(translate('OpenLP.FirstTimeWizard', 'Download Error'),
@@ -517,6 +522,15 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
             if not download_file(self, '{url}{file}'.format(url=self.themes_url, file=item.file_name),
                                  themes_destination_path / item.file_name, item.sha256):
                 missed_files.append('Theme: name'.format(name=item.file_name))
+        # Remote
+        if self.remote_page.can_download_remote:
+            self._increment_progress_bar(self.downloading.format(name='Web Remote'), 0)
+            self.previous_size = 0
+            remote_version = download_and_check(self, can_update_range=False)
+            if remote_version:
+                self.settings.setValue('api/download version', remote_version)
+            else:
+                missed_files.append('Web Remote')
         if missed_files:
             file_list = ''
             for entry in missed_files:

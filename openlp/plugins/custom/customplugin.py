@@ -61,7 +61,7 @@ class CustomPlugin(Plugin):
 
     @staticmethod
     def about():
-        about_text = translate('CustomPlugin', '<strong>Custom Slide Plugin </strong><br />The custom slide plugin '
+        about_text = translate('CustomPlugin', '<strong>Custom Slide Plugin</strong><br />The custom slide plugin '
                                'provides the ability to set up custom text slides that can be displayed on the screen '
                                'the same way songs are. This plugin provides greater freedom over the songs plugin.')
         return about_text

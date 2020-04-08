@@ -622,8 +622,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
 
     def on_new_version(self, version):
         """
-        Notifies the user that a newer version of OpenLP is available.
-        Triggered by delay thread and cannot display popup.
+        Notifies the user that a newer version of OpenLP is available. Triggered by delay thread and cannot display
+        popup.
 
         :param version: The Version to be displayed.
         """
@@ -631,6 +631,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
                                  'currently running version {current}). \n\nYou can download the latest version from '
                                  'https://openlp.org/.').format(new=version, current=get_version()[u'full'])
         QtWidgets.QMessageBox.question(self, translate('OpenLP.MainWindow', 'OpenLP Version Updated'), version_text)
+
+    def on_new_remote_version(self, version):
+        """
+        Notifies the user that a newer version of the web remote is available. Triggered by delay thread and cannot
+        display popup.
+
+        :param version: The Version to be displayed.
+        """
+        version_text = translate('OpenLP.MainWindow', 'Version {version} of the web remote is now available for '
+                                 'download.\nTo download this version, go to the Remote settings and click the Upgrade '
+                                 'button.').format(version=version)
+        self.information_message(translate('OpenLP.MainWindow', 'New Web Remote Version Available'), version_text)
 
     def show(self):
         """

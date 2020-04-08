@@ -29,7 +29,7 @@ from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.common.registry import Registry
 from openlp.core.ui.firsttimeform import FirstTimeForm, ThemeListWidgetItem
-from openlp.core.ui.firsttimewizard import ThemeListWidget
+from openlp.core.ui.firsttimewizard import RemotePage, ThemeListWidget
 
 
 INVALID_CONFIG = """
@@ -367,6 +367,50 @@ def test_on_projectors_check_box_unchecked(mock_settings):
     mock_settings.setValue.assert_called_once_with('projector/show after wizard', True)
 
 
+def test_remote_page_get_can_download_remote(ftf_app):
+    """
+    Test that the `can_download_remote` property returns the correct value
+    """
+    # GIVEN: A RemotePage object with a mocked out download_checkbox
+    remote_page = RemotePage(None)
+    remote_page.download_checkbox = MagicMock(**{"isChecked.return_value": True})
+
+    # WHEN: The can_download_remote property is accessed
+    result = remote_page.can_download_remote
+
+    # THEN: The result should be True
+    assert result is True
+
+
+def test_remote_page_set_can_download_remote(ftf_app):
+    """
+    Test that the `can_download_remote` property sets the correct value
+    """
+    # GIVEN: A RemotePage object with a mocked out download_checkbox
+    remote_page = RemotePage(None)
+    remote_page.download_checkbox = MagicMock()
+
+    # WHEN: The can_download_remote property is set
+    remote_page.can_download_remote = False
+
+    # THEN: The result should be True
+    remote_page.download_checkbox.setChecked.assert_called_once_with(False)
+
+
+def test_remote_page_set_can_download_remote_not_bool(ftf_app):
+    """
+    Test that the `can_download_remote` property throws an exception when the value is not a boolean
+    """
+    # GIVEN: A RemotePage object with a mocked out download_checkbox
+    remote_page = RemotePage(None)
+    remote_page.download_checkbox = MagicMock()
+
+    # WHEN: The can_download_remote property is set
+    # THEN: An exception is thrown
+    with pytest.raises(TypeError, match='Must be a bool'):
+        remote_page.can_download_remote = 'not a bool'
+
+
 def test_theme_list_widget_resize(ftf_app):
     """
     Test that the resizeEvent() method in the ThemeListWidget works correctly
@@ -382,5 +426,3 @@ def test_theme_list_widget_resize(ftf_app):
 
     # THEN: Check that the correct calculations were done
     mocked_setGridSize.assert_called_once_with(QtCore.QSize(149, 140))
-
-    # THEN: everything resizes correctly
