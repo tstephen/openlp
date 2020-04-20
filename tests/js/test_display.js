@@ -109,9 +109,24 @@ describe("The Display object", function () {
   it("should initialise Reveal when init is called", function () {
     spyOn(Reveal, "initialize");
     document.body.innerHTML = "";
-    _createDiv({"id": "global-background"});
     Display.init();
     expect(Reveal.initialize).toHaveBeenCalled();
+  });
+
+  it("should have checkerboard class when init is called when not display", function () {
+    spyOn(Reveal, "initialize");
+    document.body.innerHTML = "";
+    document.body.classList = "";
+    Display.init(false);
+    expect(document.body.classList.contains('checkerboard')).toEqual(true);
+  });
+
+  it("should not have checkerboard class when init is called when is a display", function () {
+    spyOn(Reveal, "initialize");
+    document.body.innerHTML = "";
+    document.body.classList = "";
+    Display.init(true);
+    expect(document.body.classList.contains('checkerboard')).toEqual(false);
   });
 
   it("should have a reinit() method", function () {
@@ -164,7 +179,6 @@ describe("Transitions", function () {
     document.body.innerHTML = "";
     _createDiv({"class": "slides"});
     _createDiv({"class": "footer"});
-    _createDiv({"id": "global-background"});
     Display._slides = {};
   });
   afterEach(function() {
@@ -563,7 +577,6 @@ describe("Display.setTextSlides", function () {
     var footer_container = _createDiv({"class": "footer"});
     Display._slidesContainer = slides_container;
     Display._footerContainer = footer_container;
-    _createDiv({"id": "global-background"});
     Display._slides = {};
   });
 
@@ -734,7 +747,6 @@ describe("Display.setImageSlides", function () {
     var footer_container = _createDiv({"class": "footer"});
     Display._slidesContainer = slides_container;
     Display._footerContainer = footer_container;
-    _createDiv({"id": "global-background"});
     Display._slides = {};
   });
 
@@ -762,7 +774,6 @@ describe("Display.setVideo", function () {
     document.body.innerHTML = "";
     var slides_container = _createDiv({"class": "slides"});
     Display._slidesContainer = slides_container;
-    _createDiv({"id": "global-background"});
     Display._slides = {};
   });
 
