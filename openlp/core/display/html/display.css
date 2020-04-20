@@ -13,8 +13,13 @@
 }
 
 body {
-  background: transparent !important;
+  background: transparent;
   color: rgb(255, 255, 255) !important;
+}
+
+body.checkerboard {
+  background: url('checkerboard.png');
+  background-size: 100%;
 }
 
 sup {

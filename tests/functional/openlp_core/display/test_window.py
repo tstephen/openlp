@@ -32,6 +32,8 @@ from PyQt5 import QtCore
 sys.modules['PyQt5.QtWebEngineWidgets'] = MagicMock()
 
 from openlp.core.display.window import DisplayWindow
+from openlp.core.common.enum import ServiceItemType
+from openlp.core.lib.theme import Theme
 from openlp.core.ui import HideMode
 
 
@@ -172,6 +174,89 @@ def test_run_javascript_sync_no_wait(mock_time, mocked_webengine, mocked_addWidg
     assert result == 1234
     webengine_page.runJavaScript.assert_called_once()
     mock_time.sleep.assert_not_called()
+
+
+@patch('PyQt5.QtWidgets.QVBoxLayout')
+@patch('openlp.core.display.webengine.WebEngineView')
+def test_set_theme_is_display_video(mocked_webengine, mocked_addWidget, mock_settings):
+    """
+    Test the set_theme function
+    """
+    # GIVEN: A display window and a video theme
+    display_window = DisplayWindow()
+    display_window.is_display = True
+    display_window.run_javascript = MagicMock()
+    theme = Theme()
+    theme.background_type = 'video'
+    result_theme = Theme()
+    result_theme.background_type = 'transparent'
+    result_theme = result_theme.export_theme(is_js=True)
+
+    # WHEN: The set theme function is called
+    display_window.set_theme(theme, is_sync=False, service_item_type=ServiceItemType.Text)
+
+    # THEN: The final theme should be transparent
+    display_window.run_javascript.assert_called_once_with('Display.setTheme({theme});'.format(theme=result_theme),
+                                                          is_sync=False)
+
+
+@patch('PyQt5.QtWidgets.QVBoxLayout')
+@patch('openlp.core.display.webengine.WebEngineView')
+def test_set_theme_not_display_video(mocked_webengine, mocked_addWidget, mock_settings):
+    """
+    Test the set_theme function
+    """
+    # GIVEN: A display window and a video theme
+    display_window = DisplayWindow()
+    display_window.is_display = False
+    display_window.run_javascript = MagicMock()
+    theme = Theme()
+    theme.background_type = 'video'
+    theme.background_border_color = 'border_colour'
+    result_theme = Theme()
+    result_theme.background_type = 'solid'
+    result_theme.background_border_color = 'border_colour'
+    result_theme.background_start_color = 'border_colour'
+    result_theme.background_end_color = 'border_colour'
+    result_theme.background_main_color = 'border_colour'
+    result_theme.background_footer_color = 'border_colour'
+    result_theme.background_color = 'border_colour'
+    result_theme = result_theme.export_theme(is_js=True)
+
+    # WHEN: The set theme function is called
+    display_window.set_theme(theme, is_sync=False, service_item_type=False)
+
+    # THEN: The final theme should use 'border_colour' for it's colour values
+    display_window.run_javascript.assert_called_once_with('Display.setTheme({theme});'.format(theme=result_theme),
+                                                          is_sync=False)
+
+
+@patch('PyQt5.QtWidgets.QVBoxLayout')
+@patch('openlp.core.display.webengine.WebEngineView')
+def test_set_theme_not_display_live(mocked_webengine, mocked_addWidget, mock_settings):
+    """
+    Test the set_theme function
+    """
+    # GIVEN: A display window and a video theme
+    display_window = DisplayWindow()
+    display_window.is_display = False
+    display_window.run_javascript = MagicMock()
+    theme = Theme()
+    theme.background_type = 'live'
+    result_theme = Theme()
+    result_theme.background_type = 'solid'
+    result_theme.background_start_color = '#590909'
+    result_theme.background_end_color = '#590909'
+    result_theme.background_main_color = '#090909'
+    result_theme.background_footer_color = '#090909'
+    result_theme = result_theme.export_theme(is_js=True)
+
+    # WHEN: The set theme function is called
+    display_window.set_theme(theme, is_sync=False, service_item_type=False)
+
+    # THEN: The final theme should use the preset colour values
+    display_window.run_javascript.assert_called_once_with('Display.setTheme({theme});'.format(theme=result_theme),
+                                                          is_sync=False)
 
 
 @patch('PyQt5.QtWidgets.QVBoxLayout')

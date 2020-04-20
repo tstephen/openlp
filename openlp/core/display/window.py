@@ -248,8 +248,8 @@ class DisplayWindow(QtWidgets.QWidget, RegistryProperties, LogMixin):
         """
         js_is_display = str(self.is_display).lower()
         item_transitions = str(self.settings.value('themes/item transitions')).lower()
-        self.run_javascript('Display.init({do_transitions}, {do_item_transitions});'
-                            .format(do_transitions=js_is_display, do_item_transitions=item_transitions))
+        self.run_javascript('Display.init({is_display}, {do_item_transitions});'
+                            .format(is_display=js_is_display, do_item_transitions=item_transitions))
         wait_for(lambda: self._is_initialised)
         if self.scale != 1:
             self.set_scale(self.scale)
@@ -404,10 +404,6 @@ class DisplayWindow(QtWidgets.QWidget, RegistryProperties, LogMixin):
                 theme_copy.background_end_color = '#590909'
                 theme_copy.background_main_color = '#090909'
                 theme_copy.background_footer_color = '#090909'
-            # If background is transparent and this is not a display, inject checkerboard background image instead
-            elif theme.background_type == 'transparent':
-                theme_copy.background_type = 'image'
-                theme_copy.background_filename = self.checkerboard_path
         exported_theme = theme_copy.export_theme(is_js=True)
         self.run_javascript('Display.setTheme({theme});'.format(theme=exported_theme), is_sync=is_sync)
 

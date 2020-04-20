@@ -385,16 +385,16 @@ var Display = {
   /**
    * Start up reveal and do any other initialisation
    */
-  init: function (doTransitions=false, doItemtransitions=false) {
-    var globalBackground = $("#global-background")[0];
-    globalBackground.style.cssText = "";
-    globalBackground.style.setProperty("background", "black");
+  init: function (isDisplay=false, doItemtransitions=false) {
+    if (!isDisplay) {
+      document.body.classList.add('checkerboard');
+    }
     Display._slidesContainer = $(".slides")[0];
     Display._footerContainer = $(".footer")[0];
     Display._backgroundsContainer = $(".backgrounds")[0];
-    Display._doTransitions = doTransitions;
+    Display._doTransitions = isDisplay;
     Reveal.initialize(Display._revealConfig);
-    Display.setItemTransition(doItemtransitions && doTransitions);
+    Display.setItemTransition(doItemtransitions && isDisplay);
     displayWatcher.setInitialised(true);
   },
   /**
@@ -1038,12 +1038,9 @@ var Display = {
     // Set the background
     var backgroundContent = "";
     var backgroundHtml = "";
-    var globalBackground = $("#global-background")[0];
-    globalBackground.style.setProperty("background", "black");
     switch (Display._theme.background_type) {
       case BackgroundType.Transparent:
         backgroundContent = "transparent";
-        globalBackground.style.setProperty("background", "transparent");
         break;
       case BackgroundType.Solid:
         backgroundContent = Display._theme.background_color;
