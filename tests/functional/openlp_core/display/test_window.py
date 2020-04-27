@@ -282,7 +282,6 @@ def test_show_display(mocked_screenlist, mocked_registry_execute, mocked_webengi
     display_window.setVisible.assert_called_once_with(True)
     display_window.run_javascript.assert_called_once_with('Display.show();')
     mocked_registry_execute.assert_called_once_with('live_display_active')
-    assert display_window.hide_mode is None
 
 
 @patch('PyQt5.QtWidgets.QVBoxLayout')
@@ -294,7 +293,7 @@ def test_show_display_no_display(mocked_screenlist, mocked_webengine, mocked_add
     """
     # GIVEN: A Display window, one screen and core/display on monitor disabled
     display_window = DisplayWindow()
-    display_window.hide_mode = HideMode.Screen
+    display_window.run_javascript = MagicMock()
     display_window.is_display = True
     mocked_screenlist.return_value = [1]
     mock_settings.value.return_value = False
@@ -302,8 +301,8 @@ def test_show_display_no_display(mocked_screenlist, mocked_webengine, mocked_add
     # WHEN: Show display is run
     display_window.show_display()
 
-    # THEN: Hide mode should still be screen
-    assert display_window.hide_mode == HideMode.Screen
+    # THEN: Shouldn't run the js show fn
+    assert display_window.run_javascript.call_count == 0
 
 
 @patch('PyQt5.QtWidgets.QVBoxLayout')
@@ -314,15 +313,16 @@ def test_hide_display_to_screen(mocked_webengine, mocked_addWidget, mock_setting
     """
     # GIVEN: Display window and setting advanced/disable transparent display = False
     display_window = DisplayWindow()
+    display_window.run_javascript = MagicMock()
     display_window.setVisible = MagicMock()
     mock_settings.value.return_value = False
 
     # WHEN: Hide display is run with no mode (should default to Screen)
     display_window.hide_display()
 
-    # THEN: Should hide the display and set the hide mode
-    display_window.setVisible.assert_called_once_with(False)
-    assert display_window.hide_mode == HideMode.Screen
+    # THEN: Should hide the display with the js transparency function (not setVisible)
+    display_window.setVisible.call_count == 0
+    display_window.run_javascript.assert_called_once_with('Display.toTransparent();')
 
 
 @patch('PyQt5.QtWidgets.QVBoxLayout')
@@ -341,7 +341,6 @@ def test_hide_display_to_blank(mocked_webengine, mocked_addWidget, mock_settings
 
     # THEN: Should run the correct javascript on the display and set the hide mode
     display_window.run_javascript.assert_called_once_with('Display.toBlack();')
-    assert display_window.hide_mode == HideMode.Blank
 
 
 @patch('PyQt5.QtWidgets.QVBoxLayout')
@@ -360,7 +359,6 @@ def test_hide_display_to_theme(mocked_webengine, mocked_addWidget, mock_settings
 
     # THEN: Should run the correct javascript on the display and set the hide mode
     display_window.run_javascript.assert_called_once_with('Display.toTheme();')
-    assert display_window.hide_mode == HideMode.Theme
 
 
 @patch('PyQt5.QtWidgets.QVBoxLayout')
@@ -372,14 +370,15 @@ def test_hide_display_to_transparent(mocked_webengine, mocked_addWidget, mock_se
     # GIVEN: Display window and setting advanced/disable transparent display = False
     display_window = DisplayWindow()
     display_window.run_javascript = MagicMock()
+    display_window.setVisible = MagicMock()
     mock_settings.value.return_value = False
 
-    # WHEN: Hide display is run with HideMode.Transparent
-    display_window.hide_display(HideMode.Transparent)
+    # WHEN: Hide display is run with HideMode.Screen
+    display_window.hide_display(HideMode.Screen)
 
-    # THEN: Should run the correct javascript on the display and set the hide mode
-    assert display_window.hide_mode == HideMode.Transparent
+    # THEN: Should run the correct javascript on the display and not set the visiblity
     display_window.run_javascript.assert_called_once_with('Display.toTransparent();')
+    assert display_window.setVisible.call_count == 0
 
 
 @patch('PyQt5.QtWidgets.QVBoxLayout')
@@ -394,12 +393,11 @@ def test_hide_transparent_to_screen(mocked_webengine, mocked_addWidget, mock_set
     display_window.setVisible = MagicMock()
     mock_settings.value.return_value = True
 
-    # WHEN: Hide display is run with HideMode.Transparent
-    display_window.hide_display(HideMode.Transparent)
+    # WHEN: Hide display is run with HideMode.Screen
+    display_window.hide_display(HideMode.Screen)
 
-    # THEN: Should run the correct javascript on the display and set the hide mode
+    # THEN: Should run setVisible(False)
     display_window.setVisible.assert_called_once_with(False)
-    assert display_window.hide_mode == HideMode.Screen
 
 
 @patch('PyQt5.QtWidgets.QVBoxLayout')

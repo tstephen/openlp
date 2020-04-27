@@ -41,7 +41,6 @@ class HideMode(object):
     Blank = 1
     Theme = 2
     Screen = 3
-    Transparent = 4
 
 
 class DisplayControllerType(object):
