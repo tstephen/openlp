@@ -146,6 +146,7 @@ class DisplayWindow(QtWidgets.QWidget, RegistryProperties, LogMixin):
         self.webview = WebEngineView(self)
         self.webview.setAttribute(QtCore.Qt.WA_TranslucentBackground)
         self.webview.page().setBackgroundColor(QtCore.Qt.transparent)
+        self.webview.display_clicked = self.disable_display
         self.layout.addWidget(self.webview)
         self.webview.loadFinished.connect(self.after_loaded)
         display_base_path = AppLocation.get_directory(AppLocation.AppDir) / 'core' / 'display' / 'html'
@@ -428,7 +429,6 @@ class DisplayWindow(QtWidgets.QWidget, RegistryProperties, LogMixin):
         self.run_javascript('Display.show();')
         if self.isHidden():
             self.setVisible(True)
-            self.webview.setVisible(True)
         self.hide_mode = None
         # Trigger actions when display is active again.
         if self.is_display:
@@ -445,23 +445,28 @@ class DisplayWindow(QtWidgets.QWidget, RegistryProperties, LogMixin):
             # Only make visible on single monitor setup if setting enabled.
             if len(ScreenList()) == 1 and not self.settings.value('core/display on monitor'):
                 return
-        # Use Screen mode if Transparent is disallowed via setting
-        if self.settings.value('advanced/disable transparent display') and mode == HideMode.Transparent:
-            mode = HideMode.Screen
-        # Now update display to the selected mode
+        # Update display to the selected mode
         if mode == HideMode.Screen:
-            self.setVisible(False)
+            if self.settings.value('advanced/disable transparent display'):
+                self.setVisible(False)
+            else:
+                self.run_javascript('Display.toTransparent();')
         elif mode == HideMode.Blank:
             self.run_javascript('Display.toBlack();')
         elif mode == HideMode.Theme:
             self.run_javascript('Display.toTheme();')
-        else:
-            self.run_javascript('Display.toTransparent();')
         if mode != HideMode.Screen:
             if self.isHidden():
                 self.setVisible(True)
-                self.webview.setVisible(True)
         self.hide_mode = mode
+
+    def disable_display(self):
+        """
+        Removes the display if showing desktop
+        This allows users to click though the screen even if the screen is only transparent
+        """
+        if self.is_display and self.hide_mode == HideMode.Screen:
+            self.setVisible(False)
 
     def set_scale(self, scale):
         """
