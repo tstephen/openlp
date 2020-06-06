@@ -234,7 +234,7 @@ class Ui_ServiceManager(object):
         self.service_manager_list.itemCollapsed.connect(self.collapsed)
         self.service_manager_list.itemExpanded.connect(self.expanded)
         # Last little bits of setting up
-        self.service_theme = self.settings.value(self.main_window.service_manager_settings_section + '/service theme')
+        self.service_theme = self.settings.value('servicemanager/service theme')
         self.service_path = AppLocation.get_section_data_path('servicemanager')
         # build the drag and drop context menu
         self.dnd_menu = QtWidgets.QMenu()
@@ -468,11 +468,11 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
             file_path, filter_used = FileDialog.getOpenFileName(
                 self.main_window,
                 translate('OpenLP.ServiceManager', 'Open File'),
-                self.settings.value(self.main_window.service_manager_settings_section + '/last directory'),
+                self.settings.value('servicemanager/last directory'),
                 translate('OpenLP.ServiceManager', 'OpenLP Service Files (*.osz *.oszl)'))
             if not file_path:
                 return False
-        self.settings.setValue(self.main_window.service_manager_settings_section + '/last directory', file_path.parent)
+        self.settings.setValue('servicemanager/last directory', file_path.parent)
         self.load_file(file_path)
 
     def save_modified_service(self):
@@ -660,8 +660,7 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
                 with suppress(FileNotFoundError):
                     file_path.unlink()
                 os.link(temp_file.name, file_path)
-            self.settings.setValue(self.main_window.service_manager_settings_section + '/last directory',
-                                   file_path.parent)
+            self.settings.setValue('servicemanager/last directory', file_path.parent)
         except (PermissionError, OSError) as error:
             self.log_exception('Failed to save service to disk: {name}'.format(name=file_path))
             self.main_window.error_message(
@@ -698,7 +697,7 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
         else:
             default_file_name = ''
         default_file_path = Path(default_file_name)
-        directory_path = self.settings.value(self.main_window.service_manager_settings_section + '/last directory')
+        directory_path = self.settings.value('servicemanager/last directory')
         if directory_path:
             default_file_path = directory_path / default_file_path
         lite_filter = translate('OpenLP.ServiceManager', 'OpenLP Service Files - lite (*.oszl)')
@@ -944,8 +943,7 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
             service_item.auto_play_slides_loop = False
             self.auto_play_slides_loop.setChecked(False)
         if service_item.auto_play_slides_once and service_item.timed_slide_interval == 0:
-            service_item.timed_slide_interval = self.settings.value(
-                self.main_window.general_settings_section + '/loop delay')
+            service_item.timed_slide_interval = self.settings.value('core/loop delay')
         self.set_modified()
 
     def toggle_auto_play_slides_loop(self):
@@ -959,8 +957,7 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
             service_item.auto_play_slides_once = False
             self.auto_play_slides_once.setChecked(False)
         if service_item.auto_play_slides_loop and service_item.timed_slide_interval == 0:
-            service_item.timed_slide_interval = self.settings.value(
-                self.main_window.general_settings_section + '/loop delay')
+            service_item.timed_slide_interval = self.settings.value('core/loop delay')
         self.set_modified()
 
     def on_timed_slide_interval(self):
@@ -970,7 +967,7 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
         item = self.find_service_item()[0]
         service_item = self.service_items[item]['service_item']
         if service_item.timed_slide_interval == 0:
-            timed_slide_interval = self.settings.value(self.main_window.general_settings_section + '/loop delay')
+            timed_slide_interval = self.settings.value('core/loop delay')
         else:
             timed_slide_interval = service_item.timed_slide_interval
         timed_slide_interval, ok = QtWidgets.QInputDialog.getInt(self, translate('OpenLP.ServiceManager',
@@ -1548,7 +1545,7 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
         self.application.set_busy_cursor()
         if self.service_items[item]['service_item'].is_valid:
             self.live_controller.add_service_manager_item(self.service_items[item]['service_item'], child)
-            if self.settings.value(self.main_window.general_settings_section + '/auto preview'):
+            if self.settings.value('core/auto preview'):
                 item += 1
                 if self.service_items and item < len(self.service_items) and \
                         self.service_items[item]['service_item'].is_capable(ItemCapabilities.CanPreview):
