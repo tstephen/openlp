@@ -287,42 +287,26 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
                                              icon=UiIcons().live_presentation,
                                              checked=False, can_shortcuts=True, category=self.category,
                                              triggers=self.on_show_display)
-            self.theme_screen = create_action(self, 'setThemeScreen',
+            self.theme_screen = create_action(self, 'themeScreen',
                                               text=translate('OpenLP.SlideController', 'Show Theme'),
                                               icon=UiIcons().live_theme,
-                                              checked=False, can_shortcuts=False, category=self.category,
+                                              checked=False, can_shortcuts=True, category=self.category,
                                               triggers=self.on_theme_display)
-            self.blank_screen = create_action(self, 'setBlankScreen',
+            self.blank_screen = create_action(self, 'blankScreen',
                                               text=translate('OpenLP.SlideController', 'Show Black'),
                                               icon=UiIcons().live_black,
-                                              checked=False, can_shortcuts=False, category=self.category,
+                                              checked=False, can_shortcuts=True, category=self.category,
                                               triggers=self.on_blank_display)
-            self.desktop_screen = create_action(self, 'setDesktopScreen',
+            self.desktop_screen = create_action(self, 'desktopScreen',
                                                 text=translate('OpenLP.SlideController', 'Show Desktop'),
                                                 icon=UiIcons().live_desktop,
-                                                checked=False, can_shortcuts=False, category=self.category,
+                                                checked=False, can_shortcuts=True, category=self.category,
                                                 triggers=self.on_hide_display)
             self.hide_menu.setDefaultAction(self.show_screen)
             self.hide_menu.menu().addAction(self.show_screen)
             self.hide_menu.menu().addAction(self.theme_screen)
             self.hide_menu.menu().addAction(self.blank_screen)
             self.hide_menu.menu().addAction(self.desktop_screen)
-            # Add togglable actions for keyboard shortcuts
-            self.controller.addAction(create_action(self, 'desktopScreen',
-                                                    can_shortcuts=True,
-                                                    context=QtCore.Qt.WidgetWithChildrenShortcut,
-                                                    category=self.category,
-                                                    triggers=self.on_toggle_desktop))
-            self.controller.addAction(create_action(self, 'themeScreen',
-                                                    can_shortcuts=True,
-                                                    context=QtCore.Qt.WidgetWithChildrenShortcut,
-                                                    category=self.category,
-                                                    triggers=self.on_toggle_theme))
-            self.controller.addAction(create_action(self, 'blankScreen',
-                                                    can_shortcuts=True,
-                                                    context=QtCore.Qt.WidgetWithChildrenShortcut,
-                                                    category=self.category,
-                                                    triggers=self.on_toggle_blank))
             # Wide menu of display control buttons.
             self.show_screen_button = QtWidgets.QToolButton(self.toolbar)
             self.show_screen_button.setObjectName('show_screen_button')
@@ -922,7 +906,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         self.selected_row = 0
         # take a copy not a link to the servicemanager copy.
         self.service_item = copy.copy(service_item)
-        if self.service_item.is_command():
+        if self.service_item.is_command() and not self.service_item.is_media():
             Registry().execute(
                 '{text}_start'.format(text=self.service_item.name.lower()),
                 [self.service_item, self.is_live, self.get_hide_mode(), slide_no])
@@ -967,7 +951,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
                 self.preview_display.load_images(self.service_item.slides)
                 for display in self.displays:
                     display.load_images(self.service_item.slides)
-            for slide_index, slide in enumerate(self.service_item.slides):
+            for _, _ in enumerate(self.service_item.slides):
                 row += 1
                 self.slide_list[str(row)] = row - 1
         self.preview_widget.replace_service_item(self.service_item, width, slide_no)
@@ -987,7 +971,10 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
             # close the previous, so make sure we don't close the new one.
             if old_item.is_command() and not self.service_item.is_command() or \
                     old_item.is_command() and not old_item.is_media() and self.service_item.is_media():
-                Registry().execute('{name}_stop'.format(name=old_item.name.lower()), [old_item, self.is_live])
+                if old_item.is_media():
+                    self.on_media_close()
+                else:
+                    Registry().execute('{name}_stop'.format(name=old_item.name.lower()), [old_item, self.is_live])
             if old_item.is_media() and not self.service_item.is_media():
                 self.on_media_close()
         if self.is_live:
