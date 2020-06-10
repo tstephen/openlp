@@ -739,8 +739,8 @@ def test_process_item(mocked_execute, registry):
     slide_controller._process_item(mocked_media_item, 0)
 
     # THEN: Registry.execute should have been called to stop the presentation
-    assert 2 == mocked_execute.call_count, 'Execute should have been called 2 times'
-    assert 'mocked_presentation_item_stop' == mocked_execute.call_args_list[1][0][0], \
+    assert 1 == mocked_execute.call_count, 'Execute should have been called 2 times'
+    assert 'mocked_presentation_item_stop' == mocked_execute.call_args_list[0][0][0], \
         'The presentation should have been stopped.'
 
 

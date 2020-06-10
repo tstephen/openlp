@@ -573,8 +573,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
         """
         process the bootstrap post setup request
         """
-        # self.preview_controller.panel.setVisible(self.settings.value('user interface/preview panel'))
-        # self.live_controller.panel.setVisible(self.settings.value('user interface/live panel'))
         self.load_settings()
         self.restore_current_media_manager_item()
         Registry().execute('theme_update_global')
@@ -637,8 +635,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
         Show the main form, as well as the display form
         """
         QtWidgets.QWidget.show(self)
-        # if self.live_controller.display.isVisible():
-        #     self.live_controller.display.setFocus()
         self.activateWindow()
         # We have -disable-web-security added by our code.
         # If a file is passed in we will have that as well so count of 2
