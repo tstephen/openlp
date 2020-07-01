@@ -21,7 +21,7 @@
 """
 Package to test the openlp.core.ui.slidecontroller package.
 """
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, sentinel
 
 from PyQt5 import QtCore, QtGui
 
@@ -695,6 +695,79 @@ def test_on_slide_selected_index_service_item_not_command(mocked_execute, regist
     assert 0 == mocked_update_preview.call_count, 'Update preview should not have been called'
     mocked_preview_widget.change_slide.assert_called_once_with(7)
     mocked_slide_selected.assert_called_once_with()
+
+
+def test_set_background_image(registry):
+    """
+    Test that the display and preview background are set
+    """
+    # GIVEN: A slide controller
+    slide_controller = SlideController(None)
+    slide_controller.preview_display = MagicMock()
+    mock_display = MagicMock()
+    slide_controller.displays = [mock_display]
+
+    # WHEN: set_background_image is called
+    slide_controller.set_background_image(sentinel.colour, sentinel.image)
+
+    # THEN: The preview and main display are called with the new colour and image
+    slide_controller.preview_display.set_background_image.assert_called_once_with(sentinel.colour, sentinel.image)
+    mock_display.set_background_image.assert_called_once_with(sentinel.colour, sentinel.image)
+
+
+def test_theme_updated(mock_settings):
+    """
+    Test that the theme_updated function updates the service if hot reload is on
+    """
+    # GIVEN: A slide controller and settings return true
+    slide_controller = SlideController(None)
+    slide_controller.service_item = sentinel.service_item
+    slide_controller._process_item = MagicMock()
+    slide_controller.preview_widget = MagicMock()
+    slide_controller.preview_widget.current_slide_number.return_value = 14
+    mock_settings.value.return_value = True
+
+    # WHEN: theme_updated is called
+    slide_controller.theme_updated()
+
+    # THEN: process_item is called with the current service_item and slide number
+    slide_controller._process_item.assert_called_once_with(sentinel.service_item, 14)
+
+
+def test_theme_updated_no_reload(mock_settings):
+    """
+    Test that the theme_updated function does not update the service if hot reload is off
+    """
+    # GIVEN: A slide controller and settings return false
+    slide_controller = SlideController(None)
+    slide_controller.service_item = sentinel.service_item
+    slide_controller._process_item = MagicMock()
+    slide_controller.preview_widget = MagicMock()
+    mock_settings.value.return_value = False
+
+    # WHEN: theme_updated is called
+    slide_controller.theme_updated()
+
+    # THEN: process_item is not called
+    assert slide_controller._process_item.call_count == 0
+
+
+def test_reload_theme(mock_settings):
+    """
+    Test that the reload_theme function triggers the reload_theme function for the displays
+    """
+    # GIVEN: A slide controller and mocked displays
+    slide_controller = SlideController(None)
+    slide_controller.preview_display = MagicMock()
+    mock_display = MagicMock()
+    slide_controller.displays = [mock_display]
+
+    # WHEN: reload_theme is called
+    slide_controller.reload_theme()
+
+    # THEN: reload_theme is called with the preview and main display
+    slide_controller.preview_display.reload_theme.assert_called_once_with()
+    mock_display.reload_theme.assert_called_once_with()
 
 
 @patch.object(Registry, 'execute')

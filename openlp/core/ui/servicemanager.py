@@ -1355,7 +1355,7 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
         """
         self.service_theme = self.theme_combo_box.currentText()
         self.settings.setValue('servicemanager/service theme', self.service_theme)
-        self.regenerate_service_items(True)
+        Registry().execute('theme_update_service')
 
     def theme_change(self):
         """
