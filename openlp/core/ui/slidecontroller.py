@@ -502,6 +502,10 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
             self.mediacontroller_live_stop.connect(self.media_controller.on_media_stop)
         else:
             getattr(self, 'slidecontroller_preview_clear').connect(self.on_clear)
+        # Update the theme whenever global or service theme updated
+        # theme_update_list catches changes to themes AND if the global theme changes
+        Registry().register_function('theme_update_list', self.theme_updated)
+        Registry().register_function('theme_update_service', self.theme_updated)
 
     def new_song_menu(self):
         """
@@ -867,6 +871,16 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         # Set theme for displays
         for display in self.displays:
             display.set_background_image(bg_color, image_path)
+
+    def theme_updated(self, var=None):
+        """
+        Reloads the service item
+
+        :param var: Unused but needed to catch the theme_update_list event
+        """
+        if self.service_item and self.settings.value('themes/hot reload'):
+            slide_num = self.preview_widget.current_slide_number()
+            self._process_item(self.service_item, slide_num)
 
     def reload_theme(self):
         """
