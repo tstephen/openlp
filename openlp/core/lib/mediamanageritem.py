@@ -130,6 +130,12 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties):
         self.can_make_live = True
         self.can_add_to_service = True
 
+    def config_update(self):
+        """
+        Is triggered when the config is updated
+        """
+        pass
+
     def retranslate_ui(self):
         """
         This method is called automatically to provide OpenLP with the opportunity to translate the ``MediaManagerItem``
