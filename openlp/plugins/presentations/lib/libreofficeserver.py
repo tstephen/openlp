@@ -31,7 +31,7 @@ import logging
 import time
 
 
-if sys.platform.startswith('darwin'):
+if sys.platform.startswith('darwin') and 'pytest' not in sys.argv[0]:
     # Only make the log file on OS X when running as a server
     logfile = os.path.join(str(os.getenv('HOME')), 'Library', 'Application Support', 'openlp', 'libreofficeserver.log')
     print('Setting up log file: {logfile}'.format(logfile=logfile))

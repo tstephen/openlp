@@ -25,13 +25,11 @@ import atexit
 import faulthandler
 import logging
 import multiprocessing
-import sys
-import os
 
 # from OpenGL import GL  # noqa
 
 from openlp.core.app import main
-from openlp.core.common import is_macosx, is_win
+from openlp.core.common import is_win
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.path import create_paths
 
@@ -74,16 +72,6 @@ def start():
     # see https://docs.python.org/3/library/multiprocessing.html#multiprocessing.freeze_support
     if is_win():
         multiprocessing.freeze_support()
-    # Mac OS X passes arguments like '-psn_XXXX' to the application. This argument is actually a process serial number.
-    # However, this causes a conflict with other OpenLP arguments. Since we do not use this argument we can delete it
-    # to avoid any potential conflicts.
-    if is_macosx():
-        sys.argv = [x for x in sys.argv if not x.startswith('-psn')]
-        if getattr(sys, 'frozen', False):
-            os.environ['QTWEBENGINEPROCESS_PATH'] = os.path.normpath(os.path.join(
-                sys._MEIPASS, '..', 'MacOS', 'PyQt5', 'Qt', 'lib', 'QtWebEngineCore.framework',
-                'Versions', '5', 'Helpers', 'QtWebEngineProcess.app', 'Contents', 'MacOS', 'QtWebEngineProcess'
-            ))
     main()
 
 
