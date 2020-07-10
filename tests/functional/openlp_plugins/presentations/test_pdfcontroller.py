@@ -26,6 +26,7 @@ import pytest
 from pathlib import Path
 from shutil import rmtree, which
 from tempfile import mkdtemp
+from unittest import skipIf
 from unittest.mock import MagicMock, patch
 
 from PyQt5 import QtCore, QtGui
@@ -56,6 +57,7 @@ SCREEN = {
     'size': QtCore.QRect(0, 0, 1024, 768)
 }
 IS_CI = 'GITLAB_CI' in os.environ or 'APPVEYOR' in os.environ
+IS_QT_QPA_PLATFORM_OFFSCREEN = 'QT_QPA_PLATFORM' in os.environ and os.environ['QT_QPA_PLATFORM'] == 'offscreen'
 
 
 def get_screen_resolution():
@@ -63,9 +65,12 @@ def get_screen_resolution():
     Get the screen resolution
     """
     if is_macosx():
-        from AppKit import NSScreen
-        screen_size = NSScreen.mainScreen().frame().size
-        return screen_size.width, screen_size.height
+        if IS_CI:
+            return 1024, 76
+        else:
+            from AppKit import NSScreen
+            screen_size = NSScreen.mainScreen().frame().size
+            return screen_size.width, screen_size.height
     elif is_win():
         from win32api import GetSystemMetrics
         return GetSystemMetrics(0), GetSystemMetrics(1)
@@ -118,6 +123,7 @@ def load_pdf(exe_path, pdf_env):
     assert 3 == document.get_slide_count(), 'The pagecount of the PDF should be 3.'
 
 
+@skipIf(IS_QT_QPA_PLATFORM_OFFSCREEN, 'This test fails when QT_QPA_PLATFORM is set to "offscreen".')
 def load_pdf_pictures(exe_path, pdf_env):
     """
     Test loading a Pdf and check the generated pictures' size

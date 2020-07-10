@@ -22,7 +22,7 @@
 Package to test the openlp.plugins.songs.forms.songmaintenanceform package.
 """
 import pytest
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import MagicMock, call, patch, ANY
 
 from PyQt5 import QtCore, QtWidgets
 
@@ -238,9 +238,10 @@ def test_reset_authors(MockedAuthor, MockedQListWidgetItem, form_env):
     expected_widget_item_calls = [call('John Wesley'), call('John Newton')]
     mocked_authors_list_widget.clear.assert_called_once_with()
     mocked_manager.get_all_objects.assert_called_once_with(MockedAuthor)
-    assert MockedQListWidgetItem.call_args_list == expected_widget_item_calls
-    mocked_author_item1.setData.assert_called_once_with(QtCore.Qt.UserRole, 2)
-    mocked_author_item2.setData.assert_called_once_with(QtCore.Qt.UserRole, 1)
+    # Do not care which order items are called since the order is different on macos vs others
+    MockedQListWidgetItem.assert_has_calls(expected_widget_item_calls, any_order=True)
+    mocked_author_item1.setData.assert_called_once_with(QtCore.Qt.UserRole, ANY)
+    mocked_author_item2.setData.assert_called_once_with(QtCore.Qt.UserRole, ANY)
     mocked_authors_list_widget.addItem.assert_has_calls([
         call(mocked_author_item1), call(mocked_author_item2)])
 
