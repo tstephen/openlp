@@ -32,6 +32,7 @@ from openlp.core.common.settings import Settings
 from openlp.plugins.songs.lib.importers.openlyrics import OpenLyricsImport
 from openlp.plugins.songs.lib.importers.songimport import SongImport
 from openlp.plugins.songs.lib.openlyricsxml import OpenLyrics
+from openlp.plugins.songs.lib.ui import SongStrings
 from tests.helpers.testmixin import TestMixin
 from tests.utils.constants import RESOURCE_PATH
 
@@ -133,6 +134,48 @@ class TestOpenLyricsImport(TestCase, TestMixin):
 
             # THEN: The xml_to_song() method should have been called
             assert importer.open_lyrics.xml_to_song.called is True
+
+    def test_can_parse_file_having_a_processing_instruction(self):
+        """
+        Test files having a processing instruction can be parsed
+        """
+        # GIVEN: A OpenLyrics XML containing a processing instruction, an OpenLyrics importer with a mocked out
+        # manager, import wizard and 'log_error' method, and a mocked out logger
+        with patch('openlp.plugins.songs.lib.importers.openlyrics.log', autospec=True) as mocked_logger:
+            mocked_manager = MagicMock()
+            mocked_import_wizard = MagicMock()
+            importer = OpenLyricsImport(mocked_manager, file_paths=[])
+            importer.import_wizard = mocked_import_wizard
+            importer.log_error = MagicMock()
+
+            # WHEN: Importing a file which contains a processing instruction
+            importer.import_source = [TEST_PATH / 'Amazing Grace.xml']
+            try:
+                importer.do_import()
+            except Exception as ex:
+                # THEN: no uncaught exception escaped from importer.do_import() is etree.XMLSyntaxError
+                assert ex is not etree.XMLSyntaxError
+                # otherwise we don't care about it now (but should in other tests...)
+                pass
+
+            # THEN: the importer's log_error method was never called with SongStrings.XMLSyntaxError as its second
+            # positional argument
+            if importer.log_error.called:
+                for call_args in importer.log_error.call_args_list:
+                    args = call_args[0]
+                    # there are at least two positional arguments
+                    if len(args) > 1:
+                        assert args[1] is not SongStrings.XMLSyntaxError
+
+            # THEN: the logger's 'exception' method was never called with a first positional argument
+            # which is a string and starts with 'XML syntax error in file'
+            if mocked_logger.exception.called:
+                for call_args in mocked_logger.exception.call_args_list:
+                    args = call_args[0]
+                    # there is at least one positional argument and it is a string
+                    if args and isinstance(args[0], str):
+                        error_message = args[0]
+                        assert not error_message.startswith('XML syntax error in file')
 
     def test_process_formatting_tags(self):
         """
