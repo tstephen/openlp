@@ -52,7 +52,7 @@ class OpenLyricsImport(SongImport):
         Imports the songs.
         """
         self.import_wizard.progress_bar.setMaximum(len(self.import_source))
-        parser = etree.XMLParser(remove_blank_text=True)
+        parser = etree.XMLParser(remove_blank_text=True, remove_pis=True)
         for file_path in self.import_source:
             if self.stop_import_flag:
                 return
