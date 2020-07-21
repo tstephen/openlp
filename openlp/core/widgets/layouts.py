@@ -60,8 +60,10 @@ class AspectRatioLayout(QtWidgets.QLayout):
 
         :param float aspect_ratio: The aspect ratio to set
         """
-        # TODO: Update the layout/widget if this changes
         self._aspect_ratio = aspect_ratio
+        # Update the layout/widget
+        geo = self.geometry()
+        self.setGeometry(geo)
 
     aspect_ratio = property(get_aspect_ratio, set_aspect_ratio)
 

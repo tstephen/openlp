@@ -47,7 +47,7 @@ def _create_mock_action(parent, name, **kwargs):
 
 
 @pytest.yield_fixture()
-def main_window(state, settings):
+def main_window(state, settings, mocked_qapp):
     app = Registry().get('application')
     app.set_busy_cursor = MagicMock()
     app.set_normal_cursor = MagicMock()
@@ -59,11 +59,13 @@ def main_window(state, settings):
     mocked_add_toolbar_action.side_effect = _create_mock_action
     renderer_patcher = patch('openlp.core.display.render.Renderer')
     renderer_patcher.start()
-    mocked_desktop = MagicMock()
-    mocked_desktop.screenCount.return_value = 1
-    mocked_desktop.screenGeometry.return_value = QtCore.QRect(0, 0, 1024, 768)
-    mocked_desktop.primaryScreen.return_value = 1
-    ScreenList.create(mocked_desktop)
+    mocked_screen = MagicMock()
+    mocked_screen.geometry.return_value = QtCore.QRect(0, 0, 1024, 768)
+    mocked_qapp.screens = MagicMock()
+    mocked_qapp.screens.return_value = [mocked_screen]
+    mocked_qapp.primaryScreen = MagicMock()
+    mocked_qapp.primaryScreen.return_value = mocked_screen
+    ScreenList.create(mocked_qapp)
     mainwindow = MainWindow()
     yield mainwindow
     del mainwindow

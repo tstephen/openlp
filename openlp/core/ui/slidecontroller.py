@@ -661,9 +661,16 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         """
         Settings dialog has changed the screen size of adjust output and screen previews.
         """
+        size = self.screens.current.display_geometry.size()
         if self.is_live and self.displays:
             for display in self.displays:
-                display.resize(self.screens.current.display_geometry.size())
+                display.resize(size)
+        old_preview_width = self.preview_display.size().width()
+        scale = old_preview_width / size.width()
+        new_preview_size = size * scale
+        self.ratio = self.screens.current.display_geometry.width() / self.screens.current.display_geometry.height()
+        self.preview_display.resize(new_preview_size)
+        self.slide_layout.set_aspect_ratio(self.ratio)
 
     def __add_actions_to_widget(self, widget):
         """

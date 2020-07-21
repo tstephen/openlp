@@ -38,14 +38,15 @@ from tests.utils.constants import RESOURCE_PATH
 
 
 @pytest.yield_fixture()
-def pdf_env(settings, mock_plugin):
+def pdf_env(settings, mock_plugin, mocked_qapp):
     temp_folder_path = Path(mkdtemp())
     thumbnail_folder_path = Path(mkdtemp())
-    desktop = MagicMock()
-    desktop.primaryScreen.return_value = SCREEN['primary']
-    desktop.screenCount.return_value = SCREEN['number']
-    desktop.screenGeometry.return_value = SCREEN['size']
-    ScreenList.create(desktop)
+    mocked_screen = MagicMock()
+    mocked_screen.geometry.return_value = QtCore.QRect(0, 0, 1024, 768)
+    mocked_qapp.screens.return_value = [mocked_screen]
+    mocked_qapp.primaryScreen = MagicMock()
+    mocked_qapp.primaryScreen.return_value = mocked_screen
+    ScreenList.create(mocked_qapp)
     yield settings, mock_plugin, temp_folder_path, thumbnail_folder_path
     rmtree(thumbnail_folder_path)
     rmtree(temp_folder_path)
