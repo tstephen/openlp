@@ -74,17 +74,15 @@ def test_create_screen_list(mocked_screens, settings):
     """
     Create the screen list
     """
-    # GIVEN: Mocked desktop
-    mocked_desktop = MagicMock()
-    mocked_desktop.screenCount.return_value = 2
-    mocked_desktop.primaryScreen.return_value = 0
-    mocked_screens.return_value = [
-        MagicMock(**{'geometry.return_value': QtCore.QRect(0, 0, 1024, 768)}),
-        MagicMock(**{'geometry.return_value': QtCore.QRect(1024, 0, 1024, 768)})
-    ]
+    # GIVEN: Mocked application
+    mocked_application = MagicMock()
+    mocked_screen1 = MagicMock(**{'geometry.return_value': QtCore.QRect(0, 0, 1024, 768)})
+    mocked_screen2 = MagicMock(**{'geometry.return_value': QtCore.QRect(1024, 0, 1024, 768)})
+    mocked_application.screens.return_value = [mocked_screen1, mocked_screen2]
+    mocked_application.primaryScreen.return_value = mocked_screen1
 
     # WHEN: create() is called
-    screen_list = ScreenList.create(mocked_desktop)
+    screen_list = ScreenList.create(mocked_application)
 
     # THEN: The correct screens have been set up
     assert screen_list.screens[0].number == 0

@@ -83,7 +83,7 @@ class OpenLP(QtCore.QObject, LogMixin):
             self.server.close_server()
         return result
 
-    def run(self, args):
+    def run(self, args, app):
         """
         Run the OpenLP application.
 
@@ -97,7 +97,7 @@ class OpenLP(QtCore.QObject, LogMixin):
             args.remove('OpenLP')
         self.args.extend(args)
         # Decide how many screens we have and their size
-        screens = ScreenList.create(QtWidgets.QApplication.desktop())
+        screens = ScreenList.create(app)
         # First time checks in settings
         has_run_wizard = self.settings.value('core/has run wizard')
         if not has_run_wizard:
@@ -435,4 +435,4 @@ def main():
         log.debug('Could not find translators.')
     if args and not args.no_error_form:
         sys.excepthook = app.hook_exception
-    sys.exit(app.run(qt_args))
+    sys.exit(app.run(qt_args, application))
