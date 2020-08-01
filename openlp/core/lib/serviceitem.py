@@ -877,6 +877,7 @@ class ServiceItem(RegistryProperties):
                 item['text'] = frame['text']
                 item['html'] = self.rendered_slides[index]['text']
                 item['chords'] = self.rendered_slides[index]['chords']
+                item['footer'] = self.rendered_slides[index]['footer']
             elif self.is_image() and not frame.get('image', '') and \
                     Registry().get('settings_thread').value('api/thumbnails'):
                 thumbnail_path = os.path.join('images', 'thumbnails', frame['title'])

@@ -25,7 +25,7 @@ import os
 import shutil
 from pathlib import Path
 from tempfile import mkdtemp
-from unittest.mock import ANY, Mock, MagicMock, patch, call
+from unittest.mock import ANY, Mock, MagicMock, patch, call, sentinel
 
 from PyQt5 import QtWidgets
 
@@ -64,6 +64,56 @@ def test_initial_theme_manager(registry):
     # WHEN: the default theme manager is built.
     # THEN: The the controller should be registered in the registry.
     assert Registry().get('theme_manager') is not None, 'The base theme manager should be registered'
+
+
+@patch('openlp.core.ui.thememanager.Theme')
+def test_get_global_theme(mocked_theme, registry):
+    """
+    Test the global theme method returns the theme data for the global theme
+    """
+    # GIVEN: A service manager instance and the global theme
+    theme_manager = ThemeManager(None)
+    theme_manager.global_theme = 'global theme name'
+    theme_manager._theme_list = {'global theme name': sentinel.global_theme}
+
+    # WHEN: Calling get_global_theme
+    result = theme_manager.get_global_theme()
+
+    # THEN: Returned global theme
+    assert result == sentinel.global_theme
+
+
+@patch('openlp.core.ui.thememanager.Theme')
+def test_get_theme_data(mocked_theme, registry):
+    """
+    Test that the get theme data method returns the requested theme data
+    """
+    # GIVEN: A service manager instance and themes
+    theme_manager = ThemeManager(None)
+    theme_manager._theme_list = {'theme1': sentinel.theme1, 'theme2': sentinel.theme2}
+
+    # WHEN: Get theme data is called with 'theme2'
+    result = theme_manager.get_theme_data('theme2')
+
+    # THEN: Should return theme2's data
+    assert result == sentinel.theme2
+
+
+@patch('openlp.core.ui.thememanager.Theme')
+def test_get_theme_data_missing(mocked_theme, registry):
+    """
+    Test that the get theme data method returns the default theme when theme name not found
+    """
+    # GIVEN: A service manager instance and themes
+    theme_manager = ThemeManager(None)
+    theme_manager._theme_list = {'theme1': sentinel.theme1, 'theme2': sentinel.theme2}
+    mocked_theme.return_value = sentinel.default_theme
+
+    # WHEN: Get theme data is called with None
+    result = theme_manager.get_theme_data(None)
+
+    # THEN: Should return default theme's data
+    assert result == sentinel.default_theme
 
 
 @patch('openlp.core.ui.thememanager.shutil')
@@ -301,7 +351,8 @@ def test_over_write_message_box_no(mocked_translate, mocked_qmessagebox_question
         defaultButton=ANY)
 
 
-def test_unzip_theme(registry):
+@patch('openlp.core.lib.theme.Theme.set_default_header_footer')
+def test_unzip_theme(mocked_theme_set_defaults, registry):
     """
     Test that unzipping of themes works
     """

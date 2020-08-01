@@ -24,7 +24,7 @@ from openlp.core.api.lib import login_required
 from openlp.core.common import ThemeLevel
 from openlp.core.common.registry import Registry
 
-from flask import jsonify, request, abort, Blueprint
+from flask import jsonify, request, abort, Blueprint, Response
 
 controller_views = Blueprint('controller', __name__)
 log = logging.getLogger(__name__)
@@ -117,8 +117,10 @@ def set_theme_level():
 
 
 @controller_views.route('/themes', methods=['GET'])
-@login_required
 def get_themes():
+    """
+    Gets a list of all existing themes
+    """
     log.debug('controller-v2-themes-get')
     theme_level = Registry().get('settings').value('themes/theme level')
     theme_list = []
@@ -144,11 +146,39 @@ def get_themes():
     return jsonify(theme_list)
 
 
+@controller_views.route('/themes/<theme_name>', methods=['GET'])
+def get_theme_data(theme_name):
+    """
+    Get a theme's data
+    """
+    log.debug(f'controller-v2-theme-data-get {theme_name}')
+    themes = Registry().execute('get_theme_names')[0]
+    if theme_name not in themes:
+        log.error('Requested non-existent theme')
+        abort(404)
+    theme_data = Registry().get('theme_manager').get_theme_data(theme_name).export_theme_self_contained(True)
+    return Response(theme_data, mimetype='application/json')
+
+
+@controller_views.route('/live-theme', methods=['GET'])
+def get_live_theme_data():
+    """
+    Get the live theme's data
+    """
+    log.debug('controller-v2-live-theme-data-get')
+    live_service_item = Registry().get('live_controller').service_item
+    if live_service_item:
+        theme_data = live_service_item.get_theme_data()
+    else:
+        theme_data = Registry().get('theme_manager').get_theme_data(None)
+    self_contained_theme = theme_data.export_theme_self_contained(True)
+    return Response(self_contained_theme, mimetype='application/json')
+
+
 @controller_views.route('/theme', methods=['GET'])
-@login_required
 def get_theme():
     """
-    Get the current theme
+    Get the current theme name
     """
     log.debug('controller-v2-theme-get')
     theme_level = Registry().get('settings').value('themes/theme level')
