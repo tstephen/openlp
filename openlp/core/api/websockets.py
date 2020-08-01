@@ -37,6 +37,9 @@ USERS = set()
 
 
 log = logging.getLogger(__name__)
+# Disable DEBUG logs for the websockets lib
+ws_logger = logging.getLogger('websockets')
+ws_logger.setLevel(logging.ERROR)
 
 
 async def handle_websocket(websocket, path):
@@ -53,12 +56,15 @@ async def handle_websocket(websocket, path):
     if reply:
         json_reply = json.dumps(reply).encode()
         await websocket.send(json_reply)
-    try:
-        while True:
+    while True:
+        try:
             await notify_users()
-            await asyncio.sleep(0.2)
-    finally:
-        await unregister(websocket)
+            await asyncio.wait_for(websocket.recv(), 0.2)
+        except asyncio.TimeoutError:
+            pass
+        except Exception:
+            await unregister(websocket)
+            break
 
 
 async def register(websocket):
@@ -123,27 +129,17 @@ class WebSocketWorker(ThreadWorker, RegistryProperties, LogMixin):
         if self.server:
             # If the websocket server exists, start listening
             self.event_loop.run_until_complete(self.server)
-            self.event_loop.run_forever()
+            try:
+                self.event_loop.run_forever()
+            finally:
+                self.event_loop.close()
         self.quit.emit()
 
     def stop(self):
         """
         Stop the websocket server
         """
-        try:
-            if hasattr(self.server, 'ws_server'):
-                self.server.ws_server.close()
-            elif hasattr(self.server, 'server'):
-                self.server.server.close()
-        except RuntimeError:
-            # Sometimes it is already closed
-            pass
-        try:
-            self.event_loop.stop()
-            self.event_loop.close()
-        except RuntimeError:
-            # Sometimes it is already closed
-            pass
+        self.event_loop.call_soon_threadsafe(self.event_loop.stop)
 
 
 class WebSocketServer(RegistryProperties, LogMixin):
