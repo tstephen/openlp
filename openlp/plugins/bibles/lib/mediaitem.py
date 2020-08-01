@@ -110,6 +110,7 @@ class BibleMediaItem(MediaManagerItem):
         self.search_timer.setSingleShot(True)
         self.search_timer.timeout.connect(self.on_search_timer_timeout)
         super().__init__(*args, **kwargs)
+        Registry().register_function('populate_bible_combo_boxes', self.populate_bible_combo_boxes)
 
     def setup_item(self):
         """
@@ -335,9 +336,11 @@ class BibleMediaItem(MediaManagerItem):
         bibles = self.plugin.manager.get_bibles()
         bibles = [(_f, bibles[_f]) for _f in bibles if _f]
         bibles.sort(key=lambda k: get_locale_key(k[0]))
+        self.version_combo_box.blockSignals(True)
         for bible in bibles:
             self.version_combo_box.addItem(bible[0], bible[1])
             self.second_combo_box.addItem(bible[0], bible[1])
+        self.version_combo_box.blockSignals(False)
         # set the default value
         bible = self.settings.value('bibles/primary bible')
         find_and_set_in_combo_box(self.version_combo_box, bible)
