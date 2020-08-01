@@ -85,3 +85,47 @@ def live_view(plugin):
     id = data.get('id', -1)
     live(plugin, id)
     return '', 204
+
+
+@plugins.route('/<plugin>/search-options', methods=['GET'])
+def search_options(plugin):
+    """
+    Get the plugin's search options
+    """
+    log.debug(f'{plugin}/search-options called')
+    if plugin == 'bibles':
+        bible_plugin = Registry().get('bible_plugin')
+        bibles = list(bible_plugin.manager.get_bibles().keys())
+        primary = Registry().get('settings').value('bibles/primary bible')
+        return jsonify(primary=primary, bibles=bibles)
+    else:
+        return '', 501
+
+
+@plugins.route('/<plugin>/search-options', methods=['POST'])
+@login_required
+def set_search_option(plugin):
+    """
+    Sets the plugin's search options
+    """
+    log.debug(f'{plugin}/search-options-set called')
+    data = request.json
+    option = ''
+    if not data:
+        log.error('Missing request data')
+        abort(400)
+    elif type(data.get('option')) is not (str or int):
+        abort(400)
+    try:
+        option = data.get('option')
+    except ValueError:
+        log.error('Invalid data passed: ' + option)
+        abort(400)
+
+    if plugin == 'bibles':
+        Registry().get('settings').setValue('bibles/primary bible', option)
+        Registry().execute('populate_bible_combo_boxes')
+        return '', 204
+    else:
+        log.error('Unimplemented method')
+        return '', 501
