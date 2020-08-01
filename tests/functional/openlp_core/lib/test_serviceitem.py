@@ -595,7 +595,8 @@ def test_to_dict_text_item(state_media, settings, service_item_env):
                         'That saved a wretch like me;\n'
                         'I once was lost, but now am found,\n'
                         'Was blind, but now I see.',
-                'title': 'Amazing Grace'
+                'title': 'Amazing Grace',
+                'footer': 'Amazing Grace<br>Written by: John Newton'
             },
             {
                 'chords': '’Twas grace that taught my heart to fear,\n'
@@ -612,7 +613,8 @@ def test_to_dict_text_item(state_media, settings, service_item_env):
                         'And grace my fears relieved;\n'
                         'How precious did that grace appear,\n'
                         'The hour I first believed!',
-                'title': 'Amazing Grace'
+                'title': 'Amazing Grace',
+                'footer': 'Amazing Grace<br>Written by: John Newton'
             },
             {
                 'chords': 'Through many dangers, toils and snares\n'
@@ -629,7 +631,8 @@ def test_to_dict_text_item(state_media, settings, service_item_env):
                         'I have already come;\n'
                         '’Tis grace that brought me safe thus far,\n'
                         'And grace will lead me home.',
-                'title': 'Amazing Grace'
+                'title': 'Amazing Grace',
+                'footer': 'Amazing Grace<br>Written by: John Newton'
             },
             {
                 'chords': 'The Lord has promised good to me,\n'
@@ -646,7 +649,8 @@ def test_to_dict_text_item(state_media, settings, service_item_env):
                         'His word my hope secures;\n'
                         'He will my shield and portion be\n'
                         'As long as life endures.',
-                'title': 'Amazing Grace'
+                'title': 'Amazing Grace',
+                'footer': 'Amazing Grace<br>Written by: John Newton'
             },
             {
                 'chords': 'Yes, when this heart and flesh shall fail,\n'
@@ -663,7 +667,8 @@ def test_to_dict_text_item(state_media, settings, service_item_env):
                         'And mortal life shall cease,\n'
                         'I shall possess within the veil\n'
                         'A life of joy and peace.',
-                'title': 'Amazing Grace'
+                'title': 'Amazing Grace',
+                'footer': 'Amazing Grace<br>Written by: John Newton'
             },
             {
                 'chords': 'When we’ve been there a thousand years,\n'
@@ -680,7 +685,8 @@ def test_to_dict_text_item(state_media, settings, service_item_env):
                         'Bright shining as the sun,\n'
                         'We’ve no less days to sing God’s praise\n'
                         'Than when we first begun.',
-                'title': 'Amazing Grace'
+                'title': 'Amazing Grace',
+                'footer': 'Amazing Grace<br>Written by: John Newton'
             }
         ],
         'theme': None,

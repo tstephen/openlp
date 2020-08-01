@@ -24,6 +24,7 @@ OpenLP work.
 """
 import logging
 import os
+import base64
 from enum import IntEnum
 from pathlib import Path
 
@@ -276,6 +277,17 @@ def image_to_byte(image, base_64=True):
         return byte_array
     # convert to base64 encoding so does not get missed!
     return bytes(byte_array.toBase64()).decode('utf-8')
+
+
+def image_to_data_uri(image_path):
+    """
+    Converts a image into a base64 data uri
+    """
+    extension = image_path.suffix.replace('.', '')
+    with open(image_path, 'rb') as image_file:
+        image_bytes = image_file.read()
+    image_base64 = base64.b64encode(image_bytes).decode('utf-8')
+    return 'data:image/{extension};base64,{data}'.format(extension=extension, data=image_base64)
 
 
 def create_thumb(image_path, thumb_path, return_icon=True, size=None):

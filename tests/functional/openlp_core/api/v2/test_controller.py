@@ -18,16 +18,27 @@
 # You should have received a copy of the GNU General Public License      #
 # along with this program.  If not, see <https://www.gnu.org/licenses/>. #
 ##########################################################################
-import pytest
 from unittest.mock import MagicMock
 
 from openlp.core.common.registry import Registry
 
 
-def test_retrieve_live_item(flask_client):
-    pytest.skip()
+def test_retrieve_live_item(flask_client, settings):
+    """
+    Test the live-item endpoint with a mocked service item
+    """
+    # GIVEN: A mocked controller with a mocked service item
+    fake_live_controller = MagicMock()
+    fake_live_controller.service_item = MagicMock()
+    fake_live_controller.selected_row = 0
+    fake_live_controller.service_item.to_dict.return_value = {'slides': [{'selected': False}]}
+    Registry().register('live_controller', fake_live_controller)
+
+    # WHEN: The live-item endpoint is called
     res = flask_client.get('/api/v2/controller/live-item').get_json()
-    assert len(res) == 0
+
+    # THEN: The correct item data should be returned
+    assert res == {'slides': [{'selected': True}]}
 
 
 def test_controller_set_requires_login(settings, flask_client):
@@ -40,6 +51,11 @@ def test_controller_set_requires_login(settings, flask_client):
 def test_controller_set_does_not_accept_get(flask_client):
     res = flask_client.get('/api/v2/controller/show')
     assert res.status_code == 405
+
+
+def test_controller_set_aborts_on_unspecified_controller(flask_client, settings):
+    res = flask_client.post('/api/v2/controller/show')
+    assert res.status_code == 400
 
 
 def test_controller_set_calls_live_controller(flask_client, settings):
@@ -67,6 +83,11 @@ def test_controller_direction_does_fails_on_wrong_data(flask_client, settings):
     assert res.status_code == 400
 
 
+def test_controller_direction_does_fails_on_missing_data(flask_client, settings):
+    res = flask_client.post('/api/v2/controller/progress')
+    assert res.status_code == 400
+
+
 def test_controller_direction_calls_service_manager(flask_client, settings):
     fake_live_controller = MagicMock()
     Registry().register('live_controller', fake_live_controller)
@@ -76,9 +97,22 @@ def test_controller_direction_calls_service_manager(flask_client, settings):
 
 
 # Themes tests
-def test_controller_get_theme_level_returns_valid_theme_level(flask_client, settings):
+def test_controller_get_theme_level_returns_valid_theme_level_global(flask_client, settings):
+    settings.setValue('themes/theme level', 1)
     res = flask_client.get('/api/v2/controller/theme-level').get_json()
-    assert res == ('global' or 'service' or 'song')
+    assert res == 'global'
+
+
+def test_controller_get_theme_level_returns_valid_theme_level_service(flask_client, settings):
+    settings.setValue('themes/theme level', 2)
+    res = flask_client.get('/api/v2/controller/theme-level').get_json()
+    assert res == 'service'
+
+
+def test_controller_get_theme_level_returns_valid_theme_level_song(flask_client, settings):
+    settings.setValue('themes/theme level', 3)
+    res = flask_client.get('/api/v2/controller/theme-level').get_json()
+    assert res == 'song'
 
 
 def test_controller_set_theme_level_aborts_if_no_theme_level(flask_client, settings):
@@ -91,10 +125,22 @@ def test_controller_set_theme_level_aborts_if_invalid_theme_level(flask_client, 
     assert res.status_code == 400
 
 
-def test_controller_set_theme_level_sets_theme_level(flask_client, settings):
+def test_controller_set_theme_level_sets_theme_level_global(flask_client, settings):
+    res = flask_client.post('/api/v2/controller/theme-level', json=dict(level='global'))
+    assert res.status_code == 204
+    assert Registry().get('settings').value('themes/theme level') == 1
+
+
+def test_controller_set_theme_level_sets_theme_level_service(flask_client, settings):
     res = flask_client.post('/api/v2/controller/theme-level', json=dict(level='service'))
     assert res.status_code == 204
     assert Registry().get('settings').value('themes/theme level') == 2
+
+
+def test_controller_set_theme_level_sets_theme_level_song(flask_client, settings):
+    res = flask_client.post('/api/v2/controller/theme-level', json=dict(level='song'))
+    assert res.status_code == 204
+    assert Registry().get('settings').value('themes/theme level') == 3
 
 
 def test_controller_get_themes_retrieves_themes_list(flask_client, settings):
@@ -104,12 +150,71 @@ def test_controller_get_themes_retrieves_themes_list(flask_client, settings):
     assert type(res) is list
 
 
-def test_controller_get_theme_returns_current_theme(flask_client, settings):
-    Registry().get('settings').setValue('themes/theme level', 1)
-    Registry().get('settings').setValue('themes/global theme', 'Default')
+def test_controller_get_themes_retrieves_themes_list_service(flask_client, settings):
+    settings.setValue('themes/theme level', 2)
+    mocked_service_manager = MagicMock()
+    mocked_service_manager.service_theme = 'test_theme'
+    Registry().register('theme_manager', MagicMock())
+    Registry().register('service_manager', mocked_service_manager)
+    Registry().register_function('get_theme_names', MagicMock(side_effect=[['theme1', 'test_theme', 'theme2']]))
+    res = flask_client.get('api/v2/controller/themes').get_json()
+    assert res == [{'name': 'theme1', 'selected': False}, {'name': 'test_theme', 'selected': True},
+                   {'name': 'theme2', 'selected': False}]
+
+
+def test_controller_get_theme_data(flask_client, settings):
+    Registry().register_function('get_theme_names', MagicMock(side_effect=[['theme1', 'theme2']]))
+    Registry().register('theme_manager', MagicMock())
+    res = flask_client.get('api/v2/controller/themes/theme1')
+    assert res.status_code == 200
+
+
+def test_controller_get_theme_data_invalid_theme(flask_client, settings):
+    Registry().register_function('get_theme_names', MagicMock(side_effect=[['theme1', 'theme2']]))
+    Registry().register('theme_manager', MagicMock())
+    res = flask_client.get('api/v2/controller/themes/imaginarytheme')
+    assert res.status_code == 404
+
+
+def test_controller_get_live_theme_data(flask_client, settings):
+    fake_live_controller = MagicMock()
+    theme = MagicMock()
+    theme.export_theme_self_contained.return_value = '[[], []]'
+    fake_live_controller.service_item.get_theme_data.return_value = theme
+    Registry().register('live_controller', fake_live_controller)
+    res = flask_client.get('api/v2/controller/live-theme')
+    assert res.status_code == 200
+    assert res.get_json() == [[], []]
+
+
+def test_controller_get_live_theme_data_no_service_item(flask_client, settings):
+    fake_theme_manager = MagicMock()
+    fake_live_controller = MagicMock()
+    theme = MagicMock()
+    theme.export_theme_self_contained.return_value = '[[], [], []]'
+    fake_theme_manager.get_theme_data.return_value = theme
+    fake_live_controller.service_item = None
+    Registry().register('theme_manager', fake_theme_manager)
+    Registry().register('live_controller', fake_live_controller)
+    res = flask_client.get('api/v2/controller/live-theme')
+    assert res.status_code == 200
+    assert res.get_json() == [[], [], []]
+
+
+def test_controller_get_theme_returns_current_theme_global(flask_client, settings):
+    settings.setValue('themes/theme level', 1)
+    settings.setValue('themes/global theme', 'Default')
     res = flask_client.get('/api/v2/controller/theme')
     assert res.status_code == 200
     assert res.get_json() == 'Default'
+
+
+def test_controller_get_theme_returns_current_theme_service(flask_client, settings):
+    settings.setValue('themes/theme level', 2)
+    settings.setValue('servicemanager/service theme', 'Service')
+    res = flask_client.get('/api/v2/controller/theme')
+    assert res.status_code == 200
+    assert res.get_json() == 'Service'
 
 
 def test_controller_set_theme_aborts_if_no_theme(flask_client, settings):
@@ -117,12 +222,30 @@ def test_controller_set_theme_aborts_if_no_theme(flask_client, settings):
     assert res.status_code == 400
 
 
-def test_controller_set_theme_sets_theme(flask_client, settings):
+def test_controller_set_theme_sets_global_theme(flask_client, settings):
+    settings.setValue('themes/theme level', 1)
+    res = flask_client.post('/api/v2/controller/theme', json=dict(theme='test'))
+    assert res.status_code == 204
+
+
+def test_controller_set_theme_sets_service_theme(flask_client, settings):
+    settings.setValue('themes/theme level', 2)
     res = flask_client.post('/api/v2/controller/theme', json=dict(theme='test'))
     assert res.status_code == 204
 
 
 def test_controller_set_theme_returns_song_exception(flask_client, settings):
-    Registry().get('settings').setValue('themes/theme level', 3)
+    settings.setValue('themes/theme level', 3)
     res = flask_client.post('/api/v2/controller/theme', json=dict(theme='test'))
     assert res.status_code == 501
+
+
+def test_controller_clear_live(flask_client, settings):
+    Registry().register('live_controller', MagicMock())
+    res = flask_client.post('/api/v2/controller/clear/live')
+    assert res.status_code == 204
+
+
+def test_controller_clear_invalid(flask_client, settings):
+    res = flask_client.post('/api/v2/controller/clear/my_screen')
+    assert res.status_code == 404
