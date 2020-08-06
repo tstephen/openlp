@@ -79,6 +79,25 @@ class SongsTab(SettingsTab):
         self.neolatin_notation_radio_button.setObjectName('neolatin_notation_radio_button')
         self.chords_layout.addWidget(self.neolatin_notation_radio_button)
         self.left_layout.addWidget(self.chords_group_box)
+        # CCLI SongSelect login group box
+
+        self.ccli_login_group_box = QtWidgets.QGroupBox(self.left_column)
+        self.ccli_login_group_box.setObjectName('ccli_login_group_box')
+        self.ccli_login_layout = QtWidgets.QFormLayout(self.ccli_login_group_box)
+        self.ccli_login_layout.setObjectName('ccli_login_layout')
+        self.ccli_username_label = QtWidgets.QLabel(self.ccli_login_group_box)
+        self.ccli_username_label.setObjectName('ccli_username_label')
+        self.ccli_username = QtWidgets.QLineEdit(self.ccli_login_group_box)
+        self.ccli_username.setObjectName('ccli_username')
+        self.ccli_login_layout.addRow(self.ccli_username_label, self.ccli_username)
+        self.ccli_password_label = QtWidgets.QLabel(self.ccli_login_group_box)
+        self.ccli_password_label.setObjectName('ccli_password_label')
+        self.ccli_password = QtWidgets.QLineEdit(self.ccli_login_group_box)
+        self.ccli_password.setEchoMode(QtWidgets.QLineEdit.Password)
+        self.ccli_password.setObjectName('ccli_password')
+        self.ccli_login_layout.addRow(self.ccli_password_label, self.ccli_password)
+        self.left_layout.addWidget(self.ccli_login_group_box)
+
         # Footer group box
         self.footer_group_box = QtWidgets.QGroupBox(self.left_column)
         self.footer_group_box.setObjectName('footer_group_box')
@@ -121,6 +140,9 @@ class SongsTab(SettingsTab):
         self.chords_group_box.setTitle(translate('SongsPlugin.SongsTab', 'Chords'))
         self.disable_chords_import_check_box.setText(translate('SongsPlugin.SongsTab',
                                                                'Ignore chords when importing songs'))
+        self.ccli_login_group_box.setTitle(translate('SongsPlugin.SongsTab', 'SongSelect Login'))
+        self.ccli_username_label.setText(translate('SongsPlugin.SongsTab', 'Username:'))
+        self.ccli_password_label.setText(translate('SongsPlugin.SongsTab', 'Password:'))
         self.chord_notation_label.setText(translate('SongsPlugin.SongsTab', 'Chord notation to use:'))
         self.english_notation_radio_button.setText(translate('SongsPlugin.SongsTab', 'English') + ' (C-D-E-F-G-A-B)')
         self.german_notation_radio_button.setText(translate('SongsPlugin.SongsTab', 'German') + ' (C-D-E-F-G-A-H)')
@@ -222,6 +244,8 @@ class SongsTab(SettingsTab):
             self.neolatin_notation_radio_button.setChecked(True)
         else:
             self.english_notation_radio_button.setChecked(True)
+        self.ccli_username.setText(self.settings.value('songs/songselect username'))
+        self.ccli_password.setText(self.settings.value('songs/songselect password'))
         self.footer_edit_box.setPlainText(self.settings.value('songs/footer template'))
 
     def save(self):
@@ -231,6 +255,19 @@ class SongsTab(SettingsTab):
         self.settings.setValue('songs/enable chords', self.chords_group_box.isChecked())
         self.settings.setValue('songs/disable chords import', self.disable_chords_import)
         self.settings.setValue('songs/chord notation', self.chord_notation)
+        self.settings.setValue('songs/songselect username', self.ccli_username.text())
+        # Only save password if it's blank or the user acknowleges the warning
+        if (self.ccli_password.text() == ''):
+            self.settings.setValue('songs/songselect password', '')
+        elif (self.ccli_password.text() != self.settings.value('songs/songselect password')):
+            answer = QtWidgets.QMessageBox.question(
+                self, translate('SongsPlugin.SongsTab', 'Save Username and Password'),
+                translate('SongsPlugin.SongsTab', 'WARNING: Saving your SongSelect password is INSECURE, '
+                                                  'your password is stored in PLAIN TEXT. Click Yes to save '
+                                                  'your password or No to cancel this.'),
+                defaultButton=QtWidgets.QMessageBox.No)
+            if answer == QtWidgets.QMessageBox.Yes:
+                self.settings.setValue('songs/songselect password', self.ccli_password.text())
         # Only save footer template if it has been changed. This allows future updates
         if self.footer_edit_box.toPlainText() != self.settings.get_default_value('songs/footer template'):
             self.settings.setValue('songs/footer template', self.footer_edit_box.toPlainText())
