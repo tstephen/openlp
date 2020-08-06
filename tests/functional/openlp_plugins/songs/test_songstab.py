@@ -24,7 +24,7 @@ This module contains tests for the lib submodule of the Images plugin.
 import pytest
 from unittest.mock import MagicMock, patch
 
-from PyQt5 import QtCore
+from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.common.registry import Registry
 from openlp.plugins.songs.lib.songstab import SongsTab
@@ -135,6 +135,38 @@ def test_neolatin_notation_button(form):
     assert form.chord_notation == 'neo-latin'
 
 
+@patch('openlp.plugins.songs.lib.songstab.QtWidgets.QMessageBox.question')
+@patch('openlp.core.common.settings.Settings.setValue')
+def test_password_change(mocked_settings_set_val, mocked_question, form):
+    """
+    Test the ccli password sends a warning when changed, and saves when accepted
+    """
+    # GIVEN: Warning is accepted and new password set
+    form.ccli_password.setText('new_password')
+    mocked_question.return_value = QtWidgets.QMessageBox.Yes
+    # WHEN: save is invoked
+    form.save()
+    # THEN: footer should not have been saved (one less call than the change test below)
+    mocked_question.assert_called_once()
+    assert mocked_settings_set_val.call_count == 9
+
+
+@patch('openlp.plugins.songs.lib.songstab.QtWidgets.QMessageBox.question')
+@patch('openlp.core.common.settings.Settings.setValue')
+def test_password_change_cancelled(mocked_settings_set_val, mocked_question, form):
+    """
+    Test the ccli password sends a warning when changed and does not save when cancelled
+    """
+    # GIVEN: Warning is not accepted and new password set
+    form.ccli_password.setText('new_password')
+    mocked_question.return_value = QtWidgets.QMessageBox.No
+    # WHEN: save is invoked
+    form.save()
+    # THEN: footer should not have been saved (one less call than the change test below)
+    mocked_question.assert_called_once()
+    assert mocked_settings_set_val.call_count == 8
+
+
 @patch('openlp.core.common.settings.Settings.setValue')
 def test_footer_nochange(mocked_settings_set_val, form):
     """
@@ -144,7 +176,7 @@ def test_footer_nochange(mocked_settings_set_val, form):
     # WHEN: save is invoked
     form.save()
     # THEN: footer should not have been saved (one less call than the change test below)
-    assert mocked_settings_set_val.call_count == 7
+    assert mocked_settings_set_val.call_count == 9
 
 
 @patch('openlp.core.common.settings.Settings.setValue')
@@ -157,7 +189,7 @@ def test_footer_change(mocked_settings_set_val, form):
     # WHEN: save is invoked
     form.save()
     # THEN: footer should have been saved (one more call to setValue than the nochange test)
-    assert mocked_settings_set_val.call_count == 8
+    assert mocked_settings_set_val.call_count == 10
     assert form.footer_edit_box.toPlainText() == 'A new footer'
 
 
