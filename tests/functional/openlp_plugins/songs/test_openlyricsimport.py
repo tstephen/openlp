@@ -234,3 +234,31 @@ class TestOpenLyricsImport(TestCase, TestMixin):
             # THEN: add_songbook_entry should have been called twice
             assert mocked_song.method_calls[0][1][1] == '48'
             assert mocked_song.method_calls[1][1][1] == '445 A'
+
+    def test_leading_and_trailing_whitespaces_inside_lines_tags_are_removed(self):
+        """
+        Test that leading and trailing whitespace inside <lines> tags and its descendants are removed
+        """
+        # GIVEN: One OpenLyrics XML with extra whitespaces in <lines> tag (Amazing_Grace_1.xml)
+        # and a copy which only difference is that it lacks those whitespaces (Amazing_Grace_2.xml)
+        mocked_manager = MagicMock()
+        mocked_import_wizard = MagicMock()
+        importer = OpenLyricsImport(mocked_manager, file_paths=[])
+        importer.import_wizard = mocked_import_wizard
+        importer.open_lyrics = MagicMock()
+        importer.open_lyrics.xml_to_song = MagicMock()
+
+        # WHEN: Importing the file not having those whitespaces...
+        importer.import_source = [TEST_PATH / 'Amazing_Grace_2.xml']
+        importer.do_import()
+
+        # keep the parsed XML which is assumed to be the first positional argument of the xml_to_song() method
+        importer.open_lyrics.xml_to_song.assert_called()
+        no_whitespaces_xml = importer.open_lyrics.xml_to_song.call_args[0][0]
+
+        # ... and importing the file having those whitespaces
+        importer.import_source = [TEST_PATH / 'Amazing_Grace_1.xml']
+        importer.do_import()
+
+        # THEN: The last call of the xml_to_song() method should have got the same XML content as its first call
+        importer.open_lyrics.xml_to_song.assert_called_with(no_whitespaces_xml)
