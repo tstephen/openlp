@@ -26,7 +26,7 @@ import pytest
 from pathlib import Path
 from unittest.mock import Mock, MagicMock, patch
 
-from openlp.core.common import ThemeLevel
+from openlp.core.common import ThemeLevel, is_win
 from openlp.core.common.enum import ServiceItemType
 from openlp.core.common.registry import Registry
 from openlp.core.lib.formattingtags import FormattingTags
@@ -563,16 +563,21 @@ def test_to_dict_text_item(state_media, settings, service_item_env):
     service_item.add_icon = MagicMock()
     FormattingTags.load_tags()
     line = convert_file_service_item(TEST_PATH, 'serviceitem-song-linked-audio.osj')
-    service_item.set_from_service(line, Path('/test/'))
+    if is_win():
+        fake_path = Path('c:\\test\\')
+    else:
+        fake_path = Path('/test/')
+    service_item.set_from_service(line, fake_path)
 
     # WHEN: to_dict() is called
     result = service_item.to_dict()
 
     # THEN: The correct dictionary should be returned
+    expected_fake_path = str(fake_path / 'amazing_grace.mp3')
     expected_dict = {
 
         'audit': ['Amazing Grace', ['John Newton'], '', ''],
-        'backgroundAudio': ['/test/amazing_grace.mp3'],
+        'backgroundAudio': [expected_fake_path],
         'capabilities': [2, 1, 5, 8, 9, 13, 15],
         'footer': ['Amazing Grace', 'Written by: John Newton'],
         'fromPlugin': False,

@@ -234,7 +234,10 @@ class PresentationMediaItem(MediaManagerItem):
             self.application.set_busy_cursor()
             self.main_window.display_progress_bar(len(row_list))
             for item in items:
-                self.clean_up_thumbnails(item.data(QtCore.Qt.UserRole))
+                file_path = item.data(QtCore.Qt.UserRole)
+                # cleaning thumbnails depends on being able to calculate sha256 hash of the actual file
+                if file_path.exists():
+                    self.clean_up_thumbnails(file_path)
                 self.main_window.increment_progress_bar()
             self.main_window.finished_progress_bar()
             for row in row_list:

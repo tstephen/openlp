@@ -85,7 +85,12 @@ def upgrade_3(session, metadata):
         thumb_path = AppLocation.get_data_path() / 'images' / 'thumbnails'
         for row in results.fetchall():
             file_path = json.loads(row.file_path, cls=OpenLPJSONDecoder)
-            hash = sha256_file_hash(file_path)
+            if file_path.exists():
+                hash = sha256_file_hash(file_path)
+            else:
+                log.warning('{image} does not exists, so no sha256 hash added.'.format(image=str(file_path)))
+                # set a fake "hash" to allow for the upgrade to go through. The image will be marked as invalid
+                hash = 'NONE'
             sql = 'UPDATE image_filenames SET file_hash = \'{hash}\' WHERE id = {id}'.format(hash=hash, id=row.id)
             conn.execute(sql)
             # rename thumbnail to use file hash
