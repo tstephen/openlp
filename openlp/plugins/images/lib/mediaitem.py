@@ -575,6 +575,7 @@ class ImageMediaItem(MediaManagerItem):
         service_item.theme = -1
         missing_items_file_names = []
         images = []
+        existing_images = []
         # Expand groups to images
         for bitem in items:
             if isinstance(bitem.data(0, QtCore.Qt.UserRole), ImageGroups) or bitem.data(0, QtCore.Qt.UserRole) is None:
@@ -590,8 +591,10 @@ class ImageMediaItem(MediaManagerItem):
         for image in images:
             if not image.file_path.exists():
                 missing_items_file_names.append(str(image.file_path))
+            else:
+                existing_images.append(image)
         # We cannot continue, as all images do not exist.
-        if not images:
+        if not existing_images:
             if not remote:
                 critical_error_message_box(
                     translate('ImagePlugin.MediaItem', 'Missing Image(s)'),
@@ -607,7 +610,7 @@ class ImageMediaItem(MediaManagerItem):
                 QtWidgets.QMessageBox.No:
             return False
         # Continue with the existing images.
-        for image in images:
+        for image in existing_images:
             name = image.file_path.name
             thumbnail_path = self.generate_thumbnail_path(image)
             service_item.add_from_image(image.file_path, name, thumbnail_path)
