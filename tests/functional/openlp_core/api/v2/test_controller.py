@@ -18,9 +18,10 @@
 # You should have received a copy of the GNU General Public License      #
 # along with this program.  If not, see <https://www.gnu.org/licenses/>. #
 ##########################################################################
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 from openlp.core.common.registry import Registry
+from pathlib import Path
 
 
 def test_retrieve_live_item(flask_client, settings):
@@ -150,16 +151,21 @@ def test_controller_get_themes_retrieves_themes_list(flask_client, settings):
     assert type(res) is list
 
 
-def test_controller_get_themes_retrieves_themes_list_service(flask_client, settings):
+@patch('openlp.core.api.versions.v2.controller.image_to_data_uri')
+def test_controller_get_themes_retrieves_themes_list_service(mocked_image_to_data_uri, flask_client, settings):
     settings.setValue('themes/theme level', 2)
+    mocked_theme_manager = MagicMock()
+    mocked_theme_manager.theme_path = Path()
     mocked_service_manager = MagicMock()
     mocked_service_manager.service_theme = 'test_theme'
-    Registry().register('theme_manager', MagicMock())
+    Registry().register('theme_manager', mocked_theme_manager)
     Registry().register('service_manager', mocked_service_manager)
     Registry().register_function('get_theme_names', MagicMock(side_effect=[['theme1', 'test_theme', 'theme2']]))
+    mocked_image_to_data_uri.return_value = ''
     res = flask_client.get('api/v2/controller/themes').get_json()
-    assert res == [{'name': 'theme1', 'selected': False}, {'name': 'test_theme', 'selected': True},
-                   {'name': 'theme2', 'selected': False}]
+    assert res == [{'thumbnail': '', 'name': 'theme1', 'selected': False},
+                   {'thumbnail': '', 'name': 'test_theme', 'selected': True},
+                   {'thumbnail': '', 'name': 'theme2', 'selected': False}]
 
 
 def test_controller_get_theme_data(flask_client, settings):
