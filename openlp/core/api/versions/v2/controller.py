@@ -23,6 +23,7 @@ import logging
 from openlp.core.api.lib import login_required
 from openlp.core.common import ThemeLevel
 from openlp.core.common.registry import Registry
+from openlp.core.lib import image_to_data_uri
 
 from flask import jsonify, request, abort, Blueprint, Response
 
@@ -133,9 +134,14 @@ def get_themes():
     themes = Registry().execute('get_theme_names')
     try:
         for theme in themes[0]:
+            # Gets the background path, get the thumbnail from it, and encode it to a base64 data uri
+            theme_path = Registry().get('theme_manager').theme_path
+            encoded_thumb = image_to_data_uri(theme_path / 'thumbnails' / '{file_name}.png'.format(file_name=theme))
+            # Append the theme to the list
             theme_list.append({
                 'name': theme,
-                'selected': False
+                'selected': False,
+                'thumbnail': encoded_thumb
             })
         for i in theme_list:
             if i["name"] == current_theme:
