@@ -120,6 +120,10 @@ class PresentationPlugin(Plugin):
         extension_loader(glob_pattern, ['presentationcontroller.py'])
         controller_classes = PresentationController.__subclasses__()
         for controller_class in controller_classes:
+            # Don't use classes marked as base
+            if hasattr(controller_class, 'base_class') and controller_class.base_class:
+                controller_classes.extend(controller_class.__subclasses__())
+                continue
             controller = controller_class(self)
             self.register_controllers(controller)
         return bool(self.controllers)

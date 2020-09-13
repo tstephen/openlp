@@ -286,6 +286,8 @@ class Settings(QtCore.QSettings):
         'presentations/Impress': QtCore.Qt.Checked,
         'presentations/Powerpoint': QtCore.Qt.Checked,
         'presentations/Pdf': QtCore.Qt.Checked,
+        'presentations/Keynote': QtCore.Qt.Checked,
+        'presentations/PowerPointMac': QtCore.Qt.Checked,
         'presentations/presentations files': [],
         'presentations/thumbnail_scheme': '',
         'presentations/powerpoint slide click advance': QtCore.Qt.Unchecked,
