@@ -119,6 +119,7 @@ class ThemeForm(QtWidgets.QWizard, Ui_ThemeWizard, RegistryProperties):
         # Make sure we don't resize before the widgets are actually created
         if hasattr(self, 'preview_area_layout'):
             self.preview_area_layout.set_aspect_ratio(self.display_aspect_ratio)
+            self.application.process_events()
             self.preview_box.set_scale(float(self.preview_box.width()) / self.renderer.width())
 
     def validateCurrentPage(self):
@@ -160,15 +161,8 @@ class ThemeForm(QtWidgets.QWizard, Ui_ThemeWizard, RegistryProperties):
         self.setOption(QtWidgets.QWizard.HaveCustomButton1, enabled)
         if self.page(page_id) == self.preview_page:
             self.update_theme()
-            self.preview_box.set_theme(self.theme, service_item_type=ServiceItemType.Text)
-            self.preview_box.clear_slides()
-            self.preview_box.set_scale(float(self.preview_box.width()) / self.renderer.width())
-            try:
-                self.display_aspect_ratio = self.renderer.width() / self.renderer.height()
-            except ZeroDivisionError:
-                self.display_aspect_ratio = 1
-            self.preview_area_layout.set_aspect_ratio(self.display_aspect_ratio)
             self.resizeEvent()
+            self.preview_box.clear_slides()
             self.preview_box.show()
             self.preview_box.generate_preview(self.theme, False, False)
 

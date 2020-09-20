@@ -24,7 +24,6 @@ Test the ThemeForm class and related methods.
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 
-from openlp.core.common.enum import ServiceItemType
 from openlp.core.common.registry import Registry
 from openlp.core.lib.theme import BackgroundType
 from openlp.core.ui.themeform import ThemeForm
@@ -266,12 +265,8 @@ def test_on_current_id_changed_preview(mocked_setup, settings):
 
     # THEN: The right options should have been set
     theme_form.update_theme.assert_called_once()
-    theme_form.preview_box.set_theme.assert_called_once_with('my fake theme',
-                                                             service_item_type=ServiceItemType.Text)
-    theme_form.preview_box.clear_slides.assert_called_once()
-    theme_form.preview_box.set_scale.assert_called_once_with(float(300 / 1920))
-    theme_form.preview_area_layout.set_aspect_ratio(16 / 9)
     theme_form.resizeEvent.assert_called_once()
+    theme_form.preview_box.clear_slides.assert_called_once()
     theme_form.preview_box.show.assert_called_once()
     theme_form.preview_box.generate_preview.assert_called_once_with('my fake theme', False, False)
 

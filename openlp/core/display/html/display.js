@@ -701,6 +701,8 @@ var Display = {
     var html = _prepareText(text);
     slide = document.createElement("section");
     slide.setAttribute("id", verse);
+    // The "future" class is used internally by reveal, it's used here to hide newly added slides
+    slide.classList.add("future");
     slide.innerHTML = html;
     return slide;
   },

@@ -568,6 +568,16 @@ describe("Display.setTextSlide", function () {
     expect($(".slides > section > section")[0].innerHTML).toEqual(_prepareText(text));
     expect(Display.reinit).toHaveBeenCalledTimes(1); // only called once for the first setTextSlide
   });
+
+  it("should give the new slide the future class", function () {
+    var text = "That saved a wretch\nlike me";
+    spyOn(Display, "reinit");
+    Display.setTextSlide("Amazing grace,\nhow sweet the sound");
+
+    Display.setTextSlide(text);
+
+    expect($(".slides > section > section")[0].classList.contains("future")).toEqual(true);
+  });
 });
 
 describe("Display.setTextSlides", function () {

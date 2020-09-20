@@ -697,16 +697,16 @@ def test_theme_change_global(mocked_regenerate_service_items, registry):
     """
     Test that when a Toolbar theme combobox displays correctly when the theme is set to Global
     """
-    # GIVEN: A service manager, a service to display with a theme level in the renderer
-    mocked_renderer = MagicMock()
+    # GIVEN: A service manager, settings set to Global theme
     service_manager = ServiceManager(None)
-    Registry().register('renderer', mocked_renderer)
     service_manager.toolbar = OpenLPToolbar(None)
     service_manager.toolbar.add_toolbar_action('theme_combo_box', triggers=MagicMock())
     service_manager.toolbar.add_toolbar_action('theme_label', triggers=MagicMock())
+    mocked_settings = MagicMock()
+    mocked_settings.value.return_value = ThemeLevel.Global
+    Registry().register('settings', mocked_settings)
 
-    # WHEN: The service manager has a Global theme
-    mocked_renderer.theme_level = ThemeLevel.Global
+    # WHEN: theme_change is called
     service_manager.theme_change()
 
     # THEN: The the theme toolbar should not be visible
@@ -719,16 +719,16 @@ def test_theme_change_service(mocked_regenerate_service_items, registry):
     """
     Test that when a Toolbar theme combobox displays correctly when the theme is set to Theme
     """
-    # GIVEN: A service manager, a service to display with a theme level in the renderer
-    mocked_renderer = MagicMock()
+    # GIVEN: A service manager, settings set to Service theme
     service_manager = ServiceManager(None)
-    Registry().register('renderer', mocked_renderer)
     service_manager.toolbar = OpenLPToolbar(None)
     service_manager.toolbar.add_toolbar_action('theme_combo_box', triggers=MagicMock())
     service_manager.toolbar.add_toolbar_action('theme_label', triggers=MagicMock())
+    mocked_settings = MagicMock()
+    mocked_settings.value.return_value = ThemeLevel.Service
+    Registry().register('settings', mocked_settings)
 
-    # WHEN: The service manager has a Service theme
-    mocked_renderer.theme_level = ThemeLevel.Service
+    # WHEN: theme_change is called
     service_manager.theme_change()
 
     # THEN: The the theme toolbar should be visible
@@ -741,18 +741,18 @@ def test_theme_change_song(mocked_regenerate_service_items, registry):
     """
     Test that when a Toolbar theme combobox displays correctly when the theme is set to Song
     """
-    # GIVEN: A service manager, a service to display with a theme level in the renderer
-    mocked_renderer = MagicMock()
+    # GIVEN: A service manager, settings set to Song theme
     service_manager = ServiceManager(None)
-    Registry().register('renderer', mocked_renderer)
     service_manager.toolbar = OpenLPToolbar(None)
     service_manager.toolbar.add_toolbar_action('theme_combo_box', triggers=MagicMock())
     service_manager.toolbar.add_toolbar_action('theme_label', triggers=MagicMock())
+    mocked_settings = MagicMock()
+    mocked_settings.value.return_value = ThemeLevel.Song
+    Registry().register('settings', mocked_settings)
 
-    # WHEN: The service manager has a Song theme
-    mocked_renderer.theme_level = ThemeLevel.Song
+    # WHEN: theme_change is called
     service_manager.theme_change()
 
-    # THEN: The the theme toolbar should  be visible
+    # THEN: The the theme toolbar should be visible
     assert service_manager.toolbar.actions['theme_combo_box'].isVisible() is True, \
         'The visibility should be True'

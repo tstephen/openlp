@@ -597,7 +597,6 @@ def test_play(mocked_get_vlc, mocked_threading):
     mocked_thread.start.assert_called_with()
     mocked_volume.assert_called_with(mocked_controller, 100)
     assert MediaState.Playing == vlc_player.get_live_state()
-    mocked_controller.vlc_widget.raise_.assert_called_with()
     assert result is True, 'The value returned from play() should be True'
 
 
@@ -667,7 +666,6 @@ def test_play_dvd(mocked_get_vlc, mocked_threading):
     mocked_controller.vlc_media_player.video_set_spu.assert_called_with(1)
     mocked_volume.assert_called_with(mocked_controller, 100)
     assert MediaState.Playing == vlc_player.get_live_state()
-    mocked_controller.vlc_widget.raise_.assert_called_with()
     assert result is True, 'The value returned from play() should be True'
 
 

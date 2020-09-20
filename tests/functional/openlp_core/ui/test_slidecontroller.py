@@ -794,6 +794,7 @@ def test_process_item(mocked_execute, registry):
     mocked_main_window = MagicMock()
     Registry().register('main_window', mocked_main_window)
     Registry().register('media_controller', MagicMock())
+    Registry().register('application', MagicMock())
     slide_controller = SlideController(None)
     slide_controller.service_item = mocked_pres_item
     slide_controller.is_live = False

@@ -981,6 +981,10 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
             if self.service_item.is_command():
                 self.preview_display.load_verses(media_empty_song, True)
             self.on_media_start(self.service_item)
+            # Let media window init, then put webengine back on top
+            self.application.process_events()
+            for display in self.displays:
+                display.raise_()
         self.slide_selected(True)
         if self.service_item.from_service:
             self.preview_widget.setFocus()
