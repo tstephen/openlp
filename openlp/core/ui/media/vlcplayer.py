@@ -287,7 +287,6 @@ class VlcPlayer(MediaPlayer):
             controller.vlc_media_player.set_time(int(start_time))
         controller.seek_slider.setMaximum(controller.media_info.length)
         self.set_state(MediaState.Playing, controller)
-        controller.vlc_widget.raise_()
         return True
 
     def pause(self, controller):

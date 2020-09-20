@@ -27,7 +27,6 @@ import mako
 import math
 import os
 import re
-import time
 
 from PyQt5 import QtWidgets, QtGui
 
@@ -823,12 +822,9 @@ class ThemePreviewRenderer(DisplayWindow, LogMixin):
         Save a screenshot, either returning it or saving it to file. Do some extra work to actually get a picture.
         """
         self.setVisible(True)
+        QtWidgets.QApplication.instance().processEvents()
+        wait_for(lambda: False, timeout=1)
         pixmap = self.grab()
-        for i in range(0, 4):
-            QtWidgets.QApplication.instance().processEvents()
-            time.sleep(0.05)
-            QtWidgets.QApplication.instance().processEvents()
-            pixmap = self.grab()
         self.setVisible(False)
         pixmap = QtGui.QPixmap(self.webview.size())
         self.webview.render(pixmap)
