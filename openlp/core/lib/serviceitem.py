@@ -309,7 +309,7 @@ class ServiceItem(RegistryProperties):
             verse_tag = verse_tag.upper()
         else:
             # For items that don't have a verse tag, autoincrement the slide numbers
-            verse_tag = str(len(self.slides))
+            verse_tag = str(len(self.slides) + 1)
         self.service_item_type = ServiceItemType.Text
         title = text[:30].split('\n')[0]
         self.slides.append({'title': title, 'text': text, 'verse': verse_tag})
@@ -897,8 +897,13 @@ class ServiceItem(RegistryProperties):
                         Registry().get('settings_thread').value('api/thumbnails'):
                     # If the file is under our app directory tree send the portion after the match
                     data_path = str(AppLocation.get_data_path())
-                    if frame['image'][0:len(data_path)] == data_path:
-                        item['img'] = urllib.request.pathname2url(frame['image'][len(data_path):])
+                    try:
+                        relative_file = frame['image'].relative_to(data_path)
+                    except ValueError:
+                        log.warning('Service item "{title}" is missing a thumbnail or has an invalid thumbnail path'
+                                    .format(title=self.title))
+                    else:
+                        item['img'] = urllib.request.pathname2url(os.path.sep + str(relative_file))
                 item['text'] = str(frame['title'])
                 item['html'] = str(frame['title'])
             data_dict['slides'].append(item)

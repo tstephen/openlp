@@ -24,7 +24,7 @@ Package to test the openlp.core.lib package.
 import os
 import pytest
 from pathlib import Path
-from unittest.mock import Mock, MagicMock, patch
+from unittest.mock import Mock, MagicMock, patch, ANY
 
 from openlp.core.common import ThemeLevel, is_win
 from openlp.core.common.enum import ServiceItemType
@@ -278,6 +278,26 @@ def test_service_item_load_image_from_local_service(mocked_get_section_data_path
         'This service item should be able to be run in a can be made to Loop'
     assert service_item.is_capable(ItemCapabilities.CanAppend) is True, \
         'This service item should be able to have new items added to it'
+
+
+def test_add_from_text_no_verse_tag():
+    """
+    Test the Service Item - adding text slides with no verse tag
+    """
+    # GIVEN: A service item and two slides
+    service_item = ServiceItem(None)
+    slide1 = "This is the first slide"
+    slide2 = "This is the second slide"
+
+    # WHEN: adding text slides to service_item
+    service_item.add_from_text(slide1)
+    service_item.add_from_text(slide2)
+
+    # THEN: Slides should be added with correctly numbered verse tags (Should start at 1)
+    assert service_item.slides == [
+        {'text': 'This is the first slide', 'title': 'This is the first slide', 'verse': '1'},
+        {'text': 'This is the second slide', 'title': 'This is the second slide', 'verse': '2'}
+    ]
 
 
 def test_add_from_command_for_a_presentation():
@@ -747,7 +767,8 @@ def test_to_dict_image_item(state_media, settings, service_item_env):
     assert result == expected_dict
 
 
-def test_to_dict_presentation_item(state_media, settings, service_item_env):
+@patch('openlp.core.lib.serviceitem.AppLocation.get_data_path')
+def test_to_dict_presentation_item(mocked_get_data_path, state_media, settings, service_item_env):
     """
     Test that the to_dict() method returns the correct data for the service item
     """
@@ -755,7 +776,9 @@ def test_to_dict_presentation_item(state_media, settings, service_item_env):
     mocked_plugin = MagicMock()
     mocked_plugin.name = 'presentations'
     service_item = ServiceItem(mocked_plugin)
+    service_item.capabilities = [ItemCapabilities.HasThumbnails]
     presentation_name = 'test.pptx'
+    mocked_get_data_path.return_value = Path('/path/to/')
     image = Path('thumbnails/abcd/slide1.png')
     display_title = 'DisplayTitle'
     notes = 'Note1\nNote2\n'
@@ -764,7 +787,7 @@ def test_to_dict_presentation_item(state_media, settings, service_item_env):
     with patch('openlp.core.lib.serviceitem.sha256_file_hash') as mocked_sha256_file_hash,\
             patch('openlp.core.lib.serviceitem.AppLocation.get_section_data_path') as mocked_get_section_data_path:
         mocked_sha256_file_hash.return_value = '4a067fed6834ea2bc4b8819f11636365'
-        mocked_get_section_data_path.return_value = Path('.')
+        mocked_get_section_data_path.return_value = Path('/path/to/presentations/')
         service_item.add_from_command(TEST_PATH, presentation_name, image, display_title, notes)
 
     # WHEN: to_dict() is called
@@ -774,7 +797,7 @@ def test_to_dict_presentation_item(state_media, settings, service_item_env):
     expected_dict = {
         'audit': '',
         'backgroundAudio': [],
-        'capabilities': [],
+        'capabilities': [21],
         'footer': [],
         'fromPlugin': False,
         'isThemeOverwritten': False,
@@ -786,7 +809,8 @@ def test_to_dict_presentation_item(state_media, settings, service_item_env):
                 'selected': False,
                 'tag': 1,
                 'text': 'test.pptx',
-                'title': ''
+                'title': '',
+                'img': ANY
             }
         ],
         'theme': None,
