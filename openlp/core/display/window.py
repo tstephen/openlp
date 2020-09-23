@@ -275,7 +275,7 @@ class DisplayWindow(QtWidgets.QWidget, RegistryProperties, LogMixin):
         :param script: The script to run, a string
         :param is_sync: Run the script synchronously. Defaults to False
         """
-        log.debug(script)
+        log.debug((script[:80] + '..') if len(script) > 80 else script)
         # Wait for previous scripts to finish
         wait_for(lambda: self.__script_done)
         if is_sync:
