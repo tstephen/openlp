@@ -22,7 +22,11 @@
 This module is for controlling keynote.
 """
 import logging
-import applescript
+try:
+    import applescript
+    APPLESCRIPT_AVAILABLE = True
+except ImportError:
+    APPLESCRIPT_AVAILABLE = False
 
 try:
     import fitz
@@ -277,13 +281,14 @@ class PowerPointMacController(AppleScriptBaseController):
         """
         log.debug('Initialising')
         super(PowerPointMacController, self).__init__(plugin, 'PowerPointMac', PowerPointMacDocument)
-        # Compiled script expected to be set by subclasses
-        try:
-            self.applescript = applescript.AppleScript(POWERPOINT_MAC_APPLESCRIPT)
-        except applescript.ScriptError:
-            log.exception('Compilation of Powerpoint applescript failed')
-        self.supports = ['ppt', 'pps', 'pptx', 'ppsx', 'pptm']
-        self.also_supports = ['odp']
+        if APPLESCRIPT_AVAILABLE:
+            # Compiled script expected to be set by subclasses
+            try:
+                self.applescript = applescript.AppleScript(POWERPOINT_MAC_APPLESCRIPT)
+            except applescript.ScriptError:
+                log.exception('Compilation of Powerpoint applescript failed')
+            self.supports = ['ppt', 'pps', 'pptx', 'ppsx', 'pptm']
+            self.also_supports = ['odp']
 
     def check_available(self):
         """

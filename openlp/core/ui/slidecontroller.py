@@ -29,6 +29,7 @@ from threading import Lock
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+from openlp.core.state import State
 from openlp.core.common import SlideLimits
 from openlp.core.common.actions import ActionList, CategoryOrder
 from openlp.core.common.i18n import UiStrings, translate
@@ -1469,24 +1470,26 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
 
     def on_media_start(self, item):
         """
-        Respond to the arrival of a media service item
+        Respond to the arrival of a media service item but only run if we have media
 
         :param item: The service item to be processed
         """
-        if self.is_live and self.get_hide_mode() == HideMode.Theme:
-            self.media_controller.load_video(self.controller_type, item, HideMode.Blank)
-            self.set_hide_mode(HideMode.Blank)
-        elif self.is_live or item.is_media():
-            # avoid loading the video if this is preview and the media is background
-            self.media_controller.load_video(self.controller_type, item, self.get_hide_mode())
-        if not self.is_live:
-            self.preview_display.show()
+        if State().check_preconditions('media'):
+            if self.is_live and self.get_hide_mode() == HideMode.Theme:
+                self.media_controller.load_video(self.controller_type, item, HideMode.Blank)
+                self.set_hide_mode(HideMode.Blank)
+            elif self.is_live or item.is_media():
+                # avoid loading the video if this is preview and the media is background
+                self.media_controller.load_video(self.controller_type, item, self.get_hide_mode())
+            if not self.is_live:
+                self.preview_display.show()
 
     def on_media_close(self):
         """
-        Respond to a request to close the Video
+        Respond to a request to close the Video if we have media
         """
-        self.media_controller.media_reset(self)
+        if State().check_preconditions('media'):
+            self.media_controller.media_reset(self)
 
     def _reset_blank(self, no_theme):
         """
