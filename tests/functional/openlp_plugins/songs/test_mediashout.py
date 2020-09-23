@@ -117,6 +117,41 @@ class TestMediaShoutImport(TestCase):
         mocked_process_song.assert_called_once_with(song, [verse], [play_order], [theme, group])
 
     @patch('openlp.plugins.songs.lib.importers.mediashout.pyodbc')
+    def test_do_import_without_topics(self, mocked_pyodbc):
+        """
+        Test the MediaShoutImport do_import method with the Themes and Groups tables don't exist
+        """
+        SongRecord = namedtuple('SongRecord', 'Record, Title, Author, Copyright, SongID, CCLI, Notes')
+        VerseRecord = namedtuple('VerseRecord', 'Type, Number, Text')
+        PlayOrderRecord = namedtuple('PlayOrderRecord', 'Type, Number, POrder')
+        song = SongRecord(1, 'Amazing Grace', 'William Wilberforce', 'Public Domain', 1, '654321', '')
+        verse = VerseRecord('Verse', 1, 'Amazing grace, how sweet the sound\nThat saved a wretch like me')
+        play_order = PlayOrderRecord('Verse', 1, 1)
+
+        # GIVEN: A MediaShoutImport instance and a bunch of stuff mocked out
+        importer = MediaShoutImport(MagicMock(), file_path='mediashout.db')
+        mocked_cursor = MagicMock()
+        mocked_cursor.fetchall.side_effect = [[song], [verse], [play_order]]
+        mocked_cursor.tables.fetchone.return_value = False
+        mocked_connection = MagicMock()
+        mocked_connection.cursor.return_value = mocked_cursor
+        mocked_pyodbc.connect.return_value = mocked_connection
+
+        # WHEN: do_import is called
+        with patch.object(importer, 'import_wizard'), \
+                patch.object(importer, 'process_song') as mocked_process_song:
+            importer.do_import()
+
+        # THEN: The songs should have been imported
+        expected_execute_calls = [
+            call('SELECT Record, Title, Author, Copyright, SongID, CCLI, Notes FROM Songs ORDER BY Title'),
+            call('SELECT Type, Number, Text FROM Verses WHERE Record = ? ORDER BY Type, Number', 1.0),
+            call('SELECT Type, Number, POrder FROM PlayOrder WHERE Record = ? ORDER BY POrder', 1.0)
+        ]
+        assert expected_execute_calls == mocked_cursor.execute.call_args_list
+        mocked_process_song.assert_called_once_with(song, [verse], [play_order])
+
+    @patch('openlp.plugins.songs.lib.importers.mediashout.pyodbc')
     def test_do_import_breaks_on_stop(self, mocked_pyodbc):
         """
         Test the MediaShoutImport do_import stops when the user presses the cancel button

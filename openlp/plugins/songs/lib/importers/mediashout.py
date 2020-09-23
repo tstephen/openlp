@@ -76,13 +76,15 @@ class MediaShoutImport(SongImport):
             cursor.execute('SELECT Type, Number, POrder FROM PlayOrder WHERE Record = ? ORDER BY POrder',
                            float(song.Record))
             verse_order = cursor.fetchall()
-            if cursor.tables(table='TableName', tableType='TABLE').fetchone():
+            topics = []
+            if cursor.tables(table='Themes', tableType='TABLE').fetchone():
                 cursor.execute('SELECT Name FROM Themes INNER JOIN SongThemes ON SongThemes.ThemeId = Themes.ThemeId '
                                'WHERE SongThemes.Record = ?', float(song.Record))
-                topics = cursor.fetchall()
-            cursor.execute('SELECT Name FROM Groups INNER JOIN SongGroups ON SongGroups.GroupId = Groups.GroupId '
-                           'WHERE SongGroups.Record = ?', float(song.Record))
-            topics += cursor.fetchall()
+                topics += cursor.fetchall()
+            if cursor.tables(table='Groups', tableType='TABLE').fetchone():
+                cursor.execute('SELECT Name FROM Groups INNER JOIN SongGroups ON SongGroups.GroupId = Groups.GroupId '
+                               'WHERE SongGroups.Record = ?', float(song.Record))
+                topics += cursor.fetchall()
             self.process_song(song, verses, verse_order, topics)
 
     def process_song(self, song, verses, verse_order, topics):
