@@ -23,7 +23,11 @@ This module is for controlling keynote.
 """
 import logging
 import shutil
-import applescript
+try:
+    import applescript
+    APPLESCRIPT_AVAILABLE = True
+except ImportError:
+    APPLESCRIPT_AVAILABLE = False
 
 from openlp.plugins.presentations.lib.applescriptbasecontroller import AppleScriptBaseController,\
     AppleScriptBaseDocument
@@ -236,13 +240,14 @@ class KeynoteController(AppleScriptBaseController):
         """
         log.debug('Initialising')
         super(KeynoteController, self).__init__(plugin, 'Keynote', KeynoteDocument)
-        # Compiled script expected to be set by subclasses
-        try:
-            self.applescript = applescript.AppleScript(KEYNOTE_APPLESCRIPT)
-        except applescript.ScriptError:
-            log.exception('Compilation of Keynote applescript failed')
-        self.supports = ['key']
-        self.also_supports = ['ppt', 'pps', 'pptx', 'ppsx', 'pptm']
+        if APPLESCRIPT_AVAILABLE:
+            # Compiled script expected to be set by subclasses
+            try:
+                self.applescript = applescript.AppleScript(KEYNOTE_APPLESCRIPT)
+            except applescript.ScriptError:
+                log.exception('Compilation of Keynote applescript failed')
+            self.supports = ['key']
+            self.also_supports = ['ppt', 'pps', 'pptx', 'ppsx', 'pptm']
 
     def check_available(self):
         """

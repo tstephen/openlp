@@ -25,6 +25,7 @@ from unittest.mock import MagicMock, patch, sentinel
 
 from PyQt5 import QtCore, QtGui
 
+from openlp.core.state import State
 from openlp.core.common.registry import Registry
 from openlp.core.lib import ServiceItemAction
 from openlp.core.ui import HideMode
@@ -771,7 +772,7 @@ def test_reload_theme(mock_settings):
 
 
 @patch.object(Registry, 'execute')
-def test_process_item(mocked_execute, registry):
+def test_process_item(mocked_execute, registry, state_media):
     """
     Test that presentation service-items is closed when followed by a media service-item
     """
@@ -816,6 +817,100 @@ def test_process_item(mocked_execute, registry):
     assert 1 == mocked_execute.call_count, 'Execute should have been called 2 times'
     assert 'mocked_presentation_item_stop' == mocked_execute.call_args_list[0][0][0], \
         'The presentation should have been stopped.'
+
+
+@patch.object(Registry, 'execute')
+def test_process_item_song_vlc(mocked_execute, registry, state_media):
+    """
+    Test that media is started if VLC is present.
+    """
+    # GIVEN: A mocked presentation service item, a mocked media service item, a mocked Registry.execute
+    #        and a slide controller with many mocks.
+    mocked_pres_item = MagicMock()
+    mocked_pres_item.name = 'mocked_song_item'
+    mocked_pres_item.is_command.return_value = False
+    mocked_pres_item.is_media.return_value = True
+    mocked_pres_item.is_image.return_value = False
+    mocked_pres_item.from_service = False
+    mocked_pres_item.get_frames.return_value = []
+    mocked_media_item = MagicMock()
+    mocked_media_item.name = 'mocked_media_item'
+    mocked_media_item.is_command.return_value = True
+    mocked_media_item.is_media.return_value = True
+    mocked_media_item.is_image.return_value = False
+    mocked_media_item.from_service = False
+    mocked_media_item.get_frames.return_value = []
+    mocked_main_window = MagicMock()
+    Registry().register('main_window', mocked_main_window)
+    Registry().register('media_controller', MagicMock())
+    Registry().register('application', MagicMock())
+    slide_controller = SlideController(None)
+    slide_controller.service_item = mocked_pres_item
+    slide_controller.is_live = False
+    slide_controller.preview_widget = MagicMock()
+    slide_controller.preview_display = MagicMock()
+    slide_controller.enable_tool_bar = MagicMock()
+    slide_controller.slide_selected = MagicMock()
+    slide_controller.on_stop_loop = MagicMock()
+    slide_controller.info_label = MagicMock()
+    slide_controller.displays = [MagicMock()]
+    slide_controller.split = 0
+    slide_controller.type_prefix = 'test'
+
+    # WHEN: _process_item is called
+    slide_controller._process_item(mocked_media_item, 0)
+
+    # THEN: Registry.execute should have been called to stop the presentation
+    assert 1 == slide_controller.media_controller.load_video.call_count, ' Load_video should have been called 1 times'
+    assert 2 == slide_controller.preview_display.load_verses.call_count, 'Execute should have been called 2 times'
+
+
+@patch.object(Registry, 'execute')
+def test_process_item_song_no_vlc(mocked_execute, registry, state_media):
+    """
+    Test that media is started if VLC is present.
+    """
+    # GIVEN: A mocked presentation service item, a mocked media service item, a mocked Registry.execute
+    #        and a slide controller with many mocks.
+    State().update_pre_conditions("media", False)
+    State().flush_preconditions()
+    mocked_pres_item = MagicMock()
+    mocked_pres_item.name = 'mocked_song_item'
+    mocked_pres_item.is_command.return_value = False
+    mocked_pres_item.is_media.return_value = True
+    mocked_pres_item.is_image.return_value = False
+    mocked_pres_item.from_service = False
+    mocked_pres_item.get_frames.return_value = []
+    mocked_media_item = MagicMock()
+    mocked_media_item.name = 'mocked_media_item'
+    mocked_media_item.is_command.return_value = True
+    mocked_media_item.is_media.return_value = True
+    mocked_media_item.is_image.return_value = False
+    mocked_media_item.from_service = False
+    mocked_media_item.get_frames.return_value = []
+    mocked_main_window = MagicMock()
+    Registry().register('main_window', mocked_main_window)
+    Registry().register('media_controller', MagicMock())
+    Registry().register('application', MagicMock())
+    slide_controller = SlideController(None)
+    slide_controller.service_item = mocked_pres_item
+    slide_controller.is_live = False
+    slide_controller.preview_widget = MagicMock()
+    slide_controller.preview_display = MagicMock()
+    slide_controller.enable_tool_bar = MagicMock()
+    slide_controller.slide_selected = MagicMock()
+    slide_controller.on_stop_loop = MagicMock()
+    slide_controller.info_label = MagicMock()
+    slide_controller.displays = [MagicMock()]
+    slide_controller.split = 0
+    slide_controller.type_prefix = 'test'
+
+    # WHEN: _process_item is called
+    slide_controller._process_item(mocked_media_item, 0)
+
+    # THEN: Registry.execute should have been called to stop the presentation
+    assert 0 == slide_controller.media_controller.load_video.call_count, ' Load_video should have been called 0 times'
+    assert 2 == slide_controller.preview_display.load_verses.call_count, 'Execute should have been called 2 times'
 
 
 def test_live_stolen_focus_shortcuts(settings):

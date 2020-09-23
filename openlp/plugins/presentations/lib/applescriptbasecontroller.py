@@ -23,7 +23,12 @@ This module is a base to be used for Mac OS X presentation modules using applesc
 to control presentation application, such as keynote and powerpoint for mac
 """
 import logging
-import applescript
+try:
+    import applescript
+    APPLESCRIPT_AVAILABLE = True
+except ImportError:
+    APPLESCRIPT_AVAILABLE = False
+
 
 from openlp.core.common import is_macosx
 from openlp.core.display.screens import ScreenList
@@ -55,7 +60,8 @@ class AppleScriptBaseController(PresentationController):
         """
         super(AppleScriptBaseController, self).__init__(plugin, name, doc)
         # Script expected to be overwritten by subclasses
-        self.applescript = applescript.AppleScript(DEFAULT_APPLESCRIPT)
+        if APPLESCRIPT_AVAILABLE:
+            self.applescript = applescript.AppleScript(DEFAULT_APPLESCRIPT)
 
     def check_available(self):
         """
