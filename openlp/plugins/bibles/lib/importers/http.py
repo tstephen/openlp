@@ -531,7 +531,7 @@ class CWExtract(RegistryProperties):
         verses = {}
         for verse in verses_div:
             self.application.process_events()
-            verse_number = int(verse.find('strong').contents[0])
+            verse_number = int(verse.find('span', 'verse-number').strong.contents[0])
             verse_span = verse.find('span', class_='verse-%d' % verse_number)
             tags_to_remove = verse_span.find_all(['a', 'sup'])
             for tag in tags_to_remove:
@@ -576,22 +576,25 @@ class CWExtract(RegistryProperties):
         soup = get_soup_for_bible_ref(bible_url)
         if not soup:
             return None
-        h4_tags = soup.find_all('h4', {'class': 'small-header'})
-        if not h4_tags:
-            log.debug('No h4 tags found - did site change?')
+        # Get all <div class="col-md-12"> on the page
+        content_column = soup.find('div', id='content-column')
+        if not content_column:
+            log.error('No div[id=content-column] -- the site must have changed')
+            return None
+        col_md_12_divs = content_column.find_all('div', 'col-md-12')
+        if not col_md_12_divs:
+            log.error('No div[class=col-md-12] -- the site must have changed')
             return None
         bibles = []
-        for h4t in h4_tags:
-            short_name = None
-            if h4t.span:
-                short_name = h4t.span.get_text().strip().lower()
-            else:
-                log.error('No span tag found - did site change?')
-                return None
+        for col_md_12 in col_md_12_divs:
+            # Check if <a><strong><span class="text-muted"> is a direct descendant
+            if not col_md_12.a or not col_md_12.a.strong or not col_md_12.a.strong.span or \
+                    'text-muted' not in col_md_12.a.strong.span['class']:
+                continue
+            short_name = str(col_md_12.a.strong.span.string).strip().lower()
             if not short_name:
                 continue
-            h4t.span.extract()
-            tag_text = h4t.get_text().strip()
+            tag_text = str(col_md_12.a.strong.contents[0]).strip()
             # The names of non-english bibles has their language in parentheses at the end
             if tag_text.endswith(')'):
                 language = tag_text[tag_text.rfind('(') + 1:-1]

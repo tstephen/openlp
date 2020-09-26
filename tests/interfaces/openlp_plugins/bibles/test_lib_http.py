@@ -124,6 +124,35 @@ class TestBibleHTTP(TestCase):
         # THEN: We should get back a valid service item
         assert len(results.verse_list) == 36, 'The book of John should not have had any verses added or removed'
 
+    def test_crosswalk_get_bibles(self):
+        """
+        Test getting list of bibles from Crosswalk.com
+        """
+        # GIVEN: A new Crosswalk extraction class
+        handler = CWExtract()
+
+        # WHEN: downloading bible list from Crosswalk
+        bibles = handler.get_bibles_from_http()
+
+        # THEN: The list should not be None, and some known bibles should be there
+        assert bibles is not None
+        assert ('Giovanni Diodati 1649 (Italian)', 'gdb', 'it') in bibles
+
+    def test_crosswalk_get_verse_text(self):
+        """
+        Test verse text from Crosswalk.com
+        """
+        # GIVEN: A new Crosswalk extraction class
+        handler = CWExtract()
+
+        # WHEN: downloading NIV Genesis from Crosswalk
+        niv_genesis_chapter_one = handler.get_bible_chapter('niv', 'Genesis', 1)
+
+        # THEN: The verse list should contain the verses
+        assert niv_genesis_chapter_one.has_verse_list() is True
+        assert 'In the beginning God created the heavens and the earth.' == niv_genesis_chapter_one.verse_list[1], \
+            'The first chapter of genesis should have been fetched.'
+
     def test_bibleserver_get_bibles(self):
         """
         Test getting list of bibles from BibleServer.com
@@ -167,32 +196,3 @@ class TestBibleHTTP(TestCase):
         # THEN: The list should not be None, and some known bibles should be there
         assert bibles is not None
         assert ('Holman Christian Standard Bible (HCSB)', 'HCSB', 'en') in bibles
-
-    def test_crosswalk_get_bibles(self):
-        """
-        Test getting list of bibles from Crosswalk.com
-        """
-        # GIVEN: A new Crosswalk extraction class
-        handler = CWExtract()
-
-        # WHEN: downloading bible list from Crosswalk
-        bibles = handler.get_bibles_from_http()
-
-        # THEN: The list should not be None, and some known bibles should be there
-        assert bibles is not None
-        assert ('Giovanni Diodati 1649 (Italian)', 'gdb', 'it') in bibles
-
-    def test_crosswalk_get_verse_text(self):
-        """
-        Test verse text from Crosswalk.com
-        """
-        # GIVEN: A new Crosswalk extraction class
-        handler = CWExtract()
-
-        # WHEN: downloading NIV Genesis from Crosswalk
-        niv_genesis_chapter_one = handler.get_bible_chapter('niv', 'Genesis', 1)
-
-        # THEN: The verse list should contain the verses
-        assert niv_genesis_chapter_one.has_verse_list() is True
-        assert 'In the beginning God created the heavens and the earth.' == niv_genesis_chapter_one.verse_list[1], \
-            'The first chapter of genesis should have been fetched.'
