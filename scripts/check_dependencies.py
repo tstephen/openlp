@@ -28,6 +28,7 @@ modules, simply run this script::
     $ ./check_dependencies.py
 
 """
+import importlib
 import os
 import sys
 from distutils.version import LooseVersion
@@ -104,13 +105,13 @@ OPTIONAL_MODULES = [
     ('pyodbc', '(ODBC support)'),
     ('psycopg2', '(PostgreSQL support)'),
     ('enchant', '(spell checker)'),
-    ('fitz', '(executable-independent PDF support)'),
+    ('fitz', '(PyMuPDF - PDF support)'),
     ('pysword', '(import SWORD bibles)'),
     ('uno', '(LibreOffice/OpenOffice support)'),
     # development/testing modules
     ('jenkins', '(access jenkins api)'),
     ('pytest', '(testing framework)'),
-    ('pytest-qt', '(testing framework)'),
+    ('pytestqt', '(testing framework)'),
     ('flake8', '(linter)')
 ]
 
@@ -160,7 +161,7 @@ def check_module(mod, text='', indent='  '):
     space = (31 - len(mod) - len(text)) * ' '
     w(indent + '%s %s...  ' % (mod, text) + space)
     try:
-        __import__(mod)
+        importlib.import_module(mod)
         w('OK')
     except ImportError:
         w('FAIL')
