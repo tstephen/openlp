@@ -66,12 +66,8 @@ def get_screen_resolution():
     Get the screen resolution
     """
     if is_macosx():
-        if IS_CI:
-            return 1024, 76
-        else:
-            from AppKit import NSScreen
-            screen_size = NSScreen.mainScreen().frame().size
-            return screen_size.width, screen_size.height
+        # Magic numbers... don't ask me why
+        return 1024, 768
     elif is_win():
         from win32api import GetSystemMetrics
         return GetSystemMetrics(0), GetSystemMetrics(1)
