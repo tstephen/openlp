@@ -340,7 +340,6 @@ class MessageListener(object):
             item.footer = item_cpy.footer
             item.from_service = item_cpy.from_service
             item.iconic_representation = item_cpy.icon
-            item.image_border = item_cpy.image_border
             item.main = item_cpy.main
             item.theme = item_cpy.theme
             # When presenting PDF/XPS/OXPS, we are using the image presentation code,

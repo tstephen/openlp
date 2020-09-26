@@ -54,12 +54,6 @@ after_test:
           # This is where we create a package using PyInstaller
           # Install PyInstaller 
           python -m pip install --no-warn-script-location pyinstaller
-          # Patch pyinstaller to fix a webengine bundle issue
-          Invoke-WebRequest -Uri "https://raw.githubusercontent.com/pyinstaller/pyinstaller/d08a42c612a91cc320c54f9e812fe967b9c8594a/PyInstaller/hooks/hook-PyQt5.QtWebEngineWidgets.py" -OutFile "hook-PyQt5.QtWebEngineWidgets.py"
-          Invoke-WebRequest -Uri "https://raw.githubusercontent.com/pyinstaller/pyinstaller/91481570517707fc70aa70dca9eb986c61eac35d/PyInstaller/hooks/hook-pkg_resources.py" -OutFile hook-pkg_resources.py
-          $sitePkgFolder = python -c "import sys; site_pkg_folder = next(p for p in sys.path if 'site-packages' in p); print(site_pkg_folder.replace('\\', '/'))"
-          cp hook-PyQt5.QtWebEngineWidgets.py "${sitePkgFolder}/PyInstaller/hooks/hook-PyQt5.QtWebEngineWidgets.py"
-          cp hook-pkg_resources.py "${sitePkgFolder}/PyInstaller/hooks/hook-pkg_resources.py"
           # Some windows only stuff...
           If ($isWindows) {
             # Disabled portable installers - can't figure out how to make them silent
