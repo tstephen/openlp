@@ -93,7 +93,7 @@ class TestMediaShoutImport(TestCase):
         importer = MediaShoutImport(MagicMock(), file_path='mediashout.db')
         mocked_cursor = MagicMock()
         mocked_cursor.fetchall.side_effect = [[song], [verse], [play_order], [theme], [group]]
-        mocked_cursor.tables.fetchone.return_value = True
+        mocked_cursor.tables.return_value.fetchone.return_value = True
         mocked_connection = MagicMock()
         mocked_connection.cursor.return_value = mocked_cursor
         mocked_pyodbc.connect.return_value = mocked_connection
@@ -132,7 +132,7 @@ class TestMediaShoutImport(TestCase):
         importer = MediaShoutImport(MagicMock(), file_path='mediashout.db')
         mocked_cursor = MagicMock()
         mocked_cursor.fetchall.side_effect = [[song], [verse], [play_order]]
-        mocked_cursor.tables.fetchone.return_value = False
+        mocked_cursor.tables.return_value.fetchone.return_value = False
         mocked_connection = MagicMock()
         mocked_connection.cursor.return_value = mocked_cursor
         mocked_pyodbc.connect.return_value = mocked_connection
@@ -149,7 +149,7 @@ class TestMediaShoutImport(TestCase):
             call('SELECT Type, Number, POrder FROM PlayOrder WHERE Record = ? ORDER BY POrder', 1.0)
         ]
         assert expected_execute_calls == mocked_cursor.execute.call_args_list
-        mocked_process_song.assert_called_once_with(song, [verse], [play_order])
+        mocked_process_song.assert_called_once_with(song, [verse], [play_order], [])
 
     @patch('openlp.plugins.songs.lib.importers.mediashout.pyodbc')
     def test_do_import_breaks_on_stop(self, mocked_pyodbc):
