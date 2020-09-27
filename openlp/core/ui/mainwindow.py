@@ -24,8 +24,6 @@ This is the main window, where all the action happens.
 import os
 import shutil
 from datetime import datetime
-from distutils import dir_util
-from distutils.errors import DistutilsFileError
 from pathlib import Path
 from tempfile import gettempdir
 
@@ -1359,9 +1357,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
                 self.show_status_message(
                     translate('OpenLP.MainWindow', 'Copying OpenLP data to new data directory location - {path} '
                               '- Please wait for copy to finish').format(path=self.new_data_path))
-                dir_util.copy_tree(str(old_data_path), str(self.new_data_path))
+                shutil.copytree(str(old_data_path), str(self.new_data_path))
                 self.log_info('Copy successful')
-            except (OSError, DistutilsFileError) as why:
+            except (OSError, shutil.Error) as why:
                 self.application.set_normal_cursor()
                 self.log_exception('Data copy failed {err}'.format(err=str(why)))
                 err_text = translate('OpenLP.MainWindow',
