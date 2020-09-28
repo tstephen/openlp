@@ -20,13 +20,9 @@
 ##########################################################################
 import logging
 
-from openlp.core.common import is_win
 from openlp.core.display.screens import ScreenList
 from openlp.plugins.presentations.lib.presentationcontroller import PresentationController, PresentationDocument
 
-
-if is_win():
-    from subprocess import STARTUPINFO, STARTF_USESHOWWINDOW
 
 try:
     import fitz
@@ -55,31 +51,16 @@ class PdfController(PresentationController):
         super(PdfController, self).__init__(plugin, 'Pdf', PdfDocument)
         self.process = None
         self.supports = ['pdf']
-        self.also_supports = []
-        # Determine whether mudraw or ghostscript is used
-        self.check_installed()
+        self.also_supports = ['xps', 'oxps', 'epub', 'cbz', 'fb2']
 
     def check_available(self):
         """
         PdfController is able to run on this machine.
 
-        :return: True if program to open PDF-files was found, otherwise False.
+        :return: True if PyMuPDF is installed, otherwise False.
         """
         log.debug('check_available Pdf')
-        return self.check_installed()
-
-    def check_installed(self):
-        """
-        Check the viewer is installed.
-
-        :return: True if program to open PDF-files was found, otherwise False.
-        """
-        log.debug('check_installed Pdf')
-        self.also_supports = []
-        if PYMUPDF_AVAILABLE:
-            self.also_supports = ['xps', 'oxps', 'epub', 'cbz', 'fb2']
-            return True
-        return False
+        return PYMUPDF_AVAILABLE
 
     def kill(self):
         """
@@ -111,12 +92,6 @@ class PdfDocument(PresentationDocument):
         self.hidden = False
         self.image_files = []
         self.num_pages = -1
-        # Setup startupinfo options for check_output to avoid console popping up on windows
-        if is_win():
-            self.startupinfo = STARTUPINFO()
-            self.startupinfo.dwFlags |= STARTF_USESHOWWINDOW
-        else:
-            self.startupinfo = None
 
     def load_presentation(self):
         """
