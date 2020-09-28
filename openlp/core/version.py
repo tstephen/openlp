@@ -26,7 +26,6 @@ import platform
 import sys
 from collections import OrderedDict
 from datetime import date
-from distutils.version import LooseVersion
 
 import requests
 from PyQt5 import QtCore
@@ -115,7 +114,8 @@ class VersionWorker(ThreadWorker):
                 retries += 1
         else:
             self.no_internet.emit()
-        if remote_version and LooseVersion(remote_version) > LooseVersion(self.current_version['full']):
+        if remote_version and (QtCore.QVersionNumber.fromString(remote_version) >
+                               QtCore.QVersionNumber.fromString(self.current_version['full'])):
             self.new_version.emit(remote_version)
         self.quit.emit()
 
