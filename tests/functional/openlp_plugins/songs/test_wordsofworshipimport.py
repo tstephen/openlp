@@ -28,44 +28,46 @@ from tests.utils.constants import RESOURCE_PATH
 TEST_PATH = RESOURCE_PATH / 'songs' / 'wordsofworship'
 
 
-class TestWordsOfWorshipFileImport(SongImportTestHelper):
+def test_amazing_grace_song_import(registry):
+    """
+    Test that loading a Words of Worship file works correctly
+    """
+    with SongImportTestHelper('WordsOfWorshipImport', 'wordsofworship') as helper:
+        helper.file_import([TEST_PATH / 'Amazing Grace (6 Verses)_v2_1_2.wow-song'],
+                           helper.load_external_result_data(TEST_PATH / 'Amazing Grace (6 Verses)_v2_1_2.json'))
 
-    def __init__(self, *args, **kwargs):
-        self.importer_class_name = 'WordsOfWorshipImport'
-        self.importer_module_name = 'wordsofworship'
-        super().__init__(*args, **kwargs)
 
-    def test_amazing_grace_song_import(self):
-        """
-        Test that loading a Words of Worship file works correctly
-        """
-        self.file_import([TEST_PATH / 'Amazing Grace (6 Verses)_v2_1_2.wow-song'],
-                         self.load_external_result_data(TEST_PATH / 'Amazing Grace (6 Verses)_v2_1_2.json'))
+def test_when_morning_gilds_song_import(registry):
+    """
+    Test that loading a Words of Worship file v2.0.0 works correctly
+    """
+    with SongImportTestHelper('WordsOfWorshipImport', 'wordsofworship') as helper:
+        helper.file_import([TEST_PATH / 'When morning gilds the skies_v2_0_0.wsg'],
+                           helper.load_external_result_data(TEST_PATH / 'When morning gilds the skies_v2_0_0.json'))
 
-    def test_when_morning_gilds_song_import(self):
-        """
-        Test that loading a Words of Worship file v2.0.0 works correctly
-        """
-        self.file_import([TEST_PATH / 'When morning gilds the skies_v2_0_0.wsg'],
-                         self.load_external_result_data(TEST_PATH / 'When morning gilds the skies_v2_0_0.json'))
 
-    def test_holy_holy_holy_song_import(self):
-        """
-        Test that loading a Words of Worship file works correctly
-        """
-        self.file_import([TEST_PATH / 'Holy Holy Holy Lord God Almighty_v2_1_2.wow-song'],
-                         self.load_external_result_data(TEST_PATH / 'Holy Holy Holy Lord God Almighty_v2_1_2.json'))
+def test_holy_holy_holy_song_import(registry):
+    """
+    Test that loading a Words of Worship file works correctly
+    """
+    with SongImportTestHelper('WordsOfWorshipImport', 'wordsofworship') as helper:
+        helper.file_import([TEST_PATH / 'Holy Holy Holy Lord God Almighty_v2_1_2.wow-song'],
+                           helper.load_external_result_data(TEST_PATH / 'Holy Holy Holy Lord God Almighty_v2_1_2.json'))
 
-    def test_test_song_v2_0_0_song_import(self):
-        """
-        Test that loading a Words of Worship file v2.0.0 works correctly
-        """
-        self.file_import([TEST_PATH / 'Test_Song_v2_0_0.wsg'],
-                         self.load_external_result_data(TEST_PATH / 'Test_Song_v2_0_0.json'))
 
-    def test_test_song_song_import(self):
-        """
-        Test that loading a Words of Worship file v2.1.2 works correctly
-        """
-        self.file_import([TEST_PATH / 'Test_Song_v2_1_2.wow-song'],
-                         self.load_external_result_data(TEST_PATH / 'Test_Song_v2_1_2.json'))
+def test_test_song_v2_0_0_song_import(registry):
+    """
+    Test that loading a Words of Worship file v2.0.0 works correctly
+    """
+    with SongImportTestHelper('WordsOfWorshipImport', 'wordsofworship') as helper:
+        helper.file_import([TEST_PATH / 'Test_Song_v2_0_0.wsg'],
+                           helper.load_external_result_data(TEST_PATH / 'Test_Song_v2_0_0.json'))
+
+
+def test_test_song_song_import(registry):
+    """
+    Test that loading a Words of Worship file v2.1.2 works correctly
+    """
+    with SongImportTestHelper('WordsOfWorshipImport', 'wordsofworship') as helper:
+        helper.file_import([TEST_PATH / 'Test_Song_v2_1_2.wow-song'],
+                           helper.load_external_result_data(TEST_PATH / 'Test_Song_v2_1_2.json'))

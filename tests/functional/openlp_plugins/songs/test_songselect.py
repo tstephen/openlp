@@ -922,16 +922,12 @@ class TestSongSelectForm(TestCase, TestMixin):
         mocked_view_song.assert_called_with()
 
 
-class TestSongSelectFileImport(SongImportTestHelper):
-
-    def __init__(self, *args, **kwargs):
-        self.importer_class_name = 'CCLIFileImport'
-        self.importer_module_name = 'cclifile'
-        super().__init__(*args, **kwargs)
-
-    def test_song_import(self):
-        """
-        Test that loading an OpenSong file works correctly on various files
-        """
-        self.file_import([TEST_PATH / 'TestSong.bin'], self.load_external_result_data(TEST_PATH / 'TestSong-bin.json'))
-        self.file_import([TEST_PATH / 'TestSong.txt'], self.load_external_result_data(TEST_PATH / 'TestSong-txt.json'))
+def test_songselect_file_import():
+    """
+    Test that loading a SongSelect file works correctly on various files
+    """
+    with SongImportTestHelper('CCLIFileImport', 'cclifile') as helper:
+        helper.file_import([TEST_PATH / 'TestSong.bin'],
+                           helper.load_external_result_data(TEST_PATH / 'TestSong-bin.json'))
+        helper.file_import([TEST_PATH / 'TestSong.txt'],
+                           helper.load_external_result_data(TEST_PATH / 'TestSong-txt.json'))

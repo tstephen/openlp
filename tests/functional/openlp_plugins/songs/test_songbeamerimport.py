@@ -25,6 +25,7 @@ from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
 from openlp.core.common.registry import Registry
+from openlp.core.common.settings import Settings
 from openlp.plugins.songs.lib.importers.songbeamer import SongBeamerImport, SongBeamerTypes
 from tests.helpers.songfileimport import SongImportTestHelper
 from tests.utils.constants import RESOURCE_PATH
@@ -33,32 +34,28 @@ from tests.utils.constants import RESOURCE_PATH
 TEST_PATH = RESOURCE_PATH / 'songs' / 'songbeamer'
 
 
-class TestSongBeamerFileImport(SongImportTestHelper):
-
-    def __init__(self, *args, **kwargs):
-        self.importer_class_name = 'SongBeamerImport'
-        self.importer_module_name = 'songbeamer'
-        super(TestSongBeamerFileImport, self).__init__(*args, **kwargs)
-
-    def test_song_import(self):
-        """
-        Test that loading an SongBeamer file works correctly on various files
-        """
+def test_songbeamer_file_import(settings):
+    """
+    Test that loading an SongBeamer file works correctly on various files
+    """
+    with SongImportTestHelper('SongBeamerImport', 'songbeamer') as helper:
         # Mock out the settings - always return False
-        self.settings.value.side_effect = lambda value: True if value == 'songs/enable chords' else False
-        self.file_import([TEST_PATH / 'Amazing Grace.sng'],
-                         self.load_external_result_data(TEST_PATH / 'Amazing Grace.json'))
-        self.file_import([TEST_PATH / 'Lobsinget dem Herrn.sng'],
-                         self.load_external_result_data(TEST_PATH / 'Lobsinget dem Herrn.json'))
-        self.file_import([TEST_PATH / 'When I Call On You.sng'],
-                         self.load_external_result_data(TEST_PATH / 'When I Call On You.json'))
+        Settings().setValue('songs/enable chords', True)
+        helper.file_import([TEST_PATH / 'Amazing Grace.sng'],
+                           helper.load_external_result_data(TEST_PATH / 'Amazing Grace.json'))
+        helper.file_import([TEST_PATH / 'Lobsinget dem Herrn.sng'],
+                           helper.load_external_result_data(TEST_PATH / 'Lobsinget dem Herrn.json'))
+        helper.file_import([TEST_PATH / 'When I Call On You.sng'],
+                           helper.load_external_result_data(TEST_PATH / 'When I Call On You.json'))
 
-    def test_cp1252_encoded_file(self):
-        """
-        Test that a CP1252 encoded file get's decoded properly.
-        """
-        self.file_import([TEST_PATH / 'cp1252song.sng'],
-                         self.load_external_result_data(TEST_PATH / 'cp1252song.json'))
+
+def test_songbeamer_cp1252_encoded_file(settings):
+    """
+    Test that a CP1252 encoded file get's decoded properly.
+    """
+    with SongImportTestHelper('SongBeamerImport', 'songbeamer') as helper:
+        helper.file_import([TEST_PATH / 'cp1252song.sng'],
+                           helper.load_external_result_data(TEST_PATH / 'cp1252song.json'))
 
 
 class TestSongBeamerImport(TestCase):

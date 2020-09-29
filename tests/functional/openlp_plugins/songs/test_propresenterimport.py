@@ -25,34 +25,31 @@ ProPresenter song files into the current installation database.
 from tests.helpers.songfileimport import SongImportTestHelper
 from tests.utils.constants import RESOURCE_PATH
 
-
 TEST_PATH = RESOURCE_PATH / 'songs' / 'propresenter'
 
 
-class TestProPresenterFileImport(SongImportTestHelper):
+def test_pro4_song_import(settings):
+    """
+    Test that loading a ProPresenter 4 file works correctly
+    """
+    with SongImportTestHelper('ProPresenterImport', 'propresenter') as helper:
+        helper.file_import([TEST_PATH / 'Amazing Grace.pro4'],
+                           helper.load_external_result_data(TEST_PATH / 'Amazing Grace.json'))
 
-    def __init__(self, *args, **kwargs):
-        self.importer_class_name = 'ProPresenterImport'
-        self.importer_module_name = 'propresenter'
-        super(TestProPresenterFileImport, self).__init__(*args, **kwargs)
 
-    def test_pro4_song_import(self):
-        """
-        Test that loading a ProPresenter 4 file works correctly
-        """
-        self.file_import([TEST_PATH / 'Amazing Grace.pro4'],
-                         self.load_external_result_data(TEST_PATH / 'Amazing Grace.json'))
+def test_pro5_song_import(settings):
+    """
+    Test that loading a ProPresenter 5 file works correctly
+    """
+    with SongImportTestHelper('ProPresenterImport', 'propresenter') as helper:
+        helper.file_import([TEST_PATH / 'Amazing Grace.pro5'],
+                           helper.load_external_result_data(TEST_PATH / 'Amazing Grace.json'))
 
-    def test_pro5_song_import(self):
-        """
-        Test that loading a ProPresenter 5 file works correctly
-        """
-        self.file_import([TEST_PATH / 'Amazing Grace.pro5'],
-                         self.load_external_result_data(TEST_PATH / 'Amazing Grace.json'))
 
-    def test_pro6_song_import(self):
-        """
-        Test that loading a ProPresenter 6 file works correctly
-        """
-        self.file_import([TEST_PATH / 'Amazing Grace.pro6'],
-                         self.load_external_result_data(TEST_PATH / 'Amazing Grace.json'))
+def test_pro6_song_import(settings):
+    """
+    Test that loading a ProPresenter 6 file works correctly
+    """
+    with SongImportTestHelper('ProPresenterImport', 'propresenter') as helper:
+        helper.file_import([TEST_PATH / 'Amazing Grace.pro6'],
+                           helper.load_external_result_data(TEST_PATH / 'Amazing Grace.json'))
