@@ -272,7 +272,7 @@ class KeynoteController(AppleScriptBaseController):
                     return True
             except ValueError:
                 pass
-            return False
+        return False
 
 
 class KeynoteDocument(AppleScriptBaseDocument):
