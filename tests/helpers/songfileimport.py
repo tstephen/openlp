@@ -73,6 +73,15 @@ class SongImportTestHelper(object):
         self.add_author_patcher.stop()
         self.song_import_patcher.stop()
 
+    def __enter__(self):
+        """Make this class into a context manager"""
+        self.setUp()
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        """Make this class into a context manager"""
+        self.tearDown
+
     def load_external_result_data(self, file_path):
         """
         A method to load and return an object containing the song data from an external file.

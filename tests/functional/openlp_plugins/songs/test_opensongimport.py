@@ -33,30 +33,21 @@ from tests.utils.constants import RESOURCE_PATH
 TEST_PATH = RESOURCE_PATH / 'songs' / 'opensong'
 
 
-class TestOpenSongFileImport(SongImportTestHelper):
-
-    def __init__(self, *args, **kwargs):
-        self.importer_class_name = 'OpenSongImport'
-        self.importer_module_name = 'opensong'
-        super(TestOpenSongFileImport, self).__init__(*args, **kwargs)
-
-    def test_song_import(self):
-        """
-        Test that loading an OpenSong file works correctly on various files
-        """
-        # Mock out the settings - always return False
-        self.settings.value.side_effect = lambda value: True if value == 'songs/enable chords' else False
-        # Do the test import
-        self.file_import([TEST_PATH / 'Amazing Grace'],
-                         self.load_external_result_data(TEST_PATH / 'Amazing Grace.json'))
-        self.file_import([TEST_PATH / 'Beautiful Garden Of Prayer'],
-                         self.load_external_result_data(TEST_PATH / 'Beautiful Garden Of Prayer.json'))
-        self.file_import([TEST_PATH / 'One, Two, Three, Four, Five'],
-                         self.load_external_result_data(TEST_PATH / 'One, Two, Three, Four, Five.json'))
-        self.file_import([TEST_PATH / 'Amazing Grace2'],
-                         self.load_external_result_data(TEST_PATH / 'Amazing Grace.json'))
-        self.file_import([TEST_PATH / 'Amazing Grace with bad CCLI'],
-                         self.load_external_result_data(TEST_PATH / 'Amazing Grace without CCLI.json'))
+def test_opensong_file_import(settings):
+    """
+    Test that loading an OpenSong file works correctly on various files
+    """
+    with SongImportTestHelper('OpenSongImport', 'opensong') as helper:
+        helper.file_import([TEST_PATH / 'Amazing Grace'],
+                           helper.load_external_result_data(TEST_PATH / 'Amazing Grace.json'))
+        helper.file_import([TEST_PATH / 'Beautiful Garden Of Prayer'],
+                           helper.load_external_result_data(TEST_PATH / 'Beautiful Garden Of Prayer.json'))
+        helper.file_import([TEST_PATH / 'One, Two, Three, Four, Five'],
+                           helper.load_external_result_data(TEST_PATH / 'One, Two, Three, Four, Five.json'))
+        helper.file_import([TEST_PATH / 'Amazing Grace2'],
+                           helper.load_external_result_data(TEST_PATH / 'Amazing Grace.json'))
+        helper.file_import([TEST_PATH / 'Amazing Grace with bad CCLI'],
+                           helper.load_external_result_data(TEST_PATH / 'Amazing Grace without CCLI.json'))
 
 
 class TestOpenSongImport(TestCase):

@@ -375,10 +375,10 @@ def resize_image(image_path, width, height, background='#000000', ignore_aspect_
         size = QtCore.QSize(width, height)
     elif image_ratio < resize_ratio:
         # Use the image's height as reference for the new size.
-        size = QtCore.QSize(image_ratio * height, height)
+        size = QtCore.QSize(int(image_ratio * height), height)
     else:
         # Use the image's width as reference for the new size.
-        size = QtCore.QSize(width, 1 / (image_ratio / width))
+        size = QtCore.QSize(width, int(1 / (image_ratio / width)))
     reader.setScaledSize(size)
     preview = reader.read()
     if image_ratio == resize_ratio:

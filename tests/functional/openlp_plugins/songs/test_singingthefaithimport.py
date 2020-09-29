@@ -28,26 +28,20 @@ from tests.utils.constants import RESOURCE_PATH
 TEST_PATH = RESOURCE_PATH / 'songs' / 'singingthefaith'
 
 
-class TestSingingTheFaithFileImport(SongImportTestHelper):
-
-    def __init__(self, *args, **kwargs):
-        self.importer_class_name = 'SingingTheFaithImport'
-        self.importer_module_name = 'singingthefaith'
-        super(TestSingingTheFaithFileImport, self).__init__(*args, **kwargs)
-
-    def test_song_import(self):
-        """
-        Test that loading a Singing The Faith file works correctly on various files
-        """
+def test_singingthefaith_file_import(registry):
+    """
+    Test that loading a Singing The Faith file works correctly on various files
+    """
+    with SongImportTestHelper('SingingTheFaithImport', 'singingthefaith') as helper:
         # Note that the previous tests without hints no longer apply as there is always a
         # hints file, which contains the hints for the real Singing The Faith Songs.
         # Unhinted songs here must be numbered above any real Singing The Faith Song
         # Single verse
-        self.file_import([TEST_PATH / 'H901.txt'],
-                         self.load_external_result_data(TEST_PATH / 'STF901.json'))
+        helper.file_import([TEST_PATH / 'H901.txt'],
+                           helper.load_external_result_data(TEST_PATH / 'STF901.json'))
         # Whole song
-        self.file_import([TEST_PATH / 'H902.txt'],
-                         self.load_external_result_data(TEST_PATH / 'STF902.json'))
+        helper.file_import([TEST_PATH / 'H902.txt'],
+                           helper.load_external_result_data(TEST_PATH / 'STF902.json'))
 
         # Tests with hints - note that the hints directory has a hints.tag which specifies
         # SongbookNumberInTitle: True
@@ -55,8 +49,8 @@ class TestSingingTheFaithFileImport(SongImportTestHelper):
         # song tests will need it
 
         # Single verse
-        self.file_import([TEST_PATH / 'hints' / 'H1.txt'],
-                         self.load_external_result_data(TEST_PATH / 'hints' / 'STF001.json'))
+        helper.file_import([TEST_PATH / 'hints' / 'H1.txt'],
+                           helper.load_external_result_data(TEST_PATH / 'hints' / 'STF001.json'))
         # Whole song
-        self.file_import([TEST_PATH / 'hints' / 'H2.txt'],
-                         self.load_external_result_data(TEST_PATH / 'hints' / 'STF002.json'))
+        helper.file_import([TEST_PATH / 'hints' / 'H2.txt'],
+                           helper.load_external_result_data(TEST_PATH / 'hints' / 'STF002.json'))
