@@ -241,7 +241,7 @@ def test_image_to_byte():
         MockedQtCore.QByteArray.assert_called_with()
         MockedQtCore.QBuffer.assert_called_with(mocked_byte_array)
         mocked_buffer.open.assert_called_with('writeonly')
-        mocked_image.save.assert_called_with(mocked_buffer, "PNG")
+        mocked_image.save.assert_called_with(mocked_buffer, "JPEG")
         assert mocked_byte_array.toBase64.called is False
         assert mocked_byte_array == result, 'The mocked out byte array should be returned'
 
@@ -250,11 +250,12 @@ def test_image_to_byte_base_64():
     """
     Test the image_to_byte() function
     """
-    with patch('openlp.core.lib.QtCore') as MockedQtCore:
+    with patch('openlp.core.lib.QtCore') as MockedQtCore, \
+            patch('openlp.core.lib.base64.b64encode') as mocked_b64encode:
         # GIVEN: A set of mocked-out Qt classes
-        mocked_byte_array = MagicMock()
+        mocked_b64encode.side_effect = lambda x: MagicMock(decode=MagicMock(return_value='{} base64ified'.format(x)))
+        mocked_byte_array = "byte_array"
         MockedQtCore.QByteArray.return_value = mocked_byte_array
-        mocked_byte_array.toBase64.return_value = QtCore.QByteArray(b'base64mock')
         mocked_buffer = MagicMock()
         MockedQtCore.QBuffer.return_value = mocked_buffer
         MockedQtCore.QIODevice.WriteOnly = 'writeonly'
@@ -267,9 +268,9 @@ def test_image_to_byte_base_64():
         MockedQtCore.QByteArray.assert_called_with()
         MockedQtCore.QBuffer.assert_called_with(mocked_byte_array)
         mocked_buffer.open.assert_called_with('writeonly')
-        mocked_image.save.assert_called_with(mocked_buffer, "PNG")
-        mocked_byte_array.toBase64.assert_called_with()
-        assert 'base64mock' == result, 'The result should be the return value of the mocked out base64 method'
+        mocked_image.save.assert_called_with(mocked_buffer, "JPEG")
+        mocked_b64encode.assert_called_with(mocked_byte_array)
+        assert 'byte_array base64ified' == result, 'The result should be the return value of the mocked base64 method'
 
 
 def test_create_thumb_with_size():

@@ -35,6 +35,7 @@ from openlp.core.common.actions import ActionList, CategoryOrder
 from openlp.core.common.i18n import UiStrings, translate
 from openlp.core.common.mixins import LogMixin, RegistryProperties
 from openlp.core.common.registry import Registry, RegistryBase
+from openlp.core.common.utils import wait_for
 from openlp.core.display.screens import ScreenList
 from openlp.core.display.window import DisplayWindow
 from openlp.core.lib import ServiceItemAction, image_to_byte
@@ -274,6 +275,9 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         self.controller_type = DisplayControllerType.Preview
         if self.is_live:
             self.controller_type = DisplayControllerType.Live
+            self.slide_changed_time = datetime.datetime.now()
+            self.fetching_screenshot = False
+            self.screen_capture = None
             # Hide Menu
             self.hide_menu = QtWidgets.QToolButton(self.toolbar)
             self.hide_menu.setObjectName('hide_menu')
@@ -927,6 +931,13 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         self.selected_row = 0
         # take a copy not a link to the servicemanager copy.
         self.service_item = copy.copy(service_item)
+        if self.is_live:
+            # Reset screen capture before any api call can arrive
+            self.screen_capture = None
+            # If item transitions are on, make sure the delay is longer than the animation
+            self.slide_changed_time = datetime.datetime.now()
+            if self.settings.value('themes/item transitions') and self.service_item.get_transition_delay() < 1:
+                self.slide_changed_time += datetime.timedelta(seconds=0.5)
         if self.service_item.is_command() and not self.service_item.is_media():
             Registry().execute(
                 '{text}_start'.format(text=self.service_item.name.lower()),
@@ -1213,7 +1224,10 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         """
         This updates the preview frame, for example after changing a slide or using *Blank to Theme*.
         """
-        self.log_debug('update_preview {text} '.format(text=self.screens.current))
+        self.log_debug('update_preview {text}'.format(text=self.screens.current))
+        if self.is_live:
+            self.screen_capture = None
+            self.slide_changed_time = max(self.slide_changed_time, datetime.datetime.now())
         if self.service_item and self.service_item.is_capable(ItemCapabilities.ProvidesOwnDisplay):
             if self.is_live:
                 # If live, grab screen-cap of main display now
@@ -1223,6 +1237,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
             else:
                 # If not live, use the slide's thumbnail/icon instead
                 image_path = Path(self.service_item.get_rendered_frame(self.selected_row))
+                self.screen_capture = image_path
                 self.preview_display.set_single_image('#000', image_path)
         else:
             self.preview_display.go_to_slide(self.selected_row)
@@ -1231,20 +1246,45 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         """
         Gets an image of the display screen and updates the preview frame.
         """
-        display_image = self.grab_maindisplay()
+        display_image = self._capture_maindisplay()
         base64_image = image_to_byte(display_image)
+        self.screen_capture = base64_image
         self.preview_display.set_single_image_data('#000', base64_image)
 
-    def grab_maindisplay(self):
+    def _capture_maindisplay(self):
         """
         Creates an image of the current screen.
         """
+        self.log_debug('_capture_maindisplay {text}'.format(text=self.screens.current))
         win_id = QtWidgets.QApplication.desktop().winId()
         screen = QtWidgets.QApplication.primaryScreen()
         rect = ScreenList().current.display_geometry
         win_image = screen.grabWindow(win_id, rect.x(), rect.y(), rect.width(), rect.height())
         win_image.setDevicePixelRatio(self.preview_display.devicePixelRatio())
         return win_image
+
+    def is_slide_loaded(self):
+        """
+        Returns a boolean as to whether the slide should be fully visible.
+        Takes transition time into consideration.
+        """
+        slide_delay_time = 1
+        if self.service_item:
+            slide_delay_time = self.service_item.get_transition_delay()
+        slide_ready_time = self.slide_changed_time + datetime.timedelta(seconds=slide_delay_time)
+        return datetime.datetime.now() > slide_ready_time
+
+    def grab_maindisplay(self):
+        """
+        Gets the last taken screenshot
+        """
+        wait_for(lambda: not self.fetching_screenshot)
+        if self.screen_capture is None:
+            self.fetching_screenshot = True
+            wait_for(self.is_slide_loaded)
+            self.screen_capture = image_to_byte(self._capture_maindisplay())
+            self.fetching_screenshot = False
+        return self.screen_capture
 
     def on_slide_selected_next_action(self, checked):
         """

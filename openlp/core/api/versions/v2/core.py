@@ -21,7 +21,6 @@
 import logging
 from openlp.core.api.lib import login_required
 from openlp.core.common.registry import Registry
-from openlp.core.lib import image_to_byte
 from openlp.core.lib.plugin import PluginStatus, StringContent
 from openlp.core.state import State
 
@@ -87,5 +86,5 @@ def login():
 @core.route('/live-image')
 def main_image():
     controller = Registry().get('live_controller')
-    img = 'data:image/png;base64,{}'.format(image_to_byte(controller.grab_maindisplay()))
+    img = 'data:image/jpeg;base64,{}'.format(controller.grab_maindisplay())
     return jsonify({'binary_image': img})

@@ -42,7 +42,7 @@ from openlp.core.common.registry import Registry
 from openlp.core.display.render import remove_tags, render_tags, render_chords_for_printing
 from openlp.core.lib import ItemCapabilities
 from openlp.core.lib import create_thumb
-from openlp.core.lib.theme import BackgroundType
+from openlp.core.lib.theme import BackgroundType, TransitionSpeed
 from openlp.core.state import State
 from openlp.core.ui.icons import UiIcons
 from openlp.core.ui.media import parse_stream_path
@@ -605,6 +605,24 @@ class ServiceItem(RegistryProperties):
                 return self.title
             else:
                 return self.slides[0]['title']
+
+    def get_transition_delay(self):
+        """
+        Returns a approximate time in seconds for how long it will take to switch slides
+        """
+        delay = 1
+        if self.is_capable(ItemCapabilities.ProvidesOwnDisplay):
+            delay = 0.5
+        else:
+            theme = self.get_theme_data()
+            transition_speed = theme.display_slide_transition_speed
+            if theme.display_slide_transition is False or transition_speed == TransitionSpeed.Fast:
+                delay = 0.5
+            elif transition_speed == TransitionSpeed.Normal:
+                delay = 1
+            elif transition_speed == TransitionSpeed.Slow:
+                delay = 2
+        return delay
 
     def merge(self, other):
         """
