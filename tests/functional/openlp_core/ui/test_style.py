@@ -31,10 +31,12 @@ from openlp.core.ui.style import MEDIA_MANAGER_STYLE, WIN_REPAIR_STYLESHEET, get
 
 @skipIf(not hasattr(openlp.core.ui.style, 'qdarkstyle'), 'qdarkstyle is not installed')
 @patch('openlp.core.ui.style.HAS_DARK_STYLE', True)
+@patch('openlp.core.ui.style.is_win')
 @patch('openlp.core.ui.style.qdarkstyle')
-def test_get_application_stylesheet_dark(mocked_qdarkstyle, mock_settings):
+def test_get_application_stylesheet_dark(mocked_qdarkstyle, mocked_is_win, mock_settings):
     """Test that the dark stylesheet is returned when available and enabled"""
-    # GIVEN: We're on Windows and no dark style is set
+    # GIVEN: We're not on Windows and dark style is set
+    mocked_is_win.return_value = False
     mocked_settings = MagicMock()
     mocked_settings.value.return_value = True
     mock_settings.return_value = mocked_settings
@@ -52,7 +54,7 @@ def test_get_application_stylesheet_dark(mocked_qdarkstyle, mock_settings):
 @patch('openlp.core.app.QtWidgets.QApplication.palette')
 def test_get_application_stylesheet_not_alternate_rows(mocked_palette, mocked_is_win, mock_settings):
     """Test that the alternate rows stylesheet is returned when enabled in settings"""
-    # GIVEN: We're on Windows and no dark style is set
+    # GIVEN: We're not on Windows and no dark style is set
     mocked_is_win.return_value = False
     mock_settings.value.return_value = False
     mocked_palette.return_value.color.return_value.name.return_value = 'color'

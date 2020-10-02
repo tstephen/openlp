@@ -36,7 +36,7 @@ from pathlib import Path
 from shutil import copytree
 from traceback import format_exception
 
-from PyQt5 import QtCore, QtWebEngineWidgets, QtWidgets  # noqa
+from PyQt5 import QtCore, QtGui, QtWebEngineWidgets, QtWidgets  # noqa
 
 from openlp.core.api.deploy import check_for_remote_update
 from openlp.core.common import is_macosx, is_win
@@ -56,7 +56,7 @@ from openlp.core.ui.firsttimeform import FirstTimeForm
 from openlp.core.ui.firsttimelanguageform import FirstTimeLanguageForm
 from openlp.core.ui.mainwindow import MainWindow
 from openlp.core.ui.splashscreen import SplashScreen
-from openlp.core.ui.style import get_application_stylesheet
+from openlp.core.ui.style import get_application_stylesheet, set_windows_darkmode
 from openlp.core.version import check_for_update, get_version
 
 
@@ -118,6 +118,9 @@ class OpenLP(QtCore.QObject, LogMixin):
         self.backup_on_upgrade(has_run_wizard, can_show_splash)
         # start the main app window
         loader()
+        # Set the darkmode for windows is enabled
+        if is_win():
+            set_windows_darkmode(app)
         self.main_window = MainWindow()
         self.main_window.installEventFilter(self.main_window)
         # Correct stylesheet bugs
@@ -330,6 +333,10 @@ def main():
     # Bug #1018855: Set the WM_CLASS property in X11
     if not is_win() and not is_macosx():
         qt_args.append('OpenLP')
+    elif is_win():
+        # support dark mode on windows 10. This makes the titlebar dark, the rest is setup later
+        # by calling set_windows_darkmode
+        qt_args.extend(['-platform', 'windows:darkmode=1'])
     # Initialise the resources
     qInitResources()
     # Now create and actually run the application.
