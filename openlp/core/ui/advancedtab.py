@@ -26,7 +26,7 @@ from datetime import datetime, timedelta
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from openlp.core.common import SlideLimits
+from openlp.core.common import SlideLimits, is_win
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.i18n import UiStrings, format_time, translate
 from openlp.core.lib.settingstab import SettingsTab
@@ -116,7 +116,7 @@ class AdvancedTab(SettingsTab):
         self.enable_auto_close_check_box.setObjectName('enable_auto_close_check_box')
         self.ui_layout.addRow(self.enable_auto_close_check_box)
         self.left_layout.addWidget(self.ui_group_box)
-        if HAS_DARK_STYLE:
+        if not is_win() and HAS_DARK_STYLE:
             self.use_dark_style_checkbox = QtWidgets.QCheckBox(self.ui_group_box)
             self.use_dark_style_checkbox.setObjectName('use_dark_style_checkbox')
             self.ui_layout.addRow(self.use_dark_style_checkbox)
@@ -292,7 +292,7 @@ class AdvancedTab(SettingsTab):
                                                             'Auto-scroll the next slide to bottom'))
         self.enable_auto_close_check_box.setText(translate('OpenLP.AdvancedTab',
                                                            'Enable application exit confirmation'))
-        if HAS_DARK_STYLE:
+        if not is_win() and HAS_DARK_STYLE:
             self.use_dark_style_checkbox.setText(translate('OpenLP.AdvancedTab', 'Use dark style (needs restart)'))
         self.service_name_group_box.setTitle(translate('OpenLP.AdvancedTab', 'Default Service Name'))
         self.service_name_check_box.setText(translate('OpenLP.AdvancedTab', 'Enable default service name'))
@@ -363,7 +363,7 @@ class AdvancedTab(SettingsTab):
             if self.autoscroll_map[i] == autoscroll_value and i < self.autoscroll_combo_box.count():
                 self.autoscroll_combo_box.setCurrentIndex(i)
         self.enable_auto_close_check_box.setChecked(self.settings.value('advanced/enable exit confirmation'))
-        if HAS_DARK_STYLE:
+        if not is_win() and HAS_DARK_STYLE:
             self.use_dark_style_checkbox.setChecked(self.settings.value('advanced/use_dark_style'))
         self.hide_mouse_check_box.setChecked(self.settings.value('advanced/hide mouse'))
         self.service_name_day.setCurrentIndex(self.settings.value('advanced/default service day'))
@@ -437,7 +437,7 @@ class AdvancedTab(SettingsTab):
             self.settings_form.register_post_process('config_screen_changed')
         self.settings_form.register_post_process('slidecontroller_update_slide_limits')
         self.settings.setValue('advanced/search as type', self.is_search_as_you_type_enabled)
-        if HAS_DARK_STYLE:
+        if not is_win() and HAS_DARK_STYLE:
             self.settings.setValue('advanced/use_dark_style', self.use_dark_style_checkbox.isChecked())
         self.proxy_widget.save()
 
