@@ -21,6 +21,8 @@
 """
 Package to test the openlp.core.ui.slidecontroller package.
 """
+import datetime
+
 from unittest.mock import MagicMock, patch, sentinel
 
 from PyQt5 import QtCore, QtGui
@@ -1011,6 +1013,7 @@ def test_update_preview_live(mocked_singleShot, registry):
     slide_controller.display_maindisplay = MagicMock()
     slide_controller.slide_preview = MagicMock()
     slide_controller.slide_count = 0
+    slide_controller.slide_changed_time = datetime.datetime.now()
 
     # WHEN: update_preview is called
     slide_controller.update_preview()
@@ -1142,7 +1145,7 @@ def test_display_maindisplay(mocked_image_to_byte, registry):
     """
     # GIVEN: A mocked slide controller, with mocked functions
     slide_controller = SlideController(None)
-    slide_controller.grab_maindisplay = MagicMock(return_value='placeholder')
+    slide_controller._capture_maindisplay = MagicMock(return_value='placeholder')
     slide_controller.preview_display = MagicMock()
     mocked_image_to_byte.side_effect = lambda x: '{} bytified'.format(x)
 
@@ -1150,8 +1153,84 @@ def test_display_maindisplay(mocked_image_to_byte, registry):
     slide_controller.display_maindisplay()
 
     # THEN: Should have grabbed the maindisplay and set to placeholder with a black background
-    slide_controller.grab_maindisplay.assert_called_once()
+    slide_controller._capture_maindisplay.assert_called_once()
     slide_controller.preview_display.set_single_image_data.assert_called_once_with('#000', 'placeholder bytified')
+
+
+@patch(u'openlp.core.ui.slidecontroller.image_to_byte')
+@patch(u'openlp.core.ui.slidecontroller.ScreenList')
+@patch(u'openlp.core.ui.slidecontroller.QtWidgets.QApplication')
+def test__capture_maindisplay(mocked_application, mocked_screenlist, mocked_image_to_byte, registry):
+    """
+    Test the _capture_maindisplay method
+    """
+    # GIVEN: A mocked slide controller, with mocked functions
+    slide_controller = SlideController(None)
+    mocked_display_geometry = MagicMock(
+        x=MagicMock(return_value=34),
+        y=MagicMock(return_value=67),
+        width=MagicMock(return_value=77),
+        height=MagicMock(return_value=42)
+    )
+    mocked_screenlist_instance = MagicMock()
+    mocked_screenlist.return_value = mocked_screenlist_instance
+    mocked_screenlist_instance.current = MagicMock(display_geometry=mocked_display_geometry)
+    mocked_primary_screen = MagicMock()
+    mocked_application.primaryScreen = MagicMock(return_value=mocked_primary_screen)
+    mocked_application.desktop = MagicMock(return_value=MagicMock(
+        winId=MagicMock(return_value=23)
+    ))
+    slide_controller.preview_display = MagicMock()
+
+    # WHEN: _capture_maindisplay is called
+    slide_controller._capture_maindisplay()
+
+    # THEN: Screenshot should have been taken with correct winId and dimensions
+    mocked_primary_screen.grabWindow.assert_called_once_with(23, 34, 67, 77, 42)
+
+
+@patch(u'openlp.core.ui.slidecontroller.image_to_byte')
+def test_grab_maindisplay(mocked_image_to_byte, registry):
+    """
+    Test the grab_maindisplay method
+    """
+    # GIVEN: A mocked slide controller, with mocked functions
+    slide_controller = SlideController(None)
+    slide_controller._capture_maindisplay = MagicMock(return_value='placeholder')
+    slide_controller.preview_display = MagicMock()
+    slide_controller.fetching_screenshot = False
+    slide_controller.screen_capture = None
+    slide_controller.service_item = MagicMock(get_transition_delay=MagicMock(return_value=1))
+    slide_controller.slide_changed_time = datetime.datetime.now() - datetime.timedelta(seconds=10)
+    mocked_image_to_byte.side_effect = lambda x: '{} bytified'.format(x)
+
+    # WHEN: grab_maindisplay is called
+    grabbed_stuff = slide_controller.grab_maindisplay()
+
+    # THEN: Should have grabbed the maindisplay and ran image_to_byte on it
+    slide_controller._capture_maindisplay.assert_called_once()
+    assert grabbed_stuff == 'placeholder bytified'
+
+
+@patch(u'openlp.core.ui.slidecontroller.image_to_byte')
+def test_grab_maindisplay_cached(mocked_image_to_byte, registry):
+    """
+    Test the grab_maindisplay method with pre-cached screenshot
+    """
+    # GIVEN: A mocked slide controller, with mocked functions
+    slide_controller = SlideController(None)
+    slide_controller._capture_maindisplay = MagicMock(return_value='placeholder')
+    slide_controller.preview_display = MagicMock()
+    slide_controller.fetching_screenshot = False
+    slide_controller.screen_capture = 'cached screen_capture'
+    mocked_image_to_byte.side_effect = lambda x: '{} bytified'.format(x)
+
+    # WHEN: grab_maindisplay is called
+    grabbed_stuff = slide_controller.grab_maindisplay()
+
+    # THEN: Should have not grabbed the maindisplay and returned the cached image
+    assert slide_controller._capture_maindisplay.call_count == 0
+    assert grabbed_stuff == 'cached screen_capture'
 
 
 def test_paint_event_text_fits():

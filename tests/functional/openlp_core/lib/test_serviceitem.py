@@ -31,6 +31,7 @@ from openlp.core.common.enum import ServiceItemType
 from openlp.core.common.registry import Registry
 from openlp.core.lib.formattingtags import FormattingTags
 from openlp.core.lib.serviceitem import ItemCapabilities, ServiceItem
+from openlp.core.lib.theme import TransitionSpeed
 from tests.utils import convert_file_service_item
 from tests.utils.constants import RESOURCE_PATH
 
@@ -570,6 +571,93 @@ def test_remove_capability(settings):
 
     # THEN: The capability should no longer be there
     assert ItemCapabilities.CanEdit not in service_item.capabilities, 'The capability should not be in the list'
+
+
+def test_get_transition_delay_own_display(settings):
+    """
+    Test the service item - get approx transition delay from theme
+    """
+    # GIVEN: A service item with a theme and theme level set to global
+    service_item = ServiceItem(None)
+    service_item.add_capability(ItemCapabilities.ProvidesOwnDisplay)
+    service_item.theme = 'song_theme'
+    mocked_theme_manager = MagicMock()
+    mocked_theme_manager.global_theme = 'global_theme'
+    Registry().register('theme_manager', mocked_theme_manager)
+    settings.setValue('servicemanager/service theme', 'service_theme')
+    settings.setValue('themes/theme level', ThemeLevel.Global)
+
+    # WHEN: Get theme data is run
+    delay = service_item.get_transition_delay()
+
+    # THEN: theme should be 0.5s
+    assert delay == 0.5
+
+
+def test_get_transition_delay_no_transition(settings):
+    """
+    Test the service item - get approx transition delay from theme
+    """
+    # GIVEN: A service item with a theme and theme level set to global
+    service_item = ServiceItem(None)
+    mocked_theme_manager = MagicMock()
+    mocked_theme_manager.global_theme = 'global_theme'
+    mocked_theme_manager.get_theme_data = Mock(return_value=MagicMock(**{
+        'display_slide_transition': False,
+        'display_slide_transition_speed': TransitionSpeed.Normal
+    }))
+    Registry().register('theme_manager', mocked_theme_manager)
+    settings.setValue('themes/theme level', ThemeLevel.Global)
+
+    # WHEN: Get theme data is run
+    delay = service_item.get_transition_delay()
+
+    # THEN: theme should be 0.5s
+    assert delay == 0.5
+
+
+def test_get_transition_delay_normal(settings):
+    """
+    Test the service item - get approx transition delay from theme
+    """
+    # GIVEN: A service item with a theme and theme level set to global
+    service_item = ServiceItem(None)
+    mocked_theme_manager = MagicMock()
+    mocked_theme_manager.global_theme = 'global_theme'
+    mocked_theme_manager.get_theme_data = Mock(return_value=MagicMock(**{
+        'display_slide_transition': True,
+        'display_slide_transition_speed': TransitionSpeed.Normal
+    }))
+    Registry().register('theme_manager', mocked_theme_manager)
+    settings.setValue('themes/theme level', ThemeLevel.Global)
+
+    # WHEN: Get theme data is run
+    delay = service_item.get_transition_delay()
+
+    # THEN: theme should be 1s
+    assert delay == 1
+
+
+def test_get_transition_delay_slow(settings):
+    """
+    Test the service item - get approx transition delay from theme
+    """
+    # GIVEN: A service item with a theme and theme level set to global
+    service_item = ServiceItem(None)
+    mocked_theme_manager = MagicMock()
+    mocked_theme_manager.global_theme = 'global_theme'
+    mocked_theme_manager.get_theme_data = Mock(return_value=MagicMock(**{
+        'display_slide_transition': True,
+        'display_slide_transition_speed': TransitionSpeed.Slow
+    }))
+    Registry().register('theme_manager', mocked_theme_manager)
+    settings.setValue('themes/theme level', ThemeLevel.Global)
+
+    # WHEN: Get theme data is run
+    delay = service_item.get_transition_delay()
+
+    # THEN: theme should be 2s
+    assert delay == 2
 
 
 def test_to_dict_text_item(state_media, settings, service_item_env):

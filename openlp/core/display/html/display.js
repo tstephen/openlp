@@ -542,7 +542,7 @@ var Display = {
     section.setAttribute("data-background", bg_color);
     section.setAttribute("style", "height: 100%; width: 100%;");
     var img = document.createElement('img');
-    img.src = 'data:image/png;base64,' + image_data;
+    img.src = 'data:image/jpeg;base64,' + image_data;
     img.setAttribute("style", "height: 100%; width: 100%");
     section.appendChild(img);
     Display._slidesContainer.appendChild(section);
