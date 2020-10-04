@@ -308,6 +308,7 @@ class PowerPointMacController(AppleScriptBaseController):
                 return False
             if major_version >= 15:
                 return True
+        return False
 
 
 class PowerPointMacDocument(AppleScriptBaseDocument):
