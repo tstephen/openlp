@@ -64,7 +64,7 @@ class VersionWorker(ThreadWorker):
     A worker class to fetch the version of OpenLP from the website. This is run from within a thread so that it
     doesn't affect the loading time of OpenLP.
     """
-    new_version = QtCore.pyqtSignal(dict)
+    new_version = QtCore.pyqtSignal(str)
     no_internet = QtCore.pyqtSignal()
 
     def __init__(self, last_check_date, current_version):
