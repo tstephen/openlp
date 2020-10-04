@@ -31,8 +31,8 @@ from openlp.core.state import State
 from openlp.core.common.registry import Registry
 from openlp.core.lib import ServiceItemAction
 from openlp.core.ui import HideMode
-from openlp.core.ui.slidecontroller import NON_TEXT_MENU, WIDE_MENU, InfoLabel, LiveController, PreviewController, \
-    SlideController
+from openlp.core.ui.slidecontroller import NON_TEXT_MENU, WIDE_MENU, NARROW_MENU, InfoLabel, LiveController, \
+    PreviewController, SlideController
 
 
 def test_initial_slide_controller(registry):
@@ -84,9 +84,10 @@ def test_text_service_item_blank(settings):
 
     # WHEN: a text based service item is used
     slide_controller.service_item.is_text = MagicMock(return_value=True)
-    slide_controller.set_blank_menu()
+    slide_controller.set_hide_mode_menu(narrow=False)
 
     # THEN: the call to set the visible items on the toolbar should be correct
+    toolbar.set_widget_visible.assert_any_call(NARROW_MENU, False)
     toolbar.set_widget_visible.assert_called_with(WIDE_MENU, True)
 
 
@@ -104,10 +105,92 @@ def test_non_text_service_item_blank(settings):
 
     # WHEN a non text based service item is used
     slide_controller.service_item.is_text = MagicMock(return_value=False)
-    slide_controller.set_blank_menu()
+    slide_controller.set_hide_mode_menu(narrow=False)
 
     # THEN: then call set up the toolbar to blank the display screen.
+    toolbar.set_widget_visible.assert_any_call(NARROW_MENU, False)
     toolbar.set_widget_visible.assert_called_with(NON_TEXT_MENU, True)
+
+
+def test_text_service_item_blank_narrow(settings):
+    """
+    Test that loading a text-based service item into the slide controller sets the correct blank menu
+    """
+    # GIVEN: A new SlideController instance.
+    slide_controller = SlideController(None)
+    service_item = MagicMock()
+    toolbar = MagicMock()
+    toolbar.set_widget_visible = MagicMock()
+    slide_controller.toolbar = toolbar
+    slide_controller.service_item = service_item
+
+    # WHEN: a text based service item is used
+    slide_controller.service_item.is_text = MagicMock(return_value=True)
+    slide_controller.set_hide_mode_menu(narrow=True)
+
+    # THEN: the call to set the visible items on the toolbar should be correct
+    toolbar.set_widget_visible.assert_any_call(NARROW_MENU, True)
+    toolbar.set_widget_visible.assert_any_call(WIDE_MENU, False)
+
+
+def test_on_controller_size_changed_wide(settings):
+    """
+    Test that on_controller_size_changed
+    """
+    # GIVEN: A new SlideController instance where the toolbar has a lot of spare space.
+    slide_controller = SlideController(None)
+    slide_controller.is_live = True
+    slide_controller.ignore_toolbar_resize_events = False
+    slide_controller.controller = MagicMock(width=MagicMock(return_value=100))
+    slide_controller.toolbar = MagicMock(size=MagicMock(return_value=MagicMock(width=MagicMock(return_value=10))))
+    slide_controller.hide_menu = MagicMock(isVisible=MagicMock(return_value=False))
+    slide_controller.set_hide_mode_menu = MagicMock()
+
+    # WHEN: The on_controller_size_changed function is called
+    slide_controller.on_controller_size_changed()
+
+    # THEN: set_hide_mode_menu should have received the correct call
+    slide_controller.set_hide_mode_menu.assert_called_with(narrow=False)
+
+
+def test_on_controller_size_changed_narrow(settings):
+    """
+    Test that on_controller_size_changed
+    """
+    # GIVEN: A new SlideController instance where the toolbar has a lot of spare space.
+    slide_controller = SlideController(None)
+    slide_controller.is_live = True
+    slide_controller.ignore_toolbar_resize_events = False
+    slide_controller.controller = MagicMock(width=MagicMock(return_value=100))
+    slide_controller.toolbar = MagicMock(size=MagicMock(return_value=MagicMock(width=MagicMock(return_value=110))))
+    slide_controller.hide_menu = MagicMock(isVisible=MagicMock(return_value=False))
+    slide_controller.set_hide_mode_menu = MagicMock()
+
+    # WHEN: The on_controller_size_changed function is called
+    slide_controller.on_controller_size_changed()
+
+    # THEN: set_hide_mode_menu should have received the correct call
+    slide_controller.set_hide_mode_menu.assert_called_with(narrow=True)
+
+
+def test_on_controller_size_changed_can_not_expand(settings):
+    """
+    Test that on_controller_size_changed
+    """
+    # GIVEN: A new SlideController instance where the toolbar has a lot of spare space.
+    slide_controller = SlideController(None)
+    slide_controller.is_live = True
+    slide_controller.ignore_toolbar_resize_events = False
+    slide_controller.controller = MagicMock(width=MagicMock(return_value=100))
+    slide_controller.toolbar = MagicMock(size=MagicMock(return_value=MagicMock(width=MagicMock(return_value=95))))
+    slide_controller.hide_menu = MagicMock(isVisible=MagicMock(return_value=True))
+    slide_controller.set_hide_mode_menu = MagicMock()
+
+    # WHEN: The on_controller_size_changed function is called
+    slide_controller.on_controller_size_changed()
+
+    # THEN: set_hide_mode_menu should have received the correct call
+    slide_controller.set_hide_mode_menu.assert_not_called()
 
 
 def test_receive_spin_delay(mock_settings):

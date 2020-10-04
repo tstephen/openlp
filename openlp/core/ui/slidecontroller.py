@@ -49,7 +49,7 @@ from openlp.core.widgets.toolbar import OpenLPToolbar
 from openlp.core.widgets.views import ListPreviewWidget
 
 # Threshold which has to be trespassed to toggle.
-HIDE_MENU_THRESHOLD = 27
+HIDE_MENU_THRESHOLD = 80
 
 NARROW_MENU = [
     'hide_menu'
@@ -204,7 +204,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         self.update_slide_limits()
         self.panel = QtWidgets.QWidget(self.main_window.control_splitter)
         self.slide_list = {}
-        self.controller_width = -1
+        self.ignore_toolbar_resize_events = False
         # Layout for holding panel
         self.panel_layout = QtWidgets.QVBoxLayout(self.panel)
         self.panel_layout.setSpacing(0)
@@ -474,6 +474,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         self.preview_widget.clicked.connect(self.on_slide_selected)
         self.preview_widget.verticalHeader().sectionClicked.connect(self.on_slide_selected)
         if self.is_live:
+            self.preview_widget.resize_event.connect(self.on_controller_size_changed)
             # Need to use event as called across threads and UI is updated
             self.slidecontroller_toggle_display.connect(self.toggle_display)
             Registry().register_function('slidecontroller_live_spin_delay', self.receive_spin_delay)
@@ -676,6 +677,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         self.ratio = self.screens.current.display_geometry.width() / self.screens.current.display_geometry.height()
         self.preview_display.resize(new_preview_size)
         self.slide_layout.set_aspect_ratio(self.ratio)
+        self.on_controller_size_changed()
 
     def __add_actions_to_widget(self, widget):
         """
@@ -696,39 +698,32 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
             self.theme_screen,
             self.blank_screen])
 
-    def on_controller_size_changed(self):
+    def on_controller_size_changed(self, event=None):
         """
-        Change layout of display control buttons on controller size change
+        Change layout of display control buttons when the controller size changes
         """
-        if self.is_live:
-            # The new width of the display
-            width = self.controller.width()
-            # Space used by the toolbar.
-            used_space = self.toolbar.size().width() + self.hide_menu.size().width()
-            # Add the threshold to prevent flickering.
-            if width > used_space + HIDE_MENU_THRESHOLD and self.hide_menu.isVisible():
-                self.toolbar.set_widget_visible(NARROW_MENU, False)
-                self.set_blank_menu()
-            # Take away a threshold to prevent flickering.
-            elif width < used_space - HIDE_MENU_THRESHOLD and not self.hide_menu.isVisible():
-                self.set_blank_menu(False)
-                self.toolbar.set_widget_visible(NARROW_MENU)
-            # Fallback to the standard blank toolbar if the hide_menu is not visible.
-            elif not self.hide_menu.isVisible():
-                self.toolbar.set_widget_visible(NARROW_MENU, False)
-                self.set_blank_menu()
+        self.log_debug('on_controller_size_changed is_event:{}'.format(event is not None))
+        if self.is_live and self.ignore_toolbar_resize_events is False:
+            spare_space = self.controller.width() - self.toolbar.size().width()
+            if spare_space <= 0 and not self.hide_menu.isVisible():
+                self.set_hide_mode_menu(narrow=True)
+            # Add threshold to prevent flickering.
+            elif spare_space > HIDE_MENU_THRESHOLD and self.hide_menu.isVisible() \
+                    or spare_space > 0 and not self.hide_menu.isVisible():
+                self.set_hide_mode_menu(narrow=False)
 
-    def set_blank_menu(self, visible=True):
+    def set_hide_mode_menu(self, narrow):
         """
-        Set the correct menu type dependent on the service item type
+        Set the wide or narrow hide mode menu
 
-        :param visible: Do I need to hide the menu?
+        :param compact: Use the narrow menu?
         """
+        self.toolbar.set_widget_visible(NARROW_MENU, narrow)
         self.toolbar.set_widget_visible(WIDE_MENU, False)
         if self.service_item and self.service_item.is_text():
-            self.toolbar.set_widget_visible(WIDE_MENU, visible)
+            self.toolbar.set_widget_visible(WIDE_MENU, not narrow)
         else:
-            self.toolbar.set_widget_visible(NON_TEXT_MENU, visible)
+            self.toolbar.set_widget_visible(NON_TEXT_MENU, not narrow)
 
     def receive_spin_delay(self):
         """
@@ -766,6 +761,8 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         self.song_menu.hide()
         self.toolbar.set_widget_visible(LOOP_LIST, False)
         self.toolbar.set_widget_visible('song_menu', False)
+        # Set to narrow menu so we don't push the panel wider than it needs to be when adding new buttons
+        self.set_hide_mode_menu(narrow=True)
         # Reset the button
         self.play_slides_once.setChecked(False)
         self.play_slides_once.setIcon(UiIcons().play_slides)
@@ -782,10 +779,6 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
             self.mediabar.show()
         self.previous_item.setVisible(not item.is_media())
         self.next_item.setVisible(not item.is_media())
-        # The layout of the toolbar is size dependent, so make sure it fits. Reset stored controller_width.
-        if self.is_live:
-            self.controller_width = -1
-        self.on_controller_size_changed()
         # Work-around for OS X, hide and then show the toolbar
         # See bug #791050
         self.toolbar.show()
@@ -925,7 +918,9 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         :param service_item: The current service item
         :param slide_no: The slide number to select
         """
+        self.log_debug('_process_item start')
         self.on_stop_loop()
+        self.ignore_toolbar_resize_events = True
         old_item = self.service_item
         # rest to allow the remote pick up verse 1 if large imaged
         self.selected_row = 0
@@ -1015,6 +1010,12 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
                 self.on_media_close()
         if self.is_live:
             Registry().execute('slidecontroller_{item}_started'.format(item=self.type_prefix), [self.service_item])
+            # Need to process events four times to get correct controller width
+            for _ in range(4):
+                self.application.process_events()
+            self.ignore_toolbar_resize_events = False
+            self.on_controller_size_changed()
+        self.log_debug('_process_item end')
 
     def on_slide_selected_index(self, message):
         """
