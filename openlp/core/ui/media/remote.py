@@ -41,6 +41,7 @@ def media_play():
     if live.service_item.name != 'media':
         abort(400)
     status = live.mediacontroller_live_play.emit()
+    log.debug(f'media_play return {status}')
     if status:
         return '', 202
     abort(400)
@@ -54,6 +55,7 @@ def media_pause():
     if live.service_item.name != 'media':
         abort(400)
     status = live.mediacontroller_live_pause.emit()
+    log.debug(f'media_pause return {status}')
     if status:
         return '', 202
     abort(400)
@@ -67,6 +69,7 @@ def media_stop():
     if live.service_item.name != 'media':
         abort(400)
     status = live.mediacontroller_live_stop.emit()
+    log.debug(f'media_stop return {status}')
     if status:
         return '', 202
     abort(400)

@@ -204,6 +204,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         self.update_slide_limits()
         self.panel = QtWidgets.QWidget(self.main_window.control_splitter)
         self.slide_list = {}
+        self.slide_count = 0
         self.ignore_toolbar_resize_events = False
         # Layout for holding panel
         self.panel_layout = QtWidgets.QVBoxLayout(self.panel)
@@ -1242,6 +1243,13 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
                 self.preview_display.set_single_image('#000', image_path)
         else:
             self.preview_display.go_to_slide(self.selected_row)
+        self.output_has_changed()
+
+    def output_has_changed(self):
+        """
+        The output has changed so we need to poke to POLL Websocket.
+        """
+        self.slide_count += 1
 
     def display_maindisplay(self):
         """
@@ -1462,11 +1470,15 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
 
     def on_clear(self):
         """
-        Clear the preview bar.
+        Clear the preview bar and other bits.
         """
         self.preview_widget.clear_list()
-        self.toolbar.set_widget_visible('editSong', False)
-        self.toolbar.set_widget_visible('clear', False)
+        self.service_item = None
+        if self.is_live:
+            self.mediabar.setVisible(False)
+        else:
+            self.toolbar.set_widget_visible('editSong', False)
+            self.toolbar.set_widget_visible('clear', False)
 
     def on_preview_add_to_service(self):
         """

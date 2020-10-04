@@ -171,7 +171,7 @@ class VlcPlayer(MediaPlayer):
         if not controller.vlc_instance:
             return False
         vlc = get_vlc()
-        log.debug('load vid in Vlc Controller')
+        log.debug('load video in VLC Controller')
         path = None
         if file and not controller.media_info.media_type == MediaType.Stream:
             path = os.path.normcase(file)

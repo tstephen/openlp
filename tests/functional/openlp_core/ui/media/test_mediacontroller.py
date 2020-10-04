@@ -219,7 +219,7 @@ def test_on_media_play(media_env):
     media_env.media_controller.on_media_play()
 
     # The mocked live controller should be called
-    media_env.media_controller.media_play.assert_called_once_with(mocked_live_controller, False)
+    media_env.media_controller.media_play.assert_called_once_with(mocked_live_controller)
 
 
 def test_on_media_pause(media_env):
@@ -265,7 +265,7 @@ def test_display_controllers_live(media_env):
     Registry().register('preview_controller', mocked_preview_controller)
 
     # WHEN: display_controllers() is called with DisplayControllerType.Live
-    controller = media_env.media_controller.display_controllers(DisplayControllerType.Live)
+    controller = media_env.media_controller._display_controllers(DisplayControllerType.Live)
 
     # THEN: the controller should be the live controller
     assert controller is mocked_live_controller
@@ -282,7 +282,7 @@ def test_display_controllers_preview(media_env):
     Registry().register('preview_controller', mocked_preview_controller)
 
     # WHEN: display_controllers() is called with DisplayControllerType.Preview
-    controller = media_env.media_controller.display_controllers(DisplayControllerType.Preview)
+    controller = media_env.media_controller._display_controllers(DisplayControllerType.Preview)
 
     # THEN: the controller should be the live controller
     assert controller is mocked_preview_controller

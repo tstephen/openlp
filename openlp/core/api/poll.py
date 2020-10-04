@@ -34,6 +34,7 @@ class Poller(RegistryProperties):
 
     def raw_poll(self):
         return {
+            'counter': self.live_controller.slide_count if self.live_controller.slide_count else 0,
             'service': self.service_manager.service_id,
             'slide': self.live_controller.selected_row or 0,
             'item': self.live_controller.service_item.unique_identifier if self.live_controller.service_item else '',
