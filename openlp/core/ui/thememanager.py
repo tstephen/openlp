@@ -199,9 +199,12 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
 
         :rtype: None
         """
+        xml_file_paths = [p for p in AppLocation.get_section_data_path('themes').glob('*/*.xml')]
+        # Exit early if there are no themes to upgrade
+        if not xml_file_paths:
+            return
         # Wait for 2 seconds to allow some other things to start processing first
         wait_for(lambda: False, timeout=1)
-        xml_file_paths = AppLocation.get_section_data_path('themes').glob('*/*.xml')
         for xml_file_path in xml_file_paths:
             theme_data = get_text_file_string(xml_file_path)
             theme = self._create_theme_from_xml(theme_data, self.theme_path)
