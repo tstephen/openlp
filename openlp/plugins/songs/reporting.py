@@ -47,7 +47,8 @@ def report_song_list():
         translate('SongPlugin.ReportSongList', 'Save File'),
         Path(translate('SongPlugin.ReportSongList', 'song_extract.csv')),
         translate('SongPlugin.ReportSongList', 'CSV format (*.csv)'))
-
+    if report_file_path is None:
+        return
     report_file_path.with_suffix('.csv')
     Registry().get('application').set_busy_cursor()
     try:
