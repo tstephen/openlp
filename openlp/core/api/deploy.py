@@ -24,7 +24,6 @@ Download and "install" the remote web client
 import json
 import logging
 from datetime import date
-from distutils.version import LooseVersion
 from zipfile import ZipFile
 
 from PyQt5 import QtCore
@@ -74,7 +73,8 @@ class RemoteVersionWorker(ThreadWorker):
                 retries += 1
         else:
             self.no_internet.emit()
-        if version_info and LooseVersion(version_info['latest']['version']) > LooseVersion(self.current_version):
+        if version_info and (QtCore.QVersionNumber.fromString(version_info['latest']['version']) >
+                             QtCore.QVersionNumber.fromString(self.current_version)):
             Registry().get('settings').setValue('api/last version test', date.today().strftime('%Y-%m-%d'))
             Registry().get('settings_form').api_tab.master_version = version_info['latest']['version']
             self.new_version.emit(version_info['latest']['version'])
