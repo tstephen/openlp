@@ -31,7 +31,6 @@ import sys
 import traceback
 from ipaddress import IPv4Address, IPv6Address, AddressValueError
 from shutil import which
-from subprocess import check_output, CalledProcessError, STDOUT
 
 from PyQt5 import QtGui
 from PyQt5.QtCore import QCryptographicHash as QHash
@@ -470,33 +469,6 @@ def clean_filename(filename):
     :rtype: str
     """
     return INVALID_FILE_CHARS.sub('_', CONTROL_CHARS.sub('', filename))
-
-
-def check_binary_exists(program_path):
-    """
-    Function that checks whether a binary exists.
-
-    :param pathlib.Path program_path: The full path to the binary to check.
-    :return: program output to be parsed
-    :rtype: bytes
-    """
-    log.debug('testing program_path: {text}'.format(text=program_path))
-    try:
-        # Setup startupinfo options for check_output to avoid console popping up on windows
-        if is_win():
-            from subprocess import STARTUPINFO, STARTF_USESHOWWINDOW
-            startupinfo = STARTUPINFO()
-            startupinfo.dwFlags |= STARTF_USESHOWWINDOW
-        else:
-            startupinfo = None
-        run_log = check_output([str(program_path), '--help'], stderr=STDOUT, startupinfo=startupinfo)
-    except CalledProcessError as e:
-        run_log = e.output
-    except Exception:
-        trace_error_handler(log)
-        run_log = ''
-    log.debug('check_output returned: {text}'.format(text=run_log))
-    return run_log
 
 
 def get_file_encoding(file_path):

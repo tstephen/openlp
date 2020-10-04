@@ -58,7 +58,6 @@ LINUX_MODULES = [
     # Optical drive detection.
     'dbus',
     'distro',
-    'Xlib',
 ]
 
 MACOSX_MODULES = [
