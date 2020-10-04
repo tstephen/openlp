@@ -70,6 +70,7 @@ class ListPreviewWidget(QtWidgets.QTableWidget, RegistryProperties):
     :param parent:
     :param screen_ratio:
     """
+    resize_event = QtCore.pyqtSignal()
 
     def __init__(self, parent, screen_ratio):
         """
@@ -105,6 +106,7 @@ class ListPreviewWidget(QtWidgets.QTableWidget, RegistryProperties):
         Overloaded method from QTableWidget. Will recalculate the layout.
         """
         self.__recalculate_layout()
+        self.resize_event.emit()
 
     def __recalculate_layout(self):
         """
