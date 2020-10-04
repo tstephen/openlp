@@ -1001,8 +1001,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
         self.application.set_normal_cursor()
         # if a warning has been shown within the last 5 seconds, skip showing again to avoid spamming user,
         # also do not show if the settings window is visible
-        if not self.settings_form.isVisible() and \
-                not self.screen_change_timestamp or (datetime.now() - self.screen_change_timestamp).seconds > 5:
+        if not self.settings_form.isVisible() and not self.screen_change_timestamp or \
+                self.screen_change_timestamp and (datetime.now() - self.screen_change_timestamp).seconds > 5:
             QtWidgets.QMessageBox.warning(self, translate('OpenLP.MainWindow', 'Screen setup has changed'),
                                           translate('OpenLP.MainWindow',
                                                     'The screen setup has changed. '

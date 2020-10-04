@@ -129,9 +129,6 @@ class SettingsForm(QtWidgets.QDialog, Ui_SettingsDialog, RegistryProperties):
                 tab_widget = self.stacked_layout.widget(tab_index)
                 if tab_widget.tab_title == plugin_name:
                     tab_widget.save()
-        # if the image background has been changed we need to regenerate the image cache
-        if 'images_config_updated' in self.processes or 'config_screen_changed' in self.processes:
-            self.register_post_process('images_regenerate')
         # Now lets process all the post save handlers
         while self.processes:
             Registry().execute(self.processes.pop(0))
