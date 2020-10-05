@@ -49,7 +49,8 @@ class WebEnginePage(QtWebEngineWidgets.QWebEnginePage):
         """
         # The JS log has the entire file location, which we don't really care about
         app_dir = AppLocation.get_directory(AppLocation.AppDir).parent
-        source_id = source_id.replace('file://{app_dir}/'.format(app_dir=app_dir), '')
+        if str(app_dir) in source_id:
+            source_id = source_id.replace('file://{app_dir}/'.format(app_dir=app_dir), '')
         # Log the JS messages to the Python logger
         log.log(LOG_LEVELS[level], '{source_id}:{line_number} {message}'.format(source_id=source_id,
                                                                                 line_number=line_number,

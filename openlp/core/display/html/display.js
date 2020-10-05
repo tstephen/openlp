@@ -236,119 +236,6 @@ function _createStyle(selector, rules) {
 }
 
 /**
- * An audio player with a play list
- */
-var AudioPlayer = function (audioElement) {
-  this._audioElement = null;
-  this._eventListeners = {};
-  this._playlist = [];
-  this._currentTrack = null;
-  this._canRepeat = false;
-  this._state = AudioState.Stopped;
-  this.createAudioElement();
-};
-
-/**
- * Call all listeners associated with this event
- * @private
- * @param {object} event - The event that was emitted
- */
-AudioPlayer.prototype._callListener = function (event) {
-  if (this._eventListeners.hasOwnProperty(event.type)) {
-    this._eventListeners[event.type].forEach(function (listener) {
-      listener(event);
-    });
-  }
-  else {
-    console.warn("Received unknown event \"" + event.type + "\", doing nothing.");
-  }
-};
-
-/**
- * Create the <audio> element that is used to play the audio
- */
-AudioPlayer.prototype.createAudioElement = function () {
-  this._audioElement = document.createElement("audio");
-  this._audioElement.addEventListener("ended", this.onEnded);
-  this._audioElement.addEventListener("ended", this._callListener);
-  this._audioElement.addEventListener("timeupdate", this._callListener);
-  this._audioElement.addEventListener("volumechange", this._callListener);
-  this._audioElement.addEventListener("durationchange", this._callListener);
-  this._audioElement.addEventListener("loadeddata", this._callListener);
-  document.addEventListener("complete", function(event) {
-    document.body.appendChild(this._audioElement);
-  });
-};
-AudioPlayer.prototype.addEventListener = function (eventType, listener) {
-  this._eventListeners[eventType] = this._eventListeners[eventType] || [];
-  this._eventListeners[eventType].push(listener);
-};
-AudioPlayer.prototype.onEnded = function (event) {
-  this.nextTrack();
-};
-AudioPlayer.prototype.setCanRepeat = function (canRepeat) {
-  this._canRepeat = canRepeat;
-};
-AudioPlayer.prototype.clearTracks = function () {
-  this._playlist = [];
-};
-AudioPlayer.prototype.addTrack = function (track) {
-  this._playlist.push(track);
-};
-AudioPlayer.prototype.nextTrack = function () {
-  if (!!this._currentTrack) {
-    var trackIndex = this._playlist.indexOf(this._currentTrack);
-    if ((trackIndex + 1 >= this._playlist.length) && this._canRepeat) {
-      this.play(this._playlist[0]);
-    }
-    else if (trackIndex + 1 < this._playlist.length) {
-      this.play(this._playlist[trackIndex + 1]);
-    }
-    else {
-      this.stop();
-    }
-  }
-  else if (this._playlist.length > 0) {
-    this.play(this._playlist[0]);
-  }
-  else {
-    console.warn("No tracks in playlist, doing nothing.");
-  }
-};
-AudioPlayer.prototype.play = function () {
-  if (arguments.length > 0) {
-    this._currentTrack = arguments[0];
-    this._audioElement.src = this._currentTrack;
-    this._audioElement.play();
-    this._state = AudioState.Playing;
-  }
-  else if (this._state == AudioState.Paused) {
-    this._audioElement.play();
-    this._state = AudioState.Playing;
-  }
-  else {
-    console.warn("No track currently paused and no track specified, doing nothing.");
-  }
-};
-
-/**
- * Pause
- */
-AudioPlayer.prototype.pause = function () {
-  this._audioElement.pause();
-  this._state = AudioState.Paused;
-};
-
-/**
- * Stop playing
- */
-AudioPlayer.prototype.stop = function () {
-  this._audioElement.pause();
-  this._audioElement.src = "";
-  this._state = AudioState.Stopped;
-};
-
-/**
  * The Display object is what we use from OpenLP
  */
 var Display = {
@@ -392,9 +279,9 @@ var Display = {
   init: function (options) {
     // Set defaults for undefined values
     options = options || {};
-    var isDisplay = options.isDisplay || false;
-    var doItemTransitions = options.doItemTransitions || false;
-    var hideMouse = options.hideMouse || false;
+    let isDisplay = options.isDisplay || false;
+    let doItemTransitions = options.doItemTransitions || false;
+    let hideMouse = options.hideMouse || false;
     // Now continue to initialisation
     if (!isDisplay) {
       document.body.classList.add('checkerboard');
@@ -1248,9 +1135,26 @@ var Display = {
    */
   setScale: function(scale) {
     document.body.style.zoom = scale+"%";
+  },
+  /**
+   * In order to check if a font exists, we need a container to do
+   * calculations on. This method creates that container and caches
+   * some width values so that we don't have to do this step every
+   * time we check if a font exists.
+   */
+  _prepareFontContainer: function() {
+    Display._fontContainer = document.createElement("span");
+    Display._fontContainer.id = "does-font-exist";
+    Display._fontContainer.innerHTML = Array(100).join("wi");
+    Display._fontContainer.style.cssText = [
+      "position: absolute",
+      "width: auto",
+      "font-size: 128px",
+      "left: -999999px"
+    ].join(" !important;");
+    document.body.appendChild(Display._fontContainer);
   }
 };
 new QWebChannel(qt.webChannelTransport, function (channel) {
-  window.mediaWatcher = channel.objects.mediaWatcher;
   window.displayWatcher = channel.objects.displayWatcher;
 });

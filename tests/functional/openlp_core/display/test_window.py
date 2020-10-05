@@ -32,7 +32,7 @@ from PyQt5 import QtCore
 # Mock QtWebEngineWidgets
 sys.modules['PyQt5.QtWebEngineWidgets'] = MagicMock()
 
-from openlp.core.display.window import DisplayWindow
+from openlp.core.display.window import DisplayWindow, DisplayWatcher
 from openlp.core.common.enum import ServiceItemType
 from openlp.core.lib.theme import Theme
 from openlp.core.ui import HideMode
@@ -218,6 +218,69 @@ def test_run_javascript_sync_no_wait(mock_time, mocked_webengine, mocked_addWidg
     assert result == 1234
     webengine_page.runJavaScript.assert_called_once()
     mock_time.sleep.assert_not_called()
+
+
+@patch('openlp.core.display.window.QtWidgets.QVBoxLayout')
+@patch('openlp.core.display.webengine.WebEngineView')
+@patch('openlp.core.display.window.is_win')
+def test_fix_font_bold_windows(mocked_is_win, mocked_webengine, mocked_layout, mock_settings):
+    """
+    Test that on Windows, fonts that end with "Bold" are handled
+    """
+    # GIVEN: A display window and a font name
+    mocked_is_win.return_value = True
+    display_window = DisplayWindow()
+    display_window.is_display = True
+    display_window.run_javascript = MagicMock()
+    font_name = 'Arial Rounded MT Bold'
+
+    # WHEN: The font is processed
+    result = display_window._fix_font_name(font_name)
+
+    # Then the font name should be fixed
+    assert result == 'Arial Rounded MT'
+
+
+@patch('openlp.core.display.window.QtWidgets.QVBoxLayout')
+@patch('openlp.core.display.webengine.WebEngineView')
+@patch('openlp.core.display.window.is_win')
+def test_fix_font_bold_not_windows(mocked_is_win, mocked_webengine, mocked_layout, mock_settings):
+    """
+    Test that on NOT Windows, fonts that end with "Bold" are ignored
+    """
+    # GIVEN: A display window and a font name
+    mocked_is_win.return_value = False
+    display_window = DisplayWindow()
+    display_window.is_display = True
+    display_window.run_javascript = MagicMock()
+    font_name = 'Arial Rounded MT Bold'
+
+    # WHEN: The font is processed
+    result = display_window._fix_font_name(font_name)
+
+    # Then the font name should be fixed
+    assert result == 'Arial Rounded MT Bold'
+
+
+@patch('openlp.core.display.window.QtWidgets.QVBoxLayout')
+@patch('openlp.core.display.webengine.WebEngineView')
+@patch('openlp.core.display.window.is_win')
+def test_fix_font_foundry(mocked_is_win, mocked_webengine, mocked_layout, mock_settings):
+    """
+    Test that a font with a foundry name in it has the foundry removed
+    """
+    # GIVEN: A display window and a font name
+    mocked_is_win.return_value = False
+    display_window = DisplayWindow()
+    display_window.is_display = True
+    display_window.run_javascript = MagicMock()
+    font_name = 'CMG Sans [Foundry]'
+
+    # WHEN: The font is processed
+    result = display_window._fix_font_name(font_name)
+
+    # Then the font name should be fixed
+    assert result == 'CMG Sans'
 
 
 @patch('openlp.core.display.window.QtWidgets.QVBoxLayout')
@@ -463,3 +526,18 @@ def test_hide_display_no_display(mocked_screenlist, mocked_webengine, mocked_add
 
     # THEN: Hide mode should still be none
     assert display_window.hide_mode is None
+
+
+def test_display_watcher_set_initialised():
+    """
+    Test that the initialised signal is emitted
+    """
+    # GIVEN: A DisplayWatcher instance
+    display_watcher = DisplayWatcher(None)
+
+    # WHEN: setInitialised is called
+    with patch.object(display_watcher, 'initialised') as mocked_initialised:
+        display_watcher.setInitialised(True)
+
+        # THEN: initialised should have been emitted
+        mocked_initialised.emit.assert_called_once_with(True)

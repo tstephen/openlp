@@ -25,9 +25,11 @@ import json
 import logging
 import os
 import copy
+import re
 
 from PyQt5 import QtCore, QtWebChannel, QtWidgets
 
+from openlp.core.common import is_win
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.enum import ServiceItemType
 from openlp.core.common.i18n import translate
@@ -39,68 +41,8 @@ from openlp.core.display.screens import ScreenList
 from openlp.core.ui import HideMode
 
 
+FONT_FOUNDRY = re.compile(r'(.*?) \[(.*?)\]')
 log = logging.getLogger(__name__)
-
-
-class MediaWatcher(QtCore.QObject):
-    """
-    A class to watch media events in the display and emit signals for OpenLP
-    """
-    progress = QtCore.pyqtSignal(float)
-    duration = QtCore.pyqtSignal(float)
-    volume = QtCore.pyqtSignal(float)
-    playback_rate = QtCore.pyqtSignal(float)
-    ended = QtCore.pyqtSignal(bool)
-    muted = QtCore.pyqtSignal(bool)
-
-    @QtCore.pyqtSlot(float)
-    def update_progress(self, time):
-        """
-        Notify about the current position of the media
-        """
-        log.warning(time)
-        self.progress.emit(time)
-
-    @QtCore.pyqtSlot(float)
-    def update_duration(self, time):
-        """
-        Notify about the duration of the media
-        """
-        log.warning(time)
-        self.duration.emit(time)
-
-    @QtCore.pyqtSlot(float)
-    def update_volume(self, level):
-        """
-        Notify about the volume of the media
-        """
-        log.warning(level)
-        level = level * 100
-        self.volume.emit(level)
-
-    @QtCore.pyqtSlot(float)
-    def update_playback_rate(self, rate):
-        """
-        Notify about the playback rate of the media
-        """
-        log.warning(rate)
-        self.playback_rate.emit(rate)
-
-    @QtCore.pyqtSlot(bool)
-    def has_ended(self, is_ended):
-        """
-        Notify that the media has ended playing
-        """
-        log.warning(is_ended)
-        self.ended.emit(is_ended)
-
-    @QtCore.pyqtSlot(bool)
-    def has_muted(self, is_muted):
-        """
-        Notify that the media has been muted
-        """
-        log.warning(is_muted)
-        self.muted.emit(is_muted)
 
 
 class DisplayWatcher(QtCore.QObject):
@@ -153,14 +95,12 @@ class DisplayWindow(QtWidgets.QWidget, RegistryProperties, LogMixin):
         self.display_path = display_base_path / 'display.html'
         self.checkerboard_path = display_base_path / 'checkerboard.png'
         self.openlp_splash_screen_path = display_base_path / 'openlp-splash-screen.png'
-        self.set_url(QtCore.QUrl.fromLocalFile(path_to_str(self.display_path)))
         self.channel = QtWebChannel.QWebChannel(self)
-        self.media_watcher = MediaWatcher(self)
-        self.channel.registerObject('mediaWatcher', self.media_watcher)
         self.display_watcher = DisplayWatcher(self)
         self.channel.registerObject('displayWatcher', self.display_watcher)
         self.webview.page().setWebChannel(self.channel)
         self.display_watcher.initialised.connect(self.on_initialised)
+        self.set_url(QtCore.QUrl.fromLocalFile(path_to_str(self.display_path)))
         self.is_display = False
         self.scale = 1
         self.hide_mode = None
@@ -174,6 +114,19 @@ class DisplayWindow(QtWidgets.QWidget, RegistryProperties, LogMixin):
             # Only make visible on single monitor setup if setting enabled.
             if len(ScreenList()) > 1 or self.settings.value('core/display on monitor'):
                 self.show()
+
+    def _fix_font_name(self, font_name):
+        """
+        Do some font machinations to see if we can fix the font name
+        """
+        # Some fonts on Windows that end in "Bold" are made into a base font that is bold
+        if is_win() and font_name.endswith(' Bold'):
+            font_name = font_name.split(' Bold')[0]
+        # Some fonts may have the Foundry name in their name. Remove the foundry name
+        match = FONT_FOUNDRY.match(font_name)
+        if match:
+            font_name = match.group(1)
+        return font_name
 
     def deregister_display(self):
         """
@@ -424,6 +377,9 @@ class DisplayWindow(QtWidgets.QWidget, RegistryProperties, LogMixin):
                 theme_copy.background_end_color = '#590909'
                 theme_copy.background_main_color = '#090909'
                 theme_copy.background_footer_color = '#090909'
+        # Do some font-checking, see https://gitlab.com/openlp/openlp/-/issues/39
+        theme_copy.font_main_name = self._fix_font_name(theme.font_main_name)
+        theme_copy.font_footer_name = self._fix_font_name(theme.font_footer_name)
         exported_theme = theme_copy.export_theme(is_js=True)
         self.run_javascript('Display.setTheme({theme});'.format(theme=exported_theme), is_sync=is_sync)
 
