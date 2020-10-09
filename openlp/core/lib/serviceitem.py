@@ -25,7 +25,6 @@ import datetime
 import logging
 import ntpath
 import os
-import urllib.request
 import uuid
 from copy import deepcopy
 from pathlib import Path
@@ -39,9 +38,9 @@ from openlp.core.common.enum import ServiceItemType
 from openlp.core.common.i18n import translate
 from openlp.core.common.mixins import RegistryProperties
 from openlp.core.common.registry import Registry
+from openlp.core.common.utils import wait_for
 from openlp.core.display.render import remove_tags, render_tags, render_chords_for_printing
-from openlp.core.lib import ItemCapabilities
-from openlp.core.lib import create_thumb
+from openlp.core.lib import create_thumb, image_to_data_uri, ItemCapabilities
 from openlp.core.lib.theme import BackgroundType, TransitionSpeed
 from openlp.core.state import State
 from openlp.core.ui.icons import UiIcons
@@ -70,6 +69,7 @@ class ServiceItem(RegistryProperties):
         self._rendered_slides = None
         self._display_slides = None
         self._print_slides = None
+        self._creating_slides = False
         self.title = ''
         self.slides = []
         self.processor = None
@@ -202,6 +202,8 @@ class ServiceItem(RegistryProperties):
         """
         Create frames for rendering and display
         """
+        wait_for(lambda: not self._creating_slides)
+        self._creating_slides = True
         self._rendered_slides = []
         self._display_slides = []
 
@@ -234,12 +236,14 @@ class ServiceItem(RegistryProperties):
                 }
                 self._display_slides.append(display_slide)
                 index += 1
+        self._creating_slides = False
 
     @property
     def rendered_slides(self):
         """
         Render the frames and return them
         """
+        wait_for(lambda: not self._creating_slides)
         if not self._rendered_slides:
             self._create_slides()
         return self._rendered_slides
@@ -249,6 +253,7 @@ class ServiceItem(RegistryProperties):
         """
         Render the frames and return them
         """
+        wait_for(lambda: not self._creating_slides)
         if not self._display_slides:
             self._create_slides()
         return self._display_slides
@@ -868,6 +873,7 @@ class ServiceItem(RegistryProperties):
     def to_dict(self):
         """
         Convert the service item into a dictionary
+        Images and thumbnails are put in dict as data uri strings.
         """
         data_dict = {
             'title': self.title,
@@ -902,7 +908,7 @@ class ServiceItem(RegistryProperties):
                 full_thumbnail_path = AppLocation.get_data_path() / thumbnail_path
                 if not full_thumbnail_path.exists():
                     create_thumb(Path(self.get_frame_path(index)), full_thumbnail_path, False)
-                item['img'] = urllib.request.pathname2url(os.path.sep + str(thumbnail_path))
+                item['img'] = image_to_data_uri(full_thumbnail_path)
                 item['text'] = str(frame['title'])
                 item['html'] = str(frame['title'])
             else:
@@ -921,7 +927,7 @@ class ServiceItem(RegistryProperties):
                         log.warning('Service item "{title}" is missing a thumbnail or has an invalid thumbnail path'
                                     .format(title=self.title))
                     else:
-                        item['img'] = urllib.request.pathname2url(os.path.sep + str(relative_file))
+                        item['img'] = image_to_data_uri(AppLocation.get_data_path() / relative_file)
                 item['text'] = str(frame['title'])
                 item['html'] = str(frame['title'])
             data_dict['slides'].append(item)

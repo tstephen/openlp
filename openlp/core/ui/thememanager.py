@@ -738,6 +738,8 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
         for theme_name in theme_name_list:
             theme_data = self._get_theme_data(theme_name)
             preview_pixmap = self.progress_form.get_preview(theme_name, theme_data)
+            if preview_pixmap is None:
+                break
             self.save_preview(theme_name, preview_pixmap)
         self.progress_form.close()
         self.load_themes()
