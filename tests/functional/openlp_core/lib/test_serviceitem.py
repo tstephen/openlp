@@ -823,7 +823,7 @@ def test_to_dict_image_item(mocked_image_to_data_uri, mocked_get_data_path, stat
     FormattingTags.load_tags()
     line = convert_file_service_item(TEST_PATH, 'serviceitem_image_2.osj')
     mocked_get_data_path.return_value = Path('/path/to/')
-    mocked_image_to_data_uri.side_effect = lambda x: 'your image uri at: {}'.format(x)
+    mocked_image_to_data_uri.side_effect = lambda x: 'your image uri at: {}'.format(x.as_posix())
 
     with patch('openlp.core.lib.serviceitem.sha256_file_hash') as mocked_sha256_file_hash:
         mocked_sha256_file_hash.return_value = '3a7ccbdb0b5a3db169c4692d7aad0ec8'
@@ -875,7 +875,7 @@ def test_to_dict_presentation_item(mocked_image_uri, mocked_get_data_path, state
     image = Path('thumbnails/abcd/slide1.png')
     display_title = 'DisplayTitle'
     notes = 'Note1\nNote2\n'
-    mocked_image_uri.side_effect = lambda x: 'your img uri at: {}'.format(x)
+    mocked_image_uri.side_effect = lambda x: 'your img uri at: {}'.format(x.as_posix())
 
     # WHEN: adding presentation to service_item
     with patch('openlp.core.lib.serviceitem.sha256_file_hash') as mocked_sha256_file_hash,\
