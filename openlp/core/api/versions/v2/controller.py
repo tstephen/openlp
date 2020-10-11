@@ -31,9 +31,9 @@ controller_views = Blueprint('controller', __name__)
 log = logging.getLogger(__name__)
 
 
-@controller_views.route('/live-item')
-def controller_text_api():
-    log.debug('controller-v2-live-item')
+@controller_views.route('/live-items')
+def controller_live_items():
+    log.debug('controller-v2-live-items')
     live_controller = Registry().get('live_controller')
     current_item = live_controller.service_item
     live_item = {}
