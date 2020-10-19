@@ -616,8 +616,10 @@ class SongMediaItem(MediaManagerItem):
         author_list = self.generate_footer(service_item, song)
         service_item.data_string = {
             'title': song.search_title,
+            'alternate_title': song.alternate_title,
             'authors': ', '.join(author_list),
-            'ccli_number': song.ccli_number
+            'ccli_number': song.ccli_number,
+            'copyright': song.copyright
         }
         service_item.xml_version = self.open_lyrics.song_to_xml(song)
         # Add the audio file to the service item.

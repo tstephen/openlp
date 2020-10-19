@@ -883,6 +883,7 @@ class ServiceItem(RegistryProperties):
             'footer': self.raw_footer,
             'audit': self.audit,
             'notes': self.notes,
+            'data': self.data_string or {},
             'fromPlugin': self.from_plugin,
             'capabilities': self.capabilities,
             'backgroundAudio': [str(file_path) for file_path in self.background_audio],
