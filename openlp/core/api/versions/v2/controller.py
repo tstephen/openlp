@@ -31,15 +31,26 @@ controller_views = Blueprint('controller', __name__)
 log = logging.getLogger(__name__)
 
 
-@controller_views.route('/live-item')
-def controller_text_api():
-    log.debug('controller-v2-live-item')
+@controller_views.route('/live-items')
+def controller_live_items():
+    log.debug('controller-v2-live-items')
     live_controller = Registry().get('live_controller')
     current_item = live_controller.service_item
     live_item = {}
     if current_item:
         live_item = current_item.to_dict()
         live_item['slides'][live_controller.selected_row]['selected'] = True
+    return jsonify(live_item)
+
+
+@controller_views.route('/live-item')
+def controller_live_item():
+    log.debug('controller-v2-live-item')
+    live_controller = Registry().get('live_controller')
+    current_item = live_controller.service_item
+    live_item = {}
+    if current_item:
+        live_item = current_item.to_dict(True, live_controller.selected_row)
     return jsonify(live_item)
 
 

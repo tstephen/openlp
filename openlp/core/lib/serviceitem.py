@@ -870,10 +870,13 @@ class ServiceItem(RegistryProperties):
                 return os.path.dirname(self.slides[0]['thumbnail'])
         return None
 
-    def to_dict(self):
+    def to_dict(self, active=False, item_no=0):
         """
         Convert the service item into a dictionary
         Images and thumbnails are put in dict as data uri strings.
+
+        :param boolean active: Do I filter list for only the active item
+        :param int item_no: the index of the active item
         """
         data_dict = {
             'title': self.title,
@@ -890,45 +893,48 @@ class ServiceItem(RegistryProperties):
             'slides': []
         }
         for index, frame in enumerate(self.get_frames()):
-            item = {
-                'tag': index + 1,
-                'title': self.title,
-                'selected': False
-            }
-            if self.is_text():
-                if frame['verse']:
-                    item['tag'] = str(frame['verse'])
-                item['text'] = frame['text']
-                item['html'] = self.rendered_slides[index]['text']
-                item['chords'] = self.rendered_slides[index]['chords']
-                item['footer'] = self.rendered_slides[index]['footer']
-            elif self.is_image() and not frame.get('image', '') and \
-                    Registry().get('settings_thread').value('api/thumbnails'):
-                thumbnail_path = os.path.join('images', 'thumbnails', frame['title'])
-                full_thumbnail_path = AppLocation.get_data_path() / thumbnail_path
-                if not full_thumbnail_path.exists():
-                    create_thumb(Path(self.get_frame_path(index)), full_thumbnail_path, False)
-                item['img'] = image_to_data_uri(full_thumbnail_path)
-                item['text'] = str(frame['title'])
-                item['html'] = str(frame['title'])
+            if active and index is not item_no:
+                continue
             else:
-                # presentations and other things
-                if self.is_capable(ItemCapabilities.HasDisplayTitle):
-                    item['title'] = str(frame['display_title'])
-                if self.is_capable(ItemCapabilities.HasNotes):
-                    item['slide_notes'] = str(frame['notes'])
-                if self.is_capable(ItemCapabilities.HasThumbnails) and \
+                item = {
+                    'tag': index + 1,
+                    'title': self.title,
+                    'selected': False
+                }
+                if self.is_text():
+                    if frame['verse']:
+                        item['tag'] = str(frame['verse'])
+                    item['text'] = frame['text']
+                    item['html'] = self.rendered_slides[index]['text']
+                    item['chords'] = self.rendered_slides[index]['chords']
+                    item['footer'] = self.rendered_slides[index]['footer']
+                elif self.is_image() and not frame.get('image', '') and \
                         Registry().get('settings_thread').value('api/thumbnails'):
-                    # If the file is under our app directory tree send the portion after the match
-                    data_path = str(AppLocation.get_data_path())
-                    try:
-                        relative_file = frame['image'].relative_to(data_path)
-                    except ValueError:
-                        log.warning('Service item "{title}" is missing a thumbnail or has an invalid thumbnail path'
-                                    .format(title=self.title))
-                    else:
-                        item['img'] = image_to_data_uri(AppLocation.get_data_path() / relative_file)
-                item['text'] = str(frame['title'])
-                item['html'] = str(frame['title'])
-            data_dict['slides'].append(item)
+                    thumbnail_path = os.path.join('images', 'thumbnails', frame['title'])
+                    full_thumbnail_path = AppLocation.get_data_path() / thumbnail_path
+                    if not full_thumbnail_path.exists():
+                        create_thumb(Path(self.get_frame_path(index)), full_thumbnail_path, False)
+                    item['img'] = image_to_data_uri(full_thumbnail_path)
+                    item['text'] = str(frame['title'])
+                    item['html'] = str(frame['title'])
+                else:
+                    # presentations and other things
+                    if self.is_capable(ItemCapabilities.HasDisplayTitle):
+                        item['title'] = str(frame['display_title'])
+                    if self.is_capable(ItemCapabilities.HasNotes):
+                        item['slide_notes'] = str(frame['notes'])
+                    if self.is_capable(ItemCapabilities.HasThumbnails) and \
+                            Registry().get('settings_thread').value('api/thumbnails'):
+                        # If the file is under our app directory tree send the portion after the match
+                        data_path = str(AppLocation.get_data_path())
+                        try:
+                            relative_file = frame['image'].relative_to(data_path)
+                        except ValueError:
+                            log.warning('Service item "{title}" is missing a thumbnail or has an invalid thumbnail path'
+                                        .format(title=self.title))
+                        else:
+                            item['img'] = image_to_data_uri(AppLocation.get_data_path() / relative_file)
+                    item['text'] = str(frame['title'])
+                    item['html'] = str(frame['title'])
+                data_dict['slides'].append(item)
         return data_dict

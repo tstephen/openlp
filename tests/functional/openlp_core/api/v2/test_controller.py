@@ -24,7 +24,7 @@ from openlp.core.common.registry import Registry
 from pathlib import Path
 
 
-def test_retrieve_live_item(flask_client, settings):
+def test_retrieve_live_items(flask_client, settings):
     """
     Test the live-item endpoint with a mocked service item
     """
@@ -36,7 +36,7 @@ def test_retrieve_live_item(flask_client, settings):
     Registry().register('live_controller', fake_live_controller)
 
     # WHEN: The live-item endpoint is called
-    res = flask_client.get('/api/v2/controller/live-item').get_json()
+    res = flask_client.get('/api/v2/controller/live-items').get_json()
 
     # THEN: The correct item data should be returned
     assert res == {'slides': [{'selected': True}]}

@@ -246,7 +246,11 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
             self.presentation_check_box.setChecked(
                 self.plugin_manager.get_plugin_by_name('presentations').is_active())
             self.image_check_box.setChecked(self.plugin_manager.get_plugin_by_name('images').is_active())
-            self.media_check_box.setChecked(self.plugin_manager.get_plugin_by_name('media').is_active())
+            # temp fix for #677 when we have an error
+            try:
+                self.media_check_box.setChecked(self.plugin_manager.get_plugin_by_name('media').is_active())
+            except Exception:
+                self.media_check_box.setEnabled(False)
             self.custom_check_box.setChecked(self.plugin_manager.get_plugin_by_name('custom').is_active())
             self.song_usage_check_box.setChecked(self.plugin_manager.get_plugin_by_name('songusage').is_active())
             self.alert_check_box.setChecked(self.plugin_manager.get_plugin_by_name('alerts').is_active())
