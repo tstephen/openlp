@@ -23,6 +23,7 @@ Test the media plugin
 """
 from unittest.mock import patch
 
+from openlp.core.state import State
 from openlp.plugins.media.mediaplugin import MediaPlugin
 
 
@@ -32,6 +33,8 @@ def test_initialise(mock_initialise, state, settings):
     Test that the initialise() method overwrites the built-in one, but still calls it
     """
     # GIVEN: A media plugin instance
+    State().add_service('mediacontroller', 0)
+    State().update_pre_conditions('mediacontroller', True)
     media_plugin = MediaPlugin()
 
     # WHEN: initialise() is called

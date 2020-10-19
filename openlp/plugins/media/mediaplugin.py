@@ -64,6 +64,12 @@ class MediaPlugin(Plugin):
         """
         pass
 
+    def check_pre_conditions(self):
+        """
+        Check the plugin can run and the media controller is available.
+        """
+        return State().is_module_active('mediacontroller')
+
     @staticmethod
     def about():
         """
