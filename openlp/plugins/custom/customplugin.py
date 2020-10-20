@@ -64,6 +64,12 @@ class CustomPlugin(Plugin):
                                'the same way songs are. This plugin provides greater freedom over the songs plugin.')
         return about_text
 
+    def check_pre_conditions(self):
+        """
+        Check the plugin can run.
+        """
+        return self.db_manager.session is not None
+
     def uses_theme(self, theme):
         """
         Called to find out if the custom plugin is currently using a theme.

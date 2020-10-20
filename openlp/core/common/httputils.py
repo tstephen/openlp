@@ -280,6 +280,7 @@ class DownloadWorker(ThreadWorker):
             log.exception('Unable to download %s', url)
             self.download_failed.emit()
         finally:
+            time.sleep(1)
             self.quit.emit()
 
     @QtCore.pyqtSlot()

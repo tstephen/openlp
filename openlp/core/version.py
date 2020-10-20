@@ -27,10 +27,10 @@ import sys
 from collections import OrderedDict
 from datetime import date
 
-import requests
 from PyQt5 import QtCore
 
 from openlp.core.common.applocation import AppLocation
+from openlp.core.common.httputils import get_web_page
 from openlp.core.common.registry import Registry
 from openlp.core.threading import ThreadWorker, run_thread
 
@@ -104,9 +104,9 @@ class VersionWorker(ThreadWorker):
         retries = 0
         while retries < 3:
             try:
-                response = requests.get(download_url, headers=headers)
-                if response.status_code == 200:
-                    remote_version = response.text.strip()
+                response = get_web_page(download_url, headers=headers)
+                if response:
+                    remote_version = response.strip()
                 log.debug('New version found: %s', remote_version)
                 break
             except OSError:

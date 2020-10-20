@@ -24,7 +24,7 @@ from openlp.core.common.registry import Registry
 from pathlib import Path
 
 
-def test_retrieve_live_item(flask_client, settings):
+def test_retrieve_live_items(flask_client, settings):
     """
     Test the live-item endpoint with a mocked service item
     """

@@ -49,6 +49,8 @@ def test_bootstrap_initialise(settings, state):
     Test the PluginManager.bootstrap_initialise() method
     """
     # GIVEN: A plugin manager with some mocked out methods
+    State().add_service('mediacontroller', 0)
+    State().update_pre_conditions('mediacontroller', True)
     manager = PluginManager()
 
     with patch.object(manager, 'hook_settings_tabs') as mocked_hook_settings_tabs, \
@@ -465,6 +467,25 @@ def test_get_plugin_by_name_exists(registry, state):
     plugin_manager = PluginManager()
     Registry().register('mock_plugin', mocked_plugin)
     State().add_service("mock", 1, is_plugin=True, status=PluginStatus.Active)
+    State().flush_preconditions()
+
+    # WHEN: We run finalise_plugins()
+    result = plugin_manager.get_plugin_by_name('Mocked Plugin')
+
+    # THEN: The is_active() and finalise() methods should have been called
+    assert result == mocked_plugin, 'The result for get_plugin_by_name should be the mocked plugin'
+
+
+def test_get_plugin_by_name_disabled(registry, state):
+    """
+    Test running the get_plugin_by_name() method to find a plugin that is disabled
+    """
+    # GIVEN: A PluginManager instance and a list with a mocked up plugin whose status is set to Active
+    mocked_plugin = MagicMock()
+    mocked_plugin.name = 'Mocked Plugin'
+    plugin_manager = PluginManager()
+    Registry().register('mock_plugin', mocked_plugin)
+    State().add_service("mock", 1, is_plugin=True, status=PluginStatus.Disabled)
     State().flush_preconditions()
 
     # WHEN: We run finalise_plugins()

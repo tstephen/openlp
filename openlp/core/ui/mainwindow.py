@@ -23,7 +23,7 @@ This is the main window, where all the action happens.
 """
 import os
 import shutil
-from datetime import datetime
+from datetime import datetime, date
 from pathlib import Path
 from tempfile import gettempdir
 
@@ -626,6 +626,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
 
         :param version: The Version to be displayed.
         """
+        Registry().get('settings').setValue('api/last version test', date.today().strftime('%Y-%m-%d'))
+        Registry().get('settings_form').api_tab.master_version = version
         version_text = translate('OpenLP.MainWindow', 'Version {version} of the web remote is now available for '
                                  'download.\nTo download this version, go to the Remote settings and click the Upgrade '
                                  'button.').format(version=version)

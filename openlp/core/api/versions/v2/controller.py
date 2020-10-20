@@ -43,6 +43,17 @@ def controller_live_items():
     return jsonify(live_item)
 
 
+@controller_views.route('/live-item')
+def controller_live_item():
+    log.debug('controller-v2-live-item')
+    live_controller = Registry().get('live_controller')
+    current_item = live_controller.service_item
+    live_item = {}
+    if current_item:
+        live_item = current_item.to_dict(True, live_controller.selected_row)
+    return jsonify(live_item)
+
+
 @controller_views.route('/show', methods=['POST'])
 @login_required
 def controller_set():
