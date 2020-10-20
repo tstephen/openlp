@@ -358,6 +358,13 @@ class Manager(object):
             self.db_url = init_url(plugin_name, str(db_file_path))  # TOdO :PATHLIB
         else:
             self.db_url = init_url(plugin_name)
+        if not session:
+            try:
+                self.session = init_schema(self.db_url)
+            except (SQLAlchemyError, DBAPIError):
+                handle_db_error(plugin_name, db_file_path)
+        else:
+            self.session = session
         if upgrade_mod:
             try:
                 db_ver, up_ver = upgrade_db(self.db_url, upgrade_mod)
@@ -373,13 +380,6 @@ class Manager(object):
                                                                                                 db_up=up_ver,
                                                                                                 db_name=self.db_url))
                 return
-        if not session:
-            try:
-                self.session = init_schema(self.db_url)
-            except (SQLAlchemyError, DBAPIError):
-                handle_db_error(plugin_name, db_file_path)
-        else:
-            self.session = session
 
     def save_object(self, object_instance, commit=True):
         """

@@ -47,8 +47,8 @@ def test_worker_init():
 
 
 @patch('openlp.core.version.platform')
-@patch('openlp.core.version.requests')
-def test_worker_start(mock_requests, mock_platform):
+@patch('openlp.core.version.get_web_page')
+def test_worker_start(mock_get_web_page, mock_platform):
     """
     Test the VersionWorkder.start() method
     """
@@ -57,7 +57,7 @@ def test_worker_start(mock_requests, mock_platform):
     current_version = {'full': '2.0', 'version': '2.0', 'build': None}
     mock_platform.system.return_value = 'Linux'
     mock_platform.release.return_value = '4.12.0-1-amd64'
-    mock_requests.get.return_value = MagicMock(text='2.4.6', status_code=200)
+    mock_get_web_page.return_value = '2.4.6'
     worker = VersionWorker(last_check_date, current_version)
 
     # WHEN: The worker is run
@@ -68,14 +68,14 @@ def test_worker_start(mock_requests, mock_platform):
     # THEN: The check completes and the signal is emitted
     expected_download_url = 'https://get.openlp.org/versions/version.txt'
     expected_headers = {'User-Agent': 'OpenLP/2.0 Linux/4.12.0-1-amd64; '}
-    mock_requests.get.assert_called_once_with(expected_download_url, headers=expected_headers)
+    mock_get_web_page.assert_called_once_with(expected_download_url, headers=expected_headers)
     mock_new_version.emit.assert_called_once_with('2.4.6')
     mock_quit.emit.assert_called_once_with()
 
 
 @patch('openlp.core.version.platform')
-@patch('openlp.core.version.requests')
-def test_worker_start_fail(mock_requests, mock_platform):
+@patch('openlp.core.version.get_web_page')
+def test_worker_start_fail(mock_get_web_page, mock_platform):
     """
     Test the Version Workder.start() method with no response
     """
@@ -84,7 +84,7 @@ def test_worker_start_fail(mock_requests, mock_platform):
     current_version = {'full': '2.0', 'version': '2.0', 'build': None}
     mock_platform.system.return_value = 'Linux'
     mock_platform.release.return_value = '4.12.0-1-amd64'
-    mock_requests.get.return_value = MagicMock(text='2.4.6', status_code=500)
+    mock_get_web_page.return_value = None
     worker = VersionWorker(last_check_date, current_version)
 
     # WHEN: The worker is run
@@ -95,14 +95,14 @@ def test_worker_start_fail(mock_requests, mock_platform):
     # THEN: The check completes and the signal is emitted
     expected_download_url = 'https://get.openlp.org/versions/version.txt'
     expected_headers = {'User-Agent': 'OpenLP/2.0 Linux/4.12.0-1-amd64; '}
-    mock_requests.get.assert_called_once_with(expected_download_url, headers=expected_headers)
+    mock_get_web_page.assert_called_once_with(expected_download_url, headers=expected_headers)
     mock_new_version.emit.assert_not_called()
     mock_quit.emit.assert_called_once_with()
 
 
 @patch('openlp.core.version.platform')
-@patch('openlp.core.version.requests')
-def test_worker_start_dev_version(mock_requests, mock_platform):
+@patch('openlp.core.version.get_web_page')
+def test_worker_start_dev_version(mock_get_web_page, mock_platform):
     """
     Test the VersionWorkder.start() method for dev versions
     """
@@ -111,7 +111,7 @@ def test_worker_start_dev_version(mock_requests, mock_platform):
     current_version = {'full': '2.1.3', 'version': '2.1.3', 'build': None}
     mock_platform.system.return_value = 'Linux'
     mock_platform.release.return_value = '4.12.0-1-amd64'
-    mock_requests.get.return_value = MagicMock(text='2.4.6', status_code=200)
+    mock_get_web_page.return_value = '2.4.6'
     worker = VersionWorker(last_check_date, current_version)
 
     # WHEN: The worker is run
@@ -122,14 +122,14 @@ def test_worker_start_dev_version(mock_requests, mock_platform):
     # THEN: The check completes and the signal is emitted
     expected_download_url = 'https://get.openlp.org/versions/dev_version.txt'
     expected_headers = {'User-Agent': 'OpenLP/2.1.3 Linux/4.12.0-1-amd64; '}
-    mock_requests.get.assert_called_once_with(expected_download_url, headers=expected_headers)
+    mock_get_web_page.assert_called_once_with(expected_download_url, headers=expected_headers)
     mock_new_version.emit.assert_called_once_with('2.4.6')
     mock_quit.emit.assert_called_once_with()
 
 
 @patch('openlp.core.version.platform')
-@patch('openlp.core.version.requests')
-def test_worker_start_nightly_version(mock_requests, mock_platform):
+@patch('openlp.core.version.get_web_page')
+def test_worker_start_nightly_version(mock_get_web_page, mock_platform):
     """
     Test the VersionWorkder.start() method for nightlies
     """
@@ -138,7 +138,7 @@ def test_worker_start_nightly_version(mock_requests, mock_platform):
     current_version = {'full': '2.1-bzr2345', 'version': '2.1', 'build': '2345'}
     mock_platform.system.return_value = 'Linux'
     mock_platform.release.return_value = '4.12.0-1-amd64'
-    mock_requests.get.return_value = MagicMock(text='2.4.6', status_code=200)
+    mock_get_web_page.return_value = '2.4.6'
     worker = VersionWorker(last_check_date, current_version)
 
     # WHEN: The worker is run
@@ -149,14 +149,14 @@ def test_worker_start_nightly_version(mock_requests, mock_platform):
     # THEN: The check completes and the signal is emitted
     expected_download_url = 'https://get.openlp.org/versions/nightly_version.txt'
     expected_headers = {'User-Agent': 'OpenLP/2.1-bzr2345 Linux/4.12.0-1-amd64; '}
-    mock_requests.get.assert_called_once_with(expected_download_url, headers=expected_headers)
+    mock_get_web_page.assert_called_once_with(expected_download_url, headers=expected_headers)
     mock_new_version.emit.assert_called_once_with('2.4.6')
     mock_quit.emit.assert_called_once_with()
 
 
 @patch('openlp.core.version.platform')
-@patch('openlp.core.version.requests')
-def test_worker_empty_response(mock_requests, mock_platform):
+@patch('openlp.core.version.get_web_page')
+def test_worker_empty_response(mock_get_web_page, mock_platform):
     """
     Test the VersionWorkder.start() method for empty responses
     """
@@ -165,7 +165,7 @@ def test_worker_empty_response(mock_requests, mock_platform):
     current_version = {'full': '2.1-bzr2345', 'version': '2.1', 'build': '2345'}
     mock_platform.system.return_value = 'Linux'
     mock_platform.release.return_value = '4.12.0-1-amd64'
-    mock_requests.get.return_value = MagicMock(text='\n')
+    mock_get_web_page.return_value = '\n'
     worker = VersionWorker(last_check_date, current_version)
 
     # WHEN: The worker is run
@@ -176,14 +176,14 @@ def test_worker_empty_response(mock_requests, mock_platform):
     # THEN: The check completes and the signal is emitted
     expected_download_url = 'https://get.openlp.org/versions/nightly_version.txt'
     expected_headers = {'User-Agent': 'OpenLP/2.1-bzr2345 Linux/4.12.0-1-amd64; '}
-    mock_requests.get.assert_called_once_with(expected_download_url, headers=expected_headers)
+    mock_get_web_page.assert_called_once_with(expected_download_url, headers=expected_headers)
     assert mock_new_version.emit.call_count == 0
     mock_quit.emit.assert_called_once_with()
 
 
 @patch('openlp.core.version.platform')
-@patch('openlp.core.version.requests')
-def test_worker_start_connection_error(mock_requests, mock_platform):
+@patch('openlp.core.version.get_web_page')
+def test_worker_start_connection_error(mock_get_web_page, mock_platform):
     """
     Test the VersionWorkder.start() method when a ConnectionError happens
     """
@@ -192,7 +192,7 @@ def test_worker_start_connection_error(mock_requests, mock_platform):
     current_version = {'full': '2.0', 'version': '2.0', 'build': None}
     mock_platform.system.return_value = 'Linux'
     mock_platform.release.return_value = '4.12.0-1-amd64'
-    mock_requests.get.side_effect = ConnectionError('Could not connect')
+    mock_get_web_page.side_effect = ConnectionError('Could not connect')
     worker = VersionWorker(last_check_date, current_version)
 
     # WHEN: The worker is run
@@ -203,8 +203,8 @@ def test_worker_start_connection_error(mock_requests, mock_platform):
     # THEN: The check completes and the signal is emitted
     expected_download_url = 'https://get.openlp.org/versions/version.txt'
     expected_headers = {'User-Agent': 'OpenLP/2.0 Linux/4.12.0-1-amd64; '}
-    mock_requests.get.assert_called_with(expected_download_url, headers=expected_headers)
-    assert mock_requests.get.call_count == 3
+    mock_get_web_page.assert_called_with(expected_download_url, headers=expected_headers)
+    assert mock_get_web_page.call_count == 3
     mocked_no_internet.emit.assert_called_once_with()
     mocked_quit.emit.assert_called_once_with()
 
