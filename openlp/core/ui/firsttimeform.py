@@ -186,7 +186,6 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
             self.has_web_access = True
         self.application.process_events()
         self.downloading = translate('OpenLP.FirstTimeWizard', 'Downloading {name}...')
-        self.application.set_normal_cursor()
         self.is_index_downloaded = True
 
     def _parse_config(self, web_config):
@@ -330,6 +329,7 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
         # Was the thread created.
         if self.thumbnail_download_threads:
             while any([not is_thread_finished(thread_name) for thread_name in self.thumbnail_download_threads]):
+                self.application.process_events()
                 time.sleep(0.1)
         self.application.set_normal_cursor()
         Registry().remove_function('config_screen_changed', self.screen_selection_widget.load)
