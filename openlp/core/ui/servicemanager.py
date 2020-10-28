@@ -302,7 +302,6 @@ class Ui_ServiceManager(object):
         Registry().register_function('theme_update_list', self.update_theme_list)
         Registry().register_function('config_screen_changed', self.regenerate_service_items)
         Registry().register_function('theme_update_global', self.theme_change)
-        Registry().register_function('theme_update_service', self.service_theme_change)
         Registry().register_function('mediaitem_suffix_reset', self.reset_supported_suffixes)
 
 
@@ -317,6 +316,7 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
     servicemanager_next_item = QtCore.pyqtSignal()
     servicemanager_previous_item = QtCore.pyqtSignal()
     servicemanager_new_file = QtCore.pyqtSignal()
+    theme_update_service = QtCore.pyqtSignal()
 
     def __init__(self, parent=None):
         """
@@ -346,6 +346,7 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
         self.servicemanager_next_item.connect(self.next_item)
         self.servicemanager_previous_item.connect(self.previous_item)
         self.servicemanager_new_file.connect(self.new_file)
+        self.theme_update_service.connect(self.service_theme_change)
 
     def bootstrap_post_set_up(self):
         """
@@ -1355,7 +1356,7 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
         """
         self.service_theme = self.theme_combo_box.currentText()
         self.settings.setValue('servicemanager/service theme', self.service_theme)
-        Registry().execute('theme_update_service')
+        self.service_theme_change()
 
     def theme_change(self):
         """

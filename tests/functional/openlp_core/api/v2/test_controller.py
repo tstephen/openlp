@@ -229,12 +229,16 @@ def test_controller_set_theme_aborts_if_no_theme(flask_client, settings):
 
 
 def test_controller_set_theme_sets_global_theme(flask_client, settings):
+    fake_theme_manager = MagicMock()
+    Registry().register('theme_manager', fake_theme_manager)
     settings.setValue('themes/theme level', 1)
     res = flask_client.post('/api/v2/controller/theme', json=dict(theme='test'))
     assert res.status_code == 204
 
 
 def test_controller_set_theme_sets_service_theme(flask_client, settings):
+    fake_service_manager = MagicMock()
+    Registry().register('service_manager', fake_service_manager)
     settings.setValue('themes/theme level', 2)
     res = flask_client.post('/api/v2/controller/theme', json=dict(theme='test'))
     assert res.status_code == 204
