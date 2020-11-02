@@ -223,10 +223,10 @@ def set_theme():
         abort(400)
     if theme_level == ThemeLevel.Global:
         Registry().get('settings').setValue('themes/global theme', theme)
-        Registry().execute('theme_update_global')
+        Registry().get('theme_manager').theme_update_global.emit()
     elif theme_level == ThemeLevel.Service:
         Registry().get('settings').setValue('servicemanager/service theme', theme)
-        Registry().execute('theme_update_service')
+        Registry().get('service_manager').theme_update_service.emit()
     elif theme_level == ThemeLevel.Song:
         log.error('Unimplemented method')
         return '', 501

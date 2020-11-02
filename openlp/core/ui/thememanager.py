@@ -136,6 +136,8 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
     """
     Manages the orders of Theme.
     """
+    theme_update_global = QtCore.pyqtSignal()
+
     def __init__(self, parent=None):
         """
         Constructor
@@ -167,6 +169,7 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
         self.setup_ui(self)
         self.global_theme = self.settings.value('themes/global theme')
         self.build_theme_path()
+        self.theme_update_global.connect(self.change_global_from_tab)
 
     def bootstrap_post_set_up(self):
         """
