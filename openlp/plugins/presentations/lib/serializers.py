@@ -21,10 +21,7 @@
 """
 This module contains some helpers for serializing Path objects in Pyro4
 """
-try:
-    from openlp.core.common.path import Path
-except ImportError:
-    from pathlib import Path
+from openlp.core.common.path import Path
 
 from Pyro4.util import SerializerBase
 
@@ -40,7 +37,7 @@ def path_class_to_dict(obj):
 
 
 def path_dict_to_class(classname, d):
-    return Path(d['parts'])
+    return Path(*d['parts'])
 
 
 def register_classes():
