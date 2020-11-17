@@ -308,9 +308,11 @@ def sha256_file_hash(filename):
     :param filename: Name of the file to hash
     :returns: str
     """
-    log.debug('sha256_hash(filename="{filename}")'.format(filename=filename))
+    log.debug('sha256_file_hash(filename="{filename}")'.format(filename=filename))
     hash_obj = hashlib.sha256()
-    with open(filename, 'rb') as f:
+    if not filename.exists():
+        return None
+    with filename.open('rb') as f:
         for chunk in iter(lambda: f.read(65536), b''):
             hash_obj.update(chunk)
     return hash_obj.hexdigest()

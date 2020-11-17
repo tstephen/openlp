@@ -59,7 +59,7 @@ def test_is_not_image_with_none_image_file():
     Test the method handles a non image file
     """
     # Given and empty string
-    file_path = RESOURCE_PATH / 'serviceitem_custom_1.osj'
+    file_path = RESOURCE_PATH / 'presentations' / 'test.ppt'
 
     # WHEN testing for it
     result = is_not_image_file(file_path)

@@ -23,10 +23,534 @@ Functional tests to test the AppLocation class and related methods.
 """
 from io import BytesIO
 from pathlib import Path
+from unittest import skipUnless
 from unittest.mock import MagicMock, PropertyMock, call, patch
 
-from openlp.core.common import add_actions, clean_filename, delete_file, get_file_encoding, get_filesystem_encoding, \
-    get_uno_command, get_uno_instance
+import pytest
+
+from openlp.core.common import Singleton, add_actions, clean_filename, clean_button_text, de_hump, delete_file, \
+    extension_loader, get_file_encoding, get_filesystem_encoding, get_uno_command, get_uno_instance, is_linux, \
+    is_macosx, is_win, is_64bit_instance, md5_hash, normalize_str, path_to_module, qmd5_hash, sha256_file_hash, \
+    trace_error_handler, verify_ip_address
+
+from tests.resources.projector.data import TEST_HASH, TEST_PIN, TEST_SALT
+
+
+test_non_ascii_string = '이것은 한국어 시험 문자열'
+test_non_ascii_hash = 'fc00c7912976f6e9c19099b514ced201'
+
+ip4_loopback = '127.0.0.1'
+ip4_local = '192.168.1.1'
+ip4_broadcast = '255.255.255.255'
+ip4_bad = '192.168.1.256'
+
+ip6_loopback = '::1'
+ip6_link_local = 'fe80::223:14ff:fe99:d315'
+ip6_bad = 'ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff'
+
+
+def test_extension_loader_no_files_found():
+    """
+    Test the `extension_loader` function when no files are found
+    """
+    # GIVEN: A mocked `Path.glob` method which does not match any files
+    with patch('openlp.core.common.applocation.AppLocation.get_directory',
+               return_value=Path('/', 'app', 'dir', 'openlp')), \
+            patch.object(Path, 'glob', return_value=[]), \
+            patch('openlp.core.common.importlib.import_module') as mocked_import_module:
+
+        # WHEN: Calling `extension_loader`
+        extension_loader('glob', ['file2.py', 'file3.py'])
+
+        # THEN: `extension_loader` should not try to import any files
+        assert mocked_import_module.called is False
+
+
+def test_extension_loader_files_found():
+    """
+    Test the `extension_loader` function when it successfully finds and loads some files
+    """
+    # GIVEN: A mocked `Path.glob` method which returns a list of files
+    with patch('openlp.core.common.applocation.AppLocation.get_directory',
+               return_value=Path('/', 'app', 'dir', 'openlp')), \
+            patch.object(Path, 'glob', return_value=[
+                Path('/', 'app', 'dir', 'openlp', 'import_dir', 'file1.py'),
+                Path('/', 'app', 'dir', 'openlp', 'import_dir', 'file2.py'),
+                Path('/', 'app', 'dir', 'openlp', 'import_dir', 'file3.py'),
+                Path('/', 'app', 'dir', 'openlp', 'import_dir', 'file4.py')]), \
+            patch('openlp.core.common.importlib.import_module') as mocked_import_module:
+
+        # WHEN: Calling `extension_loader` with a list of files to exclude
+        extension_loader('glob', ['file2.py', 'file3.py'])
+
+        # THEN: `extension_loader` should only try to import the files that are matched by the blob, excluding the
+        #       files listed in the `excluded_files` argument
+        mocked_import_module.assert_has_calls([call('openlp.import_dir.file1'),
+                                               call('openlp.import_dir.file4')])
+
+
+def test_extension_loader_import_error():
+    """
+    Test the `extension_loader` function when `SourceFileLoader` raises a `ImportError`
+    """
+    # GIVEN: A mocked `import_module` which raises an `ImportError`
+    with patch('openlp.core.common.applocation.AppLocation.get_directory',
+               return_value=Path('/', 'app', 'dir', 'openlp')), \
+            patch.object(Path, 'glob', return_value=[
+                Path('/', 'app', 'dir', 'openlp', 'import_dir', 'file1.py')]), \
+            patch('openlp.core.common.importlib.import_module', side_effect=ImportError()), \
+            patch('openlp.core.common.log') as mocked_logger:
+
+        # WHEN: Calling `extension_loader`
+        extension_loader('glob')
+
+        # THEN: The `ImportError` should be caught and logged
+        assert mocked_logger.exception.called
+
+
+def test_extension_loader_os_error():
+    """
+    Test the `extension_loader` function when `import_module` raises a `ImportError`
+    """
+    # GIVEN: A mocked `SourceFileLoader` which raises an `OSError`
+    with patch('openlp.core.common.applocation.AppLocation.get_directory',
+               return_value=Path('/', 'app', 'dir', 'openlp')), \
+            patch.object(Path, 'glob', return_value=[
+                Path('/', 'app', 'dir', 'openlp', 'import_dir', 'file1.py')]), \
+            patch('openlp.core.common.importlib.import_module', side_effect=OSError()), \
+            patch('openlp.core.common.log') as mocked_logger:
+
+        # WHEN: Calling `extension_loader`
+        extension_loader('glob')
+
+        # THEN: The `OSError` should be caught and logged
+        assert mocked_logger.exception.called
+
+
+def test_de_hump_conversion():
+    """
+    Test the de_hump function with a class name
+    """
+    # GIVEN: a Class name in Camel Case
+    string = "MyClass"
+
+    # WHEN: we call de_hump
+    new_string = de_hump(string)
+
+    # THEN: the new string should be converted to python format
+    assert new_string == "my_class", 'The class name should have been converted'
+
+
+def test_de_hump_static():
+    """
+    Test the de_hump function with a python string
+    """
+    # GIVEN: a Class name in Camel Case
+    string = "my_class"
+
+    # WHEN: we call de_hump
+    new_string = de_hump(string)
+
+    # THEN: the new string should be converted to python format
+    assert new_string == "my_class", 'The class name should have been preserved'
+
+
+def test_path_to_module():
+    """
+    Test `path_to_module` when supplied with a `Path` object
+    """
+    # GIVEN: A `Path` object
+    path = Path('core', 'ui', 'media', 'vlcplayer.py')
+
+    # WHEN: Calling path_to_module with the `Path` object
+    result = path_to_module(path)
+
+    # THEN: path_to_module should return the module name
+    assert result == 'openlp.core.ui.media.vlcplayer'
+
+
+def test_trace_error_handler():
+    """
+    Test the trace_error_handler() method
+    """
+    # GIVEN: Mocked out objects
+    with patch('openlp.core.common.traceback') as mocked_traceback:
+        mocked_traceback.extract_stack.return_value = [('openlp.fake', 56, None, 'trace_error_handler_test')]
+        mocked_logger = MagicMock()
+
+        # WHEN: trace_error_handler() is called
+        trace_error_handler(mocked_logger)
+
+        # THEN: The mocked_logger.error() method should have been called with the correct parameters
+        mocked_logger.error.assert_called_with(
+            'OpenLP Error trace\n   File openlp.fake at line 56 \n\t called trace_error_handler_test')
+
+
+def test_singleton_metaclass_multiple_init():
+    """
+    Test that a class using the Singleton Metaclass is only initialised once despite being called several times and
+    that the same instance is returned each time..
+    """
+    # GIVEN: The Singleton Metaclass and a test class using it
+    class SingletonClass(metaclass=Singleton):
+        def __init__(self):
+            pass
+
+    with patch.object(SingletonClass, '__init__', return_value=None) as patched_init:
+
+        # WHEN: Initialising the class multiple times
+        inst_1 = SingletonClass()
+        inst_2 = SingletonClass()
+
+    # THEN: The __init__ method of the SingletonClass should have only been called once, and both returned values
+    #       should be the same instance.
+    assert inst_1 is inst_2
+    assert patched_init.call_count == 1
+
+
+def test_singleton_metaclass_multiple_classes():
+    """
+    Test that multiple classes using the Singleton Metaclass return the different an appropriate instances.
+    """
+    # GIVEN: Two different classes using the Singleton Metaclass
+    class SingletonClass1(metaclass=Singleton):
+        def __init__(self):
+            pass
+
+    class SingletonClass2(metaclass=Singleton):
+        def __init__(self):
+            pass
+
+    # WHEN: Initialising both classes
+    s_c1 = SingletonClass1()
+    s_c2 = SingletonClass2()
+
+    # THEN: The instances  should be an instance of the appropriate class
+    assert isinstance(s_c1, SingletonClass1)
+    assert isinstance(s_c2, SingletonClass2)
+
+
+def test_is_win():
+    """
+    Test the is_win() function
+    """
+    # GIVEN: Mocked out objects
+    with patch('openlp.core.common.os') as mocked_os, patch('openlp.core.common.sys') as mocked_sys:
+
+        # WHEN: The mocked os.name and sys.platform are set to 'nt' and 'win32' repectivly
+        mocked_os.name = 'nt'
+        mocked_sys.platform = 'win32'
+
+        # THEN: The three platform functions should perform properly
+        assert is_win() is True, 'is_win() should return True'
+        assert is_macosx() is False, 'is_macosx() should return False'
+        assert is_linux() is False, 'is_linux() should return False'
+
+
+def test_is_macosx():
+    """
+    Test the is_macosx() function
+    """
+    # GIVEN: Mocked out objects
+    with patch('openlp.core.common.os') as mocked_os, patch('openlp.core.common.sys') as mocked_sys:
+
+        # WHEN: The mocked os.name and sys.platform are set to 'posix' and 'darwin' repectivly
+        mocked_os.name = 'posix'
+        mocked_sys.platform = 'darwin'
+
+        # THEN: The three platform functions should perform properly
+        assert is_macosx() is True, 'is_macosx() should return True'
+        assert is_win() is False, 'is_win() should return False'
+        assert is_linux() is False, 'is_linux() should return False'
+
+
+def test_is_linux():
+    """
+    Test the is_linux() function
+    """
+    # GIVEN: Mocked out objects
+    with patch('openlp.core.common.os') as mocked_os, patch('openlp.core.common.sys') as mocked_sys:
+
+        # WHEN: The mocked os.name and sys.platform are set to 'posix' and 'linux3' repectively
+        mocked_os.name = 'posix'
+        mocked_sys.platform = 'linux3'
+
+        # THEN: The three platform functions should perform properly
+        assert is_linux() is True, 'is_linux() should return True'
+        assert is_win() is False, 'is_win() should return False'
+        assert is_macosx() is False, 'is_macosx() should return False'
+
+
+@skipUnless(is_linux(), 'This can only run on Linux')
+def test_is_linux_distro():
+    """
+    Test the is_linux() function for a particular Linux distribution
+    """
+    # GIVEN: Mocked out objects
+    with patch('openlp.core.common.os') as mocked_os, \
+            patch('openlp.core.common.sys') as mocked_sys, \
+            patch('openlp.core.common.distro_id') as mocked_distro_id:
+
+        # WHEN: The mocked os.name and sys.platform are set to 'posix' and 'linux3' repectively
+        #       and the distro is Fedora
+        mocked_os.name = 'posix'
+        mocked_sys.platform = 'linux3'
+        mocked_distro_id.return_value = 'fedora'
+
+        # THEN: The three platform functions should perform properly
+        assert is_linux(distro='fedora') is True, 'is_linux(distro="fedora") should return True'
+        assert is_win() is False, 'is_win() should return False'
+        assert is_macosx() is False, 'is_macosx() should return False'
+
+
+def test_is_64bit_instance():
+    """
+    Test the is_64bit_instance() function
+    """
+    # GIVEN: Mocked out objects
+    with patch('openlp.core.common.sys') as mocked_sys:
+
+        # WHEN: The mocked sys.maxsize is set to 32-bit
+        mocked_sys.maxsize = 2**32
+
+        # THEN: The result should be False
+        assert is_64bit_instance() is False, 'is_64bit_instance() should return False'
+
+
+def test_normalize_str_leaves_newlines():
+    # GIVEN: a string containing newlines
+    string = 'something\nelse'
+    # WHEN: normalize is called
+    normalized_string = normalize_str(string)
+    # THEN: string is unchanged
+    assert normalized_string == string
+
+
+def test_normalize_str_removes_null_byte():
+    # GIVEN: a string containing a null byte
+    string = 'somet\x00hing'
+    # WHEN: normalize is called
+    normalized_string = normalize_str(string)
+    # THEN: nullbyte is removed
+    assert normalized_string == 'something'
+
+
+def test_normalize_str_replaces_crlf_with_lf():
+    # GIVEN: a string containing crlf
+    string = 'something\r\nelse'
+    # WHEN: normalize is called
+    normalized_string = normalize_str(string)
+    # THEN: crlf is replaced with lf
+    assert normalized_string == 'something\nelse'
+
+
+def test_clean_button_text():
+    """
+    Test the clean_button_text() function.
+    """
+    # GIVEN: Button text
+    input_text = '&Next >'
+    expected_text = 'Next'
+
+    # WHEN: The button caption is sent through the clean_button_text function
+    actual_text = clean_button_text(input_text)
+
+    # THEN: The text should have been cleaned
+    assert expected_text == actual_text, 'The text should be clean'
+
+
+def test_ip4_loopback_valid():
+    """
+    Test IPv4 loopbackvalid
+    """
+    # WHEN: Test with a local loopback test
+    valid = verify_ip_address(addr=ip4_loopback)
+
+    # THEN: Verify we received True
+    assert valid, 'IPv4 loopback address should have been valid'
+
+
+def test_ip4_local_valid():
+    """
+    Test IPv4 local valid
+    """
+    # WHEN: Test with a local loopback test
+    valid = verify_ip_address(addr=ip4_local)
+
+    # THEN: Verify we received True
+    assert valid is True, 'IPv4 local address should have been valid'
+
+
+def test_ip4_broadcast_valid():
+    """
+    Test IPv4 broadcast valid
+    """
+    # WHEN: Test with a local loopback test
+    valid = verify_ip_address(addr=ip4_broadcast)
+
+    # THEN: Verify we received True
+    assert valid is True, 'IPv4 broadcast address should have been valid'
+
+
+def test_ip4_address_invalid():
+    """
+    Test IPv4 address invalid
+    """
+    # WHEN: Test with a local loopback test
+    valid = verify_ip_address(addr=ip4_bad)
+
+    # THEN: Verify we received True
+    assert valid is False, 'Bad IPv4 address should not have been valid'
+
+
+def test_ip6_loopback_valid():
+    """
+    Test IPv6 loopback valid
+    """
+    # WHEN: Test IPv6 loopback address
+    valid = verify_ip_address(addr=ip6_loopback)
+
+    # THEN: Validate return
+    assert valid is True, 'IPv6 loopback address should have been valid'
+
+
+def test_ip6_local_valid():
+    """
+    Test IPv6 link-local valid
+    """
+    # WHEN: Test IPv6 link-local address
+    valid = verify_ip_address(addr=ip6_link_local)
+
+    # THEN: Validate return
+    assert valid is True, 'IPv6 link-local address should have been valid'
+
+
+def test_ip6_address_invalid():
+    """
+    Test NetworkUtils IPv6 address invalid
+    """
+    # WHEN: Given an invalid IPv6 address
+    valid = verify_ip_address(addr=ip6_bad)
+
+    # THEN: Validate bad return
+    assert valid is False, 'IPv6 bad address should have been invalid'
+
+
+def test_sha256_file_hash():
+    """
+    Test SHA256 file hash
+    """
+    # GIVEN: A mocked Path object
+    filename = Path('tests/resources/presentations/test.ppt')
+
+    # WHEN: Given a known salt+data
+    result = sha256_file_hash(filename)
+
+    # THEN: Validate return has is same
+    assert result == 'be6d7bdca25d1662d7faa1f856bfc224646dbad3b65ebff800d9ae70537968f9'
+
+
+def test_sha256_file_hash_no_exist():
+    """
+    Test SHA256 file hash when the file doesn't exist
+    """
+    # GIVEN: A mocked Path object
+    mocked_path = MagicMock()
+    mocked_path.exists.return_value = False
+
+    # WHEN: Given a known salt+data
+    result = sha256_file_hash(mocked_path)
+
+    # THEN: Validate return has is same
+    assert result is None
+
+
+def test_md5_hash():
+    """
+    Test MD5 hash from salt+data pass (python)
+    """
+    # WHEN: Given a known salt+data
+    hash_ = md5_hash(salt=TEST_SALT.encode('utf-8'), data=TEST_PIN.encode('utf-8'))
+
+    # THEN: Validate return has is same
+    assert hash_ == TEST_HASH, 'MD5 should have returned a good hash'
+
+
+def test_md5_hash_no_salt_data():
+    """
+    Test MD5 hash with no salt or data (Python)
+    """
+    # WHEN: Given a known salt+data
+    hash_ = md5_hash(None, None)
+
+    # THEN: Validate return has is same
+    assert hash_ is None, 'MD5 should have returned None'
+
+
+def test_md5_hash_bad():
+    """
+    Test MD5 hash from salt+data fail (python)
+    """
+    # WHEN: Given a different salt+hash
+    hash_ = md5_hash(salt=TEST_PIN.encode('utf-8'), data=TEST_SALT.encode('utf-8'))
+
+    # THEN: return data is different
+    assert hash_ is not TEST_HASH, 'MD5 should have returned a bad hash'
+
+
+def test_qmd5_hash():
+    """
+    Test MD5 hash from salt+data pass (Qt)
+    """
+    # WHEN: Given a known salt+data
+    hash_ = qmd5_hash(salt=TEST_SALT.encode('utf-8'), data=TEST_PIN.encode('utf-8'))
+
+    # THEN: Validate return has is same
+    assert hash_ == TEST_HASH, 'Qt-MD5 should have returned a good hash'
+
+
+def test_qmd5_hash_no_salt_data():
+    """
+    Test MD5 hash with no salt or data (Qt)
+    """
+    # WHEN: Given a known salt+data
+    hash_ = qmd5_hash(None, None)
+
+    # THEN: Validate return has is same
+    assert hash_ is None, 'Qt-MD5 should have returned None'
+
+
+def test_qmd5_hash_bad():
+    """
+    Test MD5 hash from salt+hash fail (Qt)
+    """
+    # WHEN: Given a different salt+hash
+    hash_ = qmd5_hash(salt=TEST_PIN.encode('utf-8'), data=TEST_SALT.encode('utf-8'))
+
+    # THEN: return data is different
+    assert hash_ is not TEST_HASH, 'Qt-MD5 should have returned a bad hash'
+
+
+def test_md5_non_ascii_string():
+    """
+    Test MD5 hash with non-ascii string - bug 1417809
+    """
+    # WHEN: Non-ascii string is hashed
+    hash_ = md5_hash(salt=test_non_ascii_string.encode('utf-8'), data=None)
+
+    # THEN: Valid MD5 hash should be returned
+    assert hash_ == test_non_ascii_hash, 'MD5 should have returned a valid hash'
+
+
+def test_qmd5_non_ascii_string():
+    """
+    Test MD5 hash with non-ascii string - bug 1417809
+    """
+    # WHEN: Non-ascii string is hashed
+    hash_ = md5_hash(data=test_non_ascii_string.encode('utf-8'))
+
+    # THEN: Valid MD5 hash should be returned
+    assert hash_ == test_non_ascii_hash, 'Qt-MD5 should have returned a valid hash'
 
 
 def test_add_actions_empty_list():
@@ -165,11 +689,11 @@ def test_get_uno_command_when_no_command_exists():
     """
 
     # GIVEN: A patched 'which' method which returns None
-    with patch('openlp.core.common.which', **{'return_value': None}):
+    with pytest.raises(FileNotFoundError), \
+            patch('openlp.core.common.which', **{'return_value': None}):
         # WHEN: Calling get_uno_command
-
         # THEN: a FileNotFoundError exception should be raised
-        assert FileNotFoundError, get_uno_command
+        get_uno_command()
 
 
 def test_get_uno_command_connection_type():

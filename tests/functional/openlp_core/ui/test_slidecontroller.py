@@ -899,9 +899,135 @@ def test_process_item(mocked_execute, registry, state_media):
     slide_controller._process_item(mocked_media_item, 0)
 
     # THEN: Registry.execute should have been called to stop the presentation
-    assert 1 == mocked_execute.call_count, 'Execute should have been called 2 times'
+    assert 1 == mocked_execute.call_count, 'Execute should have been called once'
     assert 'mocked_presentation_item_stop' == mocked_execute.call_args_list[0][0][0], \
         'The presentation should have been stopped.'
+
+
+@patch.object(Registry, 'execute')
+def test_process_item_transition(mocked_execute, registry, state_media):
+    """
+    Test that the correct actions are taken when a media service-item is closed followed by a image service-item
+    """
+    # GIVEN: A mocked presentation service item, a mocked media service item, a mocked Registry.execute
+    #        and a slide controller with many mocks.
+    #        and the setting 'themes/item transitions' = True
+    mocked_pres_item = MagicMock()
+    mocked_pres_item.name = 'mocked_image_item'
+    mocked_pres_item.is_command.return_value = True
+    mocked_pres_item.is_media.return_value = True
+    mocked_pres_item.is_image.return_value = False
+    mocked_pres_item.from_service = False
+    mocked_pres_item.get_frames.return_value = []
+    mocked_media_item = MagicMock()
+    mocked_media_item.name = 'mocked_media_item'
+    mocked_media_item.get_transition_delay.return_value = 0
+    mocked_media_item.is_text.return_value = False
+    mocked_media_item.is_command.return_value = False
+    mocked_media_item.is_media.return_value = False
+    mocked_media_item.requires_media.return_value = False
+    mocked_media_item.is_image.return_value = True
+    mocked_media_item.from_service = False
+    mocked_media_item.get_frames.return_value = []
+    mocked_settings = MagicMock()
+    mocked_settings.value.return_value = True
+    mocked_main_window = MagicMock()
+    Registry().register('main_window', mocked_main_window)
+    Registry().register('media_controller', MagicMock())
+    Registry().register('application', MagicMock())
+    Registry().register('settings', mocked_settings)
+    slide_controller = SlideController(None)
+    slide_controller.service_item = mocked_pres_item
+    slide_controller.is_live = True
+    slide_controller._reset_blank = MagicMock()
+    slide_controller.preview_widget = MagicMock()
+    slide_controller.preview_display = MagicMock()
+    slide_controller.enable_tool_bar = MagicMock()
+    slide_controller.on_controller_size_changed = MagicMock()
+    slide_controller.on_media_start = MagicMock()
+    slide_controller.on_media_close = MagicMock()
+    slide_controller.slide_selected = MagicMock()
+    slide_controller.new_song_menu = MagicMock()
+    slide_controller.on_stop_loop = MagicMock()
+    slide_controller.info_label = MagicMock()
+    slide_controller.song_menu = MagicMock()
+    slide_controller.displays = [MagicMock()]
+    slide_controller.toolbar = MagicMock()
+    slide_controller.split = 0
+    slide_controller.type_prefix = 'test'
+    slide_controller.screen_capture = 'old_capture'
+
+    # WHEN: _process_item is called
+    slide_controller._process_item(mocked_media_item, 0)
+
+    # THEN: Registry.execute should have been called to start the live item
+    #       Media should be closed
+    #       Controller size change should be called (because it's a live item and the interface might have changed)
+    #       The screen capture should have been reset to none
+    assert 1 == mocked_execute.call_count, 'Execute should have been called once'
+    slide_controller.on_media_close.assert_called_once_with()
+    slide_controller.on_controller_size_changed.assert_called_once()
+    assert slide_controller.screen_capture is None
+
+
+@patch.object(Registry, 'execute')
+def test_process_item_text(mocked_execute, registry, state_media):
+    """
+    Test that the correct actions are taken a text item is processed
+    """
+    # GIVEN: A mocked presentation service item, a mocked media service item, a mocked Registry.execute
+    #        and a slide controller with many mocks.
+    #        and the setting 'themes/item transitions' = True
+    mocked_media_item = MagicMock()
+    mocked_media_item.name = 'mocked_media_item'
+    mocked_media_item.get_transition_delay.return_value = 0
+    mocked_media_item.is_text.return_value = True
+    mocked_media_item.is_command.return_value = False
+    mocked_media_item.is_media.return_value = False
+    mocked_media_item.requires_media.return_value = False
+    mocked_media_item.is_image.return_value = False
+    mocked_media_item.from_service = False
+    mocked_media_item.get_frames.return_value = []
+    mocked_media_item.display_slides = [{'verse': 'Verse name'}]
+    mocked_settings = MagicMock()
+    mocked_settings.value.return_value = True
+    mocked_main_window = MagicMock()
+    Registry().register('main_window', mocked_main_window)
+    Registry().register('media_controller', MagicMock())
+    Registry().register('application', MagicMock())
+    Registry().register('settings', mocked_settings)
+    slide_controller = SlideController(None)
+    slide_controller.service_item = None
+    slide_controller.is_live = True
+    slide_controller._reset_blank = MagicMock()
+    slide_controller.preview_widget = MagicMock()
+    slide_controller.preview_display = MagicMock()
+    slide_controller.enable_tool_bar = MagicMock()
+    slide_controller.on_controller_size_changed = MagicMock()
+    slide_controller.on_media_start = MagicMock()
+    slide_controller.on_media_close = MagicMock()
+    slide_controller.slide_selected = MagicMock()
+    slide_controller.new_song_menu = MagicMock()
+    slide_controller.on_stop_loop = MagicMock()
+    slide_controller.info_label = MagicMock()
+    slide_controller.song_menu = MagicMock()
+    slide_controller.displays = [MagicMock()]
+    slide_controller.toolbar = MagicMock()
+    slide_controller.split = 0
+    slide_controller.type_prefix = 'test'
+    slide_controller.screen_capture = 'old_capture'
+
+    # WHEN: _process_item is called
+    slide_controller._process_item(mocked_media_item, 0)
+
+    # THEN: Registry.execute should have been called to start the live item
+    #       Controller size change should be called (because it's a live item and the interface might have changed)
+    #       The screen capture should have been reset to none
+    #       The slide should have been added to the slide list with the correct index
+    assert 1 == mocked_execute.call_count, 'Execute should have been called once'
+    slide_controller.on_controller_size_changed.assert_called_once()
+    assert slide_controller.screen_capture is None
+    assert slide_controller.slide_list['Verse name'] == 0
 
 
 @patch.object(Registry, 'execute')

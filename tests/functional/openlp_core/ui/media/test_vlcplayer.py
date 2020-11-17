@@ -122,7 +122,6 @@ def test_setup(MockedQtWidgets, mocked_get_vlc, mocked_is_macosx, mocked_is_win,
     assert mocked_output_display.vlc_media_player == mocked_media_player_new
     mocked_output_display.size.assert_called_with()
     mocked_qframe.resize.assert_called_with((10, 10))
-    mocked_qframe.raise_.assert_called_with()
     mocked_qframe.hide.assert_called_with()
     mocked_media_player_new.set_xwindow.assert_called_with(2)
     assert vlc_player.has_own_widget is True
@@ -848,7 +847,7 @@ def test_reset():
 
     # THEN: The media should be stopped and invisible
     mocked_display.vlc_media_player.stop.assert_called_with()
-    mocked_display.vlc_widget.setVisible.assert_called_with(False)
+    mocked_display.vlc_widget.setVisible.assert_not_called()
     assert MediaState.Off == vlc_player.get_live_state()
 
 
@@ -886,15 +885,10 @@ def test_update_ui(mocked_get_vlc):
     vlc_player = VlcPlayer(None)
 
     # WHEN: update_ui() is called
-    with patch.object(vlc_player, 'stop') as mocked_stop, \
-            patch.object(vlc_player, 'set_visible') as mocked_set_visible:
-        vlc_player.update_ui(mocked_controller, mocked_display)
+    vlc_player.update_ui(mocked_controller, mocked_display)
 
     # THEN: Certain methods should be called
-    mocked_stop.assert_called_with(mocked_controller)
-    assert 2 == mocked_stop.call_count
     mocked_controller.vlc_media_player.get_time.assert_called_with()
-    mocked_set_visible.assert_called_with(mocked_controller, False)
     mocked_controller.seek_slider.setSliderPosition.assert_called_with(400000)
     expected_calls = [call(True), call(False)]
     assert expected_calls == mocked_controller.seek_slider.blockSignals.call_args_list
@@ -921,12 +915,9 @@ def test_update_ui_dvd(mocked_get_vlc):
     vlc_player = VlcPlayer(None)
 
     # WHEN: update_ui() is called
-    with patch.object(vlc_player, 'stop') as mocked_stop:
-        vlc_player.update_ui(mocked_controller, mocked_display)
+    vlc_player.update_ui(mocked_controller, mocked_display)
 
     # THEN: Certain methods should be called
-    mocked_stop.assert_called_with(mocked_controller)
-    assert 1 == mocked_stop.call_count
     mocked_controller.vlc_media_player.get_time.assert_called_with()
     mocked_controller.seek_slider.setSliderPosition.assert_called_with(200)
     expected_calls = [call(True), call(False)]
