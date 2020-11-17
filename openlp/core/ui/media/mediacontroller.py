@@ -41,8 +41,7 @@ from openlp.core.common.registry import Registry, RegistryBase
 from openlp.core.lib.serviceitem import ItemCapabilities
 from openlp.core.lib.ui import critical_error_message_box
 from openlp.core.ui import DisplayControllerType, HideMode
-from openlp.core.ui.media import MediaState, ItemMediaInfo, MediaType, parse_optical_path, parse_stream_path, \
-    VIDEO_EXT, AUDIO_EXT
+from openlp.core.ui.media import MediaState, ItemMediaInfo, MediaType, parse_optical_path, parse_stream_path
 from openlp.core.ui.media.remote import register_views
 from openlp.core.ui.media.vlcplayer import VlcPlayer, get_vlc
 
@@ -50,6 +49,7 @@ from openlp.core.ui.media.vlcplayer import VlcPlayer, get_vlc
 log = logging.getLogger(__name__)
 
 TICK_TIME = 200
+HIDE_DELAY_TIME = 2500
 
 
 class MediaController(RegistryBase, LogMixin, RegistryProperties):
@@ -68,10 +68,16 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         # Timer for video state
         self.live_timer = QtCore.QTimer()
         self.live_timer.setInterval(TICK_TIME)
+        self.live_hide_timer = QtCore.QTimer()
+        self.live_hide_timer.setSingleShot(True)
+        self.live_kill_timer = QtCore.QTimer()
+        self.live_kill_timer.setSingleShot(True)
         self.preview_timer = QtCore.QTimer()
         self.preview_timer.setInterval(TICK_TIME)
         # Signals
         self.live_timer.timeout.connect(self._media_state_live)
+        self.live_hide_timer.timeout.connect(self._on_media_hide_live)
+        self.live_kill_timer.timeout.connect(self._on_media_kill_live)
         self.preview_timer.timeout.connect(self._media_state_preview)
         Registry().register_function('playbackPlay', self.media_play_msg)
         Registry().register_function('playbackPause', self.media_pause_msg)
@@ -154,31 +160,29 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         """
         Check if there is a running Live media Player and do updating stuff (e.g. update the UI)
         """
-        display = self._define_display(self._display_controllers(DisplayControllerType.Live))
         if DisplayControllerType.Live in self.current_media_players:
-            self.current_media_players[DisplayControllerType.Live].resize(self.live_controller)
-            self.current_media_players[DisplayControllerType.Live].update_ui(self.live_controller, display)
-            self.tick(self._display_controllers(DisplayControllerType.Live))
-            if self.current_media_players[DisplayControllerType.Live].get_live_state() is not MediaState.Playing:
+            media_player = self.current_media_players[DisplayControllerType.Live]
+            media_player.resize(self.live_controller)
+            media_player.update_ui(self.live_controller, self._define_display(self.live_controller))
+            if not self.tick(self.live_controller):
                 self.live_timer.stop()
         else:
             self.live_timer.stop()
-            self.media_stop(self._display_controllers(DisplayControllerType.Live))
+            self.media_stop(self.live_controller)
 
     def _media_state_preview(self):
         """
         Check if there is a running Preview media Player and do updating stuff (e.g. update the UI)
         """
-        display = self._define_display(self._display_controllers(DisplayControllerType.Preview))
         if DisplayControllerType.Preview in self.current_media_players:
-            self.current_media_players[DisplayControllerType.Preview].resize(self.live_controller)
-            self.current_media_players[DisplayControllerType.Preview].update_ui(self.preview_controller, display)
-            self.tick(self._display_controllers(DisplayControllerType.Preview))
-            if self.current_media_players[DisplayControllerType.Preview].get_preview_state() is not MediaState.Playing:
+            media_player = self.current_media_players[DisplayControllerType.Preview]
+            media_player.resize(self.preview_controller)
+            media_player.update_ui(self.preview_controller, self._define_display(self.preview_controller))
+            if not self.tick(self.preview_controller):
                 self.preview_timer.stop()
         else:
             self.preview_timer.stop()
-            self.media_stop(self._display_controllers(DisplayControllerType.Preview))
+            self.media_stop(self.preview_controller)
 
     def setup_display(self, controller, preview):
         """
@@ -224,9 +228,11 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         """
         is_valid = True
         controller = self._display_controllers(source)
+        log.debug(f'load_video is_live:{controller.is_live}')
         # stop running videos
         self.media_reset(controller)
         controller.media_info = ItemMediaInfo()
+        controller.media_info.media_type = MediaType.Video
         if controller.is_live:
             controller.media_info.volume = self.settings.value('media/live volume')
         else:
@@ -234,6 +240,9 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         # background will always loop video.
         if service_item.is_capable(ItemCapabilities.HasBackgroundAudio):
             controller.media_info.file_info = service_item.background_audio
+            controller.media_info.media_type = MediaType.Audio
+            # is_background indicates we shouldn't override the normal display
+            controller.media_info.is_background = True
         else:
             if service_item.is_capable(ItemCapabilities.HasBackgroundStream):
                 (name, mrl, options) = parse_stream_path(service_item.stream_mrl)
@@ -268,6 +277,7 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
                 controller.media_info.length = service_item.media_length
                 is_valid = self._check_file_type(controller, display)
             controller.media_info.start_time = service_item.start_time
+            controller.media_info.timer = service_item.start_time
             controller.media_info.end_time = service_item.end_time
         elif controller.preview_display:
             if service_item.is_capable(ItemCapabilities.IsOptical):
@@ -292,11 +302,21 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
                                        translate('MediaPlugin.MediaItem', 'Unsupported File'))
             return False
         self.log_debug('video media type: {tpe} '.format(tpe=str(controller.media_info.media_type)))
+        # If both the preview and live view have a stream, make sure only the live view continues streaming
+        if controller.media_info.media_type == MediaType.Stream:
+            if controller.is_live:
+                if self.preview_controller.media_info.media_type == MediaType.Stream:
+                    self.log_warning('stream can only be displayed in one instance, killing preview stream')
+                    self.preview_controller.on_media_close()
+            else:
+                if self.live_controller.media_info.media_type == MediaType.Stream:
+                    self.log_warning('stream cannot be previewed while also streaming live')
+                    return
         autoplay = False
-        if service_item.requires_media():
+        if service_item.requires_media() and hidden == HideMode.Theme:
             autoplay = True
         # Preview requested
-        if not controller.is_live:
+        elif not controller.is_live:
             autoplay = True
         # Visible or background requested or Service Item wants to autostart
         elif not hidden or service_item.will_auto_start:
@@ -355,6 +375,7 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         else:
             controller.media_info.media_type = MediaType.DVD
         controller.media_info.start_time = start
+        controller.media_info.timer = start
         controller.media_info.end_time = end
         controller.media_info.length = (end - start)
         controller.media_info.title_track = title
@@ -386,38 +407,23 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
                 return True
             return False
         for file in controller.media_info.file_info:
-            if file.is_file:
-                suffix = '*%s' % file.suffix.lower()
-                file = str(file)
-                if suffix in VIDEO_EXT:
-                    self.resize(controller, self.vlc_player)
-                    if self.vlc_player.load(controller, display, file):
-                        self.current_media_players[controller.controller_type] = self.vlc_player
-                        controller.media_info.media_type = MediaType.Video
-                        return True
-                if suffix in AUDIO_EXT:
-                    if self.vlc_player.load(controller, display, file):
-                        self.current_media_players[controller.controller_type] = self.vlc_player
-                        controller.media_info.media_type = MediaType.Audio
-                        return True
-            else:
-                file = str(file)
-                if self.vlc_player.can_folder:
-                    self.resize(controller, self.vlc_player)
-                    if self.vlc_player.load(controller, display, file):
-                        self.current_media_players[controller.controller_type] = self.vlc_player
-                        controller.media_info.media_type = MediaType.Video
-                        return True
+            if not file.is_file and not self.vlc_player.can_folder:
+                return False
+            file = str(file)
+            self.resize(controller, self.vlc_player)
+            if self.vlc_player.load(controller, display, file):
+                self.current_media_players[controller.controller_type] = self.vlc_player
+                return True
         return False
 
-    def media_play_msg(self, msg, status=True):
+    def media_play_msg(self, msg):
         """
         Responds to the request to play a loaded video
 
         :param msg: First element is the controller which should be used
         :param status:
         """
-        return self.media_play(msg[0], status)
+        return self.media_play(msg[0])
 
     def on_media_play(self):
         """
@@ -425,14 +431,13 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         """
         return self.media_play(self.live_controller)
 
-    def media_play(self, controller, first_time=True):
+    def media_play(self, controller):
         """
         Responds to the request to play a loaded video
 
         :param controller: The controller to be played
-        :param first_time:
         """
-        self.log_debug(f"media_play with {first_time}")
+        self.log_debug(f'media_play is_live:{controller.is_live}')
         controller.seek_slider.blockSignals(True)
         controller.volume_slider.blockSignals(True)
         display = self._define_display(controller)
@@ -441,25 +446,29 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
             controller.volume_slider.blockSignals(False)
             return False
         self.media_volume(controller, controller.media_info.volume)
-        if first_time:
-            self.current_media_players[controller.controller_type].set_visible(controller, True)
-            controller.mediabar.actions['playbackPlay'].setVisible(False)
-            controller.mediabar.actions['playbackPause'].setVisible(True)
-            controller.mediabar.actions['playbackStop'].setDisabled(False)
+        self._media_set_visibility(controller, True)
+        controller.mediabar.actions['playbackPlay'].setVisible(False)
+        controller.mediabar.actions['playbackPause'].setVisible(True)
+        controller.mediabar.actions['playbackStop'].setDisabled(False)
+        controller.mediabar.actions['playbackLoop'].setChecked(controller.media_info.is_looping_playback)
+        controller.mediabar.actions['playbackStop'].setVisible(not controller.media_info.is_background or
+                                                               controller.media_info.media_type is MediaType.Audio)
+        controller.mediabar.actions['playbackLoop'].setVisible((not controller.media_info.is_background and
+                                                               controller.media_info.media_type is not MediaType.Stream)
+                                                               or controller.media_info.media_type is MediaType.Audio)
+        # Start Timer for ui updates
         if controller.is_live:
-            if controller.hide_menu.defaultAction().isChecked():
-                controller.hide_menu.defaultAction().trigger()
-            # Start Timer for ui updates
             if not self.live_timer.isActive():
                 self.live_timer.start()
         else:
-            # Start Timer for ui updates
             if not self.preview_timer.isActive():
                 self.preview_timer.start()
         controller.seek_slider.blockSignals(False)
         controller.volume_slider.blockSignals(False)
         controller.media_info.is_playing = True
         if not controller.media_info.is_background:
+            if controller.is_live:
+                controller.set_hide_mode(None)
             display = self._define_display(controller)
             display.hide_display(HideMode.Screen)
             controller._set_theme(controller.service_item)
@@ -472,30 +481,35 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         Add a tick while the media is playing but only count if not paused
 
         :param controller:  The Controller to be processed
+        :return:            Is the video still running?
         """
         start_again = False
+        stopped = False
         if controller.media_info.is_playing and controller.media_info.length > 0:
-            if controller.media_info.timer > controller.media_info.length:
+            if controller.media_info.timer + TICK_TIME >= controller.media_info.length:
                 if controller.media_info.is_looping_playback:
                     start_again = True
                 else:
                     self.media_stop(controller)
-            elif controller.media_info.timer > controller.media_info.length - TICK_TIME * 4:
-                if not controller.media_info.is_looping_playback:
-                    display = self._define_display(controller)
-                    display.show_display()
+                    stopped = True
             controller.media_info.timer += TICK_TIME
-            seconds = controller.media_info.timer // 1000
-            minutes = seconds // 60
-            seconds %= 60
-            total_seconds = controller.media_info.length // 1000
-            total_minutes = total_seconds // 60
-            total_seconds %= 60
-            controller.position_label.setText(' %02d:%02d / %02d:%02d' %
-                                              (minutes, seconds, total_minutes, total_seconds))
+            self._update_seek_ui(controller)
+        else:
+            stopped = True
+
         if start_again:
             controller.seek_slider.setSliderPosition(0)
-            self.media_play(controller, False)
+        return not stopped
+
+    def _update_seek_ui(self, controller):
+        seconds = controller.media_info.timer // 1000
+        minutes = seconds // 60
+        seconds %= 60
+        total_seconds = controller.media_info.length // 1000
+        total_minutes = total_seconds // 60
+        total_seconds %= 60
+        controller.position_label.setText(' %02d:%02d / %02d:%02d' %
+                                          (minutes, seconds, total_minutes, total_seconds))
 
     def media_pause_msg(self, msg):
         """
@@ -517,12 +531,16 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
 
         :param controller: The Controller to be paused
         """
+        self.log_debug(f'media_stop is_live:{controller.is_live}')
         if controller.controller_type in self.current_media_players:
             self.current_media_players[controller.controller_type].pause(controller)
             controller.mediabar.actions['playbackPlay'].setVisible(True)
             controller.mediabar.actions['playbackStop'].setDisabled(False)
             controller.mediabar.actions['playbackPause'].setVisible(False)
             controller.media_info.is_playing = False
+            # Add a tick to the timer to prevent it finishing the video before it can loop back or stop
+            # If the clip finishes, we hit a bug where we cannot start the video
+            controller.media_info.timer += TICK_TIME
             controller.output_has_changed()
             return True
         return False
@@ -565,9 +583,19 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
 
         :param controller: The controller that needs to be stopped
         """
+        self.log_debug(f'media_stop is_live:{controller.is_live}')
         if controller.controller_type in self.current_media_players:
             self.current_media_players[controller.controller_type].stop(controller)
-            self.current_media_players[controller.controller_type].set_visible(controller, False)
+            if controller.is_live:
+                self.live_hide_timer.start(HIDE_DELAY_TIME)
+                if not controller.media_info.is_background:
+                    display = self._define_display(controller)
+                    if display.hide_mode == HideMode.Screen:
+                        controller.set_hide_mode(HideMode.Blank)
+                    else:
+                        controller.set_hide_mode(display.hide_mode or HideMode.Blank)
+            else:
+                self._media_set_visibility(controller, False)
             controller.seek_slider.setSliderPosition(0)
             total_seconds = controller.media_info.length // 1000
             total_minutes = total_seconds // 60
@@ -577,10 +605,7 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
             controller.mediabar.actions['playbackStop'].setDisabled(True)
             controller.mediabar.actions['playbackPause'].setVisible(False)
             controller.media_info.is_playing = False
-            controller.media_info.timer = 1000
-            controller.media_timer = 0
-            display = self._define_display(controller)
-            display.show_display()
+            controller.media_info.timer = 0
             controller.output_has_changed()
             return True
         return False
@@ -631,33 +656,76 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         """
         self.current_media_players[controller.controller_type].seek(controller, seek_value)
         controller.media_info.timer = seek_value
+        self._update_seek_ui(controller)
 
-    def media_reset(self, controller):
+    def media_reset(self, controller, delayed=False):
         """
         Responds to the request to reset a loaded video
         :param controller: The controller to use.
+        :param delayed: Should the controller briefly remain visible.
         """
+        self.log_debug('media_reset')
         self.set_controls_visible(controller, False)
         if controller.controller_type in self.current_media_players:
             display = self._define_display(controller)
-            display.show_display()
+            hide_mode = controller.get_hide_mode()
+            if hide_mode is None:
+                display.show_display()
+            else:
+                display.hide_display(hide_mode)
             self.current_media_players[controller.controller_type].reset(controller)
-            self.current_media_players[controller.controller_type].set_visible(controller, False)
-            del self.current_media_players[controller.controller_type]
+            if controller.is_live and delayed:
+                self.live_kill_timer.start(HIDE_DELAY_TIME)
+            else:
+                if controller.is_live:
+                    self.live_kill_timer.stop()
+                else:
+                    self._media_set_visibility(controller, False)
+                del self.current_media_players[controller.controller_type]
 
-    def media_hide(self, msg):
+    def media_hide_msg(self, msg):
         """
         Hide the related video Widget
 
         :param msg: First element is the boolean for Live indication
         """
         is_live = msg[1]
-        if not is_live:
+        self.media_hide(is_live)
+
+    def media_hide(self, is_live, delayed=False):
+        """
+        Pause and hide the related video Widget if is_live
+
+        :param is_live: Live indication
+        :param delayed: Should the controller briefly remain visible.
+        """
+        self.log_debug(f'media_hide is_live:{is_live}')
+        if not is_live or self.live_kill_timer.isActive():
             return
         if self.live_controller.controller_type in self.current_media_players and \
                 self.current_media_players[self.live_controller.controller_type].get_live_state() == MediaState.Playing:
-            self.media_pause(self.live_controller)
-            self.current_media_players[self.live_controller.controller_type].set_visible(self.live_controller, False)
+            if delayed:
+                self.live_hide_timer.start(HIDE_DELAY_TIME)
+            else:
+                self.media_pause(self.live_controller)
+                self._media_set_visibility(self.live_controller, False)
+
+    def _on_media_hide_live(self):
+        self.media_pause(self.live_controller)
+        self._media_set_visibility(self.live_controller, False)
+
+    def _on_media_kill_live(self):
+        self._media_set_visibility(self.live_controller, False)
+        del self.current_media_players[self.live_controller.controller_type]
+
+    def _media_set_visibility(self, controller, visible):
+        """
+        Set the live video Widget visibility
+        """
+        if controller.is_live:
+            self.live_hide_timer.stop()
+        visible = visible and controller.media_info.media_type is not MediaType.Audio
+        self.current_media_players[controller.controller_type].set_visible(controller, visible)
 
     def media_blank(self, msg):
         """
@@ -668,13 +736,30 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         """
         is_live = msg[1]
         hide_mode = msg[2]
-        if not is_live:
+        self.log_debug(f'media_blank is_live:{is_live}')
+        if not is_live or self.live_controller.controller_type not in self.current_media_players:
             return
-        Registry().execute('live_display_hide', hide_mode)
-        if self.live_controller.controller_type in self.current_media_players and \
-                self.current_media_players[self.live_controller.controller_type].get_live_state() == MediaState.Playing:
-            self.media_pause(self.live_controller)
-            self.current_media_players[self.live_controller.controller_type].set_visible(self.live_controller, False)
+        if self.live_kill_timer.isActive():
+            # If pressing blank when the video is being removed, remove it instantly
+            self._media_set_visibility(self.live_controller, False)
+            self.media_reset(self.live_controller)
+            return
+        if not self.live_controller.media_info.is_background:
+            Registry().execute('live_display_hide', hide_mode)
+        controller_type = self.live_controller.controller_type
+        playing = self.current_media_players[controller_type].get_live_state() == MediaState.Playing
+        if hide_mode == HideMode.Theme:
+            if not playing:
+                self.media_play(self.live_controller)
+            else:
+                self.live_hide_timer.stop()
+        else:
+            if hide_mode == HideMode.Screen:
+                if playing:
+                    self.media_pause(self.live_controller)
+                self._media_set_visibility(self.live_controller, False)
+            else:
+                self.live_hide_timer.start(HIDE_DELAY_TIME)
 
     def media_unblank(self, msg):
         """
@@ -683,24 +768,28 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         :param msg: First element is not relevant in this context
             Second element is the boolean for Live indication
         """
-        Registry().execute('live_display_show')
         is_live = msg[1]
-        if not is_live:
+        self.log_debug(f'media_blank is_live:{is_live}')
+        if not is_live or self.live_kill_timer.isActive():
             return
-        if self.live_controller.controller_type in self.current_media_players and \
-                self.current_media_players[self.live_controller.controller_type].get_live_state() != \
-                MediaState.Playing:
-            if self.media_play(self.live_controller):
-                self.current_media_players[self.live_controller.controller_type].set_visible(self.live_controller, True)
-                # Start Timer for ui updates
-                if not self.live_timer.isActive():
-                    self.live_timer.start()
+        Registry().execute('live_display_show')
+        if self.live_controller.controller_type in self.current_media_players:
+            if self.current_media_players[self.live_controller.controller_type].get_live_state() != \
+                    MediaState.Playing:
+                self.media_play(self.live_controller)
+            else:
+                self._media_set_visibility(self.live_controller, True)
+                if not self.live_controller.media_info.is_background:
+                    display = self._define_display(self.live_controller)
+                    display.hide_display(HideMode.Screen)
 
     def finalise(self):
         """
         Reset all the media controllers when OpenLP shuts down
         """
         self.live_timer.stop()
+        self.live_hide_timer.stop()
+        self.live_kill_timer.stop()
         self.preview_timer.stop()
         self.media_reset(self._display_controllers(DisplayControllerType.Live))
         self.media_reset(self._display_controllers(DisplayControllerType.Preview))

@@ -65,9 +65,9 @@ def test_time_display(form):
     """
     # GIVEN: A service item with with time
     mocked_serviceitem = MagicMock()
-    mocked_serviceitem.start_time = 61
-    mocked_serviceitem.end_time = 3701
-    mocked_serviceitem.media_length = 3701
+    mocked_serviceitem.start_time = 61000
+    mocked_serviceitem.end_time = 3701000
+    mocked_serviceitem.media_length = 3701000
 
     # WHEN displaying the UI and pressing enter
     form.item = {'service_item': mocked_serviceitem}
@@ -80,7 +80,7 @@ def test_time_display(form):
     assert form.hour_spin_box.value() == 0
     assert form.minute_spin_box.value() == 1
     assert form.second_spin_box.value() == 1
-    assert form.item['service_item'].start_time == 61, 'The start time should stay the same'
+    assert form.item['service_item'].start_time == 61000, 'The start time should stay the same'
 
     # WHEN displaying the UI, changing the time to 2min 3secs and pressing enter
     form.item = {'service_item': mocked_serviceitem}
@@ -95,4 +95,4 @@ def test_time_display(form):
     assert form.hour_spin_box.value() == 0
     assert form.minute_spin_box.value() == 2
     assert form.second_spin_box.value() == 3
-    assert form.item['service_item'].start_time == 123, 'The start time should have changed'
+    assert form.item['service_item'].start_time == 123000, 'The start time should have changed'

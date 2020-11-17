@@ -26,9 +26,9 @@ import pytest
 from unittest.mock import MagicMock, patch
 
 from openlp.core.common.registry import Registry
-from openlp.core.ui import DisplayControllerType
+from openlp.core.ui import DisplayControllerType, HideMode
 from openlp.core.ui.media.mediacontroller import MediaController
-from openlp.core.ui.media import ItemMediaInfo
+from openlp.core.ui.media import ItemMediaInfo, MediaState
 
 from tests.utils.constants import RESOURCE_PATH
 
@@ -58,6 +58,36 @@ def test_resize(media_env):
 
     # THEN: The player's resize method should be called correctly
     mocked_player.resize.assert_called_with(mocked_display)
+
+
+def test_load_video(media_env, settings):
+    """
+    Test that the load_video runs correctly
+    """
+    # GIVEN: A media controller and a service item
+    mocked_slide_controller = MagicMock()
+    mocked_service_item = MagicMock()
+    mocked_service_item.is_capable.return_value = False
+    settings.setValue('media/live volume', 1)
+    media_env.media_controller.current_media_players = MagicMock()
+    media_env.media_controller._check_file_type = MagicMock(return_value=True)
+    media_env.media_controller._display_controllers = MagicMock(return_value=mocked_slide_controller)
+    media_env.media_controller._define_display = MagicMock()
+    media_env.media_controller.media_reset = MagicMock()
+    media_env.media_controller.media_play = MagicMock()
+    media_env.media_controller.set_controls_visible = MagicMock()
+
+    # WHEN: load_video() is called
+    media_env.media_controller.load_video(DisplayControllerType.Live, mocked_service_item)
+
+    # THEN: The current controller's media should be reset
+    #       The volume should be set from the settings
+    #       The video should have autoplayed
+    #       The controls should have been made visible
+    media_env.media_controller.media_reset.assert_called_once_with(mocked_slide_controller)
+    assert mocked_slide_controller.media_info.volume == 1
+    media_env.media_controller.media_play.assert_called_once_with(mocked_slide_controller)
+    media_env.media_controller.set_controls_visible.assert_called_once_with(mocked_slide_controller, True)
 
 
 def test_check_file_type_null(media_env):
@@ -125,10 +155,10 @@ def test_media_play_msg(media_env):
 
     # WHEN: media_play_msg() is called
     with patch.object(media_env.media_controller, u'media_play') as mocked_media_play:
-        media_env.media_controller.media_play_msg(message, False)
+        media_env.media_controller.media_play_msg(message)
 
     # THEN: The underlying method is called
-    mocked_media_play.assert_called_with(1, False)
+    mocked_media_play.assert_called_with(1)
 
 
 def test_media_pause_msg(media_env):
@@ -161,6 +191,33 @@ def test_media_stop_msg(media_env):
     mocked_media_stop.assert_called_with(1)
 
 
+def test_media_stop(media_env):
+    """
+    Test that the media controller takes the correct actions when stopping media
+    """
+    # GIVEN: A live media controller and a message with two elements
+    mocked_slide_controller = MagicMock()
+    mocked_media_player = MagicMock()
+    mocked_display = MagicMock(hide_mode=None)
+    mocked_slide_controller.controller_type = 'media player'
+    mocked_slide_controller.media_info = MagicMock(is_background=False)
+    mocked_slide_controller.set_hide_mode = MagicMock()
+    mocked_slide_controller.is_live = True
+    media_env.media_controller.current_media_players = {'media player': mocked_media_player}
+    media_env.media_controller.live_hide_timer = MagicMock()
+    media_env.media_controller._define_display = MagicMock(return_value=mocked_display)
+
+    # WHEN: media_stop() is called
+    result = media_env.media_controller.media_stop(mocked_slide_controller)
+
+    # THEN: Result should be successful, media player should be stopped and the hide timer should have started
+    #       The controller's hide mode should be set to Blank
+    assert result is True
+    mocked_media_player.stop.assert_called_once_with(mocked_slide_controller)
+    media_env.media_controller.live_hide_timer.start.assert_called_once()
+    mocked_slide_controller.set_hide_mode.assert_called_once_with(HideMode.Blank)
+
+
 def test_media_volume_msg(media_env):
     """
     Test that the media controller responds to the request to change the volume
@@ -189,6 +246,59 @@ def test_media_seek_msg(media_env):
 
     # THEN: The underlying method is called
     mocked_media_seek.assert_called_with(1, 800)
+
+
+def test_media_reset(media_env):
+    """
+    Test that the media controller conducts the correct actions when resetting
+    """
+    # GIVEN: A media controller, mocked slide controller, mocked media player and mocked display
+    mocked_slide_controller = MagicMock()
+    mocked_media_player = MagicMock()
+    mocked_display = MagicMock(hide_mode=None)
+    mocked_slide_controller.controller_type = 'media player'
+    mocked_slide_controller.media_info = MagicMock(is_background=False)
+    mocked_slide_controller.get_hide_mode = MagicMock(return_value=None)
+    mocked_slide_controller.is_live = False
+    media_env.media_controller.current_media_players = {'media player': mocked_media_player}
+    media_env.media_controller.live_hide_timer = MagicMock()
+    media_env.media_controller._define_display = MagicMock(return_value=mocked_display)
+    media_env.media_controller._media_set_visibility = MagicMock()
+
+    # WHEN: media_reset() is called
+    media_env.media_controller.media_reset(mocked_slide_controller)
+
+    # THEN: The display should be shown, media should be hidden and removed
+    mocked_display.show_display.assert_called_once_with()
+    media_env.media_controller._media_set_visibility.assert_called_once_with(mocked_slide_controller, False)
+    assert 'media player' not in media_env.media_controller.current_media_players
+
+
+def test_media_hide(media_env, registry):
+    """
+    Test that the media controller conducts the correct actions when hiding
+    """
+    # GIVEN: A media controller, mocked slide controller, mocked media player and mocked display
+    mocked_slide_controller = MagicMock()
+    mocked_media_player = MagicMock()
+    mocked_media_player.get_live_state.return_value = MediaState.Playing
+    mocked_slide_controller.controller_type = 'media player'
+    mocked_slide_controller.media_info = MagicMock(is_background=False)
+    mocked_slide_controller.get_hide_mode = MagicMock(return_value=None)
+    mocked_slide_controller.is_live = False
+    Registry().register('live_controller', mocked_slide_controller)
+    media_env.media_controller.current_media_players = {'media player': mocked_media_player}
+    media_env.media_controller.live_kill_timer = MagicMock(isActive=MagicMock(return_value=False))
+    media_env.media_controller._media_set_visibility = MagicMock()
+    media_env.media_controller.media_pause = MagicMock()
+
+    # WHEN: media_hide() is called
+    media_env.media_controller.media_hide(is_live=True)
+
+    # THEN: media should be paused and hidden, but the player should still exist
+    media_env.media_controller.media_pause.assert_called_once_with(mocked_slide_controller)
+    media_env.media_controller._media_set_visibility.assert_called_once_with(mocked_slide_controller, False)
+    assert 'media player' in media_env.media_controller.current_media_players
 
 
 def test_media_length(media_env):
@@ -334,6 +444,7 @@ def test_media_play(media_env):
     media_env.current_media_players = MagicMock()
     Registry().register('settings', MagicMock())
     media_env.live_timer = MagicMock()
+    media_env.live_hide_timer = MagicMock()
     mocked_controller = MagicMock()
     mocked_controller.media_info.is_background = False
 
@@ -343,4 +454,5 @@ def test_media_play(media_env):
     # THEN: The web display should become transparent (only tests that the theme is reset here)
     # And the function should return true to indicate success
     assert result is True
+    media_env.live_hide_timer.stop.assert_called_once_with()
     mocked_controller._set_theme.assert_called_once()

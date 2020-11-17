@@ -134,7 +134,6 @@ class VlcPlayer(MediaPlayer):
         # creating an empty vlc media player
         controller.vlc_media_player = controller.vlc_instance.media_player_new()
         controller.vlc_widget.resize(controller.size())
-        controller.vlc_widget.raise_()
         controller.vlc_widget.hide()
         # The media player has to be 'connected' to the QFrame.
         # (otherwise a video would be displayed in it's own window)
@@ -245,22 +244,22 @@ class VlcPlayer(MediaPlayer):
         start_time = 0
         log.debug('vlc play')
         if controller.is_live:
-            if self.get_live_state() != MediaState.Paused and controller.media_info.start_time > 0:
-                start_time = controller.media_info.start_time
+            if self.get_live_state() != MediaState.Paused and controller.media_info.timer > 0:
+                start_time = controller.media_info.timer
         else:
-            if self.get_preview_state() != MediaState.Paused and controller.media_info.start_time > 0:
-                start_time = controller.media_info.start_time
+            if self.get_preview_state() != MediaState.Paused and controller.media_info.timer > 0:
+                start_time = controller.media_info.timer
         threading.Thread(target=controller.vlc_media_player.play).start()
         if not self.media_state_wait(controller, vlc.State.Playing):
             return False
         if controller.is_live:
-            if self.get_live_state() != MediaState.Paused and controller.media_info.start_time > 0:
+            if self.get_live_state() != MediaState.Paused and controller.media_info.timer > 0:
                 log.debug('vlc play, start time set')
-                start_time = controller.media_info.start_time
+                start_time = controller.media_info.timer
         else:
-            if self.get_preview_state() != MediaState.Paused and controller.media_info.start_time > 0:
+            if self.get_preview_state() != MediaState.Paused and controller.media_info.timer > 0:
                 log.debug('vlc play, start time set')
-                start_time = controller.media_info.start_time
+                start_time = controller.media_info.timer
         log.debug('mediatype: ' + str(controller.media_info.media_type))
         # Set tracks for the optical device
         if controller.media_info.media_type == MediaType.DVD and \
@@ -278,10 +277,10 @@ class VlcPlayer(MediaPlayer):
             if controller.media_info.subtitle_track > 0:
                 controller.vlc_media_player.video_set_spu(controller.media_info.subtitle_track)
                 log.debug('vlc play, subtitle_track set: ' + str(controller.media_info.subtitle_track))
-            if controller.media_info.start_time > 0:
-                log.debug('vlc play, starttime set: ' + str(controller.media_info.start_time))
-                start_time = controller.media_info.start_time
-            controller.media_info.length = controller.media_info.end_time - controller.media_info.start_time
+            if controller.media_info.timer > 0:
+                log.debug('vlc play, starttime set: ' + str(controller.media_info.timer))
+                start_time = controller.media_info.timer
+            controller.media_info.length = controller.media_info.end_time - controller.media_info.timer
         self.volume(controller, controller.media_info.volume)
         if start_time > 0 and controller.vlc_media_player.is_seekable():
             controller.vlc_media_player.set_time(int(start_time))
@@ -343,7 +342,6 @@ class VlcPlayer(MediaPlayer):
         :param controller: The controller where the media is
         """
         controller.vlc_media_player.stop()
-        controller.vlc_widget.setVisible(False)
         self.set_state(MediaState.Off, controller)
 
     def set_visible(self, controller, status):
@@ -362,14 +360,6 @@ class VlcPlayer(MediaPlayer):
         :param controller: Which Controller is running the show.
         :param output_display: The display where the media is
         """
-        vlc = get_vlc()
-        # Stop video if playback is finished.
-        if controller.vlc_media.get_state() == vlc.State.Ended:
-            self.stop(controller)
-        if controller.media_info.end_time > 0:
-            if controller.vlc_media_player.get_time() > controller.media_info.end_time:
-                self.stop(controller)
-                self.set_visible(controller, False)
         if not controller.seek_slider.isSliderDown():
             controller.seek_slider.blockSignals(True)
             if controller.media_info.media_type == MediaType.CD \

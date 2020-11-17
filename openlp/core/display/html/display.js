@@ -1016,9 +1016,6 @@ var Display = {
     targetElement.style.cssText = "";
     targetElement.setAttribute("data-background", backgroundContent);
     targetElement.setAttribute("data-background-size", "cover");
-    if (!!backgroundHtml) {
-      background.innerHTML = backgroundHtml;
-    }
 
     // set up the main area
     if (!is_text) {
