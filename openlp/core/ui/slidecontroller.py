@@ -525,6 +525,10 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         self.song_menu.setPopupMode(QtWidgets.QToolButton.InstantPopup)
         self.song_menu.setMenu(QtWidgets.QMenu(translate('OpenLP.SlideController', 'Go To'), self.toolbar))
 
+    def _raise_displays(self):
+        for display in self.displays:
+            display.raise_()
+
     def _slide_shortcut_activated(self):
         """
         Called, when a shortcut has been activated to jump to a chorus, verse, etc.
@@ -946,8 +950,12 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
             self._reset_blank(self.service_item.is_capable(ItemCapabilities.ProvidesOwnDisplay))
         self.info_label.setText(self.service_item.title)
         self.slide_list = {}
-        if old_item and old_item.requires_media():
-            self.on_media_close()
+        if old_item:
+            # Close the old item if it's not to be used by the new sevice item
+            if not self.service_item.is_media() and not self.service_item.requires_media():
+                self.on_media_close()
+            if old_item.is_command() and not old_item.is_media():
+                Registry().execute('{name}_stop'.format(name=old_item.name.lower()), [old_item, self.is_live])
         row = 0
         width = self.main_window.control_splitter.sizes()[self.split]
         if self.service_item.is_text():
@@ -989,26 +997,15 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
             if self.service_item.is_command():
                 self.preview_display.load_verses(media_empty_song, True)
             self.on_media_start(self.service_item)
-            # Let media window init, then put webengine back on top
-            self.application.process_events()
-            for display in self.displays:
-                display.raise_()
+            # Try to get display back on top of media window asap. If the media window
+            # is not loaded by the time _raise_displays is run, lyrics (web display)
+            # will be under the media window (not good).
+            QtCore.QTimer.singleShot(100, self._raise_displays)
+            QtCore.QTimer.singleShot(500, self._raise_displays)
+            QtCore.QTimer.singleShot(1000, self._raise_displays)
         self.slide_selected(True)
         if self.service_item.from_service:
             self.preview_widget.setFocus()
-        if old_item:
-            # Close the old item after the new one is opened
-            # This avoids the service theme/desktop flashing on screen
-            # However opening a new item of the same type will automatically
-            # close the previous, so make sure we don't close the new one.
-            if old_item.is_command() and not self.service_item.is_command() or \
-                    old_item.is_command() and not old_item.is_media() and self.service_item.is_media():
-                if old_item.is_media():
-                    self.on_media_close()
-                else:
-                    Registry().execute('{name}_stop'.format(name=old_item.name.lower()), [old_item, self.is_live])
-            if old_item.is_media() and not self.service_item.is_media():
-                self.on_media_close()
         if self.is_live:
             Registry().execute('slidecontroller_{item}_started'.format(item=self.type_prefix), [self.service_item])
             # Need to process events four times to get correct controller width
@@ -1528,7 +1525,9 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         :param item: The service item to be processed
         """
         if State().check_preconditions('media'):
-            if self.is_live and self.get_hide_mode() == HideMode.Theme:
+            if self.is_live and not item.is_media() and item.requires_media():
+                self.media_controller.load_video(self.controller_type, item, self.get_hide_mode())
+            elif self.is_live and self.get_hide_mode() == HideMode.Theme:
                 self.media_controller.load_video(self.controller_type, item, HideMode.Blank)
                 self.set_hide_mode(HideMode.Blank)
             elif self.is_live or item.is_media():
@@ -1542,7 +1541,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         Respond to a request to close the Video if we have media
         """
         if State().check_preconditions('media'):
-            self.media_controller.media_reset(self)
+            self.media_controller.media_reset(self, delayed=True)
 
     def _reset_blank(self, no_theme):
         """
