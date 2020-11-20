@@ -256,7 +256,7 @@ class ScreenList(metaclass=Singleton):
             for number, screen_dict in screen_settings.items():
                 # Sometimes this loads as a string instead of an int
                 number = int(number)
-                # Compare geometry, primarity of screen from settings with avilable screens
+                # Compare geometry, primary of screen from settings with available screens
                 if self.has_screen(screen_dict):
                     # If match was found, we're all happy, update with custom geometry, display info, if available
                     self[number].update(screen_dict)
