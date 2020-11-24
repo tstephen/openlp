@@ -645,13 +645,12 @@ var Display = {
    * Set image slides
    * @param {Object[]} slides - A list of images to add as JS objects [{"path": "url/to/file"}]
    */
-  setImageSlides: function (slides, background) {
+  setImageSlides: function (slides) {
     Display._clearSlidesList();
     var parentSection = document.createElement("section");
     slides.forEach(function (slide, index) {
       var section = document.createElement("section");
       section.setAttribute("id", index);
-      section.setAttribute("data-background", background);
       section.setAttribute("style", "height: 100%; width: 100%;");
       var img = document.createElement('img');
       img.src = slide.path;
@@ -876,10 +875,9 @@ var Display = {
   },
   /**
    * Set background image, replaced when theme is updated/applied
-   * @param bg_color Colour behind the image
    * @param image_path Image path
    */
-  setBackgroundImage: function (bg_color, image_path) {
+  setBackgroundImage: function (image_path) {
     var targetElement = $(".slides > section")[0];
     targetElement.setAttribute("data-background", "url('" + image_path + "')");
     targetElement.setAttribute("data-background-size", "cover");

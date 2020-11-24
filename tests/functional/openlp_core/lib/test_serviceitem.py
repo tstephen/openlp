@@ -522,7 +522,7 @@ def test_service_item_get_theme_data_song_level_service_fallback(settings):
     Test the service item - get theme data when set to song theme level
                             but the song theme doesn't exist
     """
-    # GIVEN: A service item with a theme and theme level set to song
+    # GIVEN: A service item with no theme and theme level set to song
     service_item = ServiceItem(None)
     service_item.from_service = True
     mocked_theme_manager = MagicMock()
@@ -544,7 +544,7 @@ def test_service_item_get_theme_data_song_level_global_fallback(settings):
     Test the service item - get theme data when set to song theme level
                             but the song and service theme don't exist
     """
-    # GIVEN: A service item with a theme and theme level set to song
+    # GIVEN: A service item with no theme and theme level set to song
     service_item = ServiceItem(None)
     mocked_theme_manager = MagicMock()
     mocked_theme_manager.global_theme = 'global_theme'
@@ -558,6 +558,30 @@ def test_service_item_get_theme_data_song_level_global_fallback(settings):
 
     # THEN: theme should be the global theme
     assert theme == mocked_theme_manager.global_theme
+
+
+def test_service_item_get_theme_data_theme_override(settings):
+    """
+    Test the service item - get theme data when set to global theme level
+                            but the service item has the `ProvidesOwnTheme`
+                            capability overriding the global theme
+    """
+    # GIVEN: A service item with a theme and theme level set to global
+    service_item = ServiceItem(None)
+    service_item.theme = 'item_theme'
+    service_item.add_capability(ItemCapabilities.ProvidesOwnTheme)
+    mocked_theme_manager = MagicMock()
+    mocked_theme_manager.global_theme = 'global_theme'
+    mocked_theme_manager.get_theme_data = Mock(side_effect=lambda value: value)
+    Registry().register('theme_manager', mocked_theme_manager)
+    settings.setValue('servicemanager/service theme', 'service_theme')
+    settings.setValue('themes/theme level', ThemeLevel.Global)
+
+    # WHEN: Get theme data is run
+    theme = service_item.get_theme_data()
+
+    # THEN: theme should be the service item's theme
+    assert theme == service_item.theme
 
 
 def test_remove_capability(settings):

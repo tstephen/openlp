@@ -74,6 +74,15 @@ class DisplayStyle(IntEnum):
 
 
 @unique
+class ImageThemeMode(IntEnum):
+    """
+    An enumeration for image background settings.
+    """
+    Black = 1
+    CustomTheme = 2
+
+
+@unique
 class LayoutStyle(IntEnum):
     """
     An enumeration for bible screen layout styles.

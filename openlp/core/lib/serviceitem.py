@@ -129,8 +129,8 @@ class ServiceItem(RegistryProperties):
             # but use song theme if level is song (and it exists)
             if service_theme and self.from_service:
                 theme = service_theme
-            if theme_level == ThemeLevel.Song and self.theme:
-                theme = self.theme
+        if self.is_capable(ItemCapabilities.ProvidesOwnTheme) or theme_level == ThemeLevel.Song and self.theme:
+            theme = self.theme
         theme = theme_manager.get_theme_data(theme)
         # Clean up capabilities and reload from the theme.
         if self.is_text():

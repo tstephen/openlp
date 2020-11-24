@@ -167,6 +167,9 @@ class ItemCapabilities(object):
 
     ``HasBackgroundStream``
             That a video stream is present with the text
+
+    ``ProvidesOwnTheme``
+            The capability to tell the SlideController to force the use of the service item theme.
     """
     CanPreview = 1
     CanEdit = 2
@@ -193,6 +196,7 @@ class ItemCapabilities(object):
     CanStream = 23
     HasBackgroundVideo = 24
     HasBackgroundStream = 25
+    ProvidesOwnTheme = 26
 
 
 def get_text_file_string(text_file_path):

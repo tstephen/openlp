@@ -32,8 +32,8 @@ from tempfile import gettempdir
 from PyQt5 import QtCore, QtGui
 
 from openlp.core.common import SlideLimits, ThemeLevel, is_linux, is_win
-from openlp.core.common.enum import AlertLocation, BibleSearch, CustomSearch, LayoutStyle, DisplayStyle, \
-    LanguageSelection, SongSearch, PluginStatus
+from openlp.core.common.enum import AlertLocation, BibleSearch, CustomSearch, ImageThemeMode, LayoutStyle, \
+    DisplayStyle, LanguageSelection, SongSearch, PluginStatus
 from openlp.core.common.json import OpenLPJSONDecoder, OpenLPJSONEncoder, is_serializable
 from openlp.core.common.path import files_to_paths, str_to_path
 
@@ -259,7 +259,8 @@ class Settings(QtCore.QSettings):
         'core/override position': False,
         'core/monitor': {},
         'core/application version': '0.0',
-        'images/background color': '#000000',
+        'images/background mode': ImageThemeMode.Black,
+        'images/theme': None,
         'images/db type': 'sqlite',
         'images/db username': '',
         'images/db password': '',
@@ -414,6 +415,7 @@ class Settings(QtCore.QSettings):
         ('presentations/presentations files', 'presentations/presentations files', [(files_to_paths, None)]),
         ('core/logo file', 'core/logo file', [(str_to_path, None)]),
         ('presentations/last directory', 'presentations/last directory', [(str_to_path, None)]),
+        ('images/background color', '', []),
         ('images/last directory', 'images/last directory', [(str_to_path, None)]),
         ('media/last directory', 'media/last directory', [(str_to_path, None)]),
         ('songuasge/db password', 'songusage/db password', []),

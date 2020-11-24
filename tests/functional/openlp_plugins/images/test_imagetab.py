@@ -25,6 +25,7 @@ import pytest
 from unittest.mock import MagicMock
 
 from openlp.core.common.registry import Registry
+from openlp.core.common.enum import ImageThemeMode
 from openlp.plugins.images.lib.imagetab import ImageTab
 
 
@@ -48,16 +49,33 @@ def test_save_tab_nochange(form):
         'Image Post processing should not have been requested'
 
 
-def test_save_tab_change(form):
+def test_save_tab_theme_change(form):
     """
-    Test a color change is applied and triggers post processing.
+    Test a theme change is applied and triggers post processing.
     """
     # GIVEN: Apply a change to the form.
-    form.on_background_color_changed('#999999')
+    form.theme_combo_box.currentText = MagicMock(return_value='my_theme')
+    form.on_image_theme_changed()
     # WHEN: the save is invoked
     form.save()
     # THEN: the post process should be requested
     assert 1 == form.settings_form.register_post_process.call_count, \
         'Image Post processing should have been requested'
-    # THEN: The color should be set
-    assert form.background_color == '#999999', 'The updated color should have been saved'
+    # THEN: The theme should be set
+    assert form.image_theme == 'my_theme', 'The updated theme should have been saved'
+
+
+def test_save_tab_theme_mode_change(form):
+    """
+    Test a theme change is applied and triggers post processing.
+    """
+    # GIVEN: Apply a change to the form.
+    form.radio_group.id = MagicMock(return_value=ImageThemeMode.CustomTheme)
+    form.on_radio_group_button_toggled('radio_thing', True)
+    # WHEN: the save is invoked
+    form.save()
+    # THEN: the post process should be requested
+    assert 1 == form.settings_form.register_post_process.call_count, \
+        'Image Post processing should have been requested'
+    # THEN: The theme should be set
+    assert form.background_mode == ImageThemeMode.CustomTheme, 'The updated background mode should have been saved'

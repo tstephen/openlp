@@ -155,10 +155,9 @@ class DisplayWindow(QtWidgets.QWidget, RegistryProperties, LogMixin):
         self.setGeometry(screen.display_geometry)
         self.screen_number = screen.number
 
-    def set_background_image(self, bg_color, image_path):
+    def set_background_image(self, image_path):
         image_uri = image_path.as_uri()
-        self.run_javascript('Display.setBackgroundImage("{bg_color}", "{image}");'.format(bg_color=bg_color,
-                                                                                          image=image_uri))
+        self.run_javascript('Display.setBackgroundImage("{image}");'.format(image=image_uri))
 
     def set_single_image(self, bg_color, image_path):
         """
@@ -280,9 +279,7 @@ class DisplayWindow(QtWidgets.QWidget, RegistryProperties, LogMixin):
             else:
                 image['thumbnail'] = image['path']
         json_images = json.dumps(imagesr)
-        background = self.settings.value('images/background color')
-        self.run_javascript('Display.setImageSlides({images}, "{background}");'.format(images=json_images,
-                                                                                       background=background))
+        self.run_javascript('Display.setImageSlides({images});'.format(images=json_images))
 
     def load_video(self, video):
         """
