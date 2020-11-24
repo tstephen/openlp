@@ -22,13 +22,14 @@
 import logging
 from pathlib import Path
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.common import delete_file, get_images_filter, sha256_file_hash
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.i18n import UiStrings, get_natural_key, translate
 from openlp.core.common.path import create_paths
 from openlp.core.common.registry import Registry
+from openlp.core.common.enum import ImageThemeMode
 from openlp.core.lib import ServiceItemContext, build_icon, check_item_selected, create_thumb, validate_thumb
 from openlp.core.lib.mediamanageritem import MediaManagerItem
 from openlp.core.lib.plugin import StringContent
@@ -571,8 +572,12 @@ class ImageMediaItem(MediaManagerItem):
         service_item.add_capability(ItemCapabilities.CanAppend)
         service_item.add_capability(ItemCapabilities.CanEditTitle)
         service_item.add_capability(ItemCapabilities.HasThumbnails)
-        # force a nonexistent theme
-        service_item.theme = -1
+        service_item.add_capability(ItemCapabilities.ProvidesOwnTheme)
+        if self.settings.value('images/background mode') == ImageThemeMode.CustomTheme:
+            service_item.theme = self.settings.value('images/theme')
+        else:
+            # force a nonexistent theme
+            service_item.theme = -1
         missing_items_file_names = []
         images = []
         existing_images = []
@@ -682,14 +687,13 @@ class ImageMediaItem(MediaManagerItem):
         if check_item_selected(
                 self.list_view,
                 translate('ImagePlugin.MediaItem', 'You must select an image to replace the background with.')):
-            background = QtGui.QColor(self.settings.value('images/background color'))
             bitem = self.list_view.selectedItems()[0]
             if not isinstance(bitem.data(0, QtCore.Qt.UserRole), ImageFilenames):
                 # Only continue when an image is selected.
                 return
             file_path = bitem.data(0, QtCore.Qt.UserRole).file_path
             if file_path.exists():
-                self.live_controller.set_background_image(background, file_path)
+                self.live_controller.set_background_image(file_path)
                 self.reset_action.setVisible(True)
                 self.reset_action_context.setVisible(True)
             else:

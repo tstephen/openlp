@@ -28,6 +28,8 @@ from unittest.mock import ANY, MagicMock, patch
 from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.common.registry import Registry
+from openlp.core.common.enum import ImageThemeMode
+from openlp.core.lib.serviceitem import ItemCapabilities
 from openlp.plugins.images.lib.db import ImageFilenames, ImageGroups
 from openlp.plugins.images.lib.mediaitem import ImageMediaItem
 
@@ -203,11 +205,44 @@ def test_on_display_changed(media_item):
     media_item.reset_action_context.setVisible.assert_called_with(False)
 
 
+def test_generate_slide_data_default_theme(media_item):
+    """
+    Test that the generated service item provides the corect theme
+    """
+    # GIVEN: A mocked service item and settings
+    mocked_service_item = MagicMock()
+    media_item.list_view = MagicMock()
+    Registry().get('settings').value.side_effect = [ImageThemeMode.Black]
+
+    # WHEN: generate_slide_data is called
+    media_item.generate_slide_data(mocked_service_item)
+
+    # THEN: The service item should force the theme, and use the default theme
+    mocked_service_item.add_capability.assert_any_call(ItemCapabilities.ProvidesOwnTheme)
+    assert mocked_service_item.theme == -1
+
+
+def test_generate_slide_data_custom_theme(media_item):
+    """
+    Test that the generated service item provides the corect theme
+    """
+    # GIVEN: A mocked service item and settings
+    mocked_service_item = MagicMock()
+    media_item.list_view = MagicMock()
+    Registry().get('settings').value.side_effect = [ImageThemeMode.CustomTheme, 'theme_name']
+
+    # WHEN: generate_slide_data is called
+    media_item.generate_slide_data(mocked_service_item)
+
+    # THEN: The service item should force the theme, and use the theme in the settings
+    mocked_service_item.add_capability.assert_any_call(ItemCapabilities.ProvidesOwnTheme)
+    assert mocked_service_item.theme == 'theme_name'
+
+
 @patch('openlp.plugins.images.lib.mediaitem.check_item_selected')
 @patch('openlp.plugins.images.lib.mediaitem.isinstance')
-@patch('openlp.plugins.images.lib.mediaitem.QtGui.QColor')
 @patch('openlp.plugins.images.lib.mediaitem.Path.exists')
-def test_on_replace_click(mocked_exists, mocked_qcolor, mocked_isinstance, mocked_check_item_selected, media_item):
+def test_on_replace_click(mocked_exists, mocked_isinstance, mocked_check_item_selected, media_item):
     """
     Test that on_replace_click() actually sets the background
     """
@@ -218,7 +253,6 @@ def test_on_replace_click(mocked_exists, mocked_qcolor, mocked_isinstance, mocke
     mocked_check_item_selected.return_value = True
     mocked_isinstance.return_value = True
     mocked_exists.return_value = True
-    mocked_qcolor.return_value = 'BackgroundColor'
 
     # WHEN: on_replace_click is called
     media_item.on_replace_click()
@@ -226,7 +260,7 @@ def test_on_replace_click(mocked_exists, mocked_qcolor, mocked_isinstance, mocke
     # THEN: the reset_action should be set visible, and the image should be set
     media_item.reset_action.setVisible.assert_called_with(True)
     media_item.reset_action_context.setVisible.assert_called_with(True)
-    media_item.live_controller.set_background_image.assert_called_with('BackgroundColor', ANY)
+    media_item.live_controller.set_background_image.assert_called_with(ANY)
 
 
 @patch('openlp.plugins.images.lib.mediaitem.delete_file')

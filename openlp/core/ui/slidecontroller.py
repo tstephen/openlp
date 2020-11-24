@@ -872,15 +872,15 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
                 self.delay_spin_box.setValue(int(item.timed_slide_interval))
                 self.on_play_slides_once()
 
-    def set_background_image(self, bg_color, image_path):
+    def set_background_image(self, image_path):
         """
         Reload the theme on displays.
         """
         # Set theme for preview
-        self.preview_display.set_background_image(bg_color, image_path)
+        self.preview_display.set_background_image(image_path)
         # Set theme for displays
         for display in self.displays:
-            display.set_background_image(bg_color, image_path)
+            display.set_background_image(image_path)
 
     def theme_updated(self, var=None):
         """
