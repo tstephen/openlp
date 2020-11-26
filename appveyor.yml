@@ -4,23 +4,23 @@ cache:
   - '%LOCALAPPDATA%\pip\Cache'
   -  /Users/appveyor/Libraries/Caches/pip
 
-stack: python 3.7
+stack: python 3.9
 
 environment:
   matrix:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-      PY_DIR: C:\\Python37-x64
+      PY_DIR: C:\\Python39-x64
       CHOCO_VLC_ARG:
-      FORCE_PACKAGING: 0
+      FORCE_PACKAGING: 1
       FORCE_PACKAGING_MANUAL: 0
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-      PY_DIR: C:\\Python37
+      PY_DIR: C:\\Python39
       CHOCO_VLC_ARG: --forcex86
-      FORCE_PACKAGING: 0
+      FORCE_PACKAGING: 1
       FORCE_PACKAGING_MANUAL: 0
     - APPVEYOR_BUILD_WORKER_IMAGE: macos-mojave
       QT_QPA_PLATFORM: offscreen
-      FORCE_PACKAGING: 0
+      FORCE_PACKAGING: 1
       FORCE_PACKAGING_MANUAL: 0
 
 init:
@@ -48,8 +48,8 @@ test_script:
 after_test:
   # Only package on the master repo
   - ps: >-
-      If (!(Test-Path env:APPVEYOR_PULL_REQUEST_HEAD_REPO_NAME) -Or ($env:APPVEYOR_PULL_REQUEST_HEAD_REPO_NAME -eq "") -Or ($env:FORCE_PACKAGING -eq 1)) {
-          # Continue on eror
+      If (($env:APPVEYOR_REPO_TAG) -Or ($env:APPVEYOR_SCHEDULED_BUILD) -Or ($env:FORCE_PACKAGING -eq 1)) {
+          # Continue on error
           $ErrorActionPreference = "Continue"
           # This is where we create a package using PyInstaller
           # Install PyInstaller 
