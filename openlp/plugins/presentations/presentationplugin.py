@@ -137,7 +137,9 @@ class PresentationPlugin(Plugin):
         super().app_startup()
         presentation_paths = self.settings.value('presentations/presentations files')
         for path in presentation_paths:
-            self.media_item.clean_up_thumbnails(path, clean_for_update=True)
+            # check to see if the file exists before trying to process it.
+            if path.exists():
+                self.media_item.clean_up_thumbnails(path, clean_for_update=True)
         self.media_item.list_view.clear()
         # Update the thumbnail scheme if needed
         if self.settings.value('presentations/thumbnail_scheme') != 'sha256file':

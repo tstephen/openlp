@@ -25,6 +25,8 @@ from pathlib import Path
 from unittest.mock import MagicMock, PropertyMock, call, patch
 
 from openlp.core.common.registry import Registry
+from openlp.core.lib import ServiceItemContext
+from openlp.core.lib.serviceitem import ItemCapabilities
 from openlp.plugins.presentations.lib.mediaitem import PresentationMediaItem
 
 
@@ -125,6 +127,23 @@ def test_clean_up_thumbnails_missing_file(media_item):
 
     # THEN: doc.presentation_deleted should have been called since the presentation file did not exist.
     mocked_doc.assert_has_calls([call.get_thumbnail_path(1, True), call.presentation_deleted()], True)
+
+
+def test_pdf_generate_slide_data(media_item):
+    """
+    Test that the generate slide data function makes the correct ajustments to a pdf service item.
+    """
+    # GIVEN: A mocked pdf service item
+    media_item.list_view = MagicMock()
+    media_item.display_type_combo_box = MagicMock()
+    mocked_service_item = MagicMock()
+
+    # WHEN: generate_slide_data is called
+    media_item.generate_slide_data(mocked_service_item, context=ServiceItemContext.Live, file_path=Path('test.pdf'))
+
+    # THEN: Should be categorized as images and overrides the theme
+    assert mocked_service_item.name == 'images'
+    mocked_service_item.add_capability.assert_any_call(ItemCapabilities.ProvidesOwnTheme)
 
 
 @patch('openlp.plugins.presentations.lib.mediaitem.MediaManagerItem._setup')

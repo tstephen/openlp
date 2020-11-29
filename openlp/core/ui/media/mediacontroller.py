@@ -29,7 +29,6 @@ try:
 except ImportError:
     pymediainfo_available = False
 
-from subprocess import check_output
 from PyQt5 import QtCore
 
 from openlp.core.state import State
@@ -343,13 +342,9 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         """
         if MediaInfo.can_parse():
             media_data = MediaInfo.parse(media_path)
-        else:
-            xml = check_output(['mediainfo', '-f', '--Output=XML', '--Inform=OLDXML', media_path])
-            if not xml.startswith(b'<?xml'):
-                xml = check_output(['mediainfo', '-f', '--Output=XML', media_path])
-            media_data = MediaInfo(xml.decode("utf-8"))
-        # duration returns in milli seconds
-        return media_data.tracks[0].duration
+            # duration returns in milli seconds
+            return media_data.tracks[0].duration
+        return 0
 
     def media_setup_optical(self, filename, title, audio_track, subtitle_track, start, end, display, controller):
         """

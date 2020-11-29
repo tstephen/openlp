@@ -792,7 +792,7 @@ describe("Display.setBackgroundImage and Display.resetTheme", function () {
     spyOn(Reveal, "sync");
     spyOn(Reveal, "slide");
 
-    Display.setBackgroundImage("#fff", "/file/path");
+    Display.setBackgroundImage("/file/path");
 
     expect($(".slides > section")[0].getAttribute("data-background")).toEqual("url('/file/path')");
     expect(Reveal.sync).toHaveBeenCalledTimes(1);

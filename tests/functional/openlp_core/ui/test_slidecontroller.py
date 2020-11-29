@@ -794,11 +794,11 @@ def test_set_background_image(registry):
     slide_controller.displays = [mock_display]
 
     # WHEN: set_background_image is called
-    slide_controller.set_background_image(sentinel.colour, sentinel.image)
+    slide_controller.set_background_image(sentinel.image)
 
     # THEN: The preview and main display are called with the new colour and image
-    slide_controller.preview_display.set_background_image.assert_called_once_with(sentinel.colour, sentinel.image)
-    mock_display.set_background_image.assert_called_once_with(sentinel.colour, sentinel.image)
+    slide_controller.preview_display.set_background_image.assert_called_once_with(sentinel.image)
+    mock_display.set_background_image.assert_called_once_with(sentinel.image)
 
 
 def test_theme_updated(mock_settings):
