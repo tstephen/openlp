@@ -406,5 +406,5 @@ class ScreenList(metaclass=Singleton):
         The primary screen has changed, let's sort it out and then notify everyone
         """
         for screen in self.screens:
-            screen.is_primary = self.desktop.primaryScreen().geometry() == screen.geometry
+            screen.is_primary = self.application.primaryScreen().geometry() == screen.geometry
         Registry().execute('config_screen_changed')
