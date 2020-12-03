@@ -93,6 +93,26 @@ def test_create_screen_list(mocked_screens, settings):
     assert screen_list.screens[1].is_primary is False
 
 
+@patch('openlp.core.display.screens.QtWidgets.QApplication.screens')
+def test_screen_list_on_primary_changed(mocked_screens, settings, registry):
+    """Test that the screen is correctly updated when a primary screen is changed"""
+    # GIVEN: Mocked application
+    mocked_application = MagicMock()
+    mocked_screen1 = MagicMock(**{'geometry.return_value': QtCore.QRect(0, 0, 1024, 768)})
+    mocked_screen2 = MagicMock(**{'geometry.return_value': QtCore.QRect(1024, 0, 1024, 768)})
+    mocked_application.screens.return_value = [mocked_screen1, mocked_screen2]
+    mocked_application.primaryScreen.return_value = mocked_screen1
+    screen_list = ScreenList.create(mocked_application)
+
+    # WHEN: on_primary_screen_changed() is called
+    mocked_application.primaryScreen.return_value = mocked_screen2
+    screen_list.on_primary_screen_changed()
+
+    # THEN: The primary screen should have changed
+    assert screen_list.screens[0].is_primary is False
+    assert screen_list.screens[1].is_primary is True
+
+
 def test_screen_from_dict():
     """Test that all the correct attributes are set when creating a screen from a dictionary"""
     # GIVEN: A dictionary of values
