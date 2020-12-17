@@ -19,21 +19,21 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>. #
 ##########################################################################
 """
-Package to test the openlp.core.ui.advancedtab package.
+Package to test the openlp.core.ui.servicetab package.
 """
-from openlp.core.ui.advancedtab import AdvancedTab
+from openlp.core.ui.servicetab import ServiceTab
 from openlp.core.ui.settingsform import SettingsForm
 
 
 def test_creation(settings):
     """
-    Test that Advanced Tab is created.
+    Test that Service Tab is created.
     """
-    # GIVEN: A new Advanced Tab
+    # GIVEN: A new Service Tab
     settings_form = SettingsForm(None)
 
-    # WHEN: I create an advanced tab
-    advanced_tab = AdvancedTab(settings_form)
+    # WHEN: I create an service tab
+    service_tab = ServiceTab(settings_form)
 
     # THEN:
-    assert "Advanced" == advanced_tab.tab_title, 'The tab title should be Advanced'
+    assert "Service" == service_tab.tab_title, 'The tab title should be Service'

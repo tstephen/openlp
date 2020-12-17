@@ -19,21 +19,38 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>. #
 ##########################################################################
 """
-Package to test the openlp.core.ui.advancedtab package.
+Package to test the openlp.core.ui.generaltab package.
 """
-from openlp.core.ui.advancedtab import AdvancedTab
+from openlp.core.ui.generaltab import GeneralTab
 from openlp.core.ui.settingsform import SettingsForm
 
 
 def test_creation(settings):
     """
-    Test that Advanced Tab is created.
+    Test that General Tab is created.
     """
-    # GIVEN: A new Advanced Tab
+    # GIVEN: A new General Tab
     settings_form = SettingsForm(None)
 
-    # WHEN: I create an advanced tab
-    advanced_tab = AdvancedTab(settings_form)
+    # WHEN: I create an general tab
+    general_tab = GeneralTab(settings_form)
 
     # THEN:
-    assert "Advanced" == advanced_tab.tab_title, 'The tab title should be Advanced'
+    assert "Core" == general_tab.tab_title, 'The tab title should be Core'
+
+
+def test_change_search_as_type(settings):
+    """
+    Test that when search as type is changed custom and song configs are updated
+    """
+    # GIVEN: A new General Tab
+    settings_form = SettingsForm(None)
+    general_tab = GeneralTab(settings_form)
+
+    # WHEN: I change search as type check box
+    general_tab.on_search_as_type_check_box_changed(True)
+
+    # THEN: we should have two post save processed to run
+    assert 2 == len(settings_form.processes), 'Two post save processes should be created'
+    assert "songs_config_updated" in settings_form.processes, 'The songs plugin should be called'
+    assert "custom_config_updated" in settings_form.processes, 'The custom plugin should be called'
