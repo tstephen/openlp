@@ -121,8 +121,9 @@ class PdfDocument(PresentationDocument):
                 src_size = page.bound().round()
                 # keep aspect ratio
                 scale = min(size.width() / src_size.width, size.height() / src_size.height)
-                m = fitz.Matrix(scale, scale)
-                page.getPixmap(m, alpha=False).writeImage(str(temp_dir_path / 'mainslide{:03d}.png'.format(i)))
+                matrix = fitz.Matrix(scale, scale)
+                page.getPixmap(matrix=matrix, alpha=False).writeImage(
+                    str(temp_dir_path / 'mainslide{:03d}.png'.format(i)))
             pdf.close()
             created_files = sorted(temp_dir_path.glob('*'))
             for image_path in created_files:
