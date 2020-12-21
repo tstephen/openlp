@@ -64,11 +64,12 @@ class MediaTab(SettingsTab):
         self.left_layout.addWidget(self.live_media_group_box)
         self.vlc_arguments_group_box = QtWidgets.QGroupBox(self.left_column)
         self.vlc_arguments_group_box.setObjectName('vlc_arguments_group_box')
-        self.vlc_arguments_layout = QtWidgets.QHBoxLayout(self.vlc_arguments_group_box)
+        self.vlc_arguments_layout = QtWidgets.QFormLayout(self.vlc_arguments_group_box)
         self.vlc_arguments_layout.setObjectName('vlc_arguments_layout')
-        self.vlc_arguments_layout.setContentsMargins(0, 0, 0, 0)
+        self.vlc_arguments_label = QtWidgets.QLabel(self.vlc_arguments_group_box)
+        self.vlc_arguments_label.setObjectName('vlc_arguments_label')
         self.vlc_arguments_edit = QtWidgets.QLineEdit(self)
-        self.vlc_arguments_layout.addWidget(self.vlc_arguments_edit)
+        self.vlc_arguments_layout.addRow(self.vlc_arguments_label, self.vlc_arguments_edit)
         self.left_layout.addWidget(self.vlc_arguments_group_box)
         self.left_layout.addStretch()
         self.right_layout.addStretch()
@@ -80,7 +81,8 @@ class MediaTab(SettingsTab):
         Translate the UI on the fly
         """
         self.live_media_group_box.setTitle(translate('MediaPlugin.MediaTab', 'Live Media'))
-        self.vlc_arguments_group_box.setTitle(translate('MediaPlugin.MediaTab', 'VLC arguments (requires restart)'))
+        self.vlc_arguments_group_box.setTitle(translate('MediaPlugin.MediaTab', 'VLC (requires restart)'))
+        self.vlc_arguments_label.setText(translate('MediaPlugin.MediaTab', 'Extra arguments:'))
         self.auto_start_check_box.setText(translate('MediaPlugin.MediaTab', 'Start Live items automatically'))
 
     def load(self):

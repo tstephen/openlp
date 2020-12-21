@@ -38,7 +38,7 @@ class Ui_SettingsDialog(object):
         """
         settings_dialog.setObjectName('settings_dialog')
         settings_dialog.setWindowIcon(UiIcons().main_icon)
-        settings_dialog.resize(920, 625)
+        settings_dialog.resize(900, 500)
         self.dialog_layout = QtWidgets.QGridLayout(settings_dialog)
         self.dialog_layout.setObjectName('dialog_layout')
         self.dialog_layout.setContentsMargins(8, 8, 8, 8)
