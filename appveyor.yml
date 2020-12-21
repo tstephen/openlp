@@ -30,11 +30,11 @@ install:
   # Update pip
   - python -m pip install --upgrade pip
   # Install generic dependencies from pypi
-  - python -m pip install sqlalchemy alembic appdirs chardet beautifulsoup4 lxml Mako mysql-connector-python pytest mock psycopg2-binary websockets asyncio waitress six webob requests QtAwesome PyQt5 PyQtWebEngine pymediainfo PyMuPDF QDarkStyle python-vlc Pyro4 zeroconf flask-cors pytest-qt pyenchant pysword
+  - python -m pip install sqlalchemy alembic appdirs chardet beautifulsoup4 lxml Mako mysql-connector-python pytest mock psycopg2-binary websockets asyncio waitress six webob requests QtAwesome PyQt5 PyQtWebEngine pymediainfo PyMuPDF QDarkStyle python-vlc zeroconf flask-cors pytest-qt pyenchant pysword
   # Install Windows only dependencies
   - cmd: python -m pip install pyodbc pypiwin32
   # Mac only dependencies
-  - sh: python -m pip install pyobjc-core pyobjc-framework-Cocoa py-applescript
+  - sh: python -m pip install Pyro4 pyobjc-core pyobjc-framework-Cocoa py-applescript
 
 build: off
 
@@ -52,7 +52,7 @@ after_test:
           # Continue on error
           $ErrorActionPreference = "Continue"
           # This is where we create a package using PyInstaller
-          # Install PyInstaller 
+          # Install PyInstaller
           python -m pip install --no-warn-script-location pyinstaller
           # Some windows only stuff...
           If ($isWindows) {
@@ -77,6 +77,7 @@ after_test:
             # install dmgbuild tool
             python -m pip install --no-warn-script-location dmgbuild
             # use brew to build enchant, needed for pyenchant
+            git -C /usr/local/Homebrew/Library/Taps/homebrew/homebrew-core fetch --unshallow
             brew update --quiet
             brew install enchant
           }
