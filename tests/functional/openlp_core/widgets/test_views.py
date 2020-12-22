@@ -37,7 +37,7 @@ def clapperboard(mock_settings):
     return UiIcons().clapperboard
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def preview_widget_env():
     """Local test setup"""
     parent_patcher = patch('openlp.core.widgets.views.ListPreviewWidget.parent')

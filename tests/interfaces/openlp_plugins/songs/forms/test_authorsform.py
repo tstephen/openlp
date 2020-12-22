@@ -30,7 +30,7 @@ from openlp.core.common.registry import Registry
 from openlp.plugins.songs.forms.authorsform import AuthorsForm
 
 
-@pytest.yield_fixture()
+@pytest.fixture()
 def form(settings):
     main_window = QtWidgets.QMainWindow()
     Registry().register('main_window', main_window)

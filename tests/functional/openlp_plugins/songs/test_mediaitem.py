@@ -88,7 +88,7 @@ ${title}<br/>
 }
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def media_item(settings):
     Registry().register('service_list', MagicMock())
     Registry().register('main_window', MagicMock())

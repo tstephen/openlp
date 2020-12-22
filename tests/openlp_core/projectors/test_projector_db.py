@@ -102,7 +102,7 @@ def test_upgrade_old_projector_db(temp_folder):
     assert updated_to_version == latest_version, 'The projector DB should have been upgrade to the latest version'
 
 
-@pytest.yield_fixture()
+@pytest.fixture()
 def projector(temp_folder, settings):
     """
     Set up anything necessary for all tests

@@ -37,7 +37,7 @@ TEST_PATH = RESOURCE_PATH / 'media'
 TEST_MEDIA = [['avi_file.avi', 61495], ['mp3_file.mp3', 134426], ['mpg_file.mpg', 9404], ['mp4_file.mp4', 188336]]
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def media_env(registry):
     """Local test setup"""
     Registry().register('service_manager', MagicMock())

@@ -35,7 +35,7 @@ from openlp.core.ui.media.vlcplayer import VlcPlayer, get_vlc
 from tests.helpers import MockDateTime
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def vlc_env():
     """Local test setup"""
     if 'VLC_PLUGIN_PATH' in os.environ:

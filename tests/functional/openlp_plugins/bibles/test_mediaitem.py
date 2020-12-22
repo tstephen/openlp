@@ -62,7 +62,7 @@ def mocked_timer():
     return patch('openlp.plugins.bibles.lib.mediaitem.QtCore.QTimer').start()
 
 
-@pytest.yield_fixture()
+@pytest.fixture()
 def mocked_log():
     return patch('openlp.plugins.bibles.lib.mediaitem.log').start()
 

@@ -31,7 +31,7 @@ from openlp.core.common.registry import Registry
 from openlp.plugins.songs.forms.songmaintenanceform import SongMaintenanceForm
 
 
-@pytest.yield_fixture()
+@pytest.fixture()
 def form_env(settings):
     main_window = QtWidgets.QMainWindow()
     Registry().register('main_window', main_window)

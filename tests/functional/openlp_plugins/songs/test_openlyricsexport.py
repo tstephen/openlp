@@ -32,7 +32,7 @@ import pytest
 from openlp.plugins.songs.lib.openlyricsexport import OpenLyricsExport
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def temp_folder():
     temp_path = Path(mkdtemp())
     yield temp_path

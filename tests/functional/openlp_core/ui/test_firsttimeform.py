@@ -48,7 +48,7 @@ def ftf_app(registry, qapp):
     Registry().register('application', qapp)
 
 
-@pytest.yield_fixture()
+@pytest.fixture()
 def download_env(registry):
     download_worker_patcher = patch('openlp.core.ui.firsttimeform.DownloadWorker')
     run_thread_patcher = patch('openlp.core.ui.firsttimeform.run_thread')

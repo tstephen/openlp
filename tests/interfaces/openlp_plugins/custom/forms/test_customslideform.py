@@ -30,7 +30,7 @@ from openlp.core.common.registry import Registry
 from openlp.plugins.custom.forms.editcustomslideform import EditCustomSlideForm
 
 
-@pytest.yield_fixture()
+@pytest.fixture()
 def form(settings):
     main_window = QtWidgets.QMainWindow()
     Registry().register('main_window', main_window)

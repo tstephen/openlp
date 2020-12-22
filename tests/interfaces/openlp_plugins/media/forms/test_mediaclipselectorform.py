@@ -36,7 +36,7 @@ if os.name == 'nt' and not get_vlc():
     raise SkipTest('Windows without VLC, skipping this test since it cannot run without vlc')
 
 
-@pytest.yield_fixture()
+@pytest.fixture()
 def form(settings):
     main_window = QtWidgets.QMainWindow()
     vlc_patcher = patch('openlp.plugins.media.forms.mediaclipselectorform.get_vlc')

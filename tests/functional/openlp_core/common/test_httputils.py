@@ -31,7 +31,7 @@ from openlp.core.common.httputils import ProxyMode, download_file, get_proxy_set
     get_random_user_agent, get_web_page
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def temp_file(settings):
     tmp_file = os.path.join(tempfile.gettempdir(), 'testfile')
     yield tmp_file

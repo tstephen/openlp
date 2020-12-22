@@ -40,7 +40,7 @@ def media_item(settings):
     return m_item
 
 
-@pytest.yield_fixture()
+@pytest.fixture()
 def mock_plugin(temp_folder):
     m_plugin = MagicMock()
     m_plugin.settings_section = temp_folder

@@ -46,7 +46,7 @@ def _create_mock_action(parent, name, **kwargs):
     return action
 
 
-@pytest.yield_fixture()
+@pytest.fixture()
 def main_window(state, settings, mocked_qapp):
     app = Registry().get('application')
     app.set_busy_cursor = MagicMock()

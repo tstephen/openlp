@@ -29,7 +29,7 @@ from openlp.plugins.bibles import lib
 from openlp.plugins.bibles.lib import SearchResults, get_reference_match, update_reference_separators
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def mocked_bible_test(registry):
     """Local test setup"""
     ret_value = MagicMock(**{'value.return_value': ''})
