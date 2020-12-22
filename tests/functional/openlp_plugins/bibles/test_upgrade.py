@@ -35,7 +35,7 @@ from openlp.plugins.bibles.lib import upgrade
 from tests.utils.constants import RESOURCE_PATH
 
 
-@pytest.yield_fixture()
+@pytest.fixture()
 def mock_message_box():
     patched_message_box = patch('openlp.plugins.bibles.lib.upgrade.QtWidgets.QMessageBox')
     mocked_message_box = patched_message_box.start()
@@ -51,7 +51,7 @@ def mock_message_box():
     patched_message_box.stop()
 
 
-@pytest.yield_fixture()
+@pytest.fixture()
 def db_url():
     tmp_path = Path(mkdtemp())
     db_path = RESOURCE_PATH / 'bibles' / 'web-bible-2.4.6-proxy-meta-v1.sqlite'

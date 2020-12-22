@@ -55,14 +55,14 @@ def error_message_box(settings):
     m_box.stop()
 
 
-@pytest.yield_fixture()
+@pytest.fixture()
 def mocked_open():
     m_open = patch.object(Path, 'open')
     yield m_open.start()
     m_open.stop()
 
 
-@pytest.yield_fixture()
+@pytest.fixture()
 def mocked_setup():
     s_up = patch('openlp.plugins.bibles.lib.db.BibleDB._setup')
     yield s_up.start()

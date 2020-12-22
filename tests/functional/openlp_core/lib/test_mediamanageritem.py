@@ -28,7 +28,7 @@ from openlp.core.common.registry import Registry
 from openlp.core.lib.mediamanageritem import MediaManagerItem
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def media_env():
     setup_patcher = patch('openlp.core.lib.mediamanageritem.MediaManagerItem._setup')
     setup_patcher.start()

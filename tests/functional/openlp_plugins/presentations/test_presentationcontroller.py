@@ -32,7 +32,7 @@ from openlp.plugins.presentations.lib.presentationcontroller import Presentation
 FOLDER_TO_PATCH = 'openlp.plugins.presentations.lib.presentationcontroller.PresentationDocument.get_thumbnail_folder'
 
 
-@pytest.yield_fixture()
+@pytest.fixture()
 def get_thumbnail_folder(settings):
     gtf = patch('openlp.plugins.presentations.lib.presentationcontroller.PresentationDocument.get_thumbnail_folder',
                 return_value=Path())
@@ -40,14 +40,14 @@ def get_thumbnail_folder(settings):
     gtf.stop()
 
 
-@pytest.yield_fixture()
+@pytest.fixture()
 def create_paths(settings):
     c_paths = patch('openlp.plugins.presentations.lib.presentationcontroller.create_paths')
     yield c_paths.start()
     c_paths.stop()
 
 
-@pytest.yield_fixture()
+@pytest.fixture()
 def setup(settings):
     s_up = patch('openlp.plugins.presentations.lib.presentationcontroller.PresentationDocument._setup')
     yield s_up.start()

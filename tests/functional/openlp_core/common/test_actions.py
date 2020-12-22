@@ -34,7 +34,7 @@ MOCK_ACTION1 = MagicMock(**{'text.return_value': 'first'})
 MOCK_ACTION2 = MagicMock(**{'text.return_value': 'second'})
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def action_list(settings):
     act_list = ActionList.get_instance()
     yield act_list

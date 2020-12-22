@@ -33,7 +33,7 @@ sample_theme_data = {'file_name': 'BlueBurst.otz', 'sha256': 'sha_256_hash',
                      'thumbnail': 'BlueBurst.png', 'title': 'Blue Burst'}
 
 
-@pytest.yield_fixture()
+@pytest.fixture()
 def mocked_set_icon(mock_settings):
     move_to_thread_patcher = patch('openlp.core.ui.firsttimeform.DownloadWorker.moveToThread').start()
     set_icon_patcher = patch('openlp.core.ui.firsttimeform.ThemeListWidgetItem.setIcon').start()

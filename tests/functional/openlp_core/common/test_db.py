@@ -35,7 +35,7 @@ from openlp.core.lib.db import get_upgrade_op, init_db
 from tests.utils.constants import TEST_RESOURCES_PATH
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def op():
     tmp_folder = mkdtemp()
     db_path = os.path.join(TEST_RESOURCES_PATH, 'songs', 'songs-1.9.7.sqlite')

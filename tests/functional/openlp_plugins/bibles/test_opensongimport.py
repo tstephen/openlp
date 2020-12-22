@@ -35,14 +35,14 @@ from tests.utils.constants import RESOURCE_PATH
 TEST_PATH = RESOURCE_PATH / 'bibles'
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def manager():
     db_man = patch('openlp.plugins.bibles.lib.db.Manager')
     yield db_man.start()
     db_man.stop()
 
 
-@pytest.yield_fixture()
+@pytest.fixture()
 def mocked_find_and_create_book():
     facb = patch.object(BibleImport, 'find_and_create_book')
     yield facb.start()

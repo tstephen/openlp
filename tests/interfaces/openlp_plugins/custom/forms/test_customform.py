@@ -29,7 +29,7 @@ from PyQt5 import QtCore, QtTest, QtWidgets
 from openlp.plugins.custom.forms.editcustomform import EditCustomForm
 
 
-@pytest.yield_fixture()
+@pytest.fixture()
 def form(settings):
     main_window = QtWidgets.QMainWindow()
     media_item = MagicMock()

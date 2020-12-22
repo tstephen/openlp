@@ -27,7 +27,7 @@ from openlp.core.projectors.pjlink import PJLink
 from tests.resources.projector.data import TEST1_DATA
 
 
-@pytest.yield_fixture()
+@pytest.fixture()
 def pjlink():
     pj_link = PJLink(Projector(**TEST1_DATA), no_poll=True)
     yield pj_link

@@ -29,7 +29,7 @@ from openlp.core.api.websockets import WebSocketServer
 from openlp.core.common.registry import Registry
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def poller(settings):
     poll = Poller()
     yield poll

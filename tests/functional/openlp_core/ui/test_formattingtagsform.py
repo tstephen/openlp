@@ -27,7 +27,7 @@ from unittest.mock import MagicMock, call, patch
 from openlp.core.ui.formattingtagform import FormattingTagForm
 
 
-@pytest.yield_fixture()
+@pytest.fixture()
 def tagform_env(registry):
     setup_patcher = patch('openlp.core.ui.formattingtagform.FormattingTagForm._setup')
     mocked_setup_patcher = setup_patcher.start()

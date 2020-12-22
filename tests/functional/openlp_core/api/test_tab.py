@@ -33,7 +33,7 @@ from openlp.core.common.registry import Registry
 ZERO_URL = '0.0.0.0'
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def api_tab(settings):
     Registry().set_flag('website_version', '00-00-0000')
     parent = QtWidgets.QMainWindow()

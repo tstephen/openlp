@@ -35,14 +35,14 @@ from openlp.plugins.images.lib import upgrade
 from tests.utils.constants import RESOURCE_PATH
 
 
-@pytest.yield_fixture()
+@pytest.fixture()
 def temp_path():
     tmp_path = Path(mkdtemp())
     yield tmp_path
     shutil.rmtree(tmp_path, ignore_errors=True)
 
 
-@pytest.yield_fixture()
+@pytest.fixture()
 def db_url():
     tmp_path = Path(mkdtemp())
     db_path = RESOURCE_PATH / 'images' / 'image-v0.sqlite'

@@ -30,7 +30,7 @@ from openlp.core.projectors.editform import ProjectorEditForm
 from tests.resources.projector.data import TEST1_DATA, TEST_DB
 
 
-@pytest.yield_fixture()
+@pytest.fixture()
 def projector_form(settings):
     with patch('openlp.core.projectors.db.init_url') as mocked_init_url:
         mocked_init_url.return_value = 'sqlite:///' + TEST_DB
