@@ -21,7 +21,6 @@
 """
 This module contains tests for the settings tab for the Presentations plugin.
 """
-import pytest
 from unittest.mock import MagicMock
 
 from PyQt5 import QtCore, QtTest
