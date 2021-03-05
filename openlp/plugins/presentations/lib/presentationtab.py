@@ -127,6 +127,7 @@ class PresentationTab(SettingsTab):
         Load the settings.
         """
         powerpoint_available = False
+        impress_available = False
         for key in self.controllers:
             controller = self.controllers[key]
             checkbox = self.presenter_check_boxes[controller.name]
