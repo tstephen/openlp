@@ -321,10 +321,9 @@ class ImpressDocument(PresentationDocument):
             public_display_screen_number = ScreenList().current.number
             screens = list(ScreenList())
             if screens[public_display_screen_number].is_primary:
-                presentation_screen = 1
+                self.presentation.Display = 1
             else:
-                presentation_screen = 2
-            self.presentation.Display = presentation_screen
+                self.presentation.Display = 2
         self.control = None
         self.create_thumbnails()
         self.create_titles_and_notes()
