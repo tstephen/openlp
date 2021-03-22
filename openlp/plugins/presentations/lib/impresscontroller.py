@@ -234,10 +234,10 @@ class ImpressController(PresentationController):
                 'com.sun.star.configuration.ConfigurationUpdateAccess', properties)
             # Get the specific setting for presentation screen
             presenter_screen_enabled = impress_conf_props.getHierarchicalPropertyValue(
-                'Misc/Start/PresenterScreen')
+                'Misc/Start/EnablePresenterScreen')
             # If the presentation screen is enabled we disable it
             if presenter_screen_enabled != set_visible:
-                impress_conf_props.setHierarchicalPropertyValue('Misc/Start/PresenterScreen', set_visible)
+                impress_conf_props.setHierarchicalPropertyValue('Misc/Start/EnablePresenterScreen', set_visible)
                 impress_conf_props.commitChanges()
                 # if set_visible is False this is an attempt to disable the Presenter Screen
                 # so we make a note that it has been disabled, so it can be enabled again on close.
