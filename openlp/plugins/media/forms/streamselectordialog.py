@@ -642,7 +642,8 @@ class CaptureVideoDirectShowWidget(CaptureVideoQtDetectWidget):
             for i in range(self.video_devices_combo_box.count()):
                 if self.video_devices_combo_box.itemText(i) == vdev.group(1):
                     self.video_devices_combo_box.setCurrentIndex(i)
-                    self.video_size_lineedit.setText(vsize.group(1))
+                    if vsize:
+                        self.video_size_lineedit.setText(vsize.group(1))
                     break
         adev = re.search(r'"dshow-adev=(.+)"', options)
         if adev:
