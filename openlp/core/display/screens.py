@@ -256,14 +256,12 @@ class ScreenList(metaclass=Singleton):
         screen_settings = self.settings.value('core/screens')
         if screen_settings:
             need_new_display_screen = False
-            for number, screen_dict in screen_settings.items():
-                # Sometimes this loads as a string instead of an int
-                number = int(number)
+            for screen_dict in screen_settings.values():
                 # Compare geometry, primary of screen from settings with available screens
-                matched_screen = self.match_screen(screen_dict)
-                if matched_screen is not None:
+                screen_number = self.get_screen_number(screen_dict)
+                if screen_number is not None:
                     # If match was found, we're all happy, update with custom geometry, display info, if available
-                    self[matched_screen].update(screen_dict)
+                    self[screen_number].update(screen_dict)
                 else:
                     # If no match, ignore this screen, also need to find new display screen if the discarded screen was
                     # marked as such.
@@ -333,7 +331,7 @@ class ScreenList(metaclass=Singleton):
         if can_save:
             self.save_screen_settings()
 
-    def match_screen(self, screen_dict):
+    def get_screen_number(self, screen_dict):
         """
         Tries to match a screen with the passed-in screen_dict attributes
         If a match is found then the number of the screen is returned.
