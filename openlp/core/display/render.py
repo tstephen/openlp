@@ -47,8 +47,8 @@ log = logging.getLogger(__name__)
 ENGLISH_NOTES = '[CDEFGAB]?'
 GERMAN_NOTES = '[CDEFGABH]?'
 NEOLATIN_NOTES = '(Do|Re|Mi|Fa|Sol|La|Si)?'
-CHORD_PREFIXES = '(=|\(|\|)*?'
-CHORD_SUFFIXES = '(b|bb|#|##|x|-|m|maj|min|sus|dim|0|1|2|3|4|5|6|7|8|9|\))*?'
+CHORD_PREFIXES = '(=|\\(|\\|)*?'
+CHORD_SUFFIXES = '(b|bb|#|##|x|-|m|maj|min|sus|dim|0|1|2|3|4|5|6|7|8|9|\\))*?'
 SLIM_CHARS = 'fiíIÍjlĺľrtť.,;/ ()|"\'!:\\'
 CHORD_TEMPLATE = '<span class="chordline">{chord}</span>'
 FIRST_CHORD_TEMPLATE = '<span class="chordline">{chord}</span>'
@@ -80,7 +80,7 @@ def _construct_chord_regex(notes):
     :param notes: The regular expression for a set of valid notes
     :return: An expanded regular expression for valid chords
     """
-    #chord = CHORD_PREFIXES + notes + CHORD_SUFFIXES
+    # chord = CHORD_PREFIXES + notes + CHORD_SUFFIXES
     return '(' + CHORD_PREFIXES + notes + CHORD_SUFFIXES + '(/' + notes + CHORD_SUFFIXES + ')?)'
 
 
@@ -270,7 +270,7 @@ def render_chords(text):
             rendered_lines.append(new_line)
         else:
             chords_on_prev_line = False
-            #rendered_lines.append(html.escape(line))
+            # rendered_lines.append(html.escape(line))
             chord_template = NO_CHORD_TEMPLATE
             new_line = chord_template.format(chord=line)
             rendered_lines.append(new_line)
