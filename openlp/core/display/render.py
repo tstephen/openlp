@@ -44,11 +44,11 @@ from openlp.core.lib.formattingtags import FormattingTags
 
 log = logging.getLogger(__name__)
 
-ENGLISH_NOTES = '[CDEFGAB]?'
-GERMAN_NOTES = '[CDEFGABH]?'
-NEOLATIN_NOTES = '(Do|Re|Mi|Fa|Sol|La|Si)?'
+ENGLISH_NOTES = '(C|D|E|F|G|A|B|N.C.)?'
+GERMAN_NOTES = '(C|D|E|F|G|A|B|H|N.C.)?'
+NEOLATIN_NOTES = '(Do|Re|Mi|Fa|Sol|La|Si|N.C.)?'
 CHORD_PREFIXES = '(=|\\(|\\|)*?'
-CHORD_SUFFIXES = '(b|bb|#|##|x|-|m|maj|min|sus|dim|add|0|1|2|3|4|5|6|7|8|9|\\))*?'
+CHORD_SUFFIXES = '(b|#|x|+|-|M|m|Maj|maj|min|sus|dim|add|aug|dom|0|1|2|3|4|5|6|7|8|9|\\(|\\)|no|omit)*?'
 SLIM_CHARS = 'fiíIÍjlĺľrtť.,;/ ()|"\'!:\\'
 CHORD_TEMPLATE = '<span class="chordline">{chord}</span>'
 FIRST_CHORD_TEMPLATE = '<span class="chordline">{chord}</span>'
