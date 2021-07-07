@@ -44,9 +44,9 @@ from openlp.core.lib.formattingtags import FormattingTags
 
 log = logging.getLogger(__name__)
 
-ENGLISH_NOTES = '(C|D|E|F|G|A|B|N.C.)?'
-GERMAN_NOTES = '(C|D|E|F|G|A|B|H|N.C.)?'
-NEOLATIN_NOTES = '(Do|Re|Mi|Fa|Sol|La|Si|N.C.)?'
+ENGLISH_NOTES = '(C|D|E|F|G|A|B|N\\.C\\.)?'
+GERMAN_NOTES = '(C|D|E|F|G|A|B|H|N\\.C\\.)?'
+NEOLATIN_NOTES = '(Do|Re|Mi|Fa|Sol|La|Si|N\\.C\\.)?'
 CHORD_PREFIXES = '(=|\\(|\\|)*?'
 CHORD_SUFFIXES = '(b|#|x|\\+|-|M|m|Maj|maj|min|sus|dim|add|aug|dom|0|1|2|3|4|5|6|7|8|9|\\(|\\)|no|omit)*?'
 SLIM_CHARS = 'fiíIÍjlĺľrtť.,;/ ()|"\'!:\\'
@@ -188,11 +188,11 @@ def render_chords_in_line(match):
     # The actual chord, would be "G" in match "[G]sweet the "
     chord = match.group(1)
     # The tailing word of the chord, would be "sweet" in match "[G]sweet the "
-    tail = match.group(6)
+    tail = match.group(8)
     # The remainder of the line, until line end or next chord. Would be " the " in match "[G]sweet the "
-    remainder = match.group(7)
+    remainder = match.group(9)
     # Line end if found, else None
-    end = match.group(8)
+    end = match.group(10)
     # Based on char width calculate width of chord
     for chord_char in chord:
         if chord_char not in SLIM_CHARS:
