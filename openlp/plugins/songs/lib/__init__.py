@@ -646,6 +646,12 @@ def transpose_chord(chord, transpose_value, notation):
                 current_chord = current_chord[1:]
             else:
                 current_chord = ''
+        if current_chord and current_chord[0] == '|':
+            transposed_chord += '|'
+            if len(current_chord) > 1:
+                current_chord = current_chord[1:]
+            else:
+                current_chord = ''
         if len(current_chord) > 0:
             if len(current_chord) > 1:
                 if '#b'.find(current_chord[1]) == -1:
