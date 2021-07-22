@@ -233,7 +233,7 @@ class EditVerseForm(QtWidgets.QDialog, Ui_EditVerseDialog):
         """
         if Registry().get('settings').value('songs/enable chords'):
             try:
-                transpose_lyrics(self.verse_text_edit.toPlainText(), 1)
+                transpose_lyrics(self.verse_text_edit.toPlainText(), 0)
                 super(EditVerseForm, self).accept()
             except ValueError as ve:
                 # Transposing failed
