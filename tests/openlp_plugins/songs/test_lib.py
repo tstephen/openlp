@@ -277,7 +277,7 @@ def test_transpose_chord_up():
     chord = 'C'
 
     # WHEN: Transposing it 1 up
-    new_chord = transpose_chord(chord, 1, 'english')
+    new_chord = transpose_chord(chord, 1, 'english', None, None, False)
 
     # THEN: The chord should be transposed up one note
     assert new_chord == 'C#', 'The chord should be transposed up.'
@@ -288,13 +288,13 @@ def test_transpose_chord_up_adv():
     Test that the transpose_chord() method works when transposing up an advanced chord
     """
     # GIVEN: An advanced Chord
-    chord = '(C/D#)'
+    chord = '(D/F#)'
 
     # WHEN: Transposing it 1 up
-    new_chord = transpose_chord(chord, 1, 'english')
+    new_chord = transpose_chord(chord, 1, 'english', None, None, False)
 
     # THEN: The chord should be transposed up one note
-    assert new_chord == '(C#/E)', 'The chord should be transposed up.'
+    assert new_chord == '(Eb/G)', 'The chord should be transposed up.'
 
 
 def test_transpose_chord_down():
@@ -305,7 +305,7 @@ def test_transpose_chord_down():
     chord = 'C'
 
     # WHEN: Transposing it 1 down
-    new_chord = transpose_chord(chord, -1, 'english')
+    new_chord = transpose_chord(chord, -1, 'english', None, None, False)
 
     # THEN: The chord should be transposed down one note
     assert new_chord == 'B', 'The chord should be transposed down.'
@@ -321,7 +321,7 @@ def test_transpose_chord_error():
     # WHEN: Transposing it 1 down
     # THEN: An exception should be raised
     with pytest.raises(ValueError) as err:
-        transpose_chord(chord, -1, 'english')
+        transpose_chord(chord, -1, 'english', None, None, False)
     assert err.value != ValueError('\'T\' is not in list'), \
         'ValueError exception should have been thrown for invalid chord'
 
