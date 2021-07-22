@@ -284,7 +284,7 @@ def test_transpose_chord_up():
 
     # THEN: The chord should be transposed up one note
     assert new_chord == 'C#', 'The chord should be transposed up.'
-    assert key == None, 'The key should not be set'
+    assert key is None, 'The key should not be set'
     assert lastchord == 'C#', 'If not isbass, then lastchord should be returned'
 
 
@@ -308,7 +308,7 @@ def test_transpose_chord_up_adv():
     # THEN: The chord should be transposed up one note
     assert new_chord == '(Eb', 'The chord should be transposed up.'
     assert new_bass == 'G)', 'Bass should be transposed up.'
-    assert key == None, 'no key should be defined'
+    assert key is None, 'no key should be defined'
     assert lastchord == 'Eb', 'lastchord is generated'
 
 def test_transpose_chord_down():
@@ -326,7 +326,7 @@ def test_transpose_chord_down():
 
     # THEN: The chord should be transposed down one note
     assert new_chord == 'B', 'The chord should be transposed down.'
-    assert key == None, 'The key should not be set'
+    assert key is None, 'The key should not be set'
     assert lastchord == 'B', 'If not isbass, then lastchord should be returned'
 
 
@@ -363,10 +363,10 @@ def test_transpose_lyrics(mocked_transpose_verse, mock_settings):
     transpose_lyrics(lyrics, 1)
 
     # THEN: transpose_verse should have been called
-    mocked_transpose_verse.assert_any_call('', 1, 'english')
-    mocked_transpose_verse.assert_any_call('\nAmazing grace how sweet the sound\n', 1, 'english')
-    mocked_transpose_verse.assert_any_call('\nThat saved a wretch like me.\n', 1, 'english')
-    mocked_transpose_verse.assert_any_call('\nI once was lost but now I\'m found.', 1, 'english')
+    mocked_transpose_verse.assert_any_call('', 1, 'english', None)
+    mocked_transpose_verse.assert_any_call('\nAmazing grace how sweet the sound\n', 1, 'english', None)
+    mocked_transpose_verse.assert_any_call('\nThat saved a wretch like me.\n', 1, 'english', None)
+    mocked_transpose_verse.assert_any_call('\nI once was lost but now I\'m found.', 1, 'english', None)
 
 
 def test_translated_tag():

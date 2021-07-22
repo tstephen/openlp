@@ -812,7 +812,7 @@ def transpose_chord(chord, transpose_value, notation, key, lastchord, isbass):
                     note = scales[notation][key][note_number]
             transposed_chord += note + minor + chord
         else:
-            transposed_chord += chord
+            transposed_chord += note + chord
         if thischordchangeskey:
             key = note + minor
         else:
