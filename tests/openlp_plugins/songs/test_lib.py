@@ -311,6 +311,7 @@ def test_transpose_chord_up_adv():
     assert key is None, 'no key should be defined'
     assert lastchord == 'Eb', 'lastchord is generated'
 
+
 def test_transpose_chord_down():
     """
     Test that the transpose_chord() method works when transposing down
