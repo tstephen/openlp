@@ -678,14 +678,14 @@ def transpose_chord(chord, transpose_value, notation, key, lastchord, isbass):
         'english': {
             'C': ['C', 'Db', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'],
             'Am': ['C', 'Db', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'],
-            'C#': ['H#', 'C#', 'D', 'D#', 'E', 'E#', 'F#', 'G', 'G#', 'A', 'A#', 'B'],
-            'A#m': ['H#', 'C#', 'D', 'D#', 'E', 'E#', 'F#', 'G', 'G#', 'A', 'A#', 'B'],
+            'C#': ['B#', 'C#', 'D', 'D#', 'E', 'E#', 'F#', 'G', 'G#', 'A', 'A#', 'B'],
+            'A#m': ['B#', 'C#', 'D', 'D#', 'E', 'E#', 'F#', 'G', 'G#', 'A', 'A#', 'B'],
             'Db': ['C', 'Db', 'Ebb', 'Eb', 'Fb', 'F', 'Gb', 'Abb', 'Ab', 'Bbb', 'Bb', 'Cb'],
             'Bm': ['C', 'Db', 'Ebb', 'Eb', 'Fb', 'F', 'Gb', 'Abb', 'Ab', 'Bbb', 'Bb', 'Cb'],
             'D': ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'],
-            'Hm': ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'],
-            'D#': ['H#', 'C#', 'Cx', 'D#', 'E', 'E#', 'F#', 'Fx', 'G#', 'A', 'A#', 'B'],
-            'H#m': ['H#', 'C#', 'Cx', 'D#', 'E', 'E#', 'F#', 'Fx', 'G#', 'A', 'A#', 'B'],
+            'Bm': ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'],
+            'D#': ['B#', 'C#', 'Cx', 'D#', 'E', 'E#', 'F#', 'Fx', 'G#', 'A', 'A#', 'B'],
+            'B#m': ['B#', 'C#', 'Cx', 'D#', 'E', 'E#', 'F#', 'Fx', 'G#', 'A', 'A#', 'B'],
             'Eb': ['C', 'Db', 'D', 'Eb', 'Fb', 'F', 'Gb', 'G', 'Ab', 'Bbb', 'Bb', 'Cb'],
             'Cm': ['C', 'Db', 'D', 'Eb', 'Fb', 'F', 'Gb', 'G', 'Ab', 'Bbb', 'Bb', 'Cb'],
             'E': ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B'],
@@ -698,21 +698,60 @@ def transpose_chord(chord, transpose_value, notation, key, lastchord, isbass):
             'Ebm': ['Dbb', 'Db', 'Ebb', 'Eb', 'Fb', 'F', 'Gb', 'Abb', 'Ab', 'Bbb', 'Bb', 'Cb'],
             'G': ['C', 'Db', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'],
             'Em': ['C', 'Db', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'],
-            'G#': ['H#', 'C#', 'D', 'D#', 'E', 'E#', 'F#', 'Fx', 'G#', 'A', 'A#', 'B'],
-            'E#m': ['H#', 'C#', 'D', 'D#', 'E', 'E#', 'F#', 'Fx', 'G#', 'A', 'A#', 'B'],
+            'G#': ['B#', 'C#', 'D', 'D#', 'E', 'E#', 'F#', 'Fx', 'G#', 'A', 'A#', 'B'],
+            'E#m': ['B#', 'C#', 'D', 'D#', 'E', 'E#', 'F#', 'Fx', 'G#', 'A', 'A#', 'B'],
             'Ab': ['C', 'Db', 'Ebb', 'Eb', 'Fb', 'F', 'Gb', 'G', 'Ab', 'Bbb', 'Bb', 'Cb'],
             'Fm': ['C', 'Db', 'Ebb', 'Eb', 'Fb', 'F', 'Gb', 'G', 'Ab', 'Bbb', 'Bb', 'Cb'],
             'A': ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B'],
             'F#m': ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B'],
-            'A#': ['H#', 'C#', 'Cx', 'D#', 'E', 'E#', 'F#', 'Fx', 'G#', 'Gx', 'A#', 'B'],
-            'F##m': ['H#', 'C#', 'Cx', 'D#', 'E', 'E#', 'F#', 'Fx', 'G#', 'Gx', 'A#', 'B'],
-            'Fxm': ['H#', 'C#', 'Cx', 'D#', 'E', 'E#', 'F#', 'Fx', 'G#', 'Gx', 'A#', 'B'],
-            'B': ['C', 'Db', 'D', 'Eb', 'Fb', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'Cb'],
+            'A#': ['B#', 'C#', 'Cx', 'D#', 'E', 'E#', 'F#', 'Fx', 'G#', 'Gx', 'A#', 'B'],
+            'F##m': ['B#', 'C#', 'Cx', 'D#', 'E', 'E#', 'F#', 'Fx', 'G#', 'Gx', 'A#', 'B'],
+            'Fxm': ['B#', 'C#', 'Cx', 'D#', 'E', 'E#', 'F#', 'Fx', 'G#', 'Gx', 'A#', 'B'],
+            'Bb': ['C', 'Db', 'D', 'Eb', 'Fb', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'Cb'],
             'Gm': ['C', 'Db', 'D', 'Eb', 'Fb', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'Cb'],
-            'H': ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'],
+            'B': ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'],
             'G#m': ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'],
             'Cb': ['Dbb', 'Db', 'Ebb', 'Eb', 'Fb', 'Gbb', 'Gb', 'Abb', 'Ab', 'Bbb', 'Bb', 'Cb'],
             'Abm': ['Dbb', 'Db', 'Ebb', 'Eb', 'Fb', 'Gbb', 'Gb', 'Abb', 'Ab', 'Bbb', 'Bb', 'Cb']
+        },
+        'neo-latin': {
+            'Do': ['Do', 'Reb', 'Re', 'Mib', 'Mi', 'Fa', 'Fa#', 'Sol', 'Lab', 'La', 'Sib', 'Si'],
+            'Lam': ['Do', 'Reb', 'Re', 'Mib', 'Mi', 'Fa', 'Fa#', 'Sol', 'Lab', 'La', 'Sib', 'Si'],
+            'Do#': ['Si#', 'Do#', 'Re', 'Re#', 'Mi', 'Mi#', 'Fa#', 'Sol', 'Sol#', 'La', 'La#', 'Si'],
+            'La#m': ['Si#', 'Do#', 'Re', 'Re#', 'Mi', 'Mi#', 'Fa#', 'Sol', 'Sol#', 'La', 'La#', 'Si'],
+            'Reb': ['Do', 'Reb', 'Mibb', 'Mib', 'Fab', 'Fa', 'Solb', 'Labb', 'Lab', 'Sibb', 'Sib', 'Dob'],
+            'Sim': ['Do', 'Reb', 'Mibb', 'Mib', 'Fab', 'Fa', 'Solb', 'Labb', 'Lab', 'Sibb', 'Sib', 'Dob'],
+            'Re': ['Do', 'Do#', 'Re', 'Mib', 'Mi', 'Fa', 'Fa#', 'Sol', 'Lab', 'La', 'Sib', 'Si'],
+            'Sim': ['Do', 'Do#', 'Re', 'Mib', 'Mi', 'Fa', 'Fa#', 'Sol', 'Lab', 'La', 'Sib', 'Si'],
+            'Re#': ['Si#', 'Do#', 'Dox', 'Re#', 'Mi', 'Mi#', 'Fa#', 'Fax', 'Sol#', 'La', 'La#', 'Si'],
+            'Si#m': ['Si#', 'Do#', 'Dox', 'Re#', 'Mi', 'Mi#', 'Fa#', 'Fax', 'Sol#', 'La', 'La#', 'Si'],
+            'Mib': ['Do', 'Reb', 'Re', 'Mib', 'Fab', 'Fa', 'Solb', 'Sol', 'Lab', 'Sibb', 'Sib', 'Dob'],
+            'Dom': ['Do', 'Reb', 'Re', 'Mib', 'Fab', 'Fa', 'Solb', 'Sol', 'Lab', 'Sibb', 'Sib', 'Dob'],
+            'Mi': ['Do', 'Do#', 'Re', 'Re#', 'Mi', 'Fa', 'Fa#', 'Sol', 'Sol#', 'La', 'Sib', 'Si'],
+            'Do#m': ['Do', 'Do#', 'Re', 'Re#', 'Mi', 'Fa', 'Fa#', 'Sol', 'Sol#', 'La', 'Sib', 'Si'],
+            'Fa': ['Do', 'Reb', 'Re', 'Mib', 'Mi', 'Fa', 'Solb', 'Sol', 'Lab', 'La', 'Sib', 'Dob'],
+            'Rem': ['Do', 'Do#', 'Re', 'Mib', 'Mi', 'Fa', 'Solb', 'Sol', 'Lab', 'La', 'Sib', 'Si'],
+            'Fa#': ['Do', 'Do#', 'Re', 'Re#', 'Mi', 'Mi#', 'Fa#', 'Sol', 'Sol#', 'La', 'La#', 'Si'],
+            'Re#m': ['Do', 'Do#', 'Re', 'Re#', 'Mi', 'Mi#', 'Fa#', 'Sol', 'Sol#', 'La', 'La#', 'Si'],
+            'Solb': ['Rebb', 'Reb', 'Mibb', 'Mib', 'Fab', 'Fa', 'Solb', 'Labb', 'Lab', 'Sibb', 'Sib', 'Dob'],
+            'Mibm': ['Rebb', 'Reb', 'Mibb', 'Mib', 'Fab', 'Fa', 'Solb', 'Labb', 'Lab', 'Sibb', 'Sib', 'Dob'],
+            'Sol': ['Do', 'Reb', 'Re', 'Mib', 'Mi', 'Fa', 'Fa#', 'Sol', 'Lab', 'La', 'Sib', 'Si'],
+            'Mim': ['Do', 'Reb', 'Re', 'Mib', 'Mi', 'Fa', 'Fa#', 'Sol', 'Lab', 'La', 'Sib', 'Si'],
+            'Sol#': ['Si#', 'Do#', 'Re', 'Re#', 'Mi', 'Mi#', 'Fa#', 'Fax', 'Sol#', 'La', 'La#', 'Si'],
+            'Mi#m': ['Si#', 'Do#', 'Re', 'Re#', 'Mi', 'Mi#', 'Fa#', 'Fax', 'Sol#', 'La', 'La#', 'Si'],
+            'Lab': ['Do', 'Reb', 'Mibb', 'Mib', 'Fab', 'Fa', 'Solb', 'Sol', 'Lab', 'Sibb', 'Sib', 'Dob'],
+            'Fam': ['Do', 'Reb', 'Mibb', 'Mib', 'Fab', 'Fa', 'Solb', 'Sol', 'Lab', 'Sibb', 'Sib', 'Dob'],
+            'La': ['Do', 'Do#', 'Re', 'Mib', 'Mi', 'Fa', 'Fa#', 'Sol', 'Sol#', 'La', 'Sib', 'Si'],
+            'Fa#m': ['Do', 'Do#', 'Re', 'Mib', 'Mi', 'Fa', 'Fa#', 'Sol', 'Sol#', 'La', 'Sib', 'Si'],
+            'La#': ['Si#', 'Do#', 'Dox', 'Re#', 'Mi', 'Mi#', 'Fa#', 'Fax', 'Sol#', 'Solx', 'La#', 'Si'],
+            'Fa##m': ['Si#', 'Do#', 'Dox', 'Re#', 'Mi', 'Mi#', 'Fa#', 'Fax', 'Sol#', 'Solx', 'La#', 'Si'],
+            'Faxm': ['Si#', 'Do#', 'Dox', 'Re#', 'Mi', 'Mi#', 'Fa#', 'Fax', 'Sol#', 'Solx', 'La#', 'Si'],
+            'Sib': ['Do', 'Reb', 'Re', 'Mib', 'Fab', 'Fa', 'Solb', 'Sol', 'Lab', 'La', 'Sib', 'Dob'],
+            'Solm': ['Do', 'Reb', 'Re', 'Mib', 'Fab', 'Fa', 'Solb', 'Sol', 'Lab', 'La', 'Sib', 'Dob'],
+            'Si': ['Do', 'Do#', 'Re', 'Re#', 'Mi', 'Fa', 'Fa#', 'Sol', 'Sol#', 'La', 'La#', 'Si'],
+            'Sol#m': ['Do', 'Do#', 'Re', 'Re#', 'Mi', 'Fa', 'Fa#', 'Sol', 'Sol#', 'La', 'La#', 'Si'],
+            'Dob': ['Rebb', 'Reb', 'Mibb', 'Mib', 'Fab', 'Solbb', 'Solb', 'Labb', 'Lab', 'Sibb', 'Sib', 'Dob'],
+            'Labm': ['Rebb', 'Reb', 'Mibb', 'Mib', 'Fab', 'Solbb', 'Solb', 'Labb', 'Lab', 'Sibb', 'Sib', 'Dob']
         }
     }
     notenumbers = {
@@ -734,15 +773,29 @@ def transpose_chord(chord, transpose_value, notation, key, lastchord, isbass):
             'C': 0, 'B#': 0, 'Dbb': 0,
             'C#': 1, 'Db': 1, 'B##': 1, 'Bx': 1,
             'D': 2, 'C##': 2, 'Cx': 2, 'Ebb': 2,
-            'D#': 3, 'Eb': 3,
+            'D#': 3, 'Eb': 3, 'Fbb': 3,
             'E': 4, 'D##': 4, 'Dx': 4, 'Fb': 4,
             'F': 5, 'E#': 5, 'Gbb': 5,
-            'F#': 6, 'Gb': 6,
+            'F#': 6, 'Gb': 6, 'E##': 6, 'Ex': 6,
             'G': 7, 'F##': 7, 'Fx': 7, 'Abb': 7,
             'G#': 8, 'Ab': 8,
             'A': 9, 'G##': 9, 'Gx': 9, 'Bbb': 9,
-            'Bb': 10, 'A#': 10,
+            'Bb': 10, 'A#': 10, 'Cbb': 10,
             'B': 11, 'A##': 11, 'Ax': 11, 'Cb': 11
+        },
+        'neo-latin': {
+            'Do': 0, 'Si#': 0, 'Rebb': 0,
+            'Do#': 1, 'Reb': 1, 'Si##': 1, 'Six': 1,
+            'Re': 2, 'Do##': 2, 'Dox': 2, 'Mibb': 2,
+            'Re#': 3, 'Mib': 3, 'Fabb': 3,
+            'Mi': 4, 'Re##': 4, 'Rex': 4, 'Fab': 4,
+            'Fa': 5, 'Mi#': 5, 'Solbb': 5,
+            'Fa#': 6, 'Solb': 6, 'Mi##': 6, 'Mix': 6,
+            'Sol': 7, 'Fa##': 7, 'Fax': 7, 'Labb': 7,
+            'Sol#': 8, 'Lab': 8,
+            'La': 9, 'Sol##': 9, 'Solx': 9, 'Sibb': 9,
+            'Sib': 10, 'La#': 10, 'Dobb': 10,
+            'Si': 11, 'La##': 11, 'Lax': 11, 'Dob': 11
         }
     }
     chord = chord.replace('♭', 'b').replace('♯', '#')
@@ -791,7 +844,6 @@ def transpose_chord(chord, transpose_value, notation, key, lastchord, isbass):
                 chord = chord[1:] if len(chord) > 1 else ''
             else:
                 minor = ''
-        #if note in notenumbers[notation]:
         note_number = notenumbers[notation][note]
         note_number += transpose_value
         while note_number > 11:
@@ -811,8 +863,6 @@ def transpose_chord(chord, transpose_value, notation, key, lastchord, isbass):
             else:
                 note = scales[notation][key][note_number]
         transposed_chord += note + minor + chord
-        #else:
-        #    transposed_chord += note + chord
         if thischordchangeskey:
             key = note + minor
         else:
