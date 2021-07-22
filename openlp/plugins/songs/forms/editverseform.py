@@ -124,12 +124,12 @@ class EditVerseForm(QtWidgets.QDialog, Ui_EditVerseDialog):
         try:
             transposed_lyrics = transpose_lyrics(self.verse_text_edit.toPlainText(), 1)
             self.verse_text_edit.setPlainText(transposed_lyrics)
-        except ValueError as ve:
+        except KeyError as ke:
             # Transposing failed
             critical_error_message_box(title=translate('SongsPlugin.EditVerseForm', 'Transposing failed'),
                                        message=translate('SongsPlugin.EditVerseForm',
                                                          'Transposing failed because of invalid chord:\n{err_msg}'
-                                                         .format(err_msg=ve)))
+                                                         .format(err_msg=ke)))
             return
         self.verse_text_edit.setFocus()
         self.verse_text_edit.moveCursor(QtGui.QTextCursor.End)
@@ -141,12 +141,12 @@ class EditVerseForm(QtWidgets.QDialog, Ui_EditVerseDialog):
         try:
             transposed_lyrics = transpose_lyrics(self.verse_text_edit.toPlainText(), -1)
             self.verse_text_edit.setPlainText(transposed_lyrics)
-        except ValueError as ve:
+        except KeyError as ke:
             # Transposing failed
             critical_error_message_box(title=translate('SongsPlugin.EditVerseForm', 'Transposing failed'),
                                        message=translate('SongsPlugin.EditVerseForm',
                                                          'Transposing failed because of invalid chord:\n{err_msg}'
-                                                         .format(err_msg=ve)))
+                                                         .format(err_msg=ke)))
             return
         self.verse_text_edit.setPlainText(transposed_lyrics)
         self.verse_text_edit.setFocus()
@@ -235,11 +235,11 @@ class EditVerseForm(QtWidgets.QDialog, Ui_EditVerseDialog):
             try:
                 transpose_lyrics(self.verse_text_edit.toPlainText(), 0)
                 super(EditVerseForm, self).accept()
-            except ValueError as ve:
+            except KeyError as ke:
                 # Transposing failed
                 critical_error_message_box(title=translate('SongsPlugin.EditVerseForm', 'Invalid Chord'),
                                            message=translate('SongsPlugin.EditVerseForm',
                                                              'An invalid chord was detected:\n{err_msg}'
-                                                             .format(err_msg=ve)))
+                                                             .format(err_msg=ke)))
         else:
             super(EditVerseForm, self).accept()
