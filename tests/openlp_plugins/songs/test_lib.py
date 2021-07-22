@@ -339,10 +339,10 @@ def test_transpose_chord_error():
 
     # WHEN: Transposing it 1 down
     # THEN: An exception should be raised
-    with pytest.raises(ValueError) as err:
+    with pytest.raises(KeyError) as err:
         transpose_chord(chord, -1, 'english', None, None, False)
-    assert err.value != ValueError('\'T\' is not in list'), \
-        'ValueError exception should have been thrown for invalid chord'
+    assert err.value != KeyError('\'T\' is not in list'), \
+        'KeyError exception should have been thrown for invalid chord'
 
 
 @patch('openlp.plugins.songs.lib.transpose_verse')

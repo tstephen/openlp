@@ -791,28 +791,28 @@ def transpose_chord(chord, transpose_value, notation, key, lastchord, isbass):
                 chord = chord[1:] if len(chord) > 1 else ''
             else:
                 minor = ''
-        if note in notenumbers[notation]:
-            note_number = notenumbers[notation][note]
-            note_number += transpose_value
-            while note_number > 11:
-                note_number -= 12
-            while note_number < 0:
-                note_number += 12
-            if isbass:
-                if lastchord:
-                    note = scales[notation][lastchord][note_number]
-                elif key:
-                    note = scales[notation][key][note_number]
-                else:
-                    note = notes_sharp[note_number] if notes_preferred[note_number] == '#' else notes_flat[note_number]
+        #if note in notenumbers[notation]:
+        note_number = notenumbers[notation][note]
+        note_number += transpose_value
+        while note_number > 11:
+            note_number -= 12
+        while note_number < 0:
+            note_number += 12
+        if isbass:
+            if lastchord:
+                note = scales[notation][lastchord][note_number]
+            elif key:
+                note = scales[notation][key][note_number]
             else:
-                if not key or thischordchangeskey:
-                    note = notes_sharp[note_number] if notes_preferred[note_number] == '#' else notes_flat[note_number]
-                else:
-                    note = scales[notation][key][note_number]
-            transposed_chord += note + minor + chord
+                note = notes_sharp[note_number] if notes_preferred[note_number] == '#' else notes_flat[note_number]
         else:
-            transposed_chord += note + chord
+            if not key or thischordchangeskey:
+                note = notes_sharp[note_number] if notes_preferred[note_number] == '#' else notes_flat[note_number]
+            else:
+                note = scales[notation][key][note_number]
+        transposed_chord += note + minor + chord
+        #else:
+        #    transposed_chord += note + chord
         if thischordchangeskey:
             key = note + minor
         else:
