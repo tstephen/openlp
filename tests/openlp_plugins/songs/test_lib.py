@@ -359,7 +359,7 @@ def test_transpose_lyrics(mocked_transpose_verse, mock_settings):
              '---[Verse:2]---\n'\
              'I once was lost but now I\'m found.'
     mock_settings.value.return_value = 'english'
-
+    mocked_transpose_verse.return_value = ['', None]
     # WHEN: Transposing the lyrics
     transpose_lyrics(lyrics, 1)
 
