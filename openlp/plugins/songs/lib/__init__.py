@@ -604,8 +604,8 @@ def transpose_verse(verse_text, transpose_value, notation, key):
             else:
                 # This MUST be a chord
                 transposed_chord, key, last_chord = transpose_chord(word, transpose_value, notation, key, last_chord,
-                                                                   isbass)
-                is bass = False
+                                                                    is_bass)
+                is_bass = False
                 transposed_lyrics += transposed_chord
     # If still inside a chord tag something is wrong!
     if in_tag:
