@@ -584,8 +584,8 @@ def transpose_verse(verse_text, transpose_value, notation, key):
     # 6/9 chords should be noted 6-9 or 69 or 6add9
     lyric_list = re.split(r'(\[|\]|/)', verse_text)
     transposed_lyrics = ''
-    isbass = False
-    lastchord = None
+    is_bass = False
+    last_chord = None
     in_tag = False
     for word in lyric_list:
         if not in_tag:
@@ -597,15 +597,15 @@ def transpose_verse(verse_text, transpose_value, notation, key):
                 in_tag = False
                 transposed_lyrics += word
             elif word == '/':
-                isbass = True
+                is_bass = True
                 transposed_lyrics += word
             elif word == '--}{--':
                 transposed_lyrics += word
             else:
                 # This MUST be a chord
-                transposed_chord, key, lastchord = transpose_chord(word, transpose_value, notation, key, lastchord,
+                transposed_chord, key, last_chord = transpose_chord(word, transpose_value, notation, key, last_chord,
                                                                    isbass)
-                isbass = False
+                is bass = False
                 transposed_lyrics += transposed_chord
     # If still inside a chord tag something is wrong!
     if in_tag:
@@ -614,7 +614,7 @@ def transpose_verse(verse_text, transpose_value, notation, key):
         return transposed_lyrics, key
 
 
-def transpose_chord(chord, transpose_value, notation, key, lastchord, isbass):
+def transpose_chord(chord, transpose_value, notation, key, last_chord, is_bass):
     """
     Transpose chord according to the notation used.
     NOTE: This function has a javascript equivalent in chords.js - make sure to update both!
@@ -754,7 +754,7 @@ def transpose_chord(chord, transpose_value, notation, key, lastchord, isbass):
             'Labm': ['Rebb', 'Reb', 'Mibb', 'Mib', 'Fab', 'Solbb', 'Solb', 'Labb', 'Lab', 'Sibb', 'Sib', 'Dob']
         }
     }
-    notenumbers = {
+    note_numbers = {
         'german': {
             'C': 0, 'H#': 0, 'B##': 0, 'Bx': 0, 'Dbb': 0,
             'C#': 1, 'Db': 1,
@@ -801,7 +801,7 @@ def transpose_chord(chord, transpose_value, notation, key, lastchord, isbass):
     chord = chord.replace('♭', 'b').replace('♯', '#')
     transposed_chord = ''
     minor = ''
-    thischordchangeskey = False
+    is_key_change_chord = False
     notes_sharp = notes_sharp_notation[notation]
     notes_flat = notes_flat_notation[notation]
     notes_preferred = ['b', '#', '#', 'b', '#', 'b', '#', '#', 'b', '#', 'b', '#']
@@ -815,7 +815,7 @@ def transpose_chord(chord, transpose_value, notation, key, lastchord, isbass):
         transposed_chord += '='
         if len(chord) > 1:
             chord = chord[1:]
-            thischordchangeskey = True
+            is_key_change_chord = True
         else:
             chord = ''
     if chord and chord[0] == '|':
@@ -844,28 +844,28 @@ def transpose_chord(chord, transpose_value, notation, key, lastchord, isbass):
                 chord = chord[1:] if len(chord) > 1 else ''
             else:
                 minor = ''
-        note_number = notenumbers[notation][note]
+        note_number = note_numbers[notation][note]
         note_number += transpose_value
         while note_number > 11:
             note_number -= 12
         while note_number < 0:
             note_number += 12
-        if isbass:
-            if lastchord:
-                note = scales[notation][lastchord][note_number]
+        if is_bass:
+            if last_chord:
+                note = scales[notation][last_chord][note_number]
             elif key:
                 note = scales[notation][key][note_number]
             else:
                 note = notes_sharp[note_number] if notes_preferred[note_number] == '#' else notes_flat[note_number]
         else:
-            if not key or thischordchangeskey:
+            if not key or is_key_change_chord:
                 note = notes_sharp[note_number] if notes_preferred[note_number] == '#' else notes_flat[note_number]
             else:
                 note = scales[notation][key][note_number]
         transposed_chord += note + minor + chord
-        if thischordchangeskey:
+        if is_key_change_chord:
             key = note + minor
         else:
-            if not isbass:
-                lastchord = note + minor
-    return transposed_chord, key, lastchord
+            if not is_bass:
+                last_chord = note + minor
+    return transposed_chord, key, last_chord
