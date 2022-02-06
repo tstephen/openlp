@@ -83,7 +83,6 @@ class Ui_EditVerseDialog(object):
             self.transpose_down_button.setIcon(UiIcons().arrow_down)
             self.transpose_down_button.setObjectName('transpose_down')
             self.transpose_layout.addWidget(self.transpose_down_button)
-            #self.dialog_layout.addLayout(self.transpose_layout)
             self.dialog_layout.addWidget(self.transpose_widget)
         self.button_box = create_button_box(edit_verse_dialog, 'button_box', ['cancel', 'ok'])
         self.dialog_layout.addWidget(self.button_box)

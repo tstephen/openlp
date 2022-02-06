@@ -21,7 +21,6 @@
 
 import logging
 import re
-from warnings import WarningMessage
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
@@ -117,22 +116,22 @@ class EditVerseForm(QtWidgets.QDialog, Ui_EditVerseDialog):
         The cursor position has been changed
         """
         self.update_suggested_verse_number()
-        
+
     def on_transpose_up_button_clicked(self):
         """
         The transpose up button clicked
         """
         try:
-            lyrics_stripped = re.sub(r'\[---\]',"\n", re.sub(r'---\[.*?\]---', "\n", re.sub(r'\[--}{--\]', "\n",
+            lyrics_stripped = re.sub(r'\[---\]', "\n", re.sub(r'---\[.*?\]---', "\n", re.sub(r'\[--}{--\]', "\n",
                                      self.verse_text_edit.toPlainText())))
             transposed_lyrics = transpose_lyrics(self.verse_text_edit.toPlainText(), 1)
             self.verse_text_edit.setPlainText(transposed_lyrics)
             if not re.search(r'\[(.*?)\]', lyrics_stripped)[1].startswith("="):
                 QtWidgets.QMessageBox.warning(self, translate('SongsPlugin.EditVerseForm', 'Song key warning'),
-                                                  translate('SongsPlugin.EditVerseForm',
-                                                          'No song key is present or song key is not the first '
-                                                          'chord.\nFor optimal chord experience, please, include a '
-                                                          'song key before any chord. Ex.: [=G]'))
+                                              translate('SongsPlugin.EditVerseForm',
+                                                        'No song key is present or song key is not the first '
+                                                        'chord.\nFor optimal chord experience, please, include a '
+                                                        'song key before any chord. Ex.: [=G]'))
         except KeyError as ke:
             # Transposing failed
             critical_error_message_box(title=translate('SongsPlugin.EditVerseForm', 'Transposing failed'),
@@ -144,22 +143,21 @@ class EditVerseForm(QtWidgets.QDialog, Ui_EditVerseDialog):
         self.verse_text_edit.setFocus()
         self.verse_text_edit.moveCursor(QtGui.QTextCursor.End)
 
-
     def on_transpose_down_button_clicked(self):
         """
         The transpose down button clicked
         """
         try:
-            lyrics_stripped = re.sub(r'\[---\]',"\n", re.sub(r'---\[.*?\]---', "\n", re.sub(r'\[--}{--\]', "\n",
+            lyrics_stripped = re.sub(r'\[---\]', "\n", re.sub(r'---\[.*?\]---', "\n", re.sub(r'\[--}{--\]', "\n",
                                      self.verse_text_edit.toPlainText())))
             transposed_lyrics = transpose_lyrics(self.verse_text_edit.toPlainText(), -1)
             self.verse_text_edit.setPlainText(transposed_lyrics)
             if not re.search(r'\[(.*?)\]', lyrics_stripped)[1].startswith("="):
                 QtWidgets.QMessageBox.warning(self, translate('SongsPlugin.EditVerseForm', 'Song key warning'),
-                                                  translate('SongsPlugin.EditVerseForm',
-                                                          'No song key is present or song key is not the first '
-                                                          'chord.\nFor optimal chord experience, please, include a '
-                                                          'song key before any chord. Ex.: [=G]'))
+                                              translate('SongsPlugin.EditVerseForm',
+                                                        'No song key is present or song key is not the first '
+                                                        'chord.\nFor optimal chord experience, please, include a '
+                                                        'song key before any chord. Ex.: [=G]'))
         except KeyError as ke:
             # Transposing failed
             critical_error_message_box(title=translate('SongsPlugin.EditVerseForm', 'Transposing failed'),
@@ -254,11 +252,13 @@ class EditVerseForm(QtWidgets.QDialog, Ui_EditVerseDialog):
         """
         if Registry().get('settings').value('songs/enable chords'):
             try:
-                lyrics_stripped = re.sub(r'\[---\]',"\n", re.sub(r'---\[.*?\]---', "\n", re.sub(r'\[--}{--\]', "\n",
-                                        self.verse_text_edit.toPlainText())))
+                lyrics_stripped = re.sub(r'\[---\]', "\n",
+                                         re.sub(r'---\[.*?\]---', "\n",
+                                                re.sub(r'\[--}{--\]', "\n",
+                                                       self.verse_text_edit.toPlainText())))
                 if not re.search(r'\[(.*?)\]', lyrics_stripped)[1].startswith("="):
                     QtWidgets.QMessageBox.warning(self, translate('SongsPlugin.EditVerseForm', 'Song key warning'),
-                                                    translate('SongsPlugin.EditVerseForm',
+                                                  translate('SongsPlugin.EditVerseForm',
                                                             'No song key is present or song key is not the first '
                                                             'chord.\nFor optimal chord experience, please, include a '
                                                             'song key before any chord. Ex.: [=G]'))
