@@ -139,7 +139,6 @@ class EditVerseForm(QtWidgets.QDialog, Ui_EditVerseDialog):
                                                          'Transposing failed because of invalid chord:\n{err_msg}'
                                                          .format(err_msg=ke)))
             return
-        self.verse_text_edit.setPlainText(transposed_lyrics)
         self.verse_text_edit.setFocus()
         self.verse_text_edit.moveCursor(QtGui.QTextCursor.End)
 
@@ -165,7 +164,6 @@ class EditVerseForm(QtWidgets.QDialog, Ui_EditVerseDialog):
                                                          'Transposing failed because of invalid chord:\n{err_msg}'
                                                          .format(err_msg=ke)))
             return
-        self.verse_text_edit.setPlainText(transposed_lyrics)
         self.verse_text_edit.setFocus()
         self.verse_text_edit.moveCursor(QtGui.QTextCursor.End)
 
