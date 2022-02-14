@@ -245,14 +245,25 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
         # Validate tags (lp#1199639)
         misplaced_tags = []
         verse_tags = []
+        chords = []
         for i in range(self.verse_list_widget.rowCount()):
             item = self.verse_list_widget.item(i, 0)
             tags = self.find_tags.findall(item.text())
+            stripped_text = re.sub(r'\[---\]', "\n", re.sub(r'\[--}{--\]', "\n", item.text()))
+            r = re.compile('\[(.*?)\]')
+            for match in r.finditer(stripped_text):
+                chords += match[1]
             field = item.data(QtCore.Qt.UserRole)
             verse_tags.append(field)
             if not self._validate_tags(tags):
                 misplaced_tags.append('{field1} {field2}'.format(field1=VerseType.translated_name(field[0]),
                                                                  field2=field[1:]))
+        if Registry().get('settings').value('songs/enable chords') and not chords[0].startswith("="):
+            QtWidgets.QMessageBox.warning(self, translate('SongsPlugin.EditVerseForm', 'Song key warning'),
+                                            translate('SongsPlugin.EditVerseForm',
+                                                    'No song key is present or song key is not the first '
+                                                    'chord.\nFor optimal chord experience, please, include a '
+                                                    'song key before any chord. Ex.: [=G]'))
         if misplaced_tags:
             critical_error_message_box(
                 message=translate('SongsPlugin.EditSongForm',
