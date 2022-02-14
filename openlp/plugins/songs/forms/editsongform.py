@@ -250,7 +250,7 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
             item = self.verse_list_widget.item(i, 0)
             tags = self.find_tags.findall(item.text())
             stripped_text = re.sub(r'\[---\]', "\n", re.sub(r'\[--}{--\]', "\n", item.text()))
-            r = re.compile('\[(.*?)\]')
+            r = re.compile(r'\[(.*?)\]')
             for match in r.finditer(stripped_text):
                 chords += match[1]
             field = item.data(QtCore.Qt.UserRole)
@@ -260,10 +260,9 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
                                                                  field2=field[1:]))
         if Registry().get('settings').value('songs/enable chords') and not chords[0].startswith("="):
             QtWidgets.QMessageBox.warning(self, translate('SongsPlugin.EditVerseForm', 'Song key warning'),
-                                            translate('SongsPlugin.EditVerseForm',
-                                                    'No song key is present or song key is not the first '
-                                                    'chord.\nFor optimal chord experience, please, include a '
-                                                    'song key before any chord. Ex.: [=G]'))
+                                          translate('SongsPlugin.EditVerseForm', 'No song key is present or song key '
+                                                    'is not the first chord.\nFor optimal chord experience, please, '
+                                                    'include a song key\nbefore any chord. Ex.: [=G]'))
         if misplaced_tags:
             critical_error_message_box(
                 message=translate('SongsPlugin.EditSongForm',
