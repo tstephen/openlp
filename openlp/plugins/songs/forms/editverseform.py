@@ -131,7 +131,7 @@ class EditVerseForm(QtWidgets.QDialog, Ui_EditVerseDialog):
                                               translate('SongsPlugin.EditVerseForm',
                                                         'No song key is present or song key is not the first '
                                                         'chord.\nFor optimal chord experience, please, include a '
-                                                        'song key before any chord. Ex.: [=G]'))
+                                                        'song key\nbefore any chord. Ex.: [=G]'))
         except KeyError as ke:
             # Transposing failed
             critical_error_message_box(title=translate('SongsPlugin.EditVerseForm', 'Transposing failed'),
@@ -156,7 +156,7 @@ class EditVerseForm(QtWidgets.QDialog, Ui_EditVerseDialog):
                                               translate('SongsPlugin.EditVerseForm',
                                                         'No song key is present or song key is not the first '
                                                         'chord.\nFor optimal chord experience, please, include a '
-                                                        'song key before any chord. Ex.: [=G]'))
+                                                        'song key\nbefore any chord. Ex.: [=G]'))
         except KeyError as ke:
             # Transposing failed
             critical_error_message_box(title=translate('SongsPlugin.EditVerseForm', 'Transposing failed'),
