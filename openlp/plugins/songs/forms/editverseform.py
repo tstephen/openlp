@@ -124,14 +124,15 @@ class EditVerseForm(QtWidgets.QDialog, Ui_EditVerseDialog):
         try:
             lyrics_stripped = re.sub(r'\[---\]', "\n", re.sub(r'---\[.*?\]---', "\n", re.sub(r'\[--}{--\]', "\n",
                                      self.verse_text_edit.toPlainText())))
-            transposed_lyrics = transpose_lyrics(self.verse_text_edit.toPlainText(), 1)
-            self.verse_text_edit.setPlainText(transposed_lyrics)
-            if not re.search(r'\[(.*?)\]', lyrics_stripped)[1].startswith("="):
+            chords = re.search(r'\[(.*?)\]', lyrics_stripped)
+            if chords and len(chords) > 0 and not chords[1].startswith("="):
                 QtWidgets.QMessageBox.warning(self, translate('SongsPlugin.EditVerseForm', 'Song key warning'),
                                               translate('SongsPlugin.EditVerseForm',
                                                         'No song key is present or song key is not the first '
                                                         'chord.\nFor optimal chord experience, please, include a '
                                                         'song key\nbefore any chord. Ex.: [=G]'))
+            transposed_lyrics = transpose_lyrics(self.verse_text_edit.toPlainText(), 1)
+            self.verse_text_edit.setPlainText(transposed_lyrics)
         except KeyError as ke:
             # Transposing failed
             critical_error_message_box(title=translate('SongsPlugin.EditVerseForm', 'Transposing failed'),
@@ -149,14 +150,15 @@ class EditVerseForm(QtWidgets.QDialog, Ui_EditVerseDialog):
         try:
             lyrics_stripped = re.sub(r'\[---\]', "\n", re.sub(r'---\[.*?\]---', "\n", re.sub(r'\[--}{--\]', "\n",
                                      self.verse_text_edit.toPlainText())))
-            transposed_lyrics = transpose_lyrics(self.verse_text_edit.toPlainText(), -1)
-            self.verse_text_edit.setPlainText(transposed_lyrics)
-            if not re.search(r'\[(.*?)\]', lyrics_stripped)[1].startswith("="):
+            chords = re.search(r'\[(.*?)\]', lyrics_stripped)
+            if chords and len(chords) > 0 and not chords[1].startswith("="):
                 QtWidgets.QMessageBox.warning(self, translate('SongsPlugin.EditVerseForm', 'Song key warning'),
                                               translate('SongsPlugin.EditVerseForm',
                                                         'No song key is present or song key is not the first '
                                                         'chord.\nFor optimal chord experience, please, include a '
                                                         'song key\nbefore any chord. Ex.: [=G]'))
+            transposed_lyrics = transpose_lyrics(self.verse_text_edit.toPlainText(), -1)
+            self.verse_text_edit.setPlainText(transposed_lyrics)
         except KeyError as ke:
             # Transposing failed
             critical_error_message_box(title=translate('SongsPlugin.EditVerseForm', 'Transposing failed'),
