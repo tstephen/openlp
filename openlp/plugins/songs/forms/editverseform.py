@@ -29,7 +29,7 @@ from openlp.core.common.registry import Registry
 from openlp.core.lib.ui import critical_error_message_box
 from openlp.plugins.songs.forms.editversedialog import Ui_EditVerseDialog
 from openlp.plugins.songs.lib import VerseType, transpose_lyrics
-from openlp.plugins.songs.ui import show_key_warning
+from openlp.plugins.songs.lib.ui import show_key_warning
 
 
 log = logging.getLogger(__name__)
