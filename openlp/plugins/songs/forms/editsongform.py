@@ -258,13 +258,14 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
             if not self._validate_tags(tags):
                 misplaced_tags.append('{field1} {field2}'.format(field1=VerseType.translated_name(field[0]),
                                                                  field2=field[1:]))
-        if Registry().get('settings').value('songs/enable chords') and len(chords) > 0 and \
-            not chords[0].startswith("="):
+        if Registry().get('settings').value('songs/enable chords') and \
+                Registry().get('settings').value('songs/warn about missing song key') and len(chords) > 0 and \
+                not chords[0].startswith("="):
             QtWidgets.QMessageBox.warning(self, translate('SongsPlugin.EditVerseForm', 'Song key warning'),
                                           translate('SongsPlugin.EditVerseForm', 'No song key is present or song key '
                                                     'is not the first chord.\nFor optimal chord experience, please, '
-                                                    'include a song key\nbefore any chord. Ex.: [=G]'),
-                                          QtWidgets.QMessageBox.checkBox)
+                                                    'include a song key\nbefore any chord. Ex.: [=G]'
+                                                    'You can disable this warning message in songs settings.'))
         if misplaced_tags:
             critical_error_message_box(
                 message=translate('SongsPlugin.EditSongForm',
