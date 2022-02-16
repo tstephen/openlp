@@ -105,10 +105,10 @@ def test_on_transpose_up_button_clicked(mocked_show_key_warning, edit_verse_form
     edit_verse_form.verse_text_edit.setPlainText('Am[G]azing gr[G/B]ace, how sw[C]eet the s[G]ound')
     # WHEN the method is called
     edit_verse_form.on_transpose_up_button_clicked()
-    mocked_show_key_warning.assert_called_once_with(edit_verse_form)   
+    mocked_show_key_warning.assert_called_once_with(edit_verse_form)
     # THEN chords should be transposed up
     assert 'Am[Ab]azing gr[Ab/C]ace, how sw[C#]eet the s[Ab]ound' == edit_verse_form.verse_text_edit.toPlainText()
-    
+
 
 def test_on_transpose_down_button_clicked(edit_verse_form):
     """
