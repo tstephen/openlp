@@ -29,6 +29,7 @@ from openlp.core.common.registry import Registry
 from openlp.core.lib.ui import critical_error_message_box
 from openlp.plugins.songs.forms.editversedialog import Ui_EditVerseDialog
 from openlp.plugins.songs.lib import VerseType, transpose_lyrics
+from openlp.plugins.songs.ui import show_key_warning
 
 
 log = logging.getLogger(__name__)
@@ -125,14 +126,8 @@ class EditVerseForm(QtWidgets.QDialog, Ui_EditVerseDialog):
             lyrics_stripped = re.sub(r'\[---\]', "\n", re.sub(r'---\[.*?\]---', "\n", re.sub(r'\[--}{--\]', "\n",
                                      self.verse_text_edit.toPlainText())))
             chords = re.findall(r'\[(.*?)\]', lyrics_stripped)
-            if Registry().get('settings').value('songs/warn about missing song key') and chords and len(chords) > 0 and\
-                    not chords[0].startswith("="):
-                QtWidgets.QMessageBox.warning(self, translate('SongsPlugin.EditVerseForm', 'Song key warning'),
-                                              translate('SongsPlugin.EditVerseForm',
-                                                        'No song key is present or song key is not the first '
-                                                        'chord.\nFor optimal chord experience, please, include a '
-                                                        'song key\nbefore any chord. Ex.: [=G]\n'
-                                                        'You can disable this warning message in songs settings.'))
+            if chords and not chords[0].startswith("="):
+                show_key_warning(self)
             transposed_lyrics = transpose_lyrics(self.verse_text_edit.toPlainText(), 1)
             self.verse_text_edit.setPlainText(transposed_lyrics)
         except KeyError as ke:
@@ -153,14 +148,8 @@ class EditVerseForm(QtWidgets.QDialog, Ui_EditVerseDialog):
             lyrics_stripped = re.sub(r'\[---\]', "\n", re.sub(r'---\[.*?\]---', "\n", re.sub(r'\[--}{--\]', "\n",
                                      self.verse_text_edit.toPlainText())))
             chords = re.findall(r'\[(.*?)\]', lyrics_stripped)
-            if Registry().get('settings').value('songs/warn about missing song key') and chords and len(chords) > 0 and\
-                    not chords[0].startswith("="):
-                QtWidgets.QMessageBox.warning(self, translate('SongsPlugin.EditVerseForm', 'Song key warning'),
-                                              translate('SongsPlugin.EditVerseForm',
-                                                        'No song key is present or song key is not the first '
-                                                        'chord.\nFor optimal chord experience, please, include a '
-                                                        'song key\nbefore any chord. Ex.: [=G]\n'
-                                                        'You can disable this warning message in songs settings.'))
+            if chords and not chords[0].startswith("="):
+                show_key_warning(self)
             transposed_lyrics = transpose_lyrics(self.verse_text_edit.toPlainText(), -1)
             self.verse_text_edit.setPlainText(transposed_lyrics)
         except KeyError as ke:

@@ -28,15 +28,16 @@ from shutil import copyfile
 
 from PyQt5 import QtCore, QtWidgets, QtGui
 
-from openlp.core.state import State
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.i18n import UiStrings, get_natural_key, translate
 from openlp.core.common.mixins import RegistryProperties
 from openlp.core.common.path import create_paths
 from openlp.core.common.registry import Registry
 from openlp.core.lib import MediaType, create_separated_list
+from openlp.core.lib.formattingtags import FormattingTags
 from openlp.core.lib.plugin import PluginStatus
 from openlp.core.lib.ui import critical_error_message_box, find_and_set_in_combo_box, set_case_insensitive_completer
+from openlp.core.state import State
 from openlp.core.widgets.dialogs import FileDialog
 from openlp.plugins.songs.forms.editsongdialog import Ui_EditSongDialog
 from openlp.plugins.songs.forms.editverseform import EditVerseForm
@@ -44,8 +45,7 @@ from openlp.plugins.songs.forms.mediafilesform import MediaFilesForm
 from openlp.plugins.songs.lib import VerseType, clean_song
 from openlp.plugins.songs.lib.db import Author, AuthorType, Book, MediaFile, Song, SongBookEntry, Topic
 from openlp.plugins.songs.lib.openlyricsxml import SongXML
-from openlp.plugins.songs.lib.ui import SongStrings
-from openlp.core.lib.formattingtags import FormattingTags
+from openlp.plugins.songs.lib.ui import SongStrings, show_key_warning
 
 
 log = logging.getLogger(__name__)
@@ -258,14 +258,8 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
             if not self._validate_tags(tags):
                 misplaced_tags.append('{field1} {field2}'.format(field1=VerseType.translated_name(field[0]),
                                                                  field2=field[1:]))
-        if Registry().get('settings').value('songs/enable chords') and \
-                Registry().get('settings').value('songs/warn about missing song key') and len(chords) > 0 and \
-                not chords[0].startswith("="):
-            QtWidgets.QMessageBox.warning(self, translate('SongsPlugin.EditVerseForm', 'Song key warning'),
-                                          translate('SongsPlugin.EditVerseForm', 'No song key is present or song key '
-                                                    'is not the first chord.\nFor optimal chord experience, please, '
-                                                    'include a song key\nbefore any chord. Ex.: [=G]'
-                                                    'You can disable this warning message in songs settings.'))
+        if chords and not chords[0].startswith("="):
+            show_key_warning(self)
         if misplaced_tags:
             critical_error_message_box(
                 message=translate('SongsPlugin.EditSongForm',
