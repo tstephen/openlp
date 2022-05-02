@@ -711,7 +711,7 @@ class ThemePreviewRenderer(DisplayWindow, LogMixin):
         formatted = []
         previous_html = ''
         previous_raw = ''
-        #separator = '<br>'
+        # separator = '<br>'
         separator = line_end
         html_lines = list(map(render_tags, lines))
         # Text too long so go to next page.
