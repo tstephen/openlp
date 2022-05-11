@@ -297,6 +297,9 @@ class BibleMediaItem(MediaManagerItem):
         visible = self.settings.value('bibles/second bibles')
         self.general_bible_layout.labelForField(self.second_combo_box).setVisible(visible)
         self.second_combo_box.setVisible(visible)
+        layout_style = self.settings.value('bibles/verse layout style')
+        if layout_style is not None:
+            self.style_combo_box.setCurrentIndex(layout_style)
 
     def initialise(self):
         """
