@@ -589,7 +589,7 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
                     if item['service_item'].stored_filename:
                         sha256_file_name = Path(item['service_item'].stored_filename)
                     else:
-                        sha256_file_name = Path(sha256_file_hash(frame_path)) / frame_path.suffix
+                        sha256_file_name = Path(sha256_file_hash(frame_path) + frame_path.suffix)
                     bundle = (frame_path, sha256_file_name)
                     if bundle in write_list or str(frame_path) in missing_list:
                         continue
