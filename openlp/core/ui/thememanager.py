@@ -40,7 +40,8 @@ from openlp.core.common.utils import wait_for
 from openlp.core.lib import build_icon, check_item_selected, create_thumb, get_text_file_string, validate_thumb
 from openlp.core.lib.exceptions import ValidationError
 from openlp.core.lib.theme import Theme
-from openlp.core.lib.ui import MultipleViewModeList, create_widget_action, critical_error_message_box, set_list_view_mode_toolbar_state
+from openlp.core.lib.ui import MultipleViewModeList, add_list_view_items_to_toolbar, create_widget_action, \
+    critical_error_message_box, set_list_view_mode_toolbar_state
 from openlp.core.ui.filerenameform import FileRenameForm
 from openlp.core.ui.icons import UiIcons
 from openlp.core.ui.themeform import ThemeForm
@@ -93,18 +94,7 @@ class Ui_ThemeManager(object):
                                         tooltip=translate('OpenLP.ThemeManager', 'Export a theme.'),
                                         triggers=self.on_export_theme)
         self.toolbar.addSeparator()
-        self.toolbar.add_toolbar_action('listView',
-                                        text=translate('OpenLP.ThemeManager', 'List View'),
-                                        icon=UiIcons().view_list,
-                                        checked=False,
-                                        tooltip=translate('OpenLP.ThemeManager', 'Shows the themes in a list view.'),
-                                        triggers=self.on_set_view_mode_list)
-        self.toolbar.add_toolbar_action('gridView',
-                                        text=translate('OpenLP.ThemeManager', 'Grid View'),
-                                        icon=UiIcons().view_grid,
-                                        checked=False,
-                                        tooltip=translate('OpenLP.ThemeManager', 'Shows the themes in a grid view.'),
-                                        triggers=self.on_set_view_mode_grid)
+        add_list_view_items_to_toolbar(self.toolbar, self)
         self.layout.addWidget(self.toolbar)
         self.theme_widget = QtWidgets.QWidgetAction(self.toolbar)
         self.theme_widget.setObjectName('theme_widget')
@@ -203,13 +193,13 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
         self.file_rename_form = FileRenameForm()
         self.upgrade_themes()  # TODO: Can be removed when upgrade path from OpenLP 2.4 no longer needed
         self.load_themes()
-    
+
     def load_settings(self):
         view_mode_value = None
         try:
             view_mode_value = self.settings.value('user interface/theme manager view mode')
             self.theme_list_widget.setViewMode(view_mode_value)
-        except:
+        except Exception:
             view_mode_value = QtWidgets.QListWidget.ViewMode.ListMode
             self.settings.setValue('user interface/theme manager view mode', view_mode_value)
         set_list_view_mode_toolbar_state(self.toolbar, view_mode_value)
@@ -308,12 +298,12 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
                 self.theme_list_widget.item(count).setText(name)
                 self.delete_toolbar_action.setVisible(item not in self.theme_list_widget.selectedItems())
         Registry().execute('theme_change_global')
-    
+
     def on_set_view_mode_list(self):
         mode = QtWidgets.QListView.ViewMode.ListMode
         self.theme_list_widget.setViewMode(mode)
         set_list_view_mode_toolbar_state(self.toolbar, mode)
-    
+
     def on_set_view_mode_grid(self):
         mode = QtWidgets.QListView.ViewMode.IconMode
         self.theme_list_widget.setViewMode(mode)

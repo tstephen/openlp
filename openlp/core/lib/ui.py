@@ -21,7 +21,6 @@
 """
 The :mod:`ui` module provides standard UI components for OpenLP.
 """
-from enum import Enum
 import logging
 
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -348,7 +347,7 @@ class MultipleViewModeList(QtWidgets.QListWidget):
     :param parent:
     :param mode: The default mode of the list.
     """
-    def __init__(self, parent, mode = QtWidgets.QListWidget.ViewMode.ListMode):
+    def __init__(self, parent, mode=QtWidgets.QListWidget.ViewMode.ListMode):
         super().__init__(parent)
         self._view_mode_icon_size_list = None
         self._view_mode_icon_size_grid = None
@@ -366,6 +365,8 @@ class MultipleViewModeList(QtWidgets.QListWidget):
             self._view_mode_icon_size_list = size
         elif mode == QtWidgets.QListWidget.ViewMode.IconMode:
             self._view_mode_icon_size_grid = size
+        if self.viewMode() == mode:
+            self.setIconSize(size)
 
     def setViewMode(self, mode):
         if mode is None:
@@ -378,6 +379,7 @@ class MultipleViewModeList(QtWidgets.QListWidget):
                 self.setIconSize(self._view_mode_icon_size_grid)
             self.setUniformItemSizes(True)
             self.setResizeMode(QtWidgets.QListWidget.ResizeMode.Adjust)
+            self._on_resize_icon_mode()
         elif mode == QtWidgets.QListWidget.ViewMode.ListMode:
             if self._view_mode_icon_size_grid is None:
                 self._view_mode_icon_size_grid = self.iconSize()
@@ -385,8 +387,23 @@ class MultipleViewModeList(QtWidgets.QListWidget):
                 self.setIconSize(self._view_mode_icon_size_list)
             self.setUniformItemSizes(False)
             self.setResizeMode(QtWidgets.QListWidget.ResizeMode.Fixed)
-    
-    
+            self.setFlow(QtWidgets.QListWidget.Flow.TopToBottom)
+
+    def resizeEvent(self, event: QtGui.QResizeEvent):
+        super().resizeEvent(event)
+        self._on_resize_icon_mode()
+
+    def _on_resize_icon_mode(self):
+        if self.viewMode() == QtWidgets.QListWidget.ViewMode.IconMode:
+            size = self.size()
+            iconHeight = self.iconSize().height()
+            if size.height() < ((iconHeight + (iconHeight / 2))):
+                if self.flow() != QtWidgets.QListWidget.Flow.TopToBottom:
+                    self.setFlow(QtWidgets.QListWidget.Flow.TopToBottom)
+            elif self.flow() != QtWidgets.QListWidget.Flow.LeftToRight:
+                self.setFlow(QtWidgets.QListWidget.Flow.LeftToRight)
+
+
 def set_list_view_mode_toolbar_state(toolbar, mode):
     """
     Updates a OpenLPToolbar ListView button states after clicked
@@ -400,3 +417,18 @@ def set_list_view_mode_toolbar_state(toolbar, mode):
     elif mode == QtWidgets.QListView.ViewMode.ListMode:
         toolbar.set_widget_checked('listView', True)
         toolbar.set_widget_checked('gridView', False)
+
+
+def add_list_view_items_to_toolbar(toolbar, trigger_handler):
+    toolbar.add_toolbar_action('listView',
+                               text=translate('OpenLP.Ui', 'List View'),
+                               icon=UiIcons().view_list,
+                               checked=False,
+                               tooltip=translate('OpenLP.Ui', 'Shows the list in a list view.'),
+                               triggers=trigger_handler.on_set_view_mode_list)
+    toolbar.add_toolbar_action('gridView',
+                               text=translate('OpenLP.Ui', 'Grid View'),
+                               icon=UiIcons().view_grid,
+                               checked=False,
+                               tooltip=translate('OpenLP.Ui', 'Shows the list in a grid view.'),
+                               triggers=trigger_handler.on_set_view_mode_grid)
