@@ -375,6 +375,7 @@ class Settings(QtCore.QSettings):
         'user interface/preview panel': True,
         'user interface/preview splitter geometry': QtCore.QByteArray(),
         'user interface/is preset layout': False,
+        'user interface/theme manager view mode': 1,
         'projector/show after wizard': False,
         'projector/db type': 'sqlite',
         'projector/db username': '',
