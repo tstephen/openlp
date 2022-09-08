@@ -26,10 +26,10 @@ from unittest.mock import MagicMock, call, patch
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from openlp.core.common.i18n import UiStrings, translate
-from openlp.core.lib.ui import MultipleViewModeList, add_list_view_items_to_toolbar, add_welcome_page, create_action, \
-    create_button, create_button_box, create_horizontal_adjusting_combo_box, create_valign_selection_widgets, \
-    create_widget_action, critical_error_message_box, find_and_set_in_combo_box, set_case_insensitive_completer, \
-    set_list_view_mode_toolbar_state
+from openlp.core.lib.ui import MultipleViewModeList, add_list_view_mode_items_to_toolbar, add_welcome_page, \
+    create_action, create_button, create_button_box, create_horizontal_adjusting_combo_box, \
+    create_valign_selection_widgets, create_widget_action, critical_error_message_box, find_and_set_in_combo_box, \
+    set_case_insensitive_completer, set_list_view_mode_toolbar_state
 from openlp.core.widgets.toolbar import OpenLPToolbar
 
 
@@ -425,29 +425,29 @@ def test_multiple_view_mode_list_set_view_mode_preserves_last_icon_size(settings
     assert list.iconSize() == last_icon_size
 
 
-def test_add_list_view_items_to_toolbar_creates_items(settings):
+def test_add_list_view_mode_items_to_toolbar_creates_items(settings):
     """
-    Tests if add_list_view_items_to_toolbar creates the list view items.
+    Tests if add_list_view_mode_items_to_toolbar creates the list view items.
     """
     # GIVEN: an OpenLPToolbar
     toolbar = OpenLPToolbar(None)
 
-    # WHEN: add_list_view_items_to_toolbar is called
-    add_list_view_items_to_toolbar(toolbar, MagicMock())
+    # WHEN: add_list_view_mode_items_to_toolbar is called
+    add_list_view_mode_items_to_toolbar(toolbar, MagicMock())
 
     # THEN: Assert correct icons are created
     assert isinstance(toolbar.actions['listView'], QtWidgets.QAction) is True
     assert isinstance(toolbar.actions['gridView'], QtWidgets.QAction) is True
 
 
-def test_add_list_view_items_to_toolbar_click_calls_handlers(settings):
+def test_add_list_view_mode_items_to_toolbar_click_calls_handlers(settings):
     """
-    Tests if add_list_view_items_to_toolbar created items calls the handlers
+    Tests if add_list_view_mode_items_to_toolbar created items calls the handlers
     """
     # GIVEN: an OpenLPToolbar with ListView items
     toolbar = OpenLPToolbar(None)
     handler = MagicMock()
-    add_list_view_items_to_toolbar(toolbar, handler)
+    add_list_view_mode_items_to_toolbar(toolbar, handler)
 
     # WHEN: handler items is called
     toolbar.actions['listView'].trigger()
@@ -464,7 +464,7 @@ def test_set_list_view_mode_toolbar_state_view_mode_list_mode(settings):
     """
     # GIVEN: an OpenLPToolbar with checkable List View items
     toolbar = OpenLPToolbar(None)
-    add_list_view_items_to_toolbar(toolbar, MagicMock())
+    add_list_view_mode_items_to_toolbar(toolbar, MagicMock())
 
     # WHEN: set_list_view_mode_toolbar_state is called with ListMode
     set_list_view_mode_toolbar_state(toolbar, QtWidgets.QListWidget.ViewMode.ListMode)
@@ -480,7 +480,7 @@ def test_set_list_view_mode_toolbar_state_view_mode_icon_mode(settings):
     """
     # GIVEN: an OpenLPToolbar with checkable List View items
     toolbar = OpenLPToolbar(None)
-    add_list_view_items_to_toolbar(toolbar, MagicMock())
+    add_list_view_mode_items_to_toolbar(toolbar, MagicMock())
 
     # WHEN: set_list_view_mode_toolbar_state is called with ListMode
     set_list_view_mode_toolbar_state(toolbar, QtWidgets.QListWidget.ViewMode.IconMode)

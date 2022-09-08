@@ -419,7 +419,7 @@ def set_list_view_mode_toolbar_state(toolbar, mode):
         toolbar.set_widget_checked('gridView', False)
 
 
-def add_list_view_items_to_toolbar(toolbar, trigger_handler):
+def add_list_view_mode_items_to_toolbar(toolbar, trigger_handler):
     toolbar.add_toolbar_action('listView',
                                text=translate('OpenLP.Ui', 'List View'),
                                icon=UiIcons().view_list,

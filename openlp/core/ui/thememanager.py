@@ -40,7 +40,7 @@ from openlp.core.common.utils import wait_for
 from openlp.core.lib import build_icon, check_item_selected, create_thumb, get_text_file_string, validate_thumb
 from openlp.core.lib.exceptions import ValidationError
 from openlp.core.lib.theme import Theme
-from openlp.core.lib.ui import MultipleViewModeList, add_list_view_items_to_toolbar, create_widget_action, \
+from openlp.core.lib.ui import MultipleViewModeList, add_list_view_mode_items_to_toolbar, create_widget_action, \
     critical_error_message_box, set_list_view_mode_toolbar_state
 from openlp.core.ui.filerenameform import FileRenameForm
 from openlp.core.ui.icons import UiIcons
@@ -94,7 +94,7 @@ class Ui_ThemeManager(object):
                                         tooltip=translate('OpenLP.ThemeManager', 'Export a theme.'),
                                         triggers=self.on_export_theme)
         self.toolbar.addSeparator()
-        add_list_view_items_to_toolbar(self.toolbar, self)
+        add_list_view_mode_items_to_toolbar(self.toolbar, self)
         self.layout.addWidget(self.toolbar)
         self.theme_widget = QtWidgets.QWidgetAction(self.toolbar)
         self.theme_widget.setObjectName('theme_widget')
