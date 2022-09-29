@@ -103,6 +103,13 @@ class Book(BaseModel):
     """
     Book model
     """
+    @property
+    def songs(self):
+        """
+        A property to return the songs associated with this book.
+        """
+        return [sbe.song for sbe in self.entries]
+
     def __repr__(self):
         return '<Book id="{myid:d}" name="{name}" publisher="{publisher}" />'.format(myid=self.id,
                                                                                      name=self.name,
@@ -383,7 +390,7 @@ def init_schema(url):
         class_mapper(SongBookEntry)
     except UnmappedClassError:
         mapper(SongBookEntry, songs_songbooks_table, properties={
-            'songbook': relation(Book)
+            'songbook': relation(Book, backref='entries')
         })
     try:
         class_mapper(Book)
