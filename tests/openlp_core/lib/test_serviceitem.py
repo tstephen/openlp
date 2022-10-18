@@ -412,7 +412,8 @@ def test_service_item_load_optical_media_from_service(state_media):
     assert service_item.media_length == 17.694, 'Media length should be 17.694'
 
 
-def test_service_item_load_song_and_audio_from_service(state_media, settings, service_item_env):
+@patch('openlp.core.lib.serviceitem.sha256_file_hash')
+def test_service_item_load_song_and_audio_from_service(mock_sha256_file_hash, state_media, settings, service_item_env):
     """
     Test the Service Item - adding a song slide from a saved service
     """
@@ -420,6 +421,7 @@ def test_service_item_load_song_and_audio_from_service(state_media, settings, se
     service_item = ServiceItem(None)
     service_item.add_icon = MagicMock()
     FormattingTags.load_tags()
+    mock_sha256_file_hash.return_value = 'abcd'
 
     # WHEN: We add a custom from a saved service
     line = convert_file_service_item(TEST_PATH, 'serviceitem-song-linked-audio.osj')
@@ -436,8 +438,8 @@ def test_service_item_load_song_and_audio_from_service(state_media, settings, se
         '"Amazing Grace! how sweet the s" has been returned as the title'
     assert '’Twas grace that taught my hea' == service_item.get_frame_title(1), \
         '"’Twas grace that taught my hea" has been returned as the title'
-    assert Path('/test/amazing_grace.mp3') == service_item.background_audio[0], \
-        '"/test/amazing_grace.mp3" should be in the background_audio list'
+    assert (Path('/test/amazing_grace.mp3'), 'abcd') == service_item.background_audio[0], \
+        'The tuple ("/test/abcd.mp3", "abcd") should be in the background_audio list'
 
 
 def test_service_item_get_theme_data_global_level(settings):
@@ -692,7 +694,8 @@ def test_get_transition_delay_slow(settings):
     assert delay == 2
 
 
-def test_to_dict_text_item(state_media, settings, service_item_env):
+@patch('openlp.core.lib.serviceitem.sha256_file_hash')
+def test_to_dict_text_item(mocked_sha256_file_hash, state_media, settings, service_item_env):
     """
     Test that the to_dict() method returns the correct data for the service item
     """
@@ -701,6 +704,7 @@ def test_to_dict_text_item(state_media, settings, service_item_env):
     mocked_plugin.name = 'songs'
     service_item = ServiceItem(mocked_plugin)
     service_item.add_icon = MagicMock()
+    mocked_sha256_file_hash.return_value = 'abcd'
     FormattingTags.load_tags()
     line = convert_file_service_item(TEST_PATH, 'serviceitem-song-linked-audio.osj')
     if is_win():
@@ -713,11 +717,11 @@ def test_to_dict_text_item(state_media, settings, service_item_env):
     result = service_item.to_dict()
 
     # THEN: The correct dictionary should be returned
-    expected_fake_path = str(fake_path / 'amazing_grace.mp3')
+    expected_fake_path = fake_path / 'amazing_grace.mp3'
     expected_dict = {
 
         'audit': ['Amazing Grace', ['John Newton'], '', ''],
-        'backgroundAudio': [expected_fake_path],
+        'backgroundAudio': [(expected_fake_path, 'abcd')],
         'capabilities': [2, 1, 5, 8, 9, 13, 15],
         'footer': ['Amazing Grace', 'Written by: John Newton'],
         'fromPlugin': False,
