@@ -730,11 +730,10 @@ def test_to_dict_text_item(mocked_sha256_file_hash, state_media, settings, servi
         'notes': '',
         'slides': [
             {
-                'chords': '<span class="nochordline">'
-                          'Amazing Grace! how sweet the sound\n'
+                'chords': 'Amazing Grace! how sweet the sound\n'
                           'That saved a wretch like me;\n'
                           'I once was lost, but now am found,\n'
-                          'Was blind, but now I see.</span>',
+                          'Was blind, but now I see.',
                 'html': 'Amazing Grace! how sweet the sound\n'
                         'That saved a wretch like me;\n'
                         'I once was lost, but now am found,\n'
@@ -749,11 +748,10 @@ def test_to_dict_text_item(mocked_sha256_file_hash, state_media, settings, servi
                 'footer': 'Amazing Grace<br>Written by: John Newton'
             },
             {
-                'chords': '<span class="nochordline">'
-                          '’Twas grace that taught my heart to fear,\n'
+                'chords': '’Twas grace that taught my heart to fear,\n'
                           'And grace my fears relieved;\n'
                           'How precious did that grace appear,\n'
-                          'The hour I first believed!</span>',
+                          'The hour I first believed!',
                 'html': '’Twas grace that taught my heart to fear,\n'
                         'And grace my fears relieved;\n'
                         'How precious did that grace appear,\n'
@@ -768,11 +766,10 @@ def test_to_dict_text_item(mocked_sha256_file_hash, state_media, settings, servi
                 'footer': 'Amazing Grace<br>Written by: John Newton'
             },
             {
-                'chords': '<span class="nochordline">'
-                          'Through many dangers, toils and snares\n'
+                'chords': 'Through many dangers, toils and snares\n'
                           'I have already come;\n'
                           '’Tis grace that brought me safe thus far,\n'
-                          'And grace will lead me home.</span>',
+                          'And grace will lead me home.',
                 'html': 'Through many dangers, toils and snares\n'
                         'I have already come;\n'
                         '’Tis grace that brought me safe thus far,\n'
@@ -787,11 +784,10 @@ def test_to_dict_text_item(mocked_sha256_file_hash, state_media, settings, servi
                 'footer': 'Amazing Grace<br>Written by: John Newton'
             },
             {
-                'chords': '<span class="nochordline">'
-                          'The Lord has promised good to me,\n'
+                'chords': 'The Lord has promised good to me,\n'
                           'His word my hope secures;\n'
                           'He will my shield and portion be\n'
-                          'As long as life endures.</span>',
+                          'As long as life endures.',
                 'html': 'The Lord has promised good to me,\n'
                         'His word my hope secures;\n'
                         'He will my shield and portion be\n'
@@ -806,11 +802,10 @@ def test_to_dict_text_item(mocked_sha256_file_hash, state_media, settings, servi
                 'footer': 'Amazing Grace<br>Written by: John Newton'
             },
             {
-                'chords': '<span class="nochordline">'
-                          'Yes, when this heart and flesh shall fail,\n'
+                'chords': 'Yes, when this heart and flesh shall fail,\n'
                           'And mortal life shall cease,\n'
                           'I shall possess within the veil\n'
-                          'A life of joy and peace.</span>',
+                          'A life of joy and peace.',
                 'html': 'Yes, when this heart and flesh shall fail,\n'
                         'And mortal life shall cease,\n'
                         'I shall possess within the veil\n'
@@ -825,11 +820,10 @@ def test_to_dict_text_item(mocked_sha256_file_hash, state_media, settings, servi
                 'footer': 'Amazing Grace<br>Written by: John Newton'
             },
             {
-                'chords': '<span class="nochordline">'
-                          'When we’ve been there a thousand years,\n'
+                'chords': 'When we’ve been there a thousand years,\n'
                           'Bright shining as the sun,\n'
                           'We’ve no less days to sing God’s praise\n'
-                          'Than when we first begun.</span>',
+                          'Than when we first begun.',
                 'html': 'When we’ve been there a thousand years,\n'
                         'Bright shining as the sun,\n'
                         'We’ve no less days to sing God’s praise\n'

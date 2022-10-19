@@ -224,7 +224,7 @@ class ServiceItem(RegistryProperties):
                 rendered_slide = {
                     'title': raw_slide['title'],
                     'text': render_tags(page),
-                    'chords': render_tags(page, can_render_chords=True),
+                    'chords': page,
                     'verse': index,
                     'footer': self.footer_html
                 }
