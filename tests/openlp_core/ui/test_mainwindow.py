@@ -349,10 +349,10 @@ def test_mainwindow_configuration(main_window):
     # WHEN: you check the started functions
 
     # THEN: the following registry functions should have been registered
-    expected_service_list = ['settings', 'settings_thread', 'application', 'main_window', 'http_server',
-                             'authentication_token', 'settings_form', 'service_manager', 'theme_manager',
-                             'projector_manager']
-    expected_functions_list = ['bootstrap_initialise', 'bootstrap_post_set_up', 'bootstrap_completion',
+    expected_service_list = ['settings', 'settings_thread', 'application', 'main_window', 'settings_form',
+                             'service_manager', 'theme_manager', 'projector_manager', 'http_server',
+                             'authentication_token', 'web_socket_server']
+    expected_functions_list = ['bootstrap_post_set_up', 'bootstrap_initialise', 'bootstrap_completion',
                                'config_screen_changed', 'theme_change_global']
     assert list(Registry().service_list.keys()) == expected_service_list, \
         'The service list should have been {}'.format(Registry().service_list.keys())

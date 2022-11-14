@@ -480,9 +480,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
         self.copy_data = False
         self.settings.set_up_default_values()
         self.about_form = AboutForm(self)
-        self.ws_server = WebSocketServer()
-        self.ws_server.start()
-        self.http_server = HttpServer(self)
         SettingsForm(self)
         self.formatting_tag_form = FormattingTagForm(self)
         self.shortcut_form = ShortcutListForm(self)
@@ -526,6 +523,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
         Registry().register_function('bootstrap_post_set_up', self.bootstrap_post_set_up)
         # Reset the cursor
         self.application.set_normal_cursor()
+        # Starting up web services
+        self.http_server = HttpServer(self)
+        self.ws_server = WebSocketServer()
 
     def _wait_for_threads(self):
         """
