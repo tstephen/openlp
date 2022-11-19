@@ -1023,13 +1023,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
             # also do not show if the settings window is visible
             if not self.settings_form.isVisible() and not self.screen_change_timestamp or \
                     self.screen_change_timestamp and (datetime.now() - self.screen_change_timestamp).seconds > 5:
-                self.screen_change_timestamp = datetime.now()
                 QtWidgets.QMessageBox.warning(self, translate('OpenLP.MainWindow', 'Screen setup has changed'),
                                               translate('OpenLP.MainWindow',
                                                         'The screen setup has changed. '
                                                         'OpenLP will try to automatically select a display screen, but '
                                                         'you should consider updating the screen settings.'),
                                               QtWidgets.QMessageBox.StandardButtons(QtWidgets.QMessageBox.Ok))
+                self.screen_change_timestamp = datetime.now()
             self.application.set_busy_cursor()
             self.renderer.resize(self.live_controller.screens.current.display_geometry.size())
             self.preview_controller.screen_size_changed()
