@@ -193,10 +193,9 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         # As the display was reloaded, we'll need to process current item again
         if self.service_item:
             self._process_item(self.service_item, self.selected_row, is_reloading=True)
-        if self._current_hide_mode == HideMode.Screen:
-            # Forcing screen to be on transparent mode if already hidden, otherwise the 'show' animation would not
-            # be performed.
-            self.display.hide_display(HideMode.Screen)
+        # Restoring last hide mode
+        if self._current_hide_mode:
+            self.display.hide_display(self._current_hide_mode)
 
     def close_displays(self):
         """
