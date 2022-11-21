@@ -381,6 +381,7 @@ def test_after_loaded_callback(display_window_env, mock_settings):
     # THEN: The after_loaded_callback should be called
     mocked_after_loaded_callback.assert_called_once()
 
+
 @patch.object(time, 'time')
 def test_run_javascript_no_sync_no_wait(mock_time, display_window_env, mock_settings):
     """
