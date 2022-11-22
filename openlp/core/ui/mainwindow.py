@@ -40,7 +40,7 @@ from openlp.core.common.path import create_paths, resolve
 from openlp.core.common.platform import is_macosx, is_win
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
-from openlp.core.display.screens import ConfigScreenChangedEmitter, ScreenList
+from openlp.core.display.screens import ScreenList
 from openlp.core.lib.plugin import PluginStatus
 from openlp.core.lib.ui import create_action
 from openlp.core.projectors.manager import ProjectorManager
