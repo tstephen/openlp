@@ -40,7 +40,7 @@ from openlp.core.common.path import create_paths, resolve
 from openlp.core.common.platform import is_macosx, is_win
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
-from openlp.core.display.screens import ScreenList
+from openlp.core.display.screens import ConfigScreenChangedEmitter, ScreenList
 from openlp.core.lib.plugin import PluginStatus
 from openlp.core.lib.ui import create_action
 from openlp.core.projectors.manager import ProjectorManager
@@ -1021,8 +1021,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
             self.screen_updating_lock.acquire()
             # if a warning has been shown within the last 5 seconds, skip showing again to avoid spamming user,
             # also do not show if the settings window is visible
-            if not self.settings_form.isVisible() and not self.screen_change_timestamp or \
-                    self.screen_change_timestamp and (datetime.now() - self.screen_change_timestamp).seconds > 5:
+            has_shown_messagebox_recently = self.screen_change_timestamp \
+                and (datetime.now() - self.screen_change_timestamp).seconds < 5
+            should_show_messagebox = self.settings_form.isHidden() and not has_shown_messagebox_recently
+            if should_show_messagebox:
                 QtWidgets.QMessageBox.warning(self, translate('OpenLP.MainWindow', 'Screen setup has changed'),
                                               translate('OpenLP.MainWindow',
                                                         'The screen setup has changed. '
