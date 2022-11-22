@@ -444,6 +444,3 @@ class ConfigScreenChangedEmitter(metaclass=Singleton):
 
     def __do_emit_config_screen_changed(self):
         Registry().execute('config_screen_changed')
-
-    def __del__(self):
-        self.timer.stop()
