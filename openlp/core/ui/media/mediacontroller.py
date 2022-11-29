@@ -25,10 +25,11 @@ import logging
 from pathlib import Path
 
 try:
-    from pymediainfo import MediaInfo
+    from pymediainfo import MediaInfo, __version__ as pymediainfo_version
     pymediainfo_available = True
 except ImportError:
     pymediainfo_available = False
+    pymediainfo_version = '0.0'
 
 from PyQt5 import QtCore
 
@@ -350,11 +351,16 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         :param media_path: The file path to be checked..
         """
         if MediaInfo.can_parse():
-            # pymediainfo has an issue opening non-ascii file names, so pass it a file object instead
-            # See https://gitlab.com/openlp/openlp/-/issues/1041
-            with Path(media_path).open('rb') as media_file:
-                media_data = MediaInfo.parse(media_file)
-            # duration returns in milli seconds
+            if pymediainfo_version < '4.3':
+                # pymediainfo only introduced file objects in 4.3, so if this is an older version, we'll have to use
+                # the old method. See https://gitlab.com/openlp/openlp/-/issues/1187
+                media_data = MediaInfo.parse(str(media_path))
+            else:
+                # pymediainfo has an issue opening non-ascii file names, so pass it a file object instead
+                # See https://gitlab.com/openlp/openlp/-/issues/1041
+                with Path(media_path).open('rb') as media_file:
+                    media_data = MediaInfo.parse(media_file)
+                # duration returns in milli seconds
             return media_data.tracks[0].duration or 0
         return 0
 
