@@ -28,6 +28,7 @@ from openlp.core.api.lib import login_required
 from openlp.core.lib.plugin import PluginStatus
 from openlp.core.common.registry import Registry
 from openlp.plugins.songs.lib import transpose_lyrics
+from openlp.core.display.render import remove_tags
 
 log = logging.getLogger(__name__)
 
@@ -167,6 +168,8 @@ def transpose(transpose_value):
                 chord_song_text += '---[Verse:{verse_tag}]---\n'.format(verse_tag=verse_tag)
                 chord_song_text += page
                 chord_song_text += '\n'
+        # remove formatting tags
+        chord_song_text = remove_tags(chord_song_text)
         # transpose
         transposed_lyrics = transpose_lyrics(chord_song_text, transpose_value)
         # re-split into verses
