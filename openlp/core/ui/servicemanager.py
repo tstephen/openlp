@@ -628,6 +628,8 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
                                     continue
                                 write_list.append(path_from_tuple)
             for (audio_path, audio_file_hash) in item['service_item'].background_audio:
+                if not audio_file_hash:
+                    audio_file_hash = sha256_file_hash(audio_path)
                 service_path = audio_file_hash + audio_path.suffix
                 audio_path_tuple = (audio_path, service_path)
                 if audio_path_tuple in write_list:
