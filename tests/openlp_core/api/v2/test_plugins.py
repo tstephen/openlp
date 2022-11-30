@@ -88,3 +88,9 @@ def test_plugin_set_search_option_returns_plugin_exception(flask_client, setting
     Registry().register('plugin_manager', MagicMock())
     res = flask_client.post('/api/v2/plugins/songs/search-options', json=dict(option=''))
     assert res.status_code == 400
+
+
+def test_plugin_songs_transpose_returns_plugin_exception(flask_client, settings):
+    Registry().register('plugin_manager', MagicMock())
+    res = flask_client.get('/api/v2/plugins/songs/transpose-live-item/test')
+    assert res.status_code == 400
