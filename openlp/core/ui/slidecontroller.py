@@ -833,14 +833,15 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         # See bug #791050
         self.toolbar.show()
 
-    def refresh_service_item(self):
+    def refresh_service_item(self, service_item=None):
         """
-        Method to update the service item if the screen has changed
+        Method to update the current service item
         """
-        if self.service_item.is_text() or self.service_item.is_image():
-            item = self.service_item
-            item.render()
-            self._process_item(item, self.selected_row)
+        selected_row = self.selected_row
+        if not service_item:
+            service_item = self.service_item
+        self._process_item(service_item, selected_row, True)
+        self.slide_selected()
 
     def add_service_item(self, item):
         """

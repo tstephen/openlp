@@ -1777,8 +1777,14 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
         if not theme:
             theme = None
         item = self.find_service_item()[0]
-        self.service_items[item]['service_item'].update_theme(theme)
-        self.regenerate_service_items(True)
+        service_item = self.service_items[item]['service_item']
+        # Needs to be checked before updating theme on service, as it generates a new identifier
+        is_selected_item_live = self.live_controller.service_item and \
+            service_item.unique_identifier == self.live_controller.service_item.unique_identifier
+        service_item.update_theme(theme)
+        # self.regenerate_service_items(True)
+        if self.settings.value('themes/hot reload') and is_selected_item_live:
+            self.live_controller.refresh_service_item(service_item)
 
     def on_make_live_action_triggered(self, checked):
         """
