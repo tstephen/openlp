@@ -1919,7 +1919,7 @@ Vil du likevel legge til de andre bildene?</translation>
     <message>
         <location filename="../../openlp/plugins/images/lib/imagetab.py" line="69"/>
         <source>Image Background</source>
-        <translation type="unfinished"/>
+        <translation>Bildebakgrunn</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/images/lib/imagetab.py" line="70"/>
@@ -1934,7 +1934,7 @@ Vil du likevel legge til de andre bildene?</translation>
     <message>
         <location filename="../../openlp/plugins/images/lib/imagetab.py" line="72"/>
         <source>Theme:</source>
-        <translation type="unfinished"/>
+        <translation>Tema:</translation>
     </message>
 </context>
 <context>
@@ -2538,7 +2538,7 @@ OpenLP will attempt to continue.</source>
     <message>
         <location filename="../../openlp/core/api/tab.py" line="52"/>
         <source>API</source>
-        <translation type="unfinished"/>
+        <translation>API</translation>
     </message>
     <message>
         <location filename="../../openlp/core/api/tab.py" line="396"/>

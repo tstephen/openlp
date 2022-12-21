@@ -5880,7 +5880,7 @@ Failo prievardis nėra palaikomas</translation>
     <message>
         <location filename="../../openlp/core/widgets/widgets.py" line="194"/>
         <source>({screen.geometry.width()} x {screen.geometry.height()} pixels)</source>
-        <translation type="unfinished"/>
+        <translation>({screen.geometry.width()} x {screen.geometry.height()} pikselių)</translation>
     </message>
 </context>
 <context>
