@@ -87,7 +87,7 @@ def test_load_video(media_env, settings):
     #       The controls should have been made visible
     media_env.media_controller.media_reset.assert_called_once_with(mocked_slide_controller)
     assert mocked_slide_controller.media_info.volume == 1
-    media_env.media_controller.media_play.assert_called_once_with(mocked_slide_controller)
+    media_env.media_controller.media_play.assert_called_once_with(mocked_slide_controller, False)
     media_env.media_controller.set_controls_visible.assert_called_once_with(mocked_slide_controller, True)
 
 
