@@ -333,7 +333,9 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         if self.is_theme_background:
             self.is_autoplay = True
         if self.is_autoplay:
-            if not self.media_play(controller):
+            start_hidden = self.is_theme_background and controller.is_live and \
+                (controller.current_hide_mode == HideMode.Blank or controller.current_hide_mode == HideMode.Screen)
+            if not self.media_play(controller, start_hidden):
                 critical_error_message_box(translate('MediaPlugin.MediaItem', 'Unsupported File'),
                                            translate('MediaPlugin.MediaItem', 'Unsupported File'))
                 return False
@@ -440,11 +442,12 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         """
         return self.media_play(self.live_controller)
 
-    def media_play(self, controller):
+    def media_play(self, controller, start_hidden=False):
         """
         Responds to the request to play a loaded video
 
         :param controller: The controller to be played
+        :param start_hidden: Whether to play the video without showing the controller
         """
         self.log_debug(f'media_play is_live:{controller.is_live}')
         controller.seek_slider.blockSignals(True)
@@ -455,7 +458,8 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
             controller.volume_slider.blockSignals(False)
             return False
         self.media_volume(controller, controller.media_info.volume)
-        self._media_set_visibility(controller, True)
+        if not start_hidden:
+            self._media_set_visibility(controller, True)
         controller.mediabar.actions['playbackPlay'].setVisible(False)
         controller.mediabar.actions['playbackPause'].setVisible(True)
         controller.mediabar.actions['playbackStop'].setDisabled(False)
@@ -728,6 +732,9 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
             self.live_hide_timer.stop()
         visible = visible and controller.media_info.media_type is not MediaType.Audio
         self.current_media_players[controller.controller_type].set_visible(controller, visible)
+        if controller.is_live and visible:
+            display = self._define_display(controller)
+            display.raise_()
 
     def media_blank(self, msg):
         """
@@ -756,7 +763,7 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
             else:
                 self.live_hide_timer.stop()
         else:
-            if playing:
+            if playing and not self.is_theme_background:
                 self.media_pause(self.live_controller)
             self._media_set_visibility(self.live_controller, False)
 
