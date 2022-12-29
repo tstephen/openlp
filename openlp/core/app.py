@@ -449,7 +449,7 @@ def main():
     else:
         application.setApplicationName('OpenLP')
         set_up_logging(AppLocation.get_directory(AppLocation.CacheDir))
-        set_up_web_engine_cache(portable_path / 'Other' / 'web_cache')
+        set_up_web_engine_cache(AppLocation.get_directory(AppLocation.CacheDir) / 'web_cache')
     # Set the libvlc environment variable if we're frozen
     if getattr(sys, 'frozen', False) and is_win():
         # Path to libvlc and the plugins
