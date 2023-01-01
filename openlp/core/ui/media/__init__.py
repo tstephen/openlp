@@ -50,6 +50,21 @@ class MediaState(object):
     Stopped = 4
 
 
+class VlCState(object):
+    """
+    A copy of the VLC States to allow for readable code
+    From https://www.olivieraubert.net/vlc/python-ctypes/doc/vlc.State-class.html
+    """
+    NothingSpecial = 0
+    Opening = 1
+    Buffering = 2
+    Playing = 3
+    Paused = 4
+    Stopped = 5
+    Ended = 6
+    Error = 7
+
+
 class MediaType(object):
     """
     An enumeration of possible Media Types
