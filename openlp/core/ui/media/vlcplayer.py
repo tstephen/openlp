@@ -35,12 +35,10 @@ from openlp.core.common.i18n import translate
 from openlp.core.common.platform import is_linux, is_macosx, is_win
 from openlp.core.display.screens import ScreenList
 from openlp.core.lib.ui import critical_error_message_box
-from openlp.core.ui.media import MediaState, MediaType, VlCState
+from openlp.core.ui.media import MediaState, MediaType, VlCState, get_volume
 from openlp.core.ui.media.mediaplayer import MediaPlayer
 
 log = logging.getLogger(__name__)
-
-# Audio and video extensions copied from 'include/vlc_interface.h' from vlc 2.2.0 source
 
 
 STATE_WAIT_TIME = 60
@@ -229,7 +227,7 @@ class VlcPlayer(MediaPlayer):
         controller.vlc_media.parse()
         controller.seek_slider.setMinimum(controller.media_info.start_time)
         controller.seek_slider.setMaximum(controller.media_info.end_time)
-        self.volume(controller, controller.media_info.volume)
+        self.volume(controller, get_volume(controller))
         return True
 
     def media_state_wait(self, controller, media_state):
@@ -275,7 +273,7 @@ class VlcPlayer(MediaPlayer):
         threading.Thread(target=controller.vlc_media_player.play).start()
         if not self.media_state_wait(controller, VlCState.Playing):
             return False
-        self.volume(controller, controller.media_info.volume)
+        self.volume(controller, get_volume(controller))
         self.set_state(MediaState.Playing, controller)
         return True
 
