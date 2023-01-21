@@ -683,6 +683,9 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
                 else:
                     self._media_set_visibility(controller, False)
                 del self.current_media_players[controller.controller_type]
+            controller.mediabar.actions['playbackPlay'].setVisible(True)
+            controller.mediabar.actions['playbackStop'].setDisabled(True)
+            controller.mediabar.actions['playbackPause'].setVisible(False)
 
     def media_hide_msg(self, msg):
         """
