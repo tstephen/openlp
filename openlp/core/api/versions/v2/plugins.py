@@ -141,7 +141,6 @@ def set_search_option(plugin):
 
 
 @plugins.route('/songs/transpose-live-item/<transpose_value>', methods=['GET'])
-@login_required
 def transpose(transpose_value):
     log.debug('songs/transpose-live-item called')
     if transpose_value:
