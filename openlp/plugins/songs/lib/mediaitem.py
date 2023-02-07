@@ -568,8 +568,11 @@ class SongMediaItem(MediaManagerItem):
         if self.settings.value('songs/add songbook slide') and song.songbook_entries:
             first_slide = '\n'
             for songbook_entry in song.songbook_entries:
-                first_slide += '{book} #{num}'.format(book=songbook_entry.songbook.name,
-                                                      num=songbook_entry.entry)
+                if songbook_entry.entry:
+                    first_slide += '{book} #{num}'.format(book=songbook_entry.songbook.name,
+                                                          num=songbook_entry.entry)
+                else:
+                    first_slide += songbook_entry.songbook.name
                 if songbook_entry.songbook.publisher:
                     first_slide += ' ({pub})'.format(pub=songbook_entry.songbook.publisher)
                 first_slide += '\n\n'
