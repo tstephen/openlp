@@ -21,27 +21,44 @@
 """
 The :mod:`db` module provides the database and schema that is the backend for the Images plugin.
 """
-from sqlalchemy import Column, ForeignKey, Table, types
-from sqlalchemy.orm import mapper
+from sqlalchemy import Column, ForeignKey, MetaData
+from sqlalchemy.orm import Session
+from sqlalchemy.types import Integer, Unicode
 
-from openlp.core.lib.db import BaseModel, PathType, init_db
+# Maintain backwards compatibility with older versions of SQLAlchemy while supporting SQLAlchemy 1.4+
+try:
+    from sqlalchemy.orm import declarative_base
+except ImportError:
+    from sqlalchemy.ext.declarative import declarative_base
+
+from openlp.core.lib.db import PathType, init_db
 
 
-class ImageGroups(BaseModel):
+Base = declarative_base(MetaData())
+
+
+class ImageGroups(Base):
     """
     ImageGroups model.
     """
-    pass
+    __tablename__ = 'image_groups'
+    id = Column(Integer(), primary_key=True)
+    parent_id = Column(Integer())
+    group_name = Column(Unicode(128))
 
 
-class ImageFilenames(BaseModel):
+class ImageFilenames(Base):
     """
     ImageFilenames model.
     """
-    pass
+    __tablename__ = 'image_filenames'
+    id = Column(Integer(), primary_key=True)
+    group_id = Column(Integer(), ForeignKey('image_groups.id'), default=None)
+    file_path = Column(PathType(), nullable=False)
+    file_hash = Column(Unicode(128), nullable=False)
 
 
-def init_schema(url):
+def init_schema(url: str) -> Session:
     """
     Setup the images database connection and initialise the database schema.
 
@@ -66,25 +83,6 @@ def init_schema(url):
             * file_path
             * file_hash
     """
-    session, metadata = init_db(url)
-
-    # Definition of the "image_groups" table
-    image_groups_table = Table('image_groups', metadata,
-                               Column('id', types.Integer(), primary_key=True),
-                               Column('parent_id', types.Integer()),
-                               Column('group_name', types.Unicode(128))
-                               )
-
-    # Definition of the "image_filenames" table
-    image_filenames_table = Table('image_filenames', metadata,
-                                  Column('id', types.Integer(), primary_key=True),
-                                  Column('group_id', types.Integer(), ForeignKey('image_groups.id'), default=None),
-                                  Column('file_path', PathType(), nullable=False),
-                                  Column('file_hash', types.Unicode(128), nullable=False)
-                                  )
-
-    mapper(ImageGroups, image_groups_table)
-    mapper(ImageFilenames, image_filenames_table)
-
+    session, metadata = init_db(url, base=Base)
     metadata.create_all(checkfirst=True)
     return session

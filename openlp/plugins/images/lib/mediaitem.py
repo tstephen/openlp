@@ -649,7 +649,7 @@ class ImageMediaItem(MediaManagerItem):
                     preselect_group = selected_item.data(0, QtCore.Qt.UserRole).id
         # Show 'add group' dialog
         if self.add_group_form.exec(show_top_level_group=True, selected_group=preselect_group):
-            new_group = ImageGroups.populate(parent_id=self.add_group_form.parent_group_combobox.itemData(
+            new_group = ImageGroups(parent_id=self.add_group_form.parent_group_combobox.itemData(
                 self.add_group_form.parent_group_combobox.currentIndex(), QtCore.Qt.UserRole),
                 group_name=self.add_group_form.name_edit.text())
             if not self.check_group_exists(new_group):
