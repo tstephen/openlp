@@ -337,7 +337,7 @@ class CustomMediaItem(MediaManagerItem):
             else:
                 credits = footer
         custom = CustomSlide(title=item.title, text=str(custom_xml.extract_xml(), 'utf-8'),
-                             theme_name=item.theme if item.theme_name else '', credits=credits)
+                             theme_name=item.theme if item.theme else '', credits=credits)
         self.plugin.db_manager.save_object(custom)
         self.on_search_text_button_clicked()
 
