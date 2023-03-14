@@ -21,9 +21,8 @@
 """
 The :mod:`db` module provides the database and schema that is the backend for the Images plugin.
 """
-from sqlalchemy import Column, ForeignKey, MetaData
+from sqlalchemy import MetaData
 from sqlalchemy.orm import Session
-from sqlalchemy.types import Integer, Unicode
 
 # Maintain backwards compatibility with older versions of SQLAlchemy while supporting SQLAlchemy 1.4+
 try:
@@ -31,31 +30,22 @@ try:
 except ImportError:
     from sqlalchemy.ext.declarative import declarative_base
 
-from openlp.core.lib.db import PathType, init_db
+from openlp.core.lib.db import FolderMixin, ItemMixin, init_db
 
 
 Base = declarative_base(MetaData())
 
 
-class ImageGroups(Base):
+class Folder(Base, FolderMixin):
     """
-    ImageGroups model.
+    Folder model.
     """
-    __tablename__ = 'image_groups'
-    id = Column(Integer(), primary_key=True)
-    parent_id = Column(Integer())
-    group_name = Column(Unicode(128))
 
 
-class ImageFilenames(Base):
+class Item(Base, ItemMixin):
     """
-    ImageFilenames model.
+    Item model.
     """
-    __tablename__ = 'image_filenames'
-    id = Column(Integer(), primary_key=True)
-    group_id = Column(Integer(), ForeignKey('image_groups.id'), default=None)
-    file_path = Column(PathType(), nullable=False)
-    file_hash = Column(Unicode(128), nullable=False)
 
 
 def init_schema(url: str) -> Session:
