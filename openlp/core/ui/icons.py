@@ -28,6 +28,7 @@ from PyQt5 import QtGui, QtWidgets
 
 from openlp.core.common import Singleton
 from openlp.core.common.applocation import AppLocation
+from openlp.core.common.registry import Registry
 from openlp.core.lib import build_icon
 from openlp.core.ui.style import is_ui_theme_dark
 
@@ -47,11 +48,12 @@ class UiIcons(metaclass=Singleton):
         charmap_path = AppLocation.get_directory(AppLocation.AppDir) / 'core' / 'ui' / 'fonts' / 'openlp-charmap.json'
         qta.load_font('op', font_path, charmap_path)
         palette = QtWidgets.QApplication.palette()
-        qta.set_defaults(color=palette.color(QtGui.QPalette.Active,
-                                             QtGui.QPalette.WindowText),
-                         color_disabled=palette.color(QtGui.QPalette.Disabled,
-                                                      QtGui.QPalette.WindowText))
-        icon_list = {
+        self._default_icon_colors = {
+            "color": palette.color(QtGui.QPalette.Active, QtGui.QPalette.WindowText),
+            "color_disabled": palette.color(QtGui.QPalette.Disabled, QtGui.QPalette.WindowText)
+        }
+        qta.set_defaults(**self._default_icon_colors)
+        self._icon_list = {
             'active': {'icon': 'fa.child'},
             'add': {'icon': 'fa.plus-circle'},
             'alert': {'icon': 'fa.exclamation-triangle'},
@@ -174,7 +176,7 @@ class UiIcons(metaclass=Singleton):
             'view_grid': {'icon': 'fa.th-large'},
             'volunteer': {'icon': 'fa.group'}
         }
-        self.load_icons(icon_list)
+        self.load_icons(self._icon_list)
         self.main_icon = build_icon(':/icon/openlp-logo.svg')
 
     def load_icons(self, icon_list):
@@ -199,6 +201,31 @@ class UiIcons(metaclass=Singleton):
             except Exception:
                 log.exception(f'Unexpected error for icon with key: {key}')
                 setattr(self, key, qta.icon('fa.exclamation-circle', color='red'))
+
+    def get_icon_variant(self, icon_name, **kwargs):
+        """
+        See qta.icon() documentation for more information.
+
+        :param icon_name: UiIcons' icon name
+        """
+        if icon_name not in self._icon_list:
+            raise KeyError("Icon '{icon}' is not defined.".format(icon=icon_name))
+        icon = self._icon_list[icon_name]['icon']
+        is_dark = is_ui_theme_dark()
+        if is_dark:
+            args = {"color": "white", **kwargs}
+        else:
+            args = kwargs
+        return qta.icon(icon, **args)
+
+    def get_icon_variant_selected(self, icon_name):
+        """
+        Returns an icon that honors the Qt's Pallete HighlightText color when host button is selected.
+        """
+        qtApp = Registry().get('application-qt')
+        color = qtApp.palette().highlightedText().color()
+        icon = self.get_icon_variant(icon_name, color_on=color, color_off_active=self._default_icon_colors['color'])
+        return icon
 
     @staticmethod
     def _print_icons():
