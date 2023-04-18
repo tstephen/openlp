@@ -196,7 +196,7 @@ class ServiceItem(RegistryProperties):
         elif self.name == 'media':
             self.icon = UiIcons().video
         else:
-            self.icon = UiIcons().clone
+            self.icon = UiIcons().custom
 
     def _create_slides(self):
         """
