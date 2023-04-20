@@ -29,7 +29,7 @@ import re
 from openlp.core.common.i18n import translate
 from openlp.core.common.registry import Registry
 from openlp.core.lib.formattingtags import FormattingTags
-from openlp.plugins.custom.lib.customxmlhandler import CustomXMLBuilder
+from openlp.plugins.custom.lib.customxmlhandler import CustomXML
 from openlp.plugins.custom.lib.db import CustomSlide
 
 
@@ -42,7 +42,7 @@ class PlanningCenterCustomImport(object):
     :param theme_name:  The theme_name to use for the slide.
     """
     def add_slide(self, item_title, html_details, theme_name):
-        sxml = CustomXMLBuilder()
+        sxml = CustomXML()
         slide_content = ''
         if html_details is None:
             slide_content = item_title

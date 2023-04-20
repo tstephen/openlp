@@ -34,7 +34,7 @@ from openlp.core.lib.serviceitem import ItemCapabilities
 from openlp.core.lib.ui import create_widget_action
 from openlp.core.ui.icons import UiIcons
 from openlp.plugins.custom.forms.editcustomform import EditCustomForm
-from openlp.plugins.custom.lib.customxmlhandler import CustomXMLBuilder, CustomXMLParser
+from openlp.plugins.custom.lib.customxmlhandler import CustomXML
 from openlp.plugins.custom.lib.db import CustomSlide
 
 
@@ -231,7 +231,7 @@ class CustomMediaItem(MediaManagerItem):
         theme = custom_slide.theme_name
         if theme:
             service_item.theme = theme
-        custom_xml = CustomXMLParser(custom_slide.text)
+        custom_xml = CustomXML(custom_slide.text)
         verse_list = custom_xml.get_verses()
         raw_slides = [verse[1] for verse in verse_list]
         service_item.title = title
@@ -325,7 +325,7 @@ class CustomMediaItem(MediaManagerItem):
         :param item:  the service item to be converted to a Custom item
         """
         # Create the text
-        custom_xml = CustomXMLBuilder()
+        custom_xml = CustomXML()
         for (idx, slide) in enumerate(item.slides):
             custom_xml.add_verse_to_lyrics('custom', str(idx + 1), slide['text'])
         # Create the credits from the footer
