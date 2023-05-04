@@ -446,12 +446,12 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         :param start_hidden: Whether to play the video without showing the controller
         """
         self.log_debug(f'media_play is_live:{controller.is_live}')
-        controller.seek_slider.blockSignals(True)
-        controller.volume_slider.blockSignals(True)
+        controller.mediabar.seek_slider.blockSignals(True)
+        controller.mediabar.volume_slider.blockSignals(True)
         display = self._define_display(controller)
         if not self.current_media_players[controller.controller_type].play(controller, display):
-            controller.seek_slider.blockSignals(False)
-            controller.volume_slider.blockSignals(False)
+            controller.mediabar.seek_slider.blockSignals(False)
+            controller.mediabar.volume_slider.blockSignals(False)
             return False
         self.media_volume(controller, get_volume(controller))
         if not start_hidden:
@@ -472,8 +472,8 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         else:
             if not self.preview_timer.isActive():
                 self.preview_timer.start()
-        controller.seek_slider.blockSignals(False)
-        controller.volume_slider.blockSignals(False)
+        controller.mediabar.seek_slider.blockSignals(False)
+        controller.mediabar.volume_slider.blockSignals(False)
         controller.media_info.is_playing = True
         if not controller.media_info.is_background:
             display = self._define_display(controller)
@@ -519,10 +519,10 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         end_minutes = end_seconds // 60
         end_seconds %= 60
         if end_minutes == 0 and end_seconds == 0:
-            controller.position_label.setText('')
+            controller.mediabar.position_label.setText('')
         else:
-            controller.position_label.setText(' %02d:%02d / %02d:%02d' %
-                                              (minutes, seconds, end_minutes, end_seconds))
+            controller.mediabar.position_label.setText(' %02d:%02d / %02d:%02d' %
+                                                       (minutes, seconds, end_minutes, end_seconds))
 
     def media_pause_msg(self, msg):
         """
@@ -613,7 +613,7 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
             controller.mediabar.actions['playbackPause'].setVisible(False)
             controller.media_info.is_playing = False
             controller.media_info.timer = controller.media_info.start_time
-            controller.seek_slider.setSliderPosition(controller.media_info.start_time)
+            controller.mediabar.seek_slider.setSliderPosition(controller.media_info.start_time)
             self._update_seek_ui(controller)
             controller.output_has_changed()
             return True
@@ -639,7 +639,7 @@ class MediaController(RegistryBase, LogMixin, RegistryProperties):
         self.log_debug(f'media_volume {volume}')
         save_volume(controller, volume)
         self.current_media_players[controller.controller_type].volume(controller, volume)
-        controller.volume_slider.setValue(volume)
+        controller.mediabar.volume_slider.setValue(volume)
 
     def media_seek_msg(self, msg):
         """

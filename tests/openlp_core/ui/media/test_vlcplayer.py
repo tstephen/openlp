@@ -357,8 +357,8 @@ def test_load_audio_cd(mocked_normcase, mocked_get_vlc, mocked_is_win, settings)
     mocked_controller.vlc_media_player.set_media.assert_called_with(mocked_vlc_media)
     mocked_vlc_media.parse.assert_called_with()
     mocked_media_state_wait.assert_called_with(mocked_controller, ANY)
-    mocked_controller.seek_slider.setMinimum.assert_called_with(20000)
-    mocked_controller.seek_slider.setMaximum.assert_called_with(30000)
+    mocked_controller.mediabar.seek_slider.setMinimum.assert_called_with(20000)
+    mocked_controller.mediabar.seek_slider.setMaximum.assert_called_with(30000)
     assert result is True
 
 
@@ -494,8 +494,8 @@ def test_load_dvd(mocked_normcase, mocked_get_vlc, mocked_is_win, settings):
     mocked_controller.vlc_media_player.video_set_spu.assert_called_with(4)
     mocked_vlc_media.parse.assert_called_with()
     mocked_media_state_wait.assert_called_with(mocked_controller, ANY)
-    mocked_controller.seek_slider.setMinimum.assert_called_with(20000)
-    mocked_controller.seek_slider.setMaximum.assert_called_with(30000)
+    mocked_controller.mediabar.seek_slider.setMinimum.assert_called_with(20000)
+    mocked_controller.mediabar.seek_slider.setMaximum.assert_called_with(30000)
     assert result is True
 
 
@@ -858,7 +858,7 @@ def test_update_ui(mocked_get_vlc):
     mocked_get_vlc.return_value = mocked_vlc
     mocked_controller = MagicMock()
     mocked_controller.media_info.end_time = 300
-    mocked_controller.seek_slider.isSliderDown.return_value = False
+    mocked_controller.mediabar.seek_slider.isSliderDown.return_value = False
     mocked_display = MagicMock()
     mocked_controller.vlc_media.get_state.return_value = 1
     mocked_controller.vlc_media_player.get_time.return_value = 400000
@@ -869,9 +869,9 @@ def test_update_ui(mocked_get_vlc):
 
     # THEN: Certain methods should be called
     mocked_controller.vlc_media_player.get_time.assert_called_with()
-    mocked_controller.seek_slider.setSliderPosition.assert_called_with(400000)
+    mocked_controller.mediabar.seek_slider.setSliderPosition.assert_called_with(400000)
     expected_calls = [call(True), call(False)]
-    assert expected_calls == mocked_controller.seek_slider.blockSignals.call_args_list
+    assert expected_calls == mocked_controller.mediabar.seek_slider.blockSignals.call_args_list
 
 
 @patch('openlp.core.ui.media.vlcplayer.get_vlc')
@@ -887,7 +887,7 @@ def test_update_ui_dvd(mocked_get_vlc):
     mocked_controller.media_info = ItemMediaInfo()
     mocked_controller.media_info.start_time = 100
     mocked_controller.media_info.end_time = 300
-    mocked_controller.seek_slider.isSliderDown.return_value = False
+    mocked_controller.mediabar.seek_slider.isSliderDown.return_value = False
     mocked_display = MagicMock()
     mocked_controller.vlc_media.get_state.return_value = 1
     mocked_controller.vlc_media_player.get_time.return_value = 200
@@ -899,6 +899,6 @@ def test_update_ui_dvd(mocked_get_vlc):
 
     # THEN: Certain methods should be called
     mocked_controller.vlc_media_player.get_time.assert_called_with()
-    mocked_controller.seek_slider.setSliderPosition.assert_called_with(200)
+    mocked_controller.mediabar.seek_slider.setSliderPosition.assert_called_with(200)
     expected_calls = [call(True), call(False)]
-    assert expected_calls == mocked_controller.seek_slider.blockSignals.call_args_list
+    assert expected_calls == mocked_controller.mediabar.seek_slider.blockSignals.call_args_list
