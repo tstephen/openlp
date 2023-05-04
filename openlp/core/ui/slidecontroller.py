@@ -46,7 +46,7 @@ from openlp.core.ui import DisplayControllerType, HideMode
 from openlp.core.ui.icons import UiIcons
 from openlp.core.ui.media import media_empty_song
 from openlp.core.widgets.layouts import AspectRatioLayout
-from openlp.core.widgets.toolbar import OpenLPToolbar
+from openlp.core.widgets.toolbar import MediaToolbar, OpenLPToolbar
 from openlp.core.widgets.views import ListPreviewWidget
 
 # Threshold which has to be trespassed to toggle.
@@ -72,45 +72,6 @@ NON_TEXT_MENU = [
     'blank_screen_button',
     'desktop_screen_button'
 ]
-
-
-class MediaSlider(QtWidgets.QSlider):
-    """
-    Allows the mouse events of a slider to be overridden and extra functionality added
-    """
-    def __init__(self, direction, manager, controller):
-        """
-        Constructor
-        """
-        super(MediaSlider, self).__init__(direction)
-        self.manager = manager
-        self.controller = controller
-
-    def mouseMoveEvent(self, event):
-        """
-        Override event to allow hover time to be displayed.
-
-        :param event: The triggering event
-        """
-        time_value = QtWidgets.QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), event.x(), self.width())
-        self.setToolTip('%s' % datetime.timedelta(seconds=int(time_value / 1000)))
-        QtWidgets.QSlider.mouseMoveEvent(self, event)
-
-    def mousePressEvent(self, event):
-        """
-        Mouse Press event no new functionality
-        :param event: The triggering event
-        """
-        QtWidgets.QSlider.mousePressEvent(self, event)
-
-    def mouseReleaseEvent(self, event):
-        """
-        Set the slider position when the mouse is clicked and released on the slider.
-
-        :param event: The triggering event
-        """
-        self.setValue(QtWidgets.QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), event.x(), self.width()))
-        QtWidgets.QSlider.mouseReleaseEvent(self, event)
 
 
 class InfoLabel(QtWidgets.QLabel):
@@ -410,56 +371,11 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
                                             triggers=self.on_clear)
         self.controller_layout.addWidget(self.toolbar)
         # Build a Media ToolBar
-        self.mediabar = OpenLPToolbar(self)
-        self.mediabar.setObjectName('slide_controller_toolbar')
-        self.mediabar.add_toolbar_action('playbackPlay', text='media_playback_play',
-                                         icon=UiIcons().play,
-                                         tooltip=translate('OpenLP.SlideController', 'Start playing media.'),
-                                         triggers=self.send_to_plugins)
-        self.mediabar.add_toolbar_action('playbackPause', text='media_playback_pause',
-                                         icon=UiIcons().pause,
-                                         tooltip=translate('OpenLP.SlideController', 'Pause playing media.'),
-                                         triggers=self.send_to_plugins)
-        self.mediabar.add_toolbar_action('playbackStop', text='media_playback_stop',
-                                         icon=UiIcons().stop,
-                                         tooltip=translate('OpenLP.SlideController', 'Stop playing media.'),
-                                         triggers=self.send_to_plugins)
-        self.mediabar.add_toolbar_action('playbackLoop', text='media_playback_loop',
-                                         icon=UiIcons().get_icon_variant_selected('repeat'), checked=False,
-                                         tooltip=translate('OpenLP.SlideController', 'Loop playing media.'),
-                                         triggers=self.send_to_plugins)
-        self.position_label = QtWidgets.QLabel()
-        self.position_label.setText(' 00:00 / 00:00')
-        self.position_label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        self.position_label.setToolTip(translate('OpenLP.SlideController', 'Video timer.'))
-        self.position_label.setMinimumSize(90, 0)
-        self.position_label.setObjectName('position_label')
-        self.mediabar.add_toolbar_widget(self.position_label)
-        # Build the media seek_slider.
-        self.seek_slider = MediaSlider(QtCore.Qt.Horizontal, self, self)
-        self.seek_slider.setMaximum(1000)
-        self.seek_slider.setTracking(True)
-        self.seek_slider.setMouseTracking(True)
-        self.seek_slider.setToolTip(translate('OpenLP.SlideController', 'Video position.'))
-        self.seek_slider.setGeometry(QtCore.QRect(90, 260, 221, 24))
-        self.seek_slider.setObjectName('seek_slider')
-        self.mediabar.add_toolbar_widget(self.seek_slider)
-        # Build the volume_slider.
-        self.volume_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
-        self.volume_slider.setTickInterval(10)
-        self.volume_slider.setTickPosition(QtWidgets.QSlider.TicksAbove)
-        self.volume_slider.setMinimum(0)
-        self.volume_slider.setMaximum(100)
-        self.volume_slider.setTracking(True)
-        self.volume_slider.setToolTip(translate('OpenLP.SlideController', 'Audio Volume.'))
-        self.volume_slider.setGeometry(QtCore.QRect(90, 160, 221, 24))
-        self.volume_slider.setObjectName('volume_slider')
-        self.mediabar.add_toolbar_widget(self.volume_slider)
+        self.mediabar = MediaToolbar(self)
+        self.mediabar.identification_label.setText(translate('OpenLP.SlideController', 'Media'))
+        self.mediabar.on_action = lambda *args: self.send_to_plugins(*args)
         self.controller_layout.addWidget(self.mediabar)
         self.mediabar.setVisible(False)
-        # Signals
-        self.seek_slider.valueChanged.connect(self.send_to_plugins)
-        self.volume_slider.valueChanged.connect(self.send_to_plugins)
         if self.is_live:
             self.new_song_menu()
             self.toolbar.add_toolbar_widget(self.song_menu)

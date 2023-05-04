@@ -227,8 +227,8 @@ class VlcPlayer(MediaPlayer, LogMixin):
             controller.media_info.end_time = controller.media_info.length
         # parse the metadata of the file
         controller.vlc_media.parse()
-        controller.seek_slider.setMinimum(controller.media_info.start_time)
-        controller.seek_slider.setMaximum(controller.media_info.end_time)
+        controller.mediabar.seek_slider.setMinimum(controller.media_info.start_time)
+        controller.mediabar.seek_slider.setMaximum(controller.media_info.end_time)
         self.volume(controller, get_volume(controller))
         return True
 
@@ -347,7 +347,7 @@ class VlcPlayer(MediaPlayer, LogMixin):
         :param controller: Which Controller is running the show.
         :param output_display: The display where the media is
         """
-        if not controller.seek_slider.isSliderDown():
-            controller.seek_slider.blockSignals(True)
-            controller.seek_slider.setSliderPosition(controller.vlc_media_player.get_time())
-            controller.seek_slider.blockSignals(False)
+        if not controller.mediabar.seek_slider.isSliderDown():
+            controller.mediabar.seek_slider.blockSignals(True)
+            controller.mediabar.seek_slider.setSliderPosition(controller.vlc_media_player.get_time())
+            controller.mediabar.seek_slider.blockSignals(False)
