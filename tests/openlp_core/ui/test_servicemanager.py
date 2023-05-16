@@ -24,8 +24,10 @@ Package to test the openlp.core.ui.slidecontroller package.
 import json
 from functools import partial
 from pathlib import Path
+import threading
 from unittest.mock import MagicMock, patch
 from zipfile import BadZipFile
+from time import sleep
 
 import pytest
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -2348,3 +2350,27 @@ def test_replace_service_item(registry, service_manager):
     # THEN new_item should replace item1, and only replaces that one item
     assert service_manager.service_items[0]['service_item'] == new_item
     new_item.merge.assert_called_once_with(item1)
+
+
+def test_replace_service_list_call_not_parallel(registry, service_manager: ServiceManager):
+    """
+    Tests if _replace_service_list calls are not done in parallel
+    """
+    # GIVEN a service manager and a mocked repaint
+    def mock_repaint():
+        service_manager.is_running_repaint = True
+        sleep(0.25)
+        service_manager.is_running_repaint = False
+
+    service_manager._repaint_service_list = MagicMock(side_effect=mock_repaint)
+
+    # WHEN repaint_service_list is called from different threads
+    thread_1 = threading.Thread(target=lambda: service_manager.repaint_service_list(-1, -1))
+    thread_2 = threading.Thread(target=lambda: service_manager.repaint_service_list(-1, -1))
+    thread_1.start()
+    thread_2.start()
+
+    # THEN the _repaint_service_list call must be called only once
+    thread_1.join()
+    thread_2.join()
+    service_manager._repaint_service_list.assert_called_once()
