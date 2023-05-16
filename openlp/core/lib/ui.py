@@ -127,6 +127,22 @@ def critical_error_message_box(title=None, message=None, parent=None, question=F
         QtWidgets.QMessageBox.critical(parent, title, message)
 
 
+def warning_message_box(title=None, message=None, parent=None, question=False):
+    """
+    Provides a standard critical message box for errors that OpenLP displays to users.
+
+    :param title: The title for the message box.
+    :param message: The message to display to the user.
+    :param parent: The parent UI element to attach the dialog to.
+    :param question: Should this message box question the user.
+    """
+    if question:
+        return QtWidgets.QMessageBox.warning(parent, UiStrings().Warning, message,
+                                             QtWidgets.QMessageBox.StandardButtons(QtWidgets.QMessageBox.Yes |
+                                                                                   QtWidgets.QMessageBox.No))
+    QtWidgets.QMessageBox.warning(parent, title, message)
+
+
 def create_horizontal_adjusting_combo_box(parent, name):
     """
     Creates a QComboBox with adapting width for media items.

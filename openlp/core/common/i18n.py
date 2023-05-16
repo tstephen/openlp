@@ -456,6 +456,7 @@ class UiStrings(metaclass=Singleton):
         self.View = translate('OpenLP.Ui', 'View')
         self.ViewMode = translate('OpenLP.Ui', 'View Mode')
         self.Video = translate('OpenLP.Ui', 'Video')
+        self.Warning = translate('OpenLP.Ui', 'Warning')
         self.WebDownloadText = translate('OpenLP.Ui', 'Web Interface, Download and Install Latest Version')
         self.WholeVerseContinuous = translate('OpenLP.Ui', 'Continuous (whole verses)')
         book_chapter = translate('OpenLP.Ui', 'Book Chapter')

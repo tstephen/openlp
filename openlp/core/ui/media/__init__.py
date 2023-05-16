@@ -91,6 +91,7 @@ class ItemMediaInfo(object):
     end_time = 0
     title_track = 0
     is_playing = False
+    old_timer = -1
     timer = 1000
     audio_track = 0
     subtitle_track = 0
