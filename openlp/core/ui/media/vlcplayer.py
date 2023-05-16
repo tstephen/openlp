@@ -28,6 +28,7 @@ import sys
 import threading
 from datetime import datetime
 from time import sleep
+from typing import Type
 
 from PyQt5 import QtCore, QtWidgets
 
@@ -35,7 +36,9 @@ from openlp.core.common.i18n import translate
 from openlp.core.common.mixins import LogMixin
 from openlp.core.common.platform import is_linux, is_macosx, is_win
 from openlp.core.display.screens import ScreenList
+from openlp.core.display.window import DisplayWindow
 from openlp.core.lib.ui import critical_error_message_box
+from openlp.core.ui.slidecontroller import SlideController
 from openlp.core.ui.media import MediaState, MediaType, VlCState, get_volume
 from openlp.core.ui.media.mediaplayer import MediaPlayer
 
@@ -99,7 +102,7 @@ class VlcPlayer(MediaPlayer, LogMixin):
         self.parent = parent
         self.can_folder = True
 
-    def setup(self, controller, display):
+    def setup(self, controller: SlideController, display: Type[DisplayWindow]) -> None:
         """
         Set up the media player
 
@@ -162,14 +165,14 @@ class VlcPlayer(MediaPlayer, LogMixin):
         """
         return get_vlc() is not None
 
-    def load(self, controller, output_display, file):
+    def load(self, controller: SlideController, output_display: Type[DisplayWindow], file: str) -> bool:
         """
         Load a video into VLC
 
         :param controller: The controller where the media is
         :param output_display: The display where the media is
         :param file: file/stream to be played
-        :return:
+        :return:  Success or Failure
         """
         if not controller.vlc_instance:
             return False
@@ -232,7 +235,7 @@ class VlcPlayer(MediaPlayer, LogMixin):
         self.volume(controller, get_volume(controller))
         return True
 
-    def media_state_wait(self, controller, media_state):
+    def media_state_wait(self, controller: Type[SlideController], media_state: VlCState) -> bool:
         """
         Wait for the video to change its state
         Wait no longer than 60 seconds. (loading an iso file needs a long time)
@@ -251,7 +254,7 @@ class VlcPlayer(MediaPlayer, LogMixin):
                 return False
         return True
 
-    def resize(self, controller):
+    def resize(self, controller: Type[SlideController]) -> None:
         """
         Resize the player
 
@@ -263,7 +266,7 @@ class VlcPlayer(MediaPlayer, LogMixin):
         else:
             controller.vlc_widget.resize(controller.preview_display.size())
 
-    def play(self, controller, output_display):
+    def play(self, controller: Type[SlideController], output_display: Type[DisplayWindow]) -> bool:
         """
         Play the current item
 
@@ -279,7 +282,7 @@ class VlcPlayer(MediaPlayer, LogMixin):
         self.set_state(MediaState.Playing, controller)
         return True
 
-    def pause(self, controller):
+    def pause(self, controller: Type[SlideController]) -> None:
         """
         Pause the current item
 
@@ -292,7 +295,7 @@ class VlcPlayer(MediaPlayer, LogMixin):
         if self.media_state_wait(controller, VlCState.Paused):
             self.set_state(MediaState.Paused, controller)
 
-    def stop(self, controller):
+    def stop(self, controller: Type[SlideController]) -> None:
         """
         Stop the current item
 
@@ -302,7 +305,7 @@ class VlcPlayer(MediaPlayer, LogMixin):
         threading.Thread(target=controller.vlc_media_player.stop).start()
         self.set_state(MediaState.Stopped, controller)
 
-    def volume(self, controller, vol):
+    def volume(self, controller: Type[SlideController], vol: int) -> None:
         """
         Set the volume
 
@@ -312,7 +315,7 @@ class VlcPlayer(MediaPlayer, LogMixin):
         """
         controller.vlc_media_player.audio_set_volume(vol)
 
-    def seek(self, controller, seek_value):
+    def seek(self, controller: Type[SlideController], seek_value: int) -> None:
         """
         Go to a particular position
 
@@ -322,7 +325,7 @@ class VlcPlayer(MediaPlayer, LogMixin):
         if controller.vlc_media_player.is_seekable():
             controller.vlc_media_player.set_time(seek_value)
 
-    def reset(self, controller):
+    def reset(self, controller: Type[SlideController]) -> None:
         """
         Reset the player
 
@@ -331,7 +334,7 @@ class VlcPlayer(MediaPlayer, LogMixin):
         controller.vlc_media_player.stop()
         self.set_state(MediaState.Off, controller)
 
-    def set_visible(self, controller, status):
+    def set_visible(self, controller: Type[SlideController], status: bool) -> None:
         """
         Set the visibility
 
@@ -340,7 +343,7 @@ class VlcPlayer(MediaPlayer, LogMixin):
         """
         controller.vlc_widget.setVisible(status)
 
-    def update_ui(self, controller, output_display):
+    def update_ui(self, controller: Type[SlideController], output_display: Type[DisplayWindow]) -> None:
         """
         Update the UI
 

@@ -114,6 +114,8 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         self.controller_type = None
         self.displays = []
         self.screens = ScreenList()
+        self.vlc_instance = None
+        self.media_info = None
         Registry().set_flag('has doubleclick added item to service', True)
         Registry().set_flag('replace service manager item', False)
 
@@ -1511,8 +1513,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
             elif self.is_live:
                 if self._current_hide_mode == HideMode.Theme:
                     self.set_hide_mode(HideMode.Blank)
-                self.media_controller.load_video(self.controller_type, item, self._current_hide_mode,
-                                                 is_theme_background)
+                self.media_controller.load_video(self.controller_type, item, self._current_hide_mode, False)
             elif item.is_media():
                 # avoid loading the video if this is preview and the media is background
                 self.media_controller.load_video(self.controller_type, item, is_theme_background=is_theme_background)

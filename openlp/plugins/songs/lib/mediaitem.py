@@ -265,7 +265,10 @@ class SongMediaItem(MediaManagerItem):
                 continue
             author_list = [author.display_name for author in song.authors]
             text = create_separated_list(author_list) if author_list else song.title
-            song_detail = '{title} ({author})'.format(title=song.title, author=text)
+            if len(song.media_files) > 0:
+                song_detail = f'{song.title} (A) ({text})'
+            else:
+                song_detail = '{title} ({author})'.format(title=song.title, author=text)
             song_name = QtWidgets.QListWidgetItem(song_detail)
             song_name.setData(QtCore.Qt.UserRole, song.id)
             self.list_view.addItem(song_name)
