@@ -451,12 +451,16 @@ def main():
         set_up_logging(AppLocation.get_directory(AppLocation.CacheDir))
         set_up_web_engine_cache(AppLocation.get_directory(AppLocation.CacheDir) / 'web_cache')
     # Set the libvlc environment variable if we're frozen
-    if getattr(sys, 'frozen', False) and is_win():
+    if getattr(sys, 'frozen', False):
         # Path to libvlc and the plugins
-        os.environ['PYTHON_VLC_LIB_PATH'] = str(AppLocation.get_directory(AppLocation.AppDir) / 'vlc' / 'libvlc.dll')
-        os.environ['PYTHON_VLC_MODULE_PATH'] = str(AppLocation.get_directory(AppLocation.AppDir) / 'vlc')
-        os.environ['PATH'] += ';' + str(AppLocation.get_directory(AppLocation.AppDir) / 'vlc')
-        log.debug('VLC Path: {}'.format(os.environ['PYTHON_VLC_LIB_PATH']))
+        vlc_dir = AppLocation.get_directory(AppLocation.AppDir) / 'vlc'
+        if is_win():
+            os.environ['PYTHON_VLC_LIB_PATH'] = str(vlc_dir / 'libvlc.dll')
+        elif is_macosx():
+            os.environ['PYTHON_VLC_LIB_PATH'] = str(vlc_dir / 'libvlc.5.dylib')
+        os.environ['PYTHON_VLC_MODULE_PATH'] = str(vlc_dir)
+        os.environ['PATH'] += ';' + str(vlc_dir)
+        log.debug('VLC Path: {}'.format(os.environ.get('PYTHON_VLC_LIB_PATH', '')))
     app = OpenLP()
     # Initialise the Registry
     Registry.create()
