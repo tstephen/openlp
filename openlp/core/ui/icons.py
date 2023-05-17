@@ -64,7 +64,7 @@ class UiIcons(metaclass=Singleton):
             'audio': {'icon': 'mdi.file-music-outline'},
             'authentication': {'icon': 'mdi.alert', 'attr': 'red'},
             'address': {'icon': 'mdi.book-open-variant'},
-            'back': {'icon': 'fmdi-skip-previous'},
+            'back': {'icon': 'mdi.skip-previous'},
             'backspace': {'icon': 'mdi.close'},
             # 'backspace': {'icon': 'mdi.chevron-left-box-outline'},
             'bible': {'icon': 'mdi.book-open-variant'},
