@@ -18,10 +18,10 @@
 # You should have received a copy of the GNU General Public License      #
 # along with this program.  If not, see <https://www.gnu.org/licenses/>. #
 ##########################################################################
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 from openlp.core.common.registry import Registry
-from pathlib import Path
 
 
 def test_retrieve_live_items(flask_client, settings):
@@ -56,14 +56,14 @@ def test_controller_set_does_not_accept_get(flask_client):
 
 
 def test_controller_set_aborts_on_unspecified_controller(flask_client, settings):
-    res = flask_client.post('/api/v2/controller/show')
+    res = flask_client.post('/api/v2/controller/show', json={})
     assert res.status_code == 400
 
 
 def test_controller_set_calls_live_controller(flask_client, settings):
     fake_live_controller = MagicMock()
     Registry().register('live_controller', fake_live_controller)
-    res = flask_client.post('/api/v2/controller/show', json=dict(id=400))
+    res = flask_client.post('/api/v2/controller/show', json={'id': 400})
     assert res.status_code == 204
     fake_live_controller.slidecontroller_live_set.emit.assert_called_once_with([400])
 
@@ -81,12 +81,12 @@ def test_controller_direction_does_not_accept_get(flask_client):
 
 
 def test_controller_direction_does_fails_on_wrong_data(flask_client, settings):
-    res = flask_client.post('/api/v2/controller/progress', json=dict(action='foo'))
+    res = flask_client.post('/api/v2/controller/progress', json={'action': 'foo'})
     assert res.status_code == 400
 
 
 def test_controller_direction_does_fails_on_missing_data(flask_client, settings):
-    res = flask_client.post('/api/v2/controller/progress')
+    res = flask_client.post('/api/v2/controller/progress', json={})
     assert res.status_code == 400
 
 
@@ -118,7 +118,7 @@ def test_controller_get_theme_level_returns_valid_theme_level_song(flask_client,
 
 
 def test_controller_set_theme_level_aborts_if_no_theme_level(flask_client, settings):
-    res = flask_client.post('/api/v2/controller/theme-level')
+    res = flask_client.post('/api/v2/controller/theme-level', json={})
     assert res.status_code == 400
 
 
@@ -237,7 +237,7 @@ def test_controller_get_theme_returns_current_theme_service(flask_client, settin
 
 
 def test_controller_set_theme_aborts_if_no_theme(flask_client, settings):
-    res = flask_client.post('/api/v2/controller/theme')
+    res = flask_client.post('/api/v2/controller/theme', json={})
     assert res.status_code == 400
 
 

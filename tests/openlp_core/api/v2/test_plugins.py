@@ -73,7 +73,7 @@ def test_bibles_set_search_options_sets_bible_version(flask_client, settings):
 
 def test_plugin_set_search_option_aborts_if_no_option(flask_client, settings):
     Registry().register('plugin_manager', MagicMock())
-    res = flask_client.post('/api/v2/plugins/songs/search-options')
+    res = flask_client.post('/api/v2/plugins/songs/search-options', json={})
     assert res.status_code == 400
 
 
