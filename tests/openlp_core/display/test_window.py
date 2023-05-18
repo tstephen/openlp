@@ -226,7 +226,7 @@ def test_set_startup_screen(display_window_env, mock_settings):
 
     # THEN: javascript should be run
     display_window.run_javascript.assert_called_once_with(
-        'Display.setStartupSplashScreen("red", "file://{path}");'.format(path=expect_image_path))
+        'Display.setStartupSplashScreen("red", "openlp-library://local-file/{path}");'.format(path=expect_image_path))
 
 
 def test_set_startup_screen_default_image(display_window_env, mock_settings):
@@ -237,13 +237,9 @@ def test_set_startup_screen_default_image(display_window_env, mock_settings):
     display_window = DisplayWindow()
     display_window._is_initialised = True
     display_window.run_javascript = MagicMock()
-    if is_win():
-        splash_screen_path = 'c:/default/splash_screen.png'
-        expect_splash_screen_path = '/' + splash_screen_path
-    else:
-        splash_screen_path = '/default/splash_screen.png'
-        expect_splash_screen_path = splash_screen_path
-    display_window.openlp_splash_screen_path = Path(splash_screen_path)
+    splash_screen_path = 'openlp://display/openlp-splash-screen.png'
+    expect_splash_screen_path = splash_screen_path
+    display_window.openlp_splash_screen_path = splash_screen_path
     settings = {
         'core/logo background color': 'blue',
         'core/logo file': Path(':/graphics/openlp-splash-screen.png'),
@@ -256,7 +252,7 @@ def test_set_startup_screen_default_image(display_window_env, mock_settings):
 
     # THEN: javascript should be run
     display_window.run_javascript.assert_called_with(
-        'Display.setStartupSplashScreen("blue", "file://{path}");'.format(path=expect_splash_screen_path))
+        'Display.setStartupSplashScreen("blue", "{path}");'.format(path=expect_splash_screen_path))
 
 
 def test_set_startup_screen_missing(display_window_env, mock_settings):

@@ -987,7 +987,7 @@ describe("Display.setImageSlides", function () {
   });
 
   it("should add a list of images", function () {
-    var slides = [{"path": "file:///openlp1.jpg"}, {"path": "file:///openlp2.jpg"}];
+    var slides = [{"path": "openlp-library://local-file//openlp1.jpg"}, {"path": "openlp-library://local-file//openlp2.jpg"}];
     spyOn(Reveal, "sync");
     spyOn(Reveal, "slide");
 
@@ -997,9 +997,9 @@ describe("Display.setImageSlides", function () {
     expect(Display._slides["1"]).toEqual(1);
     expect($(".slides > section > section").length).toEqual(2);
     expect($(".slides > section > section > img").length).toEqual(2);
-    expect($(".slides > section > section > img")[0].getAttribute("src")).toEqual("file:///openlp1.jpg");
+    expect($(".slides > section > section > img")[0].getAttribute("src")).toEqual("openlp-library://local-file//openlp1.jpg");
     expect($(".slides > section > section > img")[0].getAttribute("style")).toEqual("width: 100%; height: 100%; margin: 0; object-fit: contain;");
-    expect($(".slides > section > section > img")[1].getAttribute("src")).toEqual("file:///openlp2.jpg");
+    expect($(".slides > section > section > img")[1].getAttribute("src")).toEqual("openlp-library://local-file//openlp2.jpg");
     expect($(".slides > section > section > img")[1].getAttribute("style")).toEqual("width: 100%; height: 100%; margin: 0; object-fit: contain;");
     expect(Reveal.sync).toHaveBeenCalledTimes(1);
   });
@@ -1209,6 +1209,14 @@ describe("Display.toggleVideoMute", function () {
     expect(mockVideo.muted).toEqual(false);
   });
 });
+
+describe("localFile", function() {
+  it('should translate file:// protocol to openlp-library://local-file/ scheme', function() {
+    const fileUrl = 'file:///home/path/to/image.png';
+    const resultFile = Display._getFileUrl(fileUrl);
+    expect(resultFile).toEqual('openlp-library://local-file//home/path/to/image.png');
+  })
+})
 
 describe("Reveal slidechanged event", function () {
   it("should swap footer content", function (done) {
