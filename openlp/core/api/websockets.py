@@ -23,8 +23,11 @@ The :mod:`websockets` module contains the websockets server. This is a server us
 changes from within OpenLP. It uses JSON to communicate with the remotes.
 """
 import asyncio
+import dataclasses
+from dataclasses import dataclass
 import json
 import logging
+from typing import Optional, Union
 import uuid
 
 from PyQt5 import QtCore
@@ -47,9 +50,20 @@ ws_logger = logging.getLogger('websockets')
 ws_logger.setLevel(logging.ERROR)
 
 
+@dataclass
+class WebSocketMessage:
+    plugin: Optional[str]
+    key: str
+    value: Union[int, str, dict, list]
+
+
 class WebSocketWorker(ThreadWorker, RegistryProperties, LogMixin):
     """
     A special Qt thread class to allow the WebSockets server to run at the same time as the UI.
+
+    There's now two queues for websockets: one that handle queues for state changes, and another for messages.
+    The main idea is that state-based websocket connections will be removed in future, in favour of message-based
+    connections (this will also help save some bandwidth on busy networks)
     """
     def start(self):
         """
@@ -64,7 +78,8 @@ class WebSocketWorker(ThreadWorker, RegistryProperties, LogMixin):
         # Create the websocker server
         loop = 1
         self.server = None
-        self.queues = set()
+        self.state_queues = set()
+        self.message_queues = set()
         while not self.server:
             try:
                 self.server = serve(self.handle_websocket, address, port)
@@ -95,22 +110,24 @@ class WebSocketWorker(ThreadWorker, RegistryProperties, LogMixin):
         except BaseException:
             pass
 
-    async def handle_websocket(self, websocket, path):
+    async def handle_websocket(self, websocket, path: str):
         """
         Handle web socket requests and return the state information
         Waits for information to come over queue
 
         :param websocket: request from client
-        :param path: determines the endpoints supported - Not needed
+        :param path: determines the endpoints supported
         """
         client_id = uuid.uuid4() if log.getEffectiveLevel() == logging.DEBUG else 0
         log.debug(f'(client_id={client_id}) WebSocket handle_websocket connection')
         queue = asyncio.Queue()
-        await self.register(websocket, client_id, queue)
+        is_state_queue = not path.startswith('/messages')
+        await self.register(websocket, client_id, queue, is_state_queue)
         try:
-            reply = poller.get_state()
-            if reply:
-                await self.send_reply(websocket, client_id, reply)
+            if is_state_queue:
+                reply = poller.get_state()
+                if reply:
+                    await self.send_reply(websocket, client_id, reply)
             while True:
                 done, pending = await asyncio.wait(
                     [asyncio.create_task(queue.get()), asyncio.create_task(websocket.wait_closed())],
@@ -126,9 +143,9 @@ class WebSocketWorker(ThreadWorker, RegistryProperties, LogMixin):
                 else:
                     break
         finally:
-            await self.unregister(websocket, client_id, queue)
+            await self.unregister(websocket, client_id, queue, is_state_queue)
 
-    async def register(self, websocket, client_id, queue):
+    async def register(self, websocket, client_id: str, queue: asyncio.Queue, is_state_queue=True):
         """
         Register Clients
         :param websocket: The client details
@@ -137,17 +154,23 @@ class WebSocketWorker(ThreadWorker, RegistryProperties, LogMixin):
         """
         log.debug(f'(client_id={client_id}) WebSocket handler register')
         USERS.add(websocket)
-        self.queues.add(queue)
+        if is_state_queue:
+            self.state_queues.add(queue)
+        else:
+            self.message_queues.add(queue)
         log.debug('WebSocket clients count: {client_count}'.format(client_count=len(USERS)))
 
-    async def unregister(self, websocket, client_id, queue):
+    async def unregister(self, websocket, client_id, queue, is_state_queue=True):
         """
         Unregister Clients
         :param websocket: The client details
         :return:
         """
         USERS.remove(websocket)
-        self.queues.remove(queue)
+        if is_state_queue:
+            self.state_queues.remove(queue)
+        else:
+            self.message_queues.remove(queue)
         log.debug(f'(client_id={client_id}) WebSocket handler unregister')
         log.debug('WebSocket clients count: {client_count}'.format(client_count=len(USERS)))
 
@@ -161,20 +184,31 @@ class WebSocketWorker(ThreadWorker, RegistryProperties, LogMixin):
         Inserts the state in each connection message queue
         :param state: OpenLP State
         """
-        for queue in self.queues.copy():
+        for queue in self.state_queues.copy():
             self.event_loop.call_soon_threadsafe(queue.put_nowait, state)
+
+    def add_message_to_queues(self, message: WebSocketMessage):
+        """
+        Inserts the message in each connection message queue
+        :param state: OpenLP State
+        """
+        for queue in self.message_queues.copy():
+            self.event_loop.call_soon_threadsafe(queue.put_nowait, dataclasses.asdict(message))
 
 
 class WebSocketServer(RegistryBase, RegistryProperties, QtCore.QObject, LogMixin):
     """
     Wrapper round a server instance
     """
+    _send_message_signal = QtCore.pyqtSignal(WebSocketMessage)
+
     def __init__(self):
         """
         Initialise the WebSockets server
         """
         super(WebSocketServer, self).__init__()
         self.worker = None
+        self._send_message_signal.connect(self.__handle_message_signal)
 
     def bootstrap_post_set_up(self):
         self.start()
@@ -195,6 +229,14 @@ class WebSocketServer(RegistryBase, RegistryProperties, QtCore.QObject, LogMixin
         if self.worker is not None:
             self.worker.add_state_to_queues(poller.get_state())
 
+    def send_message(self, message: WebSocketMessage):
+        # Using a signal to run emission on this thread
+        self._send_message_signal.emit(message)
+
+    def __handle_message_signal(self, message: WebSocketMessage):
+        if self.worker is not None:
+            self.worker.add_message_to_queues(message)
+
     def try_poller_hook_signals(self):
         try:
             poller.hook_signals()
@@ -213,3 +255,14 @@ class WebSocketServer(RegistryBase, RegistryProperties, QtCore.QObject, LogMixin
             self.worker.stop()
         finally:
             self.worker = None
+
+
+def websocket_send_message(message: WebSocketMessage):
+    """
+    Sends a message over websocket to all connected clients.
+    """
+    ws: WebSocketServer = Registry().get("web_socket_server")
+    if ws:
+        ws.send_message(message)
+        return True
+    return False
