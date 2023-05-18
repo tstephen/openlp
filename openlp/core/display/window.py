@@ -29,7 +29,6 @@ import re
 
 from PyQt5 import QtCore, QtWebChannel, QtWidgets
 
-from openlp.core.common.applocation import AppLocation
 from openlp.core.common.enum import ServiceItemType
 from openlp.core.common.i18n import translate
 from openlp.core.common.mixins import LogMixin, RegistryProperties
@@ -146,8 +145,6 @@ class DisplayWindow(QtWidgets.QWidget, RegistryProperties, LogMixin):
             self.setAttribute(QtCore.Qt.WidgetAttribute.WA_X11NetWmWindowTypeDialog)
         if is_macosx():
             self.setAttribute(QtCore.Qt.WA_MacAlwaysShowToolWindow, True)
-        # Need to import this inline to get around a QtWebEngine issue
-        from openlp.core.display.webengine import WebEngineView
         self._is_initialised = False
         self._is_manual_close = False
         self._can_show_startup_screen = can_show_startup_screen
@@ -159,22 +156,22 @@ class DisplayWindow(QtWidgets.QWidget, RegistryProperties, LogMixin):
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.layout = QtWidgets.QVBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
-        self.webview = WebEngineView(self)
+        self.webview = self.init_webengine()
         self.webview.setAttribute(QtCore.Qt.WA_TranslucentBackground)
         self.webview.page().setBackgroundColor(QtCore.Qt.transparent)
         self.webview.display_clicked = self.disable_display
         self.layout.addWidget(self.webview)
         self.webview.loadFinished.connect(self.after_loaded)
-        display_base_path = AppLocation.get_directory(AppLocation.AppDir) / 'core' / 'display' / 'html'
-        self.display_path = display_base_path / 'display.html'
-        self.checkerboard_path = display_base_path / 'checkerboard.png'
-        self.openlp_splash_screen_path = display_base_path / 'openlp-splash-screen.png'
+        self.display_path = 'openlp://display/display.html'
+        self.checkerboard_path = 'openlp://display/checkerboard.png'
+        self.openlp_splash_screen_path = 'openlp://display/openlp-splash-screen.png'
         self.channel = QtWebChannel.QWebChannel(self)
         self.display_watcher = DisplayWatcher(self)
         self.channel.registerObject('displayWatcher', self.display_watcher)
         self.webview.page().setWebChannel(self.channel)
         self.display_watcher.initialised.connect(self.on_initialised)
-        self.set_url(QtCore.QUrl.fromLocalFile(path_to_str(self.display_path)))
+        qUrl = QtCore.QUrl(self.display_path)
+        self.set_url(qUrl)
         self.is_display = False
         self.scale = 1
         self.hide_mode = None
@@ -197,6 +194,16 @@ class DisplayWindow(QtWidgets.QWidget, RegistryProperties, LogMixin):
         """
         if not self._is_manual_close:
             event.ignore()
+
+    def init_webengine(self):
+        # Need to import this inline to get around a QtWebEngine issue
+        from openlp.core.display.webengine import WebEngineView, WebViewSchemes, OpenLPScheme, OpenLPLibraryScheme
+        webview = WebEngineView(self)
+        profile = webview.page().profile()
+        WebViewSchemes().get_scheme(OpenLPScheme.scheme_name).init_handler(profile)
+        WebViewSchemes().get_scheme(OpenLPLibraryScheme.scheme_name).init_handler(profile)
+
+        return webview
 
     def _fix_font_name(self, font_name):
         """
@@ -260,11 +267,12 @@ class DisplayWindow(QtWidgets.QWidget, RegistryProperties, LogMixin):
         bg_color = self.settings.value('core/logo background color')
         image = self.settings.value('core/logo file')
         if path_to_str(image).startswith(':'):
-            image = self.openlp_splash_screen_path
-        try:
-            image_uri = image.as_uri()
-        except Exception:
-            image_uri = ''
+            image_uri = self.openlp_splash_screen_path
+        else:
+            try:
+                image_uri = image.as_uri().replace('file://', 'openlp-library://local-file/')
+            except Exception:
+                image_uri = ''
         # if set to hide logo on startup, do not send the logo
         if self.settings.value('core/logo hide on startup'):
             image_uri = ''

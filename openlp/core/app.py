@@ -46,6 +46,7 @@ from openlp.core.common.platform import is_macosx, is_win
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.display.screens import ScreenList
+from openlp.core.display.webengine import init_webview_custom_schemes
 from openlp.core.loader import loader
 from openlp.core.resources import qInitResources
 from openlp.core.server import Server
@@ -414,6 +415,7 @@ def main():
     qInitResources()
     # Now create and actually run the application.
     QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
+    init_webview_custom_schemes()
     application = QtWidgets.QApplication(qt_args)
     application.setOrganizationName('OpenLP')
     application.setOrganizationDomain('openlp.org')

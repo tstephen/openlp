@@ -456,7 +456,7 @@ var Display = {
     section.setAttribute("data-background", bg_color);
     section.setAttribute("style", "height: 100%; width: 100%;");
     var img = document.createElement('img');
-    img.src = image;
+    img.src = Display._getFileUrl(image);
     img.setAttribute("style", "position: absolute; top: 0; bottom: 0; left: 0; right: 0; margin: auto; max-height: 100%; max-width: 100%");
     section.appendChild(img);
     Display._slides['0'] = 0;
@@ -734,7 +734,7 @@ var Display = {
       section.setAttribute("id", index);
       section.setAttribute("style", "height: 100%; width: 100%;");
       var img = document.createElement('img');
-      img.src = slide.path;
+      img.src = Display._getFileUrl(slide.path);
       img.setAttribute("style", "width: 100%; height: 100%; margin: 0; object-fit: contain;");
       img.setAttribute('data-slide', index);
       section.appendChild(img);
@@ -1211,12 +1211,12 @@ var Display = {
         }
         break;
       case BackgroundType.Image:
-        backgroundContent = "url('" + Display._theme.background_filename + "')";
+        backgroundContent = "url('" + Display._getFileUrl(Display._theme.background_filename) + "')";
         break;
       case BackgroundType.Video:
         // never actually used since background type is overridden from video to transparent in window.py
         backgroundContent = Display._theme.background_border_color;
-        backgroundHtml = "<video loop autoplay muted><source src='" + Display._theme.background_filename + "'></video>";
+        backgroundHtml = "<video loop autoplay muted><source src='" + Display._getFileUrl(Display._theme.background_filename) + "'></video>";
         break;
       default:
         backgroundContent = "#000";
@@ -1393,7 +1393,16 @@ var Display = {
     value[1] = '/';
     value[2] = Object.keys(Display._slides).length;
     return value;
-  }
+  },
+  /**
+   * Translates file:// protocol URLs to openlp-library://local-file/ scheme
+   */
+  _getFileUrl: function(url) {
+    if (url && (url.indexOf('file://') === 0)) {
+      return url.replace('file://', 'openlp-library://local-file/');
+    }
+    return url;
+  },
 };
 new QWebChannel(qt.webChannelTransport, function (channel) {
   window.displayWatcher = channel.objects.displayWatcher;
