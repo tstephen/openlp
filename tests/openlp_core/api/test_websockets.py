@@ -25,7 +25,7 @@ import pytest
 from unittest.mock import MagicMock, patch
 
 from openlp.core.api.websocketspoll import WebSocketPoller
-from openlp.core.api.websockets import WebSocketWorker, WebSocketServer
+from openlp.core.api.websockets import WebSocketMessage, WebSocketWorker, WebSocketServer, websocket_send_message
 from openlp.core.common.registry import Registry
 
 
@@ -124,6 +124,38 @@ def test_poller_get_state_is_never_none(poller):
 
     # THEN: state is not None
     assert state is not None, 'get_state() return should not be None'
+
+
+def test_send_message_works(settings):
+    """
+    Test the send_message_works really works
+    """
+    # GIVEN: A mocked WebSocketWorker and a message
+    server = WebSocketServer()
+    server.worker = MagicMock()
+    message = WebSocketMessage(plugin="core", key="test", value="test")
+
+    # WHEN: send_message is called
+    server.send_message(message)
+
+    # THEN: Worker add_message_to_queues should be called
+    server.worker.add_message_to_queues.assert_called_once_with(message)
+
+
+def test_websocket_send_message_works(settings):
+    """
+    Test the send_message_works really works
+    """
+    # GIVEN: A mocked WebSocketWorker and a message
+    server = WebSocketServer()
+    server.worker = MagicMock()
+    message = WebSocketMessage(plugin="core", key="test", value="test")
+
+    # WHEN: send_message is called
+    websocket_send_message(message)
+
+    # THEN: Worker add_message_to_queues should be called
+    server.worker.add_message_to_queues.assert_called_once_with(message)
 
 
 @patch('openlp.core.api.websockets.serve')
