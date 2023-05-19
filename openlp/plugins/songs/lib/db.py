@@ -110,23 +110,18 @@ The song database contains the following tables:
 """
 from typing import Optional
 
-from sqlalchemy import Column, ForeignKey, MetaData, Table
+from sqlalchemy import Column, ForeignKey, Table
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.orm import reconstructor, relationship
+from sqlalchemy.orm import declarative_base, reconstructor, relationship
 from sqlalchemy.sql.expression import func, text
 from sqlalchemy.types import Boolean, DateTime, Integer, Unicode, UnicodeText
 
-# Maintain backwards compatibility with older versions of SQLAlchemy while supporting SQLAlchemy 1.4+
-try:
-    from sqlalchemy.orm import declarative_base
-except ImportError:
-    from sqlalchemy.ext.declarative import declarative_base
-
 from openlp.core.common.i18n import get_natural_key, translate
-from openlp.core.lib.db import PathType, init_db
+from openlp.core.db.types import PathType
+from openlp.core.db.upgrades import init_db
 
 
-Base = declarative_base(MetaData())
+Base = declarative_base()
 
 
 songs_topics_table = Table(
@@ -383,5 +378,5 @@ def init_schema(url):
 
     """
     session, metadata = init_db(url, base=Base)
-    metadata.create_all(checkfirst=True)
+    metadata.create_all(bind=metadata.bind, checkfirst=True)
     return session

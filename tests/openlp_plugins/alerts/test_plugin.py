@@ -28,7 +28,7 @@ from openlp.plugins.alerts.alertsplugin import AlertsPlugin
 
 
 @pytest.fixture
-@patch('openlp.plugins.alerts.alertsplugin.Manager')
+@patch('openlp.plugins.alerts.alertsplugin.DBManager')
 def plugin_env(mocked_manager, settings, state, registry):
     """An instance of the AlertsPlugin"""
     mocked_manager.return_value = MagicMock()

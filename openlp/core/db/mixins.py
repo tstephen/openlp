@@ -19,54 +19,52 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>. #
 ##########################################################################
 """
-The :mod:`db` module provides the database and schema that is the backend for the Images plugin.
+The :mod:`~openlp.core.db.mixins` module provides some database mixins for OpenLP
 """
-from sqlalchemy.orm import Session, declarative_base
-
-from openlp.core.db.helpers import init_db
-from openlp.core.db.mixins import FolderMixin, ItemMixin
-
-
-Base = declarative_base()
+from sqlalchemy import Column, ForeignKey
+from sqlalchemy.types import Integer, Unicode
+from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy.orm import backref, relationship
 
 
-class Folder(Base, FolderMixin):
+class CommonMixin(object):
     """
-    Folder model.
+    Base class to automate table name and ID column.
     """
+    @declared_attr
+    def __tablename__(self):
+        return self.__name__.lower()
+
+    id = Column(Integer, primary_key=True)
 
 
-class Item(Base, ItemMixin):
+class FolderMixin(CommonMixin):
     """
-    Item model.
+    A mixin to provide most of the fields needed for folder support
     """
+    name = Column(Unicode(255), nullable=False, index=True)
+
+    @declared_attr
+    def parent_id(self):
+        return Column(Integer, ForeignKey('folder.id'))
+
+    @declared_attr
+    def folders(self):
+        return relationship('Folder', backref=backref('parent', remote_side='Folder.id'), order_by='Folder.name')
+
+    @declared_attr
+    def items(self):
+        return relationship('Item', backref='folder', order_by='Item.name')
 
 
-def init_schema(url: str) -> Session:
+class ItemMixin(CommonMixin):
     """
-    Setup the images database connection and initialise the database schema.
-
-    :param url: The database to setup
-        The images database contains the following tables:
-
-            * image_groups
-            * image_filenames
-
-        **image_groups Table**
-            This table holds the names of the images groups. It has the following columns:
-
-            * id
-            * parent_id
-            * group_name
-
-        **image_filenames Table**
-            This table holds the filenames of the images and the group they belong to. It has the following columns:
-
-            * id
-            * group_id
-            * file_path
-            * file_hash
+    A mixin to provide most of the fields needed for folder support
     """
-    session, metadata = init_db(url, base=Base)
-    metadata.create_all(bind=metadata.bind, checkfirst=True)
-    return session
+    name = Column(Unicode(255), nullable=False, index=True)
+    file_path = Column(Unicode(255))
+    file_hash = Column(Unicode(255))
+
+    @declared_attr
+    def folder_id(self):
+        return Column(Integer, ForeignKey('folder.id'))

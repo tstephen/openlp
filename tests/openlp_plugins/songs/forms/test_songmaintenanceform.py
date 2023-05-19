@@ -30,7 +30,7 @@ from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.common.i18n import UiStrings
 from openlp.core.common.registry import Registry
-from openlp.core.lib.db import Manager
+from openlp.core.db.manager import DBManager
 from openlp.plugins.songs.lib.db import init_schema, SongBook, Song, SongBookEntry
 from openlp.plugins.songs.forms.songmaintenanceform import SongMaintenanceForm
 
@@ -495,7 +495,7 @@ def test_merge_song_books(registry, settings, temp_folder):
     """
     # GIVEN a test database populated with test data, and a song maintenance form
     db_tmp_path = os.path.join(temp_folder, 'test-songs-2.9.2.sqlite')
-    manager = Manager('songs', init_schema, db_file_path=db_tmp_path)
+    manager = DBManager('songs', init_schema, db_file_path=db_tmp_path)
 
     # create 2 song books, both with the same name
     book1 = SongBook()
