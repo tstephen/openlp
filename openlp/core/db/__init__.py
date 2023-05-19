@@ -19,54 +19,5 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>. #
 ##########################################################################
 """
-The :mod:`db` module provides the database and schema that is the backend for the Images plugin.
+The :mod:`~openlp.core.db` module provides the core database functionality for OpenLP
 """
-from sqlalchemy.orm import Session, declarative_base
-
-from openlp.core.db.helpers import init_db
-from openlp.core.db.mixins import FolderMixin, ItemMixin
-
-
-Base = declarative_base()
-
-
-class Folder(Base, FolderMixin):
-    """
-    Folder model.
-    """
-
-
-class Item(Base, ItemMixin):
-    """
-    Item model.
-    """
-
-
-def init_schema(url: str) -> Session:
-    """
-    Setup the images database connection and initialise the database schema.
-
-    :param url: The database to setup
-        The images database contains the following tables:
-
-            * image_groups
-            * image_filenames
-
-        **image_groups Table**
-            This table holds the names of the images groups. It has the following columns:
-
-            * id
-            * parent_id
-            * group_name
-
-        **image_filenames Table**
-            This table holds the filenames of the images and the group they belong to. It has the following columns:
-
-            * id
-            * group_id
-            * file_path
-            * file_hash
-    """
-    session, metadata = init_db(url, base=Base)
-    metadata.create_all(bind=metadata.bind, checkfirst=True)
-    return session

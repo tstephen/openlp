@@ -51,7 +51,7 @@ class TestOsisImport(TestCase):
         self.registry_patcher = patch('openlp.plugins.bibles.lib.bibleimport.Registry')
         self.addCleanup(self.registry_patcher.stop)
         self.registry_patcher.start()
-        self.manager_patcher = patch('openlp.plugins.bibles.lib.db.Manager')
+        self.manager_patcher = patch('openlp.plugins.bibles.lib.db.DBManager')
         self.addCleanup(self.manager_patcher.stop)
         self.manager_patcher.start()
 
@@ -409,7 +409,7 @@ class TestOsisImportFileImports(TestCase):
         self.registry_patcher = patch('openlp.plugins.bibles.lib.bibleimport.Registry')
         self.addCleanup(self.registry_patcher.stop)
         self.registry_patcher.start()
-        self.manager_patcher = patch('openlp.plugins.bibles.lib.db.Manager')
+        self.manager_patcher = patch('openlp.plugins.bibles.lib.db.DBManager')
         self.addCleanup(self.manager_patcher.stop)
         self.manager_patcher.start()
 

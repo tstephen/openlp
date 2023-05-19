@@ -36,7 +36,7 @@ except ImportError:
 from openlp.core.common import trace_error_handler
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.i18n import UiStrings, get_locale_key, translate
-from openlp.core.lib.db import delete_database
+from openlp.core.db.helpers import delete_database
 from openlp.core.lib.exceptions import ValidationError
 from openlp.core.lib.ui import critical_error_message_box
 from openlp.core.widgets.enums import PathEditType

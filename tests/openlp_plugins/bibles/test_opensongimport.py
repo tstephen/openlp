@@ -37,7 +37,7 @@ TEST_PATH = RESOURCE_PATH / 'bibles'
 
 @pytest.fixture
 def manager():
-    db_man = patch('openlp.plugins.bibles.lib.db.Manager')
+    db_man = patch('openlp.plugins.bibles.lib.db.DBManager')
     yield db_man.start()
     db_man.stop()
 
