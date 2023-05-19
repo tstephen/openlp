@@ -93,7 +93,7 @@ def test_login_get_is_refused(flask_client):
 
 
 def test_login_without_data_returns_400(flask_client):
-    res = flask_client.post('/api/v2/core/login')
+    res = flask_client.post('/api/v2/core/login', json={})
     assert res.status_code == 400
 
 
