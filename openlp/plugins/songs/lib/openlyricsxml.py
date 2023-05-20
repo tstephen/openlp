@@ -132,7 +132,7 @@ class SongXML(object):
         if self.song_xml is not None:
             xml_iter = self.song_xml.getiterator()
             for element in xml_iter:
-                if element.tag == 'verse':
+                if etree.QName(element).localname == 'verse':
                     if element.text is None:
                         element.text = ''
                     verse_list.append([element.attrib, str(element.text)])

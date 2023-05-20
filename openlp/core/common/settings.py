@@ -33,7 +33,7 @@ from PyQt5 import QtCore, QtGui
 
 from openlp.core.common import SlideLimits, ThemeLevel
 from openlp.core.common.enum import AlertLocation, BibleSearch, CustomSearch, ImageThemeMode, LayoutStyle, \
-    DisplayStyle, LanguageSelection, SongSearch, PluginStatus
+    DisplayStyle, LanguageSelection, SongFirstSlideMode, SongSearch, PluginStatus
 from openlp.core.common.json import OpenLPJSONDecoder, OpenLPJSONEncoder, is_serializable
 from openlp.core.common.path import files_to_paths, str_to_path
 from openlp.core.common.platform import is_linux, is_win
@@ -42,7 +42,7 @@ from openlp.core.ui.style import UiThemes
 
 log = logging.getLogger(__name__)
 
-__version__ = 2
+__version__ = 3
 
 
 class ProxyMode(IntEnum):
@@ -114,6 +114,16 @@ def upgrade_dark_theme_to_ui_theme(value):
     :returns UiThemes: New UiThemes value
     """
     return UiThemes.QDarkStyle if value else UiThemes.Automatic
+
+
+def upgrade_add_first_songbook_slide_config(value):
+    """
+    Upgrade the "songs/add songbook slide" property to "songs/add first slide".
+
+    :param bool value: the old "add_songbook_slide" value
+    :returns SongFirstSlideMode: new SongFirstSlideMode value
+    """
+    return SongFirstSlideMode.Songbook if value is True else SongFirstSlideMode.Default
 
 
 class Settings(QtCore.QSettings):
@@ -338,7 +348,7 @@ class Settings(QtCore.QSettings):
         'songs/last import type': 0,
         'songs/update service on edit': False,
         'songs/add song from service': True,
-        'songs/add songbook slide': False,
+        'songs/first slide mode': SongFirstSlideMode.Default,
         'songs/display songbar': True,
         'songs/last directory import': None,
         'songs/last directory export': None,
@@ -471,6 +481,10 @@ class Settings(QtCore.QSettings):
         ('themes/last directory import', 'themes/last directory import', [(str_to_path, None)]),
         ('themes/last directory', 'themes/last directory', [(str_to_path, None)]),
         ('themes/wrap footer', '', []),
+    ]
+    # Settings upgrades for 3.1
+    __setting_upgrade_3__ = [
+        ('songs/add songbook slide', 'songs/first slide mode', [(upgrade_add_first_songbook_slide_config, False)])
     ]
 
     @staticmethod

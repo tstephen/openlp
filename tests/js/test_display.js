@@ -781,6 +781,8 @@ describe("Display.setTextSlide", function () {
 });
 
 describe("Display.setTextSlides", function () {
+  var textSlides;
+
   beforeEach(function() {
     document.body.innerHTML = "";
     var slides_container = _createDiv({"class": "slides"});
@@ -788,10 +790,7 @@ describe("Display.setTextSlides", function () {
     Display._slidesContainer = slides_container;
     Display._footerContainer = footer_container;
     Display._slides = {};
-  });
-
-  it("should add a list of slides", function () {
-    var slides = [
+    textSlides = [
       {
         "verse": "v1",
         "text": "Amazing grace, how sweet the sound\nThat saved a wretch like me\n" +
@@ -805,6 +804,10 @@ describe("Display.setTextSlides", function () {
         "footer": "Public Domain"
       }
     ];
+  });
+
+  it("should add a list of slides", function () {
+    var slides = textSlides;
     spyOn(Display, "clearSlides");
     spyOn(Reveal, "sync");
     spyOn(Reveal, "slide");
@@ -819,14 +822,7 @@ describe("Display.setTextSlides", function () {
   });
 
   it("should correctly set outline width", function () {
-    const slides = [
-      {
-        "verse": "v1",
-        "text": "Amazing grace, how sweet the sound\nThat saved a wretch like me\n" +
-                "I once was lost, but now I'm found\nWas blind but now I see",
-        "footer": "Public Domain"
-      }
-    ];
+    const slides = [textSlides[0]];
     const theme = {
       'font_main_color': 'yellow',
       'font_main_outline': true,
@@ -845,14 +841,7 @@ describe("Display.setTextSlides", function () {
 
   it("should correctly set text alignment,\
       (check the order of alignments in the emuns are the same in both js and python)", function () {
-    const slides = [
-      {
-        "verse": "v1",
-        "text": "Amazing grace, how sweet the sound\nThat saved a wretch like me\n" +
-                "I once was lost, but now I'm found\nWas blind but now I see",
-        "footer": "Public Domain"
-      }
-    ];
+    const slides = [textSlides[0]];
     //
     const theme = {
       'display_horizontal_align': 3,
@@ -870,14 +859,7 @@ describe("Display.setTextSlides", function () {
   })
 
   it("should enable shadows", function () {
-    const slides = [
-      {
-        "verse": "v1",
-        "text": "Amazing grace, how sweet the sound\nThat saved a wretch like me\n" +
-                "I once was lost, but now I'm found\nWas blind but now I see",
-        "footer": "Public Domain"
-      }
-    ];
+    const slides = [textSlides[0]];
     //
     const theme = {
       'font_main_shadow': true,
@@ -895,14 +877,7 @@ describe("Display.setTextSlides", function () {
   })
 
   it("should not enable shadows", function () {
-    const slides = [
-      {
-        "verse": "v1",
-        "text": "Amazing grace, how sweet the sound\nThat saved a wretch like me\n" +
-                "I once was lost, but now I'm found\nWas blind but now I see",
-        "footer": "Public Domain"
-      }
-    ];
+    const slides = [textSlides[0]];
     //
     const theme = {
       'font_main_shadow': false,
@@ -920,14 +895,7 @@ describe("Display.setTextSlides", function () {
   })
 
   it("should correctly set slide size position to theme size when adding a text slide", function () {
-    const slides = [
-      {
-        "verse": "v1",
-        "text": "Amazing grace, how sweet the sound\nThat saved a wretch like me\n" +
-                "I once was lost, but now I'm found\nWas blind but now I see",
-        "footer": "Public Domain"
-      }
-    ];
+    const slides = [textSlides[0]];
     //
     const theme = {
       'font_main_y': 789,
@@ -949,20 +917,7 @@ describe("Display.setTextSlides", function () {
   })
 
   it("should work correctly with different footer contents per slide", function () {
-    var slides = [
-      {
-        "verse": "v1",
-        "text": "Amazing grace, how sweet the sound\nThat saved a wretch like me\n" +
-                "I once was lost, but now I'm found\nWas blind but now I see",
-        "footer": "Public Domain"
-      },
-      {
-        "verse": "v2",
-        "text": "'twas Grace that taught, my heart to fear\nAnd grace, my fears relieved.\n" +
-                "How precious did that grace appear,\nthe hour I first believed.",
-        "footer": "Public Domain, Second Test"
-      }
-    ];
+    var slides = textSlides;
     spyOn(Display, "clearSlides");
     spyOn(Reveal, "sync");
     spyOn(Reveal, "slide");
@@ -973,6 +928,19 @@ describe("Display.setTextSlides", function () {
     expect($(".footer > .footer-item").length).toEqual(2);
     expect(document.querySelectorAll(".footer > .footer-item")[0].innerHTML).toEqual(slides[0].footer);
     expect(document.querySelectorAll(".footer > .footer-item")[1].innerHTML).toEqual(slides[1].footer);
+  });
+
+  it("should select correct footer index when resetting text", function () {
+    var slides = textSlides;
+    slides[1]['footer'] = 'Public Domain, Second Test';
+
+    Display.init({isDisplay: false});
+    Display.setTextSlides(slides);
+    spyOn(Reveal, 'getIndices').and.returnValue({v: 1, h: 0});
+    slides[1]['footer'] = 'Second Slide';
+    Display.setTextSlides(slides);
+
+    expect(document.querySelectorAll(".footer > .footer-item")[1].classList.contains('active')).toBeTruthy();
   });
 });
 
