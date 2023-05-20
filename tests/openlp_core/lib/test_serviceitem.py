@@ -985,10 +985,8 @@ def test_add_from_text_adds_per_slide_footer_html():
 
     # THEN: Slides should be added with correctly numbered verse tags (Should start at 1)
     assert service_item.slides == [
-        {'text': 'This is the first slide', 'title': 'This is the first slide', 'verse': '1',
-         'footer_html': slide1FooterHtml},
-        {'text': 'This is the second slide', 'title': 'This is the second slide', 'verse': '2',
-         'footer_html': slide2FooterHtml}
+        {'text': slide1, 'title': slide1, 'verse': '1', 'footer_html': slide1FooterHtml},
+        {'text': slide2, 'title': slide2, 'verse': '2', 'footer_html': slide2FooterHtml}
     ]
 
 

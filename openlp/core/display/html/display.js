@@ -683,7 +683,13 @@ var Display = {
         var footerSlide = document.createElement('div');
         footerSlide.classList.add('footer-item');
         footerSlide.setAttribute('data-slide', index);
-        if (index == 0) {
+        var currentSlide = Reveal.getIndices();
+        if (currentSlide) {
+          currentSlide = currentSlide.v;
+        } else {
+          currentSlide = 0;
+        }
+        if (index == currentSlide) {
           footerSlide.classList.add('active');
         }
         footerSlide.innerHTML = slide.footer;
