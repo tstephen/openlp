@@ -22,12 +22,12 @@
 Package to test the openlp.core.ui.slidecontroller package.
 """
 import json
+import threading
 from functools import partial
 from pathlib import Path
-import threading
+from time import sleep
 from unittest.mock import MagicMock, patch
 from zipfile import BadZipFile
-from time import sleep
 
 import pytest
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -39,6 +39,13 @@ from openlp.core.lib.exceptions import ValidationError
 from openlp.core.lib.serviceitem import ItemCapabilities, ServiceItem
 from openlp.core.ui.servicemanager import ServiceManager, ServiceManagerList
 from openlp.core.widgets.toolbar import OpenLPToolbar
+
+from tests.utils.constants import RESOURCE_PATH
+
+BIBLE_VERSES = (
+    'In the beginning, God created the heavens and the earth. The earth was formless and empty. Darkness '
+    'was on the surface of the deep and God\'s Spirit was hovering over the surface of the waters.'
+)
 
 
 def _create_mock_action(svc_manager, name, **kwargs):
@@ -53,16 +60,97 @@ def _create_mock_action(svc_manager, name, **kwargs):
     return action
 
 
-def _add_service_item(s_manager):
-    "adds a mocked service item to the passed service manager"
+def _add_song_service_item(s_manager: ServiceManager):
+    """Add a mocked songs service item to the passed service manager"""
     mocked_plugin = MagicMock()
     mocked_plugin.name = 'songs'
     service_item = ServiceItem(mocked_plugin)
     service_item.add_icon()
-    slide = "Test slide"
+    slide = 'Test slide'
     service_item.add_from_text(slide)
-    service_item.title = "Test item"
+    service_item.title = 'Test item'
+    service_item.service_item_type = ServiceItemType.Text
+    service_item.background_audio = [(Path('myfile.mp3'), None), (Path('myfile.mp3'), None)]
     s_manager.add_service_item(service_item, rebuild=True, selected=True)
+    return service_item
+
+
+def _add_bible_service_item(s_manager: ServiceManager):
+    """Add a mocked Bible service item to the passed service manager"""
+    mocked_plugin = MagicMock()
+    mocked_plugin.name = 'bibles'
+    service_item = ServiceItem(mocked_plugin)
+    service_item.add_icon()
+    service_item.add_from_text(BIBLE_VERSES)
+    service_item.title = 'Genesis 1:1-2'
+    service_item.add_capability(ItemCapabilities.CanWordSplit)
+    service_item.add_capability(ItemCapabilities.CanPreview)
+    service_item.add_capability(ItemCapabilities.CanLoop)
+    service_item.add_capability(ItemCapabilities.CanEditTitle)
+    service_item.service_item_type = ServiceItemType.Text
+    s_manager.add_service_item(service_item, rebuild=True, selected=False)
+    return service_item
+
+
+def _add_presentation_service_item(s_manager: ServiceManager, has_valid_thumb: bool = True):
+    """Add a mocked Presentation service item to the passed service manager"""
+    mocked_plugin = MagicMock()
+    mocked_plugin.name = 'presentations'
+    service_item = ServiceItem(mocked_plugin)
+    service_item.add_icon()
+    if has_valid_thumb:
+        service_item.slides = [
+            {
+                'title': 'test.ppt',
+                'image': str(RESOURCE_PATH / 'presentations' / 'img0.jpg'),
+                'path': RESOURCE_PATH / 'presentations',
+                'display_title': 'Slide 1',
+                'notes': '',
+                'thumbnail': str(RESOURCE_PATH / 'presentations' / 'img0.jpg')
+            }
+        ]
+    else:
+        service_item.slides = [
+            {
+                'title': 'test.ppt',
+                'image': 'fake/path/img0.jpg',
+                'path': '',
+                'display_title': 'Slide 1',
+                'notes': '',
+                'thumbnail': 'fake/path/img0.jpg'
+            }
+        ]
+    service_item.title = 'TestPresentation.odp'
+    service_item.add_capability(ItemCapabilities.CanEditTitle)
+    service_item.add_capability(ItemCapabilities.ProvidesOwnDisplay)
+    service_item.add_capability(ItemCapabilities.HasDisplayTitle)
+    service_item.add_capability(ItemCapabilities.HasThumbnails)
+    service_item.service_item_type = ServiceItemType.Command
+    s_manager.add_service_item(service_item, rebuild=True, selected=False)
+    return service_item
+
+
+def _add_image_service_item(s_manager: ServiceManager, has_valid_image: bool = True):
+    """Add a mocked songs service item to the passed service manager"""
+    mocked_plugin = MagicMock()
+    mocked_plugin.name = 'images'
+    service_item = ServiceItem(mocked_plugin)
+    service_item.add_icon()
+    service_item.title = 'Images'
+    service_item.service_item_type = ServiceItemType.Image
+    service_item.add_capability(ItemCapabilities.CanMaintain)
+    service_item.add_capability(ItemCapabilities.CanPreview)
+    service_item.add_capability(ItemCapabilities.CanLoop)
+    service_item.add_capability(ItemCapabilities.CanAppend)
+    service_item.add_capability(ItemCapabilities.CanEditTitle)
+    service_item.add_capability(ItemCapabilities.HasThumbnails)
+    service_item.add_capability(ItemCapabilities.ProvidesOwnTheme)
+    if has_valid_image:
+        service_item.add_from_image(RESOURCE_PATH / 'church.jpg', 'church.jpg')
+    else:
+        service_item.add_from_image(Path('fake/path/church.jpg'), 'church.jpg')
+    s_manager.add_service_item(service_item, rebuild=True, selected=True)
+    return service_item
 
 
 @pytest.fixture()
@@ -1130,7 +1218,7 @@ def test_on_delete_from_service_confirmation_disabled(settings, service_manager)
     """
     # GIVEN delete item confirmation is disabled and a mock service item
     settings.setValue('advanced/delete service item confirmation', False)
-    _add_service_item(service_manager)
+    _add_song_service_item(service_manager)
 
     # WHEN the on_delete_from_service function is called
     service_manager.on_delete_from_service()
@@ -1147,7 +1235,7 @@ def test_on_delete_from_service_confirmation_enabled_choose_delete(settings, ser
     """
     # GIVEN delete item confirmation is enabled and a mock service item
     settings.setValue('advanced/delete service item confirmation', True)
-    _add_service_item(service_manager)
+    _add_song_service_item(service_manager)
 
     # WHEN the on_delete_from_service function is called and the user chooses to delete
     service_manager._delete_confirmation_dialog = MagicMock(return_value=QtWidgets.QMessageBox.Close)
@@ -1165,7 +1253,7 @@ def test_on_delete_from_service_confirmation_enabled_choose_cancel(settings, ser
     """
     # GIVEN delete item confirmation is enabled a mock service item
     settings.setValue('advanced/delete service item confirmation', True)
-    _add_service_item(service_manager)
+    _add_song_service_item(service_manager)
     service_items_copy = service_manager.service_items.copy()
 
     # WHEN the on_delete_from_service function is called and the user cancels
@@ -2374,3 +2462,24 @@ def test_replace_service_list_call_not_parallel(registry, service_manager: Servi
     thread_1.join()
     thread_2.join()
     service_manager._repaint_service_list.assert_called_once()
+
+
+@patch('openlp.core.ui.servicemanager.sha256_file_hash')
+def test_get_write_file_list(mocked_sha256_file_hash, registry, service_manager: ServiceManager):
+    """Test that the get_write_file_list() works properly"""
+    # GIVEN: A whole bunch of items in the service, of various types and with various problems
+    mocked_sha256_file_hash.return_value = '91f95ec0c802da3b5867c5ca25a258955380fcf93e42006ba5988da5ed236287'
+    _add_song_service_item(service_manager)
+    _add_bible_service_item(service_manager)
+    _add_presentation_service_item(service_manager, has_valid_thumb=False)
+    _add_presentation_service_item(service_manager, has_valid_thumb=True)
+    _add_image_service_item(service_manager, has_valid_image=False)
+    _add_image_service_item(service_manager, has_valid_image=True)
+    presentation_item = _add_presentation_service_item(service_manager)
+    presentation_item.stored_filename = RESOURCE_PATH / 'presentations' / 'test.pptx'
+
+    # WHEN the on_delete_from_service function is called
+    write_list, missing_list = service_manager.get_write_file_list()
+
+    # THEN the service_items list should be empty
+    assert len(write_list) == 6
