@@ -603,7 +603,7 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
                 # For items that has thumbnails, add them to the list
                 if item['service_item'].is_capable(ItemCapabilities.HasThumbnails):
                     thumbnail_path = item['service_item'].get_thumbnail_path()
-                    if not thumbnail_path:
+                    if not thumbnail_path or not Path(thumbnail_path).exists():
                         continue
                     thumbnail_path_parent = Path(thumbnail_path).parent
                     if item['service_item'].is_command():
