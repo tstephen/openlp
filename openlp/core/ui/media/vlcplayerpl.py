@@ -21,10 +21,8 @@
 """
 The :mod:`~openlp.core.ui.media.vlcplayer` module contains our VLC component wrapper
 """
-import ctypes
 import logging
 import os
-import sys
 import threading
 from datetime import datetime
 from time import sleep
@@ -33,12 +31,13 @@ from PyQt5 import QtCore, QtWidgets
 
 from openlp.core.common.i18n import translate
 from openlp.core.common.mixins import LogMixin
-from openlp.core.common.platform import is_linux, is_win
+from openlp.core.common.registry import Registry
 from openlp.core.display.window import DisplayWindow
 from openlp.core.lib.ui import critical_error_message_box
 from openlp.core.ui.slidecontroller import SlideController
-from openlp.core.ui.media import MediaState, MediaType, VlCState, get_volume
+from openlp.core.ui.media import MediaState, VlCState, get_volume
 from openlp.core.ui.media.mediaplayer import MediaPlayer
+from openlp.core.ui.media.vlcplayer import get_vlc
 
 log = logging.getLogger(__name__)
 
@@ -46,59 +45,48 @@ log = logging.getLogger(__name__)
 STATE_WAIT_TIME = 60
 
 
-def get_vlc():
+def end_reached(event, controller: SlideController) -> None:
     """
-    In order to make this module more testable, we have to wrap the VLC import inside a method. We do this so that we
-    can mock out the VLC module entirely.
-
-    :return: The "vlc" module, or None
+    Process the end of a Track, triggered by VLC
+    :param event: the vlc event triggered
+    :param controller: The controller upon which the event occurs
+    :return: None
     """
-    # Import the VLC module if not already done
-    if 'vlc' not in sys.modules:
-        try:
-            import vlc  # noqa module is not used directly, but is used via sys.modules['vlc']
-        except (ImportError, OSError):
-            return None
-    # Verify that VLC is also loadable
-    is_vlc_available = False
-    try:
-        is_vlc_available = bool(sys.modules['vlc'].get_default_instance())
-    except Exception:
-        pass
-    if is_vlc_available:
-        return sys.modules['vlc']
-    return None
+    if controller.is_live:
+        Registry().get('media_controller').vlc_live_media_stop.emit()
+    else:
+        Registry().get('media_controller').vlc_preview_media_stop.emit()
 
 
-# On linux we need to initialise X threads, but not when running tests.
-# This needs to happen on module load and not in get_vlc(), otherwise it can cause crashes on some DE on some setups
-# (reported on Gnome3, Unity, Cinnamon, all GTK+ based) when using native filedialogs...
-if is_linux() and 'pytest' not in sys.argv[0] and get_vlc():
-    try:
-        try:
-            x11 = ctypes.cdll.LoadLibrary('libX11.so.6')
-        except OSError:
-            # If libx11.so.6 was not found, fallback to more generic libx11.so
-            x11 = ctypes.cdll.LoadLibrary('libX11.so')
-        x11.XInitThreads()
-    except Exception:
-        log.exception('Failed to run XInitThreads(), VLC might not work properly!')
-
-
-class VlcPlayer(MediaPlayer, LogMixin):
+def pos_callback(event, controller: SlideController) -> None:
     """
-    A specialised version of the MediaPlayer class, which provides a VLC display.
+    A Tick event triggered by VLC
+    :param event: The VLC Event triggered
+    :param controller: The controller upon which the event occurs
+    :return: None
     """
+    controller.media_info.timer = controller.vlc_media_player.get_time()
+    if controller.is_live:
+        Registry().get('media_controller').vlc_live_media_tick.emit()
+    else:
+        Registry().get('media_controller').vlc_preview_media_tick.emit()
 
+
+class VlcPlayerPL(MediaPlayer, LogMixin):
+    """
+    A specialised version of the MediaPlayer class, which provides a VLC display with a Playlist.
+    """
     def __init__(self, parent):
         """
         Constructor
         """
-        super(VlcPlayer, self).__init__(parent, 'vlc')
+        super(VlcPlayerPL, self).__init__(parent, 'vlc')
         self.original_name = 'VLC'
         self.display_name = '&VLC'
         self.parent = parent
         self.can_folder = True
+        self.can_repeat = True
+        self.can_background = True
 
     def setup(self, controller: SlideController, display: DisplayWindow) -> None:
         """
@@ -117,7 +105,7 @@ class VlcPlayer(MediaPlayer, LogMixin):
             controller.vlc_widget = QtWidgets.QFrame(display)
         controller.vlc_widget.setFrameStyle(QtWidgets.QFrame.NoFrame)
         # creating a basic vlc instance
-        command_line_options = '--no-video-title-show --input-repeat=99999999 '
+        command_line_options = '--no-video-title-show '
         if self.settings.value('advanced/hide mouse') and controller.is_live:
             command_line_options += '--mouse-hide-timeout=0 '
         if self.settings.value('media/vlc arguments'):
@@ -137,10 +125,7 @@ class VlcPlayer(MediaPlayer, LogMixin):
                 return
         self.log_debug(f"VLC version: {vlc.libvlc_get_version()}")
         # creating an empty vlc media player
-        controller.vlc_media_player = controller.vlc_instance.media_player_new()
-        controller.vlc_widget.resize(controller.size())
-        controller.vlc_widget.hide()
-        self.add_display(controller)
+        self.has_own_widget = True
 
     def check_available(self):
         """
@@ -150,66 +135,34 @@ class VlcPlayer(MediaPlayer, LogMixin):
 
     def load(self, controller: SlideController, output_display: DisplayWindow, file: str) -> bool:
         """
-        Load a Stream or DVD into VLC
+        Load a video into VLC
 
         :param controller: The controller where the media is
         :param output_display: The display where the media is
         :param file: file/stream to be played
         :return:  Success or Failure
         """
+        self.log_debug('load video in VLC Controller')
         if not controller.vlc_instance:
             return False
-        self.log_debug('load video in VLC Controller')
+        # The media player moved here to clear the playlist between uses.
+        controller.vlc_media_player = controller.vlc_instance.media_player_new()
+        controller.vlc_widget.resize(controller.size())
+        controller.vlc_widget.hide()
         self.add_display(controller)
-        path = None
-        if file and not controller.media_info.media_type == MediaType.Stream:
-            path = os.path.normcase(file)
-        # create the media
-        if controller.media_info.media_type == MediaType.CD:
-            if is_win():
-                path = '/' + path
-            controller.vlc_media = controller.vlc_instance.media_new_location('cdda://' + path)
-            controller.vlc_media_player.set_media(controller.vlc_media)
-            controller.vlc_media_player.play()
-            # Wait for media to start playing. In this case VLC actually returns an error.
-            self.media_state_wait(controller, VlCState.Playing)
-            # If subitems exists, this is a CD
-            audio_cd_tracks = controller.vlc_media.subitems()
-            if not audio_cd_tracks or audio_cd_tracks.count() < 1:
-                return False
-            controller.vlc_media = audio_cd_tracks.item_at_index(int(controller.media_info.title_track))
-            if not controller.vlc_media:
-                return False
-            # VLC's start and stop time options work on seconds
-            controller.vlc_media.add_option(f"start-time={int(controller.media_info.start_time // 1000)}")
-            controller.vlc_media.add_option(f"stop-time={int(controller.media_info.end_time // 1000)}")
-            controller.vlc_media_player.set_media(controller.vlc_media)
-        elif controller.media_info.media_type == MediaType.DVD:
-            if is_win():
-                path = '/' + path
-            dvd_location = 'dvd://' + path + '#' + controller.media_info.title_track
-            controller.vlc_media = controller.vlc_instance.media_new_location(dvd_location)
-            self.log_debug(f"vlc dvd load: {dvd_location}")
-            controller.vlc_media.add_option(f"start-time={int(controller.media_info.start_time // 1000)}")
-            controller.vlc_media.add_option(f"stop-time={int(controller.media_info.end_time // 1000)}")
-            controller.vlc_media_player.set_media(controller.vlc_media)
-            controller.vlc_media_player.play()
-            # Wait for media to start playing. In this case VLC returns an error.
-            self.media_state_wait(controller, VlCState.Playing)
-            if controller.media_info.audio_track > 0:
-                res = controller.vlc_media_player.audio_set_track(controller.media_info.audio_track)
-                self.log_debug('vlc play, audio_track set: ' + str(controller.media_info.audio_track) + ' ' + str(res))
-            if controller.media_info.subtitle_track > 0:
-                res = controller.vlc_media_player.video_set_spu(controller.media_info.subtitle_track)
-                self.log_debug('vlc play, subtitle_track set: ' +
-                               str(controller.media_info.subtitle_track) + ' ' + str(res))
-        else:
-            # We must be Streaming
-            controller.vlc_media = controller.vlc_instance.media_new_location(file[0])
-            controller.vlc_media.add_options(file[1])
-            controller.vlc_media_player.set_media(controller.vlc_media)
+        path = os.path.normcase(file)
+        controller.vlc_media = controller.vlc_instance.media_list_new()
+        controller.vlc_media.add_media(path)
+        controller.vlc_media_listPlayer = controller.vlc_instance.media_list_player_new()
+        controller.vlc_media_listPlayer.set_media_player(controller.vlc_media_player)
+        controller.vlc_media_listPlayer.set_media_list(controller.vlc_media)
+        controller.vlc_events = controller.vlc_media_player.event_manager()
+        vlc = get_vlc()
+        controller.vlc_events.event_attach(vlc.EventType.MediaPlayerTimeChanged, pos_callback, controller)
+        controller.vlc_events.event_attach(vlc.EventType.MediaPlayerEndReached, end_reached, controller)
+        controller.media_info.start_time = 0
+        controller.media_info.end_time = controller.media_info.length
         # parse the metadata of the file
-        controller.vlc_media.parse()
         controller.mediabar.seek_slider.setMinimum(controller.media_info.start_time)
         controller.mediabar.seek_slider.setMaximum(controller.media_info.end_time)
         self.volume(controller, get_volume(controller))
@@ -225,14 +178,21 @@ class VlcPlayer(MediaPlayer, LogMixin):
         :return:
         """
         start = datetime.now()
-        while media_state != controller.vlc_media.get_state():
+        while media_state != controller.vlc_media_listPlayer.get_state():
             sleep(0.1)
-            if controller.vlc_media.get_state() == VlCState.Error:
+            if controller.vlc_media_listPlayer.get_state() == VlCState.Error:
                 return False
             self.application.process_events()
             if (datetime.now() - start).seconds > STATE_WAIT_TIME:
                 return False
         return True
+
+    def toggle_loop(self, controller, loop_required: bool) -> None:
+        vlc = get_vlc()
+        if loop_required:
+            controller.vlc_media_listPlayer.set_playback_mode(vlc.PlaybackMode().loop)
+        else:
+            controller.vlc_media_listPlayer.set_playback_mode(vlc.PlaybackMode().default)
 
     def play(self, controller: SlideController, output_display: DisplayWindow) -> bool:
         """
@@ -243,7 +203,7 @@ class VlcPlayer(MediaPlayer, LogMixin):
         :return:
         """
         self.log_debug('vlc play, mediatype: ' + str(controller.media_info.media_type))
-        threading.Thread(target=controller.vlc_media_player.play).start()
+        threading.Thread(target=controller.vlc_media_listPlayer.play).start()
         if not self.media_state_wait(controller, VlCState.Playing):
             return False
         self.volume(controller, get_volume(controller))
@@ -257,9 +217,9 @@ class VlcPlayer(MediaPlayer, LogMixin):
         :param controller: The controller which is managing the display
         :return:
         """
-        if controller.vlc_media.get_state() != VlCState.Playing:
+        if controller.vlc_media_listPlayer.get_state() != VlCState.Playing:
             return
-        controller.vlc_media_player.pause()
+        controller.vlc_media_listPlayer.pause()
         if self.media_state_wait(controller, VlCState.Paused):
             self.set_state(MediaState.Paused, controller)
 
@@ -270,5 +230,5 @@ class VlcPlayer(MediaPlayer, LogMixin):
         :param controller: The controller where the media is
         :return:
         """
-        threading.Thread(target=controller.vlc_media_player.stop).start()
+        threading.Thread(target=controller.vlc_media_listPlayer.stop).start()
         self.set_state(MediaState.Stopped, controller)
