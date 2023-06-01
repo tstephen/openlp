@@ -86,12 +86,12 @@ class ItemMediaInfo(object):
     """
     file_info = None
     is_background = False
+    is_theme_background = None
     length = 0
     start_time = 0
     end_time = 0
     title_track = 0
     is_playing = False
-    old_timer = -1
     timer = 1000
     audio_track = 0
     subtitle_track = 0
