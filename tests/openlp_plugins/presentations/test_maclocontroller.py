@@ -38,13 +38,13 @@ from tests.helpers.testmixin import TestMixin
 from tests.utils.constants import TEST_RESOURCES_PATH
 
 try:
-    import Pyro4    # noqa: F401
-    has_pyro4 = True
+    import Pyro5    # noqa: F401
+    has_pyro5 = True
 except ImportError:
-    has_pyro4 = False
+    has_pyro5 = False
 
 pytestmark = [
-    pytest.mark.skipif(not has_pyro4, reason='Pyro4 is not installed, skipping testing the Mac LibreOffice controller'),
+    pytest.mark.skipif(not has_pyro5, reason='Pyro5 is not installed, skipping testing the Mac LibreOffice controller'),
     pytest.mark.skipif(not is_macosx(), reason='Not on macOS, skipping testing the Mac LibreOffice controller')
 ]
 
