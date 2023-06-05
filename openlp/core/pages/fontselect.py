@@ -82,13 +82,13 @@ class FontSelectPage(GridLayoutPage):
         self.style_bold_button = QtWidgets.QToolButton(self)
         self.style_bold_button.setCheckable(True)
         self.style_bold_button.setIcon(UiIcons().bold)
-        self.style_bold_button.setShortcut(QtGui.QKeySequence(QtGui.QKeySequence.Bold))
+        self.style_bold_button.setShortcut(QtGui.QKeySequence(QtGui.QKeySequence.StandardKey.Bold))
         self.style_bold_button.setObjectName('style_bold_button')
         self.style_layout.addWidget(self.style_bold_button)
         self.style_italic_button = QtWidgets.QToolButton(self)
         self.style_italic_button.setCheckable(True)
         self.style_italic_button.setIcon(UiIcons().italic)
-        self.style_italic_button.setShortcut(QtGui.QKeySequence(QtGui.QKeySequence.Italic))
+        self.style_italic_button.setShortcut(QtGui.QKeySequence(QtGui.QKeySequence.StandardKey.Italic))
         self.style_italic_button.setObjectName('style_italic_button')
         self.style_layout.addWidget(self.style_italic_button)
         self.style_layout.addStretch(1)
@@ -175,11 +175,11 @@ class FontSelectPage(GridLayoutPage):
         self.font_style_label.setText(translate('OpenLP.FontSelectWidget', 'Style:'))
         self.style_bold_button.setToolTip('{name} ({shortcut})'.format(
             name=translate('OpenLP.FontSelectWidget', 'Bold'),
-            shortcut=QtGui.QKeySequence(QtGui.QKeySequence.Bold).toString()
+            shortcut=QtGui.QKeySequence(QtGui.QKeySequence.StandardKey.Bold).toString()
         ))
         self.style_italic_button.setToolTip('{name} ({shortcut})'.format(
             name=translate('OpenLP.FontSelectWidget', 'Italic'),
-            shortcut=QtGui.QKeySequence(QtGui.QKeySequence.Italic).toString()
+            shortcut=QtGui.QKeySequence(QtGui.QKeySequence.StandardKey.Italic).toString()
         ))
         self.font_size_label.setText(translate('OpenLP.FontSelectWidget', 'Size:'))
         self.font_size_spinbox.setSuffix(' {unit}'.format(unit=UiStrings().FontSizePtUnit))

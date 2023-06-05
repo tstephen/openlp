@@ -65,11 +65,11 @@ def upgrade_2(session, metadata):
         msg_box = QtWidgets.QMessageBox()
         msg_box.setText(translate('BiblesPlugin', f'The proxy server {proxy} was found in the bible {name}.<br>'
                                                   f'Would you like to set it as the proxy for OpenLP?'))
-        msg_box.setIcon(QtWidgets.QMessageBox.Question)
+        msg_box.setIcon(QtWidgets.QMessageBox.Icon.Question)
         msg_box.addButton(QtWidgets.QMessageBox.No)
-        http_button = msg_box.addButton('http', QtWidgets.QMessageBox.ActionRole)
-        both_button = msg_box.addButton(translate('BiblesPlugin', 'both'), QtWidgets.QMessageBox.ActionRole)
-        https_button = msg_box.addButton('https', QtWidgets.QMessageBox.ActionRole)
+        http_button = msg_box.addButton('http', QtWidgets.QMessageBox.ButtonRole.ActionRole)
+        both_button = msg_box.addButton(translate('BiblesPlugin', 'both'), QtWidgets.QMessageBox.ButtonRole.ActionRole)
+        https_button = msg_box.addButton('https', QtWidgets.QMessageBox.ButtonRole.ActionRole)
         msg_box.setDefaultButton(both_button)
         msg_box.exec()
 

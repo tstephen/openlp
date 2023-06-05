@@ -130,7 +130,8 @@ class OpenLPToolbar(QtWidgets.QToolBar):
             log.warning(f'No handle {name} in actions list.')
 
     def add_spacer(self):
-        size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
+        size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding,
+                                            QtWidgets.QSizePolicy.Policy.Preferred)
         separator = QtWidgets.QWidget()
         separator.setSizePolicy(size_policy)
         self.addWidget(separator)
@@ -230,7 +231,7 @@ class MediaToolbar(OpenLPToolbar):
             # Build the volume_slider.
             self.volume_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
             self.volume_slider.setTickInterval(10)
-            self.volume_slider.setTickPosition(QtWidgets.QSlider.TicksAbove)
+            self.volume_slider.setTickPosition(QtWidgets.QSlider.TickPosition.TicksAbove)
             self.volume_slider.setMinimum(0)
             self.volume_slider.setMaximum(100)
             self.volume_slider.setTracking(True)

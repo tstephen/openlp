@@ -138,7 +138,7 @@ class EditVerseForm(QtWidgets.QDialog, Ui_EditVerseDialog):
                                                          .format(err_msg=ke)))
             return
         self.verse_text_edit.setFocus()
-        self.verse_text_edit.moveCursor(QtGui.QTextCursor.End)
+        self.verse_text_edit.moveCursor(QtGui.QTextCursor.MoveOperation.End)
 
     def on_transpose_down_button_clicked(self):
         """
@@ -160,7 +160,7 @@ class EditVerseForm(QtWidgets.QDialog, Ui_EditVerseDialog):
                                                          .format(err_msg=ke)))
             return
         self.verse_text_edit.setFocus()
-        self.verse_text_edit.moveCursor(QtGui.QTextCursor.End)
+        self.verse_text_edit.moveCursor(QtGui.QTextCursor.MoveOperation.End)
 
     def update_suggested_verse_number(self):
         """
@@ -219,7 +219,7 @@ class EditVerseForm(QtWidgets.QDialog, Ui_EditVerseDialog):
                 self.transpose_widget.setVisible(True)
         self.verse_text_edit.setPlainText(text)
         self.verse_text_edit.setFocus()
-        self.verse_text_edit.moveCursor(QtGui.QTextCursor.End)
+        self.verse_text_edit.moveCursor(QtGui.QTextCursor.MoveOperation.End)
 
     def get_verse(self):
         """

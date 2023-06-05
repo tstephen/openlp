@@ -99,7 +99,8 @@ class TestBibleImportForm(TestCase, TestMixin):
         bible_import_form = BibleImportForm(None, MagicMock(), None)
 
         # WHEN: The Help button is clicked
-        QtTest.QTest.mouseClick(bible_import_form.button(QtWidgets.QWizard.HelpButton), QtCore.Qt.LeftButton)
+        QtTest.QTest.mouseClick(bible_import_form.button(QtWidgets.QWizard.WizardButton.HelpButton),
+                                QtCore.Qt.LeftButton)
 
         # THEN: The Help function should be called
         mocked_help.assert_called_once()

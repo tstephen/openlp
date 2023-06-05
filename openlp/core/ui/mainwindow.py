@@ -187,7 +187,7 @@ class Ui_MainWindow(object):
                                             can_shortcuts=True,
                                             category=UiStrings().File, triggers=main_window.close)
         # Give QT Extra Hint that this is the Exit Menu Item
-        self.file_exit_item.setMenuRole(QtWidgets.QAction.QuitRole)
+        self.file_exit_item.setMenuRole(QtWidgets.QAction.MenuRole.QuitRole)
         action_list.add_category(UiStrings().Import, CategoryOrder.standard_menu)
         self.import_theme_item = create_action(main_window, 'importThemeItem', category=UiStrings().Import,
                                                can_shortcuts=True)
@@ -280,7 +280,7 @@ class Ui_MainWindow(object):
                                                      icon=UiIcons().settings, can_shortcuts=True,
                                                      category=UiStrings().Settings)
         # Give Qt Extra Hint that this is the Preferences Menu Item
-        self.settings_configure_item.setMenuRole(QtWidgets.QAction.PreferencesRole)
+        self.settings_configure_item.setMenuRole(QtWidgets.QAction.MenuRole.PreferencesRole)
         self.settings_import_item = create_action(main_window, 'settingsImportItem',
                                                   category=UiStrings().Import, can_shortcuts=True)
         self.settings_export_item = create_action(main_window, 'settingsExportItem',
@@ -290,7 +290,7 @@ class Ui_MainWindow(object):
                                         can_shortcuts=True, category=UiStrings().Help,
                                         triggers=self.on_about_item_clicked)
         # Give Qt Extra Hint that this is an About Menu Item
-        self.about_item.setMenuRole(QtWidgets.QAction.AboutRole)
+        self.about_item.setMenuRole(QtWidgets.QAction.MenuRole.AboutRole)
         if is_win():
             self.local_help_file = AppLocation.get_directory(AppLocation.AppDir) / 'OpenLP.chm'
         elif is_macosx():
@@ -326,10 +326,10 @@ class Ui_MainWindow(object):
         add_actions(self.settings_language_menu, self.language_group.actions())
         # Qt on OS X looks for keywords in the menu items title to determine which menu items get added to the main
         # menu. If we are running on Mac OS X the menu items whose title contains those keywords but don't belong in the
-        # main menu need to be marked as such with QAction.NoRole.
+        # main menu need to be marked as such with QAction.MenuRole.NoRole.
         if is_macosx():
-            self.settings_shortcuts_item.setMenuRole(QtWidgets.QAction.NoRole)
-            self.formatting_tag_item.setMenuRole(QtWidgets.QAction.NoRole)
+            self.settings_shortcuts_item.setMenuRole(QtWidgets.QAction.MenuRole.NoRole)
+            self.formatting_tag_item.setMenuRole(QtWidgets.QAction.MenuRole.NoRole)
         add_actions(self.settings_menu, (self.settings_plugin_list_item, self.settings_language_menu.menuAction(),
                     None, self.formatting_tag_item, self.settings_shortcuts_item, self.settings_configure_item))
         add_actions(self.tools_menu, (self.tools_add_tool_item, None))
@@ -897,7 +897,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
         create_paths(temp_dir_path)
         temp_config_path = temp_dir_path / import_file_path.name
         shutil.copyfile(import_file_path, temp_config_path)
-        import_settings = Settings(str(temp_config_path), QtCore.QSettings.IniFormat)
+        import_settings = Settings(str(temp_config_path), QtCore.QSettings.Format.IniFormat)
 
         self.log_info('hook upgrade_plugin_settings')
         self.plugin_manager.hook_upgrade_plugin_settings(import_settings)
@@ -1081,7 +1081,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
                 event.ignore()
         else:
             if self.settings.value('advanced/enable exit confirmation'):
-                msg_box = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Question,
+                msg_box = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Icon.Question,
                                                 translate('OpenLP.MainWindow', 'Exit OpenLP'),
                                                 translate('OpenLP.MainWindow', 'Are you sure you want to exit OpenLP?'),
                                                 QtWidgets.QMessageBox.StandardButtons(QtWidgets.QMessageBox.Close |
@@ -1244,10 +1244,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
         Sets the ability to stop the toolbars being changed.
         """
         if lock:
-            self.theme_manager_dock.setFeatures(QtWidgets.QDockWidget.NoDockWidgetFeatures)
-            self.service_manager_dock.setFeatures(QtWidgets.QDockWidget.NoDockWidgetFeatures)
-            self.media_manager_dock.setFeatures(QtWidgets.QDockWidget.NoDockWidgetFeatures)
-            self.projector_manager_dock.setFeatures(QtWidgets.QDockWidget.NoDockWidgetFeatures)
+            self.theme_manager_dock.setFeatures(QtWidgets.QDockWidget.DockWidgetFeature.NoDockWidgetFeatures)
+            self.service_manager_dock.setFeatures(QtWidgets.QDockWidget.DockWidgetFeature.NoDockWidgetFeatures)
+            self.media_manager_dock.setFeatures(QtWidgets.QDockWidget.DockWidgetFeature.NoDockWidgetFeatures)
+            self.projector_manager_dock.setFeatures(QtWidgets.QDockWidget.DockWidgetFeature.NoDockWidgetFeatures)
             self.view_mode_menu.setEnabled(False)
             self.view_media_manager_item.setEnabled(False)
             self.view_service_manager_item.setEnabled(False)
@@ -1256,10 +1256,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
             self.view_preview_panel.setEnabled(False)
             self.view_live_panel.setEnabled(False)
         else:
-            self.theme_manager_dock.setFeatures(QtWidgets.QDockWidget.AllDockWidgetFeatures)
-            self.service_manager_dock.setFeatures(QtWidgets.QDockWidget.AllDockWidgetFeatures)
-            self.media_manager_dock.setFeatures(QtWidgets.QDockWidget.AllDockWidgetFeatures)
-            self.projector_manager_dock.setFeatures(QtWidgets.QDockWidget.AllDockWidgetFeatures)
+            self.theme_manager_dock.setFeatures(QtWidgets.QDockWidget.DockWidgetFeature.AllDockWidgetFeatures)
+            self.service_manager_dock.setFeatures(QtWidgets.QDockWidget.DockWidgetFeature.AllDockWidgetFeatures)
+            self.media_manager_dock.setFeatures(QtWidgets.QDockWidget.DockWidgetFeature.AllDockWidgetFeatures)
+            self.projector_manager_dock.setFeatures(QtWidgets.QDockWidget.DockWidgetFeature.AllDockWidgetFeatures)
             self.view_mode_menu.setEnabled(True)
             self.view_media_manager_item.setEnabled(True)
             self.view_service_manager_item.setEnabled(True)

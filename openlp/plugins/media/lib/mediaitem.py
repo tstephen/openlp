@@ -172,7 +172,7 @@ class MediaMediaItem(FolderLibraryItem):
             self.load_menu.addAction(self.open_network_stream)
             self.toolbar.actions['mediaLoadAction'].setMenu(self.load_menu)
             button = self.toolbar.widgetForAction(self.toolbar.actions['mediaLoadAction'])
-            button.setPopupMode(QtWidgets.QToolButton.MenuButtonPopup)
+            button.setPopupMode(QtWidgets.QToolButton.ToolButtonPopupMode.MenuButtonPopup)
 
     def generate_slide_data(self, service_item, *, item=None, remote=False, context=ServiceItemContext.Service,
                             **kwargs):

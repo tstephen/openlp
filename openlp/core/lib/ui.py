@@ -45,7 +45,7 @@ def add_welcome_page(parent, image):
     :param image: A splash image for the wizard.
     """
     parent.welcome_page = QtWidgets.QWizardPage()
-    parent.welcome_page.setPixmap(QtWidgets.QWizard.WatermarkPixmap, QtGui.QPixmap(image))
+    parent.welcome_page.setPixmap(QtWidgets.QWizard.WizardPixmap.WatermarkPixmap, QtGui.QPixmap(image))
     parent.welcome_page.setObjectName('welcome_page')
     parent.welcome_layout = QtWidgets.QVBoxLayout(parent.welcome_page)
     parent.welcome_layout.setObjectName('WelcomeLayout')
@@ -72,31 +72,32 @@ def create_button_box(dialog, name, standard_buttons, custom_buttons=None):
     :param standard_buttons: A list of strings for the used buttons. It might contain: ``ok``, ``save``, ``cancel``,
         ``close``, and ``defaults``.
     :param custom_buttons: A list of additional buttons. If an item is an instance of QtWidgets.QAbstractButton it is
-    added with QDialogButtonBox.ActionRole. Otherwise the item has to be a tuple of a Button and a ButtonRole.
+    added with QDialogButtonBox.ButtonRole.ActionRole.
+    Otherwise the item has to be a tuple of a Button and a ButtonRole.
     """
     if custom_buttons is None:
         custom_buttons = []
     if standard_buttons is None:
         standard_buttons = []
-    buttons = QtWidgets.QDialogButtonBox.NoButton
+    buttons = QtWidgets.QDialogButtonBox.StandardButton.NoButton
     if 'ok' in standard_buttons:
-        buttons |= QtWidgets.QDialogButtonBox.Ok
+        buttons |= QtWidgets.QDialogButtonBox.StandardButton.Ok
     if 'save' in standard_buttons:
-        buttons |= QtWidgets.QDialogButtonBox.Save
+        buttons |= QtWidgets.QDialogButtonBox.StandardButton.Save
     if 'cancel' in standard_buttons:
-        buttons |= QtWidgets.QDialogButtonBox.Cancel
+        buttons |= QtWidgets.QDialogButtonBox.StandardButton.Cancel
     if 'close' in standard_buttons:
-        buttons |= QtWidgets.QDialogButtonBox.Close
+        buttons |= QtWidgets.QDialogButtonBox.StandardButton.Close
     if 'help' in standard_buttons and hasattr(dialog, 'provide_help'):
-        buttons |= QtWidgets.QDialogButtonBox.Help
+        buttons |= QtWidgets.QDialogButtonBox.StandardButton.Help
     if 'defaults' in standard_buttons:
-        buttons |= QtWidgets.QDialogButtonBox.RestoreDefaults
+        buttons |= QtWidgets.QDialogButtonBox.StandardButton.RestoreDefaults
     button_box = QtWidgets.QDialogButtonBox(dialog)
     button_box.setObjectName(name)
     button_box.setStandardButtons(buttons)
     for button in custom_buttons:
         if isinstance(button, QtWidgets.QAbstractButton):
-            button_box.addButton(button, QtWidgets.QDialogButtonBox.ActionRole)
+            button_box.addButton(button, QtWidgets.QDialogButtonBox.ButtonRole.ActionRole)
         else:
             button_box.addButton(*button)
     button_box.accepted.connect(dialog.accept)
@@ -152,8 +153,8 @@ def create_horizontal_adjusting_combo_box(parent, name):
     """
     combo = QtWidgets.QComboBox(parent)
     combo.setObjectName(name)
-    combo.setSizeAdjustPolicy(QtWidgets.QComboBox.AdjustToMinimumContentsLength)
-    combo.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+    combo.setSizeAdjustPolicy(QtWidgets.QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLength)
+    combo.setSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Fixed)
     return combo
 
 

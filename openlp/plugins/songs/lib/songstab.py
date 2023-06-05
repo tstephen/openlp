@@ -137,7 +137,7 @@ class SongsTab(SettingsTab):
         self.ccli_password_label = QtWidgets.QLabel(self.ccli_login_group_box)
         self.ccli_password_label.setObjectName('ccli_password_label')
         self.ccli_password = QtWidgets.QLineEdit(self.ccli_login_group_box)
-        self.ccli_password.setEchoMode(QtWidgets.QLineEdit.Password)
+        self.ccli_password.setEchoMode(QtWidgets.QLineEdit.EchoMode.Password)
         self.ccli_password.setObjectName('ccli_password')
         self.ccli_login_layout.addRow(self.ccli_password_label, self.ccli_password)
         self.right_layout.addWidget(self.ccli_login_group_box)
