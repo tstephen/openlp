@@ -226,7 +226,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
             self.type_label.setText(UiStrings().Preview)
         # Info label for the title of the current item, at the top of the slide controller
         self.info_label = InfoLabel(self.panel)
-        self.info_label.setSizePolicy(QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Preferred)
+        self.info_label.setSizePolicy(QtWidgets.QSizePolicy.Policy.Ignored, QtWidgets.QSizePolicy.Policy.Preferred)
         self.top_label_vertical.addWidget(self.type_label)
         self.top_label_vertical.addWidget(self.info_label)
         # Splitter
@@ -236,8 +236,8 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         # Actual controller section
         self.controller = QtWidgets.QWidget(self.splitter)
         self.controller.setGeometry(QtCore.QRect(0, 0, 100, 536))
-        self.controller.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred,
-                                                            QtWidgets.QSizePolicy.Maximum))
+        self.controller.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred,
+                                                            QtWidgets.QSizePolicy.Policy.Maximum))
         self.controller_layout = QtWidgets.QVBoxLayout(self.controller)
         self.controller_layout.setSpacing(0)
         self.controller_layout.setContentsMargins(0, 0, 0, 0)
@@ -247,7 +247,8 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         # Build the full toolbar
         self.toolbar = OpenLPToolbar(self)
         self.toolbar.setObjectName('slide_controller_toolbar')
-        size_toolbar_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        size_toolbar_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Fixed,
+                                                    QtWidgets.QSizePolicy.Policy.Fixed)
         size_toolbar_policy.setHorizontalStretch(0)
         size_toolbar_policy.setVerticalStretch(0)
         size_toolbar_policy.setHeightForWidth(self.toolbar.sizePolicy().hasHeightForWidth())
@@ -278,7 +279,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
             self.hide_menu = QtWidgets.QToolButton(self.toolbar)
             self.hide_menu.setObjectName('hide_menu')
             self.hide_menu.setText(translate('OpenLP.SlideController', 'Hide'))
-            self.hide_menu.setPopupMode(QtWidgets.QToolButton.MenuButtonPopup)
+            self.hide_menu.setPopupMode(QtWidgets.QToolButton.ToolButtonPopupMode.MenuButtonPopup)
             self.hide_menu.setMenu(QtWidgets.QMenu(translate('OpenLP.SlideController', 'Hide'), self.toolbar))
             self.toolbar.add_toolbar_widget(self.hide_menu)
             # The order of the blank to modes in Shortcuts list comes from here.
@@ -329,7 +330,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
             self.play_slides_menu = QtWidgets.QToolButton(self.toolbar)
             self.play_slides_menu.setObjectName('play_slides_menu')
             self.play_slides_menu.setText(translate('OpenLP.SlideController', 'Play Slides'))
-            self.play_slides_menu.setPopupMode(QtWidgets.QToolButton.MenuButtonPopup)
+            self.play_slides_menu.setPopupMode(QtWidgets.QToolButton.ToolButtonPopupMode.MenuButtonPopup)
             self.play_slides_menu.setMenu(QtWidgets.QMenu(translate('OpenLP.SlideController', 'Play Slides'),
                                                           self.toolbar))
             self.toolbar.add_toolbar_widget(self.play_slides_menu)
@@ -386,9 +387,9 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         self.preview_frame = QtWidgets.QFrame(self.splitter)
         self.preview_frame.setGeometry(QtCore.QRect(0, 0, 300, int(300 * self.ratio)))
         self.preview_frame.setMinimumHeight(100)
-        self.preview_frame.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Ignored,
-                                                               QtWidgets.QSizePolicy.Ignored,
-                                                               QtWidgets.QSizePolicy.Label))
+        self.preview_frame.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Ignored,
+                                                               QtWidgets.QSizePolicy.Policy.Ignored,
+                                                               QtWidgets.QSizePolicy.ControlType.Label))
         self.preview_frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.preview_frame.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.preview_frame.setObjectName('preview_frame')
@@ -471,7 +472,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         self.song_menu = QtWidgets.QToolButton(self.toolbar)
         self.song_menu.setObjectName('song_menu')
         self.song_menu.setText(translate('OpenLP.SlideController', 'Go To'))
-        self.song_menu.setPopupMode(QtWidgets.QToolButton.InstantPopup)
+        self.song_menu.setPopupMode(QtWidgets.QToolButton.ToolButtonPopupMode.InstantPopup)
         self.song_menu.setMenu(QtWidgets.QMenu(translate('OpenLP.SlideController', 'Go To'), self.toolbar))
 
     def _raise_displays(self):

@@ -363,6 +363,8 @@ class MediaController(QtWidgets.QWidget, RegistryBase, LogMixin, RegistryPropert
             is_autoplay = True
         if controller.media_info.media_type == MediaType.Stream:
             is_autoplay = True
+        if controller.media_info.media_type == MediaType.Stream:
+            is_autoplay = True
         return is_autoplay
 
     @staticmethod

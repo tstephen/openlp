@@ -76,7 +76,7 @@ class ThemeForm(QtWidgets.QWizard, Ui_ThemeWizard, RegistryProperties):
         self.main_area_page.shadow_size_changed.connect(self.calculate_lines)
         self.footer_area_page.font_name_changed.connect(self.update_theme)
         self.footer_area_page.font_size_changed.connect(self.update_theme)
-        self.setOption(QtWidgets.QWizard.HaveHelpButton, True)
+        self.setOption(QtWidgets.QWizard.WizardOption.HaveHelpButton, True)
         self.helpRequested.connect(self.provide_help)
 
     def provide_help(self):
@@ -167,7 +167,7 @@ class ThemeForm(QtWidgets.QWizard, Ui_ThemeWizard, RegistryProperties):
         :param page_id: current page number
         """
         enabled = self.page(page_id) == self.area_position_page
-        self.setOption(QtWidgets.QWizard.HaveCustomButton1, enabled)
+        self.setOption(QtWidgets.QWizard.WizardOption.HaveCustomButton1, enabled)
         if self.page(page_id) == self.preview_page:
             self.update_theme()
             self.resizeEvent()

@@ -64,7 +64,7 @@ class ServiceManagerList(QtWidgets.QTreeWidget):
         Constructor
         """
         super(ServiceManagerList, self).__init__(parent)
-        self.setDragDropMode(QtWidgets.QAbstractItemView.DragDrop)
+        self.setDragDropMode(QtWidgets.QAbstractItemView.DragDropMode.DragDrop)
         self.setAlternatingRowColors(True)
         self.setHeaderHidden(True)
         self.setExpandsOnDoubleClick(False)
@@ -159,8 +159,8 @@ class Ui_ServiceManager(object):
         self.toolbar.add_toolbar_widget(self.theme_label)
         self.theme_combo_box = QtWidgets.QComboBox(self.toolbar)
         self.theme_combo_box.setToolTip(translate('OpenLP.ServiceManager', 'Select a theme for the service.'))
-        self.theme_combo_box.setSizeAdjustPolicy(QtWidgets.QComboBox.AdjustToMinimumContentsLength)
-        self.theme_combo_box.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        self.theme_combo_box.setSizeAdjustPolicy(QtWidgets.QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLength)
+        self.theme_combo_box.setSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Fixed)
         self.theme_combo_box.setObjectName('theme_combo_box')
         self.toolbar.add_toolbar_widget(self.theme_combo_box)
         self.toolbar.setObjectName('toolbar')
@@ -168,9 +168,9 @@ class Ui_ServiceManager(object):
         # Create the service manager list
         self.service_manager_list = ServiceManagerList(widget)
         self.service_manager_list.setEditTriggers(
-            QtWidgets.QAbstractItemView.CurrentChanged |
-            QtWidgets.QAbstractItemView.DoubleClicked |
-            QtWidgets.QAbstractItemView.EditKeyPressed)
+            QtWidgets.QAbstractItemView.EditTrigger.CurrentChanged |
+            QtWidgets.QAbstractItemView.EditTrigger.DoubleClicked |
+            QtWidgets.QAbstractItemView.EditTrigger.EditKeyPressed)
         self.service_manager_list.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.service_manager_list.customContextMenuRequested.connect(self.context_menu)
         self.service_manager_list.setObjectName('service_manager_list')
@@ -367,7 +367,7 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
         self.start_time_form = StartTimeForm()
 
     def _delete_confirmation_dialog(self):
-        msg_box = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Question,
+        msg_box = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Icon.Question,
                                         translate('OpenLP.ServiceManager', 'Delete item from service'),
                                         translate('OpenLP.ServiceManager', 'Are you sure you want to delete '
                                                   'this item from the service?'),
@@ -467,7 +467,7 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
                     return False
         if not self.service_items and self.settings.value('advanced/new service message'):
             do_not_show_again = QtWidgets.QCheckBox(translate('OpenLP.Ui', 'Do not show this message again'), None)
-            message_box = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Information,
+            message_box = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Icon.Information,
                                                 translate('OpenLP.Ui', 'Create a new service.'),
                                                 translate('OpenLP.Ui', 'You already have a blank new service.\n'
                                                                        'Add some items to it then press Save'),
@@ -1704,7 +1704,7 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
         title = self.service_items[item]['service_item'].title
         title, ok = QtWidgets.QInputDialog.getText(self, translate('OpenLP.ServiceManager', 'Rename item title'),
                                                    translate('OpenLP.ServiceManager', 'Title:'),
-                                                   QtWidgets.QLineEdit.Normal, self.tr(title))
+                                                   QtWidgets.QLineEdit.EchoMode.Normal, self.tr(title))
         if ok:
             self.service_items[item]['service_item'].title = title
             self.repaint_service_list(item, -1)

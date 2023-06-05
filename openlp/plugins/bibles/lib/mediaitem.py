@@ -147,7 +147,7 @@ class BibleMediaItem(MediaManagerItem):
         self.page_layout.addWidget(self.search_tab_bar)
         # Add the Search tab.
         self.search_tab = QtWidgets.QWidget()
-        self.search_tab.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+        self.search_tab.setSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
         self.search_tab_bar.addTab(translate('BiblesPlugin.MediaItem', 'Find'))
         self.search_layout = QtWidgets.QFormLayout(self.search_tab)
         self.search_edit = SearchEdit(self.search_tab, 'bibles')
@@ -156,7 +156,7 @@ class BibleMediaItem(MediaManagerItem):
         self.page_layout.addWidget(self.search_tab)
         # Add the Select tab.
         self.select_tab = QtWidgets.QWidget()
-        self.select_tab.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+        self.select_tab.setSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
         self.search_tab_bar.addTab(translate('BiblesPlugin.MediaItem', 'Select'))
         self.select_layout = QtWidgets.QFormLayout(self.select_tab)
         self.book_layout = QtWidgets.QHBoxLayout()
@@ -190,7 +190,7 @@ class BibleMediaItem(MediaManagerItem):
         self.page_layout.addWidget(self.select_tab)
         # General Search Opions
         self.options_tab = QtWidgets.QWidget()
-        self.options_tab.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+        self.options_tab.setSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum)
         self.search_tab_bar.addTab(translate('BiblesPlugin.MediaItem', 'Options'))
         self.general_bible_layout = QtWidgets.QFormLayout(self.options_tab)
         self.version_combo_box = create_horizontal_adjusting_combo_box(self, 'version_combo_box')

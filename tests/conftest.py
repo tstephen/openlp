@@ -74,7 +74,7 @@ def settings(qapp, registry):
     """A Settings() instance"""
     fd, ini_file = mkstemp('.ini')
     Settings.set_filename(ini_file)
-    Settings().setDefaultFormat(QtCore.QSettings.IniFormat)
+    Settings().setDefaultFormat(QtCore.QSettings.Format.IniFormat)
     # Needed on windows to make sure a Settings object is available during the tests
     sets = Settings()
     sets.setValue('themes/global theme', 'my_theme')
