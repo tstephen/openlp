@@ -51,10 +51,25 @@ test-arch:
     - sh scripts/generate_resources.sh
     - xvfb-run -s '-screen 0 1024x768x24' pytest --color=no --disable-warnings
 
-test-macos:
+test-macos-intel:
   stage: test
   tags:
-    - macos
+    - apple-amd64
+  script:
+    - export PATH=/opt/local/bin:$PATH
+    - sh scripts/generate_resources.sh
+    - python3 -m pytest --color=no --disable-warnings --cov openlp
+    - mv .coverage macos.coverage
+  artifacts:
+    paths:
+      - macos.coverage
+  only:
+    - master@openlp/openlp
+
+test-macos-arm:
+  stage: test
+  tags:
+    - apple-arm
   script:
     - export PATH=/opt/local/bin:$PATH
     - sh scripts/generate_resources.sh
