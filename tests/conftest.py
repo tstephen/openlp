@@ -63,7 +63,7 @@ def mocked_qapp():
 
 
 @pytest.fixture
-def registry(autouse=True):
+def registry():
     """An instance of the Registry"""
     yield Registry.create()
     Registry._instances = {}

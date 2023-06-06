@@ -319,6 +319,7 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
         Sets up the service manager, toolbars, list view, et al.
         """
         super().__init__(parent)
+        self._save_lite = False
         self.service_items = []
         self.suffixes = set()
         self.add_media_suffixes()
@@ -805,7 +806,7 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
                 compressed_size = 0
                 for zip_info in zip_file.infolist():
                     compressed_size += zip_info.compress_size
-                self.main_window.display_progress_bar(compressed_size)
+                self.main_window.display_progress_bar(compressed_size // 1024)
                 # First find the osj-file to find out how to handle the file
                 for zip_info in zip_file.infolist():
                     # The json file has been called 'service_data.osj' since OpenLP 3.0
@@ -843,7 +844,7 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
                                 is_broken_file = True
                                 self.log_debug(f'Fixing file {fname} => {zip_info.filename}')
                         zip_file.extract(zip_info, str(self.service_path))
-                    self.main_window.increment_progress_bar(zip_info.compress_size)
+                    self.main_window.increment_progress_bar(zip_info.compress_size // 1024)
                 # Handle the content
                 self.new_file()
                 self.process_service_items(items)
