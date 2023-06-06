@@ -73,11 +73,7 @@ test-macos-arm:
   script:
     - export PATH=/opt/local/bin:$PATH
     - sh scripts/generate_resources.sh
-    - python3 -m pytest --color=no --disable-warnings --cov openlp
-    - mv .coverage macos.coverage
-  artifacts:
-    paths:
-      - macos.coverage
+    - python3 -m pytest --color=no --disable-warnings
   only:
     - master@openlp/openlp
 
@@ -113,6 +109,6 @@ pages:
     expire_in: 30 days
   dependencies:
     - test-debian
-    - test-macos
+    - test-macos-intel
   only:
     - master@openlp/openlp
