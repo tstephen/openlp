@@ -26,7 +26,7 @@ import threading
 from functools import partial
 from pathlib import Path
 from time import sleep
-from unittest.mock import MagicMock, patch
+from unittest.mock import Mock, MagicMock, call, patch
 from zipfile import BadZipFile
 
 import pytest
@@ -2483,3 +2483,45 @@ def test_get_write_file_list(mocked_sha256_file_hash, registry, service_manager:
 
     # THEN the service_items list should be empty
     assert len(write_list) == 6
+
+
+@patch('openlp.core.ui.servicemanager.ServiceItem')
+@patch('openlp.core.ui.servicemanager.find_and_set_in_combo_box')
+def test_process_service_items(mocked_fns_combo: Mock, MockServiceItem: Mock, service_manager: ServiceManager,
+                               registry: Registry):
+    """Test the process_service_items() method"""
+    # GIVEN: A mocked ServiceItem and a ServiceManager
+    mocked_service = MagicMock()
+    mocked_service.service_load.side_effect = lambda x: x
+    registry.register('test', mocked_service)
+    mocked_service_item = MagicMock()
+    # This line below is because Mock has an internal "name" attr that is set via the constructor
+    # See https://docs.python.org/3/library/unittest.mock.html#mock-names-and-the-name-attribute
+    mocked_service_item.name = 'test'
+    MockServiceItem.return_value = mocked_service_item
+    service_items = [
+        {
+        },
+        {
+            'openlp_core': {
+                'lite-service': True,
+                'service-theme': 'Blue'
+            }
+        },
+        {
+        }
+    ]
+    service_manager.theme_combo_box = MagicMock(**{'currentText.return_value': 'Blue'})
+    service_manager.add_service_item = MagicMock()
+
+    # WHEN: process_service_items() is called
+    service_manager.process_service_items(service_items)
+
+    # THEN: The correct calls should have been made
+    mocked_fns_combo.assert_called_once_with(service_manager.theme_combo_box, 'Blue', set_missing=False)
+    assert service_manager.service_theme == 'Blue'
+    assert service_manager._save_lite is True
+    assert mocked_service_item.set_from_service.call_args_list == [
+        call({}, service_manager.service_path, service_manager.servicefile_version),
+        call({}, version=service_manager.servicefile_version)
+    ]
