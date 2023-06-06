@@ -1248,6 +1248,7 @@ var Display = {
     mainStyle["font-style"] = !!Display._theme.font_main_italics ? "italic" : "";
     mainStyle["font-weight"] = !!Display._theme.font_main_bold ? "bold" : "";
     mainStyle["line-height"] = "" + (100 + Display._theme.font_main_line_adjustment) + "%";
+    mainStyle["letter-spacing"] = "" + (Display._theme.font_main_letter_adjustment) + 'px';
     // Using text-align-last because there is a <br> seperating each line
     switch (Display._theme.display_horizontal_align) {
       case HorizontalAlign.Justify:
@@ -1322,6 +1323,8 @@ var Display = {
     footerStyle["font-size"] = "" + Display._theme.font_footer_size + "pt";
     footerStyle["font-style"] = !!Display._theme.font_footer_italics ? "italic" : "";
     footerStyle["font-weight"] = !!Display._theme.font_footer_bold ? "bold" : "";
+    footerStyle["line-height"] = "" + (100 + Display._theme.font_footer_line_adjustment) + "%";
+    footerStyle["letter-spacing"] = "" + (Display._theme.font_footer_letter_adjustment) + 'px';
     footerStyle["white-space"] = Display._theme.font_footer_wrap ? "normal" : "nowrap";
     for (var footerKey in footerStyle) {
       if (footerStyle.hasOwnProperty(footerKey)) {
