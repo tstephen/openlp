@@ -279,6 +279,16 @@ class Controller(object):
             return
         self.doc.poll_slidenumber(self.is_live, self.hide_mode)
 
+    def attempt_screenshot(self, index):
+        """
+        Tries to perform a live screenshot when visible service item uses ProvidesOwnDisplay flag.
+
+        :returns: A tuple: whether the request succedded, and then the image.
+        """
+        if self.is_live:
+            return self.doc.attempt_screenshot(index)
+        return (False, None)
+
 
 class MessageListener(object):
     """
@@ -310,6 +320,7 @@ class MessageListener(object):
         Registry().register_function('presentations_slide', self.slide)
         Registry().register_function('presentations_blank', self.blank)
         Registry().register_function('presentations_unblank', self.unblank)
+        Registry().register_function('presentations_attempt_screenshot', self.attempt_live_screenshot)
         self.timer = QtCore.QTimer()
         self.timer.setInterval(500)
         self.timer.timeout.connect(self.timeout)
@@ -487,3 +498,13 @@ class MessageListener(object):
         Poll occasionally to check which slide is currently displayed so the slidecontroller view can be updated.
         """
         self.live_handler.poll()
+
+    def attempt_live_screenshot(self, message):
+        """
+        Tries to perform a live screenshot when visible service item uses ProvidesOwnDisplay flag.
+
+        :returns: A tuple: whether the request succedded, and then the image.
+        """
+        current_row = message[1]
+        result = self.live_handler.attempt_screenshot(current_row)
+        return result

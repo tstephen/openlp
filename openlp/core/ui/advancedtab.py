@@ -100,6 +100,9 @@ class AdvancedTab(SettingsTab):
         self.allow_transparent_display_check_box = QtWidgets.QCheckBox(self.display_workaround_group_box)
         self.allow_transparent_display_check_box.setObjectName('allow_transparent_display_check_box')
         self.display_workaround_layout.addWidget(self.allow_transparent_display_check_box)
+        self.prefer_windowed_capture_check_box = QtWidgets.QCheckBox(self.display_workaround_group_box)
+        self.prefer_windowed_capture_check_box.setObjectName('prefer_windowed_capture_check_box')
+        self.display_workaround_layout.addWidget(self.prefer_windowed_capture_check_box)
         self.left_layout.addWidget(self.display_workaround_group_box)
         # Proxies
         self.proxy_widget = ProxyWidget(self.right_column)
@@ -135,6 +138,8 @@ class AdvancedTab(SettingsTab):
         self.alternate_rows_check_box.setText(translate('OpenLP.AdvancedTab', 'Use alternating row colours in lists'))
         self.allow_transparent_display_check_box.setText(
             translate('OpenLP.AdvancedTab', 'Disable display transparency'))
+        self.prefer_windowed_capture_check_box.setText(
+            translate('OpenLP.AdvancedTab', 'Prefer window capture instead of screen capture'))
         self.proxy_widget.retranslate_ui()
 
     def load(self):
@@ -148,6 +153,8 @@ class AdvancedTab(SettingsTab):
         self.alternate_rows_check_box.setChecked(self.settings.value('advanced/alternate rows'))
         self.alternate_rows_check_box.blockSignals(False)
         self.allow_transparent_display_check_box.setChecked(self.settings.value('advanced/disable transparent display'))
+        self.prefer_windowed_capture_check_box.setChecked(
+            self.settings.value('advanced/prefer windowed screen capture'))
         self.data_directory_copy_check_box.hide()
         self.new_data_directory_has_files_label.hide()
         self.data_directory_cancel_button.hide()
@@ -163,6 +170,8 @@ class AdvancedTab(SettingsTab):
         """
         self.settings.setValue('advanced/disable transparent display',
                                self.allow_transparent_display_check_box.isChecked())
+        self.settings.setValue('advanced/prefer windowed screen capture',
+                               self.prefer_windowed_capture_check_box.isChecked())
         self.settings.setValue('advanced/ignore aspect ratio', self.ignore_aspect_ratio_check_box.isChecked())
         if self.x11_bypass_check_box.isChecked() != self.settings.value('advanced/x11 bypass wm'):
             self.settings.setValue('advanced/x11 bypass wm', self.x11_bypass_check_box.isChecked())

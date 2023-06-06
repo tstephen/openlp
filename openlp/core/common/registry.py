@@ -112,6 +112,14 @@ class Registry(metaclass=Singleton):
         if event in self.functions_list and function in self.functions_list[event]:
             self.functions_list[event].remove(function)
 
+    def has_function(self, event):
+        """
+        Returns whether there's any hander associated with the event.
+
+        :param event: The function to be checked
+        """
+        return event in self.functions_list
+
     def execute(self, event, *args, **kwargs):
         """
         Execute all the handlers associated with the event and return an array of results.
@@ -122,7 +130,7 @@ class Registry(metaclass=Singleton):
         """
         log.debug(f'Running function {event}')
         results = []
-        if event in self.functions_list:
+        if self.has_function(event):
             for function in self.functions_list[event]:
                 try:
                     result = function(*args, **kwargs)
