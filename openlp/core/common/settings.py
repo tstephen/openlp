@@ -195,6 +195,7 @@ class Settings(QtCore.QSettings):
         'advanced/single click preview': False,
         'advanced/single click service preview': False,
         'advanced/x11 bypass wm': X11_BYPASS_DEFAULT,
+        'advanced/prefer windowed screen capture': False,
         'advanced/search as type': True,
         'advanced/ui_theme_name': UiThemes.Automatic,
         'advanced/delete service item confirmation': False,

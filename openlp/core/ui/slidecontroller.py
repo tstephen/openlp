@@ -33,6 +33,7 @@ from openlp.core.common import SlideLimits
 from openlp.core.common.actions import ActionList, CategoryOrder
 from openlp.core.common.i18n import UiStrings, translate
 from openlp.core.common.mixins import LogMixin, RegistryProperties
+from openlp.core.common.platform import is_macosx, is_wayland_compositor
 from openlp.core.common.registry import Registry, RegistryBase
 from openlp.core.common.utils import wait_for
 from openlp.core.display.screens import ScreenList
@@ -1234,6 +1235,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         Gets an image of the display screen and updates the preview frame.
         """
         display_image = self._capture_maindisplay()
+        # display_image.setDevicePixelRatio(self.preview_display.devicePixelRatio())
         base64_image = image_to_byte(display_image)
         self.screen_capture = base64_image
         self.preview_display.set_single_image_data('#000', base64_image)
@@ -1243,11 +1245,95 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         Creates an image of the current screen.
         """
         self.log_debug('_capture_maindisplay {text}'.format(text=self.screens.current))
-        win_id = QtWidgets.QApplication.desktop().winId()
-        screen = QtWidgets.QApplication.primaryScreen()
-        rect = ScreenList().current.display_geometry
-        win_image = screen.grabWindow(win_id, rect.x(), rect.y(), rect.width(), rect.height())
-        win_image.setDevicePixelRatio(self.preview_display.devicePixelRatio())
+        # Wayland needs screenshot fallback even when OpenLP is running on X11/xcb mode.
+        fallback_to_windowed = is_wayland_compositor() or \
+            self.settings.value('advanced/prefer windowed screen capture')
+        if not fallback_to_windowed:
+            # Check if display screen is outside real screen bounds
+            # OpenLP can't take reliable screenshots when any of these conditions happens
+            # See last warning in grabWindow at https://doc.qt.io/qt-6/qscreen.html#grabWindow
+            display_rect = ScreenList().current.display_geometry
+            screen_rect = ScreenList().current.geometry
+            display_above_horizontal = display_rect.left() < screen_rect.left()
+            display_above_vertical = display_rect.top() < screen_rect.top()
+            display_beyond_horizontal = (display_rect.left() + display_rect.width() >
+                                         screen_rect.left() + screen_rect.width())
+            display_beyond_vertical = (display_rect.top() + display_rect.height() >
+                                       screen_rect.top() + screen_rect.height())
+            fallback_to_windowed = display_above_horizontal or display_above_vertical \
+                or display_beyond_horizontal or display_beyond_vertical
+        if fallback_to_windowed:
+            if self.service_item.is_capable(ItemCapabilities.ProvidesOwnDisplay) or self.service_item.is_media() or \
+               self.service_item.is_command():
+                if self.service_item.is_command():
+                    # Attempting to get screenshot from command handler
+                    service_item_name = self.service_item.name.lower()
+                    event_name = '{text}_attempt_screenshot'.format(text=service_item_name)
+                    if Registry().has_function(event_name):
+                        results = Registry().execute(event_name, [self.service_item, self.selected_row])
+                        if len(results):
+                            succedded, binary_data = results[0]
+                            if succedded and binary_data:
+                                self.log_debug('_capture_maindisplay using window capture from {name}'
+                                               .format(name=service_item_name))
+                                return binary_data
+                # Falling back to desktop capture, maybe it works
+                self.log_debug('_capture_maindisplay cannot do window capture, trying to get screenshot from screen'
+                               ' anyway')
+                return self._capture_maindisplay_desktop()
+            else:
+                self.log_debug('_capture_maindisplay falling back to window capture')
+                return self._capture_maindisplay_window()
+        else:
+            return self._capture_maindisplay_desktop()
+
+    def _capture_maindisplay_desktop(self):
+        # At least on macOS, there's a crash when opening /main Remote API endpoint,
+        # due to macOS requiring the screenshot code to be called on the main thread.
+        if is_macosx():
+            self.log_debug('_capture_maindisplay_desktop macos thread-safe call')
+            return self._capture_maindisplay_desktop_mainthread_safe()
+        else:
+            self.log_debug('_capture_maindisplay_desktop default call')
+            return self._capture_maindisplay_desktop_signal()
+
+    @QtCore.pyqtSlot(result='QPixmap')
+    def _capture_maindisplay_desktop_signal(self):
+        current_screen = ScreenList().current
+        display_rect = current_screen.display_geometry
+        screen_rect = current_screen.geometry
+        # As we capture using current screen object, we need relative coordinates.
+        # (OpenLP is storing screen positions like a big one-screen, and we can't change this without
+        # disrupting existing users)
+        relative_x = display_rect.x() - screen_rect.x()
+        relative_y = display_rect.y() - screen_rect.y()
+        width = display_rect.width()
+        height = display_rect.height()
+        win_image = current_screen.try_grab_screen_part(relative_x, relative_y, width, height)
+        return win_image
+
+    def _capture_maindisplay_desktop_mainthread_safe(self):
+        # Using internal Qt's messaging/event system to invoke the function.
+        # Usually we would need to use PyQt's signals, but they aren't blocking. So we had to resort to this solution,
+        # which use a less-documented Qt mechanism to invoke the signal in a blocking way.
+        return QtCore.QMetaObject.invokeMethod(self, '_capture_maindisplay_desktop_signal',
+                                               QtCore.Qt.ConnectionType.BlockingQueuedConnection,
+                                               QtCore.Q_RETURN_ARG('QPixmap'))
+
+    def _capture_maindisplay_window(self):
+        win_image = None
+        for display in self.displays:
+            if display.is_display:
+                if display.hide_mode == HideMode.Screen or display.hide_mode == HideMode.Blank:
+                    # Sending a black image to avoid artifacts
+                    size = display.size()
+                    win_image = QtGui.QPixmap(size)
+                    win_image.fill(QtGui.QColorConstants.Black)
+                else:
+                    win_image = display.grab_screenshot_safe()
+                    if win_image:
+                        win_image.setDevicePixelRatio(self.preview_display.devicePixelRatio())
+                break
         return win_image
 
     def is_slide_loaded(self):

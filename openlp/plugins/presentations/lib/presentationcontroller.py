@@ -86,6 +86,10 @@ class PresentationDocument(object):
     ``get_thumbnail_path(slide_no, check_exists)``
         Returns a path to an image containing a preview for the requested slide
 
+    ``attempt_screenshot()``
+        Attemps to take a screenshot from the presentation window. Returns a tuple with whether it succedded and
+        the result image.
+
     """
     def __init__(self, controller, document_path):
         """
@@ -385,6 +389,9 @@ class PresentationDocument(object):
         if not self._sha256_file_hash:
             self._sha256_file_hash = sha256_file_hash(self.file_path)
         return self._sha256_file_hash
+
+    def attempt_screenshot(self, index):
+        return (False, None)
 
 
 class PresentationList(metaclass=Singleton):

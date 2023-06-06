@@ -21,16 +21,19 @@
 """
 Package to test the openlp.core.ui.slidecontroller package.
 """
+from collections import namedtuple
 import datetime
 
 from unittest.mock import MagicMock, patch, sentinel
 
 from PyQt5 import QtCore, QtGui
-from openlp.core.lib.serviceitem import ServiceItem
+from pytest import mark
 
 from openlp.core.state import State
+from openlp.core.common.enum import ServiceItemType
 from openlp.core.common.registry import Registry
 from openlp.core.lib import ItemCapabilities, ServiceItemAction
+from openlp.core.lib.serviceitem import ServiceItem
 from openlp.core.ui import HideMode
 from openlp.core.ui.slidecontroller import NON_TEXT_MENU, WIDE_MENU, NARROW_MENU, InfoLabel, LiveController, \
     PreviewController, SlideController
@@ -1432,36 +1435,200 @@ def test_display_maindisplay(mocked_image_to_byte, registry):
     slide_controller.preview_display.set_single_image_data.assert_called_once_with('#000', 'placeholder bytified')
 
 
+CaptureMainDisplayMockReturn = namedtuple('CaptureMainDisplayMockReturn', ['slide_controller', 'mocked_primary_screen',
+                                                                           'windowed_screenshot_mock',
+                                                                           'mocked_screenlist_instance'])
+
+
+def _init__capture_maindisplay_mocks(geometry, mocked_screenlist, mocked_application, mocked_is_wayland_compositor):
+    mocked_is_wayland_compositor.return_value = False
+    slide_controller = SlideController(None)
+    windowed_screenshot_mock = QtGui.QPixmap(64, 33)
+    display_mock = MagicMock(grab_screenshot_safe=MagicMock(return_value=windowed_screenshot_mock), is_display=True)
+    slide_controller.displays = [display_mock]
+    slide_controller.service_item = ServiceItem(None)
+    mocked_geometry = MagicMock(
+        x=MagicMock(return_value=geometry[1][0]),
+        y=MagicMock(return_value=geometry[1][1]),
+        left=MagicMock(return_value=geometry[1][0]),
+        top=MagicMock(return_value=geometry[1][1]),
+        width=MagicMock(return_value=geometry[1][2]),
+        height=MagicMock(return_value=geometry[1][3])
+    )
+    mocked_display_geometry = MagicMock(
+        x=MagicMock(return_value=geometry[0][0]),
+        y=MagicMock(return_value=geometry[0][1]),
+        left=MagicMock(return_value=geometry[0][0]),
+        top=MagicMock(return_value=geometry[0][1]),
+        width=MagicMock(return_value=geometry[0][2]),
+        height=MagicMock(return_value=geometry[0][3])
+    )
+    mocked_screenlist_instance = MagicMock()
+    mocked_screenlist.return_value = mocked_screenlist_instance
+    mocked_screenlist_instance.current = MagicMock(display_geometry=mocked_display_geometry, geometry=mocked_geometry)
+    mocked_primary_screen = MagicMock()
+    mocked_application.primaryScreen = MagicMock(return_value=mocked_primary_screen)
+    slide_controller.preview_display = MagicMock()
+    return CaptureMainDisplayMockReturn(mocked_primary_screen=mocked_primary_screen, slide_controller=slide_controller,
+                                        windowed_screenshot_mock=windowed_screenshot_mock,
+                                        mocked_screenlist_instance=mocked_screenlist_instance)
+
+
 @patch(u'openlp.core.ui.slidecontroller.image_to_byte')
 @patch(u'openlp.core.ui.slidecontroller.ScreenList')
 @patch(u'openlp.core.ui.slidecontroller.QtWidgets.QApplication')
-def test__capture_maindisplay(mocked_application, mocked_screenlist, mocked_image_to_byte, registry):
+@patch(u'openlp.core.ui.slidecontroller.is_wayland_compositor')
+@mark.parametrize('geometry', [[[34, 67, 77, 42], [0, 0, 800, 600]]])
+def test__capture_maindisplay(mocked_is_wayland_compositor, mocked_application, mocked_screenlist,
+                              mocked_image_to_byte, geometry, registry, settings):
     """
     Test the _capture_maindisplay method
     """
     # GIVEN: A mocked slide controller, with mocked functions
-    slide_controller = SlideController(None)
-    mocked_display_geometry = MagicMock(
-        x=MagicMock(return_value=34),
-        y=MagicMock(return_value=67),
-        width=MagicMock(return_value=77),
-        height=MagicMock(return_value=42)
-    )
-    mocked_screenlist_instance = MagicMock()
-    mocked_screenlist.return_value = mocked_screenlist_instance
-    mocked_screenlist_instance.current = MagicMock(display_geometry=mocked_display_geometry)
-    mocked_primary_screen = MagicMock()
-    mocked_application.primaryScreen = MagicMock(return_value=mocked_primary_screen)
-    mocked_application.desktop = MagicMock(return_value=MagicMock(
-        winId=MagicMock(return_value=23)
-    ))
-    slide_controller.preview_display = MagicMock()
+    mocks = _init__capture_maindisplay_mocks(geometry, mocked_screenlist, mocked_application,
+                                             mocked_is_wayland_compositor)
 
     # WHEN: _capture_maindisplay is called
-    slide_controller._capture_maindisplay()
+    mocks.slide_controller._capture_maindisplay()
 
     # THEN: Screenshot should have been taken with correct winId and dimensions
-    mocked_primary_screen.grabWindow.assert_called_once_with(23, 34, 67, 77, 42)
+    mocks.mocked_screenlist_instance.current.try_grab_screen_part.assert_called_once()
+
+
+@patch(u'openlp.core.ui.slidecontroller.image_to_byte')
+@patch(u'openlp.core.ui.slidecontroller.ScreenList')
+@patch(u'openlp.core.ui.slidecontroller.QtWidgets.QApplication')
+@patch(u'openlp.core.ui.slidecontroller.is_wayland_compositor')
+@mark.parametrize('geometry', [[[34, 67, 77, 42], [0, 0, 800, 600]]])
+def test__capture_maindisplay_wayland_fallbacks_to_windowed(mocked_is_wayland_compositor, mocked_application,
+                                                            mocked_screenlist, mocked_image_to_byte, registry,
+                                                            geometry, settings):
+    """
+    Test the _capture_maindisplay method fallbacks to windowed capture mode if user is running on Wayland compositor
+    """
+    # GIVEN: A mocked slide controller, with mocked functions
+    mocks = _init__capture_maindisplay_mocks(geometry, mocked_screenlist, mocked_application,
+                                             mocked_is_wayland_compositor)
+    mocked_is_wayland_compositor.return_value = True
+
+    # WHEN: _capture_maindisplay is called
+    photo = mocks.slide_controller._capture_maindisplay()
+
+    # THEN: Screenshot should have been taken from DisplayWindow and Screen should not be touched
+    assert photo == mocks.windowed_screenshot_mock
+    mocks.mocked_primary_screen.grabWindow.assert_not_called()
+
+
+@patch(u'openlp.core.ui.slidecontroller.image_to_byte')
+@patch(u'openlp.core.ui.slidecontroller.ScreenList')
+@patch(u'openlp.core.ui.slidecontroller.QtWidgets.QApplication')
+@patch(u'openlp.core.ui.slidecontroller.is_wayland_compositor')
+@mark.parametrize('geometry', [[[400, 400, 800, 600], [0, 0, 800, 600]], [[510, 0, 800, 600], [0, 0, 800, 600]],
+                               [[0, 320, 800, 600], [0, 0, 800, 600]], [[-200, -100, 800, 600], [0, 0, 800, 600]],
+                               [[-120, 0, 800, 600], [0, 0, 800, 600]], [[0, -140, 800, 600], [0, 0, 800, 600]],
+                               [[-150, 0, 800, 600], [-152, 0, 800, 600]], [[0, -210, 800, 600], [0, -200, 800, 600]],
+                               [[200, 0, 800, 600], [120, 0, 800, 600]], [[0, 230, 800, 600], [0, 110, 800, 600]]])
+def test__capture_maindisplay_offscreen_fallbacks_to_windowed(mocked_is_wayland_compositor, mocked_application,
+                                                              mocked_screenlist, mocked_image_to_byte, geometry,
+                                                              registry, settings):
+    """
+    Test the _capture_maindisplay method fallbacks to windowed capture mode if user have a display
+    above/beyond screen boundaries.
+    """
+    # GIVEN: A mocked slide controller, with mocked functions and offscreen geometry
+    mocks = _init__capture_maindisplay_mocks(geometry, mocked_screenlist, mocked_application,
+                                             mocked_is_wayland_compositor)
+    mocked_is_wayland_compositor.return_value = False
+
+    # WHEN: _capture_maindisplay is called
+    photo = mocks.slide_controller._capture_maindisplay()
+
+    # THEN: Screenshot should have been taken from DisplayWindow and Screen should not be touched
+    assert photo == mocks.windowed_screenshot_mock
+    mocks.mocked_primary_screen.grabWindow.assert_not_called()
+
+
+@patch(u'openlp.core.ui.slidecontroller.ScreenList')
+@patch(u'openlp.core.ui.slidecontroller.QtWidgets.QApplication')
+@patch(u'openlp.core.ui.slidecontroller.is_wayland_compositor')
+@mark.parametrize('geometry', [[[34, 67, 77, 42], [0, 0, 800, 600]]])
+def test__capture_maindisplay_offscreen_command_screenshot(mocked_is_wayland_compositor, mocked_application,
+                                                           mocked_screenlist, geometry, registry, settings):
+    """
+    Test the _capture_maindisplay method invoke '{text}_attempt_screenshot' event on command-based service items.
+    """
+    # GIVEN: A mocked slide controller, with mocked functions and offscreen geometry
+    mocks = _init__capture_maindisplay_mocks(geometry, mocked_screenlist, mocked_application,
+                                             mocked_is_wayland_compositor)
+    mocked_is_wayland_compositor.return_value = True
+    mocks.slide_controller.service_item.capabilities = [ItemCapabilities.ProvidesOwnDisplay]
+    mocks.slide_controller.service_item.name = 'screenshottable'
+    mocks.slide_controller.service_item.service_item_type = ServiceItemType.Command
+    mocks.slide_controller.selected_row = 0
+    pixmap = QtGui.QPixmap()
+
+    def attempt_screenshot(params):
+        nonlocal pixmap
+        return True, pixmap
+
+    registry.register_function('screenshottable_attempt_screenshot', attempt_screenshot)
+
+    # WHEN: _capture_maindisplay is called
+    photo = mocks.slide_controller._capture_maindisplay()
+
+    # THEN: Screenshot should have been taken from DisplayWindow and Screen should not be touched
+    assert photo == pixmap
+
+
+@patch(u'openlp.core.ui.slidecontroller.ScreenList')
+@patch(u'openlp.core.ui.slidecontroller.QtWidgets.QApplication')
+@patch(u'openlp.core.ui.slidecontroller.is_wayland_compositor')
+@mark.parametrize('geometry', [[[-800, -600, 800, 600], [0, 0, 800, 600]]])
+@mark.parametrize('hide_mode', [HideMode.Screen, HideMode.Blank])
+def test__capture_maindisplay_window_fakes_black_screen(mocked_is_wayland_compositor, mocked_application,
+                                                        mocked_screenlist, geometry, hide_mode, registry, settings):
+    """
+    Test the _capture_maindisplay_window method fakes a black screen if display mode is Screen or Blank.
+    """
+    # GIVEN: A mocked slide controller, with mocked functions and offscreen geometry
+    mocks = _init__capture_maindisplay_mocks(geometry, mocked_screenlist, mocked_application,
+                                             mocked_is_wayland_compositor)
+    screen_size = QtCore.QSize(geometry[1][2], geometry[1][3])
+    mocked_display = MagicMock()
+    mocked_display.is_display = True
+    mocked_display.hide_mode = hide_mode
+    mocked_display.size = MagicMock(return_value=screen_size)
+    mocks.slide_controller.displays = [mocked_display]
+
+    # WHEN: _capture_maindisplay is called
+    pixmap = mocks.slide_controller._capture_maindisplay()
+
+    # THEN: A fake black screen should be returned
+    photo_size = pixmap.size()
+    image = pixmap.toImage()
+    assert photo_size.width() == screen_size.width()
+    assert photo_size.height() == screen_size.height()
+    assert image.pixelColor(int(geometry[1][2] / 2), int(geometry[1][3] / 2)).isValid()
+    assert image.pixelColor(int(geometry[1][2] / 2), int(geometry[1][3] / 2)) == QtGui.QColorConstants.Black
+
+
+@patch('openlp.core.ui.slidecontroller.is_macosx')
+def test__capture_maindisplay_desktop_calls_safe_on_macos(mocked_is_macosx, registry, settings):
+    """
+    Test the _capture_maindisplay_desktop method fallbacks to calling thread-safe code on macOS
+    (avoids a hard crash due to Cocoa/macOS internal details)
+    """
+    # GIVEN: A mocked system check (running macOS) and mocked maindisplay call
+    mocked_is_macosx.return_value = True
+    slide_controller = SlideController()
+    # slidecontroller._capture_maindisplay_desktop_signal = MagicMock(return_value=QtGui.QPixmap())
+    slide_controller._capture_maindisplay_desktop_mainthread_safe = MagicMock()
+
+    # WHEN: trying to grab desktop screenshot
+    slide_controller._capture_maindisplay_desktop()
+
+    # THEN: Screenshot should have been taken through thread-safe call
+    slide_controller._capture_maindisplay_desktop_mainthread_safe.assert_called_once()
 
 
 @patch(u'openlp.core.ui.slidecontroller.image_to_byte')
