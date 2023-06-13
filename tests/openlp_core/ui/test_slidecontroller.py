@@ -1447,6 +1447,8 @@ def _init__capture_maindisplay_mocks(geometry, mocked_screenlist, mocked_applica
     display_mock = MagicMock(grab_screenshot_safe=MagicMock(return_value=windowed_screenshot_mock), is_display=True)
     slide_controller.displays = [display_mock]
     slide_controller.service_item = ServiceItem(None)
+    # Bypassing signal call to avoid test freeze
+    slide_controller._capture_maindisplay_desktop_mainthread_safe = slide_controller._capture_maindisplay_desktop_signal
     mocked_geometry = MagicMock(
         x=MagicMock(return_value=geometry[1][0]),
         y=MagicMock(return_value=geometry[1][1]),
