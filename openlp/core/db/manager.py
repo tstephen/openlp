@@ -236,7 +236,7 @@ class DBManager(object):
             query = query.where(filter_clause)
         for try_count in range(3):
             try:
-                return self.session.execute(query.with_only_columns([func.count()])).scalar()
+                return self.session.execute(query.with_only_columns(func.count())).scalar()
             except OperationalError:
                 # This exception clause is for users running MySQL which likes to terminate connections on its own
                 # without telling anyone. See bug #927473. However, other dbms can raise it, usually in a
