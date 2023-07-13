@@ -95,7 +95,6 @@ MODULES = [
     'pymediainfo',
     'vlc',
     'qrcode',
-    'PIL.ImageQt'
 ]
 
 
