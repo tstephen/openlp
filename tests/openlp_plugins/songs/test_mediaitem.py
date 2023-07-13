@@ -177,12 +177,17 @@ def test_display_results_author(media_item):
         mock_song.title = 'My Song'
         mock_song.sort_key = 'My Song'
         mock_song.temporary = False
+        mock_author_song = MagicMock()
+        mock_author_song.author = mock_author
+        mock_author_song.song = mock_song
         mock_song_temp.id = 2
         mock_song_temp.title = 'My Temporary'
         mock_song_temp.sort_key = 'My Temporary'
         mock_song_temp.temporary = True
-        mock_author.songs.append(mock_song)
-        mock_author.songs.append(mock_song_temp)
+        mock_author_song_temp = MagicMock()
+        mock_author_song_temp.author = mock_author
+        mock_author_song_temp.song = mock_song_temp
+        mock_author.authors_songs = [mock_author_song, mock_author_song_temp]
         mock_search_results.append(mock_author)
         mock_qlist_widget = MagicMock()
         MockedQListWidgetItem.return_value = mock_qlist_widget

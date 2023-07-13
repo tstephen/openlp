@@ -297,8 +297,9 @@ class SongMediaItem(MediaManagerItem):
         self.list_view.clear()
         search_results.sort(key=get_author_key)
         for author in search_results:
-            author.songs.sort(key=get_song_key)
-            for song in author.songs:
+            songs = [author_song.song for author_song in author.authors_songs]
+            songs.sort(key=get_song_key)
+            for song in songs:
                 # Do not display temporary songs
                 if song.temporary:
                     continue
