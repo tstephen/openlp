@@ -40,7 +40,7 @@ def test_manager_finalise_exception(mocked_create_engine, mocked_init_url, temp_
     def init_schema(url):
         return mocked_session
 
-    mocked_create_engine.return_value.execute.side_effect = SQLAlchemyOperationalError(
+    mocked_create_engine.return_value.connect.return_value.execute.side_effect = SQLAlchemyOperationalError(
         statement='vacuum',
         params=[],
         orig=SQLiteOperationalError('database is locked')
@@ -52,7 +52,7 @@ def test_manager_finalise_exception(mocked_create_engine, mocked_init_url, temp_
     manager.finalise()
 
     # THEN: vacuum should have been called on the database
-    mocked_create_engine.return_value.execute.assert_called_once_with('vacuum')
+    mocked_create_engine.return_value.connect.return_value.execute.assert_called_once_with('vacuum')
 
 
 @patch('openlp.core.db.manager.init_url')
@@ -73,4 +73,4 @@ def test_manager_finalise(mocked_create_engine, mocked_init_url, temp_folder, se
     manager.finalise()
 
     # THEN: vacuum should have been called on the database
-    mocked_create_engine.return_value.execute.assert_called_once_with('vacuum')
+    mocked_create_engine.return_value.connect.return_value.execute.assert_called_once_with('vacuum')

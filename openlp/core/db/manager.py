@@ -315,11 +315,10 @@ class DBManager(object):
         """
         VACUUM the database on exit.
         """
-        if self.is_dirty:
-            engine = create_engine(self.db_url)
-            if self.db_url.startswith('sqlite'):
-                try:
-                    engine.execute("vacuum")
-                except OperationalError:
-                    # Just ignore the operational error
-                    pass
+        if self.is_dirty and self.db_url.startswith('sqlite'):
+            try:
+                engine = create_engine(self.db_url)
+                engine.connect().execute("vacuum")
+            except OperationalError:
+                # Just ignore the operational error
+                pass
