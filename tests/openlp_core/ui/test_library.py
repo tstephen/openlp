@@ -24,6 +24,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from PyQt5 import QtCore, QtWidgets
 
+from openlp.core.common.platform import is_win
 from openlp.core.ui.library import FolderLibraryItem
 
 
@@ -157,7 +158,10 @@ def test_file_to_item_as_path(folder_library_item):
     # THEN: An Item should be returned
     assert isinstance(result, MockItem)
     assert result.name == 'file.mp4'
-    assert result.file_path == 'path/to/file.mp4'
+    if is_win():
+        assert result.file_path == 'path\\to\\file.mp4'
+    else:
+        assert result.file_path == 'path/to/file.mp4'
 
 
 def test_file_to_item_as_str(folder_library_item):
