@@ -114,6 +114,23 @@ class PowerpointDocument(PresentationDocument):
     Class which holds information and controls a single presentation.
     """
 
+    @property
+    def is_in_cloud(self):
+        """Determine if the document is a cloud document."""
+        return str(self.presentation.FullName).startswith('https://') \
+            if self.presentation else False
+
+    @property
+    def presentation_file(self):
+        """The file name of the presentation, normalised in case of a cloud document."""
+        return str(self.presentation.Name) if self.is_in_cloud else str(self.presentation.FullName)
+
+    @property
+    def presentation_controller_file(self):
+        """The file name of the presentation in the Slide Controller, normalised in case of
+            a cloud document."""
+        return str(self.file_path.name) if self.is_in_cloud else str(self.file_path)
+
     def __init__(self, controller, document_path):
         """
         Constructor, store information about the file and initialise.
@@ -213,13 +230,13 @@ class PowerpointDocument(PresentationDocument):
         """
         log.debug('is_loaded')
         try:
-            if self.presentation is None or self.presentation.FullName != str(self.file_path):
+            if self.presentation is None:
                 return False
+            return self.presentation_file == self.presentation_controller_file
         except (AttributeError, pywintypes.com_error):
             log.exception('Caught exception while in is_loaded')
             trace_error_handler(log)
             return False
-        return True
 
     def is_active(self):
         """
