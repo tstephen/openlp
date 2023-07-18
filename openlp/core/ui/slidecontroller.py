@@ -88,7 +88,7 @@ class InfoLabel(QtWidgets.QLabel):
         painter = QtGui.QPainter(self)
         metrics = QtGui.QFontMetrics(self.font())
         elided = metrics.elidedText(self.text(), QtCore.Qt.ElideRight, self.width())
-        painter.drawText(self.rect(), QtCore.Qt.AlignLeft, elided)
+        painter.drawText(self.rect(), QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter, elided)
 
     def setText(self, text):
         """
@@ -207,29 +207,28 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         # Type label at the top of the slide controller with icon
         self.top_label_horizontal = QtWidgets.QHBoxLayout()
         self.panel_layout.addLayout(self.top_label_horizontal)
-        self.top_label_vertical = QtWidgets.QVBoxLayout()
         if self.is_live:
             icon = UiIcons().live
         else:
             icon = UiIcons().preview
-        pixmap = icon.pixmap(QtCore.QSize(34, 34))
+        pixmap = icon.pixmap(QtCore.QSize(28, 28))
         self.top_icon = QtWidgets.QLabel()
         self.top_icon.setPixmap(pixmap)
-        self.top_icon.setStyleSheet("padding: 0 10 0 25px;")
-        self.top_icon.setAlignment(QtCore.Qt.AlignRight)
-        self.top_label_horizontal.addWidget(self.top_icon, 1)
-        self.top_label_horizontal.addLayout(self.top_label_vertical, 100)
+        self.top_icon.setStyleSheet("padding: 0px 0px 0px 25px;")
+        self.top_icon.setAlignment(QtCore.Qt.AlignCenter)
         self.type_label = QtWidgets.QLabel(self.panel)
-        self.type_label.setStyleSheet('font-weight: bold; font-size: 12pt;')
+        self.type_label.setStyleSheet('padding: 0px 2px 0px 2px; font-weight: bold;')
         if self.is_live:
             self.type_label.setText(UiStrings().Live)
         else:
             self.type_label.setText(UiStrings().Preview)
         # Info label for the title of the current item, at the top of the slide controller
         self.info_label = InfoLabel(self.panel)
+        self.info_label.setStyleSheet('font-style: italic;')
         self.info_label.setSizePolicy(QtWidgets.QSizePolicy.Policy.Ignored, QtWidgets.QSizePolicy.Policy.Preferred)
-        self.top_label_vertical.addWidget(self.type_label)
-        self.top_label_vertical.addWidget(self.info_label)
+        self.top_label_horizontal.addWidget(self.top_icon)
+        self.top_label_horizontal.addWidget(self.type_label)
+        self.top_label_horizontal.addWidget(self.info_label, stretch=1)
         # Splitter
         self.splitter = QtWidgets.QSplitter(self.panel)
         self.splitter.setOrientation(QtCore.Qt.Vertical)
@@ -899,7 +898,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
                 self._set_theme(self.service_item)
         else:
             self._set_theme(self.service_item)
-        self.info_label.setText(self.service_item.title)
+        self.info_label.setText("–  " + self.service_item.title)
         self.slide_list = {}
         # if the old item was text or images (ie doesn't provide its own display) and the new item provides its own
         # display then clear out the old item so that it doesn't flash momentarily when next showing text/image

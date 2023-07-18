@@ -1703,7 +1703,8 @@ def test_paint_event_text_fits():
         info_label.paintEvent(MagicMock())
 
         # THEN: The text should be drawn left with the complete test_string
-        mocked_qpainter().drawText.assert_called_once_with(mocked_rect(), QtCore.Qt.AlignLeft, test_string)
+        mocked_qpainter().drawText.assert_called_once_with(mocked_rect(),
+                                                           QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter, test_string)
 
 
 def test_paint_event_text_doesnt_fit():
@@ -1734,7 +1735,9 @@ def test_paint_event_text_doesnt_fit():
 
         # THEN: The text should be drawn aligned left with an elided test_string
         elided_test_string = metrics.elidedText(test_string, QtCore.Qt.ElideRight, label_width)
-        mocked_qpainter().drawText.assert_called_once_with(mocked_rect(), QtCore.Qt.AlignLeft, elided_test_string)
+        mocked_qpainter().drawText.assert_called_once_with(mocked_rect(),
+                                                           QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter,
+                                                           elided_test_string)
 
 
 @patch('builtins.super')
