@@ -192,9 +192,15 @@ class Author(Base):
     authors_songs = relationship('AuthorSong', back_populates='author')
 
     def get_display_name(self, author_type: Optional[str] = None) -> str:
+        """Determine the display name"""
         if author_type:
             return "{name} ({author})".format(name=self.display_name, author=AuthorType.Types[author_type])
         return self.display_name
+
+    @property
+    def songs(self):
+        """All the songs associated with this author"""
+        return [author_song.song for author_song in self.authors_songs]
 
 
 class AuthorSong(Base):
