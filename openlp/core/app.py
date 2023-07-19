@@ -46,6 +46,7 @@ from openlp.core.common.platform import is_macosx, is_win
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.display.screens import ScreenList
+from openlp.core.lib.filelock import FileLock
 from openlp.core.display.webengine import init_webview_custom_schemes
 from openlp.core.loader import loader
 from openlp.core.resources import qInitResources
@@ -79,6 +80,8 @@ class OpenLP(QtCore.QObject, LogMixin):
         """
         self.is_event_loop_active = True
         result = QtWidgets.QApplication.exec()
+        if self.data_dir_lock:
+            self.data_dir_lock.release()
         if hasattr(self, 'server'):
             self.server.close_server()
         return result
@@ -468,6 +471,14 @@ def main():
     Registry.create()
     settings = Settings()
     Registry().register('settings', settings)
+    if settings.value('advanced/protect data directory'):
+        # attempt to create a file lock
+        app.data_dir_lock = FileLock(AppLocation.get_data_path(), get_version()['full'])
+        if not app.data_dir_lock.lock():
+            # not good! A message will have been presented to the user explaining why we're quitting.
+            sys.exit()
+    else:
+        app.data_dir_lock = None
     log.info(f'Arguments passed {args}')
     # Need settings object for the threads.
     settings_thread = Settings()

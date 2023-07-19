@@ -182,6 +182,7 @@ class Settings(QtCore.QSettings):
         'advanced/print file meta data': False,
         'advanced/print notes': False,
         'advanced/print slide text': False,
+        'advanced/protect data directory': False,
         'advanced/proxy mode': ProxyMode.SYSTEM_PROXY,
         'advanced/proxy http': '',
         'advanced/proxy https': '',
