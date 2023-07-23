@@ -378,34 +378,31 @@ class PowerpointDocument(PresentationDocument):
     def _window_enum_callback(self, hwnd, size):
         """
         Method for callback from win32gui.EnumWindows.
-        Used to find the powerpoint presentation window and stop it flashing in the taskbar.
+        Used to find the PowerPoint presentation window and stop it flashing in the taskbar.
         """
-        # Get the size of the current window and if it matches the size of our main display we assume
-        # it is the powerpoint presentation window.
+        # Get the size of the current window and if it greater than or equal to the size of our main display we assume
+        # it is the PowerPoint presentation window.
         (left, top, right, bottom) = win32gui.GetWindowRect(hwnd)
         window_title = win32gui.GetWindowText(hwnd)
-        log.debug('window size:  left={left:d}, top={top:d}, '
-                  'right={right:d}, bottom={bottom:d}'.format(left=left, top=top, right=right, bottom=bottom))
-        log.debug('compare size:  {y:d} and {top:d}, {height:d} and {vertical:d}, '
-                  '{x:d} and {left}, {width:d} and {horizontal:d}'.format(y=size.y(),
-                                                                          top=top,
-                                                                          height=size.height(),
-                                                                          vertical=(bottom - top),
-                                                                          x=size.x(),
-                                                                          left=left,
-                                                                          width=size.width(),
-                                                                          horizontal=(right - left)))
-        log.debug('window title: {title}'.format(title=window_title))
-        if size.y() == top and size.height() == (bottom - top) and size.x() == left and \
-                size.width() == (right - left) and self.file_path.stem in window_title:
+        powerpoint_height = bottom - top
+        powerpoint_width = right - left
+        log.debug('window size: left=%d, top=%d, right=%d, bottom=%d', left, top, right, bottom)
+        log.debug('compare size: %d and %d, %d and %d, %d and %d, %d and %d',
+                  size.y(), top, size.height(), powerpoint_height, size.x(), left, size.width(),
+                  powerpoint_width)
+        log.debug('window title: %s', window_title)
+        handle_is_found = size.y() == top and \
+            size.height() <= powerpoint_height and \
+            size.x() == left and \
+            size.width() <= powerpoint_width and \
+            self.file_path.stem in window_title
+        if handle_is_found:
             log.debug('Found a match and will save the handle')
             self.presentation_hwnd = hwnd
-            # Stop powerpoint from flashing in the taskbar
+            # Stop PowerPoint from flashing in the taskbar.
             win32gui.FlashWindowEx(self.presentation_hwnd, win32con.FLASHW_STOP, 0, 0)
-            # Returning false stops the enumeration (looping over open windows)
-            return False
-        else:
-            return True
+        # Returning false stops the enumeration (looping over open windows).
+        return not handle_is_found
 
     def get_slide_number(self):
         """
