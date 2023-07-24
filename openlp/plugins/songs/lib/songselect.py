@@ -24,7 +24,7 @@ The :mod:`~openlp.plugins.songs.lib.songselect` module contains the SongSelect i
 import logging
 import re
 from html import unescape
-from urllib.request import URLError
+from urllib.error import URLError
 from PyQt5 import QtCore
 from bs4 import BeautifulSoup, NavigableString
 
@@ -78,14 +78,14 @@ class SongSelectImport(object):
         """
         current_url_host = self.webview.page().url().host()
         current_url_path = self.webview.page().url().path()
-        if (current_url_host == QtCore.QUrl(LOGIN_URL).host() and current_url_path == QtCore.QUrl(LOGIN_PAGE).path()):
+        if current_url_host == QtCore.QUrl(LOGIN_URL).host() and current_url_path == QtCore.QUrl(LOGIN_PAGE).path():
             return Pages.Login
-        elif (current_url_host == QtCore.QUrl(BASE_URL).host()):
-            if (current_url_path == '/' or current_url_path == ''):
+        elif current_url_host == QtCore.QUrl(BASE_URL).host():
+            if current_url_path == '/' or current_url_path == '':
                 return Pages.Home
-            elif (current_url_path == QtCore.QUrl(SEARCH_URL).path()):
+            elif current_url_path == QtCore.QUrl(SEARCH_URL).path():
                 return Pages.Search
-            elif (self.get_song_number_from_url(current_url_path) is not None):
+            elif self.get_song_number_from_url(current_url_path) is not None:
                 return Pages.Song
         return Pages.Other
 
