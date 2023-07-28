@@ -614,7 +614,9 @@ class ServiceItem(RegistryProperties):
                     self.sha256_file_hash = sha256_file_hash(file_path)
                     new_file = path / '{hash}{ext}'.format(hash=self.sha256_file_hash,
                                                            ext=os.path.splitext(self.title)[1])
-                    move(file_path, new_file)
+                    # while copying instead of moving can lead to longer load times for older files, if we move we
+                    # cannot load service files with duplicated files.
+                    copy(file_path, new_file)
                 else:
                     file_path = Path(service_item['serviceitem']['data'][0]['path']) / self.title
                     self.sha256_file_hash = sha256_file_hash(file_path)
