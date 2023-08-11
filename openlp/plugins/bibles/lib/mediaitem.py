@@ -22,6 +22,7 @@
 import logging
 import re
 from enum import IntEnum, unique
+from typing import Any
 
 from PyQt5 import QtCore, QtWidgets
 
@@ -1072,7 +1073,8 @@ class BibleMediaItem(MediaManagerItem):
         else:
             return False
 
-    def search(self, string, show_error=True):
+    @QtCore.pyqtSlot(str, bool, result=list)
+    def search(self, string: str, show_error: bool = True) -> list[list[Any]]:
         """
         Search for some Bible verses (by reference).
         :param string: search string
