@@ -363,7 +363,8 @@ class FolderLibraryItem(MediaManagerItem):
         """
         return [item.file_path, item.file_path]
 
-    def search(self, string, show_error):
+    @QtCore.pyqtSlot(str, bool, result=list)
+    def search(self, string: str, show_error: bool = True) -> list[list[Any]]:
         """
         Performs a search for items containing ``string``
 

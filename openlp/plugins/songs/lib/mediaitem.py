@@ -23,6 +23,7 @@ import logging
 import mako
 import os
 from shutil import copyfile
+from typing import Any
 
 from PyQt5 import QtCore, QtWidgets
 from sqlalchemy.sql import and_, or_
@@ -841,7 +842,8 @@ class SongMediaItem(MediaManagerItem):
         # List must be empty at the end
         return not author_list
 
-    def search(self, string, show_error=True):
+    @QtCore.pyqtSlot(str, bool, result=list)
+    def search(self, string: str, show_error: bool = True) -> list[list[Any]]:
         """
         Search for some songs
         :param string: The string to show
