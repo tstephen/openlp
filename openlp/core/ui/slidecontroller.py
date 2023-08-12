@@ -147,7 +147,8 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
             if screen.is_display:
                 will_start_hidden = self._current_hide_mode == HideMode.Screen
                 display = DisplayWindow(self, screen, start_hidden=will_start_hidden,
-                                        after_loaded_callback=self._display_after_loaded_callback)
+                                        after_loaded_callback=self._display_after_loaded_callback,
+                                        window_title='Live Screen' if self.is_live else 'Preview Screen')
                 self.displays.append(display)
                 self._reset_blank(False)
         if self.display:
@@ -398,7 +399,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         self.slide_layout.setSpacing(0)
         self.slide_layout.setObjectName('SlideLayout')
         # Set up the preview display
-        self.preview_display = DisplayWindow(self)
+        self.preview_display = DisplayWindow(self, window_title='Live' if self.is_live else 'Preview')
         self.slide_layout.addWidget(self.preview_display)
         self.slide_layout.resize.connect(self.on_preview_resize)
         # Actual preview screen

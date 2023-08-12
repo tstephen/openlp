@@ -46,8 +46,8 @@ from openlp.core.common.platform import is_macosx, is_win
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.display.screens import ScreenList
+from openlp.core.display.webengine import init_webview_custom_schemes, set_webview_display_path
 from openlp.core.lib.filelock import FileLock
-from openlp.core.display.webengine import init_webview_custom_schemes
 from openlp.core.loader import loader
 from openlp.core.resources import qInitResources
 from openlp.core.server import Server
@@ -295,6 +295,8 @@ def parse_options():
                             dir_name=os.path.join('<AppDir>', '..', '..')))
     parser.add_argument('-w', '--no-web-server', dest='no_web_server', action='store_true',
                         help='Turn off the Web and Socket Server ')
+    parser.add_argument('--display-custom-path', dest='display_custom_path', default=None,
+                        help='Specify the custom path for display renderer (HTML). Useful for development.')
     parser.add_argument('rargs', nargs='*', default=[])
     # Parse command line options and deal with them.
     return parser.parse_args()
@@ -485,6 +487,11 @@ def main():
     Registry().register('settings_thread', settings_thread)
     Registry().register('application-qt', application)
     Registry().register('application', app)
+    if args.display_custom_path:
+        if (args.display_custom_path.startswith('http:') or args.display_custom_path.startswith('https:')):
+            Registry().register('display_custom_url', args.display_custom_path)
+        else:
+            set_webview_display_path(args.display_custom_path)
     Registry().set_flag('no_web_server', args.no_web_server)
     # Upgrade settings.
     app.settings = settings

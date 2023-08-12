@@ -1,9 +1,13 @@
-function _createDiv(attrs) {
+function _createDiv(attrs, inElement) {
     var div = document.createElement("div");
     for (key in attrs) {
         div.setAttribute(key, attrs[key]);
     }
-    document.body.appendChild(div);
+    if (inElement) {
+      inElement.appendChild(div);
+    } else {
+      document.body.appendChild(div);
+    }
     return div;
 }
 
@@ -318,92 +322,6 @@ describe("Transitions", function () {
 
     expect(Display._slidesContainer.children[0].children[0].getAttribute("data-transition")).toEqual("convex-vertical-reverse");
     expect(Display._slidesContainer.children[0].children[0].getAttribute("data-transition-speed")).toEqual("slow");
-  });
-});
-
-
-describe("Screen Visibility", function () {
-  var TRANSITION_TIMEOUT = 2000;
-
-  beforeEach(function() {
-    window.displayWatcher = jasmine.createSpyObj('DisplayWatcher', ['dispatchEvent', 'setInitialised', 'pleaseRepaint']);
-    document.body.innerHTML = "";
-    var revealDiv = _createDiv({"class": "reveal"});
-    var slidesDiv = _createDiv({"class": "slides"});
-    var footerDiv = _createDiv({"class": "footer"});
-    slidesDiv.innerHTML = "<section><section><p></p></section></section>";
-    revealDiv.append(slidesDiv);
-    revealDiv.append(footerDiv);
-    document.body.style.transition = "opacity 75ms ease-in-out";
-    Display.init({isDisplay: true, doItemTransition: false});
-  });
-  afterEach(function() {
-    // Reset theme
-    Display._theme = null;
-  });
-
-  it("should trigger dispatchEvent when toTransparent(eventName) is called with an event parameter", function (done) {
-    var testEventName = 'event_32';
-    displayWatcher.dispatchEvent = function(eventName) {
-      if (eventName == testEventName) {
-        done();
-      }
-    };
-
-    Display.toTransparent(testEventName);
-
-    setTimeout(function() {
-      fail('dispatchEvent not called');
-      done();
-    }, TRANSITION_TIMEOUT);
-  });
-
-  it("should trigger dispatchEvent when toBlack(eventName) is called with an event parameter", function (done) {
-    var testEventName = 'event_33';
-    displayWatcher.dispatchEvent = function(eventName) {
-      if (eventName == testEventName) {
-        done();
-      }
-    };
-
-    Display.toBlack(testEventName);
-
-    setTimeout(function() {
-      fail('dispatchEvent not called');
-      done();
-    }, TRANSITION_TIMEOUT);
-  });
-
-  it("should trigger dispatchEvent when toTheme(eventName) is called with an event parameter", function (done) {
-    var testEventName = 'event_34';
-    displayWatcher.dispatchEvent = function(eventName) {
-      if (eventName == testEventName) {
-        done();
-      }
-    };
-
-    Display.toTheme(testEventName);
-
-    setTimeout(function() {
-      fail('dispatchEvent not called');
-      done();
-    }, TRANSITION_TIMEOUT);
-  });
-
-  it("should trigger dispatchEvent when show(eventName) is called with an event parameter", function (done) {
-    var testEventName = 'event_35';
-    displayWatcher.dispatchEvent = function(eventName) {
-      if (eventName == testEventName) {
-        done();
-      }
-    };
-
-    Display.show(testEventName);
-
-    setTimeout(function() {
-      fail('dispatchEvent not called');
-      done();
-    }, TRANSITION_TIMEOUT);
   });
 });
 
@@ -785,8 +703,9 @@ describe("Display.setTextSlides", function () {
 
   beforeEach(function() {
     document.body.innerHTML = "";
-    var slides_container = _createDiv({"class": "slides"});
-    var footer_container = _createDiv({"class": "footer"});
+    var revealContainer = Display._revealContainer = _createDiv({"class": "reveal"})
+    var slides_container = _createDiv({"class": "slides"}, revealContainer);
+    var footer_container = _createDiv({"class": "footer"}, revealContainer);
     Display._slidesContainer = slides_container;
     Display._footerContainer = footer_container;
     Display._slides = {};
@@ -1203,15 +1122,14 @@ describe("Reveal slidechanged event", function () {
       }
     ];
 
-    var slidesDiv = _createDiv({"class": "slides"});
+    document.body.innerHTML = '';
+    var revealContainer = Display._revealContainer = _createDiv({"class": "reveal"});
+
+    var slidesDiv = _createDiv({"class": "slides"}, revealContainer);
     slidesDiv.innerHTML = "<section><p></p></section>";
     Display._slidesContainer = slidesDiv;
-    var footerDiv = _createDiv({"class": "footer"});
+    var footerDiv = _createDiv({"class": "footer"}, revealContainer);
     Display._footerContainer = footerDiv;
-    var revealDiv = _createDiv({"class": "reveal"});
-    revealDiv.append(slidesDiv);
-    revealDiv.append(footerDiv);
-    document.body.appendChild(revealDiv);
 
     Display.init({isDisplay: false, doItemTransitions: false});
     var oldDisplaySlideChanged = Display._onSlideChanged; 

@@ -114,11 +114,19 @@ class Registry(metaclass=Singleton):
 
     def has_function(self, event):
         """
-        Returns whether there's any hander associated with the event.
+        Returns whether there's any handler associated with the event.
 
         :param event: The function to be checked
         """
         return event in self.functions_list
+
+    def has(self, service_name: str) -> bool:
+        """
+        Returns whether there's any service registered with provided name
+
+        :param service_name: The service name to be checked
+        """
+        return service_name in self.service_list
 
     def execute(self, event, *args, **kwargs):
         """

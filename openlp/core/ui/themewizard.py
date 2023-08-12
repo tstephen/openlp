@@ -100,7 +100,7 @@ class Ui_ThemeWizard(object):
         self.preview_area_layout.margin = 8
         self.preview_area_layout.setSpacing(0)
         self.preview_area_layout.setObjectName('preview_web_layout')
-        self.preview_box = ThemePreviewRenderer(self)
+        self.preview_box = ThemePreviewRenderer(self, window_title="Theme Editor Preview")
         self.preview_box.setObjectName('preview_box')
         self.preview_area_layout.addWidget(self.preview_box)
         self.preview_layout.addWidget(self.preview_area)

@@ -212,7 +212,7 @@ class WebViewCustomScheme(QtCore.QObject):
                         | QtWebEngineCore.QWebEngineUrlScheme.Flag.LocalScheme
                         | QtWebEngineCore.QWebEngineUrlScheme.Flag.LocalAccessAllowed)
 
-    def create_scheme_handler(self):
+    def create_scheme_handler(self) -> QtWebEngineCore.QWebEngineUrlSchemeHandler:
         raise Exception('Needs to be implemented.')
 
     def init_handler(self, profile=None):
