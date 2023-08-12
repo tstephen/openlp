@@ -23,16 +23,14 @@ The :mod:`websockets` module contains the websockets server. This is a server us
 changes from within OpenLP. It uses JSON to communicate with the remotes.
 """
 import asyncio
-import dataclasses
-from dataclasses import dataclass
 import json
 import logging
-from typing import Optional, Union
 import uuid
+from dataclasses import asdict, dataclass
+from typing import Optional, Union
 
-from PyQt5 import QtCore
 import time
-
+from PyQt5 import QtCore
 from websockets import serve
 
 from openlp.core.common.mixins import LogMixin, RegistryProperties
@@ -86,10 +84,11 @@ class WebSocketWorker(ThreadWorker, RegistryProperties, LogMixin):
                 log.debug('WebSocket server started on {addr}:{port}'.format(addr=address, port=port))
             except Exception:
                 log.exception('Failed to start WebSocket server')
-                loop += 1
                 time.sleep(0.1)
             if not self.server and loop > 3:
                 log.error('Unable to start WebSocket server {addr}:{port}, giving up'.format(addr=address, port=port))
+                break
+            loop += 1
         if self.server:
             # If the websocket server exists, start listening
             try:
@@ -184,6 +183,10 @@ class WebSocketWorker(ThreadWorker, RegistryProperties, LogMixin):
         Inserts the state in each connection message queue
         :param state: OpenLP State
         """
+        if not self.event_loop.is_running():
+            # Sometimes the event loop doesn't run when we call this method -- probably because it is shutting down
+            # See https://gitlab.com/openlp/openlp/-/issues/1618
+            return
         for queue in self.state_queues.copy():
             self.event_loop.call_soon_threadsafe(queue.put_nowait, state)
 
@@ -192,8 +195,12 @@ class WebSocketWorker(ThreadWorker, RegistryProperties, LogMixin):
         Inserts the message in each connection message queue
         :param state: OpenLP State
         """
+        if not self.event_loop.is_running():
+            # Sometimes the event loop doesn't run when we call this method -- probably because it is shutting down
+            # See https://gitlab.com/openlp/openlp/-/issues/1618
+            return
         for queue in self.message_queues.copy():
-            self.event_loop.call_soon_threadsafe(queue.put_nowait, dataclasses.asdict(message))
+            self.event_loop.call_soon_threadsafe(queue.put_nowait, asdict(message))
 
 
 class WebSocketServer(RegistryBase, RegistryProperties, QtCore.QObject, LogMixin):
@@ -261,8 +268,7 @@ def websocket_send_message(message: WebSocketMessage):
     """
     Sends a message over websocket to all connected clients.
     """
-    ws: WebSocketServer = Registry().get("web_socket_server")
-    if ws:
+    if ws := Registry().get("web_socket_server"):
         ws.send_message(message)
         return True
     return False
