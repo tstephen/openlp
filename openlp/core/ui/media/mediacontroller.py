@@ -368,7 +368,7 @@ class MediaController(QtWidgets.QWidget, RegistryBase, LogMixin, RegistryPropert
         return is_autoplay
 
     @staticmethod
-    def media_length(media_path: Union[str, Path]):
+    def media_length(media_path: Union[str, Path]) -> int:
         """
         Uses Media Info to obtain the media length
 
@@ -385,7 +385,15 @@ class MediaController(QtWidgets.QWidget, RegistryBase, LogMixin, RegistryPropert
                 with Path(media_path).open('rb') as media_file:
                     media_data = MediaInfo.parse(media_file)
                 # duration returns in milli seconds
-            return media_data.tracks[0].duration or 0
+            duration = media_data.tracks[0].duration
+            # It appears that sometimes we get a string. Let's try to interpret that as int, or fall back to 0
+            # See https://gitlab.com/openlp/openlp/-/issues/1387
+            if isinstance(duration, str):
+                if duration.strip().isdigit():
+                    duration = int(duration.strip())
+                else:
+                    duration = 0
+            return duration or 0
         return 0
 
     def media_setup_optical(self, filename, title, audio_track, subtitle_track, start, end,
