@@ -2,6 +2,7 @@
  * display.js is the main Javascript file that is used to drive the display.
  */
 
+
 /**
  * Background type enumeration
  */
@@ -892,122 +893,122 @@ var Display = {
   /**
    * Blank the screen
   */
-  toBlack: function (onFinishedEventName) {
-    /* Avoid race conditions where display goes to transparent and quickly goes to black */
-    Display._abortLastTransitionOperation();
-    /*
-      Reveal's black overlay should be shown before the transitions are
-      restored, to avoid screen flashes
-    */
-    Display._restorePauseBehavior();
-    Display._requestAnimationFrameExclusive(function() {
-      if (!Reveal.isPaused()) {
-        Reveal.togglePause();
-      }
-      Display._reenableGlobalTransitions(function() {
-        var documentBody = $("body")[0];
-        documentBody.style.opacity = 1;
-        if (onFinishedEventName) {
-          displayWatcher.dispatchEvent(onFinishedEventName, {});
+  toBlack: function () {
+    return new Promise((resolve, reject) => {
+      /* Avoid race conditions where display goes to transparent and quickly goes to black */
+      Display._abortLastTransitionOperation();
+      /*
+        Reveal's black overlay should be shown before the transitions are
+        restored, to avoid screen flashes
+      */
+      Display._restorePauseBehavior();
+      Display._requestAnimationFrameExclusive(function() {
+        if (!Reveal.isPaused()) {
+          Reveal.togglePause();
         }
+        Display._reenableGlobalTransitions(function() {
+          var documentBody = $("body")[0];
+          documentBody.style.opacity = 1;
+          resolve();
+        });
       });
     });
   },
   /**
    * Hide all but theme background
   */
-  toTheme: function (onFinishedEventName) {
-    Display._abortLastTransitionOperation();
-    /*
-      Reveal's black overlay should be shown before the transitions are
-      restored, to avoid screen flashes
-    */
-    Display._restorePauseBehavior();
-    var documentBody = $("body")[0];
-    documentBody.style.opacity = 1;
-    Display._slidesContainer.style.opacity = 0;
-    Display._footerContainer.style.opacity = 0;
-    if (Reveal.isPaused()) {
-      Reveal.togglePause();
-    }
-    Display._reenableGlobalTransitions(function() {
-      if (onFinishedEventName) {
-        displayWatcher.dispatchEvent(onFinishedEventName, {});
+  toTheme: function () {
+    return new Promise((resolve, reject) => {
+      Display._abortLastTransitionOperation();
+      /*
+        Reveal's black overlay should be shown before the transitions are
+        restored, to avoid screen flashes
+      */
+      Display._restorePauseBehavior();
+      var documentBody = $("body")[0];
+      documentBody.style.opacity = 1;
+      Display._slidesContainer.style.opacity = 0;
+      Display._footerContainer.style.opacity = 0;
+      if (Reveal.isPaused()) {
+        Reveal.togglePause();
       }
+      Display._reenableGlobalTransitions(function() {
+        resolve();
+      });
     });
   },
   /**
    * Hide everything (CAUTION: Causes a invisible mouse barrier)
   */
-  toTransparent: function (onFinishedEventName) {
-    Display._abortLastTransitionOperation();
-    var documentBody = $("body")[0];
-    documentBody.style.opacity = 0;
-    if (!Reveal.isPaused()) {
-      /*
-        Removing previously the overlay if it's not paused, to avoid a
-        content flash while going from black screen to transparent
-      */
-      document.body.classList.add('is-desktop');
-      Reveal.togglePause();
-    }
-    /*
-      Waiting for body transition to happen, now it would be safe to
-      hide the Webview (as other transitions were suppressed)
-    */
-    Display._abortLastTransitionOperation();
-    Display._addTransitionEndEventToBody(transitionEndEvent);
-    function transitionEndEvent(e) {
-      // Targeting only body
-      if (e.target != documentBody) {
-        return;
+  toTransparent: function () {
+    return new Promise((resolve, reject) => {
+      Display._abortLastTransitionOperation();
+      var documentBody = $("body")[0];
+      documentBody.style.opacity = 0;
+      if (!Reveal.isPaused()) {
+        /*
+          Removing previously the overlay if it's not paused, to avoid a
+          content flash while going from black screen to transparent
+        */
+        document.body.classList.add('is-desktop');
+        Reveal.togglePause();
       }
       /*
-        Disabling all transitions (except body) to allow the Webview to attain the
-        transparent state before it gets hidden by Qt.
+        Waiting for body transition to happen, now it would be safe to
+        hide the Webview (as other transitions were suppressed)
       */
-      document.body.classList.add('disable-transitions');
-      document.body.classList.add('is-desktop');
-      Display._slidesContainer.style.opacity = 0;
-      Display._footerContainer.style.opacity = 0;
-      /*
-        Repainting before hiding the Webview to avoid flashes when
-        showing it again.
-      */
-      displayWatcher.pleaseRepaint();
-      /* Waiting for repaint to happen before saying that it's done. */
-      Display._requestAnimationFrameExclusive(function() {
-        /* We're transparent now, aborting any transition event between */
-        Display._abortLastTransitionOperation();
-        if (onFinishedEventName) {
-          displayWatcher.dispatchEvent(onFinishedEventName, {});
+      Display._abortLastTransitionOperation();
+      Display._addTransitionEndEventToBody(transitionEndEvent);
+      function transitionEndEvent(e) {
+        // Targeting only body
+        if (e.target != documentBody) {
+          return;
         }
-      });
-    }
+        /*
+          Disabling all transitions (except body) to allow the Webview to attain the
+          transparent state before it gets hidden by Qt.
+        */
+        document.body.classList.add('disable-transitions');
+        document.body.classList.add('is-desktop');
+        Display._slidesContainer.style.opacity = 0;
+        Display._footerContainer.style.opacity = 0;
+        /*
+          Repainting before hiding the Webview to avoid flashes when
+          showing it again.
+        */
+        displayWatcher.pleaseRepaint();
+        /* Waiting for repaint to happen before saying that it's done. */
+        Display._requestAnimationFrameExclusive(function() {
+          /* We're transparent now, aborting any transition event between */
+          Display._abortLastTransitionOperation();
+          resolve();
+        });
+      }
+    });
   },
   /**
    * Show the screen
   */
-  show: function (onFinishedEventName) {
-    var documentBody = $("body")[0];
-    /*
-      Removing transitionend event, avoids the content being hidden if the user
-      tries to show content again before toTransparent() transitionend event
-      happens
-    */
-    Display._abortLastTransitionOperation();
+  show: function () {
+    return new Promise((resolve, reject) => {
+      var documentBody = $("body")[0];
+      /*
+        Removing transitionend event, avoids the content being hidden if the user
+        tries to show content again before toTransparent() transitionend event
+        happens
+      */
+      Display._abortLastTransitionOperation();
 
-    Display._slidesContainer.style.opacity = 1;
-    Display._footerContainer.style.opacity = 1;
-    if (Reveal.isPaused()) {
-      Reveal.togglePause();
-    }
-    Display._restorePauseBehavior();
-    Display._reenableGlobalTransitions(function() {
-      documentBody.style.opacity = 1;
-      if (onFinishedEventName) {
-        displayWatcher.dispatchEvent(onFinishedEventName, {});
+      Display._slidesContainer.style.opacity = 1;
+      Display._footerContainer.style.opacity = 1;
+      if (Reveal.isPaused()) {
+        Reveal.togglePause();
       }
+      Display._restorePauseBehavior();
+      Display._reenableGlobalTransitions(function() {
+        documentBody.style.opacity = 1;
+        resolve();
+      });
     });
   },
 
@@ -1413,6 +1414,12 @@ var Display = {
     return url;
   },
 };
-new QWebChannel(qt.webChannelTransport, function (channel) {
-  window.displayWatcher = channel.objects.displayWatcher;
-});
+
+Display._handleNativeCall = (action, ...values) => {
+  if (Display[action]) {
+    return Display[action](...values);
+  }
+};
+
+initCommunicationBridge();
+communicationBridge.setDisplayTarget(Display);
