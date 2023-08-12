@@ -585,6 +585,40 @@ def test_media_length_duration_none(MockPath, mocked_parse, media_env):
 
 
 @patch('openlp.core.ui.media.mediacontroller.MediaInfo.parse')
+@patch('openlp.core.ui.media.mediacontroller.Path')
+def test_media_length_duration_string_digits(MockPath, mocked_parse, media_env):
+    """
+    Test that when MediaInfo gives us a duration, but it is a string, we typecast it
+    """
+    # GIVEN: A fake media file and a mocked MediaInfo.parse() function
+    mocked_parse.return_value = MagicMock(tracks=[MagicMock(duration='546')])
+    file_path = 'path/to/fake/video.mkv'
+
+    # WHEN the media data is retrieved
+    duration = media_env.media_controller.media_length(file_path)
+
+    # THEN you can determine the run time
+    assert duration == 546, 'The duration should be 546'
+
+
+@patch('openlp.core.ui.media.mediacontroller.MediaInfo.parse')
+@patch('openlp.core.ui.media.mediacontroller.Path')
+def test_media_length_duration_string_alpha(MockPath, mocked_parse, media_env):
+    """
+    Test that when MediaInfo gives us a duration, but it is a string of nonsense, we default to 0
+    """
+    # GIVEN: A fake media file and a mocked MediaInfo.parse() function
+    mocked_parse.return_value = MagicMock(tracks=[MagicMock(duration='sdffgh')])
+    file_path = 'path/to/fake/video.mkv'
+
+    # WHEN the media data is retrieved
+    duration = media_env.media_controller.media_length(file_path)
+
+    # THEN you can determine the run time
+    assert duration == 0, 'The duration should be 0'
+
+
+@patch('openlp.core.ui.media.mediacontroller.MediaInfo.parse')
 def test_media_length_duration_old_version(mocked_parse, media_env):
     """
     Test that when a version of MediaInfo < 4.3 is installed, a file name is passed directly to the parse method
