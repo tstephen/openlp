@@ -1447,8 +1447,6 @@ def _init__capture_maindisplay_mocks(geometry, mocked_screenlist, mocked_applica
     display_mock = MagicMock(grab_screenshot_safe=MagicMock(return_value=windowed_screenshot_mock), is_display=True)
     slide_controller.displays = [display_mock]
     slide_controller.service_item = ServiceItem(None)
-    # Bypassing signal call to avoid test freeze
-    slide_controller._capture_maindisplay_desktop_mainthread_safe = slide_controller._capture_maindisplay_desktop_signal
     mocked_geometry = MagicMock(
         x=MagicMock(return_value=geometry[1][0]),
         y=MagicMock(return_value=geometry[1][1]),
@@ -1612,25 +1610,6 @@ def test__capture_maindisplay_window_fakes_black_screen(mocked_is_wayland_compos
     assert photo_size.height() == screen_size.height()
     assert image.pixelColor(int(geometry[1][2] / 2), int(geometry[1][3] / 2)).isValid()
     assert image.pixelColor(int(geometry[1][2] / 2), int(geometry[1][3] / 2)) == QtGui.QColorConstants.Black
-
-
-@patch('openlp.core.ui.slidecontroller.is_macosx')
-def test__capture_maindisplay_desktop_calls_safe_on_macos(mocked_is_macosx, registry, settings):
-    """
-    Test the _capture_maindisplay_desktop method fallbacks to calling thread-safe code on macOS
-    (avoids a hard crash due to Cocoa/macOS internal details)
-    """
-    # GIVEN: A mocked system check (running macOS) and mocked maindisplay call
-    mocked_is_macosx.return_value = True
-    slide_controller = SlideController()
-    # slidecontroller._capture_maindisplay_desktop_signal = MagicMock(return_value=QtGui.QPixmap())
-    slide_controller._capture_maindisplay_desktop_mainthread_safe = MagicMock()
-
-    # WHEN: trying to grab desktop screenshot
-    slide_controller._capture_maindisplay_desktop()
-
-    # THEN: Screenshot should have been taken through thread-safe call
-    slide_controller._capture_maindisplay_desktop_mainthread_safe.assert_called_once()
 
 
 @patch(u'openlp.core.ui.slidecontroller.image_to_byte')

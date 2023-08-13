@@ -262,7 +262,7 @@ def build_icon(icon):
     return button_icon
 
 
-def image_to_byte(image, base_64=True):
+def image_to_byte(image: QtGui.QPixmap, base_64: bool = True) -> QtCore.QByteArray | str:
     """
     Resize an image to fit on the current screen for the web and returns it as a byte stream.
 

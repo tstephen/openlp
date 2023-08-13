@@ -111,11 +111,12 @@ def test_login_with_valid_credetials_returns_token(flask_client, settings):
 
 def test_retrieving_image(flask_client):
     class FakeController:
-        def grab_maindisplay(self):
-            class FakeImage:
-                def save(self, first, second):
-                    pass
-            return FakeImage()
+        @property
+        def staticMetaObject(self):
+            class FakeMetaObject:
+                def invokeMethod(self, obj, meth, conn_type, return_type):
+                    return ''
+            return FakeMetaObject()
     Registry.create().register('live_controller', FakeController())
     res = flask_client.get('/api/v2/core/live-image').get_json()
     assert res['binary_image'] != ''

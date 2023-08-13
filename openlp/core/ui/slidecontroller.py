@@ -33,7 +33,7 @@ from openlp.core.common import SlideLimits
 from openlp.core.common.actions import ActionList, CategoryOrder
 from openlp.core.common.i18n import UiStrings, translate
 from openlp.core.common.mixins import LogMixin, RegistryProperties
-from openlp.core.common.platform import is_macosx, is_wayland_compositor
+from openlp.core.common.platform import is_wayland_compositor
 from openlp.core.common.registry import Registry, RegistryBase
 from openlp.core.common.utils import wait_for
 from openlp.core.display.screens import ScreenList
@@ -1288,17 +1288,6 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
             return self._capture_maindisplay_desktop()
 
     def _capture_maindisplay_desktop(self):
-        # At least on macOS, there's a crash when opening /main Remote API endpoint,
-        # due to macOS requiring the screenshot code to be called on the main thread.
-        if is_macosx():
-            self.log_debug('_capture_maindisplay_desktop macos thread-safe call')
-            return self._capture_maindisplay_desktop_mainthread_safe()
-        else:
-            self.log_debug('_capture_maindisplay_desktop default call')
-            return self._capture_maindisplay_desktop_signal()
-
-    @QtCore.pyqtSlot(result='QPixmap')
-    def _capture_maindisplay_desktop_signal(self):
         current_screen = ScreenList().current
         display_rect = current_screen.display_geometry
         screen_rect = current_screen.geometry
@@ -1311,14 +1300,6 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         height = display_rect.height()
         win_image = current_screen.try_grab_screen_part(relative_x, relative_y, width, height)
         return win_image
-
-    def _capture_maindisplay_desktop_mainthread_safe(self):
-        # Using internal Qt's messaging/event system to invoke the function.
-        # Usually we would need to use PyQt's signals, but they aren't blocking. So we had to resort to this solution,
-        # which use a less-documented Qt mechanism to invoke the signal in a blocking way.
-        return QtCore.QMetaObject.invokeMethod(self, '_capture_maindisplay_desktop_signal',
-                                               QtCore.Qt.ConnectionType.BlockingQueuedConnection,
-                                               QtCore.Q_RETURN_ARG('QPixmap'))
 
     def _capture_maindisplay_window(self):
         win_image = None
@@ -1347,7 +1328,8 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         slide_ready_time = self.slide_changed_time + datetime.timedelta(seconds=slide_delay_time)
         return datetime.datetime.now() > slide_ready_time
 
-    def grab_maindisplay(self):
+    @QtCore.pyqtSlot(result=str)
+    def grab_maindisplay(self) -> str:
         """
         Gets the last taken screenshot
         """
