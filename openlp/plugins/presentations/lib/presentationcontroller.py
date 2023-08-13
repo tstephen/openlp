@@ -157,7 +157,7 @@ class PresentationDocument(object):
             else:
                 self._sha256_file_hash = sha256_file_hash(self.file_path)
                 # If the sha256_file_hash() function encounters an error, it will return None, so use the
-                # filename as the thumbnail folder if the result is None (or falsey)
+                # filename as the thumbnail folder if the result is None (or falsey).
                 folder = self._sha256_file_hash or self.file_path.name
         else:
             folder = self.file_path.name
@@ -179,7 +179,9 @@ class PresentationDocument(object):
                 folder = self._sha256_file_hash
             else:
                 self._sha256_file_hash = sha256_file_hash(self.file_path)
-                folder = self._sha256_file_hash
+                # If the sha256_file_hash() function encounters an error, it will return None, so use the
+                # filename as the temp folder if the result is None (or falsey).
+                folder = self._sha256_file_hash or self.file_path.name
         else:
             folder = self.file_path.name
         return Path(self.controller.temp_folder, folder)
