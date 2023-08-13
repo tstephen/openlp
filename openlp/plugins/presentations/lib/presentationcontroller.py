@@ -112,6 +112,7 @@ class PresentationDocument(object):
         :rtype: None
         """
         self.slide_number = 0
+        self.ui_slidenumber = 0
         self.file_path = document_path
         create_paths(self.get_thumbnail_folder())
 
@@ -317,8 +318,16 @@ class PresentationDocument(object):
         if not hide_mode:
             current = self.get_slide_number()
             if current == self.slide_number:
+                # if the latest reported slide number is the same as the current, return here and skip sending an update
                 return
             self.slide_number = current
+        else:
+            # when in blank mode the slide selected in the live slidecontroller overrules the slide
+            # currently selected in the blanked presentation.
+            if self.slide_number == self.ui_slidenumber:
+                # if the latest reported slide number is the same as the current, return here and skip sending an update
+                return
+            self.slide_number = self.ui_slidenumber
         if is_live:
             prefix = 'live'
         else:
