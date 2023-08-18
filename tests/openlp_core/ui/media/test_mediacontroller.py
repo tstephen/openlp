@@ -32,6 +32,7 @@ from PyQt5 import QtCore
 from openlp.core.state import State
 from openlp.core.common.platform import is_linux, is_macosx
 from openlp.core.common.registry import Registry
+from openlp.core.common.settings import Settings
 from openlp.core.ui import DisplayControllerType, HideMode
 from openlp.core.ui.media.mediacontroller import MediaController
 from openlp.core.ui.media import ItemMediaInfo, MediaState, MediaType
@@ -45,16 +46,17 @@ TEST_MEDIA = [['avi_file.avi', 61495], ['mp3_file.mp3', 134426], ['mpg_file.mpg'
 
 
 @pytest.fixture
-def media_env(qapp, registry):
+def media_env(qapp, registry: Registry):
     """Local test setup - qapp need to allow tests to run standalone.
     """
+    Registry().register('main_window', MagicMock())
     Registry().register('service_manager', MagicMock())
     media_controller = MediaController()
     yield media_controller
 
 
 @patch('openlp.core.ui.media.mediacontroller.register_views')
-def test_setup(mocked_register_views, media_env):
+def test_setup(mocked_register_views: MagicMock, media_env: MediaController):
     """
     Test that the setup method is called correctly
     """
@@ -71,7 +73,7 @@ def test_setup(mocked_register_views, media_env):
     mocked_register_views.called_once(), 'The media blueprint has not been registered'
 
 
-def test_initialise_good(media_env, state_media):
+def test_initialise_good(media_env: MediaController, state_media: State):
     """
     Test that the bootstrap initialise method is called correctly
     """
@@ -83,7 +85,7 @@ def test_initialise_good(media_env, state_media):
     mocked_setup.called_once(), 'The setup function has been called'
 
 
-def test_initialise_missing_vlc(media_env, state_media):
+def test_initialise_missing_vlc(media_env: MediaController, state_media: State):
     """
     Test that the bootstrap initialise method is called correctly with no VLC
     """
@@ -100,7 +102,7 @@ def test_initialise_missing_vlc(media_env, state_media):
 
 
 @patch('openlp.core.ui.media.mediacontroller.pymediainfo_available', False)
-def test_initialise_missing_pymedia(media_env, state_media):
+def test_initialise_missing_pymedia(media_env: MediaController, state_media: State):
     """
     Test that the bootstrap initialise method is called correctly with no pymediainfo
     """
@@ -116,7 +118,7 @@ def test_initialise_missing_pymedia(media_env, state_media):
 
 
 @skipUnless(is_linux(), "Linux only")
-def test_initialise_missing_pymedia_fedora(media_env, state_media):
+def test_initialise_missing_pymedia_fedora(media_env: MediaController, state_media: State):
     """
     Test that the bootstrap initialise method is called correctly with no VLC
     """
@@ -135,7 +137,7 @@ def test_initialise_missing_pymedia_fedora(media_env, state_media):
 
 
 @skipUnless(is_linux(), "Linux only")
-def test_initialise_missing_pymedia_not_fedora(media_env, state_media):
+def test_initialise_missing_pymedia_not_fedora(media_env: MediaController, state_media: State):
     """
     Test that the bootstrap initialise method is called correctly with no VLC
     """
@@ -153,7 +155,7 @@ def test_initialise_missing_pymedia_not_fedora(media_env, state_media):
     assert text.find("rpmfusion") == -1, "RPMFusion should not provide the modules"
 
 
-def test_initialise_missing_pymedia_mac_os(media_env, state_media):
+def test_initialise_missing_pymedia_mac_os(media_env: MediaController, state_media: State):
     """
     Test that the bootstrap initialise method is called correctly with no VLC
     """
@@ -171,11 +173,13 @@ def test_initialise_missing_pymedia_mac_os(media_env, state_media):
     assert text.find("videolan") > 0, "VideoLAN should provide the modules"
 
 
-def test_post_set_up_good(media_env, state_media):
+def test_post_set_up_good(media_env: MediaController, state_media: State, registry: Registry):
     """
     Test the Bootstrap post set up assuming all functions are good
     """
     # GIVEN: A working  environment
+    registry.register('live_controller', MagicMock())
+    registry.register('preview_controller', MagicMock())
     media_env.vlc_live_media_stop = MagicMock()
     media_env.vlc_preview_media_stop = MagicMock()
     media_env.vlc_live_media_tick = MagicMock()
@@ -193,7 +197,7 @@ def test_post_set_up_good(media_env, state_media):
     assert mocked_display.has_calls(None, True)  # Preview Controller
 
 
-def test_media_state_live(media_env, state_media):
+def test_media_state_live(media_env: MediaController, state_media: State):
     """
     Test the Bootstrap post set up assuming all functions are good
     """
@@ -217,7 +221,7 @@ def test_media_state_live(media_env, state_media):
     assert mocked_display.has_calls(None, True)  # Preview Controller
 
 
-def test_post_set_up_no_controller(media_env, state_media):
+def test_post_set_up_no_controller(media_env: MediaController, state_media: State):
     """
     Test the Bootstrap post set up assuming all functions are good
     """
@@ -237,11 +241,13 @@ def test_post_set_up_no_controller(media_env, state_media):
     assert text.find("No Displays") == -1, "No Displays have been disable"
 
 
-def test_post_set_up_controller_exception(media_env, state_media):
+def test_post_set_up_controller_exception(media_env: MediaController, state_media: State, registry: Registry):
     """
     Test the Bootstrap post set up assuming all functions are good
     """
     # GIVEN: A working environment
+    registry.register('live_controller', MagicMock())
+    registry.register('preview_controller', MagicMock())
     media_env.vlc_live_media_stop = MagicMock()
     media_env.vlc_preview_media_stop = MagicMock()
     media_env.vlc_live_media_tick = MagicMock()
@@ -979,7 +985,8 @@ def test_media_bar_stop(media_env, settings, mode):
 @pytest.mark.parametrize("back, repeat, result", [(False, True, False),
                                                   (True, True, False),
                                                   (False, False, False)])
-def test_media_bar_loop_disabled(media_env, settings, back, repeat, result):
+def test_media_bar_loop_disabled(media_env: MediaController, settings: Settings, back: bool, repeat: bool,
+                                 result: bool):
     """
     Test that media bar is set correctly following a list of events
     """
@@ -1005,7 +1012,7 @@ def test_media_bar_loop_disabled(media_env, settings, back, repeat, result):
 
 
 @pytest.mark.parametrize("loop, result", [(False, False), (True, True)])
-def test_media_bar_loop_checked(media_env, settings, loop, result):
+def test_media_bar_loop_checked(media_env: MediaController, settings: Settings, loop: bool, result: bool):
     """
     Test that media bar is set correctly following a list of events
     """

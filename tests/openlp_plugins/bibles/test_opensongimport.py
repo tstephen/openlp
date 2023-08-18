@@ -42,14 +42,14 @@ def manager():
     db_man.stop()
 
 
-@pytest.fixture()
+@pytest.fixture
 def mocked_find_and_create_book():
     facb = patch.object(BibleImport, 'find_and_create_book')
     yield facb.start()
     facb.stop()
 
 
-def test_create_importer(manager, mock_settings):
+def test_create_importer(manager: MagicMock, mock_settings: MagicMock):
     """
     Test creating an instance of the OpenSong file importer
     """

@@ -268,7 +268,10 @@ def websocket_send_message(message: WebSocketMessage):
     """
     Sends a message over websocket to all connected clients.
     """
-    if ws := Registry().get("web_socket_server"):
-        ws.send_message(message)
-        return True
+    try:
+        if ws := Registry().get("web_socket_server"):
+            ws.send_message(message)
+            return True
+    except KeyError:
+        pass
     return False

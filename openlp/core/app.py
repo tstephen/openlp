@@ -132,7 +132,6 @@ class OpenLP(QtCore.QObject, LogMixin):
         Registry().execute('bootstrap_initialise')
         State().flush_preconditions()
         Registry().execute('bootstrap_post_set_up')
-        Registry().initialise = False
         self.main_window.show()
         if can_show_splash:
             # now kill the splashscreen
