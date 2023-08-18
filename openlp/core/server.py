@@ -105,7 +105,11 @@ class Server(QtCore.QObject, LogMixin):
         if not self.file_name:
             self.file_name = self.in_stream.readLine()
             self.log_debug(f'file name = "{self.file_name}"')
-        if service_manager := Registry().get('service_manager'):
+        try:
+            service_manager = Registry().get('service_manager')
+        except KeyError:
+            service_manager = None
+        if service_manager:
             service_manager.load_service(Path(self.file_name))
         elif self._ms_waited > MAX_WAIT_TIME_MS:
             self.log_error('OpenLP is taking too long to start up, abandoning file load')

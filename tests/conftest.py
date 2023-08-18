@@ -115,6 +115,7 @@ def state_media(state):
     State().add_service("media", 0)
     State().update_pre_conditions("media", True)
     State().flush_preconditions()
+    yield state
 
 
 @pytest.fixture()

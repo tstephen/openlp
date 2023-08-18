@@ -29,14 +29,15 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 from PyQt5 import QtCore
-from openlp.core.display.screens import Screen
 
 # Mock QtWebEngineWidgets
 sys.modules['PyQt5.QtWebEngineWidgets'] = MagicMock()
 
-from openlp.core.display.window import TRANSITION_END_EVENT_NAME, DisplayWindow, DisplayWatcher
-from openlp.core.common.platform import is_win
 from openlp.core.common.enum import ServiceItemType
+from openlp.core.common.platform import is_win
+from openlp.core.common.registry import Registry
+from openlp.core.display.screens import Screen
+from openlp.core.display.window import TRANSITION_END_EVENT_NAME, DisplayWindow, DisplayWatcher
 from openlp.core.lib.theme import Theme
 from openlp.core.ui import HideMode
 
@@ -567,7 +568,8 @@ def test_set_theme_not_display_live(display_window_env, mock_settings, mock_geom
 
 @patch('openlp.core.display.window.Registry.execute')
 @patch('openlp.core.display.window.ScreenList')
-def test_show_display(mocked_screenlist, mocked_registry_execute, display_window_env, mock_settings):
+def test_show_display(mocked_screenlist: MagicMock, mocked_registry_execute: MagicMock, display_window_env,
+                      mock_settings: MagicMock, registry: Registry):
     """
     Test show_display function
     """

@@ -32,6 +32,7 @@ from pytest import mark
 from openlp.core.state import State
 from openlp.core.common.enum import ServiceItemType
 from openlp.core.common.registry import Registry
+from openlp.core.common.settings import Settings
 from openlp.core.lib import ItemCapabilities, ServiceItemAction
 from openlp.core.lib.serviceitem import ServiceItem
 from openlp.core.ui import HideMode
@@ -39,7 +40,7 @@ from openlp.core.ui.slidecontroller import NON_TEXT_MENU, WIDE_MENU, NARROW_MENU
     PreviewController, SlideController
 
 
-def test_initial_slide_controller(registry):
+def test_initial_slide_controller(registry: Registry):
     """
     Test the initial slide controller state .
     """
@@ -51,7 +52,7 @@ def test_initial_slide_controller(registry):
     assert slide_controller.is_live is False, 'The base slide controller should not be a live controller'
 
 
-def test_slide_selected(settings):
+def test_slide_selected(settings: Settings):
     """
     Test the slide selected method
     """
@@ -74,7 +75,7 @@ def test_slide_selected(settings):
     mocked_display.go_to_slide.assert_called_once_with(4)
 
 
-def test_text_service_item_blank(settings):
+def test_text_service_item_blank(settings: Settings):
     """
     Test that loading a text-based service item into the slide controller sets the correct blank menu
     """
@@ -95,7 +96,7 @@ def test_text_service_item_blank(settings):
     toolbar.set_widget_visible.assert_called_with(WIDE_MENU, True)
 
 
-def test_non_text_service_item_blank(settings):
+def test_non_text_service_item_blank(settings: Settings):
     """
     Test that loading a non-text service item into the slide controller sets the correct blank menu
     """
@@ -116,7 +117,7 @@ def test_non_text_service_item_blank(settings):
     toolbar.set_widget_visible.assert_called_with(NON_TEXT_MENU, True)
 
 
-def test_text_service_item_blank_narrow(settings):
+def test_text_service_item_blank_narrow(settings: Settings):
     """
     Test that loading a text-based service item into the slide controller sets the correct blank menu
     """
@@ -137,7 +138,7 @@ def test_text_service_item_blank_narrow(settings):
     toolbar.set_widget_visible.assert_any_call(WIDE_MENU, False)
 
 
-def test_on_controller_size_changed_wide(settings):
+def test_on_controller_size_changed_wide(settings: Settings):
     """
     Test that on_controller_size_changed
     """
@@ -157,7 +158,7 @@ def test_on_controller_size_changed_wide(settings):
     slide_controller.set_hide_mode_menu.assert_called_with(narrow=False)
 
 
-def test_on_controller_size_changed_narrow(settings):
+def test_on_controller_size_changed_narrow(settings: Settings):
     """
     Test that on_controller_size_changed
     """
@@ -177,7 +178,7 @@ def test_on_controller_size_changed_narrow(settings):
     slide_controller.set_hide_mode_menu.assert_called_with(narrow=True)
 
 
-def test_on_controller_size_changed_can_not_expand(settings):
+def test_on_controller_size_changed_can_not_expand(settings: Settings):
     """
     Test that on_controller_size_changed
     """
@@ -197,7 +198,7 @@ def test_on_controller_size_changed_can_not_expand(settings):
     slide_controller.set_hide_mode_menu.assert_not_called()
 
 
-def test_receive_spin_delay(mock_settings):
+def test_receive_spin_delay(mock_settings: MagicMock):
     """
     Test that the spin box is updated accordingly after a call to receive_spin_delay()
     """
@@ -216,7 +217,7 @@ def test_receive_spin_delay(mock_settings):
     mocked_delay_spin_box.setValue.assert_called_with(1)
 
 
-def test_toggle_display_blank(settings):
+def test_toggle_display_blank(settings: Settings):
     """
     Check that the toggle_display('blank') method calls set_hide_mode with the correct HideMode
     """
@@ -232,7 +233,7 @@ def test_toggle_display_blank(settings):
     mocked_set_hide_mode.assert_called_once_with(HideMode.Blank)
 
 
-def test_toggle_display_hide(settings):
+def test_toggle_display_hide(settings: Settings):
     """
     Check that the toggle_display('hide') method calls set_hide_mode with the correct HideMode
     """
@@ -248,7 +249,7 @@ def test_toggle_display_hide(settings):
     mocked_set_hide_mode.assert_called_once_with(HideMode.Blank)
 
 
-def test_toggle_display_theme(settings):
+def test_toggle_display_theme(settings: Settings):
     """
     Check that the toggle_display('theme') method calls set_hide_mode with the correct HideMode
     """
@@ -264,7 +265,7 @@ def test_toggle_display_theme(settings):
     mocked_set_hide_mode.assert_called_once_with(HideMode.Theme)
 
 
-def test_toggle_display_desktop(settings):
+def test_toggle_display_desktop(settings: Settings):
     """
     Check that the toggle_display('desktop') method calls set_hide_mode with the correct HideMode
     """
@@ -280,7 +281,7 @@ def test_toggle_display_desktop(settings):
     mocked_set_hide_mode.assert_called_once_with(HideMode.Screen)
 
 
-def test_toggle_display_show(settings):
+def test_toggle_display_show(settings: Settings):
     """
     Check that the toggle_display('show') method calls set_hide_mode with the correct HideMode
     """
@@ -296,7 +297,7 @@ def test_toggle_display_show(settings):
     mocked_set_hide_mode.assert_called_once_with(None)
 
 
-def test_on_toggle_blank(settings):
+def test_on_toggle_blank(settings: Settings):
     """
     Check that the on_toggle_blank method calls set_hide_mode with the correct HideMode
     """
@@ -314,7 +315,7 @@ def test_on_toggle_blank(settings):
     mocked_set_hide_mode.assert_called_once_with(HideMode.Blank)
 
 
-def test_on_toggle_blank_off(settings):
+def test_on_toggle_blank_off(settings: Settings):
     """
     Check that the on_toggle_blank method calls set_hide_mode with the correct HideMode
     """
@@ -332,7 +333,7 @@ def test_on_toggle_blank_off(settings):
     mocked_set_hide_mode.assert_called_once_with(None)
 
 
-def test_on_toggle_theme(settings):
+def test_on_toggle_theme(settings: Settings):
     """
     Check that the on_toggle_theme method calls set_hide_mode with the correct HideMode
     """
@@ -350,7 +351,7 @@ def test_on_toggle_theme(settings):
     mocked_set_hide_mode.assert_called_once_with(HideMode.Theme)
 
 
-def test_on_toggle_theme_off(settings):
+def test_on_toggle_theme_off(settings: Settings):
     """
     Check that the on_toggle_theme method calls set_hide_mode with the correct HideMode
     """
@@ -368,7 +369,7 @@ def test_on_toggle_theme_off(settings):
     mocked_set_hide_mode.assert_called_once_with(None)
 
 
-def test_on_toggle_desktop(settings):
+def test_on_toggle_desktop(settings: Settings):
     """
     Check that the on_toggle_desktop method calls set_hide_mode with the correct HideMode
     """
@@ -386,7 +387,7 @@ def test_on_toggle_desktop(settings):
     mocked_set_hide_mode.assert_called_once_with(HideMode.Screen)
 
 
-def test_on_toggle_desktop_off(settings):
+def test_on_toggle_desktop_off(settings: Settings):
     """
     Check that the on_toggle_desktop method calls set_hide_mode with the correct HideMode
     """
@@ -404,7 +405,7 @@ def test_on_toggle_desktop_off(settings):
     mocked_set_hide_mode.assert_called_once_with(None)
 
 
-def test_on_go_live_live_controller(registry):
+def test_on_go_live_live_controller(registry: Registry):
     """
     Test that when the on_go_live() method is called the message is sent to the live controller and focus is
     set correctly.
@@ -432,7 +433,7 @@ def test_on_go_live_live_controller(registry):
     mocked_live_controller.preview_widget.setFocus.assert_called_once_with()
 
 
-def test_on_go_live_service_manager(registry):
+def test_on_go_live_service_manager(registry: Registry):
     """
     Test that when the on_go_live() method is called the message is sent to the live controller and focus is
     set correctly.
@@ -463,7 +464,7 @@ def test_on_go_live_service_manager(registry):
     mocked_live_controller.preview_widget.setFocus.assert_called_once_with()
 
 
-def test_service_previous(settings):
+def test_service_previous(settings: Settings):
     """
     Check that calling the service_previous() method adds the previous key to the queue and processes the queue
     """
@@ -482,7 +483,7 @@ def test_service_previous(settings):
     mocked_process_queue.assert_called_once_with()
 
 
-def test_service_next(settings):
+def test_service_next(settings: Settings):
     """
     Check that calling the service_next() method adds the next key to the queue and processes the queue
     """
@@ -501,7 +502,7 @@ def test_service_next(settings):
     mocked_process_queue.assert_called_once_with()
 
 
-def test_update_slide_limits(mock_settings):
+def test_update_slide_limits(mock_settings: MagicMock):
     """
     Test that calling the update_slide_limits() method updates the slide limits
     """
@@ -520,7 +521,7 @@ def test_update_slide_limits(mock_settings):
     assert 10 == slide_controller.slide_limits, 'Slide limits should have been updated to 10'
 
 
-def test_enable_tool_bar_live(settings):
+def test_enable_tool_bar_live(settings: Settings):
     """
     Check that when enable_tool_bar on a live slide controller is called, enable_live_tool_bar is called
     """
@@ -541,7 +542,7 @@ def test_enable_tool_bar_live(settings):
     assert 0 == mocked_enable_preview_tool_bar.call_count, 'The preview method should not have been called'
 
 
-def test_enable_tool_bar_preview(settings):
+def test_enable_tool_bar_preview(settings: Settings):
     """
     Check that when enable_tool_bar on a preview slide controller is called, enable_preview_tool_bar is called
     """
@@ -562,7 +563,7 @@ def test_enable_tool_bar_preview(settings):
     assert 0 == mocked_enable_live_tool_bar.call_count, 'The live method should not have been called'
 
 
-def test_refresh_service_item_text(settings):
+def test_refresh_service_item_text(settings: Settings):
     """
     Test that the refresh_service_item() method refreshes a text service item
     """
@@ -586,7 +587,7 @@ def test_refresh_service_item_text(settings):
     slide_controller.slide_selected.assert_called_once()
 
 
-def test_add_service_item_with_song_edit(settings):
+def test_add_service_item_with_song_edit(settings: Settings):
     """
     Test the add_service_item() method when song_edit is True
     """
@@ -606,7 +607,7 @@ def test_add_service_item_with_song_edit(settings):
     mocked_process_item.assert_called_once_with(mocked_item, 2)
 
 
-def test_add_service_item_without_song_edit(settings):
+def test_add_service_item_without_song_edit(settings: Settings):
     """
     Test the add_service_item() method when song_edit is False
     """
@@ -626,7 +627,7 @@ def test_add_service_item_without_song_edit(settings):
     mocked_process_item.assert_called_once_with(mocked_item, 0)
 
 
-def test_replace_service_manager_item_different_items(settings):
+def test_replace_service_manager_item_different_items(settings: Settings):
     """
     Test that when the service items are not the same, nothing happens
     """
@@ -648,7 +649,7 @@ def test_replace_service_manager_item_different_items(settings):
         'The preview_widget current_slide_number.() method should not have been called'
 
 
-def test_replace_service_manager_item_same_item(settings):
+def test_replace_service_manager_item_same_item(settings: Settings):
     """
     Test that when the service item is the same, the service item is reprocessed
     """
@@ -670,7 +671,7 @@ def test_replace_service_manager_item_same_item(settings):
     mocked_process_item.assert_called_once_with(mocked_item, 7)
 
 
-def test_on_slide_selected_index_no_service_item(settings):
+def test_on_slide_selected_index_no_service_item(settings: Settings):
     """
     Test that when there is no service item, the on_slide_selected_index() method returns immediately
     """
@@ -687,7 +688,7 @@ def test_on_slide_selected_index_no_service_item(settings):
 
 
 @patch.object(Registry, 'execute')
-def test_on_slide_selected_index_service_item_command(mocked_execute, registry):
+def test_on_slide_selected_index_service_item_command(mocked_execute: MagicMock, registry: Registry):
     """
     Test that when there is a command service item, the command is executed
     """
@@ -717,7 +718,7 @@ def test_on_slide_selected_index_service_item_command(mocked_execute, registry):
 
 
 @patch.object(Registry, 'execute')
-def test_on_slide_selected_index_service_item_not_command(mocked_execute, registry):
+def test_on_slide_selected_index_service_item_not_command(mocked_execute: MagicMock, registry: Registry):
     """
     Test that when there is a service item but it's not a command, the preview widget is updated
     """
@@ -745,7 +746,7 @@ def test_on_slide_selected_index_service_item_not_command(mocked_execute, regist
     mocked_slide_selected.assert_called_once_with()
 
 
-def test_set_background_image(registry):
+def test_set_background_image(registry: Registry):
     """
     Test that the display and preview background are set
     """
@@ -763,7 +764,7 @@ def test_set_background_image(registry):
     mock_display.set_background_image.assert_called_once_with(sentinel.image)
 
 
-def test_theme_updated(mock_settings):
+def test_theme_updated(mock_settings: MagicMock):
     """
     Test that the theme_updated function updates the service if hot reload is on
     """
@@ -782,7 +783,7 @@ def test_theme_updated(mock_settings):
     slide_controller._process_item.assert_called_once_with(sentinel.service_item, 14)
 
 
-def test_theme_updated_no_reload(mock_settings):
+def test_theme_updated_no_reload(mock_settings: MagicMock):
     """
     Test that the theme_updated function does not update the service if hot reload is off
     """
@@ -800,7 +801,7 @@ def test_theme_updated_no_reload(mock_settings):
     assert slide_controller._process_item.call_count == 0
 
 
-def test_reload_theme(mock_settings):
+def test_reload_theme(mock_settings: MagicMock):
     """
     Test that the reload_theme function triggers the reload_theme function for the displays
     """
@@ -819,7 +820,7 @@ def test_reload_theme(mock_settings):
 
 
 @patch.object(Registry, 'execute')
-def test_process_item(mocked_execute, registry, state_media):
+def test_process_item(mocked_execute: MagicMock, registry: Registry, state_media: State):
     """
     Test that presentation service-items is closed when followed by a media service-item
     """
@@ -867,7 +868,7 @@ def test_process_item(mocked_execute, registry, state_media):
 
 
 @patch.object(Registry, 'execute')
-def test_process_item_transition(mocked_execute, registry, state_media):
+def test_process_item_transition(mocked_execute: MagicMock, registry: Registry, state_media: State):
     """
     Test that the correct actions are taken when a media service-item is closed followed by a image service-item
     """
@@ -935,7 +936,7 @@ def test_process_item_transition(mocked_execute, registry, state_media):
 
 
 @patch.object(Registry, 'execute')
-def test_process_item_text(mocked_execute, registry, state_media):
+def test_process_item_text(mocked_execute: MagicMock, registry: Registry, state_media: State):
     """
     Test that the correct actions are taken a text item is processed
     """
@@ -996,7 +997,7 @@ def test_process_item_text(mocked_execute, registry, state_media):
 
 
 @patch.object(Registry, 'execute')
-def test_process_item_song_vlc(mocked_execute, registry, state_media):
+def test_process_item_song_vlc(mocked_execute: MagicMock, registry: Registry, state_media: State):
     """
     Test that media is started if VLC is present.
     """
@@ -1043,7 +1044,7 @@ def test_process_item_song_vlc(mocked_execute, registry, state_media):
 
 
 @patch.object(Registry, 'execute')
-def test_process_item_song_no_vlc(mocked_execute, registry, state_media):
+def test_process_item_song_no_vlc(mocked_execute: MagicMock, registry: Registry, state_media: State):
     """
     Test that media is started if VLC is present.
     """
@@ -1091,7 +1092,8 @@ def test_process_item_song_no_vlc(mocked_execute, registry, state_media):
 
 
 @patch.object(Registry, 'execute')
-def test_process_item_is_reloading_wont_change_display_hide_mode(mocked_execute, registry, state_media):
+def test_process_item_is_reloading_wont_change_display_hide_mode(mocked_execute: MagicMock, registry: Registry,
+                                                                 state_media: State):
     """
     Test if the display's hide mode is not changed when using is_reloading parameter
     """
@@ -1146,7 +1148,7 @@ def test_process_item_is_reloading_wont_change_display_hide_mode(mocked_execute,
 
 
 @patch.object(Registry, 'execute')
-def test_process_item_provides_own_theme(mocked_execute, registry, state_media):
+def test_process_item_provides_own_theme(mocked_execute: MagicMock, registry: Registry, state_media: State):
     """
     Test that media theme is set when media item is flagged with ProvidesOwnTheme
     """
@@ -1193,7 +1195,7 @@ def test_process_item_provides_own_theme(mocked_execute, registry, state_media):
     slide_controller._set_theme.assert_called_once()
 
 
-def test_live_stolen_focus_shortcuts(settings):
+def test_live_stolen_focus_shortcuts(settings: Settings):
     """
     Test that all the needed shortcuts are available in scenarios where Live has stolen focus.
     These are found under def __add_actions_to_widget(self, widget): in slidecontroller.py
@@ -1222,7 +1224,7 @@ def test_live_stolen_focus_shortcuts(settings):
     ])
 
 
-def test_on_preview_double_click_unblank_display(mock_settings):
+def test_on_preview_double_click_unblank_display(mock_settings: MagicMock):
     # GIVEN: A slide controller, actions needed, settings set to True.
     slide_controller = SlideController(None)
     mocked_settings = MagicMock()
@@ -1244,7 +1246,7 @@ def test_on_preview_double_click_unblank_display(mock_settings):
     assert 0 == slide_controller.on_preview_add_to_service.call_count, 'Should have not been called.'
 
 
-def test_on_preview_double_click_add_to_service(mock_settings):
+def test_on_preview_double_click_add_to_service(mock_settings: MagicMock):
     # GIVEN: A slide controller, actions needed, settings set to False.
     slide_controller = SlideController(None)
     mock_settings.value.return_value = False
@@ -1265,7 +1267,7 @@ def test_on_preview_double_click_add_to_service(mock_settings):
 
 
 @patch(u'PyQt5.QtCore.QTimer.singleShot')
-def test_update_preview_live(mocked_singleShot, registry):
+def test_update_preview_live(mocked_singleShot: MagicMock, registry: Registry):
     """
     Test that the preview screen is updated with a screen grab for live service items
     """
@@ -1303,7 +1305,7 @@ def test_update_preview_live(mocked_singleShot, registry):
 
 
 @patch(u'PyQt5.QtCore.QTimer.singleShot')
-def test_update_preview_pres(mocked_singleShot, registry):
+def test_update_preview_pres(mocked_singleShot: MagicMock, registry: Registry):
     """
     Test that the preview screen is updated with the correct preview for presentation service items
     """
@@ -1340,7 +1342,7 @@ def test_update_preview_pres(mocked_singleShot, registry):
 
 
 @patch(u'PyQt5.QtCore.QTimer.singleShot')
-def test_update_preview_media(mocked_singleShot, registry):
+def test_update_preview_media(mocked_singleShot: MagicMock, registry: Registry):
     """
     Test that the preview screen is updated with the correct preview for media service items
     """
@@ -1378,7 +1380,7 @@ def test_update_preview_media(mocked_singleShot, registry):
 
 
 @patch(u'PyQt5.QtCore.QTimer.singleShot')
-def test_update_preview_image(mocked_singleShot, registry):
+def test_update_preview_image(mocked_singleShot: MagicMock, registry: Registry):
     """
     Test that the preview screen is updated with the correct preview for image service items
     """
@@ -1415,7 +1417,7 @@ def test_update_preview_image(mocked_singleShot, registry):
 
 
 @patch(u'openlp.core.ui.slidecontroller.image_to_byte')
-def test_display_maindisplay(mocked_image_to_byte, registry):
+def test_display_maindisplay(mocked_image_to_byte: MagicMock, registry: Registry):
     """
     Test the display_maindisplay method
     Here a string is substituted for what would be a screen capture of the display
@@ -1440,7 +1442,8 @@ CaptureMainDisplayMockReturn = namedtuple('CaptureMainDisplayMockReturn', ['slid
                                                                            'mocked_screenlist_instance'])
 
 
-def _init__capture_maindisplay_mocks(geometry, mocked_screenlist, mocked_application, mocked_is_wayland_compositor):
+def _init__capture_maindisplay_mocks(geometry: list, mocked_screenlist: MagicMock,
+                                     mocked_application: MagicMock, mocked_is_wayland_compositor: MagicMock):
     mocked_is_wayland_compositor.return_value = False
     slide_controller = SlideController(None)
     windowed_screenshot_mock = QtGui.QPixmap(64, 33)
@@ -1479,8 +1482,9 @@ def _init__capture_maindisplay_mocks(geometry, mocked_screenlist, mocked_applica
 @patch(u'openlp.core.ui.slidecontroller.QtWidgets.QApplication')
 @patch(u'openlp.core.ui.slidecontroller.is_wayland_compositor')
 @mark.parametrize('geometry', [[[34, 67, 77, 42], [0, 0, 800, 600]]])
-def test__capture_maindisplay(mocked_is_wayland_compositor, mocked_application, mocked_screenlist,
-                              mocked_image_to_byte, geometry, registry, settings):
+def test__capture_maindisplay(mocked_is_wayland_compositor: MagicMock, mocked_application: MagicMock,
+                              mocked_screenlist: MagicMock, mocked_image_to_byte: MagicMock, geometry: list,
+                              registry: Registry, settings: Settings):
     """
     Test the _capture_maindisplay method
     """
@@ -1500,9 +1504,11 @@ def test__capture_maindisplay(mocked_is_wayland_compositor, mocked_application, 
 @patch(u'openlp.core.ui.slidecontroller.QtWidgets.QApplication')
 @patch(u'openlp.core.ui.slidecontroller.is_wayland_compositor')
 @mark.parametrize('geometry', [[[34, 67, 77, 42], [0, 0, 800, 600]]])
-def test__capture_maindisplay_wayland_fallbacks_to_windowed(mocked_is_wayland_compositor, mocked_application,
-                                                            mocked_screenlist, mocked_image_to_byte, registry,
-                                                            geometry, settings):
+def test__capture_maindisplay_wayland_fallbacks_to_windowed(mocked_is_wayland_compositor: MagicMock,
+                                                            mocked_application: MagicMock,
+                                                            mocked_screenlist: MagicMock,
+                                                            mocked_image_to_byte: MagicMock, geometry: list,
+                                                            registry: Registry, settings: Settings):
     """
     Test the _capture_maindisplay method fallbacks to windowed capture mode if user is running on Wayland compositor
     """
@@ -1528,9 +1534,11 @@ def test__capture_maindisplay_wayland_fallbacks_to_windowed(mocked_is_wayland_co
                                [[-120, 0, 800, 600], [0, 0, 800, 600]], [[0, -140, 800, 600], [0, 0, 800, 600]],
                                [[-150, 0, 800, 600], [-152, 0, 800, 600]], [[0, -210, 800, 600], [0, -200, 800, 600]],
                                [[200, 0, 800, 600], [120, 0, 800, 600]], [[0, 230, 800, 600], [0, 110, 800, 600]]])
-def test__capture_maindisplay_offscreen_fallbacks_to_windowed(mocked_is_wayland_compositor, mocked_application,
-                                                              mocked_screenlist, mocked_image_to_byte, geometry,
-                                                              registry, settings):
+def test__capture_maindisplay_offscreen_fallbacks_to_windowed(mocked_is_wayland_compositor: MagicMock,
+                                                              mocked_application: MagicMock,
+                                                              mocked_screenlist: MagicMock,
+                                                              mocked_image_to_byte: MagicMock, geometry: list,
+                                                              registry: Registry, settings: Settings):
     """
     Test the _capture_maindisplay method fallbacks to windowed capture mode if user have a display
     above/beyond screen boundaries.
@@ -1552,8 +1560,10 @@ def test__capture_maindisplay_offscreen_fallbacks_to_windowed(mocked_is_wayland_
 @patch(u'openlp.core.ui.slidecontroller.QtWidgets.QApplication')
 @patch(u'openlp.core.ui.slidecontroller.is_wayland_compositor')
 @mark.parametrize('geometry', [[[34, 67, 77, 42], [0, 0, 800, 600]]])
-def test__capture_maindisplay_offscreen_command_screenshot(mocked_is_wayland_compositor, mocked_application,
-                                                           mocked_screenlist, geometry, registry, settings):
+def test__capture_maindisplay_offscreen_command_screenshot(mocked_is_wayland_compositor: MagicMock,
+                                                           mocked_application: MagicMock,
+                                                           mocked_screenlist: MagicMock, geometry: list,
+                                                           registry: Registry, settings: Settings):
     """
     Test the _capture_maindisplay method invoke '{text}_attempt_screenshot' event on command-based service items.
     """
@@ -1585,8 +1595,11 @@ def test__capture_maindisplay_offscreen_command_screenshot(mocked_is_wayland_com
 @patch(u'openlp.core.ui.slidecontroller.is_wayland_compositor')
 @mark.parametrize('geometry', [[[-800, -600, 800, 600], [0, 0, 800, 600]]])
 @mark.parametrize('hide_mode', [HideMode.Screen, HideMode.Blank])
-def test__capture_maindisplay_window_fakes_black_screen(mocked_is_wayland_compositor, mocked_application,
-                                                        mocked_screenlist, geometry, hide_mode, registry, settings):
+def test__capture_maindisplay_window_fakes_black_screen(mocked_is_wayland_compositor: MagicMock,
+                                                        mocked_application: MagicMock,
+                                                        mocked_screenlist: MagicMock,
+                                                        geometry: list, hide_mode: HideMode,
+                                                        registry: Registry, settings: Settings):
     """
     Test the _capture_maindisplay_window method fakes a black screen if display mode is Screen or Blank.
     """
@@ -1613,11 +1626,12 @@ def test__capture_maindisplay_window_fakes_black_screen(mocked_is_wayland_compos
 
 
 @patch(u'openlp.core.ui.slidecontroller.image_to_byte')
-def test_grab_maindisplay(mocked_image_to_byte, registry):
+def test_grab_maindisplay(mocked_image_to_byte: MagicMock, registry: Registry):
     """
     Test the grab_maindisplay method
     """
     # GIVEN: A mocked slide controller, with mocked functions
+    registry.register('application', MagicMock())
     slide_controller = SlideController(None)
     slide_controller._capture_maindisplay = MagicMock(return_value='placeholder')
     slide_controller.preview_display = MagicMock()
@@ -1636,11 +1650,12 @@ def test_grab_maindisplay(mocked_image_to_byte, registry):
 
 
 @patch(u'openlp.core.ui.slidecontroller.image_to_byte')
-def test_grab_maindisplay_cached(mocked_image_to_byte, registry):
+def test_grab_maindisplay_cached(mocked_image_to_byte: MagicMock, registry: Registry):
     """
     Test the grab_maindisplay method with pre-cached screenshot
     """
     # GIVEN: A mocked slide controller, with mocked functions
+    registry.register('application', MagicMock())
     slide_controller = SlideController(None)
     slide_controller._capture_maindisplay = MagicMock(return_value='placeholder')
     slide_controller.preview_display = MagicMock()
@@ -1720,7 +1735,7 @@ def test_paint_event_text_doesnt_fit():
 
 
 @patch('builtins.super')
-def test_set_text(mocked_super):
+def test_set_text(mocked_super: MagicMock):
     """
     Test the reimplemented setText method
     """
@@ -1737,7 +1752,7 @@ def test_set_text(mocked_super):
     mocked_super().setText.assert_called_once_with('Label Text')
 
 
-def test_initial_live_controller(registry):
+def test_initial_live_controller(registry: Registry):
     """
     Test the initial live slide controller state .
     """
@@ -1749,7 +1764,7 @@ def test_initial_live_controller(registry):
     assert live_controller.is_live is True, 'The slide controller should be a live controller'
 
 
-def test_initial_preview_controller(registry):
+def test_initial_preview_controller(registry: Registry):
     """
     Test the initial preview slide controller state.
     """
@@ -1761,7 +1776,7 @@ def test_initial_preview_controller(registry):
     assert preview_controller.is_live is False, 'The slide controller should be a Preview controller'
 
 
-def test_close_displays(registry):
+def test_close_displays(registry: Registry):
     """
     Test that closing the displays calls the correct methods
     """
