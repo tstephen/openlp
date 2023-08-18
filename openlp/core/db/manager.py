@@ -26,7 +26,7 @@ from pathlib import Path
 from types import FunctionType, ModuleType
 from typing import List, Optional, Type, Union
 
-from sqlalchemy import create_engine, func
+from sqlalchemy import create_engine, func, text
 from sqlalchemy.exc import DBAPIError, InvalidRequestError, OperationalError, SQLAlchemyError
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.decl_api import DeclarativeMeta
@@ -318,7 +318,7 @@ class DBManager(object):
         if self.is_dirty and self.db_url.startswith('sqlite'):
             try:
                 engine = create_engine(self.db_url)
-                engine.connect().execute("vacuum")
+                engine.connect().execute(text('vacuum'))
             except OperationalError:
                 # Just ignore the operational error
                 pass

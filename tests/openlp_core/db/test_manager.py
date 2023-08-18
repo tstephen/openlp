@@ -26,16 +26,20 @@ from unittest.mock import MagicMock, patch
 
 from sqlalchemy.exc import OperationalError as SQLAlchemyOperationalError
 
+from openlp.core.common.settings import Settings
 from openlp.core.db.manager import DBManager
 
 
+@patch('openlp.core.db.manager.text')
 @patch('openlp.core.db.manager.init_url')
 @patch('openlp.core.db.manager.create_engine')
-def test_manager_finalise_exception(mocked_create_engine, mocked_init_url, temp_folder, settings):
+def test_manager_finalise_exception(mocked_create_engine: MagicMock, mocked_init_url: MagicMock,
+                                    mocked_text: MagicMock, temp_folder: str, settings: Settings):
     """Test that the finalise method silently fails on an exception"""
     # GIVEN: A db Manager object
     mocked_init_url.return_value = f'sqlite:///{temp_folder}/test_db.sqlite'
     mocked_session = MagicMock()
+    mocked_text.side_effect = lambda t: t
 
     def init_schema(url):
         return mocked_session
@@ -55,13 +59,16 @@ def test_manager_finalise_exception(mocked_create_engine, mocked_init_url, temp_
     mocked_create_engine.return_value.connect.return_value.execute.assert_called_once_with('vacuum')
 
 
+@patch('openlp.core.db.manager.text')
 @patch('openlp.core.db.manager.init_url')
 @patch('openlp.core.db.manager.create_engine')
-def test_manager_finalise(mocked_create_engine, mocked_init_url, temp_folder, settings):
+def test_manager_finalise(mocked_create_engine: MagicMock, mocked_init_url: MagicMock, mocked_text: MagicMock,
+                          temp_folder: str, settings: Settings):
     """Test that the finalise method works correctly"""
     # GIVEN: A db Manager object
     mocked_init_url.return_value = f'sqlite:///{temp_folder}/test_db.sqlite'
     mocked_session = MagicMock()
+    mocked_text.side_effect = lambda t: t
 
     def init_schema(url):
         return mocked_session
