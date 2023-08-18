@@ -169,8 +169,8 @@ def test_create_importer(importer: WorshipCenterProImportLogger):
 
 @patch('openlp.plugins.songs.lib.importers.worshipcenterpro.translate')
 @patch('openlp.plugins.songs.lib.importers.worshipcenterpro.pyodbc.connect')
-@pytest.mark.parametrize('error', [(pyodbc.DatabaseError,), (pyodbc.IntegrityError,), (pyodbc.InternalError,),
-                                   (pyodbc.OperationalError,)])
+@pytest.mark.parametrize('error', [pyodbc.DatabaseError, pyodbc.IntegrityError, pyodbc.InternalError,
+                                   pyodbc.OperationalError])
 def test_pyodbc_exception(mocked_pyodbc_connect: MagicMock, mocked_translate: MagicMock,
                           importer: WorshipCenterProImportLogger, error: Exception):
     """

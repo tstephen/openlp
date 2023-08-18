@@ -112,13 +112,13 @@ from typing import Optional
 
 from sqlalchemy import Column, ForeignKey, Table
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.orm import declarative_base, reconstructor, relationship
+from sqlalchemy.orm import Session, declarative_base, reconstructor, relationship
 from sqlalchemy.sql.expression import func, text
 from sqlalchemy.types import Boolean, DateTime, Integer, Unicode, UnicodeText
 
 from openlp.core.common.i18n import get_natural_key, translate
 from openlp.core.db.types import PathType
-from openlp.core.db.upgrades import init_db
+from openlp.core.db.helpers import init_db
 
 
 Base = declarative_base()
@@ -337,6 +337,10 @@ class Song(Base):
                 return
 
         new_songbook_entry = SongBookEntry()
+        if session := Session.object_session(self):
+            # Session is None in the tests
+            session.add(songbook)
+
         new_songbook_entry.songbook = songbook
         new_songbook_entry.entry = entry
         self.songbook_entries.append(new_songbook_entry)
