@@ -54,9 +54,12 @@ class EditVerseForm(QtWidgets.QDialog, Ui_EditVerseDialog):
         self.verse_text_edit.cursorPositionChanged.connect(self.on_cursor_position_changed)
         self.verse_type_combo_box.currentIndexChanged.connect(self.on_verse_type_combo_box_changed)
         self.forced_split_button.clicked.connect(self.on_forced_split_button_clicked)
-        if Registry().get('settings').value('songs/enable chords'):
-            self.transpose_down_button.clicked.connect(self.on_transpose_down_button_clicked)
-            self.transpose_up_button.clicked.connect(self.on_transpose_up_button_clicked)
+        self.transpose_down_button.clicked.connect(self.on_transpose_down_button_clicked)
+        self.transpose_up_button.clicked.connect(self.on_transpose_up_button_clicked)
+
+    def exec(self):
+        self.transpose_widget.setVisible(Registry().get('settings').value('songs/enable chords'))
+        super(EditVerseForm, self).exec()
 
     def insert_verse(self, verse_tag, verse_num=1):
         """
