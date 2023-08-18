@@ -117,7 +117,7 @@ using a computer and a display/projector.""",
         'QtAwesome',
         "qrcode",
         'requests',
-        'SQLAlchemy >= 1.4',
+        'SQLAlchemy',
         'waitress',
         'websockets'
     ],

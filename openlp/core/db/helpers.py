@@ -28,7 +28,7 @@ from pathlib import Path
 from typing import Optional, Tuple, Union
 from urllib.parse import quote_plus as urlquote
 
-from sqlalchemy import MetaData, create_engine
+from sqlalchemy import MetaData, create_engine, __version__ as sqla_version
 from sqlalchemy.engine import Engine
 from sqlalchemy.engine.url import URL, make_url
 from sqlalchemy.exc import OperationalError, ProgrammingError
@@ -179,12 +179,16 @@ def init_db(url: str, auto_flush: bool = True, auto_commit: bool = False,
     :param base: If using declarative, the base class to bind with
     """
     engine = create_engine(url, poolclass=StaticPool)
+    if sqla_version.startswith('1.'):
+        session = scoped_session(sessionmaker(autoflush=auto_flush, autocommit=auto_commit, bind=engine))
+    else:
+        session = scoped_session(sessionmaker(autoflush=auto_flush, autobegin=True, bind=engine))
+
     if base is None:
         metadata = MetaData(bind=engine)
     else:
         base.metadata.bind = engine
         metadata = base.metadata
-    session = scoped_session(sessionmaker(autoflush=auto_flush, autocommit=auto_commit, bind=engine))
     return session, metadata
 
 

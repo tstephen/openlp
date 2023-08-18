@@ -24,7 +24,7 @@ Package to test the :mod:`~openlp.core.db.helpers` package.
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-from sqlalchemy import MetaData
+from sqlalchemy import MetaData, __version__ as sqla_version
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm.scoping import ScopedSession
 from sqlalchemy.pool import StaticPool
@@ -57,7 +57,10 @@ def test_init_db_calls_correct_functions():
         # THEN: We should see the correct function calls
         mocked_create_engine.assert_called_with(db_url, poolclass=StaticPool)
         MockedMetaData.assert_called_with(bind=mocked_engine)
-        mocked_sessionmaker.assert_called_with(autoflush=True, autocommit=False, bind=mocked_engine)
+        if sqla_version.startswith('1.'):
+            mocked_sessionmaker.assert_called_with(autoflush=True, autocommit=False, bind=mocked_engine)
+        else:
+            mocked_sessionmaker.assert_called_with(autoflush=True, autobegin=True, bind=mocked_engine)
         mocked_scoped_session.assert_called_with(mocked_sessionmaker_object)
         assert session is mocked_scoped_session_object, 'The ``session`` object should be the mock'
         assert metadata is mocked_metadata, 'The ``metadata`` object should be the mock'
