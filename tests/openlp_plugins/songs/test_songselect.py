@@ -29,7 +29,7 @@ re-downloading the HTML pages and changing the code to use the new layout.
 from unittest import TestCase
 from unittest.mock import MagicMock, patch, sentinel
 
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtCore
 
 from openlp.core.common.registry import Registry
 from openlp.plugins.songs.forms.songselectform import SongSelectForm
@@ -47,6 +47,7 @@ class TestSongSelectImport(TestCase, TestMixin):
     """
     Test the :class:`~openlp.plugins.songs.lib.songselect.SongSelectImport` class
     """
+
     def test_constructor(self):
         """
         Test that constructing a basic SongSelectImport object works correctly
@@ -261,146 +262,6 @@ class TestSongSelectImport(TestCase, TestMixin):
         # THEN: The returned value should be None
         assert result is None
 
-    @patch('openlp.plugins.songs.lib.songselect.SongSelectImport.get_song_number_from_url')
-    @patch('openlp.plugins.songs.lib.songselect.SongSelectImport.get_page')
-    def test_get_song_page_raises_exception(self, mocked_get_page, mock_get_num):
-        """
-        Test that when BeautifulSoup gets a bad song page the get_song() method returns None
-        """
-        # GIVEN: A mocked callback and an importer object
-        mocked_get_page.side_effect = None
-        mocked_callback = MagicMock()
-        importer = SongSelectImport(None, MagicMock())
-
-        # WHEN: get_song is called
-        result = importer.get_song(callback=mocked_callback)
-
-        # THEN: The callback should have been called once and None should be returned
-        mocked_callback.assert_called_with()
-        assert result is None, 'The get_song() method should have returned None'
-
-    @patch('openlp.plugins.songs.lib.songselect.SongSelectImport.get_song_number_from_url')
-    @patch('openlp.plugins.songs.lib.songselect.SongSelectImport.get_page')
-    @patch('openlp.plugins.songs.lib.songselect.BeautifulSoup')
-    def test_get_song_lyrics_raise_exception(self, MockedBeautifulSoup, mocked_get_page, mock_get_num):
-        """
-        Test that when BeautifulSoup gets a bad lyrics page the get_song() method returns None
-        """
-        # GIVEN: A bunch of mocked out stuff and an importer object
-        song_page = MagicMock(return_value={'href': '/lyricpage'})
-        MockedBeautifulSoup.side_effect = [song_page, TypeError('Test Error')]
-        mocked_callback = MagicMock()
-        importer = SongSelectImport(None, MagicMock())
-
-        # WHEN: get_song is called
-        result = importer.get_song(callback=mocked_callback)
-
-        # THEN: The callback should have been called twice and None should be returned
-        assert 2 == mocked_callback.call_count, 'The callback should have been called twice'
-        assert result is None, 'The get_song() method should have returned None'
-
-    @patch('openlp.plugins.songs.lib.songselect.log.exception')
-    @patch('openlp.plugins.songs.lib.songselect.SongSelectImport.get_song_number_from_url')
-    @patch('openlp.plugins.songs.lib.songselect.SongSelectImport.get_page')
-    def test_get_song_no_access(self, mocked_get_page, mock_get_num, mock_log_exception):
-        """
-        Test that the get_song() handles the case when the user's CCLI account has no access to the song
-        """
-        fake_song_page = '''<!DOCTYPE html><html><body>
-        <div class="content-title">
-          <h1>Song Title</h1>
-          <ul class="authors">
-            <li><a>Author 1</a></li>
-            <li><a>Author 2</a></li>
-          </ul>
-        </div>
-        <div class="song-content-data"><ul><li><strong>1234_cclinumber_5678</strong></li></ul></div>
-        <section class="page-section">
-          <a title="View song lyrics" data-open="ssUpgradeModal"></a>
-        </section>
-        <ul class="song-meta-list">
-          <li>Themes</li><li><a>theme1</a></li><li><a>theme2</a></li>
-        </ul>
-        </body></html>
-        '''
-        fake_lyrics_page = '''<!DOCTYPE html><html><body>
-        <div class="song-viewer lyrics">
-            <h3>Verse 1</h3>
-            <p>verse thing 1<br>line 2</p>
-            <h3>Verse 2</h3>
-            <p>verse thing 2</p>
-        </div>
-        <ul class="copyright">
-          <li>Copy thing</li><li>Copy thing 2</li>
-        </ul>
-        </body></html>
-        '''
-        mocked_get_page.side_effect = [fake_song_page, fake_lyrics_page]
-        mocked_callback = MagicMock()
-        importer = SongSelectImport(None, MagicMock())
-
-        # WHEN: get_song is called
-        result = importer.get_song(callback=mocked_callback)
-
-        # THEN: None should be returned
-        assert result is None, 'The get_song() method should have returned None'
-
-    @patch('openlp.plugins.songs.lib.songselect.SongSelectImport.get_song_number_from_url')
-    @patch('openlp.plugins.songs.lib.songselect.SongSelectImport.get_page')
-    def test_get_song(self, mocked_get_page, mock_get_num):
-        """
-        Test that the get_song() method returns the correct song details
-        """
-        fake_song_page = '''<!DOCTYPE html><html><body>
-        <div class="content-title">
-          <h1>Song Title</h1>
-          <ul class="authors">
-            <li><a>Author 1</a></li>
-            <li><a>Author 2</a></li>
-          </ul>
-        </div>
-        <div class="song-content-data"><ul><li><strong>1234_cclinumber_5678</strong></li></ul></div>
-        <section class="page-section">
-          <a title="View song lyrics" href="pretend link"></a>
-        </section>
-        <ul class="song-meta-list">
-          <li>Themes</li><li><a>theme1</a></li><li><a>theme2</a></li>
-        </ul>
-        </body></html>
-        '''
-        fake_lyrics_page = '''<!DOCTYPE html><html><body>
-        <div class="song-viewer lyrics">
-            <h3>Verse 1</h3>
-            <p>verse thing 1<br>line 2</p>
-            <h3>Verse 2</h3>
-            <p>verse thing 2</p>
-            <h3>Spoken Words</h3>
-            <p>completely custom verse type</p>
-        </div>
-        <ul class="copyright">
-          <li>Copy thing</li><li>Copy thing 2</li>
-        </ul>
-        </body></html>
-        '''
-        mocked_get_page.side_effect = [fake_song_page, fake_lyrics_page]
-        mocked_callback = MagicMock()
-        importer = SongSelectImport(None, MagicMock())
-
-        # WHEN: get_song is called
-        result = importer.get_song(callback=mocked_callback)
-
-        # THEN: The callback should have been called three times and the song should be returned
-        assert 3 == mocked_callback.call_count, 'The callback should have been called twice'
-        assert result is not None, 'The get_song() method should have returned a song dictionary'
-        assert result['title'] == 'Song Title'
-        assert result['authors'] == ['Author 1', 'Author 2']
-        assert result['copyright'] == 'Copy thing/Copy thing 2'
-        assert result['topics'] == ['theme1', 'theme2']
-        assert result['ccli_number'] == '1234_cclinumber_5678'
-        assert result['verses'] == [{'label': 'Verse 1', 'lyrics': 'verse thing 1\nline 2'},
-                                    {'label': 'Verse 2', 'lyrics': 'verse thing 2'},
-                                    {'label': 'Spoken Words', 'lyrics': 'completely custom verse type'}]
-
     @patch('openlp.plugins.songs.lib.songselect.clean_song')
     @patch('openlp.plugins.songs.lib.songselect.Topic')
     @patch('openlp.plugins.songs.lib.songselect.Author')
@@ -605,7 +466,7 @@ class TestSongSelectForm(TestCase, TestMixin):
         # THEN: The import object should exist, song var should be None, and the page hooked up
         assert ssform.song is None
         assert isinstance(ssform.song_select_importer, SongSelectImport), 'SongSelectImport object should be created'
-        assert ssform.webview.page.call_count == 2, 'Page should be called twice, once for each load handler'
+        assert ssform.webview.page.call_count == 3, 'Page should be called 3 times, once for each load handler'
 
     @patch('openlp.plugins.songs.forms.songselectform.QtWidgets.QDialog.exec')
     def test_exec(self, mocked_exec):
@@ -647,9 +508,6 @@ class TestSongSelectForm(TestCase, TestMixin):
         """
         # GIVEN: The SongSelectForm
         ssform = SongSelectForm(None, MagicMock(), MagicMock())
-        ssform.song_progress_bar = MagicMock()
-        ssform.import_button = MagicMock()
-        ssform.view_button = MagicMock()
         ssform.back_button = MagicMock()
         ssform.url_bar = MagicMock()
         ssform.message_area = MagicMock()
@@ -657,13 +515,10 @@ class TestSongSelectForm(TestCase, TestMixin):
         # WHEN: The method is run
         ssform.page_load_started()
 
-        # THEN: The UI should be set up accordingly (working bar and disabled buttons)
-        ssform.song_progress_bar.setMaximum.assert_called_with(0)
-        ssform.song_progress_bar.setVisible.assert_called_with(True)
-        ssform.import_button.setEnabled.assert_called_with(False)
-        ssform.view_button.setEnabled.assert_called_with(False)
+        # THEN: The UI should be set up accordingly
         ssform.back_button.setEnabled.assert_called_with(False)
-        ssform.message_area.setText.assert_called_with('')
+        ssform.message_area.setText.assert_called_with('Import songs by clicking the "Download" in the Lyrics tab '
+                                                       'or "Download ChordPro" in the Chords tabs.')
 
     def test_page_loaded_login(self):
         """
@@ -681,46 +536,6 @@ class TestSongSelectForm(TestCase, TestMixin):
 
         # THEN: The signin page method should be called
         ssform.signin_page_loaded.assert_called_once()
-
-    def test_page_loaded_song(self):
-        """
-        Test the page_loaded method for a "Song" page
-        """
-        # GIVEN: The SongSelectForm and mocked song page
-        ssform = SongSelectForm(None, MagicMock(), MagicMock())
-        ssform.song_select_importer = MagicMock()
-        ssform.song_select_importer.get_page_type.return_value = Pages.Song
-        ssform.song_progress_bar = MagicMock()
-        ssform.url_bar = MagicMock()
-
-        # WHEN: The method is run
-        ssform.page_loaded(True)
-
-        # THEN: Progress bar should have been set max 3 (for loading song)
-        ssform.song_progress_bar.setMaximum.assert_called_with(3)
-        ssform.song_progress_bar.setVisible.call_count == 2
-
-    @patch('openlp.plugins.songs.forms.songselectform.translate')
-    def test_page_loaded_song_no_access(self, mocked_translate):
-        """
-        Test the page_loaded method for a "Song" page to which the CCLI account has no access
-        """
-        # GIVEN: The SongSelectForm and mocked song page and translate function
-        ssform = SongSelectForm(None, MagicMock(), MagicMock())
-        ssform.song_select_importer = MagicMock()
-        ssform.song_select_importer.get_page_type.return_value = Pages.Song
-        ssform.song_select_importer.get_song.return_value = None
-        ssform.song_progress_bar = MagicMock()
-        ssform.url_bar = MagicMock()
-        ssform.message_area = MagicMock()
-        mocked_translate.return_value = 'some message'
-
-        # WHEN: The method is run
-        ssform.page_loaded(True)
-
-        # THEN: The no access message should be shown and the progress bar should be less than 3
-        ssform.message_area.setText.assert_called_with('some message')
-        ssform.song_progress_bar.setValue.call_count < 4
 
     def test_page_loaded_other(self):
         """
@@ -820,94 +635,6 @@ class TestSongSelectForm(TestCase, TestMixin):
         # THEN: Page should not have changed and a warning should show
         ssform.song_select_importer.set_page.assert_called_with("test")
 
-    @patch('openlp.plugins.songs.forms.songselectform.and_')
-    @patch('openlp.plugins.songs.forms.songselectform.Song')
-    @patch('openlp.plugins.songs.forms.songselectform.QtWidgets.QMessageBox.information')
-    @patch('openlp.plugins.songs.forms.songselectform.QtWidgets.QMessageBox.question')
-    @patch('openlp.plugins.songs.forms.songselectform.translate')
-    def test_on_import(self, mocked_trans, mocked_quest, mocked_info, mocked_song, mocked_and):
-        """
-        Test that when a song is imported and the user clicks the "yes" button, the UI goes back to the previous page
-        """
-        # GIVEN: A valid SongSelectForm with a mocked out QMessageBox.question() method
-        mocked_trans.side_effect = lambda *args: args[1]
-        mocked_quest.return_value = QtWidgets.QMessageBox.Yes
-        ssform = SongSelectForm(None, MagicMock(), MagicMock())
-        mocked_song_select_importer = MagicMock()
-        ssform.song_select_importer = mocked_song_select_importer
-        ssform.song = {'ccli_number': '1234'}
-
-        # WHEN: The import button is clicked, and the user clicks Yes
-        with patch.object(ssform, 'on_back_button_clicked') as mocked_on_back_button_clicked:
-            ssform.on_import_button_clicked()
-
-        # THEN: The on_back_button_clicked() method should have been called
-        mocked_song_select_importer.save_song.assert_called_with({'ccli_number': '1234'})
-        mocked_quest.assert_not_called()
-        mocked_info.assert_called_once()
-        mocked_on_back_button_clicked.assert_called_with(True)
-        assert ssform.song is None
-
-    @patch('openlp.plugins.songs.forms.songselectform.len')
-    @patch('openlp.plugins.songs.forms.songselectform.and_')
-    @patch('openlp.plugins.songs.forms.songselectform.Song')
-    @patch('openlp.plugins.songs.forms.songselectform.QtWidgets.QMessageBox.information')
-    @patch('openlp.plugins.songs.forms.songselectform.QtWidgets.QMessageBox.question')
-    @patch('openlp.plugins.songs.forms.songselectform.translate')
-    def test_on_import_duplicate_yes_clicked(self, mock_trans, mock_q, mocked_info, mock_song, mock_and, mock_len):
-        """
-        Test that when a duplicate song is imported and the user clicks the "yes" button, the song is imported
-        """
-        # GIVEN: A valid SongSelectForm with a mocked out QMessageBox.question() method
-        mock_len.return_value = 1
-        mock_trans.side_effect = lambda *args: args[1]
-        mock_q.return_value = QtWidgets.QMessageBox.Yes
-        ssform = SongSelectForm(None, MagicMock(), MagicMock())
-        mocked_song_select_importer = MagicMock()
-        ssform.song_select_importer = mocked_song_select_importer
-        ssform.song = {'ccli_number': '1234'}
-
-        # WHEN: The import button is clicked, and the user clicks Yes
-        with patch.object(ssform, 'on_back_button_clicked') as mocked_on_back_button_clicked:
-            ssform.on_import_button_clicked()
-
-        # THEN: Should have been saved and the on_back_button_clicked() method should have been called
-            mocked_song_select_importer.save_song.assert_called_with({'ccli_number': '1234'})
-            mock_q.assert_called_once()
-            mocked_info.assert_called_once()
-            mocked_on_back_button_clicked.assert_called_once()
-            assert ssform.song is None
-
-    @patch('openlp.plugins.songs.forms.songselectform.len')
-    @patch('openlp.plugins.songs.forms.songselectform.and_')
-    @patch('openlp.plugins.songs.forms.songselectform.Song')
-    @patch('openlp.plugins.songs.forms.songselectform.QtWidgets.QMessageBox.information')
-    @patch('openlp.plugins.songs.forms.songselectform.QtWidgets.QMessageBox.question')
-    @patch('openlp.plugins.songs.forms.songselectform.translate')
-    def test_on_import_duplicate_no_clicked(self, mock_trans, mock_q, mocked_info, mock_song, mock_and, mock_len):
-        """
-        Test that when a duplicate song is imported and the user clicks the "no" button, the UI exits
-        """
-        # GIVEN: A valid SongSelectForm with a mocked out QMessageBox.question() method
-        mock_len.return_value = 1
-        mock_trans.side_effect = lambda *args: args[1]
-        mock_q.return_value = QtWidgets.QMessageBox.No
-        ssform = SongSelectForm(None, MagicMock(), MagicMock())
-        mocked_song_select_importer = MagicMock()
-        ssform.song_select_importer = mocked_song_select_importer
-        ssform.song = {'ccli_number': '1234'}
-
-        # WHEN: The import button is clicked, and the user clicks No
-        with patch.object(ssform, 'on_back_button_clicked') as mocked_on_back_button_clicked:
-            ssform.on_import_button_clicked()
-
-        # THEN: Should have not been saved
-            assert mocked_song_select_importer.save_song.call_count == 0
-            mock_q.assert_called_once()
-            mocked_info.assert_not_called()
-            mocked_on_back_button_clicked.assert_not_called()
-            assert ssform.song is not None
-
     def test_on_back_button_clicked_preview(self):
         """
         Test that when the back button is clicked on preview screen, the stacked widget is set back one page
@@ -967,35 +694,6 @@ class TestSongSelectForm(TestCase, TestMixin):
         mocked_stacked_widget.setCurrentIndex.assert_called_with(0)
         ssimporter.assert_called_with()
 
-    def test_update_song_progress(self):
-        """
-        Test the _update_song_progress() method
-        """
-        # GIVEN: A SongSelect form
-        ssform = SongSelectForm(None, MagicMock(), MagicMock())
-
-        # WHEN: _update_song_progress() is called
-        with patch.object(ssform, 'song_progress_bar') as mocked_song_progress_bar:
-            mocked_song_progress_bar.value.return_value = 2
-            ssform._update_song_progress()
-
-        # THEN: The song progress bar should be updated
-            mocked_song_progress_bar.setValue.assert_called_with(3)
-
-    def test_on_view_button_clicked(self):
-        """
-        Test that view song function is run when the view button is clicked
-        """
-        # GIVEN: A SongSelect form
-        ssform = SongSelectForm(None, MagicMock(), MagicMock())
-
-        # WHEN: A song result is double-clicked
-        with patch.object(ssform, '_view_song') as mocked_view_song:
-            ssform.on_view_button_clicked()
-
-        # THEN: The song is fetched and shown to the user
-        mocked_view_song.assert_called_with()
-
 
 def test_songselect_file_import():
     """
@@ -1006,3 +704,5 @@ def test_songselect_file_import():
                            helper.load_external_result_data(TEST_PATH / 'TestSong-bin.json'))
         helper.file_import([TEST_PATH / 'TestSong.txt'],
                            helper.load_external_result_data(TEST_PATH / 'TestSong-txt.json'))
+        helper.file_import([TEST_PATH / 'TestSong2023.txt'],
+                           helper.load_external_result_data(TEST_PATH / 'TestSong2023-txt.json'))
