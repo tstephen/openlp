@@ -358,7 +358,8 @@ def test_stop_presentation(controller: MacLOController, document: MacLODocument)
 
 @patch('openlp.plugins.presentations.lib.maclocontroller.ScreenList')
 @patch('openlp.plugins.presentations.lib.maclocontroller.Registry')
-def test_start_presentation(MockedRegistry: MagicMock, MockedScreenList: MagicMock):
+def test_start_presentation(MockedRegistry: MagicMock, MockedScreenList: MagicMock, controller: MacLOController,
+                            document: MacLODocument):
     """
     Test the start_presentation() method
     """

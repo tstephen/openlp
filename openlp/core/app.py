@@ -463,7 +463,7 @@ def main():
         if is_win():
             os.environ['PYTHON_VLC_LIB_PATH'] = str(vlc_dir / 'libvlc.dll')
         elif is_macosx():
-            os.environ['PYTHON_VLC_LIB_PATH'] = str(vlc_dir / 'libvlc.5.dylib')
+            os.environ['PYTHON_VLC_LIB_PATH'] = str(vlc_dir / 'libvlc.dylib')
         os.environ['PYTHON_VLC_MODULE_PATH'] = str(vlc_dir)
         os.environ['PATH'] += ';' + str(vlc_dir)
         log.debug('VLC Path: {}'.format(os.environ.get('PYTHON_VLC_LIB_PATH', '')))
