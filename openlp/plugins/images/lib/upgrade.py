@@ -53,9 +53,15 @@ def upgrade_2(session: Session, metadata: MetaData):
     Version 2 upgrade - Move file path from old db to JSON encoded path to new db. Added during 2.5 dev
     """
     log.debug('Starting upgrade_2 for file_path to JSON')
+    op = get_upgrade_op(session)
+    conn = op.get_bind()
+    # Check if the table exists
+    table_names = inspect(conn).get_table_names()
+    if 'image_filenames' not in table_names:
+        # Bypass this upgrade, it has already been performed
+        return
     images_table = Table('image_filenames', metadata, extend_existing=True, autoload_with=metadata.bind)
     if 'file_path' not in [col.name for col in images_table.c.values()]:
-        op = get_upgrade_op(session)
         with op.batch_alter_table('image_filenames') as batch_op:
             batch_op.add_column(Column('file_path', PathType()))
         # Refresh the table definition
@@ -80,6 +86,13 @@ def upgrade_3(session: Session, metadata: MetaData):
     Version 3 upgrade - add sha256 hash
     """
     log.debug('Starting upgrade_3 for adding sha256 hashes')
+    op = get_upgrade_op(session)
+    conn = op.get_bind()
+    # Check if the table exists
+    table_names = inspect(conn).get_table_names()
+    if 'image_filenames' not in table_names:
+        # Bypass this upgrade, it has already been performed
+        return
     images_table = Table('image_filenames', metadata, extend_existing=True, autoload_with=metadata.bind)
     if 'file_hash' not in [col.name for col in images_table.c.values()]:
         op = get_upgrade_op(session)
