@@ -250,7 +250,7 @@ class SongImport(QtCore.QObject):
                           'writer:', translate('SongsPlugin.SongImport', 'writer:').lower(),
                           'authored by', translate('SongsPlugin.SongImport', 'authored by').lower(),
                           'author:', translate('SongsPlugin.SongImport', 'author:').lower()]
-        translation_prefixes = ['tranlated by', translate('SongsPlugin.SongImport', 'tranlated by').lower(),
+        translation_prefixes = ['translated by', translate('SongsPlugin.SongImport', 'translated by').lower(),
                                 'translation:', translate('SongsPlugin.SongImport', 'translation:').lower()]
         prefix_map = [(music_prefixes, AuthorType.Music), (words_prefixes, AuthorType.Words),
                       (translation_prefixes, AuthorType.Translation)]
