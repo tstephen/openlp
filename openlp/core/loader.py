@@ -22,10 +22,12 @@
 The :mod:`~openlp.core.loader` module provides a bootstrap for the singleton classes
 """
 
+from openlp.core.common.registry import Registry
+from openlp.core.display.render import Renderer
+from openlp.core.lib.pluginmanager import PluginManager
 from openlp.core.state import State
 from openlp.core.ui.media.mediacontroller import MediaController
-from openlp.core.lib.pluginmanager import PluginManager
-from openlp.core.display.render import Renderer
+
 from openlp.core.ui.slidecontroller import LiveController, PreviewController
 
 
@@ -35,6 +37,8 @@ def loader():
 
     :return: None
     """
+    # Stop errors when calling logging due initialisation due to incomplete plugin initialization.
+    Registry().set_initialising(True)
     State().load_settings()
     MediaController()
     PluginManager()
@@ -43,3 +47,5 @@ def loader():
     # Create slide controllers
     PreviewController()
     LiveController()
+    # Turn logging back on again.
+    Registry().set_initialising(False)

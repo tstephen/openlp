@@ -46,7 +46,12 @@ class Registry(metaclass=Singleton):
         registry.service_list = {}
         registry.functions_list = {}
         registry.working_flags = {}
+        registry._is_initialising = False
         return registry
+
+    def set_initialising(self, is_initialising: bool) -> None:
+        """A method to set if the Registry is initialising or not"""
+        self._is_initialising = is_initialising
 
     def get(self, key):
         """
@@ -57,9 +62,10 @@ class Registry(metaclass=Singleton):
         if key in self.service_list:
             return self.service_list[key]
         else:
-            trace_error_handler(log)
-            log.error('Service {key} not found in list'.format(key=key))
-            raise KeyError('Service {key} not found in list'.format(key=key))
+            if not self._is_initialising:
+                trace_error_handler(log)
+                log.error('Service {key} not found in list'.format(key=key))
+                raise KeyError('Service {key} not found in list'.format(key=key))
 
     def register(self, key, reference):
         """
