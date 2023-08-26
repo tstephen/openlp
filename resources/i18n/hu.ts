@@ -2508,22 +2508,22 @@ Az OpenLP megkísérli a folytatást.</translation>
     <message>
         <location filename="../../openlp/core/lib/filelock.py" line="106"/>
         <source>Data Directory Lock Error</source>
-        <translation type="unfinished"/>
+        <translation>Adatmappa zárolási hiba</translation>
     </message>
     <message>
         <location filename="../../openlp/core/lib/filelock.py" line="106"/>
         <source>You have lost OpenLPs shared Data Directory Lock, which instead has been claimed by &quot;{user}&quot; on &quot;{host}&quot;! You should close OpenLP immediately to avoid data corruption! You can try to reclaim the Data Directory Lock by restarting OpenLP</source>
-        <translation type="unfinished"/>
+        <translation>Elvesztette az OpenLP megosztott adatmappájának a zárolását, melyet „{user}” felhasználó igényelt ezen a gazdagépen: „{host}”! Az OpenLP-t azonnal be kell zárnia, hogy elkerülje az adatok sérülését! Az OpenLP újraindításával megpróbálhatja visszaszerezni az adatmappa zárolást.</translation>
     </message>
     <message>
         <location filename="../../openlp/core/lib/filelock.py" line="146"/>
         <source>Data Directory Locked</source>
-        <translation type="unfinished"/>
+        <translation>Adatmappa zárolva</translation>
     </message>
     <message>
         <location filename="../../openlp/core/lib/filelock.py" line="146"/>
         <source>OpenLPs shared Data Directory is being used by &quot;{user}&quot; on &quot;{host}&quot;. To avoid data corruption only one user can access the data at a time! Please wait a few minutes and try again.</source>
-        <translation type="unfinished"/>
+        <translation>Az OpenLP megosztott adatmappáját „{user}” felhasználó használja ezen a gazdagépen: „{host}”. Az adatok sérülésének elkerülése érdekében egyszerre csak egy felhasználó férhet hozzá az adatokhoz! Kérjük, várjon néhány percet, és próbálja meg újra.</translation>
     </message>
     <message>
         <location filename="../../openlp/core/pages/background.py" line="197"/>
@@ -2680,12 +2680,12 @@ Az OpenLP megkísérli a folytatást.</translation>
     <message>
         <location filename="../../openlp/core/ui/advancedtab.py" line="138"/>
         <source>Protect the data directory with a locking mechanism.</source>
-        <translation type="unfinished"/>
+        <translation>Adatmappa védelme zárolási mechanizmussal.</translation>
     </message>
     <message>
         <location filename="../../openlp/core/ui/advancedtab.py" line="140"/>
         <source>Protect the data directory with a locking mechanism to avoid data corruption if multiple users access the data at the same time. Useful for instances shared via network. &lt;strong&gt;NOTE:&lt;/strong&gt; This will only work if the network sharing is available when OpenLP is running.</source>
-        <translation type="unfinished"/>
+        <translation>Adatmappa védelme egy zárolási mechanizmussal az adatok sérülésének elkerülése érdekében, ha több felhasználó egyszerre fér hozzá az adatokhoz. Hasznos a hálózaton keresztül megosztott példányok esetében. &lt;strong&gt;MEGJEGYZÉS:&lt;/strong&gt; Ez csak akkor működik, ha a hálózati megosztás elérhető az OpenLP futtatásakor.</translation>
     </message>
     <message>
         <location filename="../../openlp/core/ui/advancedtab.py" line="145"/>
@@ -10582,82 +10582,82 @@ See log for details</source>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="239"/>
         <source>music by</source>
-        <translation type="unfinished"/>
+        <translation>zeneszerző:</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="240"/>
         <source>music:</source>
-        <translation type="unfinished"/>
+        <translation>zene:</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="241"/>
         <source>arranged by</source>
-        <translation type="unfinished"/>
+        <translation>adaptálta:</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="242"/>
         <source>arranged:</source>
-        <translation type="unfinished"/>
+        <translation>adaptáció:</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="243"/>
         <source>composed by</source>
-        <translation type="unfinished"/>
+        <translation>zenét szerezte:</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="244"/>
         <source>composer:</source>
-        <translation type="unfinished"/>
+        <translation>zeneszerző:</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="245"/>
         <source>words by</source>
-        <translation type="unfinished"/>
+        <translation>szövegíró:</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="246"/>
         <source>words:</source>
-        <translation type="unfinished"/>
+        <translation>szöveg:</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="247"/>
         <source>lyrics by</source>
-        <translation type="unfinished"/>
+        <translation>dalszövegíró:</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="248"/>
         <source>lyrics:</source>
-        <translation type="unfinished"/>
+        <translation>dalszöveg:</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="249"/>
         <source>written by</source>
-        <translation type="unfinished"/>
+        <translation>írta:</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="250"/>
         <source>writer:</source>
-        <translation type="unfinished"/>
+        <translation>író:</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="251"/>
         <source>authored by</source>
-        <translation type="unfinished"/>
+        <translation>szerezte:</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="252"/>
         <source>author:</source>
-        <translation type="unfinished"/>
+        <translation>szerző:</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="253"/>
-        <source>tranlated by</source>
+        <source>translated by</source>
         <translation type="unfinished"/>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="254"/>
         <source>translation:</source>
-        <translation type="unfinished"/>
+        <translation>fordítás:</translation>
     </message>
 </context>
 <context>
@@ -10832,17 +10832,17 @@ See log for details</source>
     <message>
         <location filename="../../openlp/plugins/songs/forms/songselectform.py" line="123"/>
         <source>Unsupported format</source>
-        <translation type="unfinished"/>
+        <translation>Nem támogatott formátum</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/forms/songselectform.py" line="123"/>
         <source>OpenLP can only import simple lyrics or ChordPro</source>
-        <translation type="unfinished"/>
+        <translation>Az OpenLP csak egyszerű dalszövegeket vagy ChordPro-t tud importálni.</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/forms/songselectform.py" line="149"/>
         <source>Import songs by clicking the &quot;Download&quot; in the Lyrics tab or &quot;Download ChordPro&quot; in the Chords tabs.</source>
-        <translation type="unfinished"/>
+        <translation>Dalok importálása a „Letöltés” gombra való kattintással a Dalszöveg fülön vagy a „ChordPro letöltése” gombra való kattintással az Akkordok fülön.</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/forms/songselectform.py" line="171"/>

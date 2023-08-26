@@ -10589,82 +10589,82 @@ See log for details</translation>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="239"/>
         <source>music by</source>
-        <translation type="unfinished"/>
+        <translation>music by</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="240"/>
         <source>music:</source>
-        <translation type="unfinished"/>
+        <translation>music:</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="241"/>
         <source>arranged by</source>
-        <translation type="unfinished"/>
+        <translation>arranged by</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="242"/>
         <source>arranged:</source>
-        <translation type="unfinished"/>
+        <translation>arranged:</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="243"/>
         <source>composed by</source>
-        <translation type="unfinished"/>
+        <translation>composed by</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="244"/>
         <source>composer:</source>
-        <translation type="unfinished"/>
+        <translation>composer:</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="245"/>
         <source>words by</source>
-        <translation type="unfinished"/>
+        <translation>words by</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="246"/>
         <source>words:</source>
-        <translation type="unfinished"/>
+        <translation>words:</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="247"/>
         <source>lyrics by</source>
-        <translation type="unfinished"/>
+        <translation>lyrics by</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="248"/>
         <source>lyrics:</source>
-        <translation type="unfinished"/>
+        <translation>lyrics:</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="249"/>
         <source>written by</source>
-        <translation type="unfinished"/>
+        <translation>written by</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="250"/>
         <source>writer:</source>
-        <translation type="unfinished"/>
+        <translation>writer:</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="251"/>
         <source>authored by</source>
-        <translation type="unfinished"/>
+        <translation>authored by</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="252"/>
         <source>author:</source>
-        <translation type="unfinished"/>
+        <translation>author:</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="253"/>
-        <source>tranlated by</source>
+        <source>translated by</source>
         <translation type="unfinished"/>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="254"/>
         <source>translation:</source>
-        <translation type="unfinished"/>
+        <translation>translation:</translation>
     </message>
 </context>
 <context>
@@ -10839,17 +10839,17 @@ See log for details</translation>
     <message>
         <location filename="../../openlp/plugins/songs/forms/songselectform.py" line="123"/>
         <source>Unsupported format</source>
-        <translation type="unfinished"/>
+        <translation>Unsupported format</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/forms/songselectform.py" line="123"/>
         <source>OpenLP can only import simple lyrics or ChordPro</source>
-        <translation type="unfinished"/>
+        <translation>OpenLP can only import simple lyrics or ChordPro</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/forms/songselectform.py" line="149"/>
         <source>Import songs by clicking the &quot;Download&quot; in the Lyrics tab or &quot;Download ChordPro&quot; in the Chords tabs.</source>
-        <translation type="unfinished"/>
+        <translation>Import songs by clicking the &quot;Download&quot; in the Lyrics tab or &quot;Download ChordPro&quot; in the Chords tabs.</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/forms/songselectform.py" line="171"/>

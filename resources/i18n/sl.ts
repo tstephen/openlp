@@ -2720,7 +2720,7 @@ OpenLP bo poskusil nadaljevati.</translation>
     <message>
         <location filename="../../openlp/core/ui/advancedtab.py" line="154"/>
         <source>Prefer window capture instead of screen capture</source>
-        <translation type="unfinished"/>
+        <translation>Raje kot zaslon posnemi okno </translation>
     </message>
     <message>
         <location filename="../../openlp/core/ui/advancedtab.py" line="216"/>
@@ -6265,7 +6265,7 @@ These files will be removed if you continue to save.</source>
     <message>
         <location filename="../../openlp/core/ui/servicemanager.py" line="752"/>
         <source>OpenLP Service Files - lite (*.oszl)</source>
-        <translation type="unfinished"/>
+        <translation>Oskubene datoteke OpenLP sporeda (*.oszl)</translation>
     </message>
     <message>
         <location filename="../../openlp/core/ui/servicemanager.py" line="753"/>
@@ -10241,7 +10241,7 @@ Popravite te oznake pred nadaljevanjem.</translation>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/liveworship.py" line="62"/>
         <source>Loading the extracting data</source>
-        <translation type="unfinished"/>
+        <translation>Nalaganje izluščenih podatkov</translation>
     </message>
 </context>
 <context>
@@ -10580,82 +10580,82 @@ Za več podrobnosti poglejte poročilo</translation>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="239"/>
         <source>music by</source>
-        <translation type="unfinished"/>
+        <translation>glasbo napisal/a</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="240"/>
         <source>music:</source>
-        <translation type="unfinished"/>
+        <translation>glasba:</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="241"/>
         <source>arranged by</source>
-        <translation type="unfinished"/>
+        <translation>priredbo napisal/a</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="242"/>
         <source>arranged:</source>
-        <translation type="unfinished"/>
+        <translation>priredba:</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="243"/>
         <source>composed by</source>
-        <translation type="unfinished"/>
+        <translation>zložil/a</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="244"/>
         <source>composer:</source>
-        <translation type="unfinished"/>
+        <translation>skladatelj:</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="245"/>
         <source>words by</source>
-        <translation type="unfinished"/>
+        <translation>vsebino napisal/a</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="246"/>
         <source>words:</source>
-        <translation type="unfinished"/>
+        <translation>vsebina:</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="247"/>
         <source>lyrics by</source>
-        <translation type="unfinished"/>
+        <translation>besedilo napisal/a</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="248"/>
         <source>lyrics:</source>
-        <translation type="unfinished"/>
+        <translation>besedilo:</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="249"/>
         <source>written by</source>
-        <translation type="unfinished"/>
+        <translation>napisal/a</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="250"/>
         <source>writer:</source>
-        <translation type="unfinished"/>
+        <translation>pisatelj/ica:</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="251"/>
         <source>authored by</source>
-        <translation type="unfinished"/>
+        <translation>ustvaril/a</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="252"/>
         <source>author:</source>
-        <translation type="unfinished"/>
+        <translation>ustvarjalec/ka:</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="253"/>
-        <source>tranlated by</source>
+        <source>translated by</source>
         <translation type="unfinished"/>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="254"/>
         <source>translation:</source>
-        <translation type="unfinished"/>
+        <translation>prevajalec/ka:</translation>
     </message>
 </context>
 <context>
@@ -10830,17 +10830,17 @@ Za več podrobnosti poglejte poročilo</translation>
     <message>
         <location filename="../../openlp/plugins/songs/forms/songselectform.py" line="123"/>
         <source>Unsupported format</source>
-        <translation type="unfinished"/>
+        <translation>Nepodprt zapis</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/forms/songselectform.py" line="123"/>
         <source>OpenLP can only import simple lyrics or ChordPro</source>
-        <translation type="unfinished"/>
+        <translation>OpenLP lahko uvozi le enostavno besedilo ali ChordPro</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/forms/songselectform.py" line="149"/>
         <source>Import songs by clicking the &quot;Download&quot; in the Lyrics tab or &quot;Download ChordPro&quot; in the Chords tabs.</source>
-        <translation type="unfinished"/>
+        <translation>Pesmi uvozite s klikom na &quot;Prenesi&quot; v zavihku Besedila ali na &quot;Prenesi ChordPro&quot; v zavihku Sozvoki.</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/forms/songselectform.py" line="171"/>
