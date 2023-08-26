@@ -10659,7 +10659,7 @@ Veja o log para detalhes</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="253"/>
-        <source>tranlated by</source>
+        <source>translated by</source>
         <translation type="unfinished"/>
     </message>
     <message>

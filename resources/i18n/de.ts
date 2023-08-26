@@ -9420,7 +9420,7 @@ Diese ist für die korrekte Darstellung der Sonderzeichen verantwortlich.</trans
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/chordpro.py" line="66"/>
         <source>The file contains unreadable characters.</source>
-        <translation type="unfinished"/>
+        <translation>Die Datei enthält nicht lesbare Zeichen.</translation>
     </message>
 </context>
 <context>
@@ -10658,7 +10658,7 @@ Details in der Logdatei</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="253"/>
-        <source>tranlated by</source>
+        <source>translated by</source>
         <translation type="unfinished"/>
     </message>
     <message>
