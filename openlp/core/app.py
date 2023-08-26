@@ -415,6 +415,12 @@ def main():
         # support dark mode on windows 10. This makes the titlebar dark, the rest is setup later
         # by calling set_windows_darkmode
         qt_args.extend(['-platform', 'windows:darkmode=1'])
+    elif is_macosx() and getattr(sys, 'frozen', False) and not os.environ.get('QTWEBENGINEPROCESS_PATH'):
+        # Work around an issue where PyInstaller is not setting this environment variable
+        os.environ['QTWEBENGINEPROCESS_PATH'] = str(AppLocation.get_directory(AppLocation.AppDir) / 'PyQt5' / 'Qt5' /
+                                                    'lib' / 'QtWebEngineCore.framework' / 'Versions' / '5' /
+                                                    'Helpers' / 'QtWebEngineProcess.app' / 'Contents' / 'MacOS' /
+                                                    'QtWebEngineProcess')
     # Initialise the resources
     qInitResources()
     # Now create and actually run the application.
@@ -460,13 +466,16 @@ def main():
     if getattr(sys, 'frozen', False):
         # Path to libvlc and the plugins
         vlc_dir = AppLocation.get_directory(AppLocation.AppDir) / 'vlc'
+        vlc_lib = None
         if is_win():
-            os.environ['PYTHON_VLC_LIB_PATH'] = str(vlc_dir / 'libvlc.dll')
+            vlc_lib = 'libvlc.dll'
         elif is_macosx():
-            os.environ['PYTHON_VLC_LIB_PATH'] = str(vlc_dir / 'libvlc.dylib')
-        os.environ['PYTHON_VLC_MODULE_PATH'] = str(vlc_dir)
-        os.environ['PATH'] += ';' + str(vlc_dir)
-        log.debug('VLC Path: {}'.format(os.environ.get('PYTHON_VLC_LIB_PATH', '')))
+            vlc_lib = 'libvlc.dylib'
+        if vlc_lib and vlc_dir.joinpath(vlc_lib).exists():
+            os.environ['PYTHON_VLC_LIB_PATH'] = str(vlc_dir / vlc_lib)
+            os.environ['PYTHON_VLC_MODULE_PATH'] = str(vlc_dir)
+            os.environ['PATH'] += ';' + str(vlc_dir)
+            log.debug('VLC Path: {}'.format(os.environ.get('PYTHON_VLC_LIB_PATH', '')))
     app = OpenLP()
     # Initialise the Registry
     Registry.create()

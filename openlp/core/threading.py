@@ -52,7 +52,11 @@ def run_thread(worker, thread_name, can_start=True):
     if not thread_name:
         raise ValueError('A thread_name is required when calling the "run_thread" function')
     application = Registry().get('application')
-    main_window = Registry().get('main_window')
+    try:
+        # In some cases (see First Time Form), the main window does not exist yet
+        main_window = Registry().get('main_window')
+    except KeyError:
+        main_window = None
     if thread_name in application.worker_threads:
         raise KeyError('A thread with the name "{}" has already been created, please use another'.format(thread_name))
     # Create the thread and add the thread and the worker to the parent
