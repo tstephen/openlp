@@ -42,7 +42,7 @@ from openlp.core.common.registry import Registry, RegistryBase
 from openlp.core.display.window import DisplayWindow
 from openlp.core.lib.serviceitem import ItemCapabilities
 from openlp.core.lib.ui import critical_error_message_box, warning_message_box
-from openlp.core.state import State
+from openlp.core.state import State, MessageType
 from openlp.core.ui import DisplayControllerType, HideMode
 from openlp.core.ui.slidecontroller import SlideController
 from openlp.core.ui.media import MediaState, ItemMediaInfo, MediaType, parse_optical_path, parse_stream_path, \
@@ -116,6 +116,7 @@ class MediaController(QtWidgets.QWidget, RegistryBase, LogMixin, RegistryPropert
         else:
             if hasattr(self.main_window, 'splash') and self.main_window.splash.isVisible():
                 self.main_window.splash.hide()
+            message_type = MessageType.Error
             generic_message = translate('OpenLP.MediaController',
                                         'OpenLP requires the following libraries in order to show videos and other '
                                         'media, but they are not installed. Please install these libraries to enable '
@@ -125,8 +126,11 @@ class MediaController(QtWidgets.QWidget, RegistryBase, LogMixin, RegistryPropert
                                          'repository: https://rpmfusion.org/')
             if is_macosx():
                 message = translate('OpenLP.MediaController',
-                                    'macOS is missing VLC. Please download and install from the VLC web site: '
-                                    'https://www.videolan.org/vlc/')
+                                    '<strong>OpenLP could not detect VLC.</strong> You will not be able to play media '
+                                    'without it. Please download and install from the VLC web site: '
+                                    '<a href="https://www.videolan.org/vlc/download-macosx.html">'
+                                    'https://www.videolan.org/vlc/</a>')
+                message_type = MessageType.Information
             else:
                 packages = []
                 if not has_vlc:
@@ -136,7 +140,7 @@ class MediaController(QtWidgets.QWidget, RegistryBase, LogMixin, RegistryPropert
                 message = generic_message + '\n\n' + ', '.join(packages)
                 if not has_vlc and is_linux(distro='fedora'):
                     message += '\n\n' + fedora_rpmfusion
-            State().missing_text('media_live', message)
+            State().missing_text('media_live', message, message_type)
         return True
 
     def bootstrap_post_set_up(self):

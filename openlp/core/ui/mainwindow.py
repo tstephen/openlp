@@ -1039,12 +1039,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
                 and (datetime.now() - self.screen_change_timestamp).seconds < 5
             should_show_messagebox = self.settings_form.isHidden() and not has_shown_messagebox_recently
             if should_show_messagebox:
-                QtWidgets.QMessageBox.warning(self, translate('OpenLP.MainWindow', 'Screen setup has changed'),
-                                              translate('OpenLP.MainWindow',
-                                                        'The screen setup has changed. '
-                                                        'OpenLP will try to automatically select a display screen, but '
-                                                        'you should consider updating the screen settings.'),
-                                              QtWidgets.QMessageBox.StandardButtons(QtWidgets.QMessageBox.Ok))
+                QtWidgets.QMessageBox.information(self, translate('OpenLP.MainWindow', 'Screen setup has changed'),
+                                                  translate('OpenLP.MainWindow',
+                                                            'The screen setup has changed. OpenLP will try to '
+                                                            'automatically select a display screen, but '
+                                                            'you should consider updating the screen settings.'),
+                                                  QtWidgets.QMessageBox.StandardButtons(QtWidgets.QMessageBox.Ok))
                 self.screen_change_timestamp = datetime.now()
             self.application.set_busy_cursor()
             self.renderer.resize(self.live_controller.screens.current.display_geometry.size())
