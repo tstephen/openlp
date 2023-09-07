@@ -100,8 +100,11 @@ def is_thread_finished(thread_name):
     :param str thread_name: The name of the thread
     :returns: True if the thread is finished, False if it is still running
     """
-    app = Registry().get('application')
-    return thread_name not in app.worker_threads or app.worker_threads[thread_name]['thread'].isFinished()
+    try:
+        app = Registry().get('application')
+        return thread_name not in app.worker_threads or app.worker_threads[thread_name]['thread'].isFinished()
+    except KeyError:
+        return True
 
 
 def make_remove_thread(thread_name):
@@ -118,7 +121,8 @@ def make_remove_thread(thread_name):
 
         :param str thread_name: The name of the thread to stop and remove
         """
-        application = Registry().get('application')
+        with Registry().suppress_error():
+            application = Registry().get('application')
         if application and thread_name in application.worker_threads:
             del application.worker_threads[thread_name]
     return remove_thread
