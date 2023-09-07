@@ -37,15 +37,13 @@ def loader():
 
     :return: None
     """
-    # Stop errors when calling logging due initialisation due to incomplete plugin initialization.
-    Registry().set_initialising(True)
-    State().load_settings()
-    MediaController()
-    PluginManager()
-    # Set up the path with plugins
-    Renderer(window_title='Renderer')
-    # Create slide controllers
-    PreviewController()
-    LiveController()
-    # Turn logging back on again.
-    Registry().set_initialising(False)
+    # Suppress errors when calling logging due initialisation due to incomplete plugin initialization.
+    with Registry().suppress_error():
+        State().load_settings()
+        MediaController()
+        PluginManager()
+        # Set up the path with plugins
+        Renderer(window_title='Renderer')
+        # Create slide controllers
+        PreviewController()
+        LiveController()

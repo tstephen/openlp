@@ -22,6 +22,8 @@
 Provide Registry Services
 """
 import logging
+from contextlib import contextmanager
+from typing import Any, Callable
 
 from openlp.core.common import Singleton, de_hump, trace_error_handler
 
@@ -37,7 +39,7 @@ class Registry(metaclass=Singleton):
     log.info('Registry loaded')
 
     @classmethod
-    def create(cls):
+    def create(cls) -> 'Registry':
         """
         The constructor for the component registry providing a single registry of objects.
         """
@@ -46,14 +48,17 @@ class Registry(metaclass=Singleton):
         registry.service_list = {}
         registry.functions_list = {}
         registry.working_flags = {}
-        registry._is_initialising = False
+        registry._is_suppressing = False
         return registry
 
-    def set_initialising(self, is_initialising: bool) -> None:
-        """A method to set if the Registry is initialising or not"""
-        self._is_initialising = is_initialising
+    @contextmanager
+    def suppress_error(self):
+        """Suppress errors temporarily"""
+        self._is_suppressing = True
+        yield
+        self._is_suppressing = False
 
-    def get(self, key):
+    def get(self, key: str) -> Any | None:
         """
         Extracts the registry value from the list based on the key passed in
 
@@ -62,12 +67,14 @@ class Registry(metaclass=Singleton):
         if key in self.service_list:
             return self.service_list[key]
         else:
-            if not self._is_initialising:
+            if self._is_suppressing:
+                return None
+            else:
                 trace_error_handler(log)
                 log.error('Service {key} not found in list'.format(key=key))
                 raise KeyError('Service {key} not found in list'.format(key=key))
 
-    def register(self, key, reference):
+    def register(self, key: str, reference: Any):
         """
         Registers a component against a key.
 
@@ -82,7 +89,7 @@ class Registry(metaclass=Singleton):
         else:
             self.service_list[key] = reference
 
-    def remove(self, key):
+    def remove(self, key: str):
         """
         Removes the registry value from the list based on the key passed in.
 
@@ -91,7 +98,7 @@ class Registry(metaclass=Singleton):
         if key in self.service_list:
             del self.service_list[key]
 
-    def register_function(self, event, function):
+    def register_function(self, event: str, function: Callable):
         """
         Register an event and associated function to be called
 
@@ -106,7 +113,7 @@ class Registry(metaclass=Singleton):
         else:
             self.functions_list[event] = [function]
 
-    def remove_function(self, event, function):
+    def remove_function(self, event: str, function: Callable):
         """
         Remove an event and associated handler
 
@@ -116,7 +123,7 @@ class Registry(metaclass=Singleton):
         if event in self.functions_list and function in self.functions_list[event]:
             self.functions_list[event].remove(function)
 
-    def has_function(self, event):
+    def has_function(self, event: str) -> bool:
         """
         Returns whether there's any handler associated with the event.
 
@@ -132,7 +139,7 @@ class Registry(metaclass=Singleton):
         """
         return service_name in self.service_list
 
-    def execute(self, event, *args, **kwargs):
+    def execute(self, event: str, *args, **kwargs) -> Any | None:
         """
         Execute all the handlers associated with the event and return an array of results.
 
@@ -155,10 +162,10 @@ class Registry(metaclass=Singleton):
         else:
             if log.getEffectiveLevel() == logging.DEBUG:
                 trace_error_handler(log)
-                log.exception('Event {event} called but not registered'.format(event=event))
+                log.error('Event {event} called but not registered'.format(event=event))
         return results
 
-    def get_flag(self, key):
+    def get_flag(self, key: str) -> Any | None:
         """
         Extracts the working_flag value from the list based on the key passed in
 
@@ -166,12 +173,14 @@ class Registry(metaclass=Singleton):
         """
         if key in self.working_flags:
             return self.working_flags[key]
+        elif self._is_suppressing:
+            return None
         else:
             trace_error_handler(log)
             log.error('Working Flag {key} not found in list'.format(key=key))
             raise KeyError('Working Flag {key} not found in list'.format(key=key))
 
-    def set_flag(self, key, reference):
+    def set_flag(self, key: str, reference: Any):
         """
         Sets a working_flag based on the key passed in.
 
@@ -180,7 +189,7 @@ class Registry(metaclass=Singleton):
         """
         self.working_flags[key] = reference
 
-    def remove_flag(self, key):
+    def remove_flag(self, key: str):
         """
         Removes the working flags value from the list based on the key passed.
 
