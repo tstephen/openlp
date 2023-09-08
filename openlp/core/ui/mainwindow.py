@@ -23,6 +23,7 @@ This is the main window, where all the action happens.
 """
 import json
 import shutil
+import webbrowser
 from contextlib import contextmanager
 from datetime import datetime, date
 from pathlib import Path
@@ -795,7 +796,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
         """
         Load the OpenLP website
         """
-        import webbrowser
         webbrowser.open_new('https://openlp.org/')
 
     def on_help_clicked(self):
@@ -803,11 +803,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
         If is_macosx or is_win, open the local OpenLP help file.
         Use the Online manual in other cases. (Linux)
         """
-        if is_macosx() or is_win():
-            QtGui.QDesktopServices.openUrl(QtCore.QUrl.fromLocalFile(str(self.local_help_file)))
-        else:
-            import webbrowser
-            webbrowser.open_new('https://manual.openlp.org/')
+        webbrowser.open_new('https://manual.openlp.org/')
 
     def on_about_item_clicked(self):
         """
