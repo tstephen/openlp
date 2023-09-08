@@ -44,7 +44,7 @@ install:
   - sh: brew install --cask vlc
   - sh: brew install pkg-config icu4c
   - sh: PATH="/usr/local/opt/icu4c/bin:/usr/local/opt/icu4c/sbin:$PATH" PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/icu4c/lib/pkgconfig" python -m pip install pyicu
-  - sh: python -m pip install Pyro4 pyobjc-core pyobjc-framework-Cocoa py-applescript
+  - sh: python -m pip install Pyro5 pyobjc-core pyobjc-framework-Cocoa py-applescript
 
 build: off
 
