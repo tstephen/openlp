@@ -437,7 +437,8 @@ def test_initialise(mocked_ss_import: MagicMock, form: SongSelectForm):
     # THEN: The import object should exist, song var should be None, and the page hooked up
     assert form.song is None
     assert isinstance(form.song_select_importer, SongSelectImport), 'SongSelectImport object should be created'
-    assert form.webview.page.call_count == 3, 'Page should be called 3 times, once for each load handler'
+    assert form.webview.page.call_count == 4, 'Page should be called 3 times, once for each load handler and ' \
+                                              'one from setting user agent'
 
 
 @patch('openlp.plugins.songs.forms.songselectform.QtWidgets.QDialog.exec')
