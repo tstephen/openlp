@@ -348,8 +348,6 @@ class SongsPlugin(Plugin):
         If the first time wizard has run, this function is run to import all the new songs into the database.
         """
         self.application.process_events()
-        self.on_tools_reindex_item_triggered()
-        self.application.process_events()
         db_dir_path = Path(gettempdir(), 'openlp')
         if not db_dir_path.exists():
             return
@@ -376,6 +374,9 @@ class SongsPlugin(Plugin):
             importer.do_import(progress)
             self.application.process_events()
         progress.setValue(song_count)
+        self.application.process_events()
+        self.on_tools_reindex_item_triggered()
+        self.application.process_events()
         self.media_item.on_search_text_button_clicked()
 
     def finalise(self):

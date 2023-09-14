@@ -52,11 +52,7 @@ def run_thread(worker, thread_name, can_start=True):
     if not thread_name:
         raise ValueError('A thread_name is required when calling the "run_thread" function')
     application = Registry().get('application')
-    try:
-        # In some cases (see First Time Form), the main window does not exist yet
-        main_window = Registry().get('main_window')
-    except KeyError:
-        main_window = None
+    main_window = Registry().get('main_window')
     if thread_name in application.worker_threads:
         raise KeyError('A thread with the name "{}" has already been created, please use another'.format(thread_name))
     # Create the thread and add the thread and the worker to the parent
@@ -121,8 +117,7 @@ def make_remove_thread(thread_name):
 
         :param str thread_name: The name of the thread to stop and remove
         """
-        with Registry().suppress_error():
-            application = Registry().get('application')
+        application = Registry().get('application')
         if application and thread_name in application.worker_threads:
             del application.worker_threads[thread_name]
     return remove_thread

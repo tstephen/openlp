@@ -23,7 +23,6 @@ Provide Error Handling and login Services
 """
 import inspect
 import logging
-from typing import Any
 
 from openlp.core.common import trace_error_handler
 from openlp.core.common.platform import is_win
@@ -128,13 +127,6 @@ class RegistryProperties(object):
     _projector_manager = None
     _settings = None
 
-    def _get_object(self, name: str) -> Any:
-        """Get an object, or return None"""
-        try:
-            return Registry().get(name)
-        except KeyError:
-            return None
-
     @property
     def application(self):
         """
@@ -142,10 +134,10 @@ class RegistryProperties(object):
         Windows needs to access the application in a dynamic manner.
         """
         if is_win():
-            return self._get_object('application')
+            return Registry().get('application')
         else:
             if not hasattr(self, '_application') or not self._application:
-                self._application = self._get_object('application')
+                self._application = Registry().get('application')
             return self._application
 
     @property
@@ -154,7 +146,7 @@ class RegistryProperties(object):
         Adds the plugin manager to the class dynamically
         """
         if not hasattr(self, '_plugin_manager') or not self._plugin_manager:
-            self._plugin_manager = self._get_object('plugin_manager')
+            self._plugin_manager = Registry().get('plugin_manager')
         return self._plugin_manager
 
     @property
@@ -163,7 +155,7 @@ class RegistryProperties(object):
         Adds the media controller to the class dynamically
         """
         if not hasattr(self, '_media_controller') or not self._media_controller:
-            self._media_controller = self._get_object('media_controller')
+            self._media_controller = Registry().get('media_controller')
         return self._media_controller
 
     @property
@@ -172,7 +164,7 @@ class RegistryProperties(object):
         Adds the service manager to the class dynamically
         """
         if not hasattr(self, '_service_manager') or not self._service_manager:
-            self._service_manager = self._get_object('service_manager')
+            self._service_manager = Registry().get('service_manager')
         return self._service_manager
 
     @property
@@ -181,7 +173,7 @@ class RegistryProperties(object):
         Adds the preview controller to the class dynamically
         """
         if not hasattr(self, '_preview_controller') or not self._preview_controller:
-            self._preview_controller = self._get_object('preview_controller')
+            self._preview_controller = Registry().get('preview_controller')
         return self._preview_controller
 
     @property
@@ -190,7 +182,7 @@ class RegistryProperties(object):
         Adds the live controller to the class dynamically
         """
         if not hasattr(self, '_live_controller') or not self._live_controller:
-            self._live_controller = self._get_object('live_controller')
+            self._live_controller = Registry().get('live_controller')
         return self._live_controller
 
     @property
@@ -199,7 +191,7 @@ class RegistryProperties(object):
         Adds the main window to the class dynamically
         """
         if not hasattr(self, '_main_window') or not self._main_window:
-            self._main_window = self._get_object('main_window')
+            self._main_window = Registry().get('main_window')
         return self._main_window
 
     @property
@@ -208,7 +200,7 @@ class RegistryProperties(object):
         Adds the Renderer to the class dynamically
         """
         if not hasattr(self, '_renderer') or not self._renderer:
-            self._renderer = self._get_object('renderer')
+            self._renderer = Registry().get('renderer')
         return self._renderer
 
     @property
@@ -217,7 +209,7 @@ class RegistryProperties(object):
         Adds the theme manager to the class dynamically
         """
         if not hasattr(self, '_theme_manager') or not self._theme_manager:
-            self._theme_manager = self._get_object('theme_manager')
+            self._theme_manager = Registry().get('theme_manager')
         return self._theme_manager
 
     @property
@@ -226,7 +218,7 @@ class RegistryProperties(object):
         Adds the settings form to the class dynamically
         """
         if not hasattr(self, '_settings_form') or not self._settings_form:
-            self._settings_form = self._get_object('settings_form')
+            self._settings_form = Registry().get('settings_form')
         return self._settings_form
 
     @property
@@ -235,7 +227,7 @@ class RegistryProperties(object):
         Adds the alerts manager to the class dynamically
         """
         if not hasattr(self, '_alerts_manager') or not self._alerts_manager:
-            self._alerts_manager = self._get_object('alerts_manager')
+            self._alerts_manager = Registry().get('alerts_manager')
         return self._alerts_manager
 
     @property
@@ -244,7 +236,7 @@ class RegistryProperties(object):
         Adds the projector manager to the class dynamically
         """
         if not hasattr(self, '_projector_manager') or not self._projector_manager:
-            self._projector_manager = self._get_object('projector_manager')
+            self._projector_manager = Registry().get('projector_manager')
         return self._projector_manager
 
     @property
@@ -253,5 +245,5 @@ class RegistryProperties(object):
         Adds the settings object to the class dynamically
         """
         if not hasattr(self, '_settings') or not self._settings:
-            self._settings = self._get_object('settings')
+            self._settings = Registry().get('settings')
         return self._settings

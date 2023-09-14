@@ -344,6 +344,7 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
         To be called as part of initialisation
         """
         self.setup_ui(self)
+        self.set_theme_visibility()
         # Need to use event as called across threads and UI is updated
         self.servicemanager_set_item.connect(self.on_set_item)
         self.servicemanager_set_item_by_uuid.connect(self.set_item_by_uuid)
@@ -454,6 +455,12 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
             self.suffixes.add(suffix_list)
         else:
             self.suffixes.update(suffix_list)
+
+    def set_theme_visibility(self):
+        """Set the visibility of the theme items"""
+        visible = self.settings.value('themes/theme level') != ThemeLevel.Global
+        self.toolbar.actions['theme_combo_box'].setVisible(visible)
+        self.toolbar.actions['theme_label'].setVisible(visible)
 
     def on_new_service_clicked(self):
         """
@@ -1481,9 +1488,7 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
         """
         The theme may have changed in the settings dialog so make sure the theme combo box is in the correct state.
         """
-        visible = self.settings.value('themes/theme level') != ThemeLevel.Global
-        self.toolbar.actions['theme_combo_box'].setVisible(visible)
-        self.toolbar.actions['theme_label'].setVisible(visible)
+        self.set_theme_visibility()
         self.regenerate_service_items()
 
     def on_service_theme_change(self):
