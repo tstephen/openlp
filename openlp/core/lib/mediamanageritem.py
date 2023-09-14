@@ -590,8 +590,6 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties, LogMixin):
                                               translate('OpenLP.MediaManagerItem',
                                                         'You must select one or more items to add.'))
         else:
-            # Is it possible to process multiple list items to generate
-            # multiple service items?
             if self.single_service_item:
                 self.log_debug('{plugin} Add requested'.format(plugin=self.plugin.name))
                 self.add_to_service(remote=self.remote_triggered)
