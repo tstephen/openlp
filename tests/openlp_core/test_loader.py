@@ -19,28 +19,29 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>. #
 ##########################################################################
 """
-The :mod:`~openlp.core.loader` module provides a bootstrap for the singleton classes
+Package to test the openlp.core.loader package.
 """
+from unittest.mock import MagicMock, patch
 
-from openlp.core.display.render import Renderer
-from openlp.core.lib.pluginmanager import PluginManager
-from openlp.core.state import State
-from openlp.core.ui.media.mediacontroller import MediaController
-
-from openlp.core.ui.slidecontroller import LiveController, PreviewController
+from openlp.core.loader import loader
 
 
-def loader():
-    """
-    God class to load all the components which are registered with the Registry
-
-    :return: None
-    """
-    State().load_settings()
-    MediaController()
-    PluginManager()
-    # Set up the path with plugins
-    Renderer(window_title='Renderer')
-    # Create slide controllers
-    PreviewController()
-    LiveController()
+@patch('openlp.core.loader.Renderer', autospec=True)
+@patch('openlp.core.loader.PluginManager', autospec=True)
+@patch('openlp.core.loader.State', autospec=True)
+@patch('openlp.core.loader.MediaController', autospec=True)
+@patch('openlp.core.loader.LiveController', autospec=True)
+@patch('openlp.core.loader.PreviewController', autospec=True)
+def test_loader(MockPreviewController: MagicMock, MockLiveController: MagicMock,
+                MockMediaController: MagicMock, MockState: MagicMock, MockPluginManager: MagicMock,
+                MockRenderer: MagicMock):
+    # GIVEN: A bunch of mocks
+    # WHEN: loader() is called
+    loader()
+    # THEN: The mocks should have been called
+    MockState.return_value.load_settings.assert_called_once_with()
+    MockMediaController.assert_called_once_with()
+    MockPluginManager.assert_called_once_with()
+    MockRenderer.assert_called_once_with(window_title='Renderer')
+    MockPreviewController.assert_called_once_with()
+    MockLiveController.assert_called_once_with()

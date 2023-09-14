@@ -22,8 +22,8 @@
 Provide Registry Services
 """
 import logging
-from contextlib import contextmanager
 from typing import Any, Callable
+from warnings import warn
 
 from openlp.core.common import Singleton, de_hump, trace_error_handler
 
@@ -51,13 +51,6 @@ class Registry(metaclass=Singleton):
         registry._is_suppressing = False
         return registry
 
-    @contextmanager
-    def suppress_error(self):
-        """Suppress errors temporarily"""
-        self._is_suppressing = True
-        yield
-        self._is_suppressing = False
-
     def get(self, key: str) -> Any | None:
         """
         Extracts the registry value from the list based on the key passed in
@@ -67,12 +60,8 @@ class Registry(metaclass=Singleton):
         if key in self.service_list:
             return self.service_list[key]
         else:
-            if self._is_suppressing:
-                return None
-            else:
-                trace_error_handler(log)
-                log.error('Service {key} not found in list'.format(key=key))
-                raise KeyError('Service {key} not found in list'.format(key=key))
+            warn(f'Service "{key}" not found in list', stacklevel=2)
+            return None
 
     def register(self, key: str, reference: Any):
         """

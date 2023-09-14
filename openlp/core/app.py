@@ -313,6 +313,8 @@ def set_up_logging(log_path):
     logfile = logging.FileHandler(file_path, 'w', encoding='UTF-8')
     logfile.setFormatter(logging.Formatter('%(asctime)s %(threadName)s %(name)-55s %(levelname)-8s %(message)s'))
     log.addHandler(logfile)
+    # Send warnings to the log file
+    logging.captureWarnings(True)
     print(f'Logging to: {file_path} and level {log.level}')
 
 

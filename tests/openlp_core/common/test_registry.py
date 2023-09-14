@@ -57,26 +57,13 @@ def test_registry_service(registry: Registry):
         'KeyError exception should have been thrown for duplicate service'
 
     # WHEN I try to get back a non existent component
-    # THEN I will get an exception
-    with pytest.raises(KeyError):
-        Registry().get('test2')
+    # THEN I will get None
+    assert Registry().get('test2') is None
 
     # WHEN I try to replace a component I should be allowed
     Registry().remove('test1')
     # THEN I will get an exception
-    with pytest.raises(KeyError):
-        Registry().get('test1')
-
-
-def test_registry_service_suppressed(registry: Registry):
-    """Test that None is returned when a service doesn't exist in the registry and errors are suppressed"""
-    # GIVEN: A registry
-    # WHEN: Trying to "get" an object
-    with Registry().suppress_error():
-        result = Registry().get('main_window')
-
-    # THEN: None is returned
-    assert result is None
+    assert Registry().get('test1') is None
 
 
 def test_registry_function(registry: Registry):
@@ -177,17 +164,6 @@ def test_registry_working_flags(registry: Registry):
         Registry().get_flag('test1')
     assert context.value != 'Working Flag test1 not found in list', \
         'KeyError exception should have been thrown for duplicate working flag'
-
-
-def test_registry_working_flags_suppressed(registry: Registry):
-    """Test that no exception is raised when a flag doesn't exist and errors are suppressed"""
-    # GIVEN: A registry
-    # WHEN: Trying to "get" an object
-    with Registry().suppress_error():
-        result = Registry().get_flag('test1')
-
-    # THEN: None is returned
-    assert result is None
 
 
 def test_remove_function(registry: Registry):
