@@ -68,6 +68,8 @@ class Controller(object):
         self.hide_mode = hide_mode
         log.debug('add_handler, slide_number: {slide:d}'.format(slide=slide_no))
         if self.is_live:
+            if self.doc.ui_slidenumber == 0:
+                self.doc.ui_slidenumber = 1
             if hide_mode == HideMode.Screen:
                 Registry().execute('live_display_hide', HideMode.Screen)
                 self.stop()
@@ -78,7 +80,6 @@ class Controller(object):
             else:
                 self.doc.start_presentation()
                 Registry().execute('live_display_hide', HideMode.Screen)
-                self.doc.ui_slidenumber = 1
                 if slide_no > 1:
                     self.slide(slide_no)
 
