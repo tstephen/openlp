@@ -892,9 +892,11 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
             if self.settings.value('themes/item transitions') and self.service_item.get_transition_delay() < 1:
                 self.slide_changed_time += datetime.timedelta(seconds=0.5)
         if self.service_item.is_command() and not self.service_item.is_media():
-            Registry().execute(
-                '{text}_start'.format(text=self.service_item.name.lower()),
-                [self.service_item, self.is_live, self._current_hide_mode, slide_no])
+            # Prevent that the same presentation is started multiple times.
+            if (old_item is None or old_item.sha256_file_hash != self.service_item.sha256_file_hash):
+                Registry().execute(
+                    '{text}_start'.format(text=self.service_item.name.lower()),
+                    [self.service_item, self.is_live, self._current_hide_mode, slide_no])
             if self.service_item.is_capable(ItemCapabilities.ProvidesOwnTheme):
                 self._set_theme(self.service_item)
         else:
