@@ -44,6 +44,20 @@ WIN_OS_USER_AGENT = 'Windows NT 10.0; Win64; x64'
 MAC_OS_USER_AGENT = 'Macintosh; Intel Mac OS X 13_5_2'
 LINUX_OS_USER_AGENT = 'X11; Linux x86_64'
 
+REPLACE_ALL_JS = """
+// Based on: https://vanillajstoolkit.com/polyfills/stringreplaceall/
+if (!String.prototype.replaceAll) {
+    String.prototype.replaceAll = function(str, newStr){
+        // If a regex pattern
+        if (Object.prototype.toString.call(str).toLowerCase() === '[object regexp]') {
+            return this.replace(str, newStr);
+        }
+        // If a string
+        return this.split(str).join(newStr);
+    };
+}
+"""
+
 log = logging.getLogger(__name__)
 
 
@@ -85,6 +99,19 @@ class SongSelectForm(QtWidgets.QDialog, Ui_SongSelectDialog, RegistryProperties)
         self.webview.page().loadFinished.connect(self.page_loaded)
         self.webview.page().profile().downloadRequested.connect(self.on_download_requested)
         self.webview.urlChanged.connect(self.update_url)
+        self.inject_js_str_replaceall()
+
+    def inject_js_str_replaceall(self):
+        """
+        Inject an implementation of string replaceAll which are missing in pre 5.15.3 QWebEngine
+        """
+        script = QtWebEngineWidgets.QWebEngineScript()
+        script.setInjectionPoint(QtWebEngineWidgets.QWebEngineScript.InjectionPoint.DocumentCreation)
+        script.setSourceCode(REPLACE_ALL_JS)
+        script.setWorldId(QtWebEngineWidgets.QWebEngineScript.ScriptWorldId.MainWorld)
+        script.setRunsOnSubFrames(True)
+        script.setName('string_replaceall')
+        self.webview.page().scripts().insert(script)
 
     def update_url(self, new_url):
         self.url_bar.setText(new_url.toString())
