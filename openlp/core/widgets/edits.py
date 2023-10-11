@@ -264,7 +264,7 @@ class PathEdit(QtWidgets.QWidget):
         :param Path path: The path to set the widget to
         :rtype: None
         """
-        self._path = path
+        self._path = Path(path)
         text = path_to_str(path)
         self.line_edit.setText(text)
         self.line_edit.setToolTip(text)
