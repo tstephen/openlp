@@ -622,7 +622,12 @@ class BibleImportForm(OpenLPWizard):
                 for key in bible_keys:
                     self.sword_bible_combo_box.addItem(self.pysword_folder_modules_json[key]['description'], key)
             except Exception:
+                log.exception('Loading SWORD folder failed')
+                critical_error_message_box(translate('BiblesPlugin.ImportWizardForm', 'Invalid SWORD folder'),
+                                           translate('BiblesPlugin.ImportWizardForm',
+                                                     'The folder selected does not contain a valid SWORD module.'))
                 self.sword_bible_combo_box.clear()
+                self.setField('sword_folder_path', None)
 
     def on_sword_zipfile_path_edit_path_changed(self, new_path):
         """
@@ -637,7 +642,12 @@ class BibleImportForm(OpenLPWizard):
                 for key in bible_keys:
                     self.sword_zipbible_combo_box.addItem(self.pysword_zip_modules_json[key]['description'], key)
             except Exception:
+                log.exception('Loading SWORD zip-file failed')
+                critical_error_message_box(translate('BiblesPlugin.ImportWizardForm', 'Invalid SWORD zip-file'),
+                                           translate('BiblesPlugin.ImportWizardForm',
+                                                     'The file selected is not a valid SWORD zip-file.'))
                 self.sword_zipbible_combo_box.clear()
+                self.setField('sword_zip_path', None)
 
     def register_fields(self):
         """

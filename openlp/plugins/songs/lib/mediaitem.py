@@ -731,7 +731,7 @@ class SongMediaItem(MediaManagerItem):
         footer_template = self.settings.value('songs/footer template')
         try:
             return mako.template.Template(footer_template).render_unicode(**vars).replace('\n', '')
-        except mako.exceptions.SyntaxException:
+        except (mako.exceptions.SyntaxException, mako.exceptions.CompileException):
             log.error('Failed to render Song footer html:\n' + mako.exceptions.text_error_template().render())
             if show_error:
                 critical_error_message_box(message=translate('SongsPlugin.MediaItem',
