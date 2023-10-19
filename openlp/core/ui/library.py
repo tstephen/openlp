@@ -169,27 +169,32 @@ class FolderLibraryItem(MediaManagerItem):
                 icon=UiIcons().edit,
                 triggers=self.on_edit_click)
             create_widget_action(self.list_view, separator=True)
-        create_widget_action(
-            self.list_view,
-            'listView{name}{preview}Item'.format(name=self.plugin.name.title(), preview=StringContent.Preview.title()),
-            text=self.plugin.get_string(StringContent.Preview)['title'],
-            icon=UiIcons().preview,
-            can_shortcuts=True,
-            triggers=self.on_preview_click)
-        create_widget_action(
-            self.list_view,
-            'listView{name}{live}Item'.format(name=self.plugin.name.title(), live=StringContent.Live.title()),
-            text=self.plugin.get_string(StringContent.Live)['title'],
-            icon=UiIcons().live,
-            can_shortcuts=True,
-            triggers=self.on_live_click)
-        create_widget_action(
-            self.list_view,
-            'listView{name}{service}Item'.format(name=self.plugin.name.title(), service=StringContent.Service.title()),
-            can_shortcuts=True,
-            text=self.plugin.get_string(StringContent.Service)['title'],
-            icon=UiIcons().add,
-            triggers=self.on_add_click)
+        if self.can_preview:
+            create_widget_action(
+                self.list_view,
+                'listView{name}{preview}Item'.format(name=self.plugin.name.title(),
+                                                     preview=StringContent.Preview.title()),
+                text=self.plugin.get_string(StringContent.Preview)['title'],
+                icon=UiIcons().preview,
+                can_shortcuts=True,
+                triggers=self.on_preview_click)
+        if self.can_make_live:
+            create_widget_action(
+                self.list_view,
+                'listView{name}{live}Item'.format(name=self.plugin.name.title(), live=StringContent.Live.title()),
+                text=self.plugin.get_string(StringContent.Live)['title'],
+                icon=UiIcons().live,
+                can_shortcuts=True,
+                triggers=self.on_live_click)
+        if self.can_add_to_service:
+            create_widget_action(
+                self.list_view,
+                'listView{name}{service}Item'.format(name=self.plugin.name.title(),
+                                                     service=StringContent.Service.title()),
+                can_shortcuts=True,
+                text=self.plugin.get_string(StringContent.Service)['title'],
+                icon=UiIcons().add,
+                triggers=self.on_add_click)
         if self.add_to_service_item:
             create_widget_action(self.list_view, separator=True)
             create_widget_action(

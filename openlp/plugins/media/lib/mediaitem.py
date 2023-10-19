@@ -108,6 +108,10 @@ class MediaMediaItem(FolderLibraryItem):
             self.can_add_to_service = False
         if State().check_preconditions('media_live'):
             self.can_make_live = True
+        else:
+            self.can_preview = False
+            self.can_make_live = False
+            self.can_add_to_service = False
 
     def initialise(self):
         """

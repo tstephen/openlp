@@ -114,7 +114,7 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties, LogMixin):
     def required_icons(self):
         """
         This method is called to define the icons for the plugin. It provides a default set and the plugin is able to
-        override the if required.
+        override if required.
         """
         self.has_import_icon = False
         self.has_new_icon = True
