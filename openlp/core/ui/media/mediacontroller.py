@@ -158,7 +158,8 @@ class MediaController(QtWidgets.QWidget, RegistryBase, LogMixin, RegistryPropert
             except AttributeError:
                 State().update_pre_conditions('media_live', False)
                 State().missing_text('media_live', translate(
-                    'OpenLP.MediaController', 'No Displays have been configured, so Live Media has been disabled'))
+                    'OpenLP.MediaController', 'No Displays have been configured, '
+                                              'so Live Media has been disabled'))
             self.setup_display(self.preview_controller, True)
 
     def _display_controllers(self, controller_type: DisplayControllerType) -> SlideController:

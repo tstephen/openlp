@@ -146,7 +146,14 @@ class State(LogMixin, metaclass=Singleton):
             mdl[pl] = self.modules[pl]
         self.modules = mdl
 
-    def is_module_active(self, name) -> bool:
+    def is_module_active(self, name: str) -> bool:
+        """
+        Checks if a modules is active.
+
+        :param name: Module name
+        :return: Have the preconditions been met.
+        :rtype: bool
+        """
         return self.modules[name].status == PluginStatus.Active
 
     def check_preconditions(self, name: str) -> bool:
