@@ -547,7 +547,7 @@ class DisplayWindow(QtWidgets.QWidget, RegistryProperties, LogMixin):
         """
         Set an alert
         """
-        self.run_javascript('Display.alert("{text}", {settings});'.format(text=text, settings=settings))
+        self._run_javascript('Display.alert("{text}", {settings});'.format(text=text, settings=settings))
 
     @QtCore.pyqtSlot(result='QPixmap')
     def _grab_screenshot_safe_signal(self):

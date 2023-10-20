@@ -22,6 +22,7 @@
 The :mod:`~openlp.plugins.alerts.lib.alertsmanager` module contains the part of the plugin which manages storing and
 displaying of alerts.
 """
+import json
 
 from PyQt5 import QtCore, QtGui
 
@@ -76,7 +77,7 @@ class AlertsManager(QtCore.QObject, RegistryBase, LogMixin, RegistryProperties):
             'repeat': self.settings.value('alerts/repeat'),
             'scroll': self.settings.value('alerts/scroll')
         }
-        self.live_controller.display.alert(text, alert_settings)
+        self.live_controller.display.alert(text, json.dumps(alert_settings))
 
     def _hex_to_rgb(self, rgb_values):
         """
