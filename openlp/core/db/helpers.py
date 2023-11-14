@@ -207,11 +207,12 @@ def init_url(plugin_name: str, db_file_name: Union[Path, str, None] = None) -> s
     if db_type == 'sqlite':
         db_url = get_db_path(plugin_name, db_file_name)
     else:
-        db_url = '{type}://{user}:{password}@{host}/{db}'.format(type=db_type,
-                                                                 user=urlquote(settings.value('db username')),
-                                                                 password=urlquote(settings.value('db password')),
-                                                                 host=urlquote(settings.value('db hostname')),
-                                                                 db=urlquote(settings.value('db database')))
+        db_url = '{type}://{user}:{password}@{host}/{db}'.format(
+            type=db_type,
+            user=urlquote(settings.value(f'{plugin_name}/db username')),
+            password=urlquote(settings.value(f'{plugin_name}/db password')),
+            host=urlquote(settings.value(f'{plugin_name}/db hostname')),
+            db=urlquote(settings.value(f'{plugin_name}/db database')))
     return db_url
 
 
