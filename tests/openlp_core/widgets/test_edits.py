@@ -25,6 +25,7 @@ import os
 import pytest
 from pathlib import Path
 from unittest.mock import MagicMock, PropertyMock, patch, call
+from typing import Any
 
 from PyQt5 import QtCore, QtGui, QtTest, QtWidgets
 
@@ -86,7 +87,12 @@ def test_path_getter(path_edit: PathEdit):
     assert path_edit.path == Path('getter', 'test', 'pat.h')
 
 
-def test_path_setter(path_edit: PathEdit):
+@pytest.mark.parametrize('prop, expected', [
+    (Path('setter', 'test', 'pat.h'), ('setter', 'test', 'pat.h')),
+    ('setter/str/test/pat.h', ('setter', 'str', 'test', 'pat.h')),
+    (None, None)
+])
+def test_path_setter(prop: Any, expected: Any, path_edit: PathEdit):
     """
     Test the `path` property setter.
     """
@@ -94,32 +100,17 @@ def test_path_setter(path_edit: PathEdit):
     path_edit.line_edit = MagicMock()
 
     # WHEN: Writing to the `path` property
-    path_edit.path = Path('setter', 'test', 'pat.h')
+    path_edit.path = prop
 
     # THEN: The `_path` instance variable should be set with the test data. The `line_edit` text and tooltip
     #       should have also been set.
-    assert path_edit._path == Path('setter', 'test', 'pat.h')
-    os_normalised_str = os.path.join('setter', 'test', 'pat.h')
-    path_edit.line_edit.setToolTip.assert_called_once_with(os_normalised_str)
-    path_edit.line_edit.setText.assert_called_once_with(os_normalised_str)
-
-
-def test_path_setter_str(path_edit: PathEdit):
-    """
-    Test the `path` property setter with a string instead of a Path.
-    """
-    # GIVEN: An instance of the PathEdit object and a mocked `line_edit`
-    path_edit.line_edit = MagicMock()
-
-    # WHEN: Writing to the `path` property
-    path_edit.path = 'setter/str/test/pat.h'
-
-    # THEN: The `_path` instance variable should be set with the test data. The `line_edit` text and tooltip
-    #       should have also been set.
-    assert path_edit._path == Path('setter', 'str', 'test', 'pat.h')
-    os_normalised_str = os.path.join('setter', 'str', 'test', 'pat.h')
-    path_edit.line_edit.setToolTip.assert_called_once_with(os_normalised_str)
-    path_edit.line_edit.setText.assert_called_once_with(os_normalised_str)
+    if expected is not None:
+        assert path_edit._path == Path(*expected)
+        os_normalised_str = os.path.join(*expected)
+        path_edit.line_edit.setToolTip.assert_called_once_with(os_normalised_str)
+        path_edit.line_edit.setText.assert_called_once_with(os_normalised_str)
+    else:
+        assert path_edit._path is None
 
 
 def test_path_type_getter(path_edit: PathEdit):
