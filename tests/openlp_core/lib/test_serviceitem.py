@@ -1150,3 +1150,26 @@ def test_add_icon(registry, plugin_name, icon):
 
     # THEN: The icon should be correct
     assert service_item.icon.name() == getattr(UiIcons(), icon).name()
+
+
+def test_get_service_repr_song(registry: Registry):
+    """Test the get_service_repr() method with a song"""
+    # GIVEN: A service item
+    registry.register('renderer', MagicMock())
+    service_item = ServiceItem()
+    service_item.name = 'songs'
+    service_item.theme = 'Default'
+    service_item.title = 'Test Song'
+    service_item.add_from_text('This is the first slide')
+    service_item.add_from_text('This is the second slide')
+    service_item._create_slides()
+    service_item.add_icon()
+
+    # WHEN: get_service_repr() is called
+    rep = service_item.get_service_repr(False)
+
+    # THEN: The correct repr should have been made
+    assert rep['header'].get('name') == 'songs'
+    assert rep['header'].get('plugin') == 'songs'
+    assert rep['header'].get('theme') == 'Default'
+    assert rep['header'].get('title') == 'Test Song'

@@ -466,8 +466,9 @@ class ServiceItem(RegistryProperties):
             else:
                 for slide in self.slides:
                     # When saving a service that originated from openlp 2.4 thumbnail might not be available
+                    # Also, sometimes this is not a Path object, but a string.
                     if 'thumbnail' in slide:
-                        image_path = slide['thumbnail'].relative_to(AppLocation().get_data_path())
+                        image_path = Path(slide['thumbnail']).relative_to(AppLocation().get_data_path())
                     else:
                         # Check if (by chance) the thumbnails for this image is available on this machine
                         test_thumb = AppLocation.get_section_data_path(self.name) / 'thumbnails' / stored_filename
@@ -483,7 +484,8 @@ class ServiceItem(RegistryProperties):
                 elif lite_save:
                     image = slide['image']
                 else:
-                    image = slide['image'].relative_to(AppLocation().get_data_path())
+                    # Sometimss this is not a Path object, so typecast it
+                    image = Path(slide['image']).relative_to(AppLocation().get_data_path())
                 service_data.append({'title': slide['title'], 'image': image, 'path': slide['path'],
                                      'display_title': slide['display_title'], 'notes': slide['notes']})
         return {'header': service_header, 'data': service_data}
