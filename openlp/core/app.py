@@ -476,13 +476,22 @@ def main():
         os.environ['QT_SCALE_FACTOR_ROUNDING_POLICY'] = 'PassThrough'
     # Initialise the resources
     qInitResources()
-    # Now create and actually run the application.
-    QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
+    # Initialise OpenLP
+    app = OpenLP()
+    Registry.create()
+    settings = Settings()
+    # Doing HiDPI adjustments that need to be done before QCoreApplication instantiation.
+    hidpi_mode = settings.value('advanced/hidpi mode')
+    apply_dpi_adjustments_stage_qt(hidpi_mode, qt_args)
+    # Instantiating QCoreApplication
     init_webview_custom_schemes()
     application = QtWidgets.QApplication(qt_args)
     application.setOrganizationName('OpenLP')
     application.setOrganizationDomain('openlp.org')
-    application.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
+    application.setAttribute(QtCore.Qt.AA_DontCreateNativeWidgetSiblings, True)
+    # Doing HiDPI adjustments that need to be done after QCoreApplication instantiation.
+    apply_dpi_adjustments_stage_application(hidpi_mode, application)
+    # Now create and actually run the application.
     application.setAttribute(QtCore.Qt.AA_DontCreateNativeWidgetSiblings, True)
     if no_custom_factor_rounding and hasattr(QtWidgets.QApplication, 'setHighDpiScaleFactorRoundingPolicy'):
         # TODO: Check won't be needed on PyQt6
@@ -507,6 +516,7 @@ def main():
         portable_path = resolve(portable_path)
         data_path = portable_path / 'Data'
         set_up_logging(portable_path / 'Other')
+        set_up_web_engine_cache(portable_path / 'Other' / 'web_cache')
         log.info('Running portable')
         portable_settings_path = data_path / 'OpenLP.ini'
         # Make this our settings file
@@ -522,6 +532,7 @@ def main():
     else:
         application.setApplicationName('OpenLP')
         set_up_logging(AppLocation.get_directory(AppLocation.CacheDir))
+        set_up_web_engine_cache(AppLocation.get_directory(AppLocation.CacheDir) / 'web_cache')
     # Set the libvlc environment variable if we're frozen
     if getattr(sys, 'frozen', False):
         # Path to libvlc and the plugins
@@ -536,27 +547,7 @@ def main():
             os.environ['PYTHON_VLC_MODULE_PATH'] = str(vlc_dir)
             os.environ['PATH'] += ';' + str(vlc_dir)
             log.debug('VLC Path: {}'.format(os.environ.get('PYTHON_VLC_LIB_PATH', '')))
-    app = OpenLP()
-    # Initialise the Registry
-    Registry.create()
-    settings = Settings()
-    # Doing HiDPI adjustments that need to be done before QCoreApplication instantiation.
-    hidpi_mode = settings.value('advanced/hidpi mode')
-    apply_dpi_adjustments_stage_qt(hidpi_mode, qt_args)
-    # Instantiating QCoreApplication
-    application = QtWidgets.QApplication(qt_args)
-    application.setOrganizationName('OpenLP')
-    application.setOrganizationDomain('openlp.org')
-    application.setAttribute(QtCore.Qt.AA_DontCreateNativeWidgetSiblings, True)
-    # Doing HiDPI adjustments that need to be done after QCoreApplication instantiation.
-    apply_dpi_adjustments_stage_application(hidpi_mode, application)
     settings.init_default_shortcuts()
-    if args.portable:
-        application.setApplicationName('OpenLPPortable')
-        set_up_web_engine_cache(portable_path / 'Other' / 'web_cache')
-    else:
-        application.setApplicationName('OpenLP')
-        set_up_web_engine_cache(AppLocation.get_directory(AppLocation.CacheDir) / 'web_cache')
     Registry().register('settings', settings)
     if settings.value('advanced/protect data directory'):
         # attempt to create a file lock
