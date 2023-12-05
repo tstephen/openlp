@@ -29,7 +29,7 @@ from unittest.mock import MagicMock, PropertyMock, call, patch
 
 from openlp.core.lib.exceptions import ValidationError
 from openlp.plugins.bibles.lib.bibleimport import BibleImport
-from openlp.plugins.bibles.lib.importers.csvbible import Book, CSVBible, Verse, _has_header
+from openlp.plugins.bibles.lib.importers.csvbible import Book, CSVBible, CSVBibleFileType, Verse, _has_header
 from tests.utils import load_external_result_data
 from tests.utils.constants import RESOURCE_PATH
 
@@ -121,8 +121,8 @@ def test_parse_csv_file():
     Test the parse_csv_file() with sample data
     """
     # GIVEN: A mocked csv.reader which returns an iterator with test data
-    test_data = [['1', 'Line 1', 'Data 1'], ['2', 'Line 2', 'Data 2'], ['3', 'Line 3', 'Data 3']]
-    TestTuple = namedtuple('TestTuple', 'line_no line_description line_data')
+    test_data = [['1', '1', 'name 1', 'abbrev 1'], ['2', '2', 'name 2', 'abbrev 2'], ['3', '3', 'name 3', 'abbrev 3']]
+    TestTuple = namedtuple('TestTuple', 'line_no line_id name abbrev')
     mocked_csv_file = MagicMock()
     mocked_enter_file = MagicMock()
     mocked_csv_file.open.return_value.__enter__.return_value = mocked_enter_file
@@ -134,11 +134,11 @@ def test_parse_csv_file():
         mocked_has_header.return_value = False
 
         # WHEN: Calling the CSVBible parse_csv_file method with a file name and TestTuple
-        result = CSVBible.parse_csv_file(mocked_csv_file, TestTuple)
+        result = CSVBible.parse_csv_file(mocked_csv_file, TestTuple, CSVBibleFileType.Book)
 
         # THEN: A list of TestTuple instances with the parsed data should be returned
-        assert result == [TestTuple('1', 'Line 1', 'Data 1'), TestTuple('2', 'Line 2', 'Data 2'),
-                          TestTuple('3', 'Line 3', 'Data 3')]
+        assert result == [TestTuple('1', '1', 'name 1', 'abbrev 1'), TestTuple('2', '2', 'name 2', 'abbrev 2'),
+                          TestTuple('3', '3', 'name 3', 'abbrev 3')]
         mocked_csv_file.open.assert_called_once_with('r', encoding='utf-8', newline='')
         mocked_reader.assert_called_once_with(mocked_enter_file, delimiter=',', quotechar='"')
 
@@ -153,7 +153,7 @@ def test_has_header():
 """
 
     # WHEN: Sample data is given to _has_header()
-    result = _has_header(test_data)
+    result = _has_header(test_data, CSVBibleFileType.Book)
 
     # THEN: The result should be true
     assert result is True
@@ -169,7 +169,7 @@ def test_has_no_header():
 """
 
     # WHEN: Sample data is given to _has_header()
-    result = _has_header(test_data)
+    result = _has_header(test_data, CSVBibleFileType.Book)
 
     # THEN: The result should be true
     assert result is False
@@ -190,7 +190,7 @@ def test_parse_csv_file_oserror():
         # WHEN: Calling CSVBible.parse_csv_file
         # THEN: A ValidationError should be raised
         with pytest.raises(ValidationError) as context:
-            CSVBible.parse_csv_file(mocked_csv_file, None)
+            CSVBible.parse_csv_file(mocked_csv_file, None, CSVBibleFileType.Book)
         assert context.value != ValidationError('Parsing "file.csv" failed')
 
 
@@ -209,7 +209,7 @@ def test_parse_csv_file_csverror():
         # WHEN: Calling CSVBible.parse_csv_file
         # THEN: A ValidationError should be raised
         with pytest.raises(ValidationError) as context:
-            CSVBible.parse_csv_file(mocked_csv_file, None)
+            CSVBible.parse_csv_file(mocked_csv_file, None, CSVBibleFileType.Book)
         assert context.value != ValidationError('Parsing "file.csv" failed')
 
 
@@ -359,7 +359,8 @@ def test_do_import_success(registry):
         # THEN: parse_csv_file should be called twice,
         # and True should be returned.
         assert importer.parse_csv_file.mock_calls == \
-            [call(Path('books.csv'), Book), call(Path('verses.csv'), Verse)]
+            [call(Path('books.csv'), Book, CSVBibleFileType.Book),
+             call(Path('verses.csv'), Verse, CSVBibleFileType.Verse)]
         importer.process_books.assert_called_once_with(['Book 1'])
         importer.process_verses.assert_called_once_with(['Verse 1'], ['Book 1'])
         assert result is True
