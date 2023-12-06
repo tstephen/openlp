@@ -392,7 +392,7 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
         self.author_types_combo_box.clear()
         # Don't iterate over the dictionary to give them this specific order
         for author_type in AuthorType.SortedTypes:
-            self.author_types_combo_box.addItem(AuthorType.Types[author_type], author_type)
+            self.author_types_combo_box.addItem(AuthorType.get_translated_type(author_type), author_type)
 
     def load_topics(self):
         """
@@ -648,7 +648,7 @@ class EditSongForm(QtWidgets.QDialog, Ui_EditSongDialog, RegistryProperties):
         choice, ok = QtWidgets.QInputDialog.getItem(self, translate('SongsPlugin.EditSongForm', 'Edit Author Type'),
                                                     translate('SongsPlugin.EditSongForm',
                                                               'Choose type for this author'),
-                                                    AuthorType.TranslatedTypes,
+                                                    AuthorType.get_translated_types_list(),
                                                     current=AuthorType.SortedTypes.index(author_type),
                                                     editable=False)
         if not ok:
