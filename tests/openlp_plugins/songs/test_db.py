@@ -113,7 +113,7 @@ def test_get_author_type_from_translated_text():
     Test getting an author type from translated text
     """
     # GIVEN: A string with an author type
-    author_type_name = AuthorType.Types[AuthorType.Words]
+    author_type_name = AuthorType.get_translated_type(AuthorType.Words)
 
     # WHEN: We call the method
     author_type = AuthorType.from_translated_text(author_type_name)
