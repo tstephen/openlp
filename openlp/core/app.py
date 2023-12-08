@@ -290,7 +290,7 @@ def parse_options():
                         help='Set logging to LEVEL level. Valid values are "debug", "info", "warning".')
     parser.add_argument('-p', '--portable', dest='portable', action='store_true',
                         help='Specify if this should be run as a portable app, ')
-    parser.add_argument('-pp', '--portable-path', dest='portablepath', default=None,
+    parser.add_argument('-P', '--portable-path', dest='portablepath', default=None,
                         help='Specify the path of the portable data, defaults to "{dir_name}".'.format(
                             dir_name=os.path.join('<AppDir>', '..', '..')))
     parser.add_argument('-w', '--no-web-server', dest='no_web_server', action='store_true',
@@ -417,7 +417,7 @@ def apply_dpi_adjustments_stage_qt(hidpi_mode, qt_args):
             os.environ['QT_SCALE_FACTOR_ROUNDING_POLICY'] = 'PassThrough'
 
 
-def apply_dpi_adjustments_stage_application(hidpi_mode, application):
+def apply_dpi_adjustments_stage_application(hidpi_mode: HiDPIMode, application: QtWidgets.QApplication):
     """
     Apply OpenLP DPI adjustments to bypass Windows and QT bugs (unless disabled on settings)
 
@@ -439,6 +439,25 @@ def apply_dpi_adjustments_stage_application(hidpi_mode, application):
             application.setFont(font)
     if hidpi_mode != HiDPIMode.Windows_Unaware:
         application.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
+
+
+def setup_portable_settings(portable_path: Path | str | None) -> Settings:
+    """Set up the portable settings"""
+    Settings.setDefaultFormat(Settings.IniFormat)
+    # Get location OpenLPPortable.ini
+    if portable_path:
+        if os.path.isabs(portable_path):
+            portable_path = Path(portable_path)
+        else:
+            portable_path = AppLocation.get_directory(AppLocation.AppDir) / '..' / portable_path
+    else:
+        portable_path = AppLocation.get_directory(AppLocation.AppDir) / '..' / '..'
+    portable_path = resolve(portable_path)
+    portable_settings_path = portable_path / 'Data' / 'OpenLP.ini'
+    # Make this our settings file
+    log.info(f'INI file: {portable_settings_path}')
+    Settings.set_filename(portable_settings_path)
+    return portable_path, Settings()
 
 
 def main():
@@ -479,7 +498,11 @@ def main():
     # Initialise OpenLP
     app = OpenLP()
     Registry.create()
-    settings = Settings()
+    if args.portable:
+        # This has to be done here so that we can load the settings before instantiating the application object
+        portable_path, settings = setup_portable_settings(args.portablepath)
+    else:
+        settings = Settings()
     # Doing HiDPI adjustments that need to be done before QCoreApplication instantiation.
     hidpi_mode = settings.value('advanced/hidpi mode')
     apply_dpi_adjustments_stage_qt(hidpi_mode, qt_args)
@@ -491,8 +514,6 @@ def main():
     application.setAttribute(QtCore.Qt.AA_DontCreateNativeWidgetSiblings, True)
     # Doing HiDPI adjustments that need to be done after QCoreApplication instantiation.
     apply_dpi_adjustments_stage_application(hidpi_mode, application)
-    # Now create and actually run the application.
-    application.setAttribute(QtCore.Qt.AA_DontCreateNativeWidgetSiblings, True)
     if no_custom_factor_rounding and hasattr(QtWidgets.QApplication, 'setHighDpiScaleFactorRoundingPolicy'):
         # TODO: Check won't be needed on PyQt6
         application.setHighDpiScaleFactorRoundingPolicy(QtCore.Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
@@ -504,31 +525,15 @@ def main():
         application.setFont(font)
     if args.portable:
         application.setApplicationName('OpenLPPortable')
-        Settings.setDefaultFormat(Settings.IniFormat)
-        # Get location OpenLPPortable.ini
-        if args.portablepath:
-            if os.path.isabs(args.portablepath):
-                portable_path = Path(args.portablepath)
-            else:
-                portable_path = AppLocation.get_directory(AppLocation.AppDir) / '..' / args.portablepath
-        else:
-            portable_path = AppLocation.get_directory(AppLocation.AppDir) / '..' / '..'
-        portable_path = resolve(portable_path)
         data_path = portable_path / 'Data'
         set_up_logging(portable_path / 'Other')
         set_up_web_engine_cache(portable_path / 'Other' / 'web_cache')
         log.info('Running portable')
-        portable_settings_path = data_path / 'OpenLP.ini'
-        # Make this our settings file
-        log.info(f'INI file: {portable_settings_path}')
-        Settings.set_filename(portable_settings_path)
-        portable_settings = Settings()
         # Set our data path
         log.info(f'Data path: {data_path}')
-        # Point to our data path
-        portable_settings.setValue('advanced/data path', data_path)
-        portable_settings.setValue('advanced/is portable', True)
-        portable_settings.sync()
+        settings.setValue('advanced/data path', data_path)
+        settings.setValue('advanced/is portable', True)
+        settings.sync()
     else:
         application.setApplicationName('OpenLP')
         set_up_logging(AppLocation.get_directory(AppLocation.CacheDir))
