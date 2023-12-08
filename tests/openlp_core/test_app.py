@@ -31,8 +31,9 @@ from PyQt5 import QtCore, QtWidgets
 # Mock QtWebEngineWidgets
 sys.modules['PyQt5.QtWebEngineWidgets'] = MagicMock()
 
-from openlp.core.app import parse_options, backup_if_version_changed, main as app_main
+from openlp.core.app import parse_options, backup_if_version_changed, main as app_main, setup_portable_settings
 from openlp.core.common.platform import is_win
+from openlp.core.common.settings import Settings
 
 
 @pytest.fixture
@@ -333,7 +334,8 @@ def test_main(mock_logging, mock_web_cache, mock_backup, mock_sys, mock_openlp, 
 @patch('openlp.core.app.get_version')
 @patch('openlp.core.app.AppLocation.get_data_path')
 @patch('openlp.core.app.move')
-def test_main_future_settings(mock_move, mock_get_path, mock_version, mock_warn, app_main_env, settings):
+def test_main_future_settings(mock_move: MagicMock, mock_get_path: MagicMock, mock_version: MagicMock,
+                              mock_warn: MagicMock, app_main_env: None, settings: Settings):
     """
     Test the backup_if_version_changed method backs up data if version from the future and user consents
     """
@@ -360,3 +362,29 @@ def test_main_future_settings(mock_move, mock_get_path, mock_version, mock_warn,
     mock_move.assert_called_once()
     settings.clear.assert_called_once_with()
     mock_warn.assert_called_once()
+
+
+@pytest.mark.parametrize('portable_path, settings_path',
+                         [('settings', str(Path('/openlp/settings/Data/OpenLP.ini'))),
+                          (None, str(Path('/Data/OpenLP.ini'))),
+                          ('/openlp/settings/', str(Path('/openlp/settings/Data/OpenLP.ini')))])
+@patch('openlp.core.app.Settings')
+@patch('openlp.core.app.AppLocation')
+def test_setup_portable_settings(MockAppLocation: MagicMock, MockSettings: MagicMock, portable_path: str,
+                                 settings_path: str):
+    """Test that the setup_portable_settings() function correctly creates the portable settings."""
+    print(portable_path)
+    print(settings_path)
+    # GIVEN: A portable path, a mocked settings class
+    MockAppLocation.get_directory.return_value = Path('/openlp/openlp')
+    mocked_settings = MagicMock()
+    MockSettings.return_value = mocked_settings
+    MockSettings.IniFormat = Settings.IniFormat
+
+    # WHEN: setup_portable_settings() is called
+    result_path, settings = setup_portable_settings(portable_path)
+
+    # THEN: The settings should be set up correctly
+    MockSettings.setDefaultFormat.assert_called_once_with(Settings.IniFormat)
+    MockSettings.set_filename.assert_called_once_with(Path(settings_path))
+    assert settings is mocked_settings
