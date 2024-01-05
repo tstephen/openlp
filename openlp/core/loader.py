@@ -32,7 +32,7 @@ from openlp.core.ui.slidecontroller import LiveController, PreviewController
 
 def loader():
     """
-    God class to load all the components which are registered with the Registry
+    God method to load all the components which are registered with the Registry
 
     :return: None
     """
