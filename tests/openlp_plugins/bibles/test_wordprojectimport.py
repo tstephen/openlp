@@ -21,6 +21,7 @@
 """
 This module contains tests for the WordProject Bible importer.
 """
+import pytest
 from pathlib import Path
 from unittest.mock import MagicMock, call, patch
 
@@ -232,3 +233,14 @@ def test_do_import_no_language(settings):
     assert mocked_process_books.call_count == 0
     mocked_cleanup.assert_called_once_with()
     assert result is False
+
+
+@pytest.mark.parametrize('input_, output', [
+    ('1', 1),
+    ('02.', 2),
+    ('3-4', 3),
+    ('exodus', None)
+])
+def test_get_number(input_: str, output: int, settings):
+    importer = WordProjectBible(MagicMock(), path='.', name='.', file_path='dummy.zip')
+    assert importer.get_number(input_) == output
