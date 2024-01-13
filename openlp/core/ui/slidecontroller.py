@@ -1050,7 +1050,7 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
         """
         Handle the blank screen button actions
 
-        :param checked: the new state of the of the widget
+        :param checked: the new state of the widget
         """
         self.set_hide_mode(None)
 
