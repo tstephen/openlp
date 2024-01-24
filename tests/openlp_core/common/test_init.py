@@ -22,11 +22,12 @@
 Functional tests to test the :mod:`~openlp.core.common` module
 """
 import os
+import pytest
+import sys
+
 from io import BytesIO
 from pathlib import Path
 from unittest.mock import MagicMock, PropertyMock, call, patch
-
-import pytest
 
 from openlp.core.common import Singleton, add_actions, clean_filename, clean_button_text, de_hump, delete_file, \
     extension_loader, get_file_encoding, get_filesystem_encoding, get_uno_command, get_uno_instance, md5_hash, \
@@ -86,6 +87,31 @@ def test_extension_loader_files_found():
         #       files listed in the `excluded_files` argument
         mocked_import_module.assert_has_calls([call('openlp.import_dir.file1'),
                                                call('openlp.import_dir.file4')])
+        assert "/app/dir/community" not in sys.path, "Community path has been added to the application sys.path"
+
+
+def test_extension_loader_files_found_community():
+    """
+    Test the `extension_loader` function when it successfully finds and loads some files
+    """
+    # GIVEN: A mocked `Path.glob` method which returns a list of files
+    with patch('openlp.core.common.applocation.AppLocation.get_directory',
+               return_value=Path('/', 'app', 'dir')), \
+            patch.object(Path, 'glob', return_value=[
+                Path('/', 'app', 'dir', 'contrib', 'import_dir', 'file1.py'),
+                Path('/', 'app', 'dir', 'contrib', 'import_dir', 'file2.py'),
+                Path('/', 'app', 'dir', 'contrib', 'import_dir', 'file3.py'),
+                Path('/', 'app', 'dir', 'contrib', 'import_dir', 'file4.py')]), \
+            patch('openlp.core.common.import_openlp_module') as mocked_import_module:
+
+        # WHEN: Calling `extension_loader` with a list of files to exclude
+        extension_loader('glob', ['file2.py', 'file3.py'], True)
+
+        # THEN: `extension_loader` should only try to import the files that are matched by the blob, excluding the
+        #       files listed in the `excluded_files` argument
+        mocked_import_module.assert_has_calls([call('contrib.import_dir.file1'),
+                                               call('contrib.import_dir.file4')])
+        assert "/app/dir" in sys.path, "app/dir path has not been added to the application sys.path"
 
 
 def test_extension_loader_import_error():
@@ -166,6 +192,20 @@ def test_path_to_module():
 
     # THEN: path_to_module should return the module name
     assert result == 'openlp.core.ui.media.vlcplayer'
+
+
+def test_path_to_module_community():
+    """
+    Test `path_to_module` when supplied with a `Path` object
+    """
+    # GIVEN: A `Path` object
+    path = Path('core', 'ui', 'media', 'vlcplayer.py')
+
+    # WHEN: Calling path_to_module with the `Path` object
+    result = path_to_module(path, True)
+
+    # THEN: path_to_module should return the module name
+    assert result == 'contrib.core.ui.media.vlcplayer'
 
 
 def test_trace_error_handler():

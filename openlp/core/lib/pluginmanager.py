@@ -56,6 +56,7 @@ class PluginManager(RegistryBase, LogMixin, RegistryProperties):
         """
         glob_pattern = os.path.join('plugins', '*', '[!.]*plugin.py')
         extension_loader(glob_pattern)
+        extension_loader(glob_pattern, community=True)
         plugin_classes = Plugin.__subclasses__()
         for p in plugin_classes:
             try:
