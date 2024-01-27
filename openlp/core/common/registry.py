@@ -38,6 +38,9 @@ class Registry(metaclass=Singleton):
     """
     log.info('Registry loaded')
 
+    # Try to get around the AttributeError in tests
+    functions_list = {}
+
     @classmethod
     def create(cls) -> 'Registry':
         """
