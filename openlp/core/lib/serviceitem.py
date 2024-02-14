@@ -865,6 +865,8 @@ class ServiceItem(RegistryProperties):
         """
         self.theme_overwritten = (theme is None)
         self.theme = theme
+        if self.is_text():
+            self._clear_slides_cache()
         self._new_item()
 
     def remove_invalid_frames(self, invalid_paths=None):
