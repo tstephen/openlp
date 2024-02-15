@@ -62,7 +62,7 @@ class ThemeListWidgetItem(QtWidgets.QListWidgetItem):
         thumbnail = sample_theme_data['thumbnail']
         self.file_name = sample_theme_data['file_name']
         self.sha256 = sample_theme_data['sha256']
-        self.setIcon(UiIcons().picture)  # Set a place holder icon whilst the thumbnails download
+        self.setIcon(UiIcons().get_icon_variant('picture'))  # Set a place holder icon whilst the thumbnails download
         self.setText(title)
         self.setToolTip(title)
         worker = DownloadWorker(themes_url, thumbnail)
@@ -78,7 +78,7 @@ class ThemeListWidgetItem(QtWidgets.QListWidgetItem):
 
         :rtype: None
         """
-        self.setIcon(UiIcons().exception)
+        self.setIcon(UiIcons().get_icon_variant('exception'))
 
     def _on_thumbnail_downloaded(self, thumbnail_path):
         """
