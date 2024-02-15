@@ -79,7 +79,7 @@ MODULES = [
     'PyQt5.QtTest',
     ('PyQt5.QtWebEngineWidgets', '(PyQtWebEngine on PyPI)'),
     'PyQt5.QtMultimedia',
-    'appdirs',
+    'platformdirs',
     'sqlalchemy',
     'alembic',
     'lxml',

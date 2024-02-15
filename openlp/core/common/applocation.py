@@ -26,7 +26,7 @@ import os
 import sys
 from pathlib import Path
 
-from appdirs import AppDirs
+from platformdirs import PlatformDirs
 
 import openlp
 from openlp.core.common import get_frozen_path
@@ -142,7 +142,7 @@ def _get_os_dir_path(dir_type):
             return Path(openlp.__file__).parent
         return openlp_folder_path
 
-    dirs = AppDirs('openlp', multipath=True)
+    dirs = PlatformDirs('openlp', multipath=True)
     if is_macosx():
         openlp_folder_path = Path(dirs.user_data_dir)
         if dir_type == AppLocation.DataDir:
