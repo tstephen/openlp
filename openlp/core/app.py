@@ -101,6 +101,8 @@ class OpenLP(QtCore.QObject, LogMixin):
         if 'OpenLP' in args:
             args.remove('OpenLP')
         self.args.extend(args)
+        # set desktop file name, which is used to display the proper window icon on Wayland
+        QtGui.QGuiApplication.setDesktopFileName("openlp")
         # Decide how many screens we have and their size
         screens = ScreenList.create(app)
         # First time checks in settings
