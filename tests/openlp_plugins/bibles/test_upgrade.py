@@ -59,7 +59,11 @@ def db_url():
     dst_path = tmp_path / f'openlp-{secrets.token_urlsafe()}.sqlite'
     shutil.copyfile(src_path, dst_path)
     yield 'sqlite:///' + str(dst_path)
-    dst_path.unlink()
+    try:
+        dst_path.unlink()
+    except PermissionError:
+        # on windows sometimes we try to delete this while still in use...?
+        pass
 
 
 def test_upgrade_2_basic(mock_message_box, db_url, mock_settings):

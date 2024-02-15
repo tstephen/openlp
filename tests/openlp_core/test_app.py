@@ -44,7 +44,7 @@ def app_main_env():
             patch('openlp.core.app.LanguageManager'), \
             patch('openlp.core.app.qInitResources'), \
             patch('openlp.core.app.parse_options'), \
-            patch('openlp.core.app.QtWidgets.QApplication'), \
+            patch('openlp.core.app.QtWidgets.QApplication') as mock_qapp, \
             patch('openlp.core.app.QtWidgets.QMessageBox.warning') as mock_warn, \
             patch('openlp.core.app.QtWidgets.QMessageBox.information'), \
             patch('openlp.core.app.OpenLP') as mock_openlp, \
@@ -58,6 +58,7 @@ def app_main_env():
         openlp_server.is_another_instance_running.return_value = False
         mock_apploc.get_data_path.return_value = Path()
         mock_apploc.get_directory.return_value = Path()
+        mock_qapp.devicePixelRatio.return_value = 1.0
         mock_warn.return_value = True
         openlp_instance = MagicMock()
         mock_openlp.return_value = openlp_instance
@@ -364,10 +365,16 @@ def test_main_future_settings(mock_move: MagicMock, mock_get_path: MagicMock, mo
     mock_warn.assert_called_once()
 
 
+if is_win():
+    p_prefix = 'C:'
+else:
+    p_prefix = ''
+
+
 @pytest.mark.parametrize('portable_path, settings_path',
-                         [('settings', str(Path('/openlp/settings/Data/OpenLP.ini'))),
-                          (None, str(Path('/Data/OpenLP.ini'))),
-                          ('/openlp/settings/', str(Path('/openlp/settings/Data/OpenLP.ini')))])
+                         [('settings', str(Path(p_prefix + '/openlp/settings/Data/OpenLP.ini'))),
+                          (None, str(Path(p_prefix + '/Data/OpenLP.ini'))),
+                          (p_prefix + '/openlp/settings/', str(Path(p_prefix + '/openlp/settings/Data/OpenLP.ini')))])
 @patch('openlp.core.app.Settings')
 @patch('openlp.core.app.AppLocation')
 def test_setup_portable_settings(MockAppLocation: MagicMock, MockSettings: MagicMock, portable_path: str,
