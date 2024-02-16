@@ -266,7 +266,7 @@ class PathEdit(QtWidgets.QWidget):
         """
         if path:
             self._path = Path(path)
-            text = path_to_str(path)
+            text = path_to_str(self._path)
             self.line_edit.setText(text)
             self.line_edit.setToolTip(text)
 

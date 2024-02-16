@@ -58,7 +58,7 @@ def app_main_env():
         openlp_server.is_another_instance_running.return_value = False
         mock_apploc.get_data_path.return_value = Path()
         mock_apploc.get_directory.return_value = Path()
-        mock_qapp.devicePixelRatio.return_value = 1.0
+        mock_qapp.return_value.devicePixelRatio.return_value = 1.0
         mock_warn.return_value = True
         openlp_instance = MagicMock()
         mock_openlp.return_value = openlp_instance
@@ -344,6 +344,7 @@ def test_main_future_settings(mock_move: MagicMock, mock_get_path: MagicMock, mo
     settings.from_future = MagicMock(return_value=True)
     settings.version_mismatched = MagicMock(return_value=True)
     settings.clear = MagicMock()
+    settings.upgrade_settings = MagicMock()
     settings.setValue('core/application version', '3.0.1')
     mock_warn.return_value = QtWidgets.QMessageBox.Yes
     MOCKED_VERSION = {
@@ -362,6 +363,7 @@ def test_main_future_settings(mock_move: MagicMock, mock_get_path: MagicMock, mo
     assert result is True
     mock_move.assert_called_once()
     settings.clear.assert_called_once_with()
+    settings.upgrade_settings.assert_called_once_with()
     mock_warn.assert_called_once()
 
 

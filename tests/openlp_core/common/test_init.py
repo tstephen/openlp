@@ -50,6 +50,12 @@ ip6_link_local = 'fe80::223:14ff:fe99:d315'
 ip6_bad = 'ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff'
 
 
+if is_win():
+    p_prefix = 'C:\\'
+else:
+    p_prefix = '/'
+
+
 def test_extension_loader_no_files_found():
     """
     Test the `extension_loader` function when no files are found
@@ -91,12 +97,6 @@ def test_extension_loader_files_found():
         assert "/app/dir/community" not in sys.path, "Community path has been added to the application sys.path"
 
 
-if is_win():
-    p_prefix = 'C:\\'
-else:
-    p_prefix = '/'
-
-
 def test_extension_loader_files_found_community():
     """
     Test the `extension_loader` function when it successfully finds and loads some files
@@ -130,7 +130,7 @@ def test_extension_loader_import_error():
     with patch('openlp.core.common.applocation.AppLocation.get_directory',
                return_value=Path(p_prefix, 'app', 'dir', 'openlp')), \
             patch.object(Path, 'glob', return_value=[
-                Path('/', 'app', 'dir', 'openlp', 'import_dir', 'file1.py')]), \
+                Path(p_prefix, 'app', 'dir', 'openlp', 'import_dir', 'file1.py')]), \
             patch('openlp.core.common.import_openlp_module', side_effect=ImportError()), \
             patch('openlp.core.common.log') as mocked_logger:
 
