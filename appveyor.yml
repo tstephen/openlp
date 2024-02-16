@@ -51,7 +51,7 @@ test_script:
         cd $env:APPVEYOR_BUILD_FOLDER
         # Run the tests
         python -m pytest tests
-        if ($? -eq $False) {
+        if ($LastExitCode -ne 0) {
           throw "The tests failed!"
         }
         # Go back to the user root folder

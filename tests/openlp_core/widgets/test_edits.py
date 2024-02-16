@@ -21,7 +21,6 @@
 """
 This module contains tests for the openlp.core.widgets.edits module
 """
-import os
 import pytest
 from pathlib import Path
 from unittest.mock import MagicMock, PropertyMock, patch, call
@@ -29,6 +28,7 @@ from typing import Any
 
 from PyQt5 import QtCore, QtGui, QtTest, QtWidgets
 
+from openlp.core.common.path import path_to_str
 from openlp.core.common.platform import is_win
 from openlp.core.common.registry import Registry
 from openlp.core.widgets.dialogs import FileDialog
@@ -89,7 +89,7 @@ def test_path_getter(path_edit: PathEdit):
 
 
 if is_win():
-    p_prefix = 'C:/'
+    p_prefix = 'C:\\'
 else:
     p_prefix = ''
 
@@ -113,7 +113,7 @@ def test_path_setter(prop: Any, expected: Any, path_edit: PathEdit):
     #       should have also been set.
     if expected is not None:
         assert path_edit._path == Path(*expected)
-        os_normalised_str = os.path.join(*expected)
+        os_normalised_str = path_to_str(Path(*expected))
         path_edit.line_edit.setToolTip.assert_called_once_with(os_normalised_str)
         path_edit.line_edit.setText.assert_called_once_with(os_normalised_str)
     else:
