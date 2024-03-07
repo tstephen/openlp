@@ -485,12 +485,12 @@ def main():
         # support dark mode on windows 10. This makes the titlebar dark, the rest is setup later
         # by calling set_windows_darkmode
         qt_args.extend(['-platform', 'windows:darkmode=1'])
-    elif is_macosx() and getattr(sys, 'frozen', False) and not os.environ.get('QTWEBENGINEPROCESS_PATH'):
-        # Work around an issue where PyInstaller is not setting this environment variable
-        os.environ['QTWEBENGINEPROCESS_PATH'] = str(AppLocation.get_directory(AppLocation.AppDir) / 'PyQt5' / 'Qt5' /
-                                                    'lib' / 'QtWebEngineCore.framework' / 'Versions' / '5' /
-                                                    'Helpers' / 'QtWebEngineProcess.app' / 'Contents' / 'MacOS' /
-                                                    'QtWebEngineProcess')
+    elif is_macosx() and getattr(sys, 'frozen', False):
+        # Set the location to the QtWebEngineProcess binary, normally set by PyInstaller, but it moves around...
+        os.environ['QTWEBENGINEPROCESS_PATH'] = str((AppLocation.get_directory(AppLocation.AppDir) / '..' /
+                                                     'Frameworks' / 'QtWebEngineCore.framework' / 'Versions' / '5' /
+                                                     'Helpers' / 'QtWebEngineProcess.app' / 'Contents' / 'MacOS' /
+                                                     'QtWebEngineProcess').resolve())
     no_custom_factor_rounding = not ('QT_SCALE_FACTOR_ROUNDING_POLICY' in os.environ
                                      and bool(os.environ['QT_SCALE_FACTOR_ROUNDING_POLICY'].strip()))
     if no_custom_factor_rounding:
