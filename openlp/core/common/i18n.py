@@ -225,11 +225,10 @@ class LanguageManager(object):
 
         :param language: The language to load into the translator
         """
-        if LanguageManager.auto_language:
-            language = QtCore.QLocale.system().name()
         lang_path = str(AppLocation.get_directory(AppLocation.LanguageDir))
         app_translator = QtCore.QTranslator()
         app_translator.load(language, lang_path)
+        log.info(f"Language: '{language}' loaded.")
         # A translator for buttons and other default strings provided by Qt.
         if not is_win() and not is_macosx():
             lang_path = QtCore.QLibraryInfo.location(QtCore.QLibraryInfo.TranslationsPath)
@@ -270,11 +269,10 @@ class LanguageManager(object):
         """
         language = Registry().get('settings').value('core/language')
         language = str(language)
-        log.info("Language file: '{language}' Loaded from conf file".format(language=language))
-        m = re.match(r'\[(.*)\]', language)
-        if m:
+        if re.match(r'\[(.*)\]', language):
             LanguageManager.auto_language = True
-            language = m.group(1)
+            language = QtCore.QLocale.system().name()[:2]
+        log.info(f"Language: '{language}' detected.")
         return language
 
     @staticmethod

@@ -22,9 +22,13 @@
 Package to test the openlp.core.lib.languages package.
 """
 from unittest.mock import MagicMock, patch
-
+import importlib.util
 from openlp.core.common.i18n import LANGUAGES, Language, UiStrings, get_language, get_locale_key, get_natural_key, \
     translate, LanguageManager
+from openlp.core.common.settings import Settings
+
+icu_spec = importlib.util.find_spec('icu')
+HAS_PYICU = icu_spec is not None
 
 
 def test_languages_type():
@@ -123,7 +127,11 @@ def test_get_locale_key():
         sorted_list = sorted(unsorted_list, key=get_locale_key)
 
         # THEN: We get a properly sorted list
-        assert sorted_list == ['Aushang', '\u00C4u\u00DFerung', 'Auszug'], 'Strings should be sorted properly'
+        if HAS_PYICU:
+            expected_list = ['Aushang', '\u00C4u\u00DFerung', 'Auszug']
+        else:
+            expected_list = ['Aushang', 'Auszug', '\u00C4u\u00DFerung']
+        assert sorted_list == expected_list, 'Strings should be sorted properly'
 
 
 def test_get_natural_key():
@@ -164,11 +172,19 @@ def test_check_same_instance():
     assert first_instance is second_instance, 'Two UiStrings objects should be the same instance'
 
 
-def test_get_language_from_settings(settings):
-    assert LanguageManager.get_language() == 'en'
+@patch('PyQt5.QtCore.QLocale')
+def test_get_language_from_settings(MockQLocale: MagicMock, settings: Settings):
+    """
+    Test that getting the language from settings returns the system locale
+    """
+    # GIVEN: A mocked out system locale
+    MockQLocale.system.return_value.name.return_value = 'nl_NL'
+    # WHEN: get_langauge() is called
+    # THEN: The result should be correct
+    assert LanguageManager.get_language() == 'nl'
 
 
-def test_get_language_from_settings_returns_unchanged_if_unknown_format(settings):
+def test_get_language_from_settings_returns_unchanged_if_unknown_format(settings: Settings):
     settings.setValue('core/language', '(foobar)')
     assert LanguageManager.get_language() == '(foobar)'
 
