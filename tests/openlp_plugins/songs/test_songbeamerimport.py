@@ -55,6 +55,8 @@ def test_songbeamer_file_import(settings: Settings):
                            helper.load_external_result_data(TEST_PATH / 'Lobsinget dem Herrn.json'))
         helper.file_import([TEST_PATH / 'When I Call On You.sng'],
                            helper.load_external_result_data(TEST_PATH / 'When I Call On You.json'))
+        helper.file_import([TEST_PATH / 'Großer Gott.sng'],
+                           helper.load_external_result_data(TEST_PATH / 'Großer Gott.json'))
 
 
 def test_songbeamer_cp1252_encoded_file(settings: Settings):
