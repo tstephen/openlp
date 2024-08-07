@@ -2144,11 +2144,6 @@ Vil du likevel legge til de andre bildene?</translation>
         <translation>Støtte for nettverksstrømming krever VLC.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/media/mediacontroller.py" line="337"/>
-        <source>Unsupported File</source>
-        <translation>Filtypen støttes ikke</translation>
-    </message>
-    <message>
         <location filename="../../openlp/core/ui/media/mediacontroller.py" line="319"/>
         <source>Unable to Preview Stream</source>
         <translation>Kan ikke forhåndsvise strømmen</translation>
@@ -4009,12 +4004,12 @@ Hvis du klikker på &apos;{finish_button}&apos;-knappen kan du laste ned dataene
 <context>
     <name>OpenLP.LanguageManager</name>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="302"/>
+        <location filename="../../openlp/core/common/i18n.py" line="300"/>
         <source>Language</source>
         <translation>Språk</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="302"/>
+        <location filename="../../openlp/core/common/i18n.py" line="300"/>
         <source>Please restart OpenLP to use your new language setting.</source>
         <translation>Vennligst start OpenLP på nytt for å bruke de nye språkinnstillingene.</translation>
     </message>
@@ -4022,18 +4017,18 @@ Hvis du klikker på &apos;{finish_button}&apos;-knappen kan du laste ned dataene
 <context>
     <name>OpenLP.MainWindow</name>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="264"/>
+        <location filename="../../openlp/core/common/i18n.py" line="263"/>
         <source>English</source>
         <comment>Please add the name of your language here</comment>
         <translation>Norsk (bokmål)</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="449"/>
+        <location filename="../../openlp/core/common/i18n.py" line="448"/>
         <source>Screen setup has changed</source>
         <translation>Skjermoppsettet er endret</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="450"/>
+        <location filename="../../openlp/core/common/i18n.py" line="449"/>
         <source>The screen setup has changed. OpenLP will try to automatically select a display screen, but you should consider updating the screen settings.</source>
         <translation>Skjermoppsettet er endret. OpenLP vil prøve å automatisk velge en skjerm, men du bør vurdere å oppdatere skjerminnstillingene.</translation>
     </message>
@@ -4423,7 +4418,7 @@ Hvis du klikker på &apos;{finish_button}&apos;-knappen kan du laste ned dataene
         <translation>Bruk oppsett som fokuserer på fremvisning.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="633"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="632"/>
         <source>Version {new} of OpenLP is now available for download (you are currently running version {current}). 
 
 You can download the latest version from https://openlp.org/.</source>
@@ -4432,28 +4427,28 @@ You can download the latest version from https://openlp.org/.</source>
 Du kan laste ned siste versjon fra https://openlp.org/.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="636"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="635"/>
         <source>OpenLP Version Updated</source>
         <translation>OpenLP er oppdatert</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="647"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="646"/>
         <source>Version {version} of the web remote is now available for download.
 To download this version, go to the Remote settings and click the Upgrade button.</source>
         <translation>Versjon {version} av nettfjernkontrollen er nå tilgjengelig for nedlasting. For å laste ned denne versjonen, gå til fjernkontrollinnstillingene og klikk på Oppgrader-knappen.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="650"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="649"/>
         <source>New Web Remote Version Available</source>
         <translation>Ny nett-fjernkontrollversjon er tilgjengelig</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="713"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="712"/>
         <source>Re-run First Time Wizard?</source>
         <translation>Vil du kjøre oppstartsveiviseren på nytt?</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="713"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="712"/>
         <source>Are you sure you want to re-run the First Time Wizard?
 
 Re-running this wizard may make changes to your current OpenLP configuration and possibly add songs to your existing songs list and change your default theme.</source>
@@ -4462,22 +4457,22 @@ Re-running this wizard may make changes to your current OpenLP configuration and
 Dersom du kjører veiviseren på nytt vil det sannsynlig føre til forandringer i gjeldende oppsett i OpenLP og muligens legge til sanger i eksisterende sangliste og bytte gjeldende tema.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="758"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="757"/>
         <source>OpenLP Main Display Blanked</source>
         <translation>OpenLP visningsskjerm er avslått</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="758"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="757"/>
         <source>The Main Display has been blanked out</source>
         <translation>Visningsskjerm er avslått</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="858"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="857"/>
         <source>Import settings?</source>
         <translation>Vil du importere innstillinger?</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="858"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="857"/>
         <source>Are you sure you want to import settings?
 
  Importing settings will make permanent changes to your current OpenLP configuration.
@@ -4490,17 +4485,17 @@ Dersom du kjører veiviseren på nytt vil det sannsynlig føre til forandringer 
 Dersom du importerer feil innstillinger kan det medføre uberegnelig opptreden eller OpenLP avsluttes unormalt.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="957"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="956"/>
         <source>Import settings</source>
         <translation>Importer innstillinger</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="969"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="968"/>
         <source>OpenLP Settings (*.conf)</source>
         <translation>OpenLP innstillinger (*.conf)</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="904"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="903"/>
         <source>OpenLP cannot import settings from a newer version of OpenLP.
 
 Processing has terminated and no changes have been made.</source>
@@ -4509,7 +4504,7 @@ Processing has terminated and no changes have been made.</source>
 Behandlingen er avsluttet og ingen endringer er gjort.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="917"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="916"/>
         <source>The file you have selected does not appear to be a valid OpenLP settings file.
 
 Processing has terminated and no changes have been made.</source>
@@ -4518,73 +4513,73 @@ Processing has terminated and no changes have been made.</source>
 Behandlingen er avsluttet og ingen endringer er gjort.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="957"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="956"/>
         <source>OpenLP will now close.  Imported settings will be applied the next time you start OpenLP.</source>
         <translation>OpenLP vil nå avsluttes. Importerte innstillinger blir aktive ved neste oppstart av OpenLP.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="969"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="968"/>
         <source>Export Settings File</source>
         <translation>Eksporter innstillingsfil</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="982"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="981"/>
         <source>Export setting error</source>
         <translation>Eksportinnstillingene er feil</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="982"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="981"/>
         <source>An error occurred while exporting the settings: {err}</source>
         <translation>Det oppstod en feil under eksport av innstillingene: {err}</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="1081"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="1079"/>
         <source>Exit OpenLP</source>
         <translation>Avslutt OpenLP</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="1081"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="1079"/>
         <source>Are you sure you want to exit OpenLP?</source>
         <translation>Er du sikker på at du vil avslutte OpenLP?</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="1088"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="1086"/>
         <source>&amp;Exit OpenLP</source>
         <translation>&amp;Avslutt OpenLP</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="1097"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="1095"/>
         <source>Please Wait</source>
         <translation>Vent</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="1097"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="1095"/>
         <source>Waiting for some things to finish...</source>
         <translation>Venter på at noen ting skal fullføres...</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="1177"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="1175"/>
         <source>Default Theme: {theme}</source>
         <translation>Standard tema: {theme}</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="1380"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="1378"/>
         <source>Clear List</source>
         <comment>Clear List of recent files</comment>
         <translation>Tøm listen</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="1380"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="1378"/>
         <source>Clear the list of recent files.</source>
         <translation>Tøm listen over siste brukte møteprogram.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="1461"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="1459"/>
         <source>Copying OpenLP data to new data directory location - {path} - Please wait for copy to finish</source>
         <translation>Kopierer OpenLP data til ny datakatalogplassering - {path} - Vent til kopieringen er ferdig</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="1469"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="1467"/>
         <source>OpenLP Data directory copy failed
 
 {err}</source>
@@ -4593,7 +4588,7 @@ Behandlingen er avsluttet og ingen endringer er gjort.</translation>
 {err}</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="1471"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="1469"/>
         <source>New Data Directory Error</source>
         <translation>Ny datakatalog feil</translation>
     </message>
@@ -6224,7 +6219,7 @@ Filendelsen støttes ikke</translation>
         <translation>Vis lysbilde &amp;en gang</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="960"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="962"/>
         <source>&amp;Delay between slides</source>
         <translation>&amp;Pause mellom lysbildene</translation>
     </message>
@@ -6239,52 +6234,52 @@ Filendelsen støttes ikke</translation>
         <translation>&amp;Skift postens tema</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="372"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="374"/>
         <source>Delete item from service</source>
         <translation>Slett post fra møteprogrammet</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="372"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="374"/>
         <source>Are you sure you want to delete this item from the service?</source>
         <translation>Er du sikker på at du vil slette denne posten fra møteprogrammet?</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="379"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="381"/>
         <source>&amp;Delete item</source>
         <translation>&amp;Slett post</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="402"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="404"/>
         <source>Untitled Service</source>
         <translation>Møteprogram uten navn</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="512"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="514"/>
         <source>Open File</source>
         <translation>Åpne fil</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="512"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="514"/>
         <source>OpenLP Service Files (*.osz *.oszl)</source>
         <translation>OpenLP Møteprogramfiler (*.osz *.oszl)</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="526"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="528"/>
         <source>Modified Service</source>
         <translation>Endret møteprogram</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="526"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="528"/>
         <source>The current service has been modified. Would you like to save this service?</source>
         <translation>Gjeldende møteprogram er endret. Vil du lagre?</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="679"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="681"/>
         <source>Service File(s) Missing</source>
         <translation>Møteprogramfil(er) mangler</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="680"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="682"/>
         <source>The following file(s) in the service are missing: {name}
 
 These files will be removed if you continue to save.</source>
@@ -6293,12 +6288,12 @@ These files will be removed if you continue to save.</source>
 Disse filene vil bli fjernet hvis du fortsetter til lagre.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="727"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="729"/>
         <source>Error Saving File</source>
         <translation>Feil under lagring av fil</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="727"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="729"/>
         <source>There was an error saving your file.
 
 {error}</source>
@@ -6307,82 +6302,82 @@ Disse filene vil bli fjernet hvis du fortsetter til lagre.</translation>
 {error}</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="764"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="766"/>
         <source>OpenLP Service Files - lite (*.oszl)</source>
         <translation>OpenLP møteprogramfiler - lett (*.oszl)</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="765"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="767"/>
         <source>OpenLP Service Files (*.osz)</source>
         <translation>OpenLP møteprogramfiler (*.osz)</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="873"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="875"/>
         <source>The service file {file_path} could not be loaded because it is either corrupt, inaccessible, or not a valid OpenLP 2 or OpenLP 3 service file.</source>
         <translation>Møteprogramfilen {file_path} kunne ikke lastes fordi den enten er korrupt, utilgjengelig eller ikke er en gyldig OpenLP 2- eller OpenLP 3 møteprogramfil.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="971"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="973"/>
         <source>&amp;Auto Start - active</source>
         <translation>&amp;Autostart - aktiv</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="975"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="977"/>
         <source>&amp;Auto Start - inactive</source>
         <translation>&amp;Autostart - inaktiv</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="1052"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="1054"/>
         <source>Input delay</source>
         <translation>Inngangsforsinkelse</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="1052"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="1054"/>
         <source>Delay between slides in seconds.</source>
         <translation>Ventetid mellom bildene i sekunder.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="1430"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="1431"/>
         <source>Edit</source>
         <translation>Redigere</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="1431"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="1432"/>
         <source>Service copy only</source>
         <translation>Bare kopi i møteprogrammet</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="1434"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="1435"/>
         <source>Slide theme</source>
         <translation>Lysbildetema</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="1438"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="1439"/>
         <source>Notes</source>
         <translation>Notater</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="1692"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="1704"/>
         <source>Missing Display Handler</source>
         <translation>Visningsmodul mangler</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="1625"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="1637"/>
         <source>Your item cannot be displayed as there is no handler to display it</source>
         <translation>Posten kan ikke vises fordi visningsmodul mangler</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="1692"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="1704"/>
         <source>Your item cannot be displayed as the plugin required to display it is missing or inactive</source>
         <translation>Posten kan ikke vises fordi nødvendig programtillegg enten mangler eller er inaktiv</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="1717"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="1729"/>
         <source>Rename item title</source>
         <translation>Endre navn på møteprogrampost </translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="1717"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="1729"/>
         <source>Title:</source>
         <translation>Tittel:</translation>
     </message>
@@ -6403,157 +6398,162 @@ Disse filene vil bli fjernet hvis du fortsetter til lagre.</translation>
         <translation>Tilbakestill til standard IP-adresse.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="165"/>
+        <location filename="../../openlp/core/common/i18n.py" line="401"/>
+        <source>Live preview shows blank screen</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../../openlp/core/ui/servicetab.py" line="168"/>
         <source>Service</source>
         <translation>Møteprogram</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="167"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="170"/>
         <source>Default Service Name</source>
         <translation>Standard møteprogramnavn</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="168"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="171"/>
         <source>Enable default service name</source>
         <translation>Aktiver standard møteprogramnavn</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="169"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="172"/>
         <source>Date and Time:</source>
         <translation>Dato og tid:</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="170"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="173"/>
         <source>Monday</source>
         <translation>Mandag</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="171"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="174"/>
         <source>Tuesday</source>
         <translation>Tirsdag</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="172"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="175"/>
         <source>Wednesday</source>
         <translation>Onsdag</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="173"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="176"/>
         <source>Thursday</source>
         <translation>Torsdag</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="174"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="177"/>
         <source>Friday</source>
         <translation>Fredag</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="175"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="178"/>
         <source>Saturday</source>
         <translation>Lørdag</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="176"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="179"/>
         <source>Sunday</source>
         <translation>Søndag</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="177"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="180"/>
         <source>Now</source>
         <translation>Nå</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="178"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="181"/>
         <source>Time service usually starts.</source>
         <translation>Tidspunkt når møtet vanligvis strarter.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="179"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="182"/>
         <source>Name:</source>
         <translation>Navn:</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="180"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="183"/>
         <source>Consult the OpenLP manual for usage.</source>
         <translation>Se OpenLP brukermanual for bruk.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="181"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="184"/>
         <source>Revert to the default service name &quot;{name}&quot;.</source>
         <translation>Tilbakestill til standard møteprogramnavn &quot;{name}&quot;.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="184"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="187"/>
         <source>Example:</source>
         <translation>Eksempel:</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="186"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="189"/>
         <source>Slide Controller</source>
         <translation>Fremvisningskontroll</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="187"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="190"/>
         <source>Unblank display when changing slide in Live</source>
         <translation>Gjør skjerm synlig når du endrer bilde i fremvisning</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="189"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="192"/>
         <source>Unblank display when sending items to Live</source>
         <translation>Gjør skjerm synlig når du sender element til fremvisning</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="191"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="194"/>
         <source>Automatically preview the next item in service</source>
         <translation>Automatisk forhåndsvis neste post i møteprogram</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="193"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="197"/>
         <source>Timed slide interval:</source>
         <translation>Tidsbestemt lysbildeintervall:</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="194"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="198"/>
         <source> sec</source>
         <translation>sek</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="196"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="200"/>
         <source>Service Item Wrapping</source>
         <translation>Programpost gjennomgang</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="197"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="201"/>
         <source>Behavior of next/previous on the last/first slide:</source>
         <translation>Innstilling for navigering gjennom programpostene:</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="198"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="202"/>
         <source>&amp;Remain on Slide</source>
         <translation>&amp;Bli på siste bilde i sangen</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="199"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="203"/>
         <source>&amp;Wrap around</source>
         <translation>&amp;Gjenta fra toppen</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="200"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="204"/>
         <source>&amp;Move to next/previous service item</source>
         <translation>&amp;Gå til neste post på programmet</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="202"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="206"/>
         <source>Service Editing</source>
         <translation>Redigere møteprogram</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="203"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="207"/>
         <source>Show confirmation box when deleting item from service</source>
         <translation>Vis bekreftelsesboks når du sletter post fra møteprogrammet</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="301"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="314"/>
         <source>Syntax error.</source>
         <translation>Syntaksfeil.</translation>
     </message>
@@ -6767,17 +6767,17 @@ bruk en annen hurtigtast.</translation>
         <translation>Gå til &quot;Tilleggsinformasjon&quot;</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/slidecontroller.py" line="477"/>
+        <location filename="../../openlp/core/ui/slidecontroller.py" line="478"/>
         <source>Go To</source>
         <translation>Gå til</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/slidecontroller.py" line="564"/>
+        <location filename="../../openlp/core/ui/slidecontroller.py" line="565"/>
         <source>Previous Service</source>
         <translation>Forrige møteprogram</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/slidecontroller.py" line="569"/>
+        <location filename="../../openlp/core/ui/slidecontroller.py" line="570"/>
         <source>Next Service</source>
         <translation>Neste møteprogram</translation>
     </message>
@@ -7621,510 +7621,510 @@ Filen er korrupt, utilgjengelig eller ikke et gyldig tema.</translation>
 <context>
     <name>OpenLP.Ui</name>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="340"/>
+        <location filename="../../openlp/core/common/i18n.py" line="338"/>
         <source>About</source>
         <translation>Om</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="341"/>
+        <location filename="../../openlp/core/common/i18n.py" line="339"/>
         <source>&amp;Add</source>
         <translation>&amp;Legg til</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="342"/>
+        <location filename="../../openlp/core/common/i18n.py" line="340"/>
         <source>Add folder</source>
         <translation>Legg til mappe</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="343"/>
+        <location filename="../../openlp/core/common/i18n.py" line="341"/>
         <source>Add folder.</source>
         <translation>Legg til mappe.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="344"/>
+        <location filename="../../openlp/core/common/i18n.py" line="342"/>
         <source>Add group</source>
         <translation>Legg til gruppe</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="345"/>
+        <location filename="../../openlp/core/common/i18n.py" line="343"/>
         <source>Add group.</source>
         <translation>Legg til gruppe.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="346"/>
+        <location filename="../../openlp/core/common/i18n.py" line="344"/>
         <source>Advanced</source>
         <translation>Avansert</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="347"/>
+        <location filename="../../openlp/core/common/i18n.py" line="345"/>
         <source>All Files</source>
         <translation>Alle filer</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="348"/>
+        <location filename="../../openlp/core/common/i18n.py" line="346"/>
         <source>Automatic</source>
         <translation>Automatisk</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="349"/>
+        <location filename="../../openlp/core/common/i18n.py" line="347"/>
         <source>Background Color</source>
         <translation>Bakgrunnsfarge</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="350"/>
+        <location filename="../../openlp/core/common/i18n.py" line="348"/>
         <source>Background color:</source>
         <translation>Bakgrunnsfarge:</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="351"/>
+        <location filename="../../openlp/core/common/i18n.py" line="349"/>
         <source>Search is Empty or too Short</source>
         <translation>Søket er tomt eller for kort</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="352"/>
+        <location filename="../../openlp/core/common/i18n.py" line="350"/>
         <source>&lt;strong&gt;The search you have entered is empty or shorter than 3 characters long.&lt;/strong&gt;&lt;br&gt;&lt;br&gt;Please try again with a longer search.</source>
         <translation>&lt;strong&gt;Søket du har skrevet er tomt eller kortere enn 3 tegn. &lt;/strong&gt;&lt;br&gt;&lt;br&gt;Forsøk igjen med en lengre tekst.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="355"/>
+        <location filename="../../openlp/core/common/i18n.py" line="353"/>
         <source>No Bibles Available</source>
         <translation>Ingen bibler tilgjengelig</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="356"/>
+        <location filename="../../openlp/core/common/i18n.py" line="354"/>
         <source>&lt;strong&gt;There are no Bibles currently installed.&lt;/strong&gt;&lt;br&gt;&lt;br&gt;Please use the Import Wizard to install one or more Bibles.</source>
         <translation>&lt;strong&gt;Det er ingen bibler installert. &lt;/strong&gt;&lt;br&gt;&lt;br&gt;Vennligst bruk importveiviseren for å installere en eller flere bibler.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="358"/>
+        <location filename="../../openlp/core/common/i18n.py" line="356"/>
         <source>Bottom</source>
         <translation>Bunn</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="360"/>
+        <location filename="../../openlp/core/common/i18n.py" line="358"/>
         <source>Browse...</source>
         <translation>Bla...</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="361"/>
+        <location filename="../../openlp/core/common/i18n.py" line="359"/>
         <source>Cancel</source>
         <translation>Avbryt</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="362"/>
+        <location filename="../../openlp/core/common/i18n.py" line="360"/>
         <source>CCLI number:</source>
         <translation>CCLI nummer:</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="363"/>
+        <location filename="../../openlp/core/common/i18n.py" line="361"/>
         <source>CCLI song number:</source>
         <translation>CCLI sang nummer:</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="478"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="480"/>
         <source>Create a new service.</source>
         <translation>Lag et nytt møteprogram.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="366"/>
+        <location filename="../../openlp/core/common/i18n.py" line="364"/>
         <source>Confirm Delete</source>
         <translation>Bekreft sletting</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="367"/>
+        <location filename="../../openlp/core/common/i18n.py" line="365"/>
         <source>Continuous</source>
         <translation>Kontinuerlig</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="368"/>
+        <location filename="../../openlp/core/common/i18n.py" line="366"/>
         <source>Default</source>
         <translation>Standard</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="369"/>
+        <location filename="../../openlp/core/common/i18n.py" line="367"/>
         <source>Default Color:</source>
         <translation>Standard farge:</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="370"/>
+        <location filename="../../openlp/core/common/i18n.py" line="368"/>
         <source>Service %Y-%m-%d %H-%M</source>
         <comment>This may not contain any of the following characters: /\?*|&lt;&gt;[]&quot;:+
 See http://docs.python.org/library/datetime.html#strftime-strptime-behavior for more information.</comment>
         <translation>Møteprogram %Y-%m-%d %H-%M</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="374"/>
+        <location filename="../../openlp/core/common/i18n.py" line="372"/>
         <source>&amp;Delete</source>
         <translation>&amp;Slett</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="375"/>
+        <location filename="../../openlp/core/common/i18n.py" line="373"/>
         <source>Display style:</source>
         <translation>Visningsstil:</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="377"/>
+        <location filename="../../openlp/core/common/i18n.py" line="375"/>
         <source>Duplicate Error</source>
         <translation>Duplikatfeil</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="378"/>
+        <location filename="../../openlp/core/common/i18n.py" line="376"/>
         <source>&amp;Edit</source>
         <translation>&amp;Rediger</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="380"/>
+        <location filename="../../openlp/core/common/i18n.py" line="378"/>
         <source>Empty Field</source>
         <translation>Tomt felt</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="382"/>
+        <location filename="../../openlp/core/common/i18n.py" line="380"/>
         <source>Error</source>
         <translation>Feil</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="383"/>
+        <location filename="../../openlp/core/common/i18n.py" line="381"/>
         <source>Export</source>
         <translation>Eksporter</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="384"/>
+        <location filename="../../openlp/core/common/i18n.py" line="382"/>
         <source>File</source>
         <translation>Fil</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="385"/>
+        <location filename="../../openlp/core/common/i18n.py" line="383"/>
         <source>File appears to be corrupt.</source>
         <translation>Filen ser ut til å være skadet.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="386"/>
+        <location filename="../../openlp/core/common/i18n.py" line="384"/>
         <source>pt</source>
         <comment>Abbreviated font point size unit</comment>
         <translation>pt</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="390"/>
+        <location filename="../../openlp/core/common/i18n.py" line="388"/>
         <source>Help</source>
         <translation>Hjelp</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="391"/>
+        <location filename="../../openlp/core/common/i18n.py" line="389"/>
         <source>h</source>
         <comment>The abbreviated unit for hours</comment>
         <translation>h</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="392"/>
+        <location filename="../../openlp/core/common/i18n.py" line="390"/>
         <source>Invalid Folder Selected</source>
         <comment>Singular</comment>
         <translation>Ugyldig mappe valgt</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="393"/>
+        <location filename="../../openlp/core/common/i18n.py" line="391"/>
         <source>Invalid File Selected</source>
         <comment>Singular</comment>
         <translation>Ugyldig fil valgt </translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="394"/>
+        <location filename="../../openlp/core/common/i18n.py" line="392"/>
         <source>Invalid Files Selected</source>
         <comment>Plural</comment>
         <translation>Ugyldige filer valgt</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="395"/>
+        <location filename="../../openlp/core/common/i18n.py" line="393"/>
         <source>Image</source>
         <translation>Bilde</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="396"/>
+        <location filename="../../openlp/core/common/i18n.py" line="394"/>
         <source>Import</source>
         <translation>Importere</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="401"/>
+        <location filename="../../openlp/core/common/i18n.py" line="399"/>
         <source>Layout style:</source>
         <translation>Layout stil:</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="402"/>
+        <location filename="../../openlp/core/common/i18n.py" line="400"/>
         <source>Live</source>
         <translation>Fremvisning</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="403"/>
+        <location filename="../../openlp/core/common/i18n.py" line="402"/>
         <source>Live Stream</source>
         <translation>Direktestrømming</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="404"/>
+        <location filename="../../openlp/core/common/i18n.py" line="403"/>
         <source>Live Background Error</source>
         <translation>Feil i levende bakgrunn</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="405"/>
+        <location filename="../../openlp/core/common/i18n.py" line="404"/>
         <source>Live Toolbar</source>
         <translation>Fremvisning - verktøylinje</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="406"/>
+        <location filename="../../openlp/core/common/i18n.py" line="405"/>
         <source>Load</source>
         <translation>Laste</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="407"/>
+        <location filename="../../openlp/core/common/i18n.py" line="406"/>
         <source>Manufacturer</source>
         <comment>Singular</comment>
         <translation>Produsent</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="408"/>
+        <location filename="../../openlp/core/common/i18n.py" line="407"/>
         <source>Manufacturers</source>
         <comment>Plural</comment>
         <translation>Produsenter</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="409"/>
+        <location filename="../../openlp/core/common/i18n.py" line="408"/>
         <source>Model</source>
         <comment>Singular</comment>
         <translation>Modell</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="410"/>
+        <location filename="../../openlp/core/common/i18n.py" line="409"/>
         <source>Models</source>
         <comment>Plural</comment>
         <translation>Modeller</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="411"/>
+        <location filename="../../openlp/core/common/i18n.py" line="410"/>
         <source>m</source>
         <comment>The abbreviated unit for minutes</comment>
         <translation>m</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="412"/>
+        <location filename="../../openlp/core/common/i18n.py" line="411"/>
         <source>Middle</source>
         <translation>Midten</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="413"/>
+        <location filename="../../openlp/core/common/i18n.py" line="412"/>
         <source>New</source>
         <translation>Ny</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="414"/>
+        <location filename="../../openlp/core/common/i18n.py" line="413"/>
         <source>New Service</source>
         <translation>Nytt møteprogram</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="415"/>
+        <location filename="../../openlp/core/common/i18n.py" line="414"/>
         <source>New Theme</source>
         <translation>Nytt tema</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="416"/>
+        <location filename="../../openlp/core/common/i18n.py" line="415"/>
         <source>Next Track</source>
         <translation>Neste spor</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="417"/>
+        <location filename="../../openlp/core/common/i18n.py" line="416"/>
         <source>No Folder Selected</source>
         <comment>Singular</comment>
         <translation>Ingen mappe valgt</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="418"/>
+        <location filename="../../openlp/core/common/i18n.py" line="417"/>
         <source>No File Selected</source>
         <comment>Singular</comment>
         <translation>Ingen fil er valgt</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="419"/>
+        <location filename="../../openlp/core/common/i18n.py" line="418"/>
         <source>No Files Selected</source>
         <comment>Plural</comment>
         <translation>Inger filer er valgt</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="420"/>
+        <location filename="../../openlp/core/common/i18n.py" line="419"/>
         <source>No Item Selected</source>
         <comment>Singular</comment>
         <translation>Ingen post er valgt</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="421"/>
+        <location filename="../../openlp/core/common/i18n.py" line="420"/>
         <source>No Items Selected</source>
         <comment>Plural</comment>
         <translation>Ingen poster er valgt</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="422"/>
+        <location filename="../../openlp/core/common/i18n.py" line="421"/>
         <source>No Search Results</source>
         <translation>Ingen søkeresultat</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="423"/>
+        <location filename="../../openlp/core/common/i18n.py" line="422"/>
         <source>OpenLP</source>
         <translation>OpenLP</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="424"/>
+        <location filename="../../openlp/core/common/i18n.py" line="423"/>
         <source>OpenLP Song Database</source>
         <translation>OpenLP sangdatabase</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="425"/>
+        <location filename="../../openlp/core/common/i18n.py" line="424"/>
         <source>OpenLP is already running on this machine. 
 Closing this instance</source>
         <translation>OpenLP kjører allerede på denne maskinen.
 Lukker denne</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="426"/>
+        <location filename="../../openlp/core/common/i18n.py" line="425"/>
         <source>Open service.</source>
         <translation>Åpne møteprogram.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="427"/>
+        <location filename="../../openlp/core/common/i18n.py" line="426"/>
         <source>Optional, this will be displayed in footer.</source>
         <translation>Valgfritt, dette vil bli vist i bunntekst.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="428"/>
+        <location filename="../../openlp/core/common/i18n.py" line="427"/>
         <source>Optional, this won&apos;t be displayed in footer.</source>
         <translation>Valgfritt, dette vil ikke bli vist i bunntekst.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="430"/>
+        <location filename="../../openlp/core/common/i18n.py" line="429"/>
         <source>Permission Error</source>
         <translation>Tillatelsefeil</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="431"/>
+        <location filename="../../openlp/core/common/i18n.py" line="430"/>
         <source>Play Slides in Loop</source>
         <translation>Kontinuerlig visning av sider</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="432"/>
+        <location filename="../../openlp/core/common/i18n.py" line="431"/>
         <source>Play Slides to End</source>
         <translation>Vis sider til &quot;siste side&quot;</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="434"/>
+        <location filename="../../openlp/core/common/i18n.py" line="433"/>
         <source>Preview</source>
         <translation>Forhåndsvisning</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="435"/>
+        <location filename="../../openlp/core/common/i18n.py" line="434"/>
         <source>Preview Toolbar</source>
         <translation>Forhåndsvisning - verktøylinje</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="436"/>
+        <location filename="../../openlp/core/common/i18n.py" line="435"/>
         <source>Print Service</source>
         <translation>Skriv ut møteprogram</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="437"/>
+        <location filename="../../openlp/core/common/i18n.py" line="436"/>
         <source>Projector</source>
         <comment>Singular</comment>
         <translation>Projektor</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="438"/>
+        <location filename="../../openlp/core/common/i18n.py" line="437"/>
         <source>Projectors</source>
         <comment>Plural</comment>
         <translation>Projektorer</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="439"/>
+        <location filename="../../openlp/core/common/i18n.py" line="438"/>
         <source>Replace Background</source>
         <translation>Erstatt bakgrunn</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="440"/>
+        <location filename="../../openlp/core/common/i18n.py" line="439"/>
         <source>Replace live background.</source>
         <translation>Bytt fremvisningbakgrunn.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="441"/>
+        <location filename="../../openlp/core/common/i18n.py" line="440"/>
         <source>Replace live background is not available when the WebKit player is disabled.</source>
         <translation>En kan ikke bytte levende bakgrunn når WebKit spilleren er deaktivert.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="443"/>
+        <location filename="../../openlp/core/common/i18n.py" line="442"/>
         <source>Reset Background</source>
         <translation>Tilbakestill bakgrunn</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="444"/>
+        <location filename="../../openlp/core/common/i18n.py" line="443"/>
         <source>Reset live background.</source>
         <translation>Tilbakestill levende bakgrunn.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="445"/>
+        <location filename="../../openlp/core/common/i18n.py" line="444"/>
         <source>Required, this will be displayed in footer.</source>
         <translation>Påkrevd, dette vil bli vist i bunntekst.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="446"/>
+        <location filename="../../openlp/core/common/i18n.py" line="445"/>
         <source>s</source>
         <comment>The abbreviated unit for seconds</comment>
         <translation>s</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="448"/>
+        <location filename="../../openlp/core/common/i18n.py" line="447"/>
         <source>Save &amp;&amp; Preview</source>
         <translation>Lagre &amp;&amp; Forhåndsvisning</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="454"/>
+        <location filename="../../openlp/core/common/i18n.py" line="453"/>
         <source>Search</source>
         <translation>Søk</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="455"/>
+        <location filename="../../openlp/core/common/i18n.py" line="454"/>
         <source>Search Themes...</source>
         <comment>Search bar place holder text </comment>
         <translation>Søk tema...</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="456"/>
+        <location filename="../../openlp/core/common/i18n.py" line="455"/>
         <source>You must select an item to delete.</source>
         <translation>Du må velge en post å slette.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="457"/>
+        <location filename="../../openlp/core/common/i18n.py" line="456"/>
         <source>You must select an item to edit.</source>
         <translation>Du må velge en post å redigere.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="458"/>
+        <location filename="../../openlp/core/common/i18n.py" line="457"/>
         <source>Settings</source>
         <translation>Innstillinger</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="459"/>
+        <location filename="../../openlp/core/common/i18n.py" line="458"/>
         <source>Save Service</source>
         <translation>Lagre møteprogram</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="460"/>
+        <location filename="../../openlp/core/common/i18n.py" line="459"/>
         <source>Service</source>
         <translation>Møteprogram</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="461"/>
+        <location filename="../../openlp/core/common/i18n.py" line="460"/>
         <source>Please type more text to use &apos;Search As You Type&apos;</source>
         <translation>Vennligst skriv mer tekst for å bruke &quot;Søk mens du skriver&quot;</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="462"/>
+        <location filename="../../openlp/core/common/i18n.py" line="461"/>
         <source>Optional &amp;Split</source>
         <translation>Valgfri &amp;deling</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="463"/>
+        <location filename="../../openlp/core/common/i18n.py" line="462"/>
         <source>Split a slide into two only if it does not fit on the screen as one slide.</source>
         <translation>Splitte et lysbilde i to bare hvis det ikke passer på skjermen som en side.</translation>
     </message>
@@ -8134,119 +8134,119 @@ Lukker denne</translation>
         <translation>Starter import...</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="466"/>
+        <location filename="../../openlp/core/common/i18n.py" line="465"/>
         <source>Stop Play Slides in Loop</source>
         <translation>Stopp kontinuerlig visning</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="467"/>
+        <location filename="../../openlp/core/common/i18n.py" line="466"/>
         <source>Stop Play Slides to End</source>
         <translation>Stopp visning av sider til siste side</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="468"/>
+        <location filename="../../openlp/core/common/i18n.py" line="467"/>
         <source>Theme</source>
         <comment>Singular</comment>
         <translation>Tema</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="469"/>
+        <location filename="../../openlp/core/common/i18n.py" line="468"/>
         <source>Themes</source>
         <comment>Plural</comment>
         <translation>Temaer</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="470"/>
+        <location filename="../../openlp/core/common/i18n.py" line="469"/>
         <source>Tools</source>
         <translation>Verktøy</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="471"/>
+        <location filename="../../openlp/core/common/i18n.py" line="470"/>
         <source>Top</source>
         <translation>Topp</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="473"/>
+        <location filename="../../openlp/core/common/i18n.py" line="472"/>
         <source>Unable to read the file(s) listed below, please check that your user has permission to read the file(s) or that the file(s) are not using cloud storage (e.g. Dropbox, OneDrive).</source>
-        <translation type="unfinished"/>
+        <translation>Kan ikke lese filen(e) som er oppført nedenfor, sjekk at brukeren din har tillatelse til å lese filen(e) eller at filen(e) ikke bruker skylagring (f.eks. Dropbox, OneDrive).</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="476"/>
+        <location filename="../../openlp/core/common/i18n.py" line="475"/>
         <source>Unsupported File</source>
         <translation>Filtypen støttes ikke</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="479"/>
+        <location filename="../../openlp/core/common/i18n.py" line="478"/>
         <source>Verse Per Slide</source>
         <translation>Vers pr side</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="480"/>
+        <location filename="../../openlp/core/common/i18n.py" line="479"/>
         <source>Verse Per Line</source>
         <translation>Vers pr linje</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="482"/>
+        <location filename="../../openlp/core/common/i18n.py" line="481"/>
         <source>Version</source>
         <translation>Versjon</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="483"/>
+        <location filename="../../openlp/core/common/i18n.py" line="482"/>
         <source>View</source>
         <translation>Vis</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="484"/>
+        <location filename="../../openlp/core/common/i18n.py" line="483"/>
         <source>View Mode</source>
         <translation>Visningsmodus</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="485"/>
+        <location filename="../../openlp/core/common/i18n.py" line="484"/>
         <source>Video</source>
         <translation>Video</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="486"/>
+        <location filename="../../openlp/core/common/i18n.py" line="485"/>
         <source>Warning</source>
         <translation>Advarsel</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="487"/>
+        <location filename="../../openlp/core/common/i18n.py" line="486"/>
         <source>Web Interface, Download and Install Latest Version</source>
         <translation>Webgrensesnitt, last ned og installer siste versjon</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="488"/>
+        <location filename="../../openlp/core/common/i18n.py" line="487"/>
         <source>Continuous (whole verses)</source>
         <translation>Kontinuerlig (hele vers)</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="489"/>
+        <location filename="../../openlp/core/common/i18n.py" line="488"/>
         <source>Book Chapter</source>
         <translation>Bok kapittel</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="490"/>
+        <location filename="../../openlp/core/common/i18n.py" line="489"/>
         <source>Chapter</source>
         <translation>Kapittel</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="491"/>
+        <location filename="../../openlp/core/common/i18n.py" line="490"/>
         <source>Verse</source>
         <translation>Vers</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="493"/>
+        <location filename="../../openlp/core/common/i18n.py" line="492"/>
         <source>Psalm</source>
         <translation>Salme</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="494"/>
+        <location filename="../../openlp/core/common/i18n.py" line="493"/>
         <source>Book names may be shortened from full names, for an example Ps 23 = Psalm 23</source>
         <translation>Boknavn kan forkortes fra fulle navn, f.eks. Sal 23 = Salme 23</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/mediaitem.py" line="716"/>
+        <location filename="../../openlp/plugins/songs/lib/mediaitem.py" line="723"/>
         <source>Written by</source>
         <translation>Skrevet av </translation>
     </message>
@@ -8291,12 +8291,12 @@ Lukker denne</translation>
         <translation>Viser listen i rutenettvisning.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="477"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="479"/>
         <source>Do not show this message again</source>
         <translation>Ikke vis denne meldingen igjen</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="478"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="480"/>
         <source>You already have a blank new service.
 Add some items to it then press Save</source>
         <translation>Du har allerede et tomt møteprogram.
@@ -8598,12 +8598,12 @@ Legg til noen programposter og trykk så lagre</translation>
         <translation>Autentisering mislyktes. Sjekk legitimasjonen din i OpenLP-innstillinger.</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/planningcenter/forms/selectplanform.py" line="252"/>
+        <location filename="../../openlp/plugins/planningcenter/forms/selectplanform.py" line="263"/>
         <source>Import failed</source>
         <translation>Import mislyktes</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/planningcenter/forms/selectplanform.py" line="252"/>
+        <location filename="../../openlp/plugins/planningcenter/forms/selectplanform.py" line="263"/>
         <source>Could not import bible text because no bible is installed.</source>
         <translation>Kunne ikke importere bibeltekst fordi ingen bibel er installert.</translation>
     </message>
@@ -9605,7 +9605,7 @@ Innstillingen er avgjørende for riktige tegn.</translation>
 <context>
     <name>SongsPlugin.EditSongForm</name>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="447"/>
+        <location filename="../../openlp/core/common/i18n.py" line="446"/>
         <source>&amp;Save &amp;&amp; Close</source>
         <translation>&amp;Lagre &amp;&amp; Lukk</translation>
     </message>
@@ -9794,7 +9794,7 @@ Vennligst korriger disse før du fortsetter.</translation>
     <message>
         <location filename="../../openlp/plugins/songs/forms/editsongform.py" line="283"/>
         <source>Cannot link more than one audio file. Remove items from Linked Audio other than the one you wish to keep.</source>
-        <translation type="unfinished"/>
+        <translation>Kan ikke koble til mer enn én lydfil. Fjern andre elementer fra tilkoblet lyd enn den du ønsker å beholde.</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/forms/editsongform.py" line="602"/>
@@ -9869,7 +9869,7 @@ Vennligst korriger disse før du fortsetter.</translation>
     <message>
         <location filename="../../openlp/plugins/songs/forms/editsongform.py" line="968"/>
         <source>Cannot link more than one audio file.</source>
-        <translation type="unfinished"/>
+        <translation>Kan ikke koble til mer enn én lydfil.</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/forms/editsongform.py" line="956"/>
@@ -9880,47 +9880,47 @@ Vennligst korriger disse før du fortsetter.</translation>
 <context>
     <name>SongsPlugin.EditVerseForm</name>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="376"/>
+        <location filename="../../openlp/core/common/i18n.py" line="374"/>
         <source>Down</source>
         <translation>Ned</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="379"/>
+        <location filename="../../openlp/core/common/i18n.py" line="377"/>
         <source>Edit Verse</source>
         <translation>Rediger vers</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="387"/>
+        <location filename="../../openlp/core/common/i18n.py" line="385"/>
         <source>&amp;Forced Split</source>
         <translation>&amp;Hardt sideskift</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="388"/>
+        <location filename="../../openlp/core/common/i18n.py" line="386"/>
         <source>Split the verse when displayed regardless of the screen size.</source>
         <translation>Del verset når det vises uavhengig av skjermstørrelse.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="397"/>
+        <location filename="../../openlp/core/common/i18n.py" line="395"/>
         <source>&amp;Insert</source>
         <translation>Set &amp;inn</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="398"/>
+        <location filename="../../openlp/core/common/i18n.py" line="396"/>
         <source>Split a slide into two by inserting a verse splitter.</source>
         <translation>Splitte siden i to ved å sette et verssplitter.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="472"/>
+        <location filename="../../openlp/core/common/i18n.py" line="471"/>
         <source>Transpose:</source>
         <translation>Transponer:</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="477"/>
+        <location filename="../../openlp/core/common/i18n.py" line="476"/>
         <source>Up</source>
         <translation>Opp</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="481"/>
+        <location filename="../../openlp/core/common/i18n.py" line="480"/>
         <source>&amp;Verse type:</source>
         <translation>&amp;Verstype:</translation>
     </message>
@@ -10159,7 +10159,7 @@ Vennligst korriger disse før du fortsetter.</translation>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importer.py" line="287"/>
         <source>EasyWorship 6/7 Service File</source>
-        <translation type="unfinished"/>
+        <translation>EasyWorship 6/7 møteprogramfil</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importer.py" line="294"/>
@@ -10374,7 +10374,7 @@ Vennligst korriger disse før du fortsetter.</translation>
 <context>
     <name>SongsPlugin.MediaItem</name>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/mediaitem.py" line="731"/>
+        <location filename="../../openlp/plugins/songs/lib/mediaitem.py" line="738"/>
         <source>CCLI License</source>
         <translation>CCLI Lisens</translation>
     </message>
@@ -10460,17 +10460,17 @@ Vennligst korriger disse før du fortsetter.</translation>
         <translation>kopi</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/mediaitem.py" line="637"/>
+        <location filename="../../openlp/plugins/songs/lib/mediaitem.py" line="644"/>
         <source>Media</source>
         <translation>Media</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/mediaitem.py" line="684"/>
+        <location filename="../../openlp/plugins/songs/lib/mediaitem.py" line="691"/>
         <source>CCLI License: </source>
         <translation>CCLI Lisens: </translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/mediaitem.py" line="744"/>
+        <location filename="../../openlp/plugins/songs/lib/mediaitem.py" line="751"/>
         <source>Failed to render Song footer html.
 See log for details</source>
         <translation>Kunne ikke gjengi html for sangbunntekst.
@@ -10605,7 +10605,7 @@ Se logg for detaljer</translation>
 <context>
     <name>SongsPlugin.SongBeamerImport</name>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/importers/songbeamer.py" line="138"/>
+        <location filename="../../openlp/plugins/songs/lib/importers/songbeamer.py" line="132"/>
         <source>File is not a valid SongBeamer file.</source>
         <translation>Filen er ikke en gyldig SongBeamer-fil.</translation>
     </message>
@@ -10979,237 +10979,242 @@ Er du sikker på at du vil importere denne sangen?</translation>
 <context>
     <name>SongsPlugin.SongsTab</name>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="163"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="167"/>
         <source>Song related settings</source>
         <translation>Innstillinger for sanger</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="164"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="168"/>
         <source>Enable &quot;Go to verse&quot; button in Live panel</source>
         <translation>Aktiver &quot;Gå til vers&quot;-knapp i fremvisningspanelet</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="166"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="170"/>
         <source>Update service from song edit</source>
         <translation>Oppgrader sanger også i møteprogrammet</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="167"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="171"/>
         <source>Import missing songs from Service files</source>
         <translation>Importer manglende sanger fra møteprogramfilene</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="169"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="173"/>
         <source>Add first slide:</source>
         <translation>Legg til første lysbilde:</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="170"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="174"/>
         <source>None</source>
         <translation>Ingen</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="171"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="175"/>
         <source>Songbook</source>
         <translation>Sangbok</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="172"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="176"/>
         <source>Same as Footer</source>
         <translation>Samme som bunntekst</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="173"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="177"/>
         <source>Auto-play background audio</source>
         <translation>Automatisk avspilling av bakgrunnslyd</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="174"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="178"/>
+        <source>Apply UPPERCASE globally to all songs.</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="179"/>
         <source>If enabled all text between &quot;[&quot; and &quot;]&quot; will be regarded as chords.</source>
         <translation>Hvis aktivert vil all tekst mellom  &quot;[&quot; og &quot;]&quot; bli ansett for å være akkord.</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="176"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="181"/>
         <source>Chords</source>
         <translation>Akkorder</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="177"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="182"/>
         <source>Ignore chords when importing songs</source>
         <translation>Ignorer akkorder når sanger importeres</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="179"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="184"/>
         <source>SongSelect Login</source>
         <translation>SongSelect loginn</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="180"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="185"/>
         <source>Username:</source>
         <translation>Brukernavn:</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="181"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="186"/>
         <source>Password:</source>
         <translation>Passord:</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="182"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="187"/>
         <source>Chord notation to use:</source>
         <translation>Akkordnotasjon som skal brukes:</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="183"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="188"/>
         <source>English</source>
         <translation>Norsk (bokmål)</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="184"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="189"/>
         <source>German</source>
         <translation>Tysk</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="185"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="190"/>
         <source>Neo-Latin</source>
         <translation>Nylatin</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="187"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="192"/>
         <source>Warn about missing song key</source>
         <translation>Advar om manglende sangtoneart</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="188"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="193"/>
         <source>Footer</source>
         <translation>Bunntekst</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="193"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="198"/>
         <source>Song Title</source>
         <translation>Sangtittel</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="194"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="199"/>
         <source>Alternate Title</source>
         <translation>Alternativ tittel</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="195"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="200"/>
         <source>Written By</source>
         <translation>Skrevet av </translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="196"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="201"/>
         <source>Authors when type is not set</source>
         <translation>Forfattere når kategori ikke er satt</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="198"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="203"/>
         <source>Authors (Type &quot;Words&quot;)</source>
         <translation>Forfattere (Kategori &quot;Tekst&quot;)</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="200"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="205"/>
         <source>Authors (Type &quot;Music&quot;)</source>
         <translation>Forfattere (Kategori &quot;Musikk&quot;)</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="203"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="208"/>
         <source>Authors (Type &quot;Words and Music&quot;)</source>
         <translation>Forfattere (Kategori &quot;Tekst og Musikk&quot;)</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="206"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="211"/>
         <source>Authors (Type &quot;Translation&quot;)</source>
         <translation>Forfattere (Kategori &quot;Oversetting&quot;)</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="207"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="212"/>
         <source>Authors (Type &quot;Words&quot; &amp; &quot;Words and Music&quot;)</source>
         <translation>Forfattere (Kategori &quot;Tekst&quot; &amp; &quot;Tekst og Musikk&quot;)</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="209"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="214"/>
         <source>Authors (Type &quot;Music&quot; &amp; &quot;Words and Music&quot;)</source>
         <translation>Forfattere (Kategori &quot;Musikk&quot; &amp; &quot;Tekst og Musikk&quot;)</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="211"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="216"/>
         <source>Copyright information</source>
         <translation>Copyrightinformasjon</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="212"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="217"/>
         <source>Songbook Entries</source>
         <translation>Sangbokoppføringer</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="214"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="219"/>
         <source>CCLI License</source>
         <translation>CCLI Lisens</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="215"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="220"/>
         <source>Song CCLI Number</source>
         <translation>CCLI sang nummer</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="216"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="221"/>
         <source>Topics</source>
         <translation>Emner</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="217"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="222"/>
         <source>Where rendering on first (cover) slide</source>
         <translation>Hvor gjengivelse på første (omslags-) lysbilde</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="219"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="224"/>
         <source>Placeholder</source>
         <translation>Plassholder</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="219"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="224"/>
         <source>Description</source>
         <translation>Beskrivelse</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="226"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="231"/>
         <source>can be empty</source>
         <translation>kan være tom</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="227"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="232"/>
         <source>list of entries, can be empty</source>
         <translation>liste over oppføringer, kan være tom</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="232"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="237"/>
         <source>How to Use</source>
         <translation>Hvordan bruke</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="233"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="238"/>
         <source>Template</source>
         <translation>Mal</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="234"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="239"/>
         <source>Mako Syntax</source>
         <translation>Mako Syntax</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="236"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="241"/>
         <source>Reset Template</source>
         <translation>Tilbakestill mal</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="323"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="334"/>
         <source>Save Username and Password</source>
         <translation>Lagre brukernavn og passord</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="323"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="334"/>
         <source>WARNING: Saving your SongSelect password is INSECURE, your password is stored in PLAIN TEXT. Click Yes to save your password or No to cancel this.</source>
         <translation>ADVARSEL: Lagring av SongSelect-passordet er USIKKERT, passordet ditt er lagret i REN TEKST. Klikk Ja for å lagre passordet ditt eller Nei for å avbryte.</translation>
     </message>
@@ -11254,37 +11259,37 @@ Du kan deaktivere denne advarselen i sanginnstillingene.</translation>
 <context>
     <name>SongsPlugin.VerseType</name>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="359"/>
+        <location filename="../../openlp/core/common/i18n.py" line="357"/>
         <source>Bridge</source>
         <translation>Stikk</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="364"/>
+        <location filename="../../openlp/core/common/i18n.py" line="362"/>
         <source>Chorus</source>
         <translation>Refreng</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="381"/>
+        <location filename="../../openlp/core/common/i18n.py" line="379"/>
         <source>Ending</source>
         <translation>Avslutning</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="400"/>
+        <location filename="../../openlp/core/common/i18n.py" line="398"/>
         <source>Intro</source>
         <translation>Intro</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="429"/>
+        <location filename="../../openlp/core/common/i18n.py" line="428"/>
         <source>Other</source>
         <translation>Tilleggsinformasjon</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="433"/>
+        <location filename="../../openlp/core/common/i18n.py" line="432"/>
         <source>Pre-Chorus</source>
         <translation>Bro</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="478"/>
+        <location filename="../../openlp/core/common/i18n.py" line="477"/>
         <source>Verse</source>
         <translation>Vers</translation>
     </message>

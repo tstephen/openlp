@@ -2131,11 +2131,6 @@ Do you want to add the other images anyway?</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/media/mediacontroller.py" line="337"/>
-        <source>Unsupported File</source>
-        <translation>Fișier neacceptat</translation>
-    </message>
-    <message>
         <location filename="../../openlp/core/ui/media/mediacontroller.py" line="319"/>
         <source>Unable to Preview Stream</source>
         <translation type="unfinished"/>
@@ -3954,12 +3949,12 @@ If you click the &apos;{finish_button}&apos; button you can download the data at
 <context>
     <name>OpenLP.LanguageManager</name>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="302"/>
+        <location filename="../../openlp/core/common/i18n.py" line="300"/>
         <source>Language</source>
         <translation>Limba</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="302"/>
+        <location filename="../../openlp/core/common/i18n.py" line="300"/>
         <source>Please restart OpenLP to use your new language setting.</source>
         <translation>Reporniți vă rog, OpenLP pentru a folosi noua setare de limbă.</translation>
     </message>
@@ -3967,18 +3962,18 @@ If you click the &apos;{finish_button}&apos; button you can download the data at
 <context>
     <name>OpenLP.MainWindow</name>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="264"/>
+        <location filename="../../openlp/core/common/i18n.py" line="263"/>
         <source>English</source>
         <comment>Please add the name of your language here</comment>
         <translation>Română</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="449"/>
+        <location filename="../../openlp/core/common/i18n.py" line="448"/>
         <source>Screen setup has changed</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="450"/>
+        <location filename="../../openlp/core/common/i18n.py" line="449"/>
         <source>The screen setup has changed. OpenLP will try to automatically select a display screen, but you should consider updating the screen settings.</source>
         <translation type="unfinished"/>
     </message>
@@ -4368,35 +4363,35 @@ If you click the &apos;{finish_button}&apos; button you can download the data at
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="633"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="632"/>
         <source>Version {new} of OpenLP is now available for download (you are currently running version {current}). 
 
 You can download the latest version from https://openlp.org/.</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="636"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="635"/>
         <source>OpenLP Version Updated</source>
         <translation>Versiunea OpenLP s-a Actualizat</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="647"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="646"/>
         <source>Version {version} of the web remote is now available for download.
 To download this version, go to the Remote settings and click the Upgrade button.</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="650"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="649"/>
         <source>New Web Remote Version Available</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="713"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="712"/>
         <source>Re-run First Time Wizard?</source>
         <translation>Reporniți Interfața Inițială?</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="713"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="712"/>
         <source>Are you sure you want to re-run the First Time Wizard?
 
 Re-running this wizard may make changes to your current OpenLP configuration and possibly add songs to your existing songs list and change your default theme.</source>
@@ -4405,22 +4400,22 @@ Re-running this wizard may make changes to your current OpenLP configuration and
 Repornind această interfață poate aduce schimbări la configurația curentă a OpenLP și e posibil să adauge cântece la lista existentă de cântece și să schimbe tema dumneavoastră implicită.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="758"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="757"/>
         <source>OpenLP Main Display Blanked</source>
         <translation>Ecranul Principal al OpenLP este Oprit</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="758"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="757"/>
         <source>The Main Display has been blanked out</source>
         <translation>Ecranul Principal a fost oprit</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="858"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="857"/>
         <source>Import settings?</source>
         <translation>Importați setările?</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="858"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="857"/>
         <source>Are you sure you want to import settings?
 
  Importing settings will make permanent changes to your current OpenLP configuration.
@@ -4433,24 +4428,24 @@ Importând setările se vor face schimbări permanente la configurația actuală
 Importând setări incorecte poate cauza comportament nesigur sau OpenLP să se închidă anormal.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="957"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="956"/>
         <source>Import settings</source>
         <translation>Importă setări</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="969"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="968"/>
         <source>OpenLP Settings (*.conf)</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="904"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="903"/>
         <source>OpenLP cannot import settings from a newer version of OpenLP.
 
 Processing has terminated and no changes have been made.</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="917"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="916"/>
         <source>The file you have selected does not appear to be a valid OpenLP settings file.
 
 Processing has terminated and no changes have been made.</source>
@@ -4459,80 +4454,80 @@ Processing has terminated and no changes have been made.</source>
 Procesarea s-a terminat și nici o schimbare nu a fost făcută.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="957"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="956"/>
         <source>OpenLP will now close.  Imported settings will be applied the next time you start OpenLP.</source>
         <translation>OpenLP se va închide acum. Setările importate vor fi aplicate data viitoare când porniți OpenLP.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="969"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="968"/>
         <source>Export Settings File</source>
         <translation>Fișier de Setări pentru Exportare</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="982"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="981"/>
         <source>Export setting error</source>
         <translation>Eroare la exportarea setărilor</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="982"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="981"/>
         <source>An error occurred while exporting the settings: {err}</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="1081"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="1079"/>
         <source>Exit OpenLP</source>
         <translation>Închide OpenLP</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="1081"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="1079"/>
         <source>Are you sure you want to exit OpenLP?</source>
         <translation>Sigur vreți să închideți OpenLP?</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="1088"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="1086"/>
         <source>&amp;Exit OpenLP</source>
         <translation>&amp;Închide OpenLP</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="1097"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="1095"/>
         <source>Please Wait</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="1097"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="1095"/>
         <source>Waiting for some things to finish...</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="1177"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="1175"/>
         <source>Default Theme: {theme}</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="1380"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="1378"/>
         <source>Clear List</source>
         <comment>Clear List of recent files</comment>
         <translation>Goliți Lista</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="1380"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="1378"/>
         <source>Clear the list of recent files.</source>
         <translation>Șterge lista fișierelor recente.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="1461"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="1459"/>
         <source>Copying OpenLP data to new data directory location - {path} - Please wait for copy to finish</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="1469"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="1467"/>
         <source>OpenLP Data directory copy failed
 
 {err}</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="1471"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="1469"/>
         <source>New Data Directory Error</source>
         <translation>Eroare Dosar Data Nou</translation>
     </message>
@@ -6158,7 +6153,7 @@ File extension not supported</source>
         <translation>Redare automată diapozitive &amp;O dată</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="960"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="962"/>
         <source>&amp;Delay between slides</source>
         <translation>Întârziere dintre diapozitive</translation>
     </message>
@@ -6173,146 +6168,146 @@ File extension not supported</source>
         <translation>S&amp;chimbați Tema Elementului</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="372"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="374"/>
         <source>Delete item from service</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="372"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="374"/>
         <source>Are you sure you want to delete this item from the service?</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="379"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="381"/>
         <source>&amp;Delete item</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="402"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="404"/>
         <source>Untitled Service</source>
         <translation>Serviciu Fără Nume</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="512"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="514"/>
         <source>Open File</source>
         <translation>Deschideți Fișier</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="512"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="514"/>
         <source>OpenLP Service Files (*.osz *.oszl)</source>
         <translation>Fișiere Serviciu OpenLP (*.osz *.oszl)</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="526"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="528"/>
         <source>Modified Service</source>
         <translation>Serviciu Modificat</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="526"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="528"/>
         <source>The current service has been modified. Would you like to save this service?</source>
         <translation>Serviciul curent a fost modificat. Doriți să salvați acest serviciu?</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="679"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="681"/>
         <source>Service File(s) Missing</source>
         <translation>Fișier(ele) de Serviciu Lipsesc</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="680"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="682"/>
         <source>The following file(s) in the service are missing: {name}
 
 These files will be removed if you continue to save.</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="727"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="729"/>
         <source>Error Saving File</source>
         <translation>Eroare Salvare Fișier</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="727"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="729"/>
         <source>There was an error saving your file.
 
 {error}</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="764"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="766"/>
         <source>OpenLP Service Files - lite (*.oszl)</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="765"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="767"/>
         <source>OpenLP Service Files (*.osz)</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="873"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="875"/>
         <source>The service file {file_path} could not be loaded because it is either corrupt, inaccessible, or not a valid OpenLP 2 or OpenLP 3 service file.</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="971"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="973"/>
         <source>&amp;Auto Start - active</source>
         <translation>Pornire &amp;Automată - activată</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="975"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="977"/>
         <source>&amp;Auto Start - inactive</source>
         <translation>Pornire &amp;Automată - dezactivată</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="1052"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="1054"/>
         <source>Input delay</source>
         <translation>Întroduceți întârziere</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="1052"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="1054"/>
         <source>Delay between slides in seconds.</source>
         <translation>Întârzierea dintre diapozitive în secunde.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="1430"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="1431"/>
         <source>Edit</source>
         <translation>Editați</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="1431"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="1432"/>
         <source>Service copy only</source>
         <translation>Doar copiați serviciul</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="1434"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="1435"/>
         <source>Slide theme</source>
         <translation>Temă diapozitiv</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="1438"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="1439"/>
         <source>Notes</source>
         <translation>Note</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="1692"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="1704"/>
         <source>Missing Display Handler</source>
         <translation>Agent de Afișare Lipsă</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="1625"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="1637"/>
         <source>Your item cannot be displayed as there is no handler to display it</source>
         <translation>Elementul dumneavoastră nu poate fi afișat pentru că nu este nici un agent care să îl afișeze</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="1692"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="1704"/>
         <source>Your item cannot be displayed as the plugin required to display it is missing or inactive</source>
         <translation>Elementul dumneavoastră nu poate fi afișat deoarece extensia necesară lipsește sau e dezactivată</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="1717"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="1729"/>
         <source>Rename item title</source>
         <translation>Redenumiți titlul elementului</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="1717"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="1729"/>
         <source>Title:</source>
         <translation>Titlu:</translation>
     </message>
@@ -6333,157 +6328,162 @@ These files will be removed if you continue to save.</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="165"/>
+        <location filename="../../openlp/core/common/i18n.py" line="401"/>
+        <source>Live preview shows blank screen</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../../openlp/core/ui/servicetab.py" line="168"/>
         <source>Service</source>
         <translation>Serviciu</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="167"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="170"/>
         <source>Default Service Name</source>
         <translation>Numele Implicit al Serviciului</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="168"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="171"/>
         <source>Enable default service name</source>
         <translation>Activează numele implicit al serviciului</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="169"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="172"/>
         <source>Date and Time:</source>
         <translation>Data și ora:</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="170"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="173"/>
         <source>Monday</source>
         <translation>Luni</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="171"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="174"/>
         <source>Tuesday</source>
         <translation>Marți</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="172"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="175"/>
         <source>Wednesday</source>
         <translation>Miercuri</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="173"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="176"/>
         <source>Thursday</source>
         <translation>Joi</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="174"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="177"/>
         <source>Friday</source>
         <translation>Vineri</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="175"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="178"/>
         <source>Saturday</source>
         <translation>Sâmbătă</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="176"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="179"/>
         <source>Sunday</source>
         <translation>Duminică</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="177"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="180"/>
         <source>Now</source>
         <translation>Acum</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="178"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="181"/>
         <source>Time service usually starts.</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="179"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="182"/>
         <source>Name:</source>
         <translation>Nume:</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="180"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="183"/>
         <source>Consult the OpenLP manual for usage.</source>
         <translation>Consultați manualul OpenLP pentru folosire.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="181"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="184"/>
         <source>Revert to the default service name &quot;{name}&quot;.</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="184"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="187"/>
         <source>Example:</source>
         <translation>Exemplu:</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="186"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="189"/>
         <source>Slide Controller</source>
         <translation>Controlor de Diapozitive</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="187"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="190"/>
         <source>Unblank display when changing slide in Live</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="189"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="192"/>
         <source>Unblank display when sending items to Live</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="191"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="194"/>
         <source>Automatically preview the next item in service</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="193"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="197"/>
         <source>Timed slide interval:</source>
         <translation>Intervalul diapozitivelor temporizate:</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="194"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="198"/>
         <source> sec</source>
         <translation> sec</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="196"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="200"/>
         <source>Service Item Wrapping</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="197"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="201"/>
         <source>Behavior of next/previous on the last/first slide:</source>
         <translation>Comportamentul butonului următor/precedent la ultimul/primul diapozitiv:</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="198"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="202"/>
         <source>&amp;Remain on Slide</source>
         <translation>&amp;Rămâne la Diapozitiv</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="199"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="203"/>
         <source>&amp;Wrap around</source>
         <translation>Circular</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="200"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="204"/>
         <source>&amp;Move to next/previous service item</source>
         <translation>Trece la ur&amp;mătorul/precedentul element din serviciu</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="202"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="206"/>
         <source>Service Editing</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="203"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="207"/>
         <source>Show confirmation box when deleting item from service</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="301"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="314"/>
         <source>Syntax error.</source>
         <translation>Eroare de sintaxă</translation>
     </message>
@@ -6696,17 +6696,17 @@ please use a different shortcut.</source>
         <translation>Mergeți la &quot;Other&quot;</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/slidecontroller.py" line="477"/>
+        <location filename="../../openlp/core/ui/slidecontroller.py" line="478"/>
         <source>Go To</source>
         <translation>Mergeți la</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/slidecontroller.py" line="564"/>
+        <location filename="../../openlp/core/ui/slidecontroller.py" line="565"/>
         <source>Previous Service</source>
         <translation>Serviciul Anterior</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/slidecontroller.py" line="569"/>
+        <location filename="../../openlp/core/ui/slidecontroller.py" line="570"/>
         <source>Next Service</source>
         <translation>Următorul Serviciu</translation>
     </message>
@@ -7546,509 +7546,509 @@ It is corrupt, inaccessible or not a valid theme.</source>
 <context>
     <name>OpenLP.Ui</name>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="340"/>
+        <location filename="../../openlp/core/common/i18n.py" line="338"/>
         <source>About</source>
         <translation>Despre</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="341"/>
+        <location filename="../../openlp/core/common/i18n.py" line="339"/>
         <source>&amp;Add</source>
         <translation>&amp;Adăugați</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="342"/>
+        <location filename="../../openlp/core/common/i18n.py" line="340"/>
         <source>Add folder</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="343"/>
+        <location filename="../../openlp/core/common/i18n.py" line="341"/>
         <source>Add folder.</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="344"/>
+        <location filename="../../openlp/core/common/i18n.py" line="342"/>
         <source>Add group</source>
         <translation>Adăugați grup</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="345"/>
+        <location filename="../../openlp/core/common/i18n.py" line="343"/>
         <source>Add group.</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="346"/>
+        <location filename="../../openlp/core/common/i18n.py" line="344"/>
         <source>Advanced</source>
         <translation>Avansat</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="347"/>
+        <location filename="../../openlp/core/common/i18n.py" line="345"/>
         <source>All Files</source>
         <translation>Toate Fișierele</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="348"/>
+        <location filename="../../openlp/core/common/i18n.py" line="346"/>
         <source>Automatic</source>
         <translation>Automat</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="349"/>
+        <location filename="../../openlp/core/common/i18n.py" line="347"/>
         <source>Background Color</source>
         <translation>Culoare de Fundal</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="350"/>
+        <location filename="../../openlp/core/common/i18n.py" line="348"/>
         <source>Background color:</source>
         <translation>Culoare fundal:</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="351"/>
+        <location filename="../../openlp/core/common/i18n.py" line="349"/>
         <source>Search is Empty or too Short</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="352"/>
+        <location filename="../../openlp/core/common/i18n.py" line="350"/>
         <source>&lt;strong&gt;The search you have entered is empty or shorter than 3 characters long.&lt;/strong&gt;&lt;br&gt;&lt;br&gt;Please try again with a longer search.</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="355"/>
+        <location filename="../../openlp/core/common/i18n.py" line="353"/>
         <source>No Bibles Available</source>
         <translation>Nicio Biblie disponibilă</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="356"/>
+        <location filename="../../openlp/core/common/i18n.py" line="354"/>
         <source>&lt;strong&gt;There are no Bibles currently installed.&lt;/strong&gt;&lt;br&gt;&lt;br&gt;Please use the Import Wizard to install one or more Bibles.</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="358"/>
+        <location filename="../../openlp/core/common/i18n.py" line="356"/>
         <source>Bottom</source>
         <translation>Jos</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="360"/>
+        <location filename="../../openlp/core/common/i18n.py" line="358"/>
         <source>Browse...</source>
         <translation>Căutare...</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="361"/>
+        <location filename="../../openlp/core/common/i18n.py" line="359"/>
         <source>Cancel</source>
         <translation>Anulare</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="362"/>
+        <location filename="../../openlp/core/common/i18n.py" line="360"/>
         <source>CCLI number:</source>
         <translation>Număr CCLI:</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="363"/>
+        <location filename="../../openlp/core/common/i18n.py" line="361"/>
         <source>CCLI song number:</source>
         <translation>Numărul CCLI al cântecului:</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="478"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="480"/>
         <source>Create a new service.</source>
         <translation>Crează un serviciu nou.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="366"/>
+        <location filename="../../openlp/core/common/i18n.py" line="364"/>
         <source>Confirm Delete</source>
         <translation>Confirmați Ștergerea</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="367"/>
+        <location filename="../../openlp/core/common/i18n.py" line="365"/>
         <source>Continuous</source>
         <translation>Continuu</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="368"/>
+        <location filename="../../openlp/core/common/i18n.py" line="366"/>
         <source>Default</source>
         <translation>Implicit</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="369"/>
+        <location filename="../../openlp/core/common/i18n.py" line="367"/>
         <source>Default Color:</source>
         <translation>Culoare Implicită:</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="370"/>
+        <location filename="../../openlp/core/common/i18n.py" line="368"/>
         <source>Service %Y-%m-%d %H-%M</source>
         <comment>This may not contain any of the following characters: /\?*|&lt;&gt;[]&quot;:+
 See http://docs.python.org/library/datetime.html#strftime-strptime-behavior for more information.</comment>
         <translation>Serviciu %Y-%m-%d %H-%M</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="374"/>
+        <location filename="../../openlp/core/common/i18n.py" line="372"/>
         <source>&amp;Delete</source>
         <translation>Ștergeți</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="375"/>
+        <location filename="../../openlp/core/common/i18n.py" line="373"/>
         <source>Display style:</source>
         <translation>Stil de afișare:</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="377"/>
+        <location filename="../../openlp/core/common/i18n.py" line="375"/>
         <source>Duplicate Error</source>
         <translation>Eroare Duplicare</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="378"/>
+        <location filename="../../openlp/core/common/i18n.py" line="376"/>
         <source>&amp;Edit</source>
         <translation>&amp;Editați</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="380"/>
+        <location filename="../../openlp/core/common/i18n.py" line="378"/>
         <source>Empty Field</source>
         <translation>Goliți Câmp</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="382"/>
+        <location filename="../../openlp/core/common/i18n.py" line="380"/>
         <source>Error</source>
         <translation>Eroare</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="383"/>
+        <location filename="../../openlp/core/common/i18n.py" line="381"/>
         <source>Export</source>
         <translation>Exportați</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="384"/>
+        <location filename="../../openlp/core/common/i18n.py" line="382"/>
         <source>File</source>
         <translation>Fișier</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="385"/>
+        <location filename="../../openlp/core/common/i18n.py" line="383"/>
         <source>File appears to be corrupt.</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="386"/>
+        <location filename="../../openlp/core/common/i18n.py" line="384"/>
         <source>pt</source>
         <comment>Abbreviated font point size unit</comment>
         <translation>pt</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="390"/>
+        <location filename="../../openlp/core/common/i18n.py" line="388"/>
         <source>Help</source>
         <translation>Ajutor</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="391"/>
+        <location filename="../../openlp/core/common/i18n.py" line="389"/>
         <source>h</source>
         <comment>The abbreviated unit for hours</comment>
         <translation>h</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="392"/>
+        <location filename="../../openlp/core/common/i18n.py" line="390"/>
         <source>Invalid Folder Selected</source>
         <comment>Singular</comment>
         <translation>Dosar Ales Incorect</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="393"/>
+        <location filename="../../openlp/core/common/i18n.py" line="391"/>
         <source>Invalid File Selected</source>
         <comment>Singular</comment>
         <translation>Fișier Ales Incorect</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="394"/>
+        <location filename="../../openlp/core/common/i18n.py" line="392"/>
         <source>Invalid Files Selected</source>
         <comment>Plural</comment>
         <translation>Fișiere Alese Incorecte</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="395"/>
+        <location filename="../../openlp/core/common/i18n.py" line="393"/>
         <source>Image</source>
         <translation>Imagine</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="396"/>
+        <location filename="../../openlp/core/common/i18n.py" line="394"/>
         <source>Import</source>
         <translation>Împortați</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="401"/>
+        <location filename="../../openlp/core/common/i18n.py" line="399"/>
         <source>Layout style:</source>
         <translation>Stil aspect:</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="402"/>
+        <location filename="../../openlp/core/common/i18n.py" line="400"/>
         <source>Live</source>
         <translation>În Direct</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="403"/>
+        <location filename="../../openlp/core/common/i18n.py" line="402"/>
         <source>Live Stream</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="404"/>
+        <location filename="../../openlp/core/common/i18n.py" line="403"/>
         <source>Live Background Error</source>
         <translation>Eroare Fundal În Direct</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="405"/>
+        <location filename="../../openlp/core/common/i18n.py" line="404"/>
         <source>Live Toolbar</source>
         <translation>Bară de Instrumente În Direct</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="406"/>
+        <location filename="../../openlp/core/common/i18n.py" line="405"/>
         <source>Load</source>
         <translation>Încărcați</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="407"/>
+        <location filename="../../openlp/core/common/i18n.py" line="406"/>
         <source>Manufacturer</source>
         <comment>Singular</comment>
         <translation>Producător</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="408"/>
+        <location filename="../../openlp/core/common/i18n.py" line="407"/>
         <source>Manufacturers</source>
         <comment>Plural</comment>
         <translation>Producători</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="409"/>
+        <location filename="../../openlp/core/common/i18n.py" line="408"/>
         <source>Model</source>
         <comment>Singular</comment>
         <translation>Model</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="410"/>
+        <location filename="../../openlp/core/common/i18n.py" line="409"/>
         <source>Models</source>
         <comment>Plural</comment>
         <translation>Modele</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="411"/>
+        <location filename="../../openlp/core/common/i18n.py" line="410"/>
         <source>m</source>
         <comment>The abbreviated unit for minutes</comment>
         <translation>m</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="412"/>
+        <location filename="../../openlp/core/common/i18n.py" line="411"/>
         <source>Middle</source>
         <translation>Mijloc</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="413"/>
+        <location filename="../../openlp/core/common/i18n.py" line="412"/>
         <source>New</source>
         <translation>Nou</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="414"/>
+        <location filename="../../openlp/core/common/i18n.py" line="413"/>
         <source>New Service</source>
         <translation>Serviciu Nou</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="415"/>
+        <location filename="../../openlp/core/common/i18n.py" line="414"/>
         <source>New Theme</source>
         <translation>Temă Nouă</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="416"/>
+        <location filename="../../openlp/core/common/i18n.py" line="415"/>
         <source>Next Track</source>
         <translation>Următoarea Pistă</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="417"/>
+        <location filename="../../openlp/core/common/i18n.py" line="416"/>
         <source>No Folder Selected</source>
         <comment>Singular</comment>
         <translation>Nici un Dosar Ales</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="418"/>
+        <location filename="../../openlp/core/common/i18n.py" line="417"/>
         <source>No File Selected</source>
         <comment>Singular</comment>
         <translation>Nici un Fișier Ales</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="419"/>
+        <location filename="../../openlp/core/common/i18n.py" line="418"/>
         <source>No Files Selected</source>
         <comment>Plural</comment>
         <translation>Nu sunt Fișiere Selectate</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="420"/>
+        <location filename="../../openlp/core/common/i18n.py" line="419"/>
         <source>No Item Selected</source>
         <comment>Singular</comment>
         <translation>Nici un Element Selectat</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="421"/>
+        <location filename="../../openlp/core/common/i18n.py" line="420"/>
         <source>No Items Selected</source>
         <comment>Plural</comment>
         <translation>Nu sunt Elemente Selectate</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="422"/>
+        <location filename="../../openlp/core/common/i18n.py" line="421"/>
         <source>No Search Results</source>
         <translation>Nu sunt Rezultate de Căutare</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="423"/>
+        <location filename="../../openlp/core/common/i18n.py" line="422"/>
         <source>OpenLP</source>
         <translation>OpenLP</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="424"/>
+        <location filename="../../openlp/core/common/i18n.py" line="423"/>
         <source>OpenLP Song Database</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="425"/>
+        <location filename="../../openlp/core/common/i18n.py" line="424"/>
         <source>OpenLP is already running on this machine. 
 Closing this instance</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="426"/>
+        <location filename="../../openlp/core/common/i18n.py" line="425"/>
         <source>Open service.</source>
         <translation>Deschide Serviciu.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="427"/>
+        <location filename="../../openlp/core/common/i18n.py" line="426"/>
         <source>Optional, this will be displayed in footer.</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="428"/>
+        <location filename="../../openlp/core/common/i18n.py" line="427"/>
         <source>Optional, this won&apos;t be displayed in footer.</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="430"/>
+        <location filename="../../openlp/core/common/i18n.py" line="429"/>
         <source>Permission Error</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="431"/>
+        <location filename="../../openlp/core/common/i18n.py" line="430"/>
         <source>Play Slides in Loop</source>
         <translation>Redați Repetitiv Diapozitivele</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="432"/>
+        <location filename="../../openlp/core/common/i18n.py" line="431"/>
         <source>Play Slides to End</source>
         <translation>Redați Diapozitivele până la Sfârșit</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="434"/>
+        <location filename="../../openlp/core/common/i18n.py" line="433"/>
         <source>Preview</source>
         <translation>Examinare</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="435"/>
+        <location filename="../../openlp/core/common/i18n.py" line="434"/>
         <source>Preview Toolbar</source>
         <translation>Bară de Instrumente a Examinării</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="436"/>
+        <location filename="../../openlp/core/common/i18n.py" line="435"/>
         <source>Print Service</source>
         <translation>Tipăriți Serviciu</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="437"/>
+        <location filename="../../openlp/core/common/i18n.py" line="436"/>
         <source>Projector</source>
         <comment>Singular</comment>
         <translation>Proiector</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="438"/>
+        <location filename="../../openlp/core/common/i18n.py" line="437"/>
         <source>Projectors</source>
         <comment>Plural</comment>
         <translation>Proiectoare</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="439"/>
+        <location filename="../../openlp/core/common/i18n.py" line="438"/>
         <source>Replace Background</source>
         <translation>Înlocuiți Fundal</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="440"/>
+        <location filename="../../openlp/core/common/i18n.py" line="439"/>
         <source>Replace live background.</source>
         <translation>Îlocuiți fundal în direct</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="441"/>
+        <location filename="../../openlp/core/common/i18n.py" line="440"/>
         <source>Replace live background is not available when the WebKit player is disabled.</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="443"/>
+        <location filename="../../openlp/core/common/i18n.py" line="442"/>
         <source>Reset Background</source>
         <translation>Restabiliți Fundal</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="444"/>
+        <location filename="../../openlp/core/common/i18n.py" line="443"/>
         <source>Reset live background.</source>
         <translation>Restabiliți fundal în direct</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="445"/>
+        <location filename="../../openlp/core/common/i18n.py" line="444"/>
         <source>Required, this will be displayed in footer.</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="446"/>
+        <location filename="../../openlp/core/common/i18n.py" line="445"/>
         <source>s</source>
         <comment>The abbreviated unit for seconds</comment>
         <translation>s</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="448"/>
+        <location filename="../../openlp/core/common/i18n.py" line="447"/>
         <source>Save &amp;&amp; Preview</source>
         <translation>Salvați și Examinați</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="454"/>
+        <location filename="../../openlp/core/common/i18n.py" line="453"/>
         <source>Search</source>
         <translation>Căutare</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="455"/>
+        <location filename="../../openlp/core/common/i18n.py" line="454"/>
         <source>Search Themes...</source>
         <comment>Search bar place holder text </comment>
         <translation>Căutați Teme...</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="456"/>
+        <location filename="../../openlp/core/common/i18n.py" line="455"/>
         <source>You must select an item to delete.</source>
         <translation>Trebuie să alegeți un element pentru a șterge.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="457"/>
+        <location filename="../../openlp/core/common/i18n.py" line="456"/>
         <source>You must select an item to edit.</source>
         <translation>Trebuie să alegeți un element pentru a edita.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="458"/>
+        <location filename="../../openlp/core/common/i18n.py" line="457"/>
         <source>Settings</source>
         <translation>Setări</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="459"/>
+        <location filename="../../openlp/core/common/i18n.py" line="458"/>
         <source>Save Service</source>
         <translation>Salvați Serviciu</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="460"/>
+        <location filename="../../openlp/core/common/i18n.py" line="459"/>
         <source>Service</source>
         <translation>Serviciu</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="461"/>
+        <location filename="../../openlp/core/common/i18n.py" line="460"/>
         <source>Please type more text to use &apos;Search As You Type&apos;</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="462"/>
+        <location filename="../../openlp/core/common/i18n.py" line="461"/>
         <source>Optional &amp;Split</source>
         <translation>Împărțire Opțională</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="463"/>
+        <location filename="../../openlp/core/common/i18n.py" line="462"/>
         <source>Split a slide into two only if it does not fit on the screen as one slide.</source>
         <translation>Împărțește un diapozitiv în două numai dacă nu încape pe ecran ca un singur diapozitiv.</translation>
     </message>
@@ -8058,119 +8058,119 @@ Closing this instance</source>
         <translation>Se pornește importul...</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="466"/>
+        <location filename="../../openlp/core/common/i18n.py" line="465"/>
         <source>Stop Play Slides in Loop</source>
         <translation>Opriți Redarea Repetitivă a Diapozitivelor</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="467"/>
+        <location filename="../../openlp/core/common/i18n.py" line="466"/>
         <source>Stop Play Slides to End</source>
         <translation>Opriți Redarea Diapozitivelor până la Sfârșit</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="468"/>
+        <location filename="../../openlp/core/common/i18n.py" line="467"/>
         <source>Theme</source>
         <comment>Singular</comment>
         <translation>Temă</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="469"/>
+        <location filename="../../openlp/core/common/i18n.py" line="468"/>
         <source>Themes</source>
         <comment>Plural</comment>
         <translation>Teme</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="470"/>
+        <location filename="../../openlp/core/common/i18n.py" line="469"/>
         <source>Tools</source>
         <translation>Instrumente</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="471"/>
+        <location filename="../../openlp/core/common/i18n.py" line="470"/>
         <source>Top</source>
         <translation>Sus</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="473"/>
+        <location filename="../../openlp/core/common/i18n.py" line="472"/>
         <source>Unable to read the file(s) listed below, please check that your user has permission to read the file(s) or that the file(s) are not using cloud storage (e.g. Dropbox, OneDrive).</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="476"/>
+        <location filename="../../openlp/core/common/i18n.py" line="475"/>
         <source>Unsupported File</source>
         <translation>Fișier neacceptat</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="479"/>
+        <location filename="../../openlp/core/common/i18n.py" line="478"/>
         <source>Verse Per Slide</source>
         <translation>Un Vers per Diapozitiv</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="480"/>
+        <location filename="../../openlp/core/common/i18n.py" line="479"/>
         <source>Verse Per Line</source>
         <translation>Un Vers per Linie</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="482"/>
+        <location filename="../../openlp/core/common/i18n.py" line="481"/>
         <source>Version</source>
         <translation>Versiune</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="483"/>
+        <location filename="../../openlp/core/common/i18n.py" line="482"/>
         <source>View</source>
         <translation>Vizualizare</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="484"/>
+        <location filename="../../openlp/core/common/i18n.py" line="483"/>
         <source>View Mode</source>
         <translation>Mode de Vizualizare</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="485"/>
+        <location filename="../../openlp/core/common/i18n.py" line="484"/>
         <source>Video</source>
         <translation>Video</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="486"/>
+        <location filename="../../openlp/core/common/i18n.py" line="485"/>
         <source>Warning</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="487"/>
+        <location filename="../../openlp/core/common/i18n.py" line="486"/>
         <source>Web Interface, Download and Install Latest Version</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="488"/>
+        <location filename="../../openlp/core/common/i18n.py" line="487"/>
         <source>Continuous (whole verses)</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="489"/>
+        <location filename="../../openlp/core/common/i18n.py" line="488"/>
         <source>Book Chapter</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="490"/>
+        <location filename="../../openlp/core/common/i18n.py" line="489"/>
         <source>Chapter</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="491"/>
+        <location filename="../../openlp/core/common/i18n.py" line="490"/>
         <source>Verse</source>
         <translation>Strofa</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="493"/>
+        <location filename="../../openlp/core/common/i18n.py" line="492"/>
         <source>Psalm</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="494"/>
+        <location filename="../../openlp/core/common/i18n.py" line="493"/>
         <source>Book names may be shortened from full names, for an example Ps 23 = Psalm 23</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/mediaitem.py" line="716"/>
+        <location filename="../../openlp/plugins/songs/lib/mediaitem.py" line="723"/>
         <source>Written by</source>
         <translation>Scris de</translation>
     </message>
@@ -8215,12 +8215,12 @@ Closing this instance</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="477"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="479"/>
         <source>Do not show this message again</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="478"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="480"/>
         <source>You already have a blank new service.
 Add some items to it then press Save</source>
         <translation type="unfinished"/>
@@ -8521,12 +8521,12 @@ Add some items to it then press Save</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/plugins/planningcenter/forms/selectplanform.py" line="252"/>
+        <location filename="../../openlp/plugins/planningcenter/forms/selectplanform.py" line="263"/>
         <source>Import failed</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/plugins/planningcenter/forms/selectplanform.py" line="252"/>
+        <location filename="../../openlp/plugins/planningcenter/forms/selectplanform.py" line="263"/>
         <source>Could not import bible text because no bible is installed.</source>
         <translation type="unfinished"/>
     </message>
@@ -9515,7 +9515,7 @@ Codarea este responsabilă pentru reprezentarea corectă a caracterelor.</transl
 <context>
     <name>SongsPlugin.EditSongForm</name>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="447"/>
+        <location filename="../../openlp/core/common/i18n.py" line="446"/>
         <source>&amp;Save &amp;&amp; Close</source>
         <translation type="unfinished"/>
     </message>
@@ -9784,47 +9784,47 @@ Please correct these tags before continuing.</source>
 <context>
     <name>SongsPlugin.EditVerseForm</name>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="376"/>
+        <location filename="../../openlp/core/common/i18n.py" line="374"/>
         <source>Down</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="379"/>
+        <location filename="../../openlp/core/common/i18n.py" line="377"/>
         <source>Edit Verse</source>
         <translation>Editare Strofă</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="387"/>
+        <location filename="../../openlp/core/common/i18n.py" line="385"/>
         <source>&amp;Forced Split</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="388"/>
+        <location filename="../../openlp/core/common/i18n.py" line="386"/>
         <source>Split the verse when displayed regardless of the screen size.</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="397"/>
+        <location filename="../../openlp/core/common/i18n.py" line="395"/>
         <source>&amp;Insert</source>
         <translation>&amp;Introduceți</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="398"/>
+        <location filename="../../openlp/core/common/i18n.py" line="396"/>
         <source>Split a slide into two by inserting a verse splitter.</source>
         <translation>Împărțește un diapozitiv în două prin introducerea unui împărțitor de diapozitive.</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="472"/>
+        <location filename="../../openlp/core/common/i18n.py" line="471"/>
         <source>Transpose:</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="477"/>
+        <location filename="../../openlp/core/common/i18n.py" line="476"/>
         <source>Up</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="481"/>
+        <location filename="../../openlp/core/common/i18n.py" line="480"/>
         <source>&amp;Verse type:</source>
         <translation>Tipul strofei:</translation>
     </message>
@@ -10278,7 +10278,7 @@ Please correct these tags before continuing.</source>
 <context>
     <name>SongsPlugin.MediaItem</name>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/mediaitem.py" line="731"/>
+        <location filename="../../openlp/plugins/songs/lib/mediaitem.py" line="738"/>
         <source>CCLI License</source>
         <translation type="unfinished"/>
     </message>
@@ -10364,17 +10364,17 @@ Please correct these tags before continuing.</source>
         <translation>copiați</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/mediaitem.py" line="637"/>
+        <location filename="../../openlp/plugins/songs/lib/mediaitem.py" line="644"/>
         <source>Media</source>
         <translation>Media</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/mediaitem.py" line="684"/>
+        <location filename="../../openlp/plugins/songs/lib/mediaitem.py" line="691"/>
         <source>CCLI License: </source>
         <translation>Licență CCLI:</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/mediaitem.py" line="744"/>
+        <location filename="../../openlp/plugins/songs/lib/mediaitem.py" line="751"/>
         <source>Failed to render Song footer html.
 See log for details</source>
         <translation type="unfinished"/>
@@ -10508,7 +10508,7 @@ See log for details</source>
 <context>
     <name>SongsPlugin.SongBeamerImport</name>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/importers/songbeamer.py" line="138"/>
+        <location filename="../../openlp/plugins/songs/lib/importers/songbeamer.py" line="132"/>
         <source>File is not a valid SongBeamer file.</source>
         <translation type="unfinished"/>
     </message>
@@ -10880,237 +10880,242 @@ Are you sure you want to import this song?</source>
 <context>
     <name>SongsPlugin.SongsTab</name>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="163"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="167"/>
         <source>Song related settings</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="164"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="168"/>
         <source>Enable &quot;Go to verse&quot; button in Live panel</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="166"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="170"/>
         <source>Update service from song edit</source>
         <translation>Actualizează serviciul din editarea cântecului</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="167"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="171"/>
         <source>Import missing songs from Service files</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="169"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="173"/>
         <source>Add first slide:</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="170"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="174"/>
         <source>None</source>
         <translation>nimic</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="171"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="175"/>
         <source>Songbook</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="172"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="176"/>
         <source>Same as Footer</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="173"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="177"/>
         <source>Auto-play background audio</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="174"/>
-        <source>If enabled all text between &quot;[&quot; and &quot;]&quot; will be regarded as chords.</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="176"/>
-        <source>Chords</source>
-        <translation type="unfinished"/>
-    </message>
-    <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="177"/>
-        <source>Ignore chords when importing songs</source>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="178"/>
+        <source>Apply UPPERCASE globally to all songs.</source>
         <translation type="unfinished"/>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/songstab.py" line="179"/>
+        <source>If enabled all text between &quot;[&quot; and &quot;]&quot; will be regarded as chords.</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="181"/>
+        <source>Chords</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="182"/>
+        <source>Ignore chords when importing songs</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="184"/>
         <source>SongSelect Login</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="180"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="185"/>
         <source>Username:</source>
         <translation>Utilizator:</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="181"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="186"/>
         <source>Password:</source>
         <translation>Parola:</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="182"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="187"/>
         <source>Chord notation to use:</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="183"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="188"/>
         <source>English</source>
         <translation>Română</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="184"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="189"/>
         <source>German</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="185"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="190"/>
         <source>Neo-Latin</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="187"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="192"/>
         <source>Warn about missing song key</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="188"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="193"/>
         <source>Footer</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="193"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="198"/>
         <source>Song Title</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="194"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="199"/>
         <source>Alternate Title</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="195"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="200"/>
         <source>Written By</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="196"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="201"/>
         <source>Authors when type is not set</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="198"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="203"/>
         <source>Authors (Type &quot;Words&quot;)</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="200"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="205"/>
         <source>Authors (Type &quot;Music&quot;)</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="203"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="208"/>
         <source>Authors (Type &quot;Words and Music&quot;)</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="206"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="211"/>
         <source>Authors (Type &quot;Translation&quot;)</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="207"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="212"/>
         <source>Authors (Type &quot;Words&quot; &amp; &quot;Words and Music&quot;)</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="209"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="214"/>
         <source>Authors (Type &quot;Music&quot; &amp; &quot;Words and Music&quot;)</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="211"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="216"/>
         <source>Copyright information</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="212"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="217"/>
         <source>Songbook Entries</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="214"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="219"/>
         <source>CCLI License</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="215"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="220"/>
         <source>Song CCLI Number</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="216"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="221"/>
         <source>Topics</source>
         <translation>Subiecte</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="217"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="222"/>
         <source>Where rendering on first (cover) slide</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="219"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="224"/>
         <source>Placeholder</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="219"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="224"/>
         <source>Description</source>
         <translation>Descriere</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="226"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="231"/>
         <source>can be empty</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="227"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="232"/>
         <source>list of entries, can be empty</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="232"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="237"/>
         <source>How to Use</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="233"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="238"/>
         <source>Template</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="234"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="239"/>
         <source>Mako Syntax</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="236"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="241"/>
         <source>Reset Template</source>
         <translation type="unfinished"/>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="323"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="334"/>
         <source>Save Username and Password</source>
         <translation>Salvați Utilizatorul și Parola</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="323"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="334"/>
         <source>WARNING: Saving your SongSelect password is INSECURE, your password is stored in PLAIN TEXT. Click Yes to save your password or No to cancel this.</source>
         <translation type="unfinished"/>
     </message>
@@ -11152,37 +11157,37 @@ You can disable this warning message in songs settings.</source>
 <context>
     <name>SongsPlugin.VerseType</name>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="359"/>
+        <location filename="../../openlp/core/common/i18n.py" line="357"/>
         <source>Bridge</source>
         <translation>Bridge</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="364"/>
+        <location filename="../../openlp/core/common/i18n.py" line="362"/>
         <source>Chorus</source>
         <translation>Cor</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="381"/>
+        <location filename="../../openlp/core/common/i18n.py" line="379"/>
         <source>Ending</source>
         <translation>Ending</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="400"/>
+        <location filename="../../openlp/core/common/i18n.py" line="398"/>
         <source>Intro</source>
         <translation>Intro</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="429"/>
+        <location filename="../../openlp/core/common/i18n.py" line="428"/>
         <source>Other</source>
         <translation>Alceva</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="433"/>
+        <location filename="../../openlp/core/common/i18n.py" line="432"/>
         <source>Pre-Chorus</source>
         <translation>Pre-Chorus</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="478"/>
+        <location filename="../../openlp/core/common/i18n.py" line="477"/>
         <source>Verse</source>
         <translation>Strofa</translation>
     </message>

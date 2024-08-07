@@ -2139,11 +2139,6 @@ Do you want to add the other images anyway?</source>
         <translation>需 VLC 支援以進行網路串流。</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/media/mediacontroller.py" line="337"/>
-        <source>Unsupported File</source>
-        <translation>檔案不支援</translation>
-    </message>
-    <message>
         <location filename="../../openlp/core/ui/media/mediacontroller.py" line="319"/>
         <source>Unable to Preview Stream</source>
         <translation>無法預覽串流</translation>
@@ -4004,12 +3999,12 @@ If you click the &apos;{finish_button}&apos; button you can download the data at
 <context>
     <name>OpenLP.LanguageManager</name>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="302"/>
+        <location filename="../../openlp/core/common/i18n.py" line="300"/>
         <source>Language</source>
         <translation>語言</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="302"/>
+        <location filename="../../openlp/core/common/i18n.py" line="300"/>
         <source>Please restart OpenLP to use your new language setting.</source>
         <translation>使用新語言設定請重新啟動 OpenLP。</translation>
     </message>
@@ -4017,18 +4012,18 @@ If you click the &apos;{finish_button}&apos; button you can download the data at
 <context>
     <name>OpenLP.MainWindow</name>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="264"/>
+        <location filename="../../openlp/core/common/i18n.py" line="263"/>
         <source>English</source>
         <comment>Please add the name of your language here</comment>
         <translation>English</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="449"/>
+        <location filename="../../openlp/core/common/i18n.py" line="448"/>
         <source>Screen setup has changed</source>
         <translation>已變更螢幕設定</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="450"/>
+        <location filename="../../openlp/core/common/i18n.py" line="449"/>
         <source>The screen setup has changed. OpenLP will try to automatically select a display screen, but you should consider updating the screen settings.</source>
         <translation>已變更螢幕設定。OpenLP 將嘗試自動選取顯示器，但請考慮更新螢幕設定。</translation>
     </message>
@@ -4418,7 +4413,7 @@ If you click the &apos;{finish_button}&apos; button you can download the data at
         <translation>用於 Live 當下的佈景主題。</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="633"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="632"/>
         <source>Version {new} of OpenLP is now available for download (you are currently running version {current}). 
 
 You can download the latest version from https://openlp.org/.</source>
@@ -4427,29 +4422,29 @@ You can download the latest version from https://openlp.org/.</source>
 亦可至 https://openlp.org/ 下載最新版本。</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="636"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="635"/>
         <source>OpenLP Version Updated</source>
         <translation>OpenLP 版本已更新</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="647"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="646"/>
         <source>Version {version} of the web remote is now available for download.
 To download this version, go to the Remote settings and click the Upgrade button.</source>
         <translation>有新版本 {version} 的 Web 遠端可供下載。
 欲下載此版本，請前往遠端設定，接著按下 [升級]。</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="650"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="649"/>
         <source>New Web Remote Version Available</source>
         <translation>已有可用的 Web 遠端新版本</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="713"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="712"/>
         <source>Re-run First Time Wizard?</source>
         <translation>重新執行首次配置精靈？</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="713"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="712"/>
         <source>Are you sure you want to re-run the First Time Wizard?
 
 Re-running this wizard may make changes to your current OpenLP configuration and possibly add songs to your existing songs list and change your default theme.</source>
@@ -4458,22 +4453,22 @@ Re-running this wizard may make changes to your current OpenLP configuration and
 重新執行可能會變更目前 OpenLP 配置，並可能新增歌曲至已存在的歌曲列表以及變更預設佈景主題。</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="758"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="757"/>
         <source>OpenLP Main Display Blanked</source>
         <translation>已空白 OpenLP 主要顯示</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="758"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="757"/>
         <source>The Main Display has been blanked out</source>
         <translation>已空白主要顯示</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="858"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="857"/>
         <source>Import settings?</source>
         <translation>確定要匯入設定？</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="858"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="857"/>
         <source>Are you sure you want to import settings?
 
  Importing settings will make permanent changes to your current OpenLP configuration.
@@ -4486,17 +4481,17 @@ Re-running this wizard may make changes to your current OpenLP configuration and
 匯入不正確的設定可能導致非預期的結果或 OpenLP 非正常終止。</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="957"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="956"/>
         <source>Import settings</source>
         <translation>匯入設定</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="969"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="968"/>
         <source>OpenLP Settings (*.conf)</source>
         <translation>OpenLP 設定 (*.conf)</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="904"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="903"/>
         <source>OpenLP cannot import settings from a newer version of OpenLP.
 
 Processing has terminated and no changes have been made.</source>
@@ -4505,7 +4500,7 @@ Processing has terminated and no changes have been made.</source>
 已終止處理，未進行任何變更。</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="917"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="916"/>
         <source>The file you have selected does not appear to be a valid OpenLP settings file.
 
 Processing has terminated and no changes have been made.</source>
@@ -4514,73 +4509,73 @@ Processing has terminated and no changes have been made.</source>
 已終止處理並且未作任何變更。</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="957"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="956"/>
         <source>OpenLP will now close.  Imported settings will be applied the next time you start OpenLP.</source>
         <translation>OpenLP 即將關閉。匯入的設定將會在下一次啟動 OpenLP 時套用。</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="969"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="968"/>
         <source>Export Settings File</source>
         <translation>匯出設定檔</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="982"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="981"/>
         <source>Export setting error</source>
         <translation>匯出設定錯誤</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="982"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="981"/>
         <source>An error occurred while exporting the settings: {err}</source>
         <translation>匯出設定時發生錯誤: {err}</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="1081"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="1079"/>
         <source>Exit OpenLP</source>
         <translation>離開 OpenLP</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="1081"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="1079"/>
         <source>Are you sure you want to exit OpenLP?</source>
         <translation>確定要離開 OpenLP？</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="1088"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="1086"/>
         <source>&amp;Exit OpenLP</source>
         <translation>離開 OpenLP(&amp;E)</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="1097"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="1095"/>
         <source>Please Wait</source>
         <translation>請稍候</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="1097"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="1095"/>
         <source>Waiting for some things to finish...</source>
         <translation>正在完成事項...</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="1177"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="1175"/>
         <source>Default Theme: {theme}</source>
         <translation>預設主題: {theme}</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="1380"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="1378"/>
         <source>Clear List</source>
         <comment>Clear List of recent files</comment>
         <translation>清除列表</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="1380"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="1378"/>
         <source>Clear the list of recent files.</source>
         <translation>清除最近使用的文件列表。</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="1461"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="1459"/>
         <source>Copying OpenLP data to new data directory location - {path} - Please wait for copy to finish</source>
         <translation>正在複製 OpenLP 數據至新目錄位置 - {path} - 請耐心等待複製完成</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="1469"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="1467"/>
         <source>OpenLP Data directory copy failed
 
 {err}</source>
@@ -4589,7 +4584,7 @@ Processing has terminated and no changes have been made.</source>
 {err}</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/mainwindow.py" line="1471"/>
+        <location filename="../../openlp/core/ui/mainwindow.py" line="1469"/>
         <source>New Data Directory Error</source>
         <translation>新增數據目錄錯誤</translation>
     </message>
@@ -6220,7 +6215,7 @@ File extension not supported</source>
         <translation>自動播放一次投影片(&amp;O)</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="960"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="962"/>
         <source>&amp;Delay between slides</source>
         <translation>投影片之間延遲(&amp;D)</translation>
     </message>
@@ -6235,52 +6230,52 @@ File extension not supported</source>
         <translation>變更佈景主題(&amp;C)</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="372"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="374"/>
         <source>Delete item from service</source>
         <translation>從聚會中刪除項目</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="372"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="374"/>
         <source>Are you sure you want to delete this item from the service?</source>
         <translation>確定要從聚會中刪除項目？</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="379"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="381"/>
         <source>&amp;Delete item</source>
         <translation>刪除項目(&amp;D)</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="402"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="404"/>
         <source>Untitled Service</source>
         <translation>無標題聚會</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="512"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="514"/>
         <source>Open File</source>
         <translation>開啟檔案</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="512"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="514"/>
         <source>OpenLP Service Files (*.osz *.oszl)</source>
         <translation>OpenLP 聚會檔 (*.osz *.oszl)</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="526"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="528"/>
         <source>Modified Service</source>
         <translation>聚會已變更</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="526"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="528"/>
         <source>The current service has been modified. Would you like to save this service?</source>
         <translation>目前的聚會已變更。您想要儲存此聚會嗎？</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="679"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="681"/>
         <source>Service File(s) Missing</source>
         <translation>聚會檔案遺失</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="680"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="682"/>
         <source>The following file(s) in the service are missing: {name}
 
 These files will be removed if you continue to save.</source>
@@ -6289,12 +6284,12 @@ These files will be removed if you continue to save.</source>
 如繼續儲存，將刪除遺失檔案。</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="727"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="729"/>
         <source>Error Saving File</source>
         <translation>儲存檔案錯誤</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="727"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="729"/>
         <source>There was an error saving your file.
 
 {error}</source>
@@ -6303,82 +6298,82 @@ These files will be removed if you continue to save.</source>
 {error}</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="764"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="766"/>
         <source>OpenLP Service Files - lite (*.oszl)</source>
         <translation>OpenLP 聚會檔 - 精簡版 (*.oszl)</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="765"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="767"/>
         <source>OpenLP Service Files (*.osz)</source>
         <translation>OpenLP 聚會檔 (*.osz)</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="873"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="875"/>
         <source>The service file {file_path} could not be loaded because it is either corrupt, inaccessible, or not a valid OpenLP 2 or OpenLP 3 service file.</source>
         <translation>無法載入「{file_path}」聚會檔。因檔案已損毀、無法存取或並非有效的 OpenLP 2 或 OpenLP 3 聚會檔。</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="971"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="973"/>
         <source>&amp;Auto Start - active</source>
         <translation>自動開始(&amp;A) - 已作用</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="975"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="977"/>
         <source>&amp;Auto Start - inactive</source>
         <translation>自動開始(&amp;A) - 未作用</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="1052"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="1054"/>
         <source>Input delay</source>
         <translation>輸入延遲</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="1052"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="1054"/>
         <source>Delay between slides in seconds.</source>
         <translation>投影片之間延遲。</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="1430"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="1431"/>
         <source>Edit</source>
         <translation>編輯</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="1431"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="1432"/>
         <source>Service copy only</source>
         <translation>複製聚會</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="1434"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="1435"/>
         <source>Slide theme</source>
         <translation>投影片佈景主題</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="1438"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="1439"/>
         <source>Notes</source>
         <translation>筆記</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="1692"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="1704"/>
         <source>Missing Display Handler</source>
         <translation>遺失顯示處理常式</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="1625"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="1637"/>
         <source>Your item cannot be displayed as there is no handler to display it</source>
         <translation>無法顯示項目，因尚無處理常式以顯示項目</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="1692"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="1704"/>
         <source>Your item cannot be displayed as the plugin required to display it is missing or inactive</source>
         <translation>無法顯示項目，因所需的外掛遺失或無效</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="1717"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="1729"/>
         <source>Rename item title</source>
         <translation>重新命名標題</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="1717"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="1729"/>
         <source>Title:</source>
         <translation>標題:</translation>
     </message>
@@ -6399,157 +6394,162 @@ These files will be removed if you continue to save.</source>
         <translation>還原至預設 IP 位址。</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="165"/>
+        <location filename="../../openlp/core/common/i18n.py" line="401"/>
+        <source>Live preview shows blank screen</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../../openlp/core/ui/servicetab.py" line="168"/>
         <source>Service</source>
         <translation>聚會</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="167"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="170"/>
         <source>Default Service Name</source>
         <translation>預設聚會名稱</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="168"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="171"/>
         <source>Enable default service name</source>
         <translation>啟用預設聚會名稱</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="169"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="172"/>
         <source>Date and Time:</source>
         <translation>時間及日期:</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="170"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="173"/>
         <source>Monday</source>
         <translation>星期一</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="171"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="174"/>
         <source>Tuesday</source>
         <translation>星期二</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="172"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="175"/>
         <source>Wednesday</source>
         <translation>星期三</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="173"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="176"/>
         <source>Thursday</source>
         <translation>星期四</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="174"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="177"/>
         <source>Friday</source>
         <translation>星期五</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="175"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="178"/>
         <source>Saturday</source>
         <translation>星期六</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="176"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="179"/>
         <source>Sunday</source>
         <translation>星期日</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="177"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="180"/>
         <source>Now</source>
         <translation>現在</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="178"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="181"/>
         <source>Time service usually starts.</source>
         <translation>聚會預計開始時間。</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="179"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="182"/>
         <source>Name:</source>
         <translation>名稱:</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="180"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="183"/>
         <source>Consult the OpenLP manual for usage.</source>
         <translation>參閱 OpenLP 使用手冊。</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="181"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="184"/>
         <source>Revert to the default service name &quot;{name}&quot;.</source>
         <translation>還原至為預設聚會名稱「{name}」。</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="184"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="187"/>
         <source>Example:</source>
         <translation>範例:</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="186"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="189"/>
         <source>Slide Controller</source>
         <translation>投影片控制器</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="187"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="190"/>
         <source>Unblank display when changing slide in Live</source>
         <translation>當於 Live 切換投影片時取消空白顯示</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="189"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="192"/>
         <source>Unblank display when sending items to Live</source>
         <translation>當傳送項目至 Live 時取消空白顯示</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="191"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="194"/>
         <source>Automatically preview the next item in service</source>
         <translation>自動預覽聚會的下一個項目</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="193"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="197"/>
         <source>Timed slide interval:</source>
         <translation>投影片間隔時間:</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="194"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="198"/>
         <source> sec</source>
         <translation>秒</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="196"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="200"/>
         <source>Service Item Wrapping</source>
         <translation>群組聚會項目</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="197"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="201"/>
         <source>Behavior of next/previous on the last/first slide:</source>
         <translation>下一張/上一張於最後一張/第一張投影片的的行為:</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="198"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="202"/>
         <source>&amp;Remain on Slide</source>
         <translation>保持在投影片(&amp;R)</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="199"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="203"/>
         <source>&amp;Wrap around</source>
         <translation>環繞(&amp;W)</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="200"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="204"/>
         <source>&amp;Move to next/previous service item</source>
         <translation>轉移至下一個/上一個 聚會項目(&amp;M)</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="202"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="206"/>
         <source>Service Editing</source>
         <translation>聚會編輯</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="203"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="207"/>
         <source>Show confirmation box when deleting item from service</source>
         <translation>從聚會中刪除項目時顯示確認方塊</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicetab.py" line="301"/>
+        <location filename="../../openlp/core/ui/servicetab.py" line="314"/>
         <source>Syntax error.</source>
         <translation>語法錯誤。</translation>
     </message>
@@ -6763,17 +6763,17 @@ please use a different shortcut.</source>
         <translation>前往「其他」</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/slidecontroller.py" line="477"/>
+        <location filename="../../openlp/core/ui/slidecontroller.py" line="478"/>
         <source>Go To</source>
         <translation>前往</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/slidecontroller.py" line="564"/>
+        <location filename="../../openlp/core/ui/slidecontroller.py" line="565"/>
         <source>Previous Service</source>
         <translation>上一場聚會</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/slidecontroller.py" line="569"/>
+        <location filename="../../openlp/core/ui/slidecontroller.py" line="570"/>
         <source>Next Service</source>
         <translation>下一場聚會</translation>
     </message>
@@ -7617,510 +7617,510 @@ It is corrupt, inaccessible or not a valid theme.</source>
 <context>
     <name>OpenLP.Ui</name>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="340"/>
+        <location filename="../../openlp/core/common/i18n.py" line="338"/>
         <source>About</source>
         <translation>關於</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="341"/>
+        <location filename="../../openlp/core/common/i18n.py" line="339"/>
         <source>&amp;Add</source>
         <translation>新增(&amp;A)</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="342"/>
+        <location filename="../../openlp/core/common/i18n.py" line="340"/>
         <source>Add folder</source>
         <translation>新增資料夾</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="343"/>
+        <location filename="../../openlp/core/common/i18n.py" line="341"/>
         <source>Add folder.</source>
         <translation>新增資料夾。</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="344"/>
+        <location filename="../../openlp/core/common/i18n.py" line="342"/>
         <source>Add group</source>
         <translation>新增群組</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="345"/>
+        <location filename="../../openlp/core/common/i18n.py" line="343"/>
         <source>Add group.</source>
         <translation>新增群組。</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="346"/>
+        <location filename="../../openlp/core/common/i18n.py" line="344"/>
         <source>Advanced</source>
         <translation>進階</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="347"/>
+        <location filename="../../openlp/core/common/i18n.py" line="345"/>
         <source>All Files</source>
         <translation>所有檔案</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="348"/>
+        <location filename="../../openlp/core/common/i18n.py" line="346"/>
         <source>Automatic</source>
         <translation>自動</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="349"/>
+        <location filename="../../openlp/core/common/i18n.py" line="347"/>
         <source>Background Color</source>
         <translation>背景色彩</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="350"/>
+        <location filename="../../openlp/core/common/i18n.py" line="348"/>
         <source>Background color:</source>
         <translation>背景色彩:</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="351"/>
+        <location filename="../../openlp/core/common/i18n.py" line="349"/>
         <source>Search is Empty or too Short</source>
         <translation>搜尋字元太短或為空</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="352"/>
+        <location filename="../../openlp/core/common/i18n.py" line="350"/>
         <source>&lt;strong&gt;The search you have entered is empty or shorter than 3 characters long.&lt;/strong&gt;&lt;br&gt;&lt;br&gt;Please try again with a longer search.</source>
         <translation>&lt;strong&gt;您輸入的搜尋字元為空或小於 3 個字元。&lt;/strong&gt;&lt;br&gt;&lt;br&gt;請重新嘗試輸入更多搜尋字元。</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="355"/>
+        <location filename="../../openlp/core/common/i18n.py" line="353"/>
         <source>No Bibles Available</source>
         <translation>沒有可用的聖經</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="356"/>
+        <location filename="../../openlp/core/common/i18n.py" line="354"/>
         <source>&lt;strong&gt;There are no Bibles currently installed.&lt;/strong&gt;&lt;br&gt;&lt;br&gt;Please use the Import Wizard to install one or more Bibles.</source>
         <translation>&lt;strong&gt;沒有任何已安裝聖經。&lt;/strong&gt;&lt;br&gt;&lt;br&gt;請使用匯入精靈安裝聖經。</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="358"/>
+        <location filename="../../openlp/core/common/i18n.py" line="356"/>
         <source>Bottom</source>
         <translation>底端</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="360"/>
+        <location filename="../../openlp/core/common/i18n.py" line="358"/>
         <source>Browse...</source>
         <translation>瀏覽...</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="361"/>
+        <location filename="../../openlp/core/common/i18n.py" line="359"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="362"/>
+        <location filename="../../openlp/core/common/i18n.py" line="360"/>
         <source>CCLI number:</source>
         <translation>CCLI 編號:</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="363"/>
+        <location filename="../../openlp/core/common/i18n.py" line="361"/>
         <source>CCLI song number:</source>
         <translation>CCLI 歌曲編號:</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="478"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="480"/>
         <source>Create a new service.</source>
         <translation>建立新聚會。</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="366"/>
+        <location filename="../../openlp/core/common/i18n.py" line="364"/>
         <source>Confirm Delete</source>
         <translation>確認刪除</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="367"/>
+        <location filename="../../openlp/core/common/i18n.py" line="365"/>
         <source>Continuous</source>
         <translation>連續</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="368"/>
+        <location filename="../../openlp/core/common/i18n.py" line="366"/>
         <source>Default</source>
         <translation>預設</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="369"/>
+        <location filename="../../openlp/core/common/i18n.py" line="367"/>
         <source>Default Color:</source>
         <translation>預設色彩:</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="370"/>
+        <location filename="../../openlp/core/common/i18n.py" line="368"/>
         <source>Service %Y-%m-%d %H-%M</source>
         <comment>This may not contain any of the following characters: /\?*|&lt;&gt;[]&quot;:+
 See http://docs.python.org/library/datetime.html#strftime-strptime-behavior for more information.</comment>
         <translation>聚會 %Y-%m-%d %H-%M</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="374"/>
+        <location filename="../../openlp/core/common/i18n.py" line="372"/>
         <source>&amp;Delete</source>
         <translation>刪除(&amp;D)</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="375"/>
+        <location filename="../../openlp/core/common/i18n.py" line="373"/>
         <source>Display style:</source>
         <translation>顯示方式:</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="377"/>
+        <location filename="../../openlp/core/common/i18n.py" line="375"/>
         <source>Duplicate Error</source>
         <translation>重複的錯誤</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="378"/>
+        <location filename="../../openlp/core/common/i18n.py" line="376"/>
         <source>&amp;Edit</source>
         <translation>編輯(&amp;E)</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="380"/>
+        <location filename="../../openlp/core/common/i18n.py" line="378"/>
         <source>Empty Field</source>
         <translation>空白區域</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="382"/>
+        <location filename="../../openlp/core/common/i18n.py" line="380"/>
         <source>Error</source>
         <translation>錯誤</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="383"/>
+        <location filename="../../openlp/core/common/i18n.py" line="381"/>
         <source>Export</source>
         <translation>匯出</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="384"/>
+        <location filename="../../openlp/core/common/i18n.py" line="382"/>
         <source>File</source>
         <translation>檔案</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="385"/>
+        <location filename="../../openlp/core/common/i18n.py" line="383"/>
         <source>File appears to be corrupt.</source>
         <translation>檔案似乎已損毀。</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="386"/>
+        <location filename="../../openlp/core/common/i18n.py" line="384"/>
         <source>pt</source>
         <comment>Abbreviated font point size unit</comment>
         <translation>pt</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="390"/>
+        <location filename="../../openlp/core/common/i18n.py" line="388"/>
         <source>Help</source>
         <translation>協助</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="391"/>
+        <location filename="../../openlp/core/common/i18n.py" line="389"/>
         <source>h</source>
         <comment>The abbreviated unit for hours</comment>
         <translation>時</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="392"/>
+        <location filename="../../openlp/core/common/i18n.py" line="390"/>
         <source>Invalid Folder Selected</source>
         <comment>Singular</comment>
         <translation>選取的資料夾無效</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="393"/>
+        <location filename="../../openlp/core/common/i18n.py" line="391"/>
         <source>Invalid File Selected</source>
         <comment>Singular</comment>
         <translation>選取的檔案無效</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="394"/>
+        <location filename="../../openlp/core/common/i18n.py" line="392"/>
         <source>Invalid Files Selected</source>
         <comment>Plural</comment>
         <translation>選取的檔案無效</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="395"/>
+        <location filename="../../openlp/core/common/i18n.py" line="393"/>
         <source>Image</source>
         <translation>圖片</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="396"/>
+        <location filename="../../openlp/core/common/i18n.py" line="394"/>
         <source>Import</source>
         <translation>匯入</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="401"/>
+        <location filename="../../openlp/core/common/i18n.py" line="399"/>
         <source>Layout style:</source>
         <translation>版面樣式:</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="402"/>
+        <location filename="../../openlp/core/common/i18n.py" line="400"/>
         <source>Live</source>
         <translation>Live</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="403"/>
+        <location filename="../../openlp/core/common/i18n.py" line="402"/>
         <source>Live Stream</source>
         <translation>Live 直播</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="404"/>
+        <location filename="../../openlp/core/common/i18n.py" line="403"/>
         <source>Live Background Error</source>
         <translation>Live 背景錯誤</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="405"/>
+        <location filename="../../openlp/core/common/i18n.py" line="404"/>
         <source>Live Toolbar</source>
         <translation>Live 工具列</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="406"/>
+        <location filename="../../openlp/core/common/i18n.py" line="405"/>
         <source>Load</source>
         <translation>載入</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="407"/>
+        <location filename="../../openlp/core/common/i18n.py" line="406"/>
         <source>Manufacturer</source>
         <comment>Singular</comment>
         <translation>製造商</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="408"/>
+        <location filename="../../openlp/core/common/i18n.py" line="407"/>
         <source>Manufacturers</source>
         <comment>Plural</comment>
         <translation>製造商</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="409"/>
+        <location filename="../../openlp/core/common/i18n.py" line="408"/>
         <source>Model</source>
         <comment>Singular</comment>
         <translation>型號</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="410"/>
+        <location filename="../../openlp/core/common/i18n.py" line="409"/>
         <source>Models</source>
         <comment>Plural</comment>
         <translation>型號</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="411"/>
+        <location filename="../../openlp/core/common/i18n.py" line="410"/>
         <source>m</source>
         <comment>The abbreviated unit for minutes</comment>
         <translation>分</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="412"/>
+        <location filename="../../openlp/core/common/i18n.py" line="411"/>
         <source>Middle</source>
         <translation>中間</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="413"/>
+        <location filename="../../openlp/core/common/i18n.py" line="412"/>
         <source>New</source>
         <translation>新增</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="414"/>
+        <location filename="../../openlp/core/common/i18n.py" line="413"/>
         <source>New Service</source>
         <translation>新聚會</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="415"/>
+        <location filename="../../openlp/core/common/i18n.py" line="414"/>
         <source>New Theme</source>
         <translation>新增佈景主題</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="416"/>
+        <location filename="../../openlp/core/common/i18n.py" line="415"/>
         <source>Next Track</source>
         <translation>下一個音軌</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="417"/>
+        <location filename="../../openlp/core/common/i18n.py" line="416"/>
         <source>No Folder Selected</source>
         <comment>Singular</comment>
         <translation>未選取資料夾</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="418"/>
+        <location filename="../../openlp/core/common/i18n.py" line="417"/>
         <source>No File Selected</source>
         <comment>Singular</comment>
         <translation>未選取檔案</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="419"/>
+        <location filename="../../openlp/core/common/i18n.py" line="418"/>
         <source>No Files Selected</source>
         <comment>Plural</comment>
         <translation>未選取檔案</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="420"/>
+        <location filename="../../openlp/core/common/i18n.py" line="419"/>
         <source>No Item Selected</source>
         <comment>Singular</comment>
         <translation>未選取項目</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="421"/>
+        <location filename="../../openlp/core/common/i18n.py" line="420"/>
         <source>No Items Selected</source>
         <comment>Plural</comment>
         <translation>未選取項目</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="422"/>
+        <location filename="../../openlp/core/common/i18n.py" line="421"/>
         <source>No Search Results</source>
         <translation>沒有搜尋結果</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="423"/>
+        <location filename="../../openlp/core/common/i18n.py" line="422"/>
         <source>OpenLP</source>
         <translation>OpenLP</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="424"/>
+        <location filename="../../openlp/core/common/i18n.py" line="423"/>
         <source>OpenLP Song Database</source>
         <translation>OpenLP 歌曲資料庫</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="425"/>
+        <location filename="../../openlp/core/common/i18n.py" line="424"/>
         <source>OpenLP is already running on this machine. 
 Closing this instance</source>
         <translation>OpenLP 已在此電腦執行。
 關閉此執行個體</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="426"/>
+        <location filename="../../openlp/core/common/i18n.py" line="425"/>
         <source>Open service.</source>
         <translation>開啟聚會。</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="427"/>
+        <location filename="../../openlp/core/common/i18n.py" line="426"/>
         <source>Optional, this will be displayed in footer.</source>
         <translation>可選，將顯示於頁尾中。</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="428"/>
+        <location filename="../../openlp/core/common/i18n.py" line="427"/>
         <source>Optional, this won&apos;t be displayed in footer.</source>
         <translation>可選，將不會顯示於頁尾中。</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="430"/>
+        <location filename="../../openlp/core/common/i18n.py" line="429"/>
         <source>Permission Error</source>
         <translation>權限錯誤</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="431"/>
+        <location filename="../../openlp/core/common/i18n.py" line="430"/>
         <source>Play Slides in Loop</source>
         <translation>循環播放投影片</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="432"/>
+        <location filename="../../openlp/core/common/i18n.py" line="431"/>
         <source>Play Slides to End</source>
         <translation>播放投影片至結尾</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="434"/>
+        <location filename="../../openlp/core/common/i18n.py" line="433"/>
         <source>Preview</source>
         <translation>預覽</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="435"/>
+        <location filename="../../openlp/core/common/i18n.py" line="434"/>
         <source>Preview Toolbar</source>
         <translation>預覽工具列</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="436"/>
+        <location filename="../../openlp/core/common/i18n.py" line="435"/>
         <source>Print Service</source>
         <translation>列印聚會</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="437"/>
+        <location filename="../../openlp/core/common/i18n.py" line="436"/>
         <source>Projector</source>
         <comment>Singular</comment>
         <translation>投影機</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="438"/>
+        <location filename="../../openlp/core/common/i18n.py" line="437"/>
         <source>Projectors</source>
         <comment>Plural</comment>
         <translation>投影機</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="439"/>
+        <location filename="../../openlp/core/common/i18n.py" line="438"/>
         <source>Replace Background</source>
         <translation>更換背景</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="440"/>
+        <location filename="../../openlp/core/common/i18n.py" line="439"/>
         <source>Replace live background.</source>
         <translation>更換 Live 背景。</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="441"/>
+        <location filename="../../openlp/core/common/i18n.py" line="440"/>
         <source>Replace live background is not available when the WebKit player is disabled.</source>
         <translation>當停用 WebKit 播放程式時，更換即時背景不可用。</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="443"/>
+        <location filename="../../openlp/core/common/i18n.py" line="442"/>
         <source>Reset Background</source>
         <translation>重設背景</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="444"/>
+        <location filename="../../openlp/core/common/i18n.py" line="443"/>
         <source>Reset live background.</source>
         <translation>重設 Live 背景。</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="445"/>
+        <location filename="../../openlp/core/common/i18n.py" line="444"/>
         <source>Required, this will be displayed in footer.</source>
         <translation>必要，這會顯示在頁尾中。</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="446"/>
+        <location filename="../../openlp/core/common/i18n.py" line="445"/>
         <source>s</source>
         <comment>The abbreviated unit for seconds</comment>
         <translation>秒</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="448"/>
+        <location filename="../../openlp/core/common/i18n.py" line="447"/>
         <source>Save &amp;&amp; Preview</source>
         <translation>儲存並預覽</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="454"/>
+        <location filename="../../openlp/core/common/i18n.py" line="453"/>
         <source>Search</source>
         <translation>搜尋</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="455"/>
+        <location filename="../../openlp/core/common/i18n.py" line="454"/>
         <source>Search Themes...</source>
         <comment>Search bar place holder text </comment>
         <translation>搜尋佈景主題...</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="456"/>
+        <location filename="../../openlp/core/common/i18n.py" line="455"/>
         <source>You must select an item to delete.</source>
         <translation>必須選取項目以刪除。</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="457"/>
+        <location filename="../../openlp/core/common/i18n.py" line="456"/>
         <source>You must select an item to edit.</source>
         <translation>必須選取項目以編輯。</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="458"/>
+        <location filename="../../openlp/core/common/i18n.py" line="457"/>
         <source>Settings</source>
         <translation>設定</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="459"/>
+        <location filename="../../openlp/core/common/i18n.py" line="458"/>
         <source>Save Service</source>
         <translation>儲存聚會</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="460"/>
+        <location filename="../../openlp/core/common/i18n.py" line="459"/>
         <source>Service</source>
         <translation>聚會</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="461"/>
+        <location filename="../../openlp/core/common/i18n.py" line="460"/>
         <source>Please type more text to use &apos;Search As You Type&apos;</source>
         <translation>請輸入更多文字以使用「即時搜尋」</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="462"/>
+        <location filename="../../openlp/core/common/i18n.py" line="461"/>
         <source>Optional &amp;Split</source>
         <translation>分隔 (可選)(&amp;S)</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="463"/>
+        <location filename="../../openlp/core/common/i18n.py" line="462"/>
         <source>Split a slide into two only if it does not fit on the screen as one slide.</source>
         <translation>如果投影片超出螢幕，則將其一分為二。</translation>
     </message>
@@ -8130,119 +8130,119 @@ Closing this instance</source>
         <translation>開始匯入...</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="466"/>
+        <location filename="../../openlp/core/common/i18n.py" line="465"/>
         <source>Stop Play Slides in Loop</source>
         <translation>停止循環播放投影片</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="467"/>
+        <location filename="../../openlp/core/common/i18n.py" line="466"/>
         <source>Stop Play Slides to End</source>
         <translation>停止順序播放投影片至結尾</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="468"/>
+        <location filename="../../openlp/core/common/i18n.py" line="467"/>
         <source>Theme</source>
         <comment>Singular</comment>
         <translation>佈景主題</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="469"/>
+        <location filename="../../openlp/core/common/i18n.py" line="468"/>
         <source>Themes</source>
         <comment>Plural</comment>
         <translation>佈景主題</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="470"/>
+        <location filename="../../openlp/core/common/i18n.py" line="469"/>
         <source>Tools</source>
         <translation>工具</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="471"/>
+        <location filename="../../openlp/core/common/i18n.py" line="470"/>
         <source>Top</source>
         <translation>上方</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="473"/>
+        <location filename="../../openlp/core/common/i18n.py" line="472"/>
         <source>Unable to read the file(s) listed below, please check that your user has permission to read the file(s) or that the file(s) are not using cloud storage (e.g. Dropbox, OneDrive).</source>
-        <translation type="unfinished"/>
+        <translation>無法讀取以下檔案，請檢查使用者已取得權限以存取檔案，或者確認檔案並非儲存於雲端空間 (例如: Dropbox, OneDrive)。</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="476"/>
+        <location filename="../../openlp/core/common/i18n.py" line="475"/>
         <source>Unsupported File</source>
         <translation>檔案不支援</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="479"/>
+        <location filename="../../openlp/core/common/i18n.py" line="478"/>
         <source>Verse Per Slide</source>
         <translation>每張投影片</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="480"/>
+        <location filename="../../openlp/core/common/i18n.py" line="479"/>
         <source>Verse Per Line</source>
         <translation>每一行</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="482"/>
+        <location filename="../../openlp/core/common/i18n.py" line="481"/>
         <source>Version</source>
         <translation>版本</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="483"/>
+        <location filename="../../openlp/core/common/i18n.py" line="482"/>
         <source>View</source>
         <translation>檢視</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="484"/>
+        <location filename="../../openlp/core/common/i18n.py" line="483"/>
         <source>View Mode</source>
         <translation>檢視模式</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="485"/>
+        <location filename="../../openlp/core/common/i18n.py" line="484"/>
         <source>Video</source>
         <translation>視訊</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="486"/>
+        <location filename="../../openlp/core/common/i18n.py" line="485"/>
         <source>Warning</source>
         <translation>警告</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="487"/>
+        <location filename="../../openlp/core/common/i18n.py" line="486"/>
         <source>Web Interface, Download and Install Latest Version</source>
         <translation>Web 介面，下載並安裝最新版本</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="488"/>
+        <location filename="../../openlp/core/common/i18n.py" line="487"/>
         <source>Continuous (whole verses)</source>
         <translation>連續播放 (整節經文)</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="489"/>
+        <location filename="../../openlp/core/common/i18n.py" line="488"/>
         <source>Book Chapter</source>
         <translation>書卷章節</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="490"/>
+        <location filename="../../openlp/core/common/i18n.py" line="489"/>
         <source>Chapter</source>
         <translation>章節</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="491"/>
+        <location filename="../../openlp/core/common/i18n.py" line="490"/>
         <source>Verse</source>
         <translation>V 主歌</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="493"/>
+        <location filename="../../openlp/core/common/i18n.py" line="492"/>
         <source>Psalm</source>
         <translation>詩篇</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="494"/>
+        <location filename="../../openlp/core/common/i18n.py" line="493"/>
         <source>Book names may be shortened from full names, for an example Ps 23 = Psalm 23</source>
         <translation>可從書卷全名縮寫成較短名稱，例如「詩 23」=「詩篇 23」</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/mediaitem.py" line="716"/>
+        <location filename="../../openlp/plugins/songs/lib/mediaitem.py" line="723"/>
         <source>Written by</source>
         <translation>撰寫</translation>
     </message>
@@ -8287,12 +8287,12 @@ Closing this instance</source>
         <translation>顯示列表於網格檢視中。</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="477"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="479"/>
         <source>Do not show this message again</source>
         <translation>不再顯示這個訊息</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/ui/servicemanager.py" line="478"/>
+        <location filename="../../openlp/core/ui/servicemanager.py" line="480"/>
         <source>You already have a blank new service.
 Add some items to it then press Save</source>
         <translation>已建立空白新聚會。
@@ -8594,12 +8594,12 @@ Add some items to it then press Save</source>
         <translation>驗證失敗。請檢查 OpenLP 設定中所配置的憑證。</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/planningcenter/forms/selectplanform.py" line="252"/>
+        <location filename="../../openlp/plugins/planningcenter/forms/selectplanform.py" line="263"/>
         <source>Import failed</source>
         <translation>匯入失敗</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/planningcenter/forms/selectplanform.py" line="252"/>
+        <location filename="../../openlp/plugins/planningcenter/forms/selectplanform.py" line="263"/>
         <source>Could not import bible text because no bible is installed.</source>
         <translation>由於尚無已安裝的聖經，以致無法匯入聖經內容。</translation>
     </message>
@@ -9600,7 +9600,7 @@ The encoding is responsible for the correct character representation.</source>
 <context>
     <name>SongsPlugin.EditSongForm</name>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="447"/>
+        <location filename="../../openlp/core/common/i18n.py" line="446"/>
         <source>&amp;Save &amp;&amp; Close</source>
         <translation>儲存並關閉(&amp;S)</translation>
     </message>
@@ -9875,47 +9875,47 @@ Please correct these tags before continuing.</source>
 <context>
     <name>SongsPlugin.EditVerseForm</name>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="376"/>
+        <location filename="../../openlp/core/common/i18n.py" line="374"/>
         <source>Down</source>
         <translation>下</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="379"/>
+        <location filename="../../openlp/core/common/i18n.py" line="377"/>
         <source>Edit Verse</source>
         <translation>編輯段落</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="387"/>
+        <location filename="../../openlp/core/common/i18n.py" line="385"/>
         <source>&amp;Forced Split</source>
         <translation>強制分隔(&amp;F)</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="388"/>
+        <location filename="../../openlp/core/common/i18n.py" line="386"/>
         <source>Split the verse when displayed regardless of the screen size.</source>
         <translation>無論螢幕大小為何，顯示時皆分隔經文。</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="397"/>
+        <location filename="../../openlp/core/common/i18n.py" line="395"/>
         <source>&amp;Insert</source>
         <translation>插入(&amp;I)</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="398"/>
+        <location filename="../../openlp/core/common/i18n.py" line="396"/>
         <source>Split a slide into two by inserting a verse splitter.</source>
         <translation>插入分隔符號以將經文一分為二。</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="472"/>
+        <location filename="../../openlp/core/common/i18n.py" line="471"/>
         <source>Transpose:</source>
         <translation>調換:</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="477"/>
+        <location filename="../../openlp/core/common/i18n.py" line="476"/>
         <source>Up</source>
         <translation>上</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="481"/>
+        <location filename="../../openlp/core/common/i18n.py" line="480"/>
         <source>&amp;Verse type:</source>
         <translation>段落類型(&amp;V):</translation>
     </message>
@@ -10369,7 +10369,7 @@ Please correct these tags before continuing.</source>
 <context>
     <name>SongsPlugin.MediaItem</name>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/mediaitem.py" line="731"/>
+        <location filename="../../openlp/plugins/songs/lib/mediaitem.py" line="738"/>
         <source>CCLI License</source>
         <translation>CCLI 授權</translation>
     </message>
@@ -10455,17 +10455,17 @@ Please correct these tags before continuing.</source>
         <translation>複製</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/mediaitem.py" line="637"/>
+        <location filename="../../openlp/plugins/songs/lib/mediaitem.py" line="644"/>
         <source>Media</source>
         <translation>媒體</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/mediaitem.py" line="684"/>
+        <location filename="../../openlp/plugins/songs/lib/mediaitem.py" line="691"/>
         <source>CCLI License: </source>
         <translation>CCLI 授權:</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/mediaitem.py" line="744"/>
+        <location filename="../../openlp/plugins/songs/lib/mediaitem.py" line="751"/>
         <source>Failed to render Song footer html.
 See log for details</source>
         <translation>轉譯歌曲頁腳 HTML 失敗。
@@ -10600,7 +10600,7 @@ See log for details</source>
 <context>
     <name>SongsPlugin.SongBeamerImport</name>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/importers/songbeamer.py" line="138"/>
+        <location filename="../../openlp/plugins/songs/lib/importers/songbeamer.py" line="132"/>
         <source>File is not a valid SongBeamer file.</source>
         <translation>檔案並非有效的 SongBeamer 檔。</translation>
     </message>
@@ -10974,237 +10974,242 @@ Are you sure you want to import this song?</source>
 <context>
     <name>SongsPlugin.SongsTab</name>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="163"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="167"/>
         <source>Song related settings</source>
         <translation>歌曲相關設定</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="164"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="168"/>
         <source>Enable &quot;Go to verse&quot; button in Live panel</source>
         <translation>在 Live 面板中啟用「前往經文」選項</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="166"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="170"/>
         <source>Update service from song edit</source>
         <translation>編輯歌詞更新聚會管理</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="167"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="171"/>
         <source>Import missing songs from Service files</source>
         <translation>從聚會檔匯入遺失的歌曲</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="169"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="173"/>
         <source>Add first slide:</source>
         <translation>新增第一頁投影片</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="170"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="174"/>
         <source>None</source>
         <translation>無</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="171"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="175"/>
         <source>Songbook</source>
         <translation>歌曲簿</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="172"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="176"/>
         <source>Same as Footer</source>
         <translation>頁尾一致</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="173"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="177"/>
         <source>Auto-play background audio</source>
         <translation>自動播放背景音訊</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="174"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="178"/>
+        <source>Apply UPPERCASE globally to all songs.</source>
+        <translation type="unfinished"/>
+    </message>
+    <message>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="179"/>
         <source>If enabled all text between &quot;[&quot; and &quot;]&quot; will be regarded as chords.</source>
         <translation>如啟用，「[」以及「]」之間的文字皆視為 C 和弦。</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="176"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="181"/>
         <source>Chords</source>
         <translation>和弦</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="177"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="182"/>
         <source>Ignore chords when importing songs</source>
         <translation>匯入歌曲時忽略和弦</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="179"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="184"/>
         <source>SongSelect Login</source>
         <translation>SongSelect 登入</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="180"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="185"/>
         <source>Username:</source>
         <translation>使用者名稱:</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="181"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="186"/>
         <source>Password:</source>
         <translation>使用者密碼:</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="182"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="187"/>
         <source>Chord notation to use:</source>
         <translation>欲使用的和弦符號:</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="183"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="188"/>
         <source>English</source>
         <translation>English</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="184"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="189"/>
         <source>German</source>
         <translation>German</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="185"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="190"/>
         <source>Neo-Latin</source>
         <translation>Neo-Latin</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="187"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="192"/>
         <source>Warn about missing song key</source>
         <translation>遺失歌曲調號警告</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="188"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="193"/>
         <source>Footer</source>
         <translation>頁尾</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="193"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="198"/>
         <source>Song Title</source>
         <translation>歌曲標題</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="194"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="199"/>
         <source>Alternate Title</source>
         <translation>副標題</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="195"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="200"/>
         <source>Written By</source>
         <translation>作者</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="196"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="201"/>
         <source>Authors when type is not set</source>
         <translation>當未設定作者類型時</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="198"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="203"/>
         <source>Authors (Type &quot;Words&quot;)</source>
         <translation>作者 (類型「作詞」)</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="200"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="205"/>
         <source>Authors (Type &quot;Music&quot;)</source>
         <translation>作者 (類型「作曲」)</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="203"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="208"/>
         <source>Authors (Type &quot;Words and Music&quot;)</source>
         <translation>作者 (類型「詞曲」)</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="206"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="211"/>
         <source>Authors (Type &quot;Translation&quot;)</source>
         <translation>作者 (類型「譯者」)</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="207"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="212"/>
         <source>Authors (Type &quot;Words&quot; &amp; &quot;Words and Music&quot;)</source>
         <translation>作者 (類型「作詞」和「詞曲」)</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="209"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="214"/>
         <source>Authors (Type &quot;Music&quot; &amp; &quot;Words and Music&quot;)</source>
         <translation>作者 (類型「作曲」和「詞曲」)</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="211"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="216"/>
         <source>Copyright information</source>
         <translation>版權資訊</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="212"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="217"/>
         <source>Songbook Entries</source>
         <translation>歌曲簿項目</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="214"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="219"/>
         <source>CCLI License</source>
         <translation>CCLI 授權</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="215"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="220"/>
         <source>Song CCLI Number</source>
         <translation>CCLI 歌曲編號</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="216"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="221"/>
         <source>Topics</source>
         <translation>主題</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="217"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="222"/>
         <source>Where rendering on first (cover) slide</source>
         <translation>第一張 (封面) 投影片上的渲染位置</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="219"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="224"/>
         <source>Placeholder</source>
         <translation>預留位置</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="219"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="224"/>
         <source>Description</source>
         <translation>說明</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="226"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="231"/>
         <source>can be empty</source>
         <translation>可留空</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="227"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="232"/>
         <source>list of entries, can be empty</source>
         <translation>項目列表，可以為空</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="232"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="237"/>
         <source>How to Use</source>
         <translation>如何使用</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="233"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="238"/>
         <source>Template</source>
         <translation>範本</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="234"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="239"/>
         <source>Mako Syntax</source>
         <translation>Mako 語法</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="236"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="241"/>
         <source>Reset Template</source>
         <translation>重設範本</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="323"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="334"/>
         <source>Save Username and Password</source>
         <translation>儲存帳號及密碼</translation>
     </message>
     <message>
-        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="323"/>
+        <location filename="../../openlp/plugins/songs/lib/songstab.py" line="334"/>
         <source>WARNING: Saving your SongSelect password is INSECURE, your password is stored in PLAIN TEXT. Click Yes to save your password or No to cancel this.</source>
         <translation>警告: 儲存 SongSelect 密碼是不安全的，密碼是以明文格式儲存。點選 [是] 以繼續儲存密碼，或點選 [否] 以取消操作。</translation>
     </message>
@@ -11249,37 +11254,37 @@ You can disable this warning message in songs settings.</source>
 <context>
     <name>SongsPlugin.VerseType</name>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="359"/>
+        <location filename="../../openlp/core/common/i18n.py" line="357"/>
         <source>Bridge</source>
         <translation>B 橋段</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="364"/>
+        <location filename="../../openlp/core/common/i18n.py" line="362"/>
         <source>Chorus</source>
         <translation>C 副歌</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="381"/>
+        <location filename="../../openlp/core/common/i18n.py" line="379"/>
         <source>Ending</source>
         <translation>E 結尾</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="400"/>
+        <location filename="../../openlp/core/common/i18n.py" line="398"/>
         <source>Intro</source>
         <translation>I 前奏</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="429"/>
+        <location filename="../../openlp/core/common/i18n.py" line="428"/>
         <source>Other</source>
         <translation>O 其他</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="433"/>
+        <location filename="../../openlp/core/common/i18n.py" line="432"/>
         <source>Pre-Chorus</source>
         <translation>P 導歌</translation>
     </message>
     <message>
-        <location filename="../../openlp/core/common/i18n.py" line="478"/>
+        <location filename="../../openlp/core/common/i18n.py" line="477"/>
         <source>Verse</source>
         <translation>V 主歌</translation>
     </message>
