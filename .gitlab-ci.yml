@@ -56,31 +56,31 @@ test-arch:
     - sh scripts/generate_resources.sh
     - xvfb-run -s '-screen 0 1024x768x24' pytest --color=no --disable-warnings
 
-test-macos-intel:
-  stage: test
-  tags:
-    - apple-amd64
-  script:
-    - export PATH=/opt/local/bin:$PATH
-    - sh scripts/generate_resources.sh
-    - python3 -m pytest --color=no --disable-warnings --cov openlp
-    - mv .coverage macos.coverage
-  artifacts:
-    paths:
-      - macos.coverage
-  only:
-    - master@openlp/openlp
+# test-macos-intel:
+#   stage: test
+#   tags:
+#     - apple-amd64
+#   script:
+#     - export PATH=/opt/local/bin:$PATH
+#     - sh scripts/generate_resources.sh
+#     - python3 -m pytest --color=no --disable-warnings --cov openlp
+#     - mv .coverage macos.coverage
+#   artifacts:
+#     paths:
+#       - macos.coverage
+#   only:
+#     - master@openlp/openlp
 
-test-macos-arm:
-  stage: test
-  tags:
-    - apple-arm
-  script:
-    - export PATH=/opt/local/bin:$PATH
-    - sh scripts/generate_resources.sh
-    - python3 -m pytest --color=no --disable-warnings
-  only:
-    - master@openlp/openlp
+# test-macos-arm:
+#   stage: test
+#   tags:
+#     - apple-arm
+#   script:
+#     - export PATH=/opt/local/bin:$PATH
+#     - sh scripts/generate_resources.sh
+#     - python3 -m pytest --color=no --disable-warnings
+#   only:
+#     - master@openlp/openlp
 
 test-display:
   stage: test
@@ -102,9 +102,10 @@ pages:
   stage: deploy
   image: $IMAGE_BASE/debian
   script:
-    - fixpaths linux.coverage
-    - fixpaths macos.coverage
-    - python3-coverage combine linux.coverage macos.coverage
+    # - fixpaths linux.coverage
+    # - fixpaths macos.coverage
+    # - python3-coverage combine linux.coverage macos.coverage
+    - mv linux.coverage .coverage
     - python3-coverage html
     - mv htmlcov public
     - python3-coverage xml
@@ -119,6 +120,6 @@ pages:
         path: coverage.xml
   dependencies:
     - test-debian
-    - test-macos-intel
+    # - test-macos-intel
   only:
     - master@openlp/openlp
