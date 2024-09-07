@@ -92,10 +92,8 @@ def test_post_set_up_good(media_env: MediaController, state_media: State, regist
     registry.register('live_controller', mocked_live_controller)
     mocked_preview_controller = MagicMock()
     registry.register('preview_controller', mocked_preview_controller)
-    media_env.vlc_live_media_stop = MagicMock()
-    media_env.vlc_preview_media_stop = MagicMock()
-    media_env.vlc_live_media_tick = MagicMock()
-    media_env.vlc_preview_media_tick = MagicMock()
+    media_env.live_media_tick = MagicMock()
+    media_env.preview_media_tick = MagicMock()
     State().add_service("mediacontroller", 0)
     State().update_pre_conditions("mediacontroller", True)
     # WHEN: I call the function
@@ -105,8 +103,8 @@ def test_post_set_up_good(media_env: MediaController, state_media: State, regist
     assert mocked_display.call_count == 2, "Should have been called twice"
     text = State().get_text()
     assert text.find("No Displays") == -1, "No Displays have been disable"
-    mocked_display.assert_any_call(mocked_live_controller, False)  # Live Controller
-    mocked_display.assert_any_call(mocked_preview_controller, True)  # Preview Controller
+    mocked_display.assert_any_call(mocked_live_controller)  # Live Controller
+    mocked_display.assert_any_call(mocked_preview_controller)  # Preview Controller
 
 
 def test_media_state_live(media_env: MediaController, state_media: State):
@@ -114,9 +112,7 @@ def test_media_state_live(media_env: MediaController, state_media: State):
     Test the Bootstrap post set up assuming all functions are good
     """
     # GIVEN: A working  environment
-    media_env.vlc_live_media_stop = MagicMock()
-    media_env.vlc_preview_media_stop = MagicMock()
-    media_env.vlc_preview_media_tick = MagicMock()
+    media_env.preview_media_tick = MagicMock()
     mocked_live_controller = MagicMock()
     mocked_live_controller.is_live = True
     mocked_live_controller.media_info.media_type = MediaType.Audio
@@ -132,8 +128,8 @@ def test_media_state_live(media_env: MediaController, state_media: State):
     # THEN: the environment is set up correctly
     text = State().get_text()
     assert text.find("No Displays") == -1, "No Displays have been disable"
-    mocked_display.assert_any_call(mocked_live_controller, False)  # Live Controller
-    mocked_display.assert_any_call(mocked_preview_controller, True)  # Preview Controller
+    mocked_display.assert_any_call(mocked_live_controller)  # Live Controller
+    mocked_display.assert_any_call(mocked_preview_controller)  # Preview Controller
 
 
 def test_post_set_up_no_controller(media_env: MediaController, state_media: State):
@@ -141,10 +137,6 @@ def test_post_set_up_no_controller(media_env: MediaController, state_media: Stat
     Test the Bootstrap post set up assuming all functions are good
     """
     # GIVEN: A working environment
-    media_env.vlc_live_media_stop = MagicMock()
-    media_env.vlc_preview_media_stop = MagicMock()
-    media_env.vlc_live_media_tick = MagicMock()
-    media_env.vlc_preview_media_tick = MagicMock()
     State().add_service("mediacontroller", 0)
     State().update_pre_conditions("mediacontroller", False)
     # WHEN: I call the function
@@ -163,10 +155,6 @@ def test_post_set_up_controller_exception(media_env: MediaController, state_medi
     # GIVEN: A working environment
     registry.register('live_controller', MagicMock())
     registry.register('preview_controller', MagicMock())
-    media_env.vlc_live_media_stop = MagicMock()
-    media_env.vlc_preview_media_stop = MagicMock()
-    media_env.vlc_live_media_tick = MagicMock()
-    media_env.vlc_preview_media_tick = MagicMock()
     State().add_service("mediacontroller", 0)
     State().update_pre_conditions("mediacontroller", True)
     State().add_service("media_live", 0)
@@ -589,12 +577,11 @@ def test_set_controls_visible(media_env):
     mocked_controller.mediabar.setVisible.assert_called_once_with(True)
 
 
-def test_media_play(media_env):
+def test_media_play(media_env, settings):
     """
     Test that the display/controllers are set up correctly
     """
     # GIVEN: A mocked controller where is_background is false
-    Registry().register('settings', MagicMock())
     media_env.live_timer = MagicMock()
     media_env.live_hide_timer = MagicMock()
     mocked_controller = MagicMock()
@@ -624,28 +611,38 @@ def test_decide_autoplay_media_preview(media_env, settings):
     media_env.media_controller.is_theme_background = False
 
     # WHEN: decide_autoplay() is called
-    media_env.media_controller.decide_autostart(mocked_service_item, media_env.media_controller, False)
+    media_env.media_controller.decide_autostart(mocked_service_item, media_env.media_controller)
 
     # THEN: The current controller's media should be reset
     assert media_env.media_controller.media_play_item.media_autostart is True, "The Media should have been autoplayed"
 
 
-def test_decide_autoplay_media_normal_hidden_live(media_env, settings):
+@pytest.mark.parametrize("tests", [[False, QtCore.Qt.CheckState.Unchecked, False, False, MediaType.Audio, False],
+                                   [True, QtCore.Qt.CheckState.Checked, True, True, MediaType.DeviceStream, True],
+                                   [False, QtCore.Qt.CheckState.Checked, False, False, MediaType.Audio, True],
+                                   [True, QtCore.Qt.CheckState.Unchecked, False, False, MediaType.Audio, True],
+                                   [False, QtCore.Qt.CheckState.Unchecked, True, False, MediaType.Audio, True],
+                                   [False, QtCore.Qt.CheckState.Unchecked, False, True, MediaType.Audio, True]
+                                   ])
+def test_decide_autoplay_media_normal(media_env, settings, tests):
     """
     Test that media with a normal background behaves
     """
     # GIVEN: A media controller and a service item
     mocked_service_item = MagicMock()
-    mocked_service_item.requires_media.return_value = True
-    settings.setValue('media/media auto start', QtCore.Qt.CheckState.Unchecked)
+    mocked_service_item.will_auto_start = tests[0]
+    settings.setValue('media/media auto start', tests[1])
+    settings.setValue('songs/auto play audio', False)
     media_env.media_controller.is_live = True
     media_env.media_controller.media_play_item = MediaPlayItem()
-    media_env.media_controller.is_theme_background = True
+    media_env.media_controller.media_play_item.is_background = tests[2]
+    media_env.media_controller.media_play_item.is_theme_background = tests[3]
+    media_env.media_controller.media_play_item.media_type = tests[4]
     # WHEN: decide_autoplay() is called
-    media_env.media_controller.decide_autostart(mocked_service_item, media_env.media_controller, HideMode.Screen)
+    media_env.media_controller.decide_autostart(mocked_service_item, media_env.media_controller)
     # THEN: Autoplay will obey the following
-    assert media_env.media_controller.media_play_item.media_autostart is False, \
-           "The Media should not have have been autoplayed"
+    assert media_env.media_controller.media_play_item.media_autostart is tests[5], \
+           f"The Media autoplay does not match expected results {tests}"
 
 
 def test_media_bar_play(media_env, settings):

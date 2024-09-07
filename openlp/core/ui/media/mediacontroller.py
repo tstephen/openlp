@@ -51,6 +51,8 @@ class MediaController(QtWidgets.QWidget, RegistryBase, LogMixin, RegistryPropert
     The implementation of the Media Controller which manages how media is played.
     """
 
+    live_media_status_changed = QtCore.Signal()
+    preview_media_status_changed = QtCore.Signal()
     live_media_tick = QtCore.Signal()
     preview_media_tick = QtCore.Signal()
     live_media_stop = QtCore.Signal()
@@ -62,8 +64,6 @@ class MediaController(QtWidgets.QWidget, RegistryBase, LogMixin, RegistryPropert
         self.log_info("MediaController Initialising")
 
     def setup(self):
-        self.media_player = None
-        self.audio_player = None
         # Timer for video state
         self.live_hide_timer = QtCore.QTimer()
         self.live_hide_timer.setSingleShot(True)
@@ -104,17 +104,19 @@ class MediaController(QtWidgets.QWidget, RegistryBase, LogMixin, RegistryPropert
         """
         if State().check_preconditions("mediacontroller"):
             try:
+                self.live_media_status_changed.connect(self._media_status_changed_live)
+                self.preview_media_status_changed.connect(self._media_status_changed_preview)
                 self.live_media_tick.connect(self._media_state_live)
                 self.preview_media_tick.connect(self._media_state_preview)
-                self.live_media_stop.connect(self.live_media_stopped)
-                self.preview_media_stop.connect(self.preview_media_stopped)
-                self.setup_display(self.live_controller, False)
+                # self.live_media_stop.connect(self.live_media_stopped)
+                # self.preview_media_stop.connect(self.preview_media_stopped)
+                self.setup_display(self.live_controller)
             except AttributeError:
                 State().update_pre_conditions('media_live', False)
                 State().missing_text("media_live", translate(
                     'OpenLP.MediaController', "No Displays have been configured, "
                     "so Live Media has been disabled"))
-            self.setup_display(self.preview_controller, True)
+            self.setup_display(self.preview_controller)
 
     def _display_controllers(self, controller_type: DisplayControllerType) -> SlideController:
         """
@@ -143,6 +145,18 @@ class MediaController(QtWidgets.QWidget, RegistryBase, LogMixin, RegistryPropert
         self.preview_controller.media_player.update_ui()
         self.tick(self.preview_controller)
 
+    def _media_status_changed_live(self) -> None:
+        """
+        The player has stopped so updated the live UI
+        """
+        self._media_bar(self.live_controller, "stop")
+
+    def _media_status_changed_preview(self) -> None:
+        """
+        The playerr has stopped so updated the preview UI
+        """
+        self._media_bar(self.preview_controller, "stop")
+
     def live_media_stopped(self) -> None:
         """
         The live media has stopped
@@ -165,12 +179,10 @@ class MediaController(QtWidgets.QWidget, RegistryBase, LogMixin, RegistryPropert
             self.has_started = False
             self.media_play(self.preview_controller)
 
-    def setup_display(self, controller: SlideController, preview: bool) -> None:
+    def setup_display(self, controller: SlideController) -> None:
         """
         After a new display is configured, all media related widgets will be created too
         :param controller:  Display on which the output is to be played
-        # TODO
-        :param preview:  Are we to preview
         """
         controller.media_play_item = MediaPlayItem()
         controller.media_player = MediaPlayer()
@@ -212,37 +224,31 @@ class MediaController(QtWidgets.QWidget, RegistryBase, LogMixin, RegistryPropert
         log.debug(f"load_video is_live:{controller.is_live}")
         # stop running videos
         self.media_reset(controller)
-        print("A")
         controller.media_play_item.is_theme_background = is_theme_background
         controller.media_play_item.media_type = MediaType.Video
         controller.media_play_item.is_playing = MediaState.Loaded
         # background will always loop video.
         if service_item.is_capable(ItemCapabilities.HasBackgroundAudio):
-            print("B")
             controller.media_play_item.audio_file = service_item.background_audio[0][0]
             controller.media_play_item.media_type = MediaType.Audio
             controller.media_play_item.is_background = True
             if controller.media_play_item.is_theme_background:
-                print("B1")
                 controller.media_play_item.media_type = MediaType.Dual
                 controller.media_play_item.media_file = service_item.video_file_name
                 # is_background indicates we shouldn't override the normal display
-                controller.media_play_item.is_background = False
+                controller.media_play_item.is_background = True
         elif service_item.is_capable(ItemCapabilities.CanStream):
-            print("C")
             path = service_item.get_frames()[0]["path"]
             (stream_type, _, mrl, options) = parse_stream_path(path)
             controller.media_play_item.external_stream = (mrl, options)
-            # controller.media_play_item.is_background = True
+            controller.media_play_item.is_background = True
             controller.media_play_item.media_type = stream_type
         # has theme video set in service_item.
         elif service_item.is_capable(ItemCapabilities.HasBackgroundVideo):
-            print("D")
             controller.media_play_item.media_file = service_item.video_file_name
-            controller.media_play_item.is_background = False
+            controller.media_play_item.is_background = True
         else:
             # I am a media file so play me
-            print("E")
             controller.media_play_item.media_file = service_item.get_frame_path()
             controller.media_play_item.is_background = False
         controller.media_play_item.length = service_item.media_length
@@ -277,8 +283,8 @@ class MediaController(QtWidgets.QWidget, RegistryBase, LogMixin, RegistryPropert
                     )
 
                     return False
-        self._media_bar(controller, "load")
         self.decide_autostart(service_item, controller)
+        self._media_bar(controller, "load")
         self.media_play(controller, is_load=True)
         self._update_seek_ui(controller)
         self.set_controls_visible(controller, True)
@@ -295,20 +301,18 @@ class MediaController(QtWidgets.QWidget, RegistryBase, LogMixin, RegistryPropert
             controller.media_play_item.media_autostart = True
             controller.media_play_item.audio_autostart = True
             return
-        if controller.media_play_item.is_background:
+
+        if controller.media_play_item.is_background \
+            or service_item.will_auto_start \
+            or self.settings.value("media/media auto start") == QtCore.Qt.CheckState.Checked \
+            or controller.media_play_item.is_theme_background \
+                or controller.media_play_item.media_type in [MediaType.DeviceStream, MediaType.NetworkStream]:
             controller.media_play_item.media_autostart = True
-        if service_item.will_auto_start:
-            controller.media_play_item.media_autostart = True
-        if self.settings.value("media/media auto start") == QtCore.Qt.CheckState.Checked:
-            controller.media_play_item.media_autostart = True
+        # TODO needs fixing
         # elif self.settings.value("core/auto unblank"):
-        if controller.media_play_item.is_theme_background:
-            controller.media_play_item.media_autostart = True
-        if controller.media_play_item.media_type in [MediaType.DeviceStream, MediaType.NetworkStream]:
-            controller.media_play_item.media_autostart = True
         if self.settings.value('songs/auto play audio'):
             controller.media_play_item.audio_autostart = True
-            if not controller.media_play_item.is_theme_background:
+            if not controller.media_play_item.media_type == MediaType.Dual:
                 controller.media_play_item.media_autostart = True
 
     @staticmethod
@@ -370,34 +374,36 @@ class MediaController(QtWidgets.QWidget, RegistryBase, LogMixin, RegistryPropert
         controller.mediabar.seek_slider.blockSignals(True)
         controller.mediabar.volume_slider.blockSignals(True)
         display = self._define_display(controller)
+        controller.media_play_item.request_play = False
         if is_load:
-            if controller.media_play_item.audio_file and controller.media_play_item.audio_autostart:
-                controller.audio_player.play()
-                print("play a")
-            if controller.media_play_item.media_file and controller.media_play_item.media_autostart:
-                controller.media_player.play()
-                print("play m")
+            if controller.media_play_item.media_file:
+                if controller.media_play_item.media_autostart:
+                    controller.media_player.play()
+                else:
+                    controller.media_play_item.request_play = True
+            if controller.media_play_item.audio_file:
+                if controller.media_play_item.audio_autostart:
+                    controller.audio_player.play()
+                else:
+                    controller.media_play_item.request_play = True
         else:
             # This comes from the buttons so we have started the started media
             if controller.media_play_item.audio_file:
                 controller.audio_player.play()
-                print("play a")
             if controller.media_play_item.media_file:
                 controller.media_player.play()
-                print("play m")
         # TODO to be tested my need a different play function
         if controller.media_player and controller.media_play_item.external_stream:
             controller.media_player.play()
         self.media_volume(controller, get_volume(controller))
         #     if not start_hidden:
-        #         self._media_set_visibility(controller, True)
+        self._media_set_visibility(controller, True)
         self._media_bar(controller, "play")
         # Start Timer for ui updates
         controller.mediabar.seek_slider.blockSignals(False)
         controller.mediabar.volume_slider.blockSignals(False)
         controller.media_play_item.is_playing = MediaState.Playing
         if not controller.media_play_item.is_background:
-            print("not is_background")
             display = self._define_display(controller)
             if controller.is_live:
                 controller.set_hide_mode(None)
@@ -442,9 +448,9 @@ class MediaController(QtWidgets.QWidget, RegistryBase, LogMixin, RegistryPropert
             controller.mediabar.actions["playbackLoop"].setChecked(loop_set)
             controller.mediabar.actions["playbackLoop"].setDisabled(loop_disabled)
         if mode == "play":
-            controller.mediabar.actions["playbackPlay"].setDisabled(True)
-            controller.mediabar.actions["playbackPause"].setDisabled(False)
-            controller.mediabar.actions["playbackStop"].setDisabled(False)
+            controller.mediabar.actions["playbackPlay"].setDisabled(not controller.media_play_item.request_play)
+            controller.mediabar.actions["playbackPause"].setDisabled(controller.media_play_item.request_play)
+            controller.mediabar.actions["playbackStop"].setDisabled(controller.media_play_item.request_play)
             controller.mediabar.actions["playbackLoop"].setChecked(loop_set)
             controller.mediabar.actions["playbackLoop"].setDisabled(loop_disabled)
         if mode == "pause" or mode == "stop" or mode == "reset":
@@ -493,10 +499,12 @@ class MediaController(QtWidgets.QWidget, RegistryBase, LogMixin, RegistryPropert
         # lets save current playing state for restart
         controller.media_play_item.media_autostart = controller.media_player.status()
         controller.media_play_item.audio_autostart = controller.audio_player.status()
-        if controller.audio_player and controller.media_play_item.audio_file:
-            controller.audio_player.pause()
-        if controller.media_player and controller.media_play_item.media_file:
-            controller.media_player.pause()
+        if controller.media_play_item.media_type == MediaType.Dual:
+            if controller.audio_player and controller.media_play_item.audio_file:
+                controller.audio_player.pause()
+        else:
+            if controller.media_player and controller.media_play_item.media_file:
+                controller.media_player.pause()
         self._media_bar(controller, "pause")
         controller.media_play_item.is_playing = MediaState.Paused
         # Add a tick to the timer to prevent it finishing the video before it can loop back or stop
@@ -520,7 +528,10 @@ class MediaController(QtWidgets.QWidget, RegistryBase, LogMixin, RegistryPropert
         :param controller: The controller that needs to be stopped
         """
         toggle_looping_playback(controller)
-        controller.media_player.toggle_loop(saved_looping_playback(controller))
+        if controller.media_play_item.media_type == MediaType.Dual:
+            controller.audio_player.toggle_loop(saved_looping_playback(controller))
+        else:
+            controller.media_player.toggle_loop(saved_looping_playback(controller))
         controller.mediabar.actions["playbackLoop"].setChecked(saved_looping_playback(controller))
 
     def media_stop_msg(self, msg: list) -> bool:
@@ -730,7 +741,6 @@ class MediaController(QtWidgets.QWidget, RegistryBase, LogMixin, RegistryPropert
         if not is_live or self.live_kill_timer.isActive():
             return
         Registry().execute("live_display_show")
-        print("state", self.live_controller.media_play_item.is_playing != MediaState.Playing)
         if self.live_controller.media_play_item.is_playing != MediaState.Playing:
             self.media_play(self.live_controller)
         else:
