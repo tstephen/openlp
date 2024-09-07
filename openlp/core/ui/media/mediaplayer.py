@@ -80,12 +80,25 @@ class MediaPlayer(MediaBase, LogMixin):
         self.controller = controller
         self.display = display
         self.media_player.positionChanged.connect(self.position_changed_event)
+        self.media_player.mediaStatusChanged.connect(self.media_status_changed_event)
         # device stream objects. setVideoOutput is called when loading stream, video_widget can't be used by both
         # QMediaCaptureSession and QMediaPlayer
         self.media_capture_session = QMediaCaptureSession()
         self.media_capture_session.setAudioOutput(self.audio_output)
         self.device_video_input = None
         self.device_audio_input = None
+
+    def media_status_changed_event(self, event):
+        """
+        Handle the end of Media event and update UI
+        """
+        if self.controller.media_play_item.media_type == MediaType.Dual:
+            return
+        if event == QMediaPlayer.MediaStatus.EndOfMedia:
+            if self.controller.is_live:
+                Registry().get("media_controller").live_media_status_changed.emit()
+            else:
+                Registry().get("media_controller"). preview_media_status_changed.emit()
 
     def position_changed_event(self, position) -> None:
         """

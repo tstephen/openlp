@@ -46,17 +46,6 @@ def get_supported_media_suffix() -> tuple[list, list]:
     return a_suffixes, v_suffixes
 
 
-def validate_supported_mime_type(mime: str) -> bool:
-    result = ['mp3']
-    for f in QMediaFormat().supportedFileFormats(QMediaFormat.Decode):
-        mime_type = QMediaFormat(f).mimeType()
-        result.append(mime_type.name())
-        for m in mime_type.suffixes():
-            if mime in m:
-                return True
-    return False
-
-
 class MediaState(object):
     """
     An enumeration for possible States of the Media Player
@@ -97,6 +86,7 @@ class MediaPlayItem(object):
     media_type = MediaType().Unused
     media_autostart = False
     audio_autostart = False
+    request_play = False  # On Load do I reun play
 
 
 def get_volume(controller) -> int:

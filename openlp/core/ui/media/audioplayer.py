@@ -64,6 +64,7 @@ class AudioPlayer(MediaBase, LogMixin):
         self.controller = controller
         self.display = display
         self.media_player.positionChanged.connect(self.pos_callback)
+        self.media_player.mediaStatusChanged.connect(self.media_status_changed_event)
 
     def pos_callback(self, position) -> None:
         """
@@ -78,6 +79,18 @@ class AudioPlayer(MediaBase, LogMixin):
             Registry().get("media_controller").live_media_tick.emit()
         else:
             Registry().get("media_controller").preview_media_tick.emit()
+
+    def media_status_changed_event(self, event):
+        """
+        Handle the end of Media event and update UI
+        """
+        if self.controller.media_play_item.media_type != MediaType.Dual:
+            return
+        if event == QMediaPlayer.MediaStatus.EndOfMedia:
+            if self.controller.is_live:
+                Registry().get("media_controller").live_media_status_changed.emit()
+            else:
+                Registry().get("media_controller"). preview_media_status_changed.emit()
 
     def load(self) -> bool:
         """
