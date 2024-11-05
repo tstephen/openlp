@@ -217,7 +217,6 @@ class ChooseFolderForm(QtWidgets.QDialog, FolderPopulateMixin):
         self.choose_folder_layout.setWidget(5, QtWidgets.QFormLayout.ItemRole.FieldRole, self.folder_button_box)
 
         self.retranslate_ui()
-        QtCore.QMetaObject.connectSlotsByName(self)
 
     def retranslate_ui(self):
         """

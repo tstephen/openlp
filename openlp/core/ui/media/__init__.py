@@ -34,8 +34,7 @@ def get_supported_media_suffix() -> tuple[list, list]:
     """
     Provide a list of suffixes the Media input dialog to use for selection
     """
-    # Hardcode mp3 until QT bUG 126143 lands
-    a_suffixes = ['*.mp3']
+    a_suffixes = ['']
     v_suffixes = ['']
     for f in QMediaFormat().supportedFileFormats(QMediaFormat.Decode):
         mime_type = QMediaFormat(f).mimeType()
