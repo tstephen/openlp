@@ -52,7 +52,7 @@ OpenLP (previously openlp.org) is free church presentation software, or lyrics p
 slides of songs, Bible verses, videos, images, and even presentations (if PowerPoint is installed) for church worship
 using a computer and a display/projector.""",
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'Environment :: MacOS X',
         'Environment :: Win32 (MS Windows)',
         'Environment :: X11 Applications',
@@ -110,7 +110,7 @@ using a computer and a display/projector.""",
         'PyICU',
         'pyobjc; platform_system=="Darwin"',
         'pyobjc-framework-Cocoa; platform_system=="Darwin"',
-        'PySide6 >= 6.7',
+        'PySide6 >= 6.8',
         'Pyro5; platform_system=="Darwin"',
         'pywin32; platform_system=="Windows"',
         'QtAwesome',

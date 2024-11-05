@@ -527,12 +527,14 @@ class MediaController(QtWidgets.QWidget, RegistryBase, LogMixin, RegistryPropert
 
         :param controller: The controller that needs to be stopped
         """
+        controller.mediabar.actions['playbackLoop'].blockSignals(True)
         toggle_looping_playback(controller)
         if controller.media_play_item.media_type == MediaType.Dual:
             controller.audio_player.toggle_loop(saved_looping_playback(controller))
         else:
             controller.media_player.toggle_loop(saved_looping_playback(controller))
         controller.mediabar.actions["playbackLoop"].setChecked(saved_looping_playback(controller))
+        controller.mediabar.actions['playbackLoop'].blockSignals(False)
 
     def media_stop_msg(self, msg: list) -> bool:
         """
