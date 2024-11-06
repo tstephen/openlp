@@ -22,10 +22,13 @@
 This class contains the core default settings.
 """
 import datetime
+import itertools
 import json
 import logging
+import plistlib
 import os
 from enum import IntEnum
+from contextlib import suppress
 from pathlib import Path
 from tempfile import gettempdir
 
@@ -36,8 +39,11 @@ from openlp.core.common.enum import AlertLocation, BibleSearch, CustomSearch, Hi
     DisplayStyle, LanguageSelection, SongFirstSlideMode, SongSearch, PluginStatus
 from openlp.core.common.json import OpenLPJSONDecoder, OpenLPJSONEncoder, is_serializable
 from openlp.core.common.path import files_to_paths, str_to_path
-from openlp.core.common.platform import is_linux, is_win
+from openlp.core.common.platform import is_linux, is_win, is_macosx
 from openlp.core.ui.style import UiThemes
+
+if is_win():
+    import winreg
 
 
 log = logging.getLogger(__name__)
@@ -124,6 +130,88 @@ def upgrade_add_first_songbook_slide_config(value):
     :returns SongFirstSlideMode: new SongFirstSlideMode value
     """
     return SongFirstSlideMode.Songbook if value is True else SongFirstSlideMode.Default
+
+
+if is_win():
+    def _wingreg_subkeys(path):
+        """
+        Helper function to loop through windows registry subkeys
+        """
+        with suppress(WindowsError), winreg.OpenKey(winreg.HKEY_CURRENT_USER, path, 0, winreg.KEY_READ) as k:
+            for i in itertools.count():
+                yield winreg.EnumKey(k, i)
+
+    def _wingreg_subvalues(path):
+        """
+        Helper function to loop through windows registry subvalues
+        """
+        with suppress(WindowsError), winreg.OpenKey(winreg.HKEY_CURRENT_USER, path, 0, winreg.KEY_READ) as k:
+            for i in itertools.count():
+                yield winreg.EnumValue(k, i)
+
+
+def check_for_variant_migration(settings):
+    """
+    Check if the settings loaded contains PyQt5 variants from before the PySide6 migration. If so, we need to do some
+    manual conversion from PyQt5 variant to PySide6 variant.
+    """
+    # Check for need to upgrade variants from PyQt5 to PySide6
+    settings_version = settings.value('core/application version')
+    # convert to string of version in format "1.2.3" to an integer tuple for easy comparison
+    settings_version_tuple = tuple(map(int, settings_version.split('.')))
+    # last version using PyQt5 was the 3.1.x series
+    if settings_version_tuple < (3, 1, 99):
+        # Do OS/format specific conversion:
+        if is_linux() or settings.format() == Settings.IniFormat:
+            settings_filename = settings.fileName()
+            # Do a simple search/replace that allows the PySide to load the PyQt5 variant
+            with open(settings_filename, 'r+') as settings_file:
+                file_contents = settings_file.read()
+                settings_file.seek(0)
+                # an alternative to 'tPyObject' is 'x18PySide::PyObjectWrapper'
+                settings_file.write(file_contents.replace('xePyQt_PyObject', 'tPyObject'))
+                settings_file.truncate()
+            # reload migrated settings
+            settings = Settings()
+            return settings
+        elif is_win():
+            # search through OpenLP windows registry keys for variants and do a search and replace.
+            key_val = r'SOFTWARE\OpenLP\OpenLP'
+            for key in _wingreg_subkeys(key_val):
+                subkey = '{main_key}\\{sub_key}'.format(main_key=key_val, sub_key=key)
+                for value in _wingreg_subvalues(subkey):
+                    if value[2] == winreg.REG_BINARY:
+                        decoded_value = value[1].decode('utf-16')
+                        if '@Variant' in decoded_value:
+                            # do search/replace in 'bytes' to minimize any encoding issues. Using utf-16le to avoid BOM
+                            needle = b'\x0e\x00' + 'PyQt_PyObject'.encode('utf-16le')
+                            replacement = b'\t\x00' + 'PyObject'.encode('utf-16le')
+                            migrated = value[1].replace(needle, replacement)
+                            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, subkey, 0, winreg.KEY_ALL_ACCESS) as k:
+                                winreg.SetValueEx(k, value[0], 0, winreg.REG_BINARY, migrated)
+            # reload migrated settings
+            settings = Settings()
+            return settings
+        elif is_macosx():
+            # get plist filename
+            settings_filename = settings.fileName()
+            # load plist data
+            with open(settings_filename, 'rb') as plistfile:
+                plistdata = plistlib.load(plistfile)
+            # loop over plist entries, find variants and do a simple search/replace that allows
+            # # the PySide to load the PyQt5 variant
+            for key, value in plistdata.items():
+                if isinstance(value, (bytes, bytearray)):
+                    if value.startswith(b'@Variant'):
+                        migrated_value = value.replace(b'\x0ePyQt_PyObject', b'\tPyObject')
+                        plistdata[key] = migrated_value
+            with open(settings_filename, 'wb') as plistfile:
+                plistlib.dump(plistdata, plistfile, fmt=plistlib.FMT_BINARY)
+            # reload migrated settings
+            settings = Settings()
+            return settings
+    # no conversion
+    return settings
 
 
 class Settings(QtCore.QSettings):

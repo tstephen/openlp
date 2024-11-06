@@ -4,21 +4,15 @@ cache:
   - '%LOCALAPPDATA%\pip\Cache'
   -  /Users/appveyor/Libraries/Caches/pip
 
-stack: python 3.11
+stack: python 3.12
 
 environment:
   matrix:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-      PY_DIR: C:\\Python311-x64
-      CHOCO_VLC_ARG:
+      PY_DIR: C:\\Python312-x64
       FORCE_PACKAGING: 0
-      PYICU_PACK: https://github.com/cgohlke/pyicu-build/releases/download/v2.11/PyICU-2.11-cp311-cp311-win_amd64.whl
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-      PY_DIR: C:\\Python311
-      CHOCO_VLC_ARG: --forcex86
-      FORCE_PACKAGING: 0
-      PYICU_PACK: https://github.com/cgohlke/pyicu-build/releases/download/v2.11/PyICU-2.11-cp311-cp311-win32.whl
-    - APPVEYOR_BUILD_WORKER_IMAGE: macos-catalina
+      PYICU_PACK: https://github.com/cgohlke/pyicu-build/releases/download/v2.14/PyICU-2.14-cp312-cp312-win_amd64.whl
+    - APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
       QT_QPA_PLATFORM: offscreen
       FORCE_PACKAGING: 0
       HOMEBREW_FORCE_BREWED_CURL: 1
@@ -30,15 +24,13 @@ init:
 install:
   # Update pip
   - python -m pip install --upgrade pip
-  # Install generic dependencies from pypi.
-  - python -m pip install sqlalchemy alembic platformdirs chardet beautifulsoup4 lxml Mako mysql-connector-python pytest mock psycopg2-binary websockets waitress six requests QtAwesome PySide6 PyMuPDF QDarkStyle python-vlc flask-cors pytest-qt pyenchant pysword qrcode flask packaging
+  # Install generic dependencies from pypi. psycopg2-binary not working on mac...
+  - python -m pip install sqlalchemy alembic platformdirs chardet beautifulsoup4 lxml Mako mysql-connector-python pytest mock websockets waitress six requests QtAwesome PySide6 PyMuPDF QDarkStyle flask-cors pytest-qt pyenchant pysword qrcode flask packaging
   # Install Windows only dependencies
   - cmd: python -m pip install pyodbc pypiwin32
-  - cmd: choco install vlc %CHOCO_VLC_ARG% --no-progress --limit-output
   # Download and install pyicu for windows from https://github.com/cgohlke/pyicu-build
   - cmd: python -m pip install %PYICU_PACK%
   # Mac only dependencies
-  - sh: brew install --cask vlc
   - sh: brew install pkg-config icu4c
   - sh: PATH="/usr/local/opt/icu4c/bin:/usr/local/opt/icu4c/sbin:$PATH" PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/opt/icu4c/lib/pkgconfig" python -m pip install pyicu
   - sh: python -m pip install Pyro5 pyobjc-core pyobjc-framework-Cocoa py-applescript

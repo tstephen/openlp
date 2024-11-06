@@ -1502,6 +1502,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
         # Drop this argument, it's obvs not a filename
         if '--disable-web-security' in args:
             args.remove('--disable-web-security')
+        # strip platform args, not a filename either
+        try:
+            platform_idx = args.index('-platform')
+            if platform_idx >= 0:
+                # remove the platform arg
+                args.pop(platform_idx)
+                # remove the platform input
+                args.pop(platform_idx)
+        except (ValueError, IndexError):
+            pass
         # It has been known for Microsoft to double quote the path passed in and then encode one of the quotes.
         # Remove these to get the correct path.
         args = list(map(lambda x: x.replace('&quot;', ''), args))
