@@ -100,12 +100,15 @@ def main_window_reduced(settings, state):
             patch('openlp.core.ui.mainwindow.QtCore.QTimer.singleShot'), \
             patch('openlp.core.ui.mainwindow.QtWidgets.QToolBox'), \
             patch('openlp.core.ui.mainwindow.QtWidgets.QMainWindow.addDockWidget'), \
+            patch('openlp.core.ui.mainwindow.QtGui.QActionGroup'), \
             patch('openlp.core.ui.mainwindow.ServiceManager'), \
             patch('openlp.core.ui.mainwindow.ThemeManager'), \
             patch('openlp.core.ui.mainwindow.ProjectorManager'), \
             patch('openlp.core.ui.mainwindow.HttpServer'), \
             patch('openlp.core.ui.mainwindow.WebSocketServer'), \
-            patch('openlp.core.ui.mainwindow.PluginForm'):
+            patch('openlp.core.ui.mainwindow.PluginForm'), \
+            patch('openlp.core.ui.mainwindow.create_action'), \
+            patch('openlp.core.ui.mainwindow.add_actions'):
         return MainWindow()
 
 
@@ -341,8 +344,10 @@ def test_load_settings_position_invalid(main_window, settings):
     # WHEN the settings are loaded
     main_window.load_settings()
 
-    # THEN the main window's position should be (0, 0)
-    assert main_window.pos().x() == 0
+    # THEN the main window's position should be a valid position such as (0, 0) or another valid postion,
+    #      depending on the window system.
+    assert main_window.pos().x() >= -0
+    assert main_window.pos().y() >= -0
 
 
 def test_mainwindow_configuration(main_window):
