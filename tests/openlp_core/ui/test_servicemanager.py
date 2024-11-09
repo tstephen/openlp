@@ -73,7 +73,7 @@ def _add_song_service_item(s_manager: ServiceManager):
     service_item.title = 'Test item'
     service_item.service_item_type = ServiceItemType.Text
     service_item.background_audio = [(Path('myfile.mp3'), None), (Path('myfile.mp3'), None)]
-    s_manager.add_service_item(service_item, rebuild=True, selected=True)
+    s_manager.add_service_item(service_item, rebuild=True, repaint=False, selected=True)
     return service_item
 
 
@@ -90,7 +90,7 @@ def _add_bible_service_item(s_manager: ServiceManager):
     service_item.add_capability(ItemCapabilities.CanLoop)
     service_item.add_capability(ItemCapabilities.CanEditTitle)
     service_item.service_item_type = ServiceItemType.Text
-    s_manager.add_service_item(service_item, rebuild=True, selected=False)
+    s_manager.add_service_item(service_item, rebuild=True, repaint=False, selected=False)
     return service_item
 
 
@@ -128,7 +128,7 @@ def _add_presentation_service_item(s_manager: ServiceManager, has_valid_thumb: b
     service_item.add_capability(ItemCapabilities.HasDisplayTitle)
     service_item.add_capability(ItemCapabilities.HasThumbnails)
     service_item.service_item_type = ServiceItemType.Command
-    s_manager.add_service_item(service_item, rebuild=True, selected=False)
+    s_manager.add_service_item(service_item, rebuild=True, repaint=False, selected=False)
     return service_item
 
 
@@ -151,7 +151,7 @@ def _add_image_service_item(s_manager: ServiceManager, has_valid_image: bool = T
         service_item.add_from_image(RESOURCE_PATH / 'church.jpg', 'church.jpg')
     else:
         service_item.add_from_image(Path('fake/path/church.jpg'), 'church.jpg')
-    s_manager.add_service_item(service_item, rebuild=True, selected=True)
+    s_manager.add_service_item(service_item, rebuild=True, repaint=False, selected=True)
     return service_item
 
 

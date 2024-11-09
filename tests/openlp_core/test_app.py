@@ -314,13 +314,14 @@ def test_backup_on_upgrade(mocked_question, mocked_get_version, qapp, settings):
     qapp.splash.show.assert_called_once_with()
 
 
+@patch('openlp.core.app.FirstTimeLanguageForm')
 @patch('openlp.core.app.OpenLP')
 @patch('openlp.core.app.sys')
 @patch('openlp.core.app.backup_if_version_changed')
 @patch('openlp.core.app.set_up_web_engine_cache')
 @patch('openlp.core.app.set_up_logging')
 def test_main(mock_logging: MagicMock, mock_web_cache: MagicMock, mock_backup: MagicMock, mock_sys: MagicMock,
-              mock_openlp: MagicMock, mocked_qapp: MagicMock, app_main_env: None):
+              mock_openlp: MagicMock, mock_ftlang_form, mocked_qapp: MagicMock, app_main_env: None):
     """
     Test the main method performs primary actions
     """
@@ -329,6 +330,9 @@ def test_main(mock_logging: MagicMock, mock_web_cache: MagicMock, mock_backup: M
     mock_openlp.return_value = openlp_instance
     openlp_instance.is_data_path_missing.return_value = False
     mock_backup.return_value = True
+    mock_ftlang_form_exec = MagicMock()
+    mock_ftlang_form_exec.return_value = True
+    mock_ftlang_form.return_value = mock_ftlang_form_exec
 
     # WHEN: the main method is run
     app_main()
