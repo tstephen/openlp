@@ -1086,7 +1086,7 @@ def test_process_item_song_vlc(mocked_execute: MagicMock, registry: Registry, st
     slide_controller._process_item(mocked_media_item, 0)
 
     # THEN: Registry.execute should have been called to stop the presentation
-    assert 1 == slide_controller.media_controller.load_video.call_count, ' Load_video should have been called 1 times'
+    assert 1 == slide_controller.media_controller.load_media.call_count, ' load_media should have been called 1 times'
     assert 2 == slide_controller.preview_display.load_verses.call_count, 'Execute should have been called 2 times'
 
 
@@ -1134,7 +1134,7 @@ def test_process_item_song_no_vlc(mocked_execute: MagicMock, registry: Registry,
     slide_controller._process_item(mocked_media_item, 0)
 
     # THEN: Registry.execute should have been called to stop the presentation
-    assert 0 == slide_controller.media_controller.load_video.call_count, ' Load_video should have been called 0 times'
+    assert 0 == slide_controller.media_controller.load_media.call_count, ' load_media should have been called 0 times'
     assert 2 == slide_controller.preview_display.load_verses.call_count, 'Execute should have been called 2 times'
 
 

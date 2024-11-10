@@ -187,9 +187,9 @@ def test_resize(media_env):
     mocked_player.resize.assert_called_once()
 
 
-def test_load_video(media_env, settings):
+def test_load_media(media_env, settings):
     """
-    Test that the load_video runs correctly
+    Test that the load_media runs correctly
     """
     # GIVEN: A media controller and a service item
     mocked_slide_controller = MagicMock()
@@ -207,8 +207,8 @@ def test_load_video(media_env, settings):
     media_env.media_controller.media_reset = MagicMock()
     media_env.media_controller.media_play = MagicMock()
     media_env.media_controller.set_controls_visible = MagicMock()
-    # WHEN: load_video() is called
-    media_env.media_controller.load_video(DisplayControllerType.Live, mocked_service_item)
+    # WHEN: load_media() is called
+    media_env.media_controller.load_media(DisplayControllerType.Live, mocked_service_item)
 
     # THEN: The current controller's media should be reset
     #       The volume should be set from the settings

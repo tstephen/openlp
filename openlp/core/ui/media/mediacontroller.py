@@ -210,7 +210,7 @@ class MediaController(QtWidgets.QWidget, RegistryBase, LogMixin, RegistryPropert
         """
         controller.media_player.resize()
 
-    def load_video(self, source, service_item, hidden: bool = False, is_theme_background: bool = False) -> bool:
+    def load_media(self, source, service_item, hidden: bool = False, is_theme_background: bool = False) -> bool:
         """
         Loads and starts a video to run and sets the stored sound value.
 
@@ -221,7 +221,7 @@ class MediaController(QtWidgets.QWidget, RegistryBase, LogMixin, RegistryPropert
         :param is_theme_background: Is the theme providing a background
         """
         controller = self._display_controllers(source)
-        log.debug(f"load_video is_live:{controller.is_live}")
+        log.debug(f"load_media is_live:{controller.is_live}")
         # stop running videos
         self.media_reset(controller)
         controller.media_play_item.is_theme_background = is_theme_background
@@ -260,7 +260,8 @@ class MediaController(QtWidgets.QWidget, RegistryBase, LogMixin, RegistryPropert
             # Media could not be loaded correctly
             critical_error_message_box(
                 translate("MediaPlugin.MediaItem", "Unsupported File"),
-                translate("MediaPlugin.MediaItem", "Unable to load file - Unsupported File"),
+                translate("MediaPlugin.MediaItem", "Unable to load file - Unsupported File: " +
+                          controller.media_play_item.media_file),
             )
             return False
         self.log_debug("video media type: {tpe} ".format(tpe=str(controller.media_play_item.media_type)))

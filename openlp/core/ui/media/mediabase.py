@@ -36,14 +36,7 @@ class MediaBase(RegistryProperties):
         """
         self.parent = parent
         self.name = name
-        self.available = self.check_available()
         self.controller = None
-
-    def check_available(self) -> bool:
-        """
-        Player is available on this machine
-        """
-        return False
 
     def setup(self, controller, display):
         """
@@ -62,24 +55,6 @@ class MediaBase(RegistryProperties):
         :param file: The file to be loaded
         """
         return True
-
-    # def add_display(self, controller: SlideController):
-    #     # The media player has to be 'connected' to the QFrame.
-    #     # (otherwise a video would be displayed in it's own window)
-    #     # This is platform specific!
-    #     # You have to give the id of the QFrame (or similar object)
-    #     # to vlc, different platforms have different functions for this.
-    #     win_id = int(controller.media_widget.winId())
-    #     if is_win():
-    #         controller.vlc_media_player.set_hwnd(win_id)
-    #     elif is_macosx():
-    #         # We have to use 'set_nsobject' since Qt5 on OSX uses Cocoa
-    #         # framework and not the old Carbon.
-    #         controller.vlc_media_player.set_nsobject(win_id)
-    #     else:
-    #         # for Linux/*BSD using the X Server
-        #     controller.vlc_media_player.set_xwindow(win_id)
-        # self.has_own_widget = True
 
     def resize(self) -> None:
         """
