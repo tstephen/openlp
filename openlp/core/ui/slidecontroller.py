@@ -1596,15 +1596,14 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
             is_theme_background = BackgroundType.from_string(theme_data.background_type) in [BackgroundType.Stream,
                                                                                              BackgroundType.Video]
             if self.is_live and not item.is_media() and item.requires_media():
-                self.media_controller.load_video(self.controller_type, item, self._current_hide_mode,
+                self.media_controller.load_media(self.controller_type, item, self._current_hide_mode,
                                                  is_theme_background)
             elif self.is_live:
                 if self._current_hide_mode == HideMode.Theme:
                     self.set_hide_mode(HideMode.Blank)
-                self.media_controller.load_video(self.controller_type, item, self._current_hide_mode, False)
+                self.media_controller.load_media(self.controller_type, item, self._current_hide_mode, False)
             elif item.is_media():
-                # avoid loading the video if this is preview and the media is background
-                self.media_controller.load_video(self.controller_type, item, is_theme_background=is_theme_background)
+                self.media_controller.load_media(self.controller_type, item)
             if not self.is_live:
                 self.preview_display.show()
 

@@ -87,6 +87,7 @@ class MediaPlayer(MediaBase, LogMixin):
         self.media_capture_session.setAudioOutput(self.audio_output)
         self.device_video_input = None
         self.device_audio_input = None
+        self.set_visible(False)  # Hide player till needed
 
     def media_status_changed_event(self, event):
         """
@@ -124,12 +125,6 @@ class MediaPlayer(MediaBase, LogMixin):
             self.media_player.setLoops(QMediaPlayer.Loops.Infinite)
         else:
             self.media_player.setLoops(QMediaPlayer.Loops.Once)
-
-    def check_available(self) -> bool:
-        """
-        Return the availability of component
-        """
-        return True
 
     def load(self) -> bool:
         """
@@ -196,7 +191,7 @@ class MediaPlayer(MediaBase, LogMixin):
                 self.device_audio_input.setMuted(False)
         else:
             self.media_player.play()
-        # TODO handle variable start times fpr first play
+        # TODO handle variable start times for first play
 
     def pause(self) -> None:
         """
@@ -230,5 +225,6 @@ class MediaPlayer(MediaBase, LogMixin):
 
     def duration(self) -> int:
         """
+        Obtain the duration of the playing
         """
         return self.media_player.duration()
