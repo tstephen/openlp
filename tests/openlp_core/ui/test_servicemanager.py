@@ -1196,6 +1196,8 @@ def test_on_delete_from_service_confirmation_disabled(settings: Settings, servic
     # GIVEN delete item confirmation is disabled and a mock service item
     settings.setValue('advanced/delete service item confirmation', False)
     _add_song_service_item(service_manager)
+    service_manager.find_service_item = MagicMock()
+    service_manager.find_service_item.return_value = (0, MagicMock())
 
     # WHEN the on_delete_from_service function is called
     service_manager.on_delete_from_service()
@@ -1214,6 +1216,8 @@ def test_on_delete_from_service_confirmation_enabled_choose_delete(settings: Set
     # GIVEN delete item confirmation is enabled and a mock service item
     settings.setValue('advanced/delete service item confirmation', True)
     _add_song_service_item(service_manager)
+    service_manager.find_service_item = MagicMock()
+    service_manager.find_service_item.return_value = (0, MagicMock())
 
     # WHEN the on_delete_from_service function is called and the user chooses to delete
     service_manager._delete_confirmation_dialog = MagicMock(return_value=QtWidgets.QMessageBox.StandardButton.Close)
@@ -1959,8 +1963,7 @@ def test_basic_service_manager(service_manager: ServiceManager):
 
 @patch('openlp.core.ui.servicemanager.QtWidgets.QTreeWidget.itemAt')
 @patch('openlp.core.ui.servicemanager.QtWidgets.QWidget.mapToGlobal')
-@patch('openlp.core.ui.servicemanager.QtWidgets.QMenu.exec')
-def test_default_context_menu(mocked_exec, mocked_mapToGlobal, mocked_item_at_method, service_manager: ServiceManager):
+def test_default_context_menu(mocked_mapToGlobal, mocked_item_at_method, service_manager: ServiceManager):
     """
     Test the context_menu() method with a default service item
     """
@@ -1981,6 +1984,7 @@ def test_default_context_menu(mocked_exec, mocked_mapToGlobal, mocked_item_at_me
     service_manager.notes_action.setVisible = MagicMock()
     service_manager.time_action.setVisible = MagicMock()
     service_manager.auto_start_action.setVisible = MagicMock()
+    service_manager.menu.exec = MagicMock()
 
     # WHEN: Show the context menu.
     service_manager.context_menu(q_point)
@@ -2006,8 +2010,7 @@ def test_edit_context_menu(service_manager: ServiceManager):
     # GIVEN: A service item added
     service_manager.setup_ui(service_manager)
     with patch('openlp.core.ui.servicemanager.QtWidgets.QTreeWidget.itemAt') as mocked_item_at_method, \
-            patch('openlp.core.ui.servicemanager.QtWidgets.QWidget.mapToGlobal'), \
-            patch('openlp.core.ui.servicemanager.QtWidgets.QMenu.exec'):
+            patch('openlp.core.ui.servicemanager.QtWidgets.QWidget.mapToGlobal'):
         mocked_item = MagicMock()
         mocked_item.parent.return_value = None
         mocked_item_at_method.return_value = mocked_item
@@ -2026,6 +2029,7 @@ def test_edit_context_menu(service_manager: ServiceManager):
         service_manager.notes_action.setVisible = MagicMock()
         service_manager.time_action.setVisible = MagicMock()
         service_manager.auto_start_action.setVisible = MagicMock()
+        service_manager.menu.exec = MagicMock()
 
         # WHEN: Show the context menu.
         service_manager.context_menu(q_point)
@@ -2051,8 +2055,7 @@ def test_maintain_context_menu(service_manager: ServiceManager):
     # GIVEN: A service item added
     service_manager.setup_ui(service_manager)
     with patch('openlp.core.ui.servicemanager.QtWidgets.QTreeWidget.itemAt') as mocked_item_at_method, \
-            patch('openlp.core.ui.servicemanager.QtWidgets.QWidget.mapToGlobal'), \
-            patch('openlp.core.ui.servicemanager.QtWidgets.QMenu.exec'):
+            patch('openlp.core.ui.servicemanager.QtWidgets.QWidget.mapToGlobal'):
         mocked_item = MagicMock()
         mocked_item.parent.return_value = None
         mocked_item_at_method.return_value = mocked_item
@@ -2070,6 +2073,7 @@ def test_maintain_context_menu(service_manager: ServiceManager):
         service_manager.notes_action.setVisible = MagicMock()
         service_manager.time_action.setVisible = MagicMock()
         service_manager.auto_start_action.setVisible = MagicMock()
+        service_manager.menu.exec = MagicMock()
 
         # WHEN: Show the context menu.
         service_manager.context_menu(q_point)
@@ -2095,8 +2099,7 @@ def test_loopy_context_menu(service_manager: ServiceManager):
     # GIVEN: A service item added
     service_manager.setup_ui(service_manager)
     with patch('openlp.core.ui.servicemanager.QtWidgets.QTreeWidget.itemAt') as mocked_item_at_method, \
-            patch('openlp.core.ui.servicemanager.QtWidgets.QWidget.mapToGlobal'), \
-            patch('openlp.core.ui.servicemanager.QtWidgets.QMenu.exec'):
+            patch('openlp.core.ui.servicemanager.QtWidgets.QWidget.mapToGlobal'):
         mocked_item = MagicMock()
         mocked_item.parent.return_value = None
         mocked_item_at_method.return_value = mocked_item
@@ -2116,6 +2119,7 @@ def test_loopy_context_menu(service_manager: ServiceManager):
         service_manager.notes_action.setVisible = MagicMock()
         service_manager.time_action.setVisible = MagicMock()
         service_manager.auto_start_action.setVisible = MagicMock()
+        service_manager.menu.exec = MagicMock()
 
         # WHEN: Show the context menu.
         service_manager.context_menu(q_point)
@@ -2141,8 +2145,7 @@ def test_start_time_context_menu(service_manager: ServiceManager):
     # GIVEN: A service item added
     service_manager.setup_ui(service_manager)
     with patch('openlp.core.ui.servicemanager.QtWidgets.QTreeWidget.itemAt') as mocked_item_at_method, \
-            patch('openlp.core.ui.servicemanager.QtWidgets.QWidget.mapToGlobal'), \
-            patch('openlp.core.ui.servicemanager.QtWidgets.QMenu.exec'):
+            patch('openlp.core.ui.servicemanager.QtWidgets.QWidget.mapToGlobal'):
         mocked_item = MagicMock()
         mocked_item.parent.return_value = None
         mocked_item_at_method.return_value = mocked_item
@@ -2160,6 +2163,7 @@ def test_start_time_context_menu(service_manager: ServiceManager):
         service_manager.notes_action.setVisible = MagicMock()
         service_manager.time_action.setVisible = MagicMock()
         service_manager.auto_start_action.setVisible = MagicMock()
+        service_manager.menu.exec = MagicMock()
 
         # WHEN: Show the context menu.
         service_manager.context_menu(q_point)
@@ -2185,8 +2189,7 @@ def test_auto_start_context_menu(service_manager: ServiceManager):
     # GIVEN: A service item added
     service_manager.setup_ui(service_manager)
     with patch('openlp.core.ui.servicemanager.QtWidgets.QTreeWidget.itemAt') as mocked_item_at_method, \
-            patch('openlp.core.ui.servicemanager.QtWidgets.QWidget.mapToGlobal'), \
-            patch('openlp.core.ui.servicemanager.QtWidgets.QMenu.exec'):
+            patch('openlp.core.ui.servicemanager.QtWidgets.QWidget.mapToGlobal'):
         mocked_item = MagicMock()
         mocked_item.parent.return_value = None
         mocked_item_at_method.return_value = mocked_item
@@ -2205,6 +2208,7 @@ def test_auto_start_context_menu(service_manager: ServiceManager):
         service_manager.time_action.setVisible = MagicMock()
         service_manager.auto_start_action.setVisible = MagicMock()
         service_manager.rename_action.setVisible = MagicMock()
+        service_manager.menu.exec = MagicMock()
 
         # WHEN: Show the context menu.
         service_manager.context_menu(q_point)
