@@ -28,19 +28,15 @@ try:
 except ImportError:
     APPLESCRIPT_AVAILABLE = False
 
-try:
-    import fitz
-    PYMUPDF_AVAILABLE = True
-except ImportError:
-    try:
-        import fitz_old as fitz
-        PYMUPDF_AVAILABLE = True
-    except ImportError:
-        PYMUPDF_AVAILABLE = False
-
 from openlp.plugins.presentations.lib.applescriptbasecontroller import AppleScriptBaseController, \
     AppleScriptBaseDocument
 
+from PySide6 import QtWidgets
+from PySide6.QtPdf import QPdfDocument
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QColor, QImage, QPainter
+
+from openlp.core.common.registry import Registry
 
 log = logging.getLogger(__name__)
 
@@ -337,25 +333,31 @@ class PowerPointMacDocument(AppleScriptBaseDocument):
         ret = super().load_presentation()
         if ret:
             # we make powerpoint export to PDF and then convert the pdf to thumbnails
-            if PYMUPDF_AVAILABLE:
-                pdf_file = self.get_thumbnail_folder() / 'tmp.pdf'
-                # if the pdf file does not exists anymore it is assume the convertion has been done
-                if not pdf_file.exists():
-                    return True
-                log.debug('converting pdf to png thumbnails using PyMuPDF')
-                pdf = fitz.open(str(pdf_file))
-                for i, page in enumerate(pdf, start=1):
-                    src_size = page.bound().round()
-                    # keep aspect ratio
-                    scale = min(640 / src_size.width, 480 / src_size.height)
-                    m = fitz.Matrix(scale, scale)
-                    pngpath = str(self.get_thumbnail_folder() / 'slide{num}.png'.format(num=i))
-                    try:
-                        page.get_pixmap(matrix=m, alpha=False).save(pngpath)
-                    except AttributeError:
-                        # old function names
-                        page.getPixmap(matrix=m, alpha=False).writeImage(pngpath)
-                pdf.close()
-                # delete pdf
-                pdf_file.unlink()
+            pdf_file = self.get_thumbnail_folder() / 'tmp.pdf'
+            # if the pdf file does not exists anymore it is assume the convertion has been done
+            if not pdf_file.exists():
+                return True
+            log.debug('converting pdf to png thumbnails using QPdf')
+            pdf_doc = QPdfDocument(Registry().get('application'))
+            pdf_doc.load(str(pdf_file))
+            # wait for loading to complete
+            while pdf_doc.status() != QPdfDocument.Status.Ready:
+                QtWidgets.QApplication.processEvents()
+            # Generate images from PDF
+            log.debug('loading presentation using QPdfDocument')
+            painter = QPainter()
+            for i in range(0, pdf_doc.pageCount()):
+                page_size = pdf_doc.pagePointSize(i).toSize()
+                scaled_page_size = page_size.scaled(640, 480, Qt.AspectRatioMode.KeepAspectRatio)
+                image = pdf_doc.render(i, scaled_page_size)
+                png_filename = str(self.get_thumbnail_folder() / 'slide{num}.png'.format(num=i + 1))
+                # due to the background not being set to white by default, it needs to be done manually
+                image_redraw = QImage(image.size(), QImage.Format_ARGB32)
+                image_redraw.fill(QColor(Qt.white).rgb())
+                painter.begin(image_redraw)
+                painter.drawImage(0, 0, image)
+                image_redraw.save(png_filename, 'png')
+                painter.end()
+            # delete pdf
+            pdf_file.unlink()
         return ret
