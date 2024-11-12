@@ -320,8 +320,10 @@ def test_backup_on_upgrade(mocked_question, mocked_get_version, qapp, settings):
 @patch('openlp.core.app.backup_if_version_changed')
 @patch('openlp.core.app.set_up_web_engine_cache')
 @patch('openlp.core.app.set_up_logging')
-def test_main(mock_logging: MagicMock, mock_web_cache: MagicMock, mock_backup: MagicMock, mock_sys: MagicMock,
-              mock_openlp: MagicMock, mock_ftlang_form, mocked_qapp: MagicMock, app_main_env: None):
+@patch('openlp.core.app.check_for_variant_migration')
+def test_main(mock_chk_var_migr: MagicMock, mock_logging: MagicMock, mock_web_cache: MagicMock, mock_backup: MagicMock,
+              mock_sys: MagicMock, mock_openlp: MagicMock, mock_ftlang_form: MagickMock, mocked_qapp: MagicMock,
+              app_main_env: None):
     """
     Test the main method performs primary actions
     """
@@ -330,6 +332,7 @@ def test_main(mock_logging: MagicMock, mock_web_cache: MagicMock, mock_backup: M
     mock_openlp.return_value = openlp_instance
     openlp_instance.is_data_path_missing.return_value = False
     mock_backup.return_value = True
+    mock_chk_var_migr.side_effect = (lambda x: x)  # check_for_variant_migration should just return the input arg
     mock_ftlang_form_exec = MagicMock()
     mock_ftlang_form_exec.return_value = True
     mock_ftlang_form.return_value = mock_ftlang_form_exec
