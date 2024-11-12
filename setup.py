@@ -124,7 +124,7 @@ using a computer and a display/projector.""",
         'darkstyle': ['QDarkStyle'],
         'mysql': ['PyMySQL'],
         'odbc': ['pyodbc'],
-        'postgresql': ['psycopg2'],
+        'postgresql': ['psycopg2_binary'],
         'spellcheck': ['pyenchant >= 1.6'],
         'sword-bibles': ['pysword'],
         'test': [
