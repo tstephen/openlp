@@ -25,7 +25,7 @@ install:
   # Update pip
   - python -m pip install --upgrade pip
   # Install generic dependencies from pypi. psycopg2-binary not working on mac...
-  - python -m pip install sqlalchemy alembic platformdirs chardet beautifulsoup4 lxml Mako mysql-connector-python pytest mock websockets waitress six requests QtAwesome PySide6 PyMuPDF QDarkStyle flask-cors pytest-qt pyenchant pysword qrcode flask packaging
+  - python -m pip install sqlalchemy alembic platformdirs chardet beautifulsoup4 lxml Mako mysql-connector-python pytest mock websockets waitress six requests QtAwesome PySide6 QDarkStyle flask-cors pytest-qt pyenchant pysword qrcode flask packaging
   # Install Windows only dependencies
   - cmd: python -m pip install pyodbc pypiwin32
   # Download and install pyicu for windows from https://github.com/cgohlke/pyicu-build

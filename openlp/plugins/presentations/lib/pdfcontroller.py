@@ -20,23 +20,21 @@
 ##########################################################################
 import logging
 
+from pathlib import Path
+
+from PySide6 import QtWidgets
+from PySide6.QtPdf import QPdfDocument
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QColor, QImage, QPainter
+
+from openlp.core.common.registry import Registry
 from openlp.core.display.screens import ScreenList
 from openlp.plugins.presentations.lib.presentationcontroller import PresentationController, PresentationDocument
 
 
-try:
-    import fitz
-    PYMUPDF_AVAILABLE = True
-except ImportError:
-    try:
-        import fitz_old as fitz
-        PYMUPDF_AVAILABLE = True
-    except ImportError:
-        PYMUPDF_AVAILABLE = False
-
 log = logging.getLogger(__name__)
 
-PDF_CONTROLLER_FILETYPES = ['pdf', 'xps', 'oxps', 'epub', 'cbz', 'fb2']
+PDF_CONTROLLER_FILETYPES = ['pdf']
 
 
 class PdfController(PresentationController):
@@ -55,16 +53,16 @@ class PdfController(PresentationController):
         super(PdfController, self).__init__(plugin, 'Pdf', PdfDocument)
         self.process = None
         self.supports = ['pdf']
-        self.also_supports = ['xps', 'oxps', 'epub', 'cbz', 'fb2']
+        self.also_supports = []
 
     def check_available(self):
         """
         PdfController is able to run on this machine.
 
-        :return: True if PyMuPDF is installed, otherwise False.
+        :return: Always returns true since QtPdf seems to be required for Qt.
         """
         log.debug('check_available Pdf')
-        return PYMUPDF_AVAILABLE
+        return True
 
     def kill(self):
         """
@@ -114,35 +112,34 @@ class PdfDocument(PresentationDocument):
             self.num_pages = len(self.image_files)
             return True
         size = ScreenList().current.display_geometry
+        # load pdf
+        self.presentation = QPdfDocument(Registry().get('application'))
+        self.presentation.load(str(self.file_path))
+        # wait for loading to complete
+        while self.presentation.status() != QPdfDocument.Status.Ready:
+            QtWidgets.QApplication.processEvents()
         # Generate images from PDF that will fit the frame.
-        runlog = ''
         if not temp_dir_path.is_dir():
             temp_dir_path.mkdir(parents=True)
-        try:
-            log.debug('loading presentation using PyMuPDF')
-            pdf = fitz.open(str(self.file_path))
-            for i, page in enumerate(pdf, start=1):
-                src_size = page.bound().round()
-                # keep aspect ratio
-                scale = min(size.width() / src_size.width, size.height() / src_size.height)
-                matrix = fitz.Matrix(scale, scale)
-                pngpath = str(temp_dir_path / 'mainslide{:03d}.png'.format(i))
-                try:
-                    page.get_pixmap(matrix=matrix, alpha=False).save(pngpath)
-                except AttributeError:
-                    # old function names
-                    page.getPixmap(matrix=matrix, alpha=False).writeImage(pngpath)
-            pdf.close()
-            created_files = sorted(temp_dir_path.glob('*'))
-            for image_path in created_files:
-                if image_path.is_file():
-                    self.image_files.append(image_path)
-        except Exception:
-            log.exception(runlog)
-            return False
-        self.num_pages = len(self.image_files)
+        log.debug('loading presentation using QPdfDocument')
+        painter = QPainter()
+        for i in range(0, self.presentation.pageCount()):
+            page_size = self.presentation.pagePointSize(i).toSize()
+            scaled_page_size = page_size.scaled(size.width(), size.height(), Qt.AspectRatioMode.KeepAspectRatio)
+            image = self.presentation.render(i, scaled_page_size)
+            png_filename = str(temp_dir_path / 'mainslide{:03d}.png'.format(i + 1))
+            # due to the background not being set to white by default, it needs to be done manually
+            image_redraw = QImage(image.size(), QImage.Format_ARGB32)
+            image_redraw.fill(QColor(Qt.white).rgb())
+            painter.begin(image_redraw)
+            painter.drawImage(0, 0, image)
+            image_redraw.save(png_filename, 'png')
+            painter.end()
+            png_path = Path(png_filename)
+            self.image_files.append(Path(png_path))
         # Create thumbnails
         self.create_thumbnails()
+        self.create_titles_and_notes()
         return True
 
     def create_thumbnails(self):
@@ -173,9 +170,9 @@ class PdfDocument(PresentationDocument):
         :return: True if loaded, False if not.
         """
         log.debug('is_loaded pdf')
-        if self.num_pages < 0:
-            return False
-        return True
+        if self.presentation:
+            return True
+        return False
 
     def is_active(self):
         """
@@ -192,4 +189,16 @@ class PdfDocument(PresentationDocument):
 
         :return: The number of pages in the presentation..
         """
-        return self.num_pages
+        return self.presentation.pageCount()
+
+    def create_titles_and_notes(self):
+        """
+        Writes the list of titles - usually page number - (one per slide)
+        to 'titles.txt' and the notes to 'slideNotes[x].txt'
+        in the thumbnails directory
+        """
+        titles = []
+        notes = []
+        for i in range(0, self.presentation.pageCount()):
+            titles.append(self.presentation.pageLabel(i))
+        self.save_titles_and_notes(titles, notes)

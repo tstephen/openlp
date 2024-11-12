@@ -102,7 +102,6 @@ OPTIONAL_MODULES = [
     ('pyodbc', '(ODBC support)'),
     ('psycopg2', '(PostgreSQL support)'),
     ('enchant', '(spell checker)'),
-    ('fitz', '(PyMuPDF - PDF support)'),
     ('pysword', '(import SWORD bibles)'),
     ('uno', '(LibreOffice/OpenOffice support)'),
     # development/testing modules

@@ -64,7 +64,7 @@ def test_constructor(settings, mock_plugin):
     assert 'Pdf' == controller.name, 'The name of the presentation controller should be correct'
 
 
-def load_pdf(pdf_env):
+def test_load_pdf(pdf_env):
     """
     Test loading a Pdf using the PdfController
     """
@@ -86,7 +86,7 @@ def load_pdf(pdf_env):
     assert 3 == document.get_slide_count(), 'The pagecount of the PDF should be 3.'
 
 
-def load_pdf_pictures(pdf_env):
+def test_load_pdf_pictures(pdf_env):
     """
     Test loading a Pdf and check the generated pictures' size
     """
@@ -108,19 +108,6 @@ def load_pdf_pictures(pdf_env):
     image = QtGui.QImage(os.path.join(str(temp_folder_path), 'pdf_test1.pdf', 'mainslide001.png'))
     # Calculate the width of the PDF based on the aspect ratio of the PDF
     height = 768
-    width = int(round(height * 0.70703125, 0))
+    width = int(round(height * 0.70572917, 0))
     assert image.height() == height, 'The height should be {height}'.format(height=height)
     assert image.width() == width, 'The width should be {width}'.format(width=width)
-
-
-def test_loading_pdf_using_pymupdf(pdf_env):
-    try:
-        import fitz  # noqa: F401
-    except ImportError:
-        try:
-            import fitz_old as fitz  # noqa: F401
-        except ImportError:
-            pytest.skip('PyMuPDF is not installed')
-
-    load_pdf(pdf_env)
-    load_pdf_pictures(pdf_env)

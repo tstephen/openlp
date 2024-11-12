@@ -202,7 +202,7 @@ class PowerpointDocument(PresentationDocument):
                 self.index_map[key] = num + 1
                 if generate_thumbs:
                     self.presentation.Slides(num + 1).Export(
-                        str(self.get_thumbnail_folder() / 'slide{key:d}.png'.format(key=key)), 'png', 320, 240)
+                        str(self.get_thumbnail_folder() / 'slide{key:d}.png'.format(key=key)), 'png', 640, 360)
                 key += 1
         self.slide_count = key - 1
 
