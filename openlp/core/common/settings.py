@@ -172,7 +172,7 @@ def check_for_variant_migration(settings):
                 settings_file.write(file_contents.replace('xePyQt_PyObject', 'tPyObject'))
                 settings_file.truncate()
             # reload migrated settings
-            settings = Settings()
+            settings = Settings(settings_filename, Settings.IniFormat)
             return settings
         elif is_win():
             # search through OpenLP windows registry keys for variants and do a search and replace.
@@ -208,7 +208,7 @@ def check_for_variant_migration(settings):
             with open(settings_filename, 'wb') as plistfile:
                 plistlib.dump(plistdata, plistfile, fmt=plistlib.FMT_BINARY)
             # reload migrated settings
-            settings = Settings()
+            settings = Settings(settings_filename, QtCore.QSettings.NativeFormat)
             return settings
     # no conversion
     return settings

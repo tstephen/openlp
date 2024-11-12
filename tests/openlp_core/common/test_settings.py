@@ -22,12 +22,21 @@
 Package to test the openlp.core.lib.settings package.
 """
 import pytest
+import shutil
+import tempfile
 from pathlib import Path
 from unittest.mock import call, patch
 
+from PySide6 import QtCore
+
 from openlp.core.common import settings as modsettings
-from openlp.core.common.settings import Settings, media_players_conv, upgrade_dark_theme_to_ui_theme
+from openlp.core.common.platform import is_macosx
+from openlp.core.common.settings import Settings, media_players_conv, upgrade_dark_theme_to_ui_theme, \
+    check_for_variant_migration
+from openlp.core.common.enum import PluginStatus
 from openlp.core.ui.style import UiThemes
+
+from tests.utils.constants import RESOURCE_PATH
 
 
 def test_media_players_conv():
@@ -345,3 +354,36 @@ def test_upgrade_dark_theme_to_ui_theme_false():
 
     # THEN: UiTheme.QDarkStyle should be returned
     assert result == UiThemes.Automatic
+
+
+def test_settings_pyqt5_pyside6_migration_ini():
+    """Test that an ini file created by PyQt5 can be read by PySide6"""
+    # WHEN: The system is using ini configuration
+    # GIVEN: an ini file created by PyQt5 loaded by PySide6 (which is used now)
+    with tempfile.TemporaryDirectory() as tmpdirname:
+        tmp_ini_file_path = tmpdirname + '/OpenLP-3-1-3.ini'
+        shutil.copyfile(str(RESOURCE_PATH / 'settings' / 'OpenLP-3-1-3.ini'), tmp_ini_file_path)
+
+        settings = Settings(tmp_ini_file_path, QtCore.QSettings.IniFormat)
+        settings = check_for_variant_migration(settings)
+
+        # THEN: The migration of Variant based entries should be converted correctly (mostly enums)
+        value = settings.value('custom/status')
+        assert value == PluginStatus.Active
+
+
+@pytest.mark.skipif(not is_macosx(), reason='This test only works on macOs')
+def test_settings_pyqt5_pyside6_migration_plist():
+    """Test that an plist file created by PyQt5 can be read by PySide6"""
+    # WHEN: The system is mac and therefore using plist format as the native format
+    # GIVEN: an plist file created by PyQt5 loaded by PySide6 (which is used now)
+    with tempfile.TemporaryDirectory() as tmpdirname:
+        tmp_plist_file_path = tmpdirname + '/org.openlp.OpenLP-3-1-3.plist'
+        shutil.copyfile(str(RESOURCE_PATH / 'settings' / 'org.openlp.OpenLP-3-1-3.plist'), tmp_plist_file_path)
+
+        settings = Settings(tmp_plist_file_path, QtCore.QSettings.NativeFormat)
+        settings = check_for_variant_migration(settings)
+
+        # THEN: The migration of Variant based entries should be converted correctly (mostly enums)
+        value = settings.value('custom/status')
+        assert value == PluginStatus.Active
