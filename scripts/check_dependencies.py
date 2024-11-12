@@ -177,9 +177,9 @@ def verify_python():
 def verify_versions():
     print('Verifying version of modules...')
     try:
-        from PySide6 import QtCore
-        check_vers(QtCore.PYQT_VERSION_STR, VERS['PySide6'], 'PySide6')
-        check_vers(QtCore.qVersion(), VERS['Qt6'], 'Qt6')
+        import PySide6
+        check_vers(PySide6.__version__, VERS['PySide6'], 'PySide6')
+        check_vers(PySide6.QtCore.qVersion(), VERS['Qt6'], 'Qt6')
     except ImportError:
         print_vers_fail(VERS['PySide6'], 'PySide6')
         print_vers_fail(VERS['Qt6'], 'Qt6')

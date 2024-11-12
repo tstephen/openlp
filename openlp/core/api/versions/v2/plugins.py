@@ -43,11 +43,11 @@ alert_2_views = Blueprint('v2-alert-plugin', __name__)
 def search(plugin_name, text):
     plugin = Registry().get('plugin_manager').get_plugin_by_name(plugin_name)
     if plugin.status == PluginStatus.Active and plugin.media_item and plugin.media_item.has_search:
-        if hasattr(plugin.media_item.search, '__pyqtSignature__'):
-            # If this method has a signature, it means that it should be called from the parent thread
+        if hasattr(plugin.media_item.search, '_slots'):
+            # If this method has a _slots attribute, it means that it should be called from the parent thread
             results = plugin.media_item.staticMetaObject.invokeMethod(
                 plugin.media_item, 'search', QtCore.Qt.ConnectionType.DirectConnection,
-                QtCore.Q_RETURN_ARG(list), QtCore.Q_ARG(str, text), QtCore.Q_ARG(bool, False))
+                QtCore.Q_RETURN_ARG('QVariantList'), QtCore.Q_ARG(str, text), QtCore.Q_ARG(bool, False))
         else:
             # Fall back to original behaviour
             results = plugin.media_item.search(text, False)

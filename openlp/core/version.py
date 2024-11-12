@@ -43,7 +43,7 @@ CONNECTION_TIMEOUT = 30
 CONNECTION_RETRIES = 2
 LIBRARIES = OrderedDict([
     ('Python', ('platform', 'python_version')),
-    ('PySide6', ('PySide6.Qt', 'PYQT_VERSION_STR')),
+    ('PySide6', ('PySide6', '__version__')),
     ('SQLAlchemy', ('sqlalchemy',)),
     ('Alembic', ('alembic',)),
     ('BeautifulSoup', ('bs4',)),

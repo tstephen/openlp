@@ -40,7 +40,7 @@ def test_search_threaded(registry, settings):
     mocked_songs_plugin = MagicMock()
     mocked_songs_plugin.status = PluginStatus.Active
     mocked_songs_plugin.media_item.has_search = True
-    mocked_songs_plugin.media_item.search.__pyqtSignature__ = 'slot'
+    mocked_songs_plugin.media_item.search._slots = MagicMock()  # ensure that the method is identified as threaded
     mocked_songs_plugin.media_item.staticMetaObject.invokeMethod.return_value = [[1, 'Test', 'This is a test']]
     mocked_plugin_manager = MagicMock(**{'get_plugin_by_name.return_value': mocked_songs_plugin})
     Registry().register('plugin_manager', mocked_plugin_manager)
@@ -64,6 +64,7 @@ def test_search_unthreaded(registry, settings):
     mocked_songs_plugin.status = PluginStatus.Active
     mocked_songs_plugin.media_item.has_search = True
     mocked_songs_plugin.media_item.search.return_value = [[1, 'Test', 'This is a test']]
+    del mocked_songs_plugin.media_item.search._slots  # ensure that the method is identified as unthreaded
     mocked_plugin_manager = MagicMock(**{'get_plugin_by_name.return_value': mocked_songs_plugin})
     Registry().register('plugin_manager', mocked_plugin_manager)
 
