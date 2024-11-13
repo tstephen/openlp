@@ -132,7 +132,6 @@ class UiAboutDialog(object):
                       '<li><a href="https://fontawesome.com">Font Awesome</a> (CC-BY 4.0, OFL 1.1, MIT)</li>'
                       '<li><a href="https://lxml.de">lxml</a> (BSD)</li>'
                       '<li><a href="https://www.makotemplates.org">Mako templates</a> (MIT)</li>'
-                      '<li><a href="https://mediaarea.net/en/MediaInfo">MediaInfo</a> (BSD-style)</li>'
                       '<li><a href="https://github.com/rfk/pyenchant/">pyenchant</a> (LGPL)</li>'
                       '<li><a href="https://gitlab.com/tgc-dk/pysword">pysword</a> (MIT)</li>'
                       '<li><a href="https://pytest.org/">pytest</a> (MIT)</li>'

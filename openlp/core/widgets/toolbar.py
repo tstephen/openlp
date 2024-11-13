@@ -21,7 +21,6 @@
 """
 Provide common toolbar handling for OpenLP
 """
-import datetime
 import logging
 
 from PySide6 import QtCore, QtWidgets
@@ -137,52 +136,6 @@ class OpenLPToolbar(QtWidgets.QToolBar):
         separator.setSizePolicy(size_policy)
         self.addWidget(separator)
         pass
-
-
-class MediaSlider(QtWidgets.QSlider):
-    """
-    Allows the mouse events of a slider to be overridden and extra functionality added
-    """
-    def __init__(self, direction, manager, controller):
-        """
-        Constructor
-        """
-        super(MediaSlider, self).__init__(direction)
-        self.manager = manager
-        self.controller = controller
-
-    def mouseMoveEvent(self, event):
-        """
-        Override event to allow hover time to be displayed.
-
-        :param event: The triggering event
-        """
-        if "seek_slider" in self.objectName():
-            time_value = QtWidgets.QStyle.sliderValueFromPosition(self.minimum(), self.maximum(),
-                                                                  event.x(), self.width())
-            self.setToolTip('%s' % datetime.timedelta(seconds=int(time_value / 1000)))
-        else:
-            volume_value = QtWidgets.QStyle.sliderValueFromPosition(self.minimum(), self.maximum(),
-                                                                    event.x(), self.width())
-            print(float(volume_value / 10))
-            self.setToolTip("%1.2f" % float((volume_value / 10)))
-        QtWidgets.QSlider.mouseMoveEvent(self, event)
-
-    def mousePressEvent(self, event):
-        """
-        Mouse Press event no new functionality
-        :param event: The triggering event
-        """
-        QtWidgets.QSlider.mousePressEvent(self, event)
-
-    def mouseReleaseEvent(self, event):
-        """
-        Set the slider position when the mouse is clicked and released on the slider.
-
-        :param event: The triggering event
-        """
-        self.setValue(QtWidgets.QStyle.sliderValueFromPosition(self.minimum(), self.maximum(), event.x(), self.width()))
-        QtWidgets.QSlider.mouseReleaseEvent(self, event)
 
 
 class MediaToolbar(OpenLPToolbar):
