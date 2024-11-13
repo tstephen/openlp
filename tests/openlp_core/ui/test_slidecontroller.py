@@ -1679,7 +1679,7 @@ def test__capture_maindisplay_offscreen_command_screenshot(mocked_is_wayland_com
     mocks.slide_controller.service_item.name = 'screenshottable'
     mocks.slide_controller.service_item.service_item_type = ServiceItemType.Command
     mocks.slide_controller.selected_row = 0
-    pixmap = QtGui.QPixmap(1,1)
+    pixmap = QtGui.QPixmap(1, 1)
 
     def attempt_screenshot(params):
         nonlocal pixmap

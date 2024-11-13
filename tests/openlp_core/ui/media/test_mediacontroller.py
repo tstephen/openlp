@@ -469,7 +469,7 @@ def test_media_hide(media_env, settings):
 @pytest.mark.parametrize('file_name,media_length', TEST_MEDIA)
 def test_media_length(file_name, media_length, media_env):
     """
-    Check the duration of a few different files via MediaInfo
+    Check the duration of a few different files via QTMediaPlayer
     """
     # GIVEN: a media file
     full_path = TEST_PATH / file_name
