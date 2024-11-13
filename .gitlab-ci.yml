@@ -19,6 +19,14 @@ lint-javascript:
     - yarn install
     - yarn lint
 
+test-pypi:
+  stage: test
+  image: $IMAGE_BASE/pypi
+  script:
+    - pip install -e '.[darkstyle,mysql,odbc,postgresql,spellcheck,sword-bibles,test]'
+    - sh scripts/generate_resources.sh
+    - xvfb-run -s '-screen 0 1024x768x24' pytest --color=no --disable-warnings
+
 test-debian:
   stage: test
   image: $IMAGE_BASE/debian
