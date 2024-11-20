@@ -109,11 +109,11 @@ test-windows:
     - "# Download the necessary Bluetooth components for QT6 from OpenLP."
     - $bluetoothFileName = 'bluetooth.zip'
     - Invoke-WebRequest -OutFile "$env:Temp\$bluetoothFileName" -Uri "https://get.openlp.org/win-sdk/$bluetoothFileName"
-    - "# Extracting the ZIP file."
+    - "# Extracting the ZIP file"
     - Expand-Archive -Path "$env:Temp\$bluetoothFileName" -DestinationPath "C:\Windows\System32"
     - "# Updating pip"
     - python -m pip install --upgrade pip
-    - "# Installing generic dependencies from pypi"
+    - "# Installing generic dependencies from PyPI"
     - >
       pip install alembic
       beautifulsoup4
@@ -142,7 +142,7 @@ test-windows:
       sqlalchemy
       waitress
       websockets
-    - "# Installing Windows only dependencies from pypi"
+    - "# Installing Windows only dependencies from PyPI"
     - pip install pyodbc pypiwin32
     - $pyIcuPackageFileName = 'PyICU-2.14-cp312-cp312-win_amd64.whl'
     - "# Downloading PyICU for Windows from GitHub"
