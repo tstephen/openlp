@@ -91,26 +91,8 @@ test-arch:
 #   only:
 #     - master@openlp/openlp
 
-test-windows:
-  stage: test
-  tags:
-    - saas-windows-medium-amd64
+.pip_dependencies:
   script:
-    - "# Enabling feature that doesn't let Chocolatey ask for confirmation"
-    - choco feature enable --name='allowGlobalConfirmation'
-    - "# Installing Python 3.12"
-    - choco install python312
-    - "# Importing PowerShell module for the Chocolatey profile"
-    - Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
-    - "# Refreshing the environment"
-    - refreshenv
-    - "# Set environment variable QT_QPA_PLATFORM to offscreen to avoid UI troubles."
-    - $env:QT_QPA_PLATFORM='offscreen'
-    - "# Download the necessary Bluetooth components for QT6 from OpenLP."
-    - $bluetoothFileName = 'bluetooth.zip'
-    - Invoke-WebRequest -OutFile "$env:Temp\$bluetoothFileName" -Uri "https://get.openlp.org/win-sdk/$bluetoothFileName"
-    - "# Extracting the ZIP file"
-    - Expand-Archive -Path "$env:Temp\$bluetoothFileName" -DestinationPath "C:\Windows\System32"
     - "# Updating pip"
     - python -m pip install --upgrade pip
     - "# Installing generic dependencies from PyPI"
@@ -142,15 +124,65 @@ test-windows:
       sqlalchemy
       waitress
       websockets
+
+.run_tests:
+  script:
+    - "# Running tests"
+    - pytest --color=no --disable-warnings
+
+test-macos:
+  stage: test
+  tags:
+    - saas-macos-medium-m1
+  image: macos-14-xcode-15
+  script:
+    - !reference [.pip_dependencies, script]
+    - "# Installing MacOS only dependencies from PyPI"
+    - >
+      pip install py-applescript
+      pyobjc-core
+      pyobjc-framework-Cocoa
+      Pyro5
+    - "# Installing PyICU"
+    - brew install pkg-config icu4c
+    - export PATH="$PATH:/opt/homebrew/opt/icu4c/bin:/opt/homebrew/opt/icu4c/sbin"
+    - export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/opt/homebrew/opt/icu4c/lib/pkgconfig"
+    - pip install pyicu
+    - !reference [.run_tests, script]
+  only:
+    - master@openlp/openlp
+
+test-windows:
+  stage: test
+  tags:
+    - saas-windows-medium-amd64
+  script:
+    - "# Enabling feature that doesn't let Chocolatey ask for confirmation"
+    - choco feature enable --name='allowGlobalConfirmation'
+    - "# Installing Python 3.12"
+    - choco install python312
+    - "# Importing PowerShell module for the Chocolatey profile"
+    - Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
+    - "# Refreshing the environment"
+    - refreshenv
+    - "# Set environment variable QT_QPA_PLATFORM to offscreen to avoid UI troubles."
+    - $env:QT_QPA_PLATFORM='offscreen'
+    - "# Download the necessary Bluetooth components for QT6 from OpenLP."
+    - $bluetoothFileName = 'bluetooth.zip'
+    - Invoke-WebRequest -OutFile "$env:Temp\$bluetoothFileName" -Uri "https://get.openlp.org/win-sdk/$bluetoothFileName"
+    - "# Extracting the ZIP file"
+    - Expand-Archive -Path "$env:Temp\$bluetoothFileName" -DestinationPath "C:\Windows\System32"
+    - !reference [.pip_dependencies, script]
     - "# Installing Windows only dependencies from PyPI"
-    - pip install pyodbc pypiwin32
+    - >
+      pip install pyodbc
+      pypiwin32
     - $pyIcuPackageFileName = 'PyICU-2.14-cp312-cp312-win_amd64.whl'
     - "# Downloading PyICU for Windows from GitHub"
     - Invoke-WebRequest -OutFile $pyIcuPackageFileName -Uri https://github.com/cgohlke/pyicu-build/releases/download/v2.14/$pyIcuPackageFileName
     - "# Installing PyICU for Windows"
     - pip install $pyIcuPackageFileName
-    - "# Running tests"
-    - pytest --color=no --disable-warnings
+    - !reference [.run_tests, script]
   only:
     - master@openlp/openlp
 
