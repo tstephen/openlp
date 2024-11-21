@@ -418,8 +418,8 @@ def test_after_loaded_callback(display_window_env, mock_settings, registry):
     mocked_after_loaded_callback.assert_called_once()
 
 
-@patch.object(time, 'time')
-def test_run_in_display_no_sync_no_wait(mock_time, display_window_env, mock_settings):
+@patch('openlp.core.display.window.wait_for')
+def test_run_in_display_no_sync_no_wait(mocked_wait_for, display_window_env, mock_settings):
     """
     test a script is run on the webview
     """
@@ -433,30 +433,33 @@ def test_run_in_display_no_sync_no_wait(mock_time, display_window_env, mock_sett
 
     # THEN: javascript should be run with no delay
     webengine_page.runJavaScript.assert_called_once_with('javascript to execute')
-    mock_time.sleep.assert_not_called()
+    assert mocked_wait_for.call_count == 1, 'wait_for should have only been called once'
 
 
-@patch.object(time, 'time')
-def test_run_in_display_sync_no_wait(mock_time, display_window_env, mock_settings):
+@patch('openlp.core.display.window.wait_for')
+def test_run_in_display_sync_no_wait(mocked_wait_for, display_window_env, mock_settings):
     """
     test a synced script is run on the webview and immediately returns a result
     """
     # GIVEN: A (fake) webengine page with a js callback fn
-    def save_callback(script, callback):
-        callback(1234)
+    mocked_wait_for.return_value = True
     display_window = DisplayWindow()
     display_window.webview = MagicMock()
     webengine_page = MagicMock()
-    webengine_page.runJavaScript.side_effect = save_callback
+
+    def post_js_result(script: str):
+        """A mock method to call the handle_javascript_result() method when the script is run"""
+        display_window.handle_javascript_result(1234)
+
+    webengine_page.runJavaScript.side_effect = post_js_result
     display_window.webview.page.return_value = webengine_page
 
-    # WHEN: javascript is requested to run
+    # WHEN: javascript is requested to run, and the JS returns a result
     result = display_window._run_javascript('javascript to execute', True)
 
     # THEN: javascript should be run with no delay and return with the correct result
     assert result == 1234
     webengine_page.runJavaScript.assert_called_once()
-    mock_time.sleep.assert_not_called()
 
 
 @patch('openlp.core.display.window.is_win')

@@ -47,23 +47,36 @@ def buttons_env(mock_settings: MagicMock):
     translate_patcher.stop()
 
 
-@patch('openlp.core.widgets.buttons.ColorButton.setToolTip')
-def test_constructor(mocked_set_tool_tip, buttons_env):
+def test_constructor(mock_settings: MagicMock):
     """
     Test that constructing a ColorButton object works correctly
     """
-
-    # GIVEN: The ColorButton class, a mocked change_color, setToolTip methods and clicked signal
+    # GIVEN: The ColorButton class
     # WHEN: The ColorButton object is instantiated
-    mocked_clicked = buttons_env[0]
-    mocked_change_color = buttons_env[3]
     widget = ColorButton()
 
     # THEN: The widget __init__ method should have the correct properties and methods called
     assert widget.parent is None, 'The parent should be the same as the one that the class was instianted with'
-    mocked_change_color.assert_called_once_with('#ffffff')
-    mocked_set_tool_tip.assert_called_once_with('Tool Tip Text')
-    mocked_clicked.connect.assert_called_once_with(widget.on_clicked)
+
+
+def test_setup(mock_settings: MagicMock):
+    """
+    Test the _setup() method correctly instantiates the object
+    """
+    # GIVEN: A ColorButton object
+    with patch.object(ColorButton, '_setup'):
+        widget = ColorButton()
+
+    # WHEN: _setup() is called
+    with patch.object(widget, 'change_color') as mocked_change_color, \
+            patch.object(widget, 'setToolTip') as mocked_set_tooltip, \
+            patch.object(widget, 'clicked') as mocked_clicked:
+        widget._setup()
+
+        # THEN: The correct methods should have been called
+        mocked_change_color.assert_called_once_with('#ffffff')
+        mocked_set_tooltip.assert_called_once_with('Click to select a color.')
+        mocked_clicked.connect.assert_called_once_with(widget.on_clicked)
 
 
 @patch('openlp.core.widgets.buttons.ColorButton.setStyleSheet')

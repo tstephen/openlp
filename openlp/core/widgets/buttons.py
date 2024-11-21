@@ -40,6 +40,10 @@ class ColorButton(QtWidgets.QPushButton):
         """
         super().__init__(parent)
         self.parent = parent
+        self._setup()
+
+    def _setup(self):
+        """Set up the object. This method is used to make the class easily tested"""
         self.change_color('#ffffff')
         self.setToolTip(translate('OpenLP.ColorButton', 'Click to select a color.'))
         self.clicked.connect(self.on_clicked)

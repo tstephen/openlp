@@ -21,515 +21,487 @@
 """
 Test ProjectorEditForm.accept_me
 """
-import logging
+from unittest.mock import MagicMock, patch, call
 
-import openlp.core.projectors.db
-import openlp.core.projectors.editform
-
-from unittest.mock import DEFAULT, patch
-
+from openlp.core.projectors.editform import ProjectorEditForm, Message
 from openlp.core.projectors.constants import PJLINK_VALID_PORTS
 from openlp.core.projectors.db import Projector
 from tests.resources.projector.data import TEST1_DATA
 
-_test_module = openlp.core.projectors.editform.__name__
-_test_module_db = openlp.core.projectors.db.__name__
-Message = openlp.core.projectors.editform.Message
 
-
-def test_name_NameBlank(projector_editform_mtdb, caplog):
+@patch('openlp.core.projectors.editform.log')
+@patch('openlp.core.projectors.editform.Message.show_warning')
+def test_accept_me_name_blank(mocked_show_warning: MagicMock, mocked_log: MagicMock, mock_settings: MagicMock):
     """
     Test when name field blank
     """
     # GIVEN: Test setup
-    caplog.set_level(logging.DEBUG)
-    logs = [(_test_module, logging.DEBUG, 'accept_me() signal received')]
-    projector_editform_mtdb.exec()
-    projector_editform_mtdb.name_text.setText('')
+    mocked_projectordb = MagicMock()
+    mocked_projectordb.get_projector.return_value = []
+    projector_editform = ProjectorEditForm(None, mocked_projectordb)
+    with patch('openlp.core.projectors.editform.QtWidgets.QDialog.exec'):
+        projector_editform.exec()
+    projector_editform.name_text.setText('')
 
-    # WHEN: Called
-    caplog.clear()
-    projector_editform_mtdb.accept_me()
+    # WHEN: The accept_me slot is called
+    projector_editform.accept_me()
 
     # THEN: Appropriate calls made
-    assert caplog.record_tuples == logs, 'Invalid logs'
-    projector_editform_mtdb.mock_msg_box.warning.assert_called_once_with(None,
-                                                                         Message.NameBlank['title'],
-                                                                         Message.NameBlank['text']
-                                                                         )
+    mocked_log.debug.assert_called_once_with('accept_me() signal received')
+    mocked_show_warning.assert_called_once_with(message=Message.NameBlank)
 
 
-def test_name_DatabaseError_id(projector_editform_mtdb, caplog):
+@patch('openlp.core.projectors.editform.log')
+@patch('openlp.core.projectors.editform.Message.show_warning')
+def test_accept_me_database_error_id(mocked_show_warning: MagicMock, mocked_log: MagicMock,
+                                     mock_settings: MagicMock):
     """
     Test with mismatch ID between Projector() and DB
     """
     # GIVEN: Test setup
-    t_id = TEST1_DATA['id']
-    t_name = TEST1_DATA['name']
-    caplog.set_level(logging.DEBUG)
-    logs = [(_test_module, logging.DEBUG, 'accept_me() signal received'),
-            (_test_module_db, logging.DEBUG, 'Filter by Name'),
-            (_test_module, logging.WARNING,
-             f'editform(): No record found but projector had id={t_id}')]
-    projector_editform_mtdb.exec()
-    projector_editform_mtdb.name_text.setText(t_name)
-    projector_editform_mtdb.projector.id = t_id
+    name = TEST1_DATA['name']
+    test_id = TEST1_DATA['id']
+    mocked_projectordb = MagicMock()
+    mocked_projectordb.get_projector.return_value = []
+    projector_editform = ProjectorEditForm(None, mocked_projectordb)
+    with patch('openlp.core.projectors.editform.QtWidgets.QDialog.exec'):
+        projector_editform.exec()
+    projector_editform.name_text.setText(name)
+    projector_editform.projector.id = test_id
 
     # WHEN: Called
-    caplog.clear()
-    projector_editform_mtdb.accept_me()
+    projector_editform.accept_me()
 
     # THEN: Appropriate calls made
-    assert caplog.record_tuples == logs, 'Invalid logs'
-    projector_editform_mtdb.mock_msg_box.warning.assert_called_once_with(None,
-                                                                         Message.DatabaseError['title'],
-                                                                         Message.DatabaseError['text']
-                                                                         )
+    mocked_log.debug.assert_called_once_with('accept_me() signal received')
+    mocked_log.warning.assert_called_once_with(f'editform(): No record found but projector had id={test_id}')
+    mocked_projectordb.get_projector.assert_called_once_with(name=name)
+    mocked_show_warning.assert_called_once_with(message=Message.DatabaseError)
 
 
-def test_name_DatabaseError_name(projector_editform_mtdb, caplog):
+@patch('openlp.core.projectors.editform.log')
+@patch('openlp.core.projectors.editform.Message.show_warning')
+def test_accept_me_name_database_error_name(mocked_show_warning: MagicMock, mocked_log: MagicMock,
+                                            mock_settings: MagicMock):
     """
     Test with mismatch between name and DB
     """
     # GIVEN: Test setup
-    t_name = TEST1_DATA['name']
-    caplog.set_level(logging.DEBUG)
-    logs = [(_test_module, logging.DEBUG, 'accept_me() signal received'),
-            (_test_module_db, logging.DEBUG, 'Filter by Name'),
-            (_test_module, logging.WARNING,
-             f'editform(): No record found when there should be name="{t_name}"')]
-    projector_editform_mtdb.exec()
-    projector_editform_mtdb.name_text.setText(t_name)
-    projector_editform_mtdb.projector.name = t_name
-    projector_editform_mtdb.new_projector = False
+    name = TEST1_DATA['name']
+    mocked_projectordb = MagicMock()
+    mocked_projectordb.get_projector.return_value = []
+    projector_editform = ProjectorEditForm(None, mocked_projectordb)
+    with patch('openlp.core.projectors.editform.QtWidgets.QDialog.exec'):
+        projector_editform.exec()
+    projector_editform.name_text.setText(name)
+    projector_editform.projector.name = name
+    projector_editform.new_projector = False
 
     # WHEN: Called
-    caplog.clear()
-    projector_editform_mtdb.accept_me()
+    projector_editform.accept_me()
 
     # THEN: Appropriate calls made
-    assert caplog.record_tuples == logs, 'Invalid logs'
-    projector_editform_mtdb.mock_msg_box.warning.assert_called_once_with(None,
-                                                                         Message.DatabaseError['title'],
-                                                                         Message.DatabaseError['text']
-                                                                         )
+    mocked_log.debug.assert_called_once_with('accept_me() signal received')
+    mocked_log.warning.assert_called_once_with(f'editform(): No record found when there should be name="{name}"')
+    mocked_projectordb.get_projector.assert_called_once_with(name=name)
+    mocked_show_warning.assert_called_once_with(message=Message.DatabaseError)
 
 
-def test_name_NameDuplicate(projector_editform, caplog):
+@patch('openlp.core.projectors.editform.log')
+@patch('openlp.core.projectors.editform.Message.show_warning')
+def test_accept_me_name_duplicate(mocked_show_warning: MagicMock, mocked_log: MagicMock,
+                                  mock_settings: MagicMock):
     """
     Test when name duplicate
     """
     # GIVEN: Test setup
-    t_name = TEST1_DATA['name']
-    # As long as the new record port number is different, we should be good
-    caplog.set_level(logging.DEBUG)
-    logs = [(_test_module, logging.DEBUG, 'accept_me() signal received'),
-            (_test_module_db, logging.DEBUG, 'Filter by Name'),
-            (_test_module, logging.WARNING, f'editform(): Name "{t_name}" already in database')
-            ]
-    projector_editform.exec()
-    projector_editform.name_text.setText(t_name)
-    projector_editform.projector.name = t_name
+    name = TEST1_DATA['name']
+    mocked_projectordb = MagicMock()
+    mocked_projectordb.get_projector.return_value = [MagicMock()]
+    projector_editform = ProjectorEditForm(None, mocked_projectordb)
+    with patch('openlp.core.projectors.editform.QtWidgets.QDialog.exec'):
+        projector_editform.exec()
+    projector_editform.name_text.setText(name)
+    projector_editform.projector.name = name
 
     # WHEN: Called
-    caplog.clear()
     projector_editform.accept_me()
 
     # THEN: Appropriate calls made
-    assert caplog.record_tuples == logs, 'Invalid logs'
-    projector_editform.mock_msg_box.warning.assert_called_once_with(None,
-                                                                    Message.NameDuplicate['title'],
-                                                                    Message.NameDuplicate['text']
-                                                                    )
+    mocked_log.debug.assert_called_once_with('accept_me() signal received')
+    mocked_log.warning.assert_called_once_with(f'editform(): Name "{name}" already in database')
+    mocked_projectordb.get_projector.assert_called_once_with(name=name)
+    mocked_show_warning.assert_called_once_with(message=Message.NameDuplicate)
 
 
-def test_name_DatabaseMultiple(projector_editform, caplog):
+@patch('openlp.core.projectors.editform.log')
+@patch('openlp.core.projectors.editform.Message.show_warning')
+def test_accept_me_name_multiple(mocked_show_warning: MagicMock, mocked_log: MagicMock, mock_settings: MagicMock):
     """
     Test when multiple database records have the same name
     """
     # GIVEN: Test setup
     # Save another instance of TEST1_DATA
-    t_proj = Projector(**TEST1_DATA)
-    t_proj.id = None
-    projector_editform.projectordb.save_object(t_proj)
-
-    # Test variables
-    t_id1 = TEST1_DATA['id']
-    # There should only be 3 records in the DB, TEST[1,2,3]_DATA
-    # The above save_object() should have created record 4
-    t_id2 = t_proj.id
-    t_name = TEST1_DATA['name']
-    caplog.set_level(logging.DEBUG)
-    logs = [(_test_module, logging.DEBUG, 'accept_me() signal received'),
-            (_test_module_db, logging.DEBUG, 'Filter by Name'),
-            (_test_module, logging.WARNING, f'editform(): Multiple records found for name "{t_name}"'),
-            (_test_module, logging.WARNING, f'editform() Found record={t_id1} name="{t_name}"'),
-            (_test_module, logging.WARNING, f'editform() Found record={t_id2} name="{t_name}"')
-            ]
-    projector_editform.exec()
-    projector_editform.name_text.setText(t_name)
+    name = TEST1_DATA['name']
+    projector_1 = Projector(**TEST1_DATA)
+    projector_1.id = 1
+    projector_2 = Projector(**TEST1_DATA)
+    projector_2.id = 2
+    mocked_projectordb = MagicMock()
+    mocked_projectordb.get_projector.return_value = [projector_1, projector_2]
+    projector_editform = ProjectorEditForm(None, mocked_projectordb)
+    with patch('openlp.core.projectors.editform.QtWidgets.QDialog.exec'):
+        projector_editform.exec()
+    projector_editform.name_text.setText(name)
 
     # WHEN: Called
-    caplog.clear()
     projector_editform.accept_me()
 
     # THEN: Appropriate calls made
-    assert caplog.record_tuples == logs, 'Invalid logs'
-    projector_editform.mock_msg_box.warning.assert_called_once_with(None,
-                                                                    Message.DatabaseMultiple['title'],
-                                                                    Message.DatabaseMultiple['text']
-                                                                    )
+    mocked_log.debug.assert_called_once_with('accept_me() signal received')
+    assert mocked_log.warning.call_args_list == [
+        call(f'editform(): Multiple records found for name "{name}"'),
+        call(f'editform() Found record={projector_1.id} name="{name}"'),
+        call(f'editform() Found record={projector_2.id} name="{name}"'),
+    ]
+    mocked_projectordb.get_projector.assert_called_once_with(name=name)
+    mocked_show_warning.assert_called_once_with(message=Message.DatabaseMultiple)
 
 
-def test_ip_IPBlank(projector_editform_mtdb, caplog):
+@patch('openlp.core.projectors.editform.log')
+@patch('openlp.core.projectors.editform.Message.show_warning')
+def test_accept_me_ip_blank(mocked_show_warning: MagicMock, mocked_log: MagicMock, mock_settings: MagicMock):
     """
     Test when IP field blank
     """
     # GIVEN: Test setup
-    t_name = TEST1_DATA['name']
-    caplog.set_level(logging.DEBUG)
-    logs = [(_test_module, logging.DEBUG, 'accept_me() signal received'),
-            (_test_module_db, logging.DEBUG, 'Filter by Name')]
-    projector_editform_mtdb.exec()
-    projector_editform_mtdb.name_text.setText(t_name)
-    projector_editform_mtdb.ip_text.setText('')
+    name = TEST1_DATA['name']
+    mocked_projectordb = MagicMock()
+    mocked_projectordb.get_projector.return_value = []
+    projector_editform = ProjectorEditForm(None, mocked_projectordb)
+    with patch('openlp.core.projectors.editform.QtWidgets.QDialog.exec'):
+        projector_editform.exec()
+    projector_editform.name_text.setText(name)
+    projector_editform.ip_text.setText('')
 
     # WHEN: Called
-    caplog.clear()
-    projector_editform_mtdb.accept_me()
+    projector_editform.accept_me()
 
     # THEN: Appropriate calls made
-    assert caplog.record_tuples == logs, 'Invalid logs'
-    projector_editform_mtdb.mock_msg_box.warning.assert_called_once_with(None,
-                                                                         Message.IPBlank['title'],
-                                                                         Message.IPBlank['text']
-                                                                         )
+    mocked_log.debug.assert_called_once_with('accept_me() signal received')
+    mocked_projectordb.get_projector.assert_called_once_with(name=name)
+    mocked_show_warning.assert_called_once_with(message=Message.IPBlank)
 
 
-def test_ip_IPInvalid(projector_editform_mtdb, caplog):
+@patch('openlp.core.projectors.editform.log')
+@patch('openlp.core.projectors.editform.Message.show_warning')
+def test_accept_me_ip_invalid(mocked_show_warning: MagicMock, mocked_log: MagicMock, mock_settings: MagicMock):
     """
     Test when IP invalid
     """
     # GIVEN: Test setup
-    t_name = TEST1_DATA['name']
-    t_ip = 'a'
-    caplog.set_level(logging.DEBUG)
-    logs = [(_test_module, logging.DEBUG, 'accept_me() signal received'),
-            (_test_module_db, logging.DEBUG, 'Filter by Name')]
-    projector_editform_mtdb.exec()
-    projector_editform_mtdb.name_text.setText(t_name)
-    projector_editform_mtdb.ip_text.setText(t_ip)
+    name = TEST1_DATA['name']
+    mocked_projectordb = MagicMock()
+    mocked_projectordb.get_projector.return_value = []
+    projector_editform = ProjectorEditForm(None, mocked_projectordb)
+    with patch('openlp.core.projectors.editform.QtWidgets.QDialog.exec'):
+        projector_editform.exec()
+    projector_editform.name_text.setText(name)
+    projector_editform.ip_text.setText('300.256.900.512')
 
     # WHEN: Called
-    caplog.clear()
-    projector_editform_mtdb.accept_me()
+    projector_editform.accept_me()
 
     # THEN: Appropriate calls made
-    assert caplog.record_tuples == logs, 'Invalid logs'
-    projector_editform_mtdb.mock_msg_box.warning.assert_called_once_with(None,
-                                                                         Message.IPInvalid['title'],
-                                                                         Message.IPInvalid['text']
-                                                                         )
+    mocked_log.debug.assert_called_once_with('accept_me() signal received')
+    mocked_projectordb.get_projector.assert_called_once_with(name=name)
+    mocked_show_warning.assert_called_once_with(message=Message.IPInvalid)
 
 
-def test_port_PortBlank(projector_editform_mtdb, caplog):
+@patch('openlp.core.projectors.editform.log')
+@patch('openlp.core.projectors.editform.Message.show_warning')
+def test_accept_me_port_blank(mocked_show_warning: MagicMock, mocked_log: MagicMock, mock_settings: MagicMock):
     """
     Test when port field blank
     """
     # GIVEN: Test setup
-    t_name = TEST1_DATA['name']
-    t_ip = TEST1_DATA['ip']
-    caplog.set_level(logging.DEBUG)
-    logs = [(_test_module, logging.DEBUG, 'accept_me() signal received'),
-            (_test_module_db, logging.DEBUG, 'Filter by Name'),
-            ]
-    projector_editform_mtdb.exec()
-    projector_editform_mtdb.name_text.setText(t_name)
-    projector_editform_mtdb.ip_text.setText(t_ip)
-    projector_editform_mtdb.port_text.setText('')
+    name = TEST1_DATA['name']
+    ip = TEST1_DATA['ip']
+    mocked_projectordb = MagicMock()
+    mocked_projectordb.get_projector.return_value = []
+    projector_editform = ProjectorEditForm(None, mocked_projectordb)
+    with patch('openlp.core.projectors.editform.QtWidgets.QDialog.exec'):
+        projector_editform.exec()
+    projector_editform.name_text.setText(name)
+    projector_editform.ip_text.setText(ip)
+    projector_editform.port_text.setText('')
 
     # WHEN: Called
-    caplog.clear()
-    projector_editform_mtdb.accept_me()
+    projector_editform.accept_me()
 
     # THEN: Appropriate calls made
-    assert caplog.record_tuples == logs, 'Invalid logs'
-    projector_editform_mtdb.mock_msg_box.warning.assert_called_once_with(None,
-                                                                         Message.PortBlank['title'],
-                                                                         Message.PortBlank['text']
-                                                                         )
+    mocked_log.debug.assert_called_once_with('accept_me() signal received')
+    mocked_projectordb.get_projector.assert_called_once_with(name=name)
+    mocked_show_warning.assert_called_once_with(message=Message.PortBlank)
 
 
-def test_port_PortInvalid_not_decimal(projector_editform_mtdb, caplog):
+@patch('openlp.core.projectors.editform.log')
+@patch('openlp.core.projectors.editform.Message.show_warning')
+def test_accept_me_port_not_decimal(mocked_show_warning: MagicMock, mocked_log: MagicMock):
     """
     Test when port not a decimal digit
     """
     # GIVEN: Test setup
-    t_name = TEST1_DATA['name']
-    t_ip = TEST1_DATA['ip']
-    caplog.set_level(logging.DEBUG)
-    logs = [(_test_module, logging.DEBUG, 'accept_me() signal received'),
-            (_test_module_db, logging.DEBUG, 'Filter by Name'),
-            ]
-    projector_editform_mtdb.exec()
-    projector_editform_mtdb.name_text.setText(t_name)
-    projector_editform_mtdb.ip_text.setText(t_ip)
-    projector_editform_mtdb.port_text.setText('a')
+    name = TEST1_DATA['name']
+    ip = TEST1_DATA['ip']
+    mocked_projectordb = MagicMock()
+    mocked_projectordb.get_projector.return_value = []
+    projector_editform = ProjectorEditForm(None, mocked_projectordb)
+    with patch('openlp.core.projectors.editform.QtWidgets.QDialog.exec'):
+        projector_editform.exec()
+    projector_editform.name_text.setText(name)
+    projector_editform.ip_text.setText(ip)
+    projector_editform.port_text.setText('string')
 
     # WHEN: Called
-    caplog.clear()
-    projector_editform_mtdb.accept_me()
+    projector_editform.accept_me()
 
     # THEN: Appropriate calls made
-    assert caplog.record_tuples == logs, 'Invalid logs'
-    projector_editform_mtdb.mock_msg_box.warning.assert_called_once_with(None,
-                                                                         Message.PortInvalid['title'],
-                                                                         Message.PortInvalid['text']
-                                                                         )
+    mocked_log.debug.assert_called_once_with('accept_me() signal received')
+    mocked_projectordb.get_projector.assert_called_once_with(name=name)
+    mocked_show_warning.assert_called_once_with(message=Message.PortInvalid)
 
 
-def test_port_PortInvalid_low(projector_editform_mtdb, caplog):
+@patch('openlp.core.projectors.editform.log')
+@patch('openlp.core.projectors.editform.Message.show_warning')
+def test_accept_me_port_too_low(mocked_show_warning: MagicMock, mocked_log: MagicMock):
     """
     Test when port number less than PJLINK_VALID_PORTS lower value
     """
     # GIVEN: Test setup
-    t_name = TEST1_DATA['name']
-    t_ip = TEST1_DATA['ip']
-    t_port = PJLINK_VALID_PORTS.start - 1
-    caplog.set_level(logging.DEBUG)
-    logs = [(_test_module, logging.DEBUG, 'accept_me() signal received'),
-            (_test_module_db, logging.DEBUG, 'Filter by Name'),
-            ]
-    projector_editform_mtdb.exec()
-    projector_editform_mtdb.name_text.setText(t_name)
-    projector_editform_mtdb.ip_text.setText(t_ip)
-    projector_editform_mtdb.port_text.setText(str(t_port))
+    name = TEST1_DATA['name']
+    ip = TEST1_DATA['ip']
+    port = PJLINK_VALID_PORTS.start - 1
+    mocked_projectordb = MagicMock()
+    mocked_projectordb.get_projector.return_value = []
+    projector_editform = ProjectorEditForm(None, mocked_projectordb)
+    with patch('openlp.core.projectors.editform.QtWidgets.QDialog.exec'):
+        projector_editform.exec()
+    projector_editform.name_text.setText(name)
+    projector_editform.ip_text.setText(ip)
+    projector_editform.port_text.setText(str(port))
 
     # WHEN: Called
-    caplog.clear()
-    projector_editform_mtdb.accept_me()
+    projector_editform.accept_me()
 
     # THEN: Appropriate calls made
-    assert caplog.record_tuples == logs, 'Invalid logs'
-    projector_editform_mtdb.mock_msg_box.warning.assert_called_once_with(None,
-                                                                         Message.PortInvalid['title'],
-                                                                         Message.PortInvalid['text']
-                                                                         )
+    mocked_log.debug.assert_called_once_with('accept_me() signal received')
+    mocked_projectordb.get_projector.assert_called_once_with(name=name)
+    mocked_show_warning.assert_called_once_with(message=Message.PortInvalid)
 
 
-def test_port_PortInvalid_high(projector_editform_mtdb, caplog):
+@patch('openlp.core.projectors.editform.log')
+@patch('openlp.core.projectors.editform.Message.show_warning')
+def test_accpt_me_port_too_high(mocked_show_warning: MagicMock, mocked_log: MagicMock):
     """
     Test when port number greater than PJLINK_VALID_PORTS higher value
     """
     # GIVEN: Test setup
-    t_name = TEST1_DATA['name']
-    t_ip = TEST1_DATA['ip']
-    t_port = PJLINK_VALID_PORTS.stop + 1
-    caplog.set_level(logging.DEBUG)
-    logs = [(_test_module, logging.DEBUG, 'accept_me() signal received'),
-            (_test_module_db, logging.DEBUG, 'Filter by Name'),
-            ]
-    projector_editform_mtdb.exec()
-    projector_editform_mtdb.name_text.setText(t_name)
-    projector_editform_mtdb.ip_text.setText(t_ip)
-    projector_editform_mtdb.port_text.setText(str(t_port))
+    name = TEST1_DATA['name']
+    ip = TEST1_DATA['ip']
+    port = PJLINK_VALID_PORTS.stop + 1
+    mocked_projectordb = MagicMock()
+    mocked_projectordb.get_projector.return_value = []
+    projector_editform = ProjectorEditForm(None, mocked_projectordb)
+    with patch('openlp.core.projectors.editform.QtWidgets.QDialog.exec'):
+        projector_editform.exec()
+    projector_editform.name_text.setText(name)
+    projector_editform.ip_text.setText(ip)
+    projector_editform.port_text.setText(str(port))
 
     # WHEN: Called
-    caplog.clear()
-    projector_editform_mtdb.accept_me()
+    projector_editform.accept_me()
 
     # THEN: Appropriate calls made
-    assert caplog.record_tuples == logs, 'Invalid logs'
-    projector_editform_mtdb.mock_msg_box.warning.assert_called_once_with(None,
-                                                                         Message.PortInvalid['title'],
-                                                                         Message.PortInvalid['text']
-                                                                         )
+    mocked_log.debug.assert_called_once_with('accept_me() signal received')
+    mocked_projectordb.get_projector.assert_called_once_with(name=name)
+    mocked_show_warning.assert_called_once_with(message=Message.PortInvalid)
 
 
-def test_adx_AddressDuplicate(projector_editform, caplog):
+@patch('openlp.core.projectors.editform.log')
+@patch('openlp.core.projectors.editform.Message.show_warning')
+def test_accept_me_address_duplicate(mocked_show_warning: MagicMock, mocked_log: MagicMock):
     """
     Test when IP:Port address duplicate
     """
     # GIVEN: Test setup
-    t_ip = TEST1_DATA['ip']
-    t_port = TEST1_DATA['port']
-
-    caplog.set_level(logging.DEBUG)
-    logs = [(_test_module, logging.DEBUG, 'accept_me() signal received'),
-            (_test_module_db, logging.DEBUG, 'Filter by Name'),
-            (_test_module_db, logging.DEBUG, 'Filter by IP Port'),
-            (_test_module, logging.WARNING, f'editform(): Address already in database {t_ip}:{t_port}')
-            ]
-    projector_editform.exec()
-    projector_editform.name_text.setText('A Different Name Not In DB')
-    projector_editform.ip_text.setText(t_ip)
-    projector_editform.port_text.setText(str(t_port))
+    name = 'A Different Name Not In DB'
+    ip = TEST1_DATA['ip']
+    port = TEST1_DATA['port']
+    mocked_projectordb = MagicMock()
+    mocked_projectordb.get_projector.side_effect = [[], [Projector(**TEST1_DATA)]]
+    projector_editform = ProjectorEditForm(None, mocked_projectordb)
+    with patch('openlp.core.projectors.editform.QtWidgets.QDialog.exec'):
+        projector_editform.exec()
+    projector_editform.name_text.setText(name)
+    projector_editform.ip_text.setText(ip)
+    projector_editform.port_text.setText(str(port))
 
     # WHEN: Called
-    caplog.clear()
     projector_editform.accept_me()
 
     # THEN: Appropriate calls made
-    assert caplog.record_tuples == logs, 'Invalid logs'
-    projector_editform.mock_msg_box.warning.assert_called_once_with(None,
-                                                                    Message.AddressDuplicate['title'],
-                                                                    Message.AddressDuplicate['text']
-                                                                    )
+    mocked_log.debug.assert_called_once_with('accept_me() signal received')
+    mocked_log.warning.assert_called_once_with(f'editform(): Address already in database {ip}:{port}')
+    assert mocked_projectordb.get_projector.call_args_list == [call(name=name), call(ip=ip, port=port)]
+    mocked_show_warning.assert_called_once_with(message=Message.AddressDuplicate)
 
 
-def test_adx_DatabaseMultiple(projector_editform, caplog):
+@patch('openlp.core.projectors.editform.log')
+@patch('openlp.core.projectors.editform.Message.show_warning')
+def test_accept_me_address_multiple(mocked_show_warning: MagicMock, mocked_log: MagicMock):
     """
     Test when database has multiple same IP:Port records
     """
     # GIVEN: Test setup
-    t_proj = Projector(**TEST1_DATA)
-    t_proj.id = None
-    projector_editform.projectordb.save_object(t_proj)
-    t_id1 = TEST1_DATA['id']
-    t_id2 = t_proj.id
     t_name = TEST1_DATA['name']
-    t_ip = TEST1_DATA['ip']
-    t_port = TEST1_DATA['port']
-
-    caplog.set_level(logging.DEBUG)
-    logs = [(_test_module, logging.DEBUG, 'accept_me() signal received'),
-            (_test_module_db, logging.DEBUG, 'Filter by Name'),
-            (_test_module_db, logging.DEBUG, 'Filter by IP Port'),
-            (_test_module, logging.WARNING, f'editform(): Multiple records found for {t_ip}:{t_port}'),
-            (_test_module, logging.WARNING, f'editform(): record={t_id1} name="{t_name}" adx={t_ip}:{t_port}'),
-            (_test_module, logging.WARNING, f'editform(): record={t_id2} name="{t_name}" adx={t_ip}:{t_port}')
-            ]
-    projector_editform.exec()
-    projector_editform.name_text.setText('A Different Name Not In DB')
-    projector_editform.ip_text.setText(t_ip)
-    projector_editform.port_text.setText(str(t_port))
+    name = 'A Different Name Not In DB'
+    ip = TEST1_DATA['ip']
+    port = TEST1_DATA['port']
+    projector_1 = Projector(**TEST1_DATA)
+    projector_1.id = 1
+    projector_2 = Projector(**TEST1_DATA)
+    projector_2.id = 2
+    mocked_projectordb = MagicMock()
+    mocked_projectordb.get_projector.side_effect = [[], [projector_1, projector_2]]
+    projector_editform = ProjectorEditForm(None, mocked_projectordb)
+    with patch('openlp.core.projectors.editform.QtWidgets.QDialog.exec'):
+        projector_editform.exec()
+    projector_editform.name_text.setText(name)
+    projector_editform.ip_text.setText(ip)
+    projector_editform.port_text.setText(str(port))
 
     # WHEN: Called
-    caplog.clear()
     projector_editform.accept_me()
 
     # THEN: Appropriate calls made
-    assert caplog.record_tuples == logs, 'Invalid logs'
-    projector_editform.mock_msg_box.warning.assert_called_once_with(None,
-                                                                    Message.DatabaseMultiple['title'],
-                                                                    Message.DatabaseMultiple['text']
-                                                                    )
+    mocked_log.debug.assert_called_once_with('accept_me() signal received')
+    assert mocked_log.warning.call_args_list == [
+        call(f'editform(): Multiple records found for {ip}:{port}'),
+        call(f'editform(): record={projector_1.id} name="{t_name}" adx={ip}:{port}'),
+        call(f'editform(): record={projector_2.id} name="{t_name}" adx={ip}:{port}')
+    ]
+    assert mocked_projectordb.get_projector.call_args_list == [call(name=name), call(ip=ip, port=port)]
+    mocked_show_warning.assert_called_once_with(message=Message.DatabaseMultiple)
 
 
-@patch.multiple(openlp.core.projectors.editform.ProjectorEditForm, updateProjectors=DEFAULT, close=DEFAULT)
-@patch.object(openlp.core.projectors.db.ProjectorDB, 'add_projector')
-def test_save_new(mock_add, projector_editform_mtdb, **kwargs):
+@patch('openlp.core.projectors.editform.Message.show_warning')
+def test_accept_me_save_new(mocked_show_warning: MagicMock):
+    """
+    Test editform saving new projector instance
+    """
+    # GIVEN: Test environment
+    mocked_projectordb = MagicMock()
+    mocked_projectordb.get_projector.return_value = []
+    mocked_projectordb.add_projector.return_value = True
+    projector_editform = ProjectorEditForm(None, mocked_projectordb)
+    projector_editform.new_projector = True
+    with patch('openlp.core.projectors.editform.QtWidgets.QDialog.exec'):
+        projector_editform.exec()
+    projector_editform.name_text.setText(TEST1_DATA['name'])
+    projector_editform.ip_text.setText(TEST1_DATA['ip'])
+    projector_editform.port_text.setText(str(TEST1_DATA['port']))
+
+    # WHEN: Called
+    with patch.object(projector_editform, 'updateProjectors') as mocked_update_projectors, \
+            patch.object(projector_editform, 'close') as mocked_close:
+        projector_editform.accept_me()
+
+    # THEN: appropriate message called
+    assert mocked_show_warning.call_count == 0, 'No warnings should not have been shown'
+    mocked_update_projectors.emit.assert_called_once()
+    mocked_close.assert_called_once()
+
+
+@patch('openlp.core.projectors.editform.Message.show_warning')
+def test_accept_me_save_new_fail(mocked_show_warning: MagicMock):
     """
     Test editform saving new projector instance where db fails to save
     """
     # GIVEN: Test environment
-    mock_update = kwargs['updateProjectors']
-    mock_close = kwargs['close']
-    mock_add.return_value = True
-
-    t_proj = Projector(**TEST1_DATA)
-    t_proj.id = None
-    projector_editform_mtdb.new_projector = True
-    projector_editform_mtdb.exec()
-    projector_editform_mtdb.name_text.setText(t_proj.name)
-    projector_editform_mtdb.ip_text.setText(t_proj.ip)
-    projector_editform_mtdb.port_text.setText(str(t_proj.port))
-
-    # WHEN: Called
-    projector_editform_mtdb.accept_me()
-
-    # THEN: appropriate message called
-    projector_editform_mtdb.mock_msg_box.warning.assert_not_called()
-    mock_update.emit.assert_called_once()
-    mock_close.assert_called_once()
-
-
-@patch.multiple(openlp.core.projectors.editform.ProjectorEditForm, updateProjectors=DEFAULT, close=DEFAULT)
-@patch.object(openlp.core.projectors.db.ProjectorDB, 'add_projector')
-def test_save_new_fail(mock_add, projector_editform_mtdb, caplog, **kwargs):
-    """
-    Test editform saving new projector instance where db fails to save
-    """
-    # GIVEN: Test environment
-    mock_update = kwargs['updateProjectors']
-    mock_close = kwargs['close']
-    mock_add.return_value = False
-
-    caplog.set_level(logging.DEBUG)
-    t_proj = Projector(**TEST1_DATA)
-    t_proj.id = None
-    projector_editform_mtdb.new_projector = True
-    projector_editform_mtdb.exec()
-    projector_editform_mtdb.name_text.setText(t_proj.name)
-    projector_editform_mtdb.ip_text.setText(t_proj.ip)
-    projector_editform_mtdb.port_text.setText(str(t_proj.port))
+    mocked_projectordb = MagicMock()
+    mocked_projectordb.get_projector.return_value = []
+    mocked_projectordb.add_projector.return_value = False
+    projector_editform = ProjectorEditForm(None, mocked_projectordb)
+    projector_editform.new_projector = True
+    with patch('openlp.core.projectors.editform.QtWidgets.QDialog.exec'):
+        projector_editform.exec()
+    projector_editform.name_text.setText(TEST1_DATA['name'])
+    projector_editform.ip_text.setText(TEST1_DATA['ip'])
+    projector_editform.port_text.setText(str(TEST1_DATA['port']))
 
     # WHEN: Called
-    projector_editform_mtdb.accept_me()
+    with patch.object(projector_editform, 'updateProjectors') as mocked_update_projectors, \
+            patch.object(projector_editform, 'close') as mocked_close:
+        projector_editform.accept_me()
 
     # THEN: appropriate message called
-    mock_add.assert_called_once_with(projector_editform_mtdb.projector)
-    projector_editform_mtdb.mock_msg_box.warning.assert_called_once_with(None,
-                                                                         Message.DatabaseError['title'],
-                                                                         Message.DatabaseError['text']
-                                                                         )
-    mock_update.assert_not_called()
-    mock_close.assert_not_called()
+    mocked_show_warning.assert_called_once_with(message=Message.DatabaseError)
+    assert mocked_update_projectors.emit.call_count == 0, 'The updateProjectors signal should have not emitted'
+    assert mocked_close.call_count == 0, 'The form should not have closed'
 
 
-@patch.multiple(openlp.core.projectors.editform.ProjectorEditForm, updateProjectors=DEFAULT, close=DEFAULT)
-@patch.object(openlp.core.projectors.db.ProjectorDB, 'update_projector')
-def test_save_update(mock_add, projector_editform, **kwargs):
+@patch('openlp.core.projectors.editform.Message.show_warning')
+def test_accept_me_save_update(mocked_show_warning: MagicMock):
     """
     Test editform update projector instance in database
     """
     # GIVEN: Test environment
-    mock_update = kwargs['updateProjectors']
-    mock_close = kwargs['close']
-    mock_add.return_value = True
-
-    t_proj = Projector(**TEST1_DATA)
-    projector_editform.new_projector = True
-    projector_editform.exec(projector=t_proj)
-    projector_editform.name_text.setText(t_proj.name)
-    projector_editform.ip_text.setText(t_proj.ip)
-    projector_editform.port_text.setText(str(t_proj.port))
+    mocked_projectordb = MagicMock()
+    mocked_projectordb.get_projector.side_effect = [[MagicMock()], []]
+    mocked_projectordb.update_projector.return_value = True
+    projector_editform = ProjectorEditForm(None, mocked_projectordb)
+    with patch('openlp.core.projectors.editform.QtWidgets.QDialog.exec'):
+        projector_editform.exec()
+    projector_editform.name_text.setText(TEST1_DATA['name'])
+    projector_editform.ip_text.setText(TEST1_DATA['ip'])
+    projector_editform.port_text.setText(str(TEST1_DATA['port']))
+    projector_editform.new_projector = False
 
     # WHEN: Called
-    projector_editform.accept_me()
+    with patch.object(projector_editform, 'updateProjectors') as mocked_update_projectors, \
+            patch.object(projector_editform, 'close') as mocked_close:
+        projector_editform.accept_me()
 
     # THEN: appropriate message called
-    projector_editform.mock_msg_box.warning.assert_not_called()
-    mock_update.emit.assert_called_once()
-    mock_close.assert_called_once()
+    assert mocked_show_warning.call_count == 0, 'No warnings should not have been shown'
+    mocked_update_projectors.emit.assert_called_once()
+    mocked_close.assert_called_once()
 
 
-@patch.multiple(openlp.core.projectors.editform.ProjectorEditForm, updateProjectors=DEFAULT, close=DEFAULT)
-@patch.object(openlp.core.projectors.db.ProjectorDB, 'update_projector')
-def test_save_update_fail(mock_add, projector_editform, caplog, **kwargs):
+@patch('openlp.core.projectors.editform.Message.show_warning')
+def test_save_update_fail(mocked_show_warning: MagicMock):
     """
     Test editform updating projector instance where db fails to save
     """
     # GIVEN: Test environment
-    mock_update = kwargs['updateProjectors']
-    mock_close = kwargs['close']
-    mock_add.return_value = False
-
-    caplog.set_level(logging.DEBUG)
-    t_proj = Projector(**TEST1_DATA)
-    projector_editform.exec(projector=t_proj)
-    projector_editform.name_text.setText(t_proj.name)
-    projector_editform.ip_text.setText(t_proj.ip)
-    projector_editform.port_text.setText(str(t_proj.port))
+    mocked_projectordb = MagicMock()
+    mocked_projectordb.get_projector.side_effect = [[MagicMock()], []]
+    mocked_projectordb.update_projector.return_value = False
+    projector_editform = ProjectorEditForm(None, mocked_projectordb)
+    with patch('openlp.core.projectors.editform.QtWidgets.QDialog.exec'):
+        projector_editform.exec()
+    projector_editform.name_text.setText(TEST1_DATA['name'])
+    projector_editform.ip_text.setText(TEST1_DATA['ip'])
+    projector_editform.port_text.setText(str(TEST1_DATA['port']))
+    projector_editform.new_projector = False
 
     # WHEN: Called
-    projector_editform.accept_me()
+    with patch.object(projector_editform, 'updateProjectors') as mocked_update_projectors, \
+            patch.object(projector_editform, 'close') as mocked_close:
+        projector_editform.accept_me()
 
     # THEN: appropriate message called
-    mock_add.assert_called_once_with(projector_editform.projector)
-    projector_editform.mock_msg_box.warning.assert_called_once_with(None,
-                                                                    Message.DatabaseError['title'],
-                                                                    Message.DatabaseError['text']
-                                                                    )
-    mock_update.assert_not_called()
-    mock_close.assert_not_called()
+    mocked_show_warning.assert_called_once_with(message=Message.DatabaseError)
+    assert mocked_update_projectors.emit.call_count == 0, 'The updateProjectors signal should have not emitted'
+    assert mocked_close.call_count == 0, 'The form should not have closed'

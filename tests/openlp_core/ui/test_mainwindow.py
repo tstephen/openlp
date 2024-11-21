@@ -562,34 +562,38 @@ def test_restore_current_media_manager_item(main_window_reduced):
     main_window_reduced.media_tool_box.setCurrentIndex.assert_called_with(2)
 
 
-def test_projector_manager_dock_locked(main_window_reduced):
+def test_set_lock_panel_locked(main_window_reduced):
     """
     Projector Manager enable UI options -  bug #1390702
     """
     # GIVEN: A mocked projector manager dock item:
-    projector_dock = main_window_reduced.projector_manager_dock
-
-    # WHEN: main_window.lock_panel action is triggered
-    main_window_reduced.lock_panel.triggered.emit(True)
+    # WHEN: main_window.set_lock_panel is called
+    main_window_reduced.set_lock_panel(True)
 
     # THEN: Projector manager dock should have been called with disable UI features
-    projector_dock.setFeatures.assert_called_with(QtWidgets.QDockWidget.DockWidgetFeature.NoDockWidgetFeatures)
+    no_dock_features = QtWidgets.QDockWidget.DockWidgetFeature.NoDockWidgetFeatures
+    main_window_reduced.theme_manager_dock.setFeatures.assert_called_with(no_dock_features)
+    main_window_reduced.service_manager_dock.setFeatures.assert_called_with(no_dock_features)
+    main_window_reduced.media_manager_dock.setFeatures.assert_called_with(no_dock_features)
+    main_window_reduced.projector_manager_dock.setFeatures.assert_called_with(no_dock_features)
 
 
-def test_projector_manager_dock_unlocked(main_window_reduced):
+def test_set_lock_panel_unlocked(main_window_reduced):
     """
     Projector Manager disable UI options -  bug #1390702
     """
     # GIVEN: A mocked projector manager dock item:
-    projector_dock = main_window_reduced.projector_manager_dock
-
     # WHEN: main_window.lock_panel action is triggered
-    main_window_reduced.lock_panel.triggered.emit(False)
+    main_window_reduced.set_lock_panel(False)
 
     # THEN: Projector manager dock should have been called with enable UI features
-    projector_dock.setFeatures.assert_called_with(QtWidgets.QDockWidget.DockWidgetFeature.DockWidgetClosable |
-                                                  QtWidgets.QDockWidget.DockWidgetFeature.DockWidgetFloatable |
-                                                  QtWidgets.QDockWidget.DockWidgetFeature.DockWidgetMovable)
+    all_dock_features = (QtWidgets.QDockWidget.DockWidgetFeature.DockWidgetClosable |
+                         QtWidgets.QDockWidget.DockWidgetFeature.DockWidgetFloatable |
+                         QtWidgets.QDockWidget.DockWidgetFeature.DockWidgetMovable)
+    main_window_reduced.theme_manager_dock.setFeatures.assert_called_with(all_dock_features)
+    main_window_reduced.service_manager_dock.setFeatures.assert_called_with(all_dock_features)
+    main_window_reduced.media_manager_dock.setFeatures.assert_called_with(all_dock_features)
+    main_window_reduced.projector_manager_dock.setFeatures.assert_called_with(all_dock_features)
 
 
 @patch('openlp.core.ui.mainwindow.MainWindow.open_cmd_line_files')
