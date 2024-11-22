@@ -183,8 +183,6 @@ test-windows:
     - "# Installing PyICU for Windows"
     - pip install $pyIcuPackageFileName
     - !reference [.run_tests, script]
-  only:
-    - master@openlp/openlp
 
 test-display:
   stage: test

@@ -85,7 +85,7 @@ class AlignmentTransitionsPage(GridLayoutPage):
         self.transition_reverse_check_box.setObjectName('transition_reverse_check_box')
         self.layout.addWidget(self.transition_reverse_check_box, 5, 3)
         # Connect slots
-        self.transitions_enabled_check_box.stateChanged.connect(self._on_transition_enabled_changed)
+        self.transitions_enabled_check_box.toggled.connect(self._on_transition_enabled_changed)
 
     def retranslate_ui(self):
         """
@@ -159,7 +159,6 @@ class AlignmentTransitionsPage(GridLayoutPage):
     @is_transition_enabled.setter
     def is_transition_enabled(self, value):
         self.transitions_enabled_check_box.setChecked(value)
-        self._on_transition_enabled_changed(value)
 
     @property
     def transition_type(self):

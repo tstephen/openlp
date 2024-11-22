@@ -21,7 +21,7 @@
 """
 Package to test the openlp.core.pages.alignment package.
 """
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -194,11 +194,12 @@ def test_set_is_transition_enabled(settings):
     page._on_transition_enabled_changed = MagicMock()
 
     # WHEN: The property is set
-    page.is_transition_enabled = True
+    with patch.object(page, '_on_transition_enabled_changed') as mocked_on_transition_enabled_changed:
+        page.is_transition_enabled = True
 
     # THEN: The result should be correct
     assert page.transitions_enabled_check_box.isChecked() is True
-    page._on_transition_enabled_changed.assert_called_once_with(True)
+    mocked_on_transition_enabled_changed.assert_called_once_with(True)
 
 
 def test_get_transition_type(settings):
