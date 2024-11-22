@@ -65,32 +65,6 @@ test-arch:
     - sh scripts/generate_resources.sh
     - xvfb-run -s '-screen 0 1024x768x24' pytest --color=no --disable-warnings
 
-# test-macos-intel:
-#   stage: test
-#   tags:
-#     - apple-amd64
-#   script:
-#     - export PATH=/opt/local/bin:$PATH
-#     - sh scripts/generate_resources.sh
-#     - python3 -m pytest --color=no --disable-warnings --cov openlp
-#     - mv .coverage macos.coverage
-#   artifacts:
-#     paths:
-#       - macos.coverage
-#   only:
-#     - master@openlp/openlp
-
-# test-macos-arm:
-#   stage: test
-#   tags:
-#     - apple-arm
-#   script:
-#     - export PATH=/opt/local/bin:$PATH
-#     - sh scripts/generate_resources.sh
-#     - python3 -m pytest --color=no --disable-warnings
-#   only:
-#     - master@openlp/openlp
-
 .pip_dependencies:
   script:
     - "# Updating pip"
@@ -149,8 +123,6 @@ test-macos:
     - export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/opt/homebrew/opt/icu4c/lib/pkgconfig"
     - pip install pyicu
     - !reference [.run_tests, script]
-  only:
-    - master@openlp/openlp
 
 test-windows:
   stage: test
@@ -222,6 +194,5 @@ pages:
         path: coverage.xml
   dependencies:
     - test-debian
-    # - test-macos-intel
   only:
     - master@openlp/openlp
