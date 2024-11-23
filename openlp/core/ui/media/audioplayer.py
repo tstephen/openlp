@@ -102,7 +102,7 @@ class AudioPlayer(MediaBase, LogMixin):
         """
         self.log_debug("load audio in Audio Player")
         # The media player moved here to clear the playlist between uses.
-        if self.controller.media_play_item.audio_file:  # and self.controller.media_play_item.is_background:
+        if self.controller.media_play_item.audio_file:
             self.media_player.setSource(QUrl.fromLocalFile(str(self.controller.media_play_item.audio_file)))
             return True
         return False
@@ -112,10 +112,6 @@ class AudioPlayer(MediaBase, LogMixin):
         Play the current loaded audio item
         :return:
         """
-        # self.log_debug("vlc play, mediatype: " + str(controller.media_play_item.media_type))
-        # threading.Thread(target=controller.vlc_media_listPlayer.play).start()
-        # self.volume(controller, get_volume(controller))
-        # return True
         self.media_player.play()
 
     def pause(self) -> None:
@@ -134,5 +130,4 @@ class AudioPlayer(MediaBase, LogMixin):
         :param controller: The controller where the media is
         :return:
         """
-        # threading.Thread(target=controller.vlc_media_listPlayer.stop).start()
         self.media_player.stop()
