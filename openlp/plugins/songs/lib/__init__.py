@@ -21,8 +21,8 @@
 """
 The :mod:`~openlp.plugins.songs.lib` module contains a number of library functions and classes used in the Songs plugin.
 """
-
 import logging
+import os
 import re
 
 from PySide6 import QtWidgets
@@ -515,7 +515,7 @@ def strip_rtf(text, default_encoding=None):
     return text, default_encoding
 
 
-def delete_song(song_id, trigger_event=True):
+def delete_song(song_id: int, trigger_event: bool = True):
     """
     Deletes a song from the database. Media files associated to the song are removed prior to the deletion of the song.
 
@@ -527,7 +527,10 @@ def delete_song(song_id, trigger_event=True):
     media_files = songs_manager.get_all_objects(MediaFile, MediaFile.song_id == song_id)
     for media_file in media_files:
         try:
-            media_file.file_path.unlink()
+            if isinstance(media_file.file_path, str):
+                os.unlink(media_file.file_path)
+            else:
+                media_file.file_path.unlink()
         except OSError:
             log.exception('Could not remove file: {name}'.format(name=media_file.file_path))
     try:

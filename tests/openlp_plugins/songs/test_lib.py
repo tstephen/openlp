@@ -21,10 +21,13 @@
 """
 This module contains tests for the lib submodule of the Songs plugin.
 """
-import pytest
-from unittest.mock import PropertyMock, patch
+from unittest.mock import MagicMock, PropertyMock, patch
 
-from openlp.plugins.songs.lib import VerseType, clean_string, clean_title, strip_rtf, transpose_chord, transpose_lyrics
+import pytest
+
+from openlp.core.common.registry import Registry
+from openlp.plugins.songs.lib import VerseType, clean_string, clean_title, delete_song, strip_rtf, \
+    transpose_chord, transpose_lyrics
 from openlp.plugins.songs.lib.songcompare import _op_length, _remove_typos, songs_probably_equal
 
 full_lyrics = '''amazing grace how sweet the sound that saved a wretch like me i once was lost but now am
@@ -347,7 +350,7 @@ def test_transpose_chord_error():
 
 
 @patch('openlp.plugins.songs.lib.transpose_verse')
-def test_transpose_lyrics(mocked_transpose_verse, mock_settings):
+def test_transpose_lyrics(mocked_transpose_verse: MagicMock, mock_settings: MagicMock):
     """
     Test that the transpose_lyrics() splits verses correctly
     """
@@ -593,7 +596,7 @@ def test_from_tag_with_none_default():
 
 
 @patch('openlp.plugins.songs.lib.VerseType.translated_tags', new_callable=PropertyMock, return_value=['x'])
-def test_from_loose_input_with_invalid_input(mocked_translated_tags):
+def test_from_loose_input_with_invalid_input(mocked_translated_tags: MagicMock):
     """
     Test that the from_loose_input() method returns a sane default when passed an invalid tag and None as default.
     """
@@ -606,7 +609,7 @@ def test_from_loose_input_with_invalid_input(mocked_translated_tags):
 
 
 @patch('openlp.plugins.songs.lib.VerseType.translated_tags', new_callable=PropertyMock, return_value=['x'])
-def test_from_loose_input_with_valid_input(mocked_translated_tags):
+def test_from_loose_input_with_valid_input(mocked_translated_tags: MagicMock):
     """
     Test that the from_loose_input() method returns valid output on valid input.
     """
@@ -616,3 +619,36 @@ def test_from_loose_input_with_valid_input(mocked_translated_tags):
 
     # THEN: The result should be a Verse
     assert result == VerseType.Verse, 'The result should be a verse, but was "%s"' % result
+
+
+@patch('openlp.plugins.songs.lib.AppLocation.get_section_data_path')
+@patch('openlp.plugins.songs.lib.MediaFile')
+@patch('openlp.plugins.songs.lib.Song')
+@patch('openlp.plugins.songs.lib.os.unlink')
+def test_delete_song(mocked_unlink: MagicMock, MockSong: MagicMock, MockMediaFile: MagicMock,
+                     mocked_get_section_data_path: MagicMock, registry: Registry):
+    """Test deleting a song and all its media files"""
+    # GIVEN: A song ID and some mocked objects
+    song_id = 1234
+    MockMediaFile.song_id = song_id
+    mocked_songs_manager = MagicMock()
+    mocked_media_file_str = MagicMock(file_path='/path/to/file.mp3')
+    mocked_media_file_path = MagicMock()
+    mocked_songs_manager.get_all_objects.return_value = [mocked_media_file_str, mocked_media_file_path]
+    registry.register('songs_manager', mocked_songs_manager)
+    mocked_save_path = MagicMock()
+    mocked_save_path.exists.return_value = True
+    mocked_get_section_data_path.return_value.__truediv__.return_value.__truediv__.return_value = mocked_save_path
+    mocked_song_deleted = MagicMock()
+    registry.register_function('song_deleted', mocked_song_deleted)
+
+    # WHEN: delete_song() is called
+    delete_song(song_id, True)
+
+    # THEN: All the files should be deleted
+    mocked_songs_manager.get_all_objects.assert_called_once_with(MockMediaFile, MockMediaFile.song_id == song_id)
+    mocked_unlink.assert_called_once_with(mocked_media_file_str.file_path)
+    mocked_media_file_path.file_path.unlink.assert_called_once_with()
+    mocked_save_path.rmdir.assert_called_once_with()
+    mocked_songs_manager.delete_object.assert_called_once_with(MockSong, song_id)
+    mocked_song_deleted.assert_called_once_with(song_id)
