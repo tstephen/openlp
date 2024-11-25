@@ -109,6 +109,9 @@ test-macos:
   tags:
     - saas-macos-medium-m1
   image: macos-14-xcode-15
+  variables:
+    # Set environment variable QT_QPA_PLATFORM to offscreen to avoid UI troubles
+    QT_QPA_PLATFORM: "offscreen"
   script:
     - !reference [.pip_dependencies, script]
     - "# Installing MacOS only dependencies from PyPI"
@@ -128,6 +131,11 @@ test-windows:
   stage: test
   tags:
     - saas-windows-medium-amd64
+  variables:
+    # Set environment variable QT_QPA_PLATFORM to offscreen to avoid UI troubles
+    QT_QPA_PLATFORM: "offscreen"
+    # Force QT Media Backend to Windows
+    QT_MEDIA_BACKEND: "windows"
   script:
     - "# Enabling feature that doesn't let Chocolatey ask for confirmation"
     - choco feature enable --name='allowGlobalConfirmation'
@@ -137,13 +145,13 @@ test-windows:
     - Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
     - "# Refreshing the environment"
     - refreshenv
-    - "# Set environment variable QT_QPA_PLATFORM to offscreen to avoid UI troubles."
-    - $env:QT_QPA_PLATFORM='offscreen'
-    - "# Download the necessary Bluetooth components for QT6 from OpenLP."
-    - $bluetoothFileName = 'bluetooth.zip'
-    - Invoke-WebRequest -OutFile "$env:Temp\$bluetoothFileName" -Uri "https://get.openlp.org/win-sdk/$bluetoothFileName"
+    - "# Installing Windows Feature 'Server Media Foundation'"
+    - Install-WindowsFeature Server-Media-Foundation
+    - "# Download the necessary files for PySide6 from OpenLP"
+    - $zipFileName = 'requiredfiles.zip'
+    - Invoke-WebRequest -OutFile "$env:Temp\$zipFileName" -Uri "https://get.openlp.org/win-sdk/$zipFileName"
     - "# Extracting the ZIP file"
-    - Expand-Archive -Path "$env:Temp\$bluetoothFileName" -DestinationPath "C:\Windows\System32"
+    - Expand-Archive -Path "$env:Temp\$zipFileName" -DestinationPath "C:\Windows\System32"
     - !reference [.pip_dependencies, script]
     - "# Installing Windows only dependencies from PyPI"
     - >
