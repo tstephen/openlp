@@ -21,31 +21,31 @@
 """
 Package to test the openlp.core.projectors.pjlink commands package.
 """
-from unittest.mock import call, patch
+from unittest.mock import MagicMock, call, patch
 
-import openlp.core.projectors.pjlink
+from openlp.core.projectors.pjlink import PJLink
 from openlp.core.projectors.pjlinkcommands import process_command
 from openlp.core.projectors.constants import E_ERROR, E_WARN, PJLINK_ERST_DATA, PJLINK_ERST_STATUS, S_OK
 
 
-@patch.object(openlp.core.projectors.pjlinkcommands, 'log')
-def test_projector_ackn(mock_log, pjlink):
+@patch('openlp.core.projectors.pjlinkcommands.log')
+def test_projector_ackn(mocked_log: MagicMock, pjlink: PJLink):
     """
     Test ackn command (empty test)
     """
     # GIVEN: Test setup
-    log_debug_text = [call('({ip}) Processing command "ACKN" with data "0"'.format(ip=pjlink.name)),
-                      call('({ip}) Calling function for ACKN'.format(ip=pjlink.name))]
-
     # WHEN: Called with setting shutter closed and mute on
     process_command(projector=pjlink, cmd='ACKN', data='0')
 
     # THEN: Shutter should be closed and mute should be True
-    mock_log.debug.assert_has_calls(log_debug_text)
+    mocked_log.debug.assert_has_calls([
+        call(f'({pjlink.name}) Processing command "ACKN" with data "0"'),
+        call(f'({pjlink.name}) Calling function for ACKN')
+    ])
 
 
-@patch.object(openlp.core.projectors.pjlinkcommands, 'log')
-def test_projector_erst_all_error(mock_log, pjlink):
+@patch('openlp.core.projectors.pjlinkcommands.log')
+def test_projector_erst_all_error(mocked_log: MagicMock, pjlink: PJLink):
     """
     Test test_projector_process_erst_all_error
     """
@@ -62,10 +62,6 @@ def test_projector_erst_all_error(mock_log, pjlink):
                 'Cover': E_ERROR,
                 'Filter': E_ERROR,
                 'Other': E_ERROR}
-    log_warning_calls = []
-    log_debug_calls = [call('({ip}) Processing command "ERST" with data "{chk}"'.format(ip=pjlink.name,
-                                                                                        chk=chk_data)),
-                       call('({ip}) Calling function for ERST'.format(ip=pjlink.name))]
     pjlink.projector_errors = None
 
     # WHEN: process_erst with status set to WARN
@@ -73,33 +69,35 @@ def test_projector_erst_all_error(mock_log, pjlink):
 
     # THEN: PJLink instance errors should match chk_value
     assert pjlink.projector_errors == chk_test, 'Projector errors should be all E_ERROR'
-    mock_log.warning.assert_has_calls(log_warning_calls)
-    mock_log.debug.assert_has_calls(log_debug_calls)
+    mocked_log.warning.assert_not_called()
+    assert mocked_log.debug.call_args_list == [
+        call(f'({pjlink.name}) Processing command "ERST" with data "{chk_data}"'),
+        call(f'({pjlink.name}) Calling function for ERST')
+    ]
 
 
-@patch.object(openlp.core.projectors.pjlinkcommands, 'log')
-def test_projector_erst_all_ok(mock_log, pjlink):
+@patch('openlp.core.projectors.pjlinkcommands.log')
+def test_projector_erst_all_ok(mocked_log: MagicMock, pjlink: PJLink):
     """
     Test to verify pjlink.projector_errors is set to None when no errors
     """
     # GIVEN: Test object
     chk_data = '0' * PJLINK_ERST_DATA['DATA_LENGTH']
-    log_warning_calls = []
-    log_debug_calls = [call('({ip}) Processing command "ERST" with data "{chk}"'.format(ip=pjlink.name,
-                                                                                        chk=chk_data)),
-                       call('({ip}) Calling function for ERST'.format(ip=pjlink.name))]
 
     # WHEN: process_erst with no errors
     process_command(projector=pjlink, cmd='ERST', data=chk_data)
 
     # THEN: PJLink instance errors should be None
     assert pjlink.projector_errors is None, 'projector_errors should have been set to None'
-    mock_log.warning.assert_has_calls(log_warning_calls)
-    mock_log.debug.assert_has_calls(log_debug_calls)
+    mocked_log.warning.assert_not_called()
+    assert mocked_log.debug.call_args_list == [
+        call(f'({pjlink.name}) Processing command "ERST" with data "{chk_data}"'),
+        call(f'({pjlink.name}) Calling function for ERST')
+    ]
 
 
-@patch.object(openlp.core.projectors.pjlinkcommands, 'log')
-def test_projector_erst_all_warn(mock_log, pjlink):
+@patch('openlp.core.projectors.pjlinkcommands.log')
+def test_projector_erst_all_warn(mocked_log: MagicMock, pjlink: PJLink):
     """
     Test test_projector_process_erst_all_error
     """
@@ -110,16 +108,14 @@ def test_projector_erst_all_warn(mock_log, pjlink):
                                                               cover=PJLINK_ERST_STATUS[E_WARN],
                                                               filt=PJLINK_ERST_STATUS[E_WARN],
                                                               other=PJLINK_ERST_STATUS[E_WARN])
-    chk_test = {'Fan': E_WARN,
-                'Lamp': E_WARN,
-                'Temperature': E_WARN,
-                'Cover': E_WARN,
-                'Filter': E_WARN,
-                'Other': E_WARN}
-    log_warning_calls = []
-    log_debug_calls = [call('({ip}) Processing command "ERST" with data "{chk}"'.format(ip=pjlink.name,
-                                                                                        chk=chk_data)),
-                       call('({ip}) Calling function for ERST'.format(ip=pjlink.name))]
+    chk_test = {
+        'Fan': E_WARN,
+        'Lamp': E_WARN,
+        'Temperature': E_WARN,
+        'Cover': E_WARN,
+        'Filter': E_WARN,
+        'Other': E_WARN
+    }
     pjlink.projector_errors = None
 
     # WHEN: process_erst with status set to WARN
@@ -127,23 +123,20 @@ def test_projector_erst_all_warn(mock_log, pjlink):
 
     # THEN: PJLink instance errors should match chk_value
     assert pjlink.projector_errors == chk_test, 'Projector errors should be all E_WARN'
-    mock_log.warning.assert_has_calls(log_warning_calls)
-    mock_log.debug.assert_has_calls(log_debug_calls)
+    mocked_log.warning.assert_not_called()
+    assert mocked_log.debug.call_args_list == [
+        call(f'({pjlink.name}) Processing command "ERST" with data "{chk_data}"'),
+        call(f'({pjlink.name}) Calling function for ERST')
+    ]
 
 
-@patch.object(openlp.core.projectors.pjlinkcommands, 'log')
-def test_projector_erst_data_invalid_length(mock_log, pjlink):
+@patch('openlp.core.projectors.pjlinkcommands.log')
+def test_projector_erst_data_invalid_length(mocked_log: MagicMock, pjlink: PJLink):
     """
     Test test_projector_process_erst_data_invalid_length
     """
     # GIVEN: Test object
     chk_data = '0' * (PJLINK_ERST_DATA['DATA_LENGTH'] + 1)
-    log_warn_calls = [call('({ip}) Invalid error status response "{data}": '
-                           'length != {chk}'.format(ip=pjlink.name,
-                                                    data=chk_data, chk=PJLINK_ERST_DATA['DATA_LENGTH']))]
-    log_debug_calls = [call('({ip}) Processing command "ERST" with data "{data}"'.format(ip=pjlink.name,
-                                                                                         data=chk_data)),
-                       call('({ip}) Calling function for ERST'.format(ip=pjlink.name))]
     pjlink.projector_errors = None
 
     # WHEN: process_erst called with invalid data (too many values
@@ -151,22 +144,22 @@ def test_projector_erst_data_invalid_length(mock_log, pjlink):
 
     # THEN: pjlink.projector_errors should be empty and warning logged
     assert not pjlink.projector_errors, 'There should be no errors'
-    mock_log.warning.assert_has_calls(log_warn_calls)
-    mock_log.debug.assert_has_calls(log_debug_calls)
+    assert mocked_log.warning.call_args_list == [
+        call(f'({pjlink.name}) Invalid error status response "{chk_data}": length != {PJLINK_ERST_DATA["DATA_LENGTH"]}')
+    ]
+    assert mocked_log.debug.call_args_list == [
+        call(f'({pjlink.name}) Processing command "ERST" with data "{chk_data}"'),
+        call(f'({pjlink.name}) Calling function for ERST')
+    ]
 
 
-@patch.object(openlp.core.projectors.pjlinkcommands, 'log')
-def test_projector_erst_data_invalid_nan(mock_log, pjlink):
+@patch('openlp.core.projectors.pjlinkcommands.log')
+def test_projector_erst_data_invalid_nan(mocked_log: MagicMock, pjlink: PJLink):
     """
     Test ERST called with invalid data
     """
     # GIVEN: Test object
     chk_data = 'Z' + ('0' * (PJLINK_ERST_DATA['DATA_LENGTH'] - 1))
-    log_warn_calls = [call('({ip}) Invalid error status response "{data}"'.format(ip=pjlink.name,
-                                                                                  data=chk_data))]
-    log_debug_calls = [call('({ip}) Processing command "ERST" with data "{data}"'.format(ip=pjlink.name,
-                                                                                         data=chk_data)),
-                       call('({ip}) Calling function for ERST'.format(ip=pjlink.name))]
     pjlink.projector_errors = None
 
     # WHEN: process_erst called with invalid data (too many values
@@ -174,12 +167,15 @@ def test_projector_erst_data_invalid_nan(mock_log, pjlink):
 
     # THEN: pjlink.projector_errors should be empty and warning logged
     assert not pjlink.projector_errors, 'There should be no errors'
-    mock_log.warning.assert_has_calls(log_warn_calls)
-    mock_log.debug.assert_has_calls(log_debug_calls)
+    mocked_log.warning.assert_called_once_with(f'({pjlink.name}) Invalid error status response "{chk_data}"')
+    assert mocked_log.debug.call_args_list == [
+        call(f'({pjlink.name}) Processing command "ERST" with data "{chk_data}"'),
+        call(f'({pjlink.name}) Calling function for ERST')
+    ]
 
 
-@patch.object(openlp.core.projectors.pjlinkcommands, 'log')
-def test_projector_erst_warn_cover_only(mock_log, pjlink):
+@patch('openlp.core.projectors.pjlinkcommands.log')
+def test_projector_erst_warn_cover_only(mocked_log: MagicMock, pjlink: PJLink):
     """
     Test test_projector_process_erst_warn_cover_only
     """
@@ -191,10 +187,6 @@ def test_projector_erst_warn_cover_only(mock_log, pjlink):
                                                               filt=PJLINK_ERST_STATUS[S_OK],
                                                               other=PJLINK_ERST_STATUS[S_OK])
     chk_test = {'Cover': E_WARN}
-    log_warn_calls = []
-    log_debug_calls = [call('({ip}) Processing command "ERST" with data "{data}"'.format(ip=pjlink.name,
-                                                                                         data=chk_data)),
-                       call('({ip}) Calling function for ERST'.format(ip=pjlink.name))]
     pjlink.projector_errors = None
 
     # WHEN: process_erst with status set to WARN
@@ -205,23 +197,20 @@ def test_projector_erst_warn_cover_only(mock_log, pjlink):
     assert 'Cover' in pjlink.projector_errors, '"Cover" should be the only error listed'
     assert pjlink.projector_errors['Cover'] == E_WARN, '"Cover" should have E_WARN listed as error'
     assert chk_test == pjlink.projector_errors, 'projector_errors should match test errors'
-    mock_log.warning.assert_has_calls(log_warn_calls)
-    mock_log.debug.assert_has_calls(log_debug_calls)
+    mocked_log.warning.assert_not_called()
+    assert mocked_log.debug.call_args_list == [
+        call(f'({pjlink.name}) Processing command "ERST" with data "{chk_data}"'),
+        call(f'({pjlink.name}) Calling function for ERST')
+    ]
 
 
-@patch.object(openlp.core.projectors.pjlinkcommands, 'log')
-def test_projector_inf1(mock_log, pjlink):
+@patch('openlp.core.projectors.pjlinkcommands.log')
+def test_projector_inf1(mocked_log: MagicMock, pjlink: PJLink):
     """
     Test saving INF1 data (manufacturer)
     """
     # GIVEN: Test object
     chk_data = 'TEst INformation MultiCase'
-    log_warn_calls = []
-    log_debug_calls = [call('({ip}) Processing command "INF1" with data "{data}"'.format(ip=pjlink.name,
-                                                                                         data=chk_data)),
-                       call('({ip}) Calling function for INF1'.format(ip=pjlink.name)),
-                       call('({ip}) Setting projector manufacturer data to '
-                            '"{data}"'.format(ip=pjlink.name, data=chk_data))]
     pjlink.manufacturer = None
 
     # WHEN: process_inf called with test data
@@ -229,23 +218,21 @@ def test_projector_inf1(mock_log, pjlink):
 
     # THEN: Data should be saved
     assert pjlink.manufacturer == chk_data, 'Test data should have been saved'
-    mock_log.warning.assert_has_calls(log_warn_calls)
-    mock_log.debug.assert_has_calls(log_debug_calls)
+    mocked_log.warning.assert_not_called()
+    assert mocked_log.debug.call_args_list == [
+        call(f'({pjlink.name}) Processing command "INF1" with data "{chk_data}"'),
+        call(f'({pjlink.name}) Calling function for INF1'),
+        call(f'({pjlink.name}) Setting projector manufacturer data to "{chk_data}"')
+    ]
 
 
-@patch.object(openlp.core.projectors.pjlinkcommands, 'log')
-def test_projector_inf2(mock_log, pjlink):
+@patch('openlp.core.projectors.pjlinkcommands.log')
+def test_projector_inf2(mocked_log: MagicMock, pjlink: PJLink):
     """
     Test saving INF2 data (model)
     """
     # GIVEN: Test object
     chk_data = 'TEst moDEl MultiCase'
-    log_warn_calls = []
-    log_debug_calls = [call('({ip}) Processing command "INF2" with data "{data}"'.format(ip=pjlink.name,
-                                                                                         data=chk_data)),
-                       call('({ip}) Calling function for INF2'.format(ip=pjlink.name)),
-                       call('({ip}) Setting projector model to "{data}"'.format(ip=pjlink.name,
-                                                                                data=chk_data))]
     pjlink.model = None
 
     # WHEN: process_inf called with test data
@@ -253,23 +240,21 @@ def test_projector_inf2(mock_log, pjlink):
 
     # THEN: Data should be saved
     assert pjlink.model == chk_data, 'Test data should have been saved'
-    mock_log.warning.assert_has_calls(log_warn_calls)
-    mock_log.debug.assert_has_calls(log_debug_calls)
+    mocked_log.warning.assert_not_called()
+    assert mocked_log.debug.call_args_list == [
+        call(f'({pjlink.name}) Processing command "INF2" with data "{chk_data}"'),
+        call(f'({pjlink.name}) Calling function for INF2'),
+        call(f'({pjlink.name}) Setting projector model to "{chk_data}"')
+    ]
 
 
-@patch.object(openlp.core.projectors.pjlinkcommands, 'log')
-def test_projector_info(mock_log, pjlink):
+@patch('openlp.core.projectors.pjlinkcommands.log')
+def test_projector_info(mocked_log: MagicMock, pjlink: PJLink):
     """
     Test saving INF2 data (model)
     """
     # GIVEN: Test object
     chk_data = 'TEst ExtrANEous MultiCase INformatoin that MFGR might Set'
-    log_warn_calls = []
-    log_debug_calls = [call('({ip}) Processing command "INFO" with data "{data}"'.format(ip=pjlink.name,
-                                                                                         data=chk_data)),
-                       call('({ip}) Calling function for INFO'.format(ip=pjlink.name)),
-                       call('({ip}) Setting projector other_info to "{data}"'.format(ip=pjlink.name,
-                                                                                     data=chk_data))]
     pjlink.other_info = None
 
     # WHEN: process_inf called with test data
@@ -277,5 +262,9 @@ def test_projector_info(mock_log, pjlink):
 
     # THEN: Data should be saved
     assert pjlink.other_info == chk_data, 'Test data should have been saved'
-    mock_log.warning.assert_has_calls(log_warn_calls)
-    mock_log.debug.assert_has_calls(log_debug_calls)
+    mocked_log.warning.assert_not_called()
+    assert mocked_log.debug.call_args_list == [
+        call(f'({pjlink.name}) Processing command "INFO" with data "{chk_data}"'),
+        call(f'({pjlink.name}) Calling function for INFO'),
+        call(f'({pjlink.name}) Setting projector other_info to "{chk_data}"')
+    ]
