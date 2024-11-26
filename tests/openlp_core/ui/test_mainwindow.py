@@ -31,7 +31,6 @@ import pytest
 from PySide6 import QtCore, QtWidgets, QtGui
 
 from openlp.core.common.i18n import UiStrings
-from openlp.core.common.platform import is_macosx
 from openlp.core.common.registry import Registry
 from openlp.core.display.screens import ScreenList
 from openlp.core.lib.plugin import PluginStatus
@@ -42,6 +41,8 @@ from tests.utils.constants import TEST_RESOURCES_PATH, RESOURCE_PATH
 
 JSON_RECENT_FILES = ('[{"parts": ["/", "path", "to", "service-1.osz"], "json_meta": {"class": "Path", "version": 1}},'
                      '{"parts": ["/", "path", "to", "service-2.osz"], "json_meta": {"class": "Path", "version": 1}}]')
+
+QT_QPA_PLATFORM = os.environ.get("QT_QPA_PLATFORM", "")
 
 
 def _create_mock_action(parent, name, **kwargs):
@@ -284,6 +285,7 @@ def test_set_service_unmodified(main_window):
         'The main window\'s title should be set to "<the contents of UiStrings().OpenLP> - test.osz"'
 
 
+@pytest.mark.skipif(QT_QPA_PLATFORM == 'offscreen', reason='This test does not work with the offscreen backend')
 def test_load_settings_position_valid(main_window, settings):
     """
     Test that the position of the main window is restored when it's valid
@@ -316,7 +318,7 @@ def test_load_settings_position_valid(main_window, settings):
     assert main_window.pos().x() == 10
 
 
-@pytest.mark.skipif(is_macosx(), reason='Test does not work on macOS')
+@pytest.mark.skipif(QT_QPA_PLATFORM == 'offscreen', reason='This test does not work with the offscreen backend')
 def test_load_settings_position_invalid(main_window, settings):
     """
     Test that the position of the main window is not restored when it's invalid, but rather set to (0, 0)

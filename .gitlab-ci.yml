@@ -22,6 +22,8 @@ lint-javascript:
 test-pypi:
   stage: test
   image: $IMAGE_BASE/pypi
+  variables:
+    QT_QPA_PLATFORM: offscreen
   script:
     - pip install -e '.[darkstyle,mysql,odbc,postgresql,spellcheck,sword-bibles,test]'
     - sh scripts/generate_resources.sh
@@ -84,8 +86,6 @@ test-arch:
       platformdirs
       psycopg2-binary
       pyenchant
-      pymediainfo
-      PyMuPDF
       PySide6
       pysword
       pytest
@@ -126,6 +126,8 @@ test-macos:
     - export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/opt/homebrew/opt/icu4c/lib/pkgconfig"
     - pip install pyicu
     - !reference [.run_tests, script]
+  rules:
+    - if: $CI_COMMIT_REF_NAME == "master"
 
 test-windows:
   stage: test
@@ -134,8 +136,11 @@ test-windows:
   variables:
     # Set environment variable QT_QPA_PLATFORM to offscreen to avoid UI troubles
     QT_QPA_PLATFORM: "offscreen"
-    # Force QT Media Backend to Windows
-    QT_MEDIA_BACKEND: "windows"
+    # Set the pip cache folder so that we can cache the content
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/pip-cache"
+  cache:
+    paths:
+      - pip-cache
   script:
     - "# Enabling feature that doesn't let Chocolatey ask for confirmation"
     - choco feature enable --name='allowGlobalConfirmation'
@@ -158,10 +163,8 @@ test-windows:
       pip install pyodbc
       pypiwin32
     - $pyIcuPackageFileName = 'PyICU-2.14-cp312-cp312-win_amd64.whl'
-    - "# Downloading PyICU for Windows from GitHub"
-    - Invoke-WebRequest -OutFile $pyIcuPackageFileName -Uri https://github.com/cgohlke/pyicu-build/releases/download/v2.14/$pyIcuPackageFileName
-    - "# Installing PyICU for Windows"
-    - pip install $pyIcuPackageFileName
+    - "# Installing PyICU for Windows from GitHub"
+    - pip install https://github.com/cgohlke/pyicu-build/releases/download/v2.14/$pyIcuPackageFileName
     - !reference [.run_tests, script]
 
 test-display:
