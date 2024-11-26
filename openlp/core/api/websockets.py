@@ -33,9 +33,9 @@ import time
 from PySide6 import QtCore
 
 try:
-    from websockets.server import serve
-except ImportError:
     from websockets import serve
+except ImportError:
+    from websockets.server import serve
 
 from openlp.core.common.mixins import LogMixin, RegistryProperties
 from openlp.core.common.registry import Registry, RegistryBase
