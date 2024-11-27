@@ -191,7 +191,11 @@ class BibleManager(LogMixin, RegistryProperties):
         bible.session.close()
         bible.session = None
         gc.collect()
-        return delete_file(bible.path / '{name}{suffix}'.format(name=name, suffix=self.suffix))
+        if bible.file_path:
+            bible_path = bible.path / bible.file_path
+        else:
+            bible_path = bible.path / f'{bible.name}{self.suffix}'
+        return delete_file(bible_path)
 
     def get_bibles(self):
         """

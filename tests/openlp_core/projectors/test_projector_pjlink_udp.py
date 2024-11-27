@@ -21,9 +21,9 @@
 """
 Package to test the PJLink UDP functions
 """
-from unittest.mock import call, patch
+from unittest.mock import MagicMock, call, patch
 
-import openlp.core.projectors.pjlink
+from openlp.core.common.settings import Settings
 from openlp.core.projectors.constants import PJLINK_PORT
 from openlp.core.projectors.pjlink import PJLinkUDP
 from openlp.core.projectors.tab import ProjectorTab
@@ -31,8 +31,8 @@ from openlp.core.projectors.tab import ProjectorTab
 from tests.resources.projector.data import TEST1_DATA
 
 
-@patch.object(openlp.core.projectors.pjlink, 'log')
-def test_get_datagram_data_negative_zero_length(mock_log, settings):
+@patch('openlp.core.projectors.pjlink.log')
+def test_get_datagram_data_negative_zero_length(mocked_log: MagicMock, settings: Settings):
     """
     Test get_datagram when pendingDatagramSize = 0
     """
@@ -41,21 +41,21 @@ def test_get_datagram_data_negative_zero_length(mock_log, settings):
     log_warning_calls = [call('(UDP:4352) No data (-1)')]
     log_debug_calls = [call('(UDP:4352) PJLinkUDP() Initialized'),
                        call('(UDP:4352) get_datagram() - Receiving data')]
-    with patch.object(pjlink_udp, 'pendingDatagramSize') as mock_datagram, \
-            patch.object(pjlink_udp, 'readDatagram') as mock_read:
-        mock_datagram.return_value = -1
-        mock_read.return_value = ('', TEST1_DATA['ip'], PJLINK_PORT)
+    with patch.object(pjlink_udp, 'pendingDatagramSize') as mocked_datagram, \
+            patch.object(pjlink_udp, 'readDatagram') as mocked_read:
+        mocked_datagram.return_value = -1
+        mocked_read.return_value = ('', TEST1_DATA['ip'], PJLINK_PORT)
 
         # WHEN: get_datagram called with 0 bytes ready
         pjlink_udp.get_datagram()
 
         # THEN: Log entries should be made and method returns
-        mock_log.warning.assert_has_calls(log_warning_calls)
-        mock_log.debug.assert_has_calls(log_debug_calls)
+        mocked_log.warning.assert_has_calls(log_warning_calls)
+        mocked_log.debug.assert_has_calls(log_debug_calls)
 
 
-@patch.object(openlp.core.projectors.pjlink, 'log')
-def test_get_datagram_data_no_data(mock_log, settings):
+@patch('openlp.core.projectors.pjlink.log')
+def test_get_datagram_data_no_data(mocked_log: MagicMock, settings: Settings):
     """
     Test get_datagram when data length = 0
     """
@@ -73,12 +73,12 @@ def test_get_datagram_data_no_data(mock_log, settings):
         pjlink_udp.get_datagram()
 
         # THEN: Log entries should be made and method returns
-        mock_log.warning.assert_has_calls(log_warning_calls)
-        mock_log.debug.assert_has_calls(log_debug_calls)
+        mocked_log.warning.assert_has_calls(log_warning_calls)
+        mocked_log.debug.assert_has_calls(log_debug_calls)
 
 
-@patch.object(openlp.core.projectors.pjlink, 'log')
-def test_get_datagram_pending_zero_length(mock_log, settings):
+@patch('openlp.core.projectors.pjlink.log')
+def test_get_datagram_pending_zero_length(mocked_log: MagicMock, settings: Settings):
     """
     Test get_datagram when pendingDatagramSize = 0
     """
@@ -94,12 +94,12 @@ def test_get_datagram_pending_zero_length(mock_log, settings):
         pjlink_udp.get_datagram()
 
         # THEN: Log entries should be made and method returns
-        mock_log.warning.assert_has_calls(log_warning_calls)
-        mock_log.debug.assert_has_calls(log_debug_calls)
+        mocked_log.warning.assert_has_calls(log_warning_calls)
+        mocked_log.debug.assert_has_calls(log_debug_calls)
 
 
-@patch.object(openlp.core.projectors.tab, 'log')
-def test_pjlinksettings_add_udp_listener(mock_log, settings):
+@patch('openlp.core.projectors.tab.log')
+def test_pjlinksettings_add_udp_listener(mocked_log: MagicMock, settings: Settings):
     """
     Test adding UDP listners to PJLink Settings tab
     """
@@ -117,12 +117,12 @@ def test_pjlinksettings_add_udp_listener(mock_log, settings):
     # THEN: settings tab should have one entry
     assert len(settings_tab.udp_listeners) == 1
     assert pjlink_udp.port in settings_tab.udp_listeners
-    mock_log.debug.assert_has_calls(log_debug_calls)
-    mock_log.warning.assert_has_calls(log_warning_calls)
+    mocked_log.debug.assert_has_calls(log_debug_calls)
+    mocked_log.warning.assert_has_calls(log_warning_calls)
 
 
-@patch.object(openlp.core.projectors.tab, 'log')
-def test_pjlinksettings_add_udp_listener_multiple_same(mock_log, settings):
+@patch('openlp.core.projectors.tab.log')
+def test_pjlinksettings_add_udp_listener_multiple_same(mocked_log: MagicMock, settings: Settings):
     """
     Test adding second UDP listner with same port to PJLink Settings tab
     """
@@ -140,12 +140,12 @@ def test_pjlinksettings_add_udp_listener_multiple_same(mock_log, settings):
     # THEN: settings tab should have one entry
     assert len(settings_tab.udp_listeners) == 1
     assert pjlink_udp.port in settings_tab.udp_listeners
-    mock_log.debug.assert_has_calls(log_debug_calls)
-    mock_log.warning.assert_has_calls(log_warning_calls)
+    mocked_log.debug.assert_has_calls(log_debug_calls)
+    mocked_log.warning.assert_has_calls(log_warning_calls)
 
 
-@patch.object(openlp.core.projectors.tab, 'log')
-def test_pjlinksettings_add_udp_listener_multiple_different(mock_log, settings):
+@patch('openlp.core.projectors.tab.log')
+def test_pjlinksettings_add_udp_listener_multiple_different(mocked_log: MagicMock, settings: Settings):
     """
     Test adding second UDP listner with different port to PJLink Settings tab
     """
@@ -166,12 +166,12 @@ def test_pjlinksettings_add_udp_listener_multiple_different(mock_log, settings):
     assert len(settings_tab.udp_listeners) == 2
     assert pjlink_udp1.port in settings_tab.udp_listeners
     assert pjlink_udp2.port in settings_tab.udp_listeners
-    mock_log.debug.assert_has_calls(log_debug_calls)
-    mock_log.warning.assert_has_calls(log_warning_calls)
+    mocked_log.debug.assert_has_calls(log_debug_calls)
+    mocked_log.warning.assert_has_calls(log_warning_calls)
 
 
-@patch.object(openlp.core.projectors.tab, 'log')
-def test_pjlinksettings_remove_udp_listener(mock_log, settings):
+@patch('openlp.core.projectors.tab.log')
+def test_pjlinksettings_remove_udp_listener(mocked_log: MagicMock, settings: Settings):
     """
     Test removing UDP listners to PJLink Settings tab
     """
@@ -190,12 +190,12 @@ def test_pjlinksettings_remove_udp_listener(mock_log, settings):
 
     # THEN: settings tab should have one entry
     assert len(settings_tab.udp_listeners) == 0
-    mock_log.debug.assert_has_calls(log_debug_calls)
-    mock_log.warning.assert_has_calls(log_warning_calls)
+    mocked_log.debug.assert_has_calls(log_debug_calls)
+    mocked_log.warning.assert_has_calls(log_warning_calls)
 
 
-@patch.object(openlp.core.projectors.tab, 'log')
-def test_pjlinksettings_remove_udp_listener_multiple_different(mock_log, settings):
+@patch('openlp.core.projectors.tab.log')
+def test_pjlinksettings_remove_udp_listener_multiple_different(mocked_log: MagicMock, settings: Settings):
     """
     Test adding second UDP listner with different port to PJLink Settings tab
     """
@@ -217,14 +217,15 @@ def test_pjlinksettings_remove_udp_listener_multiple_different(mock_log, setting
     assert len(settings_tab.udp_listeners) == 1
     assert pjlink_udp1.port in settings_tab.udp_listeners
     assert pjlink_udp2.port not in settings_tab.udp_listeners
-    mock_log.debug.assert_has_calls(log_debug_calls)
-    mock_log.warning.assert_has_calls(log_warning_calls)
+    mocked_log.debug.assert_has_calls(log_debug_calls)
+    mocked_log.warning.assert_has_calls(log_warning_calls)
 
 
-@patch.object(PJLinkUDP, 'check_settings')
-@patch.object(openlp.core.projectors.pjlink, 'log')
-@patch.object(openlp.core.projectors.tab, 'log')
-def test_pjlinksettings_call_udp_listener(mock_tab_log, mock_pjlink_log, mock_check_settings, settings):
+@patch('openlp.core.projectors.pjlink.PJLinkUDP.check_settings')
+@patch('openlp.core.projectors.pjlink.log')
+@patch('openlp.core.projectors.tab.log')
+def test_pjlinksettings_call_udp_listener(mocked_tab_log: MagicMock, mocked_pjlink_log: MagicMock,
+                                          mocked_check_settings: MagicMock, settings: Settings):
     """
     Test calling UDP listners in PJLink Settings tab
     """
@@ -243,6 +244,6 @@ def test_pjlinksettings_call_udp_listener(mock_tab_log, mock_pjlink_log, mock_ch
 
     # THEN: settings tab should have one entry
     assert len(settings_tab.udp_listeners) == 1
-    mock_check_settings.assert_called()
-    mock_tab_log.debug.assert_has_calls(tab_debug_calls)
-    mock_pjlink_log.assert_has_calls(pjlink_debug_calls)
+    mocked_check_settings.assert_called()
+    mocked_tab_log.debug.assert_has_calls(tab_debug_calls)
+    mocked_pjlink_log.assert_has_calls(pjlink_debug_calls)
