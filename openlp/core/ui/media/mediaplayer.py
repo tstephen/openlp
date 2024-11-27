@@ -99,7 +99,7 @@ class MediaPlayer(MediaBase, LogMixin):
             if self.controller.is_live:
                 Registry().get("media_controller").live_media_status_changed.emit()
             else:
-                Registry().get("media_controller"). preview_media_status_changed.emit()
+                Registry().get("media_controller").preview_media_status_changed.emit()
 
     def position_changed_event(self, position) -> None:
         """
@@ -113,7 +113,7 @@ class MediaPlayer(MediaBase, LogMixin):
         if self.controller.is_live:
             Registry().get("media_controller").live_media_tick.emit()
         else:
-            Registry().get("media_controller"). preview_media_tick.emit()
+            Registry().get("media_controller").preview_media_tick.emit()
 
     def toggle_loop(self, loop_required: bool) -> None:
         """

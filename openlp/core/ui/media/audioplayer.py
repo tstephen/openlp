@@ -63,10 +63,10 @@ class AudioPlayer(MediaBase, LogMixin):
         self.media_player.setAudioOutput(self.audio_output)
         self.controller = controller
         self.display = display
-        self.media_player.positionChanged.connect(self.pos_callback)
+        self.media_player.positionChanged.connect(self.position_changed_event)
         self.media_player.mediaStatusChanged.connect(self.media_status_changed_event)
 
-    def pos_callback(self, position) -> None:
+    def position_changed_event(self, position) -> None:
         """
         Media callback for position changed event.  Saves position and calls UI updates.
         :param event: The media position has changed
@@ -90,7 +90,7 @@ class AudioPlayer(MediaBase, LogMixin):
             if self.controller.is_live:
                 Registry().get("media_controller").live_media_status_changed.emit()
             else:
-                Registry().get("media_controller"). preview_media_status_changed.emit()
+                Registry().get("media_controller").preview_media_status_changed.emit()
 
     def load(self) -> bool:
         """

@@ -25,11 +25,12 @@ This class is for playing Media within OpenLP.
 from unittest.mock import MagicMock, call, patch
 
 from PySide6 import QtCore
-from PySide6.QtMultimedia import QAudioOutput
+from PySide6.QtMultimedia import QAudioOutput, QMediaPlayer
 import pytest
 
+from openlp.core.common.registry import Registry
 from openlp.core.display.screens import Screen, ScreenList
-from openlp.core.ui.media import MediaType
+from openlp.core.ui.media import MediaPlayItem, MediaType
 from openlp.core.ui.media.mediaplayer import MediaPlayer
 
 
@@ -61,7 +62,7 @@ def test_init(mock_settings):
 @patch('openlp.core.ui.media.mediaplayer.QtWidgets')
 def test_setup_live(MockedQtWidgets):
     """
-    Test the setup method
+    Test the setup method for Live Controller
     """
     # GIVEN: A bunch of mocked out stuff and a MediaPlayer object
     mocked_output_display = MagicMock()
@@ -86,7 +87,7 @@ def test_setup_live(MockedQtWidgets):
 @patch('openlp.core.ui.media.mediaplayer.QtWidgets')
 def test_setup_preview(MockedQtWidgets):
     """
-    Test the setup method
+    Test the setup method for Preview controller
     """
     # GIVEN: A bunch of mocked out stuff and a MediaPlayer object
     mocked_output_display = MagicMock()
@@ -115,25 +116,43 @@ def test_load_media(base_media_player):
     media_path = '/path/to/media.mp4'
     base_media_player.controller.media_play_item.media_type = MediaType.Video
     base_media_player.controller.media_play_item.media_file = media_path
-    # WHEN: A video is loaded into VLC
+    # WHEN: A video is loaded
     result = base_media_player.load()
     # THEN: The video should be loaded
     base_media_player.media_player.setAudioOutput.assert_called_once()
     assert result is True
 
 
-def test_load_stream(base_media_player):
+def test_load_with_stream(base_media_player):
     """
-    Test loading streaming into MediaPlayer
+    Test send stream to load function - this is not valid!
     """
-    # GIVEN: A mocked out get_vlc() method
+    # GIVEN: A stream load call with a missing stream
     base_media_player.controller.media_play_item.media_type = MediaType.DeviceStream
-    base_media_player.controller.media_play_item.media_file = None
+    base_media_player.controller.media_play_item.external_stream = None
     # WHEN: A video is loaded into VLC
-    result = base_media_player.load()
-    # THEN: The video should be loaded
+    result = base_media_player.load_stream()
+    # THEN: The media should fail
     base_media_player.media_player.setAudioOutput.assert_not_called()
     assert result is False
+
+
+def test_load_network_stream(base_media_player):
+    """
+    Test loading a networkstream request
+    """
+    # GIVEN: A mocked out media devices object
+    mrl = 'http://128.0.0.1'
+    base_media_player.controller.media_play_item.external_stream = [mrl]
+    base_media_player.controller.media_play_item.media_type = MediaType.NetworkStream
+    # WHEN: A device stream is loaded
+    result = base_media_player.load_stream()
+    # THEN: The video should be loaded
+    base_media_player.media_capture_session.setVideoOutput.assert_called_once()
+    base_media_player.media_player.setAudioInput.assert_not_called()
+    base_media_player.media_player.setVideoOutput.assert_called_with(base_media_player.video_widget)
+    base_media_player.media_player.setSource.assert_called_with(mrl)
+    assert result is True
 
 
 def test_resize_live(base_media_player):
@@ -305,7 +324,7 @@ def test_seek_unseekable_media(base_media_player):
     base_media_player.seek(100)
 
     # THEN: nothing should happen
-    base_media_player.media_player.setPosition.assert_not_called
+    base_media_player.media_player.setPosition.assert_not_called()
 
 
 def test_reset(base_media_player):
@@ -327,13 +346,154 @@ def test_update_ui(base_media_player):
     Test updating the UI
     """
     # GIVEN: A whole bunch of mocks
-    base_media_player.controller.media_info.end_time = 300
+    base_media_player.controller.media_play_item = MediaPlayItem()
+    base_media_player.media_player.position.return_value = 300
     base_media_player.controller.mediabar.seek_slider.isSliderDown.return_value = False
 
     # WHEN: update_ui() is called
     base_media_player.update_ui()
 
     # THEN: Certain methods should be called
-    # base_media_player.controller.mediabar.seek_slider.setSliderPosition.assert_called_with(400000)
+    base_media_player.controller.mediabar.seek_slider.setSliderPosition.assert_called_with(300)
     expected_calls = [call(True), call(False)]
     assert expected_calls == base_media_player.controller.mediabar.seek_slider.blockSignals.call_args_list
+
+
+def test_toggle_loop_true(base_media_player):
+    """
+    Test the toggling method updates media player correctly
+    """
+    # GIVEN: A the default test setup
+    # WHEN: when you ask to toggle
+    base_media_player.toggle_loop(True)
+    # THEN: We should have and infinite loop
+    base_media_player.media_player.setLoops.assert_called_with(QMediaPlayer.Loops.Infinite)
+
+
+def test_toggle_loop_false(base_media_player):
+    """
+    Test the toggling method updates media player correctly
+    """
+    # GIVEN: A the default test setup
+    # WHEN: when you ask to toggle
+    base_media_player.toggle_loop(False)
+    # THEN: We should have and infinite loop
+    base_media_player.media_player.setLoops.assert_called_with(QMediaPlayer.Loops.Once)
+
+
+def test_media_status_changed_live_media(base_media_player, registry):
+    """
+    Test the handing of QMediaPlayer event status changes for live
+    """
+    # GIVEN: A the lived set up
+    base_media_player.controller.media_play_item.media_type = MediaType.Video
+    base_media_player.controller.is_live = True
+    mocked_controller = MagicMock()
+    Registry().register("media_controller", mocked_controller)
+    # WHEN: the media state changes and it is end of media
+    base_media_player.media_status_changed_event(QMediaPlayer.MediaStatus.EndOfMedia)
+    # THEN: the live media status event is triggered
+    mocked_controller.live_media_status_changed.emit.assert_called_once()
+    mocked_controller.preview_media_status_changed.emit.assert_not_called()
+
+
+def test_media_status_changed_preview_media(base_media_player, registry):
+    """
+    Test the handing of QMediaPlayer event status changes for preview
+    """
+    # GIVEN: A the lived set up
+    base_media_player.controller.media_play_item.media_type = MediaType.Video
+    base_media_player.controller.is_live = False
+    mocked_controller = MagicMock()
+    Registry().register("media_controller", mocked_controller)
+    # WHEN: the media state changes and it is end of media
+    base_media_player.media_status_changed_event(QMediaPlayer.MediaStatus.EndOfMedia)
+    # THEN: the live media status event is triggered
+    mocked_controller.live_media_status_changed.emit.assert_not_called()
+    mocked_controller.preview_media_status_changed.emit.assert_called_once()
+
+
+def test_media_status_changed_dual(base_media_player, registry):
+    """
+    Test the handing of QMediaPlayer event status changes for Dual media
+    """
+    # GIVEN: A the lived set up
+    base_media_player.controller.media_play_item.media_type = MediaType.Dual
+    base_media_player.controller.is_live = False
+    mocked_controller = MagicMock()
+    Registry().register("media_controller", mocked_controller)
+    # WHEN: the media state changes and it is end of media
+    base_media_player.media_status_changed_event(QMediaPlayer.MediaStatus.EndOfMedia)
+    # THEN: the live media status event is triggered
+    mocked_controller.live_media_status_changed.emit.assert_not_called()
+    mocked_controller.preview_media_status_changed.emit.assert_not_called()
+
+
+def test_media_status_changed_not_end(base_media_player, registry):
+    """
+    Test the handing of QMediaPlayer event status changes when not end of media
+    """
+    # GIVEN: A the lived set up
+    base_media_player.controller.media_play_item.media_type = MediaType.Video
+    base_media_player.controller.is_live = False
+    mocked_controller = MagicMock()
+    Registry().register("media_controller", mocked_controller)
+    # WHEN: the media state changes and it is end of media
+    base_media_player.media_status_changed_event(QMediaPlayer.MediaStatus.LoadedMedia)
+    # THEN: the live media status event is triggered
+    mocked_controller.live_media_status_changed.emit.assert_not_called()
+    mocked_controller.preview_media_status_changed.emit.assert_not_called()
+
+
+def test_position_changed_live(base_media_player, registry):
+    """
+    Test the handing of QMediaPlayer when the position changes
+    """
+    # GIVEN: The live set up
+    base_media_player.controller.media_play_item.media_type = MediaType.Video
+    base_media_player.controller.is_live = True
+    base_media_player.controller.media_play_item.timer = 0
+    mocked_controller = MagicMock()
+    Registry().register("media_controller", mocked_controller)
+    # WHEN: the media position changes and it is end of media
+    base_media_player.position_changed_event(400)
+    # THEN: the live position changed event is triggered
+    mocked_controller.live_media_tick.emit.assert_called_once()
+    mocked_controller.preview_media_tick.emit.assert_not_called()
+    assert base_media_player.controller.media_play_item.timer == 400
+
+
+def test_position_changed_preview(base_media_player, registry):
+    """
+    Test the handing of QMediaPlayer when the position changes Preview
+    """
+    # GIVEN: The live set up
+    base_media_player.controller.media_play_item.media_type = MediaType.Video
+    base_media_player.controller.is_live = False
+    base_media_player.controller.media_play_item.timer = 0
+    mocked_controller = MagicMock()
+    Registry().register("media_controller", mocked_controller)
+    # WHEN: the media position changes and it is end of media
+    base_media_player.position_changed_event(400)
+    # THEN: the live position changed event is triggered
+    mocked_controller.live_media_tick.emit.assert_not_called()
+    mocked_controller.preview_media_tick.emit.assert_called_once()
+    assert base_media_player.controller.media_play_item.timer == 400
+
+
+def test_position_changed_dual(base_media_player, registry):
+    """
+    Test the handing of QMediaPlayer when the position changes - Dual
+    """
+    # GIVEN: The live set up
+    base_media_player.controller.media_play_item.media_type = MediaType.Dual
+    base_media_player.controller.is_live = True
+    base_media_player.controller.media_play_item.timer = 0
+    mocked_controller = MagicMock()
+    Registry().register("media_controller", mocked_controller)
+    # WHEN: the media position changes and it is end of media
+    base_media_player.position_changed_event(400)
+    # THEN: the live position changed event is triggered
+    mocked_controller.live_media_tick.emit.assert_not_called()
+    mocked_controller.preview_media_tick.emit.assert_not_called()
+    assert base_media_player.controller.media_play_item.timer == 0

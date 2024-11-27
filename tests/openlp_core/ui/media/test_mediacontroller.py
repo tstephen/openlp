@@ -743,3 +743,52 @@ def test_media_bar_loop_checked(media_env: MediaController, settings: Settings, 
     media_env.media_controller._media_bar(mocked_controller, "load")
     # THEN: The following functions should have been called
     mocked_controller.mediabar.actions['playbackLoop'].setChecked.assert_called_with(result)
+
+
+def test_media_pause(media_env):
+    # GIVEN: A COntroller for a video
+    mocked_controller = MagicMock()
+
+    mocked_controller = MagicMock()
+    mocked_controller.media_play_item = MagicMock()
+    mocked_controller.is_live = True
+    mocked_controller.controller_type = 1  # Live
+    mocked_controller.media_play_item.media_type = MediaType.Video
+    mocked_controller.mediabar = MagicMock()
+    mocked_controller.media_player = MagicMock()
+    mocked_controller.output_has_changed = MagicMock()
+
+    # WHEN:  pause is pressed
+    media_env.media_controller.media_pause(mocked_controller)
+
+    # THEN: The following should have happened
+    mocked_controller.media_play_item.media_autostart is not None
+    mocked_controller.media_play_item.audio_autostart is not None
+    mocked_controller.audio_player.pause.assert_not_called()
+    mocked_controller.media_player.pause.assert_called_once()
+    mocked_controller.output_has_changed.assert_called_once()
+    mocked_controller.media_player.get_time.assert_called_once()
+
+
+def test_media_pause_dual(media_env):
+    # GIVEN: A COntroller for a video
+    mocked_controller = MagicMock()
+
+    mocked_controller = MagicMock()
+    mocked_controller.media_play_item = MagicMock()
+    mocked_controller.is_live = True
+    mocked_controller.controller_type = 1  # Live
+    mocked_controller.media_play_item.media_type = MediaType.Dual
+    mocked_controller.mediabar = MagicMock()
+    mocked_controller.media_player = MagicMock()
+    mocked_controller.output_has_changed = MagicMock()
+
+    # WHEN:  pause is pressed
+    media_env.media_controller.media_pause(mocked_controller)
+
+    # THEN: The following should have happened
+    mocked_controller.media_play_item.media_autostart is not None
+    mocked_controller.media_play_item.audio_autostart is not None
+    mocked_controller.audio_player.pause.assert_called_once()
+    mocked_controller.media_player.pause.assert_not_called()
+    mocked_controller.output_has_changed.assert_called_once()
