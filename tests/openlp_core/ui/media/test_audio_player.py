@@ -24,9 +24,10 @@ This class is for playing Media within OpenLP.
 """
 from unittest.mock import MagicMock
 
-from PySide6.QtMultimedia import QAudioOutput
+from PySide6.QtMultimedia import QAudioOutput, QMediaPlayer
 import pytest
 
+from openlp.core.common.registry import Registry
 from openlp.core.ui.media import MediaType
 from openlp.core.ui.media.audioplayer import AudioPlayer
 
@@ -138,3 +139,121 @@ def test_stop(base_audio_player):
 
     # THEN: A thread should have been started to stop VLC
     base_audio_player.media_player.stop.assert_called_once()
+
+
+def test_media_status_changed_live_media(base_audio_player, registry):
+    """
+    Test the handing of QMediaPlayer event status changes for live
+    """
+    # GIVEN: A the lived set up
+    base_audio_player.controller.media_play_item.media_type = MediaType.Dual
+    base_audio_player.controller.is_live = True
+    mocked_controller = MagicMock()
+    Registry().register("media_controller", mocked_controller)
+    # WHEN: the media state changes and it is end of media
+    base_audio_player.media_status_changed_event(QMediaPlayer.MediaStatus.EndOfMedia)
+    # THEN: the live media status event is triggered
+    mocked_controller.live_media_status_changed.emit.assert_called_once()
+    mocked_controller.preview_media_status_changed.emit.assert_not_called()
+
+
+def test_media_status_changed_preview_media(base_audio_player, registry):
+    """
+    Test the handing of QMediaPlayer event status changes for preview
+    """
+    # GIVEN: A the lived set up
+    base_audio_player.controller.media_play_item.media_type = MediaType.Dual
+    base_audio_player.controller.is_live = False
+    mocked_controller = MagicMock()
+    Registry().register("media_controller", mocked_controller)
+    # WHEN: the media state changes and it is end of media
+    base_audio_player.media_status_changed_event(QMediaPlayer.MediaStatus.EndOfMedia)
+    # THEN: the live media status event is triggered
+    mocked_controller.live_media_status_changed.emit.assert_not_called()
+    mocked_controller.preview_media_status_changed.emit.assert_called_once()
+
+
+def test_media_status_changed_video(base_audio_player, registry):
+    """
+    Test the handing of QMediaPlayer event status changes for Dual media
+    """
+    # GIVEN: A the lived set up
+    base_audio_player.controller.media_play_item.media_type = MediaType.Video
+    base_audio_player.controller.is_live = False
+    mocked_controller = MagicMock()
+    Registry().register("media_controller", mocked_controller)
+    # WHEN: the media state changes and it is end of media
+    base_audio_player.media_status_changed_event(QMediaPlayer.MediaStatus.EndOfMedia)
+    # THEN: the live media status event is triggered
+    mocked_controller.live_media_status_changed.emit.assert_not_called()
+    mocked_controller.preview_media_status_changed.emit.assert_not_called()
+
+
+def test_media_status_changed_not_end(base_audio_player, registry):
+    """
+    Test the handing of QMediaPlayer event status changes when not end of media
+    """
+    # GIVEN: A the lived set up
+    base_audio_player.controller.media_play_item.media_type = MediaType.Dual
+    base_audio_player.controller.is_live = False
+    mocked_controller = MagicMock()
+    Registry().register("media_controller", mocked_controller)
+    # WHEN: the media state changes and it is end of media
+    base_audio_player.media_status_changed_event(QMediaPlayer.MediaStatus.LoadedMedia)
+    # THEN: the live media status event is triggered
+    mocked_controller.live_media_status_changed.emit.assert_not_called()
+    mocked_controller.preview_media_status_changed.emit.assert_not_called()
+
+
+def test_position_changed_live(base_audio_player, registry):
+    """
+    Test the handing of QMediaPlayer when the position changes
+    """
+    # GIVEN: The live set up
+    base_audio_player.controller.media_play_item.media_type = MediaType.Dual
+    base_audio_player.controller.is_live = True
+    base_audio_player.controller.media_play_item.timer = 0
+    mocked_controller = MagicMock()
+    Registry().register("media_controller", mocked_controller)
+    # WHEN: the media position changes and it is end of media
+    base_audio_player.position_changed_event(400)
+    # THEN: the live position changed event is triggered
+    mocked_controller.live_media_tick.emit.assert_called_once()
+    mocked_controller.preview_media_tick.emit.assert_not_called()
+    assert base_audio_player.controller.media_play_item.timer == 400
+
+
+def test_position_changed_preview(base_audio_player, registry):
+    """
+    Test the handing of QMediaPlayer when the position changes Preview
+    """
+    # GIVEN: The live set up
+    base_audio_player.controller.media_play_item.media_type = MediaType.Dual
+    base_audio_player.controller.is_live = False
+    base_audio_player.controller.media_play_item.timer = 0
+    mocked_controller = MagicMock()
+    Registry().register("media_controller", mocked_controller)
+    # WHEN: the media position changes and it is end of media
+    base_audio_player.position_changed_event(400)
+    # THEN: the live position changed event is triggered
+    mocked_controller.live_media_tick.emit.assert_not_called()
+    mocked_controller.preview_media_tick.emit.assert_called_once()
+    assert base_audio_player.controller.media_play_item.timer == 400
+
+
+def test_position_changed_video(base_audio_player, registry):
+    """
+    Test the handing of QMediaPlayer when the position changes - Video
+    """
+    # GIVEN: The live set up
+    base_audio_player.controller.media_play_item.media_type = MediaType.Video
+    base_audio_player.controller.is_live = True
+    base_audio_player.controller.media_play_item.timer = 0
+    mocked_controller = MagicMock()
+    Registry().register("media_controller", mocked_controller)
+    # WHEN: the media position changes and it is end of media
+    base_audio_player.position_changed_event(400)
+    # THEN: the live position changed event is triggered
+    mocked_controller.live_media_tick.emit.assert_not_called()
+    mocked_controller.preview_media_tick.emit.assert_not_called()
+    assert base_audio_player.controller.media_play_item.timer == 0
