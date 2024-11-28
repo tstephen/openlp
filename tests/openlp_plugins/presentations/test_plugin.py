@@ -43,10 +43,12 @@ def test_plugin_about():
     )
 
 
-def test_creaste_settings_tab(qapp, state, registry, settings):
+@patch('openlp.plugins.presentations.lib.presentationcontroller.PresentationController.is_available')
+def test_create_settings_tab(mocked_pres_ctrl_is_available, qapp, state, registry, settings):
     """Test creating the settings tab"""
-    # GIVEN: A Presentations plugin
+    # GIVEN: A Presentations plugin and mocked PresentationController.is_available
     presentations_plugin = PresentationPlugin()
+    mocked_pres_ctrl_is_available.return_value = True
 
     # WHEN: create_settings_tab is run
     presentations_plugin.create_settings_tab(None)

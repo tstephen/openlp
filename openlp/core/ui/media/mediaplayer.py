@@ -41,6 +41,7 @@ from openlp.core.ui.media import MediaType
 
 log = logging.getLogger(__name__)
 
+# A workaround for https://bugreports.qt.io/browse/PYSIDE-2935
 if is_win():
     os.add_dll_directory(sysconfig.get_path('purelib') + '/PySide6/')
 

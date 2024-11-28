@@ -164,6 +164,8 @@ def check_for_variant_migration(settings):
         # Do OS/format specific conversion:
         if is_linux() or settings.format() == Settings.IniFormat:
             settings_filename = settings.fileName()
+            if not Path(settings_filename).exists():
+                return settings
             # Do a simple search/replace that allows the PySide to load the PyQt5 variant
             with open(settings_filename, 'r+') as settings_file:
                 file_contents = settings_file.read()
@@ -195,6 +197,8 @@ def check_for_variant_migration(settings):
         elif is_macosx():
             # get plist filename
             settings_filename = settings.fileName()
+            if not Path(settings_filename).exists():
+                return settings
             # load plist data
             with open(settings_filename, 'rb') as plistfile:
                 plistdata = plistlib.load(plistfile)
