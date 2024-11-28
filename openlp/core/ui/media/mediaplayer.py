@@ -22,7 +22,9 @@
 The :mod:`~openlp.core.ui.media.mediaplayer` module for media playing.
 """
 import logging
+import os
 import re
+import sysconfig
 
 from PySide6 import QtCore, QtWidgets
 from PySide6.QtMultimedia import QAudioInput, QAudioOutput, QCamera, QMediaDevices, QMediaCaptureSession, QMediaPlayer
@@ -30,6 +32,7 @@ from PySide6.QtMultimediaWidgets import QVideoWidget
 from PySide6.QtCore import QUrl
 
 from openlp.core.common.mixins import LogMixin
+from openlp.core.common.platform import is_win
 from openlp.core.common.registry import Registry
 from openlp.core.display.window import DisplayWindow
 from openlp.core.ui.slidecontroller import SlideController
@@ -37,6 +40,9 @@ from openlp.core.ui.media.mediabase import MediaBase
 from openlp.core.ui.media import MediaType
 
 log = logging.getLogger(__name__)
+
+if is_win():
+    os.add_dll_directory(sysconfig.get_path('purelib') + '/PySide6/')
 
 
 class MediaPlayer(MediaBase, LogMixin):
