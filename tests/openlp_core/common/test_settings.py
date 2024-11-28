@@ -387,3 +387,15 @@ def test_settings_pyqt5_pyside6_migration_plist():
         # THEN: The migration of Variant based entries should be converted correctly (mostly enums)
         value = settings.value('custom/status')
         assert value == PluginStatus.Active
+
+
+def test_settings_pyqt5_pyside6_migration_ini_missing():
+    """Test that the ini migration can handle that there is no existing file"""
+    # WHEN: The system is using ini configuration but no ini file already exists
+    # GIVEN: an settings instance
+    tmp_ini_file_path = str(RESOURCE_PATH / 'settings' / 'files-does-not-exists.ini')
+    settings = Settings(tmp_ini_file_path, QtCore.QSettings.IniFormat)
+    ret_settings = check_for_variant_migration(settings)
+
+    # THEN: The returned settings object should be the same as the original
+    assert settings == ret_settings
