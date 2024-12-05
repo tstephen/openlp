@@ -42,7 +42,9 @@ class SplashScreen(QtWidgets.QSplashScreen):
         """
         self.setObjectName('splashScreen')
         self.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.PreventContextMenu)
-        splash_image = QtGui.QPixmap(':/graphics/openlp-splash-screen.png')
-        splash_image.setDevicePixelRatio(self.devicePixelRatioF())
+        source_image = QtGui.QPixmap(':/graphics/openlp-splash-screen.png')
+        source_image.setDevicePixelRatio(self.devicePixelRatioF())
+        splash_image = source_image.scaled(370, 370, mode=QtCore.Qt.TransformationMode.SmoothTransformation)
+        source_image = None
         self.setPixmap(splash_image)
         self.resize(370, 370)

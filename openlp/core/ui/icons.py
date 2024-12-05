@@ -85,6 +85,7 @@ class UiIcons(metaclass=Singleton):
             'desktop': {'icon': 'mdi.desktop-mac'},
             'delete': {'icon': 'mdi.delete'},
             'device_stream': {'icon': 'mdi.video'},
+            'donate': {'icon': 'mdi.cash-multiple'},
             'download': {'icon': 'mdi.download'},
             'edit': {'icon': 'mdi.file-document-edit-outline'},
             'email': {'icon': 'mdi.email'},
