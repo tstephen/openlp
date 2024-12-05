@@ -29,6 +29,7 @@ import os
 import shutil
 from unittest.mock import MagicMock, patch
 
+from openlp.core.common.settings import Settings
 from openlp.core.db.upgrades import upgrade_db
 from openlp.core.projectors import upgrade
 from openlp.core.projectors.constants import PJLINK_PORT
@@ -37,7 +38,7 @@ from tests.resources.projector.data import TEST1_DATA, TEST2_DATA, TEST3_DATA, T
 from tests.utils.constants import TEST_RESOURCES_PATH
 
 
-def compare_data(one, two):
+def compare_data(one: Projector, two: Projector) -> bool:
     """
     Verify two Projector() instances contain the same data
     """
@@ -54,7 +55,7 @@ def compare_data(one, two):
         one.model_lamp == two.model_lamp
 
 
-def compare_source(one, two):
+def compare_source(one: ProjectorSource, two: ProjectorSource) -> bool:
     """
     Verify two ProjectorSource instances contain the same data
     """
@@ -65,7 +66,7 @@ def compare_source(one, two):
         one.text == two.text
 
 
-def add_records(projector_db, test):
+def add_records(projector_db: ProjectorDB, test: list) -> list:
     """
     Add record if not in database
     """
@@ -86,11 +87,12 @@ def add_records(projector_db, test):
 
 
 @pytest.fixture()
-def projector(temp_folder, settings):
+def projector(temp_folder: str, settings: Settings):
     """
     Set up anything necessary for all tests
     """
-    tmpdb_url = 'sqlite:///{db}'.format(db=os.path.join(temp_folder, TEST_DB))
+    # tmpdb_url = 'sqlite:///{db}'.format(db=os.path.join(temp_folder, TEST_DB))
+    tmpdb_url = 'sqlite://'
     with patch('openlp.core.projectors.db.init_url') as mocked_init_url:
         mocked_init_url.return_value = tmpdb_url
         proj = ProjectorDB()
@@ -99,10 +101,11 @@ def projector(temp_folder, settings):
     del proj
 
 
-def test_upgrade_old_projector_db(temp_folder):
+def test_upgrade_old_projector_db(temp_folder: str):
     """
     Test that we can upgrade a version 1 db to the current schema
     """
+
     # GIVEN: An old prjector db
     old_db = os.path.join(TEST_RESOURCES_PATH, "projector", TEST_DB_PJLINK1)
     tmp_db = os.path.join(temp_folder, TEST_DB)
