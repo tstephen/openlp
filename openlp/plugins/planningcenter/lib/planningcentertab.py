@@ -58,7 +58,7 @@ class PlanningCenterTab(SettingsTab):
         # secret
         self.secret_label = QtWidgets.QLabel(self.auth_group_box)
         self.secret_line_edit = QtWidgets.QLineEdit(self.auth_group_box)
-        self.secret_line_edit.setMaxLength(64)
+        self.secret_line_edit.setMaxLength(128)
         self.auth_layout.addRow(self.secret_label, self.secret_line_edit)
         # Buttons
         self.button_layout = QtWidgets.QDialogButtonBox(self.auth_group_box)
