@@ -1,9 +1,11 @@
 stages:
   - test
+  - build
   - deploy
 
 variables:
   IMAGE_BASE: $CI_REGISTRY/openlp/runners
+  OPENLP_HOST: "new.openlp.io"
 
 lint-python:
   stage: test
@@ -57,7 +59,7 @@ test-fedora:
   image: $IMAGE_BASE/fedora
   script:
     - sh scripts/generate_resources.sh
-    #    - xvfb-run -s '-screen 0 1024x768x24' pytest-3 --color=no --disable-warnings
+    # - xvfb-run -s '-screen 0 1024x768x24' pytest-3 --color=no --disable-warnings
     - xwfb-run -c weston -s \\-geometry -s 1024x768x24 -- pytest
 
 test-arch:
@@ -104,6 +106,23 @@ test-arch:
     - "# Running tests"
     - pytest --color=no --disable-warnings
 
+.recompile_boot_loader_pyinstaller:
+  # It is necessary to recompile the boot loader of PyInstaller to prevent antivirus false positives.
+  # See: https://github.com/pyinstaller/pyinstaller/blob/develop/.github/ISSUE_TEMPLATE/antivirus.md
+  script:
+    - $pyInstallerVersion = '6.11.1'
+    - "# Downloading PyInstaller from GitHub"
+    - $zipFileName = "v$pyInstallerVersion.zip"
+    - Invoke-WebRequest -OutFile "$env:Temp\$zipFileName" -Uri https://github.com/pyinstaller/pyinstaller/archive/refs/tags/$zipFileName
+    - "# Extracting the ZIP file"
+    - Expand-Archive -Path "$env:Temp\$zipFileName" -DestinationPath .
+    - Set-Location ".\pyinstaller-$pyInstallerVersion\bootloader"
+    - "# Building the boot loader"
+    - python ./waf all --target-arch=64bit
+    - Set-Location '..'
+    - pip install .
+    - Set-Location '..'
+
 test-macos:
   stage: test
   tags:
@@ -127,7 +146,7 @@ test-macos:
     - pip install pyicu
     - !reference [.run_tests, script]
   rules:
-    - if: $CI_COMMIT_REF_NAME == "master"
+    - if: $CI_COMMIT_BRANCH == "master"
 
 test-windows:
   stage: test
@@ -152,7 +171,7 @@ test-windows:
     - refreshenv
     - "# Installing Windows Feature 'Server Media Foundation'"
     - Install-WindowsFeature Server-Media-Foundation
-    - "# Download the necessary files for PySide6 from OpenLP"
+    - "# Downloading the necessary files for PySide6 from OpenLP"
     - $zipFileName = 'requiredfiles.zip'
     - Invoke-WebRequest -OutFile "$env:Temp\$zipFileName" -Uri "https://get.openlp.org/win-sdk/$zipFileName"
     - "# Extracting the ZIP file"
@@ -174,14 +193,66 @@ test-display:
     - yarn install
     - yarn test --browsers ChromiumHeadlessCI
 
+build-windows:
+  stage: build
+  extends: test-windows
+  script:
+    - !reference [test-windows, script]
+    - "# Installing WiX Toolset"
+    - choco install wixtoolset --ignore-dependencies
+    - "# Refreshing the environment"
+    - refreshenv
+    - "# Downloading PortableApps Installer and Launcher from OpenLP"
+    - "# because the installers of PortableApps offer no silent install."
+    - $zipFileName = 'PortableApps.zip'
+    - Invoke-WebRequest -OutFile "$env:Temp\$zipFileName" -Uri "https://get.openlp.org/win-sdk/$zipFileName"
+    - Set-Location '..'
+    - "# Extracting the ZIP file"
+    - Expand-Archive -Path "$env:Temp\$zipFileName" -DestinationPath .
+    - !reference [.recompile_boot_loader_pyinstaller, script]
+    - "# Downloading the necessary files for packaging from GitLab"
+    - $repositoryName = 'packaging'
+    - $branchName = 'master'
+    - $zipFileName = "$repositoryName-$branchName.zip"
+    - Invoke-WebRequest -OutFile "$env:Temp\$zipFileName" -Uri "https://gitlab.com/$env:CI_PROJECT_NAMESPACE/$repositoryName/-/archive/$branchName/$zipFileName"
+    - "# Extracting the ZIP file"
+    - Expand-Archive -Path "$env:Temp\$zipFileName" -DestinationPath .
+    - Set-Location (Get-Item "$env:Temp\$zipFileName").BaseName
+    - "# Starting creating Windows MSI and Portable"
+    - python builders/windows-builder.py --release $env:CI_COMMIT_TAG --skip-update --config windows/config-gitlab.ini --branch $env:CI_PROJECT_DIR --portable
+  artifacts:
+    name: $CI_COMMIT_REF_SLUG
+    paths:
+      - dist
+    expire_in: 1 days
+  rules:
+    - if: $CI_COMMIT_TAG
+
+deploy-windows:
+  stage: deploy
+  image: $IMAGE_BASE/ssh
+  script:
+    - mkdir -p ~/.ssh
+    - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - eval $(ssh-agent -s)
+    - ssh-add ~/.ssh/id_rsa
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+    - ssh openlp@$OPENLP_HOST "mkdir -p /home/openlp/sites/get.openlp.org/www/$CI_COMMIT_TAG"
+    - cd dist
+    - scp *.exe openlp@$OPENLP_HOST:/home/openlp/sites/get.openlp.org/www/$CI_COMMIT_TAG/
+    - scp *.msi openlp@$OPENLP_HOST:/home/openlp/sites/get.openlp.org/www/$CI_COMMIT_TAG/
+  rules:
+    - if: $CI_COMMIT_TAG
+
 upload-pypi:
   stage: deploy
   image: $IMAGE_BASE/debian
   script:
     - python3 setup.py sdist bdist_wheel
     - twine upload dist/*
-  only:
-    - tags
+  rules:
+    - if: $CI_COMMIT_TAG
 
 pages:
   stage: deploy
@@ -205,5 +276,5 @@ pages:
         path: coverage.xml
   dependencies:
     - test-debian
-  only:
-    - master@openlp/openlp
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
