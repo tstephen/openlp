@@ -77,8 +77,9 @@ class ThemeForm(QtWidgets.QWizard, Ui_ThemeWizard, RegistryProperties):
         self.main_area_page.outline_size_changed.connect(self.calculate_lines)
         self.main_area_page.is_shadow_enabled_changed.connect(self.on_shadow_toggled)
         self.main_area_page.shadow_size_changed.connect(self.calculate_lines)
-        self.footer_area_page.font_name_changed.connect(self.update_theme)
-        self.footer_area_page.font_size_changed.connect(self.update_theme)
+        self.footer_area_page.font_name_changed.connect(self.calculate_lines)
+        self.footer_area_page.font_size_changed.connect(self.calculate_lines)
+        self.footer_area_page.wrap_changed.connect(self.calculate_lines)
         self.footer_area_page.line_spacing_changed.connect(self.calculate_lines)
         self.footer_area_page.letter_spacing_changed.connect(self.calculate_lines)
         self.setOption(QtWidgets.QWizard.WizardOption.HaveHelpButton, True)
@@ -308,6 +309,7 @@ class ThemeForm(QtWidgets.QWizard, Ui_ThemeWizard, RegistryProperties):
         self.footer_area_page.is_bold = self.theme.font_footer_bold
         self.footer_area_page.is_italic = self.theme.font_footer_italics
         self.footer_area_page.font_size = self.theme.font_footer_size
+        self.footer_area_page.wrap = self.theme.font_footer_wrap
         self.footer_area_page.line_spacing = self.theme.font_footer_line_adjustment
         self.footer_area_page.letter_spacing = self.theme.font_footer_letter_adjustment
 
@@ -334,6 +336,8 @@ class ThemeForm(QtWidgets.QWizard, Ui_ThemeWizard, RegistryProperties):
         """
         self.alignment_page.horizontal_align = self.theme.display_horizontal_align
         self.alignment_page.vertical_align = self.theme.display_vertical_align
+        self.alignment_page.horizontal_align_footer = self.theme.display_horizontal_align_footer
+        self.alignment_page.vertical_align_footer = self.theme.display_vertical_align_footer
         self.alignment_page.is_transition_enabled = self.theme.display_slide_transition
         self.alignment_page.transition_type = self.theme.display_slide_transition_type
         self.alignment_page.transition_speed = self.theme.display_slide_transition_speed
@@ -392,9 +396,10 @@ class ThemeForm(QtWidgets.QWizard, Ui_ThemeWizard, RegistryProperties):
         # footer page
         self.theme.font_footer_name = self.footer_area_page.font_name
         self.theme.font_footer_color = self.footer_area_page.font_color
-        self.theme.font_footer_size = self.footer_area_page.font_size
         self.theme.font_footer_bold = self.footer_area_page.is_bold
         self.theme.font_footer_italics = self.footer_area_page.is_italic
+        self.theme.font_footer_size = self.footer_area_page.font_size
+        self.theme.font_footer_wrap = self.footer_area_page.wrap
         self.theme.font_footer_line_adjustment = self.footer_area_page.line_spacing
         self.theme.font_footer_letter_adjustment = self.footer_area_page.letter_spacing
         # position page (main)
@@ -418,6 +423,8 @@ class ThemeForm(QtWidgets.QWizard, Ui_ThemeWizard, RegistryProperties):
         # alignment page
         self.theme.display_horizontal_align = self.alignment_page.horizontal_align
         self.theme.display_vertical_align = self.alignment_page.vertical_align
+        self.theme.display_horizontal_align_footer = self.alignment_page.horizontal_align_footer
+        self.theme.display_vertical_align_footer = self.alignment_page.vertical_align_footer
         self.theme.display_slide_transition = self.alignment_page.is_transition_enabled
         self.theme.display_slide_transition_type = self.alignment_page.transition_type
         self.theme.display_slide_transition_speed = self.alignment_page.transition_speed

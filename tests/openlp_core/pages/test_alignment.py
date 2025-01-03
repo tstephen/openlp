@@ -170,6 +170,118 @@ def test_set_vertical_align_exception(settings):
         page.vertical_align = []
 
 
+def test_get_horizontal_align_footer(settings):
+    """
+    Test the horizontal_align_footer getter
+    """
+    # GIVEN: A AlignmentTransitionsPage instance with the combobox set to index 1
+    page = AlignmentTransitionsPage()
+    page.footer_horizontal_combo_box.setCurrentIndex(1)
+
+    # WHEN: The property is accessed
+    result = page.horizontal_align_footer
+
+    # THEN: The result should be correct
+    assert result == HorizontalType.Right
+
+
+def test_set_horizontal_align_footer_int(settings):
+    """
+    Test the horizontal_align_footer setter with an int
+    """
+    # GIVEN: A AlignmentTransitionsPage instance
+    page = AlignmentTransitionsPage()
+
+    # WHEN: The property is set
+    page.horizontal_align_footer = HorizontalType.Center
+
+    # THEN: The combobox should be correct
+    assert page.footer_horizontal_combo_box.currentIndex() == 2
+
+
+def test_set_horizontal_align_footer_str(settings):
+    """
+    Test the horizontal_align_footer setter with a str
+    """
+    # GIVEN: A AlignmentTransitionsPage instance
+    page = AlignmentTransitionsPage()
+
+    # WHEN: The property is set
+    page.horizontal_align_footer = HorizontalType.to_string(HorizontalType.Justify)
+
+    # THEN: The combobox should be correct
+    assert page.footer_horizontal_combo_box.currentIndex() == 3
+
+
+def test_set_horizontal_align_footer_exception(settings):
+    """
+    Test the horizontal_align setter with something other than a str or int
+    """
+    # GIVEN: A AlignmentTransitionsPage instance
+    page = AlignmentTransitionsPage()
+
+    # WHEN: The property is set
+    # THEN: An exception is raised
+    with pytest.raises(TypeError, match='horizontal_align_footer must either be a string or an int'):
+        page.horizontal_align_footer = []
+
+
+def test_get_vertical_align_footer(settings):
+    """
+    Test the vertical_align_footer getter
+    """
+    # GIVEN: A AlignmentTransitionsPage instance with the combobox set to index 1
+    page = AlignmentTransitionsPage()
+    page.footer_vertical_combo_box.setCurrentIndex(1)
+
+    # WHEN: The property is accessed
+    result = page.vertical_align_footer
+
+    # THEN: The result should be correct
+    assert result == VerticalType.Middle
+
+
+def test_set_vertical_align_footer_int(settings):
+    """
+    Test the vertical_align_footer setter with an int
+    """
+    # GIVEN: A AlignmentTransitionsPage instance
+    page = AlignmentTransitionsPage()
+
+    # WHEN: The property is set
+    page.vertical_align_footer = VerticalType.Bottom
+
+    # THEN: The combobox should be correct
+    assert page.footer_vertical_combo_box.currentIndex() == 2
+
+
+def test_set_vertical_align_footer_str(settings):
+    """
+    Test the vertical_align_footer setter with a str
+    """
+    # GIVEN: A AlignmentTransitionsPage instance
+    page = AlignmentTransitionsPage()
+
+    # WHEN: The property is set
+    page.vertical_align_footer = VerticalType.to_string(VerticalType.Top)
+
+    # THEN: The combobox should be correct
+    assert page.footer_vertical_combo_box.currentIndex() == 0
+
+
+def test_set_vertical_align_footer_exception(settings):
+    """
+    Test the vertical_align_footer setter with something other than a str or int
+    """
+    # GIVEN: A AlignmentTransitionsPage instance
+    page = AlignmentTransitionsPage()
+
+    # WHEN: The property is set
+    # THEN: An exception is raised
+    with pytest.raises(TypeError, match='vertical_align_footer must either be a string or an int'):
+        page.vertical_align_footer = []
+
+
 def test_get_is_transition_enabled(settings):
     """
     Test the is_transition_enabled getter

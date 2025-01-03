@@ -103,8 +103,9 @@ def test_setup(settings):
     theme_form.main_area_page.is_shadow_enabled_changed.connect.assert_called_once_with(
         theme_form.on_shadow_toggled)
     theme_form.main_area_page.shadow_size_changed.connect.assert_called_once_with(theme_form.calculate_lines)
-    theme_form.footer_area_page.font_name_changed.connect.assert_called_once_with(theme_form.update_theme)
-    theme_form.footer_area_page.font_size_changed.connect.assert_called_once_with(theme_form.update_theme)
+    theme_form.footer_area_page.font_name_changed.connect.assert_called_once_with(theme_form.calculate_lines)
+    theme_form.footer_area_page.font_size_changed.connect.assert_called_once_with(theme_form.calculate_lines)
+    theme_form.footer_area_page.wrap_changed.connect.assert_called_once_with(theme_form.calculate_lines)
     theme_form.footer_area_page.line_spacing_changed.connect.assert_called_once_with(theme_form.calculate_lines)
     theme_form.footer_area_page.letter_spacing_changed.connect.assert_called_once_with(theme_form.calculate_lines)
 
@@ -459,8 +460,8 @@ def test_update_theme_static(mocked_setup, settings):
                                           is_outline_enabled=True, outline_color='#00f', outline_size=3,
                                           is_shadow_enabled=True, shadow_color='#111', shadow_size=5, is_bold=True,
                                           is_italic=False, letter_spacing=2)
-    theme_form.footer_area_page = MagicMock(font_name='Oxygen', font_color='#fff', font_size=20, is_bold=False,
-                                            is_italic=True, line_spacing=2, letter_spacing=-1)
+    theme_form.footer_area_page = MagicMock(font_name='Oxygen', font_color='#fff', font_size=20, wrap=False,
+                                            is_bold=False, is_italic=True, line_spacing=2, letter_spacing=-1)
     theme_form.alignment_page = MagicMock(horizontal_align='left', vertical_align='top', is_transition_enabled=True,
                                           transition_type='fade', transition_speed='normal',
                                           transition_direction='horizontal', is_transition_reverse_enabled=False)
@@ -490,6 +491,7 @@ def test_update_theme_static(mocked_setup, settings):
     assert theme_form.theme.font_footer_name == 'Oxygen'
     assert theme_form.theme.font_footer_color == '#fff'
     assert theme_form.theme.font_footer_size == 20
+    assert theme_form.theme.font_footer_wrap is False
     assert theme_form.theme.font_footer_bold is False
     assert theme_form.theme.font_footer_italics is True
     assert theme_form.theme.font_footer_override is False

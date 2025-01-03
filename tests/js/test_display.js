@@ -88,7 +88,7 @@ describe("The function", function () {
     ]);
   });
 
-  it("_buildTextShadow should return a string of text-shadow", function () {
+  it("_buildTextShadow should return an array of text-shadow values", function () {
     let shadow = _buildTextShadow(2, 2, "#acf");
     expect(shadow).toEqual([
       "#acf 0pt 0pt 0pt",
@@ -116,7 +116,7 @@ describe("The function", function () {
       "#acf 4pt 2pt 0pt",
       "#acf 4pt 3pt 0pt",
       "#acf 4pt 4pt 0pt"
-    ].join(", "));
+    ]);
   });
 
   it("_getStyle should return the correct style on an element", function () {
@@ -764,7 +764,9 @@ describe("Display.setTextSlides", function () {
     //
     const theme = {
       'display_horizontal_align': 3,
-      'display_vertical_align': 1
+      'display_vertical_align': 1,
+      'display_horizontal_align_footer': 2,
+      'display_vertical_align_footer': 0
     };
     spyOn(Reveal, "sync");
     spyOn(Reveal, "slide");
@@ -773,8 +775,11 @@ describe("Display.setTextSlides", function () {
     Display.setTextSlides(slides);
 
     const slidesDiv = $(".text-slides")[0];
-    expect(slidesDiv.style['text-align-last']).toEqual('justify');
+    expect(slidesDiv.style['text-align']).toEqual('justify');
     expect(slidesDiv.style['justify-content']).toEqual('center');
+    const footerDiv = $(".footer")[0];
+    expect(footerDiv.style['text-align']).toEqual('center');
+    expect(footerDiv.style['justify-content']).toEqual('flex-start');
   })
 
   it("should enable shadows", function () {
@@ -829,7 +834,7 @@ describe("Display.setTextSlides", function () {
     Display.setTextSlides(slides);
 
     const slidesDiv = $(".text-slides")[0];
-    expect(slidesDiv.style['margin-top']).toEqual('789px');
+    expect(slidesDiv.style['top']).toEqual('789px');
     expect(slidesDiv.style['left']).toEqual('1000px');
     expect(slidesDiv.style['width']).toEqual('1230px');
     expect(slidesDiv.style['height']).toEqual('4560px');

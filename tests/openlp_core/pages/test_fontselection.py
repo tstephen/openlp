@@ -110,6 +110,19 @@ def test_font_size_changed(settings):
     instance.font_size_changed.emit.assert_called_once_with(14)
 
 
+def test_wrap_changed(settings):
+    # GIVEN: An instance of FontSelectPage with a mocked out "font_size_changed" signal
+    instance = FontSelectPage()
+    instance.wrap_changed = MagicMock()
+    instance.wrap_check_box.isChecked = MagicMock(return_value=True)
+
+    # WHEN: The text-wrap changes
+    instance._on_wrap_changed(2)
+
+    # THEN: The signal should be emitted with the correct value
+    instance.wrap_changed.emit.assert_called_once_with(True)
+
+
 def test_line_spacing_changed(settings):
     # GIVEN: An instance of FontSelectPage with a mocked out "line_spacing_changed" signal
     instance = FontSelectPage()
@@ -412,6 +425,36 @@ def test_set_font_size_property(settings):
 
     # THEN: The correct value should be set
     instance.font_size_spinbox.setValue.assert_called_once_with(18)
+
+
+def test_get_wrap_property(settings):
+    """
+    Test the `wrap` property
+    """
+    # GIVEN: An instance of FontSelectPage with some mocks
+    instance = FontSelectPage()
+    instance.wrap_check_box.isChecked = MagicMock(return_value=True)
+
+    # WHEN: The `wrap` propert is accessed
+    result = instance.wrap
+
+    # THEN: The value should be correct
+    assert result is True
+
+
+def test_set_wrap_property(settings):
+    """
+    Test setting the `wrap` property
+    """
+    # GIVEN: An instance of FontSelectPage with some mocks
+    instance = FontSelectPage()
+    instance.wrap_check_box.setChecked = MagicMock()
+
+    # WHEN: The `wrap` property is set
+    instance.wrap = True
+
+    # THEN: The correct value should be set
+    instance.wrap_check_box.setChecked.assert_called_once_with(True)
 
 
 def test_get_line_spacing_property(settings):

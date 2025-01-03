@@ -127,6 +127,25 @@ var AlertDelay = {
 };
 
 /**
+ * Map of horizontal aligns to their CSS names for the text-align property
+ */
+var HorizontalAlignCSS = {
+  [HorizontalAlign.Justify]: "justify",
+  [HorizontalAlign.Center]: "center",
+  [HorizontalAlign.Left]: "left",
+  [HorizontalAlign.Right]: "right",
+};
+
+/**
+ * Map of vertical aligns to their CSS names for the justify-content property
+ */
+var VerticalAlignCSS = {
+  [VerticalAlign.Top]: "flex-start",
+  [VerticalAlign.Middle]: "center",
+  [VerticalAlign.Bottom]: "flex-end"
+};
+
+/**
  * Return an array of elements based on the selector query
  * @param {string} selector - The selector to find elements
  * @returns {array} An array of matching elements
@@ -162,9 +181,9 @@ function _buildRadialGradient(width, startColor, endColor) {
 /**
  * Build a set of text shadows to form an outline
  * @private
- * @param {Number} size - The desired width of the outline
+ * @param {number} size - The desired width of the outline
  * @param {string} color - The color of the outline
- * @returns {array} A list of shadows to be given to "text-shadow"
+ * @returns {Array} A list of shadows to be given to "text-shadow"
  */
 function _buildTextOutline(size, color) {
   let shadows = [];
@@ -182,9 +201,10 @@ function _buildTextOutline(size, color) {
 /**
  * Build a text shadow
  * @private
- * @param {Number} offset - The offset of the shadow
+ * @param {number} offset - The offset of the shadow
+ * @param {number} size - The desired width of the shadow
  * @param {string} color - The color that the shadow should be
- * @returns {string} The text-shadow rule
+ * @returns {Array} A list of shadows to be given to "text-shadow"
  */
 function _buildTextShadow(offset, size, color) {
   let shadows = [];
@@ -195,8 +215,9 @@ function _buildTextShadow(offset, size, color) {
       shadows.push(color + " " + i + "pt " + j + "pt 0pt");
     }
   }
-  return shadows.join(", ");
+  return shadows;
 }
+
 
 /**
  * Get a style value from an element (computed or manual)
@@ -1116,7 +1137,7 @@ var Display = {
   },
   /**
    * Apply the theme to the provided element
-   * @param targetElement The target element to apply the theme (expected to be a <section> in the slides container)
+   * @param targetElement The target element to apply the theme (expected to be a `<section>` in the slides container)
    * @param is_text Used to decide if the main area constraints should be applied
    */
   applyTheme: function (targetElement, is_text=true) {
@@ -1237,96 +1258,84 @@ var Display = {
       // only transition and background for non text slides
       return;
     }
-    mainStyle = {};
-    // These need to be fixed, in the Python they use a width passed in as a parameter
-    mainStyle.width = Display._theme.font_main_width + "px";
-    mainStyle.height = Display._theme.font_main_height + "px";
-    mainStyle["margin-top"] = "" + Display._theme.font_main_y + "px";
-    mainStyle.left = "" + Display._theme.font_main_x + "px";
-    mainStyle.color = Display._theme.font_main_color;
-    mainStyle["font-family"] = Display._theme.font_main_name;
-    mainStyle["font-size"] = "" + Display._theme.font_main_size + "pt";
-    mainStyle["font-style"] = !!Display._theme.font_main_italics ? "italic" : "";
-    mainStyle["font-weight"] = !!Display._theme.font_main_bold ? "bold" : "";
-    mainStyle["line-height"] = "" + (100 + Display._theme.font_main_line_adjustment) + "%";
-    mainStyle["letter-spacing"] = "" + (Display._theme.font_main_letter_adjustment) + 'px';
-    // Using text-align-last because there is a <br> seperating each line
-    switch (Display._theme.display_horizontal_align) {
-      case HorizontalAlign.Justify:
-        mainStyle["text-align"] = "justify";
-        mainStyle["text-align-last"] = "justify";
-        break;
-      case HorizontalAlign.Center:
-        mainStyle["text-align"] = "center";
-        mainStyle["text-align-last"] = "center";
-        break;
-      case HorizontalAlign.Left:
-        mainStyle["text-align"] = "left";
-        mainStyle["text-align-last"] = "left";
-        break;
-      case HorizontalAlign.Right:
-        mainStyle["text-align"] = "right";
-        mainStyle["text-align-last"] = "right";
-        break;
-      default:
-        mainStyle["text-align"] = "center";
-        mainStyle["text-align-last"] = "center";
-    }
-    switch (Display._theme.display_vertical_align) {
-      case VerticalAlign.Middle:
-        mainStyle["justify-content"] = "center";
-        break;
-      case VerticalAlign.Top:
-        mainStyle["justify-content"] = "flex-start";
-        break;
-      case VerticalAlign.Bottom:
-        mainStyle["justify-content"] = "flex-end";
-        // This gets around the webkit scroll height bug
-        mainStyle["padding-bottom"] = "" + (Display._theme.font_main_size / 8) + "px";
-        break;
-      default:
-        mainStyle["justify-content"] = "center";
-    }
-    /**
-     * This section draws the font outline. Previously we used the proprietary -webkit-text-stroke property
-     * but it draws the outline INSIDE the text, instead of OUTSIDE, so we had to go back to the old way
-     * of using multiple text-shadow rules to fake an outline.
-     */
-    if (!!Display._theme.font_main_outline && Display._theme.hasOwnProperty('font_main_shadow_size') && !!Display._theme.font_main_shadow) {
-      let outlineShadows = _buildTextOutline(Display._theme.font_main_outline_size, Display._theme.font_main_outline_color);
-      let textShadow = _buildTextShadow(Display._theme.font_main_shadow_size, Display._theme.font_main_outline_size, Display._theme.font_main_shadow_color);
-      mainStyle["text-shadow"] = outlineShadows.join(", ") + ", " + textShadow;
-    }
-    else if (!!Display._theme.font_main_outline) {
-      let outlineShadows = _buildTextOutline(Display._theme.font_main_outline_size, Display._theme.font_main_outline_color);
-      mainStyle["text-shadow"] = outlineShadows.join(", ");
-    }
-    else if (Display._theme.hasOwnProperty('font_main_shadow_size') && !!Display._theme.font_main_shadow) {
-      mainStyle["text-shadow"] = _buildTextShadow(Display._theme.font_main_shadow_size, 0, Display._theme.font_main_shadow_color);
-    }
+
+    var mainStyle = {
+      width: `${Display._theme.font_main_width}px`,
+      height: `${Display._theme.font_main_height}px`,
+      top: `${Display._theme.font_main_y}px`,
+      left: `${Display._theme.font_main_x}px`,
+      color: Display._theme.font_main_color,
+      "font-family": Display._theme.font_main_name,
+      "font-size": `${Display._theme.font_main_size}pt`,
+      "font-style": Display._theme.font_main_italics ? "italic" : "",
+      "font-weight": Display._theme.font_main_bold ? "bold" : "",
+      "line-height": `${100 + Display._theme.font_main_line_adjustment}%`,
+      "letter-spacing": `${Display._theme.font_main_letter_adjustment}px`,
+
+      "text-align":
+        HorizontalAlignCSS[Display._theme.display_horizontal_align] ||
+        HorizontalAlignCSS[HorizontalAlign.Center],
+
+      "justify-content":
+        VerticalAlignCSS[Display._theme.display_vertical_align] ||
+        VerticalAlignCSS[HorizontalAlign.Center],
+
+      "padding-bottom":
+        Display._theme.display_vertical_align === VerticalAlign.Bottom ?
+        `${Display._theme.font_main_size / 8}px` : "",
+
+      // This section draws the font outline. Previously we used the proprietary -webkit-text-stroke property
+      // but it draws the outline INSIDE the text, instead of OUTSIDE, so we had to go back to the old way
+      // of using multiple text-shadow rules to fake an outline.
+      "text-shadow": [
+        ...(
+          Display._theme.font_main_outline ?
+          _buildTextOutline(Display._theme.font_main_outline_size, Display._theme.font_main_outline_color) :
+          []
+        ),
+        ...(
+          Display._theme.font_main_shadow ?
+          _buildTextShadow(Display._theme.font_main_shadow_size, Display._theme.main_outline_size || 0, Display._theme.font_main_shadow_color) :
+          []
+        )
+      ].join(", ")
+    };
+
     targetElement.style.cssText = "";
     for (var mainKey in mainStyle) {
       if (mainStyle.hasOwnProperty(mainKey)) {
         targetElement.style.setProperty(mainKey, mainStyle[mainKey]);
       }
     }
+
     // Set up the footer
-    footerStyle = {
-      "text-align": "left"
+    var footerStyle = {
+      width: `${Display._theme.font_footer_width}px`,
+      height: `${Display._theme.font_footer_height}px`,
+      top: `${Display._theme.font_footer_y}px`,
+      left: `${Display._theme.font_footer_x}px`,
+      color: Display._theme.font_footer_color,
+      "font-family": Display._theme.font_footer_name,
+      "font-size": `${Display._theme.font_footer_size}pt`,
+      "font-style": Display._theme.font_footer_italics ? "italic" : "",
+      "font-weight": Display._theme.font_footer_bold ? "bold" : "",
+      "line-height": `${100 + Display._theme.font_footer_line_adjustment}%`,
+      "letter-spacing": `${Display._theme.font_footer_letter_adjustment}px`,
+      "white-space": Display._theme.font_footer_wrap ? "normal" : "nowrap",
+
+      "text-align":
+        HorizontalAlignCSS[Display._theme.display_horizontal_align_footer] ||
+        HorizontalAlignCSS[HorizontalAlign.Left],
+
+      "justify-content":
+        VerticalAlignCSS[Display._theme.display_vertical_align_footer] ||
+        VerticalAlignCSS[HorizontalAlign.Top],
+
+      "padding-bottom":
+        Display._theme.display_vertical_align_footer === VerticalAlign.Bottom ?
+        `${Display._theme.font_main_size / 8}px` : ""
     };
-    footerStyle.position = "absolute";
-    footerStyle.left = "" + Display._theme.font_footer_x + "px";
-    footerStyle.top = "" + Display._theme.font_footer_y + "px";
-    footerStyle.width = "" + Display._theme.font_footer_width + "px";
-    footerStyle.height = "" + Display._theme.font_footer_height + "px";
-    footerStyle.color = Display._theme.font_footer_color;
-    footerStyle["font-family"] = Display._theme.font_footer_name;
-    footerStyle["font-size"] = "" + Display._theme.font_footer_size + "pt";
-    footerStyle["font-style"] = !!Display._theme.font_footer_italics ? "italic" : "";
-    footerStyle["font-weight"] = !!Display._theme.font_footer_bold ? "bold" : "";
-    footerStyle["line-height"] = "" + (100 + Display._theme.font_footer_line_adjustment) + "%";
-    footerStyle["letter-spacing"] = "" + (Display._theme.font_footer_letter_adjustment) + 'px';
-    footerStyle["white-space"] = Display._theme.font_footer_wrap ? "normal" : "nowrap";
+
     for (var footerKey in footerStyle) {
       if (footerStyle.hasOwnProperty(footerKey)) {
         Display._footerContainer.style.setProperty(footerKey, footerStyle[footerKey]);

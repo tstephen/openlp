@@ -36,14 +36,16 @@ class FontSelectPage(GridLayoutPage):
     """
     Outline = 'outline'
     Shadow = 'shadow'
+    Wrap = 'wrap'
     LineSpacing = 'line_spacing'
     LetterSpacing = 'letter_spacing'
 
     font_name_changed = QtCore.Signal(str)
-    font_size_changed = QtCore.Signal(int)
     font_color_changed = QtCore.Signal(str)
     is_bold_changed = QtCore.Signal(bool)
     is_italic_changed = QtCore.Signal(bool)
+    font_size_changed = QtCore.Signal(int)
+    wrap_changed = QtCore.Signal(bool)
     line_spacing_changed = QtCore.Signal(int)
     letter_spacing_changed = QtCore.Signal(int)
     is_outline_enabled_changed = QtCore.Signal(bool)
@@ -58,6 +60,7 @@ class FontSelectPage(GridLayoutPage):
         self.feature_widgets = {
             FontSelectPage.Outline: [self.outline_groupbox],
             FontSelectPage.Shadow: [self.shadow_groupbox],
+            FontSelectPage.Wrap: [self.wrap_check_box],
             FontSelectPage.LineSpacing: [self.line_spacing_label, self.line_spacing_spinbox],
             FontSelectPage.LetterSpacing: [self.letter_spacing_label, self.letter_spacing_spinbox]
         }
@@ -105,6 +108,10 @@ class FontSelectPage(GridLayoutPage):
         self.font_size_spinbox.setValue(16)
         self.font_size_spinbox.setObjectName('font_size_spinbox')
         self.layout.addWidget(self.font_size_spinbox, 2, 1)
+        # Word wrap
+        self.wrap_check_box = QtWidgets.QCheckBox(self)
+        self.wrap_check_box.setObjectName('wrap_check_box')
+        self.layout.addWidget(self.wrap_check_box, 3, 1)
         # Line spacing
         self.line_spacing_label = FormLabel(self)
         self.line_spacing_label.setObjectName('line_spacing_label')
@@ -173,6 +180,7 @@ class FontSelectPage(GridLayoutPage):
         self.style_bold_button.toggled.connect(self._on_style_bold_toggled)
         self.style_italic_button.toggled.connect(self._on_style_italic_toggled)
         self.font_size_spinbox.valueChanged.connect(self._on_font_size_changed)
+        self.wrap_check_box.stateChanged.connect(self._on_wrap_changed)
         self.line_spacing_spinbox.valueChanged.connect(self._on_line_spacing_changed)
         self.letter_spacing_spinbox.valueChanged.connect(self._on_letter_spacing_changed)
         self.outline_groupbox.toggled.connect(self._on_outline_toggled)
@@ -196,6 +204,7 @@ class FontSelectPage(GridLayoutPage):
         ))
         self.font_size_label.setText(translate('OpenLP.FontSelectWidget', 'Size:'))
         self.font_size_spinbox.setSuffix(' {unit}'.format(unit=UiStrings().FontSizePtUnit))
+        self.wrap_check_box.setText(translate('OpenLP.FontSelectWidget', 'Word Wrap'))
         self.line_spacing_label.setText(translate('OpenLP.FontSelectWidget', 'Line Spacing:'))
         self.letter_spacing_label.setText(translate('OpenLP.FontSelectWidget', 'Letter Spacing:'))
         self.outline_groupbox.setTitle(translate('OpenLP.FontSelectWidget', 'Outline'))
@@ -220,6 +229,9 @@ class FontSelectPage(GridLayoutPage):
 
     def _on_font_size_changed(self, size):
         self.font_size_changed.emit(size)
+
+    def _on_wrap_changed(self, _):
+        self.wrap_changed.emit(self.wrap_check_box.isChecked())
 
     def _on_line_spacing_changed(self, spacing):
         self.line_spacing_changed.emit(spacing)
@@ -304,6 +316,14 @@ class FontSelectPage(GridLayoutPage):
     @font_size.setter
     def font_size(self, size):
         self.font_size_spinbox.setValue(size)
+
+    @property
+    def wrap(self):
+        return self.wrap_check_box.isChecked()
+
+    @wrap.setter
+    def wrap(self, wrap):
+        self.wrap_check_box.setChecked(wrap)
 
     @property
     def line_spacing(self):

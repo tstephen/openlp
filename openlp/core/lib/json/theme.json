@@ -38,9 +38,10 @@
             "shadow_size": 5,
             "size": 12,
             "width": 1004,
+            "wrap": false,
             "x": 10,
             "y": 690
-            },
+        },
         "main": {
             "bold": false,
             "color": "#FFFFFF",

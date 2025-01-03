@@ -329,6 +329,20 @@ def set_case_insensitive_completer(cache, widget):
     widget.setCompleter(completer)
 
 
+def create_halign_selection_widgets(parent):
+    """
+    Creates a standard label and combo box for asking users to select a horizontal alignment.
+
+    :param parent: The parent object. This should be a ``QWidget`` descendant.
+    """
+    label = FormLabel(parent)
+    label.setText(translate('OpenLP.ThemeWizard', 'Horizontal Align:'))
+    combo_box = QtWidgets.QComboBox(parent)
+    combo_box.addItems([UiStrings().Left, UiStrings().Right, UiStrings().Center, UiStrings().Justify])
+    label.setBuddy(combo_box)
+    return label, combo_box
+
+
 def create_valign_selection_widgets(parent):
     """
     Creates a standard label and combo box for asking users to select a vertical alignment.
