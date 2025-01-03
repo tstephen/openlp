@@ -66,6 +66,7 @@ class Ui_ThemeWizard(object):
         # Main Area Page
         self.main_area_page = FontSelectPage()
         self.main_area_page.setObjectName('main_area_page')
+        self.main_area_page.disable_features(FontSelectPage.Wrap)
         theme_wizard.addPage(self.main_area_page)
         # Footer Area Page
         self.footer_area_page = FontSelectPage()

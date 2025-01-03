@@ -185,6 +185,19 @@ section.text-slides.stack.present {
   text-align: center;
 }
 
+.footer {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+}
+
+.footer .footer-item {
+  display: none;
+}
+
+.footer .footer-item.active {
+  display: block;
+}
 
 /*********************************************
  * Transition overrides to allow different directions
@@ -427,11 +440,3 @@ section.text-slides.stack.present {
 
 .reveal[class*=fade].overview .slides section {
   transition: none; }
-
-.footer .footer-item {
-  display: none;
-}
-
-.footer .footer-item.active {
-  display: block;
-}
