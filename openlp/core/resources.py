@@ -3,7 +3,7 @@
 ##########################################################################
 # OpenLP - Open Source Lyrics Projection                                 #
 # ---------------------------------------------------------------------- #
-# Copyright (c) 2008-2024 OpenLP Developers                              #
+# Copyright (c) 2008-2025 OpenLP Developers                              #
 # ---------------------------------------------------------------------- #
 # This program is free software: you can redistribute it and/or modify   #
 # it under the terms of the GNU General Public License as published by   #
@@ -50108,7 +50108,7 @@ rVk{hu\x81YixTX`LW]\
 =>:?<;B?;B@7;=7?\
 B9CF5<>BCP8F[L`v\
 5?>189:=<?IJ6A:6\
-;9-202420241=:5<\
+;9-202520241=:5<\
 =<?A<CG<GG:?A9EH\
 8MR7BD=GK6EI7FK=\
 GM;?D>GEFPVAPNAJ\
