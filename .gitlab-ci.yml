@@ -3,6 +3,9 @@ stages:
   - build
   - deploy
 
+default:
+  retry: 2
+
 variables:
   PYTHON_VERSION_WINDOWS_AND_MACOS: "3.12"
   IMAGE_BASE: $CI_REGISTRY/openlp/runners
@@ -136,6 +139,12 @@ test-macos:
   variables:
     # Set environment variable QT_QPA_PLATFORM to offscreen to avoid UI troubles
     QT_QPA_PLATFORM: "offscreen"
+    # Set the pip cache folder so that we can cache the content.
+    # See: https://pip.pypa.io/en/stable/topics/caching/
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/pip-cache"
+  cache:
+    paths:
+      - pip-cache
   script:
     - export HOMEBREW_NO_AUTO_UPDATE=TRUE
     - export HOMEBREW_NO_INSTALL_CLEANUP=TRUE
@@ -173,7 +182,8 @@ test-windows:
   variables:
     # Set environment variable QT_QPA_PLATFORM to offscreen to avoid UI troubles
     QT_QPA_PLATFORM: "offscreen"
-    # Set the pip cache folder so that we can cache the content
+    # Set the pip cache folder so that we can cache the content.
+    # See: https://pip.pypa.io/en/stable/topics/caching/
     PIP_CACHE_DIR: "$CI_PROJECT_DIR/pip-cache"
   cache:
     paths:
