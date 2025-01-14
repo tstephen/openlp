@@ -20,6 +20,7 @@ def parse_args() -> Namespace:
                         help='Name of the environment variable containing the token. Defaults to UPLOAD_TOKEN')
     parser.add_argument('--upload-url', '-u', metavar='UPLOAD_URL', default='https://get.openlp.io/api/files/',
                         help='The base URL to use when uploading. Needs a trailing slash.')
+    parser.add_argument('--dry-run', action='store_true', help='Perform a dry run, good for testing')
     return parser.parse_args()
 
 
@@ -44,7 +45,21 @@ def get_upload_token(env_var: str) -> str:
 def get_version_number(filename: Path) -> str:
     """Strip down a filename to just the version number"""
     basename = filename.stem.replace('.tar', '')
-    version_number = basename.split('-')[1]
+    if 'Portable' in basename:
+        # Gotta mess around with the portable file name more
+        version_parts = basename.split('_')[1].split('-')[0].split('.')
+        prerelease = ''
+        if len(version_parts) > 3:
+            pre = int(version_parts[3])
+            if 3000 <= pre < 4000:
+                prerelease = f'rc{pre - 3000}'
+            elif 2000 <= pre < 3000:
+                prerelease = f'b{pre - 2000}'
+            elif 1000 <= pre < 2000:
+                prerelease = f'a{pre - 1000}'
+        version_number = '.'.join(version_parts[:3]) + prerelease
+    else:
+        version_number = basename.split('-')[1]
     return version_number
 
 
@@ -78,7 +93,11 @@ def main():
         print(e)
         sys.exit(2)
     destination = get_destination(args.filename)
-    is_success = upload_file(args.upload_url, args.filename, destination, upload_token)
+    if args.dry_run:
+        print(f'Destination: {destination}')
+        is_success = True
+    else:
+        is_success = upload_file(args.upload_url, args.filename, destination, upload_token)
     if not is_success:
         print('ERROR: Unable to upload file')
         sys.exit(3)
