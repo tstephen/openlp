@@ -122,7 +122,16 @@ class SelectPlanForm(QtWidgets.QDialog, Ui_SelectPlanDialog):
             # Get Today's date and see if it is listed... if it is, then select it in the combobox
             today = date.today()
             for plan in plan_list:
-                self.plan_selection_combo_box.addItem(plan['attributes']['dates'], plan['id'])
+                plan_title = (
+                    plan['attributes']['title']
+                    or plan['attributes']['series_title']
+                    or ''
+                )
+                item_name = plan['attributes']['dates']
+                if plan_title:
+                    item_name = f'{item_name} - {plan_title}'
+                self.plan_selection_combo_box.addItem(item_name, plan['id'])
+
                 # sort_date=str: 2018-12-21T19:00:00Z
                 plan_datetime = datetime.strptime(plan['attributes']['sort_date'].rstrip("Z"), '%Y-%m-%dT%H:%M:%S')
                 plan_date = date(plan_datetime.year, plan_datetime.month, plan_datetime.day)
