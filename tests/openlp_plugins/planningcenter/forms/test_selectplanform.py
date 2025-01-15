@@ -82,7 +82,7 @@ def test_initial_defaults(mocked_date: MagicMock, mocked_exec: MagicMock, form: 
     assert form.service_type_combo_box.currentText() == 'gbf', 'The service_type_combo_box defaults to "gbf"'
     # the selected plan is today (the mocked date is a Sunday). Set to lowercase beacuse in some locales
     # months is not capitalized.
-    assert form.plan_selection_combo_box.currentText() == 'September 29, 2019', \
+    assert form.plan_selection_combo_box.currentText() == 'September 29, 2019 - Morning Worship', \
         'Incorrect default date selected for Plan Date'
     # count the number of themes listed and make sure it matches expected value
     assert form.song_theme_selection_combo_box.count() == 0, 'Count of song themes is incorrect'
@@ -138,6 +138,43 @@ def test_default_plan_date_is_next_sunday(mocked_date: MagicMock, mocked_exec: M
     # THEN: The plan selection date is 9/29 (the following Sunday)
     assert form.plan_selection_combo_box.currentText() == 'September 29, 2019', \
         'The next Sunday\'s Date is not selected in the plan_selection_combo_box'
+
+
+@patch('PySide6.QtWidgets.QDialog.exec')
+@patch('openlp.plugins.planningcenter.forms.selectplanform.PlanningCenterAPI.get_plan_list')
+def test_plan_selection_combobox_item_texts(mocked_get_plan_list: MagicMock, mocked_exec: MagicMock,
+                                            form: SelectPlanForm):
+    """
+    Test that plan titles in the plan selection combobox are set correctly
+    """
+
+    # GIVEN: a SelectPlanForm and a PlanningCenterAPI that returns mocked plans
+    mocked_get_plan_list.return_value = [
+        # plan with no title
+        {'id': '1', 'attributes': {'dates': 'January 1, 2019',
+                                   'sort_date': '2019-01-01T10:30:00Z', 'title': None,
+                                   'series_title': None}},
+        # plan with 'title'
+        {'id': '2', 'attributes': {'dates': 'January 2, 2019',
+                                   'sort_date': '2019-01-02T10:30:00Z', 'title': 'Test',
+                                   'series_title': None}},
+        # plan with 'title' and 'series_title'
+        {'id': '3', 'attributes': {'dates': 'January 3, 2019',
+                                   'sort_date': '2019-01-03T10:30:00Z', 'title': 'Test',
+                                   'series_title': 'Series'}},
+        # plan with 'series title'
+        {'id': '4', 'attributes': {'dates': 'January 4, 2019',
+                                   'sort_date': '2019-01-04T10:30:00Z', 'title': None,
+                                   'series_title': 'Series'}},
+    ]
+    # WHEN: the form is executed, causing plans to be loaded
+    form.exec()
+    # THEN: the plan titles in the plan select combobox should be assigned correctly
+    assert form.plan_selection_combo_box.count() == 5
+    assert form.plan_selection_combo_box.itemText(1) == 'January 1, 2019'
+    assert form.plan_selection_combo_box.itemText(2) == 'January 2, 2019 - Test'
+    assert form.plan_selection_combo_box.itemText(3) == 'January 3, 2019 - Test'
+    assert form.plan_selection_combo_box.itemText(4) == 'January 4, 2019 - Series'
 
 
 @patch('PySide6.QtWidgets.QDialog.exec')
