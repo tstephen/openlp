@@ -26,6 +26,7 @@ from PySide6 import QtCore, QtWidgets
 
 from openlp.core.common.i18n import translate
 from openlp.core.lib.settingstab import SettingsTab
+from openlp.core.widgets.comboboxes import LazyComboBox
 from openlp.plugins.planningcenter.lib.planningcenter_api import PlanningCenterAPI
 
 
@@ -38,6 +39,8 @@ class PlanningCenterTab(SettingsTab):
         self.tab_layout = QtWidgets.QVBoxLayout(self)
         self.tab_layout.setObjectName('tab_layout')
         self.tab_layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
+
+        # === AUTH GROUP ===
         self.auth_group_box = QtWidgets.QGroupBox(self)
         self.tab_layout.addWidget(self.auth_group_box)
         self.auth_layout = QtWidgets.QFormLayout(self.auth_group_box)
@@ -65,10 +68,28 @@ class PlanningCenterTab(SettingsTab):
         self.test_credentials_button = QtWidgets.QPushButton(self.auth_group_box)
         self.button_layout.addButton(self.test_credentials_button, QtWidgets.QDialogButtonBox.ButtonRole.AcceptRole)
         self.auth_layout.addRow(self.button_layout)
+
+        # === DEFAULTS GROUP ===
+        self.defaults_group_box = QtWidgets.QGroupBox(self)
+        self.tab_layout.addWidget(self.defaults_group_box)
+        self.defaults_layout = QtWidgets.QFormLayout(self.defaults_group_box)
+        self.defaults_layout.setFieldGrowthPolicy(
+            QtWidgets.QFormLayout.FieldGrowthPolicy.AllNonFixedFieldsGrow
+        )
+
+        self.def_service_type_label = QtWidgets.QLabel(self.defaults_group_box)
+        self.def_service_type_combobox = LazyComboBox(
+            self.defaults_group_box, loader=self.on_load_def_service_type_combobox_items
+        )
+        self.defaults_layout.addRow(
+            self.def_service_type_label, self.def_service_type_combobox
+        )
+
         # signals
         self.test_credentials_button.clicked.connect(self.on_test_credentials_button_clicked)
 
     def retranslate_ui(self):
+        # === AUTH GROUP ===
         self.auth_group_box.setTitle(translate('PlanningCenterPlugin.PlanningCenterTab', 'Authentication Settings'))
         self.application_id_label.setText(translate('PlanningCenterPlugin.PlanningCenterTab', 'Application ID:'))
         self.secret_label.setText(translate('PlanningCenterPlugin.PlanningCenterTab', 'Secret:'))
@@ -94,6 +115,12 @@ boxes below. Personal Access Tokens are created by doing the following:
         self.test_credentials_button.setText(translate('PlanningCenterPlugin.PlanningCenterAuthForm',
                                                        'Test Credentials'))
 
+        # === DEFAULTS GROUP ===
+        self.defaults_group_box.setTitle(translate('PlanningCenterPlugin.PlanningCenterTab', 'Defaults'))
+        self.def_service_type_label.setText(
+            translate('PlanningCenterPlugin.PlanningCenterTab', 'Default service type:')
+        )
+
     def resizeEvent(self, event=None):
         """
         Don't call SettingsTab resize handler because we are not using left/right columns.
@@ -109,12 +136,39 @@ boxes below. Personal Access Tokens are created by doing the following:
         self.application_id_line_edit.setText(self.application_id)
         self.secret_line_edit.setText(self.secret)
 
+        if self.def_service_type_combobox.count() == 0:
+            # add the current setting as an item, since the service types have not
+            # been loaded yet
+            self.def_service_type_combobox.addItem(
+                self.settings.value('planningcenter/default_service_type_name'),
+                self.settings.value('planningcenter/default_service_type_id'),
+            )
+        else:
+            # the service types have been loaded, so set the correct index
+            self.def_service_type_combobox.setCurrentIndex(
+                self.def_service_type_combobox.findData(
+                    self.settings.value('planningcenter/default_service_type_id')
+                )
+            )
+
     def save(self):
         """
         Save the changes on exit of the Settings dialog.
         """
         self.settings.setValue('planningcenter/application_id', self.application_id_line_edit.text())
         self.settings.setValue('planningcenter/secret', self.secret_line_edit.text())
+        self.settings.setValue(
+            'planningcenter/default_service_type_id',
+            self.def_service_type_combobox.itemData(
+                self.def_service_type_combobox.currentIndex()
+            ),
+        )
+        self.settings.setValue(
+            'planningcenter/default_service_type_name',
+            self.def_service_type_combobox.itemText(
+                self.def_service_type_combobox.currentIndex()
+            ),
+        )
 
     def on_test_credentials_button_clicked(self):
         """
@@ -123,17 +177,48 @@ boxes below. Personal Access Tokens are created by doing the following:
         application_id = self.application_id_line_edit.text()
         secret = self.secret_line_edit.text()
         if len(application_id) == 0 or len(secret) == 0:
-            QtWidgets.QMessageBox.warning(self, "Authentication Failed",
-                                          "Please enter values for both Application ID and Secret",
+            QtWidgets.QMessageBox.warning(self, 'Authentication Failed',
+                                          'Please enter values for both Application ID and Secret',
                                           QtWidgets.QMessageBox.StandardButton.Ok)
             return
         test_auth = PlanningCenterAPI(application_id, secret)
         organization = test_auth.check_credentials()
         if len(organization):
             QtWidgets.QMessageBox.information(self, 'Planning Center Online Authentication Test',
-                                              "Authentication successful for organization: {0}".format(organization),
+                                              'Authentication successful for organization: {0}'.format(organization),
                                               QtWidgets.QMessageBox.StandardButton.Ok)
         else:
-            QtWidgets.QMessageBox.warning(self, "Authentication Failed",
-                                          "Authentiation Failed",
+            QtWidgets.QMessageBox.warning(self, 'Authentication Failed',
+                                          'Authentiation Failed',
                                           QtWidgets.QMessageBox.StandardButton.Ok)
+
+    def on_load_def_service_type_combobox_items(self) -> bool:
+        selected_id = self.def_service_type_combobox.itemData(
+            self.def_service_type_combobox.currentIndex()
+        )
+
+        try:
+            application_id = self.application_id_line_edit.text()
+            secret = self.secret_line_edit.text()
+
+            # use the planning center api directly to only request service types
+            plcapi = PlanningCenterAPI(application_id, secret)
+            service_types = plcapi.get_service_type_list()
+        except Exception as e:
+            QtWidgets.QMessageBox.warning(self, 'Unable to request service types',
+                                          str(e), QtWidgets.QMessageBox.Ok,)
+            return False
+
+        selected_index = 0
+        self.def_service_type_combobox.clear()
+        self.def_service_type_combobox.addItem('-- none --', '')
+        for i, service_type in enumerate(service_types):
+            id = service_type['id']
+            name = service_type['attributes']['name']
+            if selected_id == id:
+                selected_index = i + 1
+
+            self.def_service_type_combobox.addItem(name, id)
+
+        self.def_service_type_combobox.setCurrentIndex(selected_index)
+        return True

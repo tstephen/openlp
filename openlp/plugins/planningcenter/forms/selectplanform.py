@@ -51,8 +51,8 @@ class SelectPlanForm(QtWidgets.QDialog, Ui_SelectPlanDialog):
                                    QtCore.Qt.WindowType.WindowTitleHint)
         self.plugin = plugin
         # create an Planning Center API Object
-        application_id = Registry().get('settings').value("planningcenter/application_id")
-        secret = Registry().get('settings').value("planningcenter/secret")
+        application_id = Registry().get('settings').value('planningcenter/application_id')
+        secret = Registry().get('settings').value('planningcenter/secret')
         self.planning_center_api = PlanningCenterAPI(application_id, secret)
         self.setup_ui(self)
         self.service_type_combo_box.currentIndexChanged.connect(self.on_service_type_combobox_changed)
@@ -81,7 +81,13 @@ class SelectPlanForm(QtWidgets.QDialog, Ui_SelectPlanDialog):
         self.service_type_combo_box.clear()
         for service_type in service_types_list:
             self.service_type_combo_box.addItem(service_type['attributes']['name'], service_type['id'])
-        self.service_type_combo_box.setCurrentIndex(0)
+
+        selected_index = self.service_type_combo_box.findData(
+            Registry().get('settings').value('planningcenter/default_service_type_id')
+        )
+        self.service_type_combo_box.setCurrentIndex(
+            selected_index if selected_index >= 0 else 0
+        )
         self.on_plan_selection_combobox_changed()
         # Set the 2 lists of themes
         theme_manager = Registry().get('theme_manager')

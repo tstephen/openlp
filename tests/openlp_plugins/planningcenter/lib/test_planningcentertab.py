@@ -97,17 +97,131 @@ def test_good_authentication_credentials(mocked_information: MagicMock, mocked_c
     mocked_information.assert_called_once()
 
 
-def test_save_credentials(settings: Settings, tab: PlanningCenterTab):
+@patch('openlp.plugins.planningcenter.lib.planningcentertab.PlanningCenterAPI.get_service_type_list')
+def test_load_service_type_combobox_items(mocked_get_service_type_list: MagicMock, tab: PlanningCenterTab):
+    """
+    Test that clicking default service type combo box loads the service types
+    """
+
+    # GIVEN: a PlanningCenterTab with a default selected service type and a PlanningCenterAPI
+    # that returns three service types
+    tab.def_service_type_combobox.clear()
+    tab.def_service_type_combobox.addItem("Service Type 2", "2")
+    tab.def_service_type_combobox.setCurrentIndex(0)
+
+    mocked_get_service_type_list.return_value = [
+        {
+            "id": "1",
+            "attributes": {"name": "Service Type 1"}
+        },
+        {
+            "id": "2",
+            "attributes": {"name": "Service Type 2"}
+        },
+        {
+            "id": "3",
+            "attributes": {"name": "Service Type 3"}
+        },
+    ]
+
+    # WHEN: the service types are loaded
+    success = tab.on_load_def_service_type_combobox_items()
+
+    # THEN: the service types should be added to the combo box and the current selected
+    # service type should be preserved
+    assert success is True
+    assert tab.def_service_type_combobox.count() == 4
+    assert tab.def_service_type_combobox.currentIndex() == 2
+    assert tab.def_service_type_combobox.itemData(tab.def_service_type_combobox.currentIndex()) == "2"
+
+
+@patch('openlp.plugins.planningcenter.lib.planningcentertab.PlanningCenterAPI.get_service_type_list')
+@patch('openlp.plugins.planningcenter.lib.planningcentertab.QtWidgets.QMessageBox.warning')
+def test_load_service_type_combobox_items_bad_auth(
+    mocked_warning: MagicMock,
+    mocked_get_service_type_list: MagicMock,
+    tab: PlanningCenterTab
+):
+    """
+    Test that clicking default service type combo box with bad credentials causes warning
+    """
+
+    # GIVEN: A PlanningCenterTab and bad credentials
+    mocked_get_service_type_list.side_effect = Exception("test exception")
+
+    # WHEN: service types for the default service type combo box are loading
+    success = tab.on_load_def_service_type_combobox_items()
+
+    # THEN: a warning should be issued and the function should return False so we
+    # can retry loading
+    mocked_warning.assert_called_once()
+    assert success is False
+
+
+def test_load_when_service_type_combobox_loaded(settings: Settings, tab: PlanningCenterTab):
+    """
+    Test that the configured default service type is added to the default service type
+    combobox when the tab is loading for the first time.
+    """
+
+    # GIVEN: a configured default service type and an empty combo box
+    settings.setValue('planningcenter/default_service_type_id', '123')
+    settings.setValue('planningcenter/default_service_type_name', 'Test Service Type')
+
+    tab.def_service_type_combobox.clear()
+
+    # WHEN: the settings tab is loaded
+    tab.load()
+
+    # THEN: the combo box should have one item with the configured default service type
+    assert tab.def_service_type_combobox.count() == 1
+    assert tab.def_service_type_combobox.itemData(tab.def_service_type_combobox.currentIndex()) == '123'
+    assert tab.def_service_type_combobox.itemText(tab.def_service_type_combobox.currentIndex()) == 'Test Service Type'
+
+
+def test_load_when_service_type_combobox_not_loaded(settings: Settings, tab: PlanningCenterTab):
+    """
+    Test that the correct service type is selected when the tab is loading and the
+    default service type combobox has previously been loaded.
+    """
+
+    # GIVEN: a configured default service type and a loaded combo box
+    tab.def_service_type_combobox.clear()
+    tab.def_service_type_combobox.addItem('-- none --', '')
+    tab.def_service_type_combobox.addItem('ServiceType1', '1')
+    tab.def_service_type_combobox.addItem('ServiceType2', '2')
+    tab.def_service_type_combobox.addItem('ServiceType3', '3')
+
+    settings.setValue('planningcenter/default_service_type_id', '2')
+    settings.setValue('planningcenter/default_service_type_name', 'ServiceType2')
+
+    # WHEN: the settings tab is loaded
+    tab.load()
+
+    # THEN: the configured default service type should be selected
+    assert tab.def_service_type_combobox.count() == 4
+    assert tab.def_service_type_combobox.currentIndex() == 2
+    assert tab.def_service_type_combobox.itemData(tab.def_service_type_combobox.currentIndex()) == '2'
+    assert tab.def_service_type_combobox.itemText(tab.def_service_type_combobox.currentIndex()) == 'ServiceType2'
+
+
+def test_save(settings: Settings, tab: PlanningCenterTab):
     """
     Test that credentials are saved in settings when the save function is called
     """
     # GIVEN: A PlanningCenterTab Class
-    # WHEN: application id and secret values are set to something and the save function is called
+    # WHEN: fields are set to something and the save function is called
     tab.application_id_line_edit.setText('planningcenter')
     tab.secret_line_edit.setText('woohoo')
+
+    tab.def_service_type_combobox.clear()
+    tab.def_service_type_combobox.addItem('Service Type', '1234')
+    tab.def_service_type_combobox.setCurrentIndex(0)
+
     tab.save()
+
     # THEN: The settings version of application_id and secret should reflect the new values
-    application_id = settings.value('planningcenter/application_id')
-    secret = settings.value('planningcenter/secret')
-    assert application_id == 'planningcenter'
-    assert secret == 'woohoo'
+    assert settings.value('planningcenter/application_id') == 'planningcenter'
+    assert settings.value('planningcenter/secret') == 'woohoo'
+    assert settings.value('planningcenter/default_service_type_name') == 'Service Type'
+    assert settings.value('planningcenter/default_service_type_id') == '1234'
