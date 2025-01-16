@@ -408,6 +408,8 @@ class Settings(QtCore.QSettings):
         'planningcenter/status': PluginStatus.Inactive,
         'planningcenter/application_id': '',
         'planningcenter/secret': '',
+        'planningcenter/default_service_type_name': '-- none --',
+        'planningcenter/default_service_type_id': '',
         'presentations/status': PluginStatus.Inactive,
         'presentations/override app': QtCore.Qt.CheckState.Unchecked,
         'presentations/maclo': QtCore.Qt.CheckState.Checked,
