@@ -15,11 +15,12 @@ except ImportError:
 
 def parse_args() -> Namespace:
     parser = ArgumentParser()
-    parser.add_argument('filename', type=Path, help='File to upload')
+    parser.add_argument('filename', type=Path, nargs='+', help='File(s) to upload')
     parser.add_argument('--env-var', '-e', metavar='ENV_VAR', default='UPLOAD_TOKEN',
                         help='Name of the environment variable containing the token. Defaults to UPLOAD_TOKEN')
     parser.add_argument('--upload-url', '-u', metavar='UPLOAD_URL', default='https://get.openlp.io/api/files/',
-                        help='The base URL to use when uploading. Needs a trailing slash.')
+                        help='The base URL to use when uploading. Needs a trailing slash. Defaults to '
+                        'https://get.openlp.io/api/files/')
     parser.add_argument('--dry-run', action='store_true', help='Perform a dry run, good for testing')
     return parser.parse_args()
 
@@ -92,14 +93,18 @@ def main():
     except KeyError as e:
         print(e)
         sys.exit(2)
-    destination = get_destination(args.filename)
-    if args.dry_run:
-        print(f'Destination: {destination}')
-        is_success = True
-    else:
-        is_success = upload_file(args.upload_url, args.filename, destination, upload_token)
-    if not is_success:
-        print('ERROR: Unable to upload file')
+    has_errors = False
+    for filename in args.filename:
+        destination = get_destination(filename)
+        if args.dry_run:
+            print(f'Destination: {destination}')
+            is_success = True
+        else:
+            is_success = upload_file(args.upload_url, filename, destination, upload_token)
+        if not is_success:
+            has_errors = True
+            print(f'ERROR: Unable to upload {filename}')
+    if has_errors:
         sys.exit(3)
 
 
