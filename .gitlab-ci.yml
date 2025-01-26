@@ -9,7 +9,6 @@ default:
 variables:
   PYTHON_VERSION_WINDOWS_AND_MACOS: "3.12"
   IMAGE_BASE: $CI_REGISTRY/openlp/runners
-  OPENLP_HOST: "new.openlp.io"
   PACKAGING_REPOSITORY_NAME: "packaging"
   PACKAGING_BRANCH_NAME: "master"
   PACKAGING_DIRECTORY_NAME: "$PACKAGING_REPOSITORY_NAME-$PACKAGING_BRANCH_NAME"
@@ -21,6 +20,8 @@ lint-python:
   script:
     - sh scripts/generate_resources.sh
     - flake8
+  rules:
+    - if: $CI_COMMIT_TAG == null
 
 lint-javascript:
   stage: test
@@ -28,6 +29,8 @@ lint-javascript:
   script:
     - yarn install
     - yarn lint
+  rules:
+    - if: $CI_COMMIT_TAG == null
 
 test-pypi:
   stage: test
@@ -38,6 +41,8 @@ test-pypi:
     - pip install -e '.[darkstyle,mysql,odbc,postgresql,spellcheck,sword-bibles,test]'
     - sh scripts/generate_resources.sh
     - xvfb-run -s '-screen 0 1024x768x24' pytest --color=no --disable-warnings
+  rules:
+    - if: $CI_COMMIT_TAG == null
 
 test-debian:
   stage: test
@@ -54,6 +59,8 @@ test-debian:
       coverage_report:
         coverage_format: cobertura
         path: coverage.xml
+  rules:
+    - if: $CI_COMMIT_TAG == null
 
 test-ubuntu:
   stage: test
@@ -61,6 +68,8 @@ test-ubuntu:
   script:
     - sh scripts/generate_resources.sh
     - xvfb-run -s '-screen 0 1024x768x24' pytest-3 --color=no --disable-warnings
+  rules:
+    - if: $CI_COMMIT_TAG == null
 
 test-fedora:
   stage: test
@@ -69,6 +78,8 @@ test-fedora:
     - sh scripts/generate_resources.sh
     # - xvfb-run -s '-screen 0 1024x768x24' pytest-3 --color=no --disable-warnings
     - xwfb-run -c weston -s \\-geometry -s 1024x768x24 -- pytest
+  rules:
+    - if: $CI_COMMIT_TAG == null
 
 test-arch:
   stage: test
@@ -76,6 +87,8 @@ test-arch:
   script:
     - sh scripts/generate_resources.sh
     - xvfb-run -s '-screen 0 1024x768x24' pytest --color=no --disable-warnings
+  rules:
+    - if: $CI_COMMIT_TAG == null
 
 .pip_dependencies:
   script:
@@ -216,6 +229,8 @@ test-windows:
     - "# Installing PyICU for Windows from GitHub"
     - pip install https://github.com/cgohlke/pyicu-build/releases/download/v$pyIcuVersion/$pyIcuPackageFileName
     - !reference [.run_tests, script]
+  rules:
+    - if: $CI_COMMIT_TAG == null
 
 test-display:
   stage: test
@@ -223,6 +238,8 @@ test-display:
   script:
     - yarn install
     - yarn test --browsers ChromiumHeadlessCI
+  rules:
+    - if: $CI_COMMIT_TAG == null
 
 build-source:
   stage: build
@@ -324,19 +341,11 @@ deploy-nightlies:
 
 deploy-installers-for-windows-and-macos:
   stage: deploy
-  image: $IMAGE_BASE/ssh
+  image: $IMAGE_BASE/debian
   script:
-    - mkdir -p ~/.ssh
-    - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-    - chmod 600 ~/.ssh/id_rsa
-    - eval $(ssh-agent -s)
-    - ssh-add ~/.ssh/id_rsa
-    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
-    - ssh openlp@$OPENLP_HOST "mkdir -p /home/openlp/sites/get.openlp.org/www/$CI_COMMIT_TAG"
-    - cd dist
-    - scp *.exe openlp@$OPENLP_HOST:/home/openlp/sites/get.openlp.org/www/$CI_COMMIT_TAG/
-    - scp *.msi openlp@$OPENLP_HOST:/home/openlp/sites/get.openlp.org/www/$CI_COMMIT_TAG/
-    - scp *.dmg openlp@$OPENLP_HOST:/home/openlp/sites/get.openlp.org/www/$CI_COMMIT_TAG/
+    - python scripts/upload-build.py dist/*.exe
+    - python scripts/upload-build.py dist/*.msi
+    - python scripts/upload-build.py dist/*.dmg
   rules:
     - if: $CI_COMMIT_TAG
 
