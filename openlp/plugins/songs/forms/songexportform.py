@@ -170,7 +170,9 @@ class SongExportForm(OpenLPWizard):
             return True
         elif self.currentPage() == self.available_songs_page:
             items = [
-                item for item in find_list_widget_items(self.available_list_widget) if item.checkState()
+                item
+                for item in find_list_widget_items(self.available_list_widget)
+                if item.checkState() == QtCore.Qt.Checked
             ]
             if not items:
                 critical_error_message_box(
@@ -320,4 +322,6 @@ def on_item_activated(item):
 
     :param item:  The *QListWidgetItem* which was triggered.
     """
-    item.setCheckState(QtCore.Qt.CheckState.Unchecked if item.checkState() else QtCore.Qt.CheckState.Checked)
+    item.setCheckState(QtCore.Qt.CheckState.Unchecked
+                       if item.checkState() == QtCore.Qt.CheckState.Checked
+                       else QtCore.Qt.CheckState.Checked)
