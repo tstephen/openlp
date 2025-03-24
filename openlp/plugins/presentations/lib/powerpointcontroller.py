@@ -75,7 +75,8 @@ class PowerpointController(PresentationController):
                 try:
                     process = Dispatch('PowerPoint.Application' + entry)
                     self.com_obj_name = 'PowerPoint.Application' + entry
-                    process.Quit()
+                    if process.Presentations.Count == 0:
+                        process.Quit()
                     return True
                 except (AttributeError, pywintypes.com_error):
                     pass
