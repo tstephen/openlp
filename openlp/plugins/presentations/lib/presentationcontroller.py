@@ -407,31 +407,36 @@ class PresentationDocument(object):
 
 class PresentationList(metaclass=Singleton):
     """
-    This is a singleton class which maintains a list of instances for presentations
-    which have been started.
-    The document load_presentation() method is called several times - for example, when the
-    presentation files are being loaded into the library - but a document is included in this
-    PresentationList only when the presentation is actually displayed.
-    In this case the loading is initiated by a Registry 'presentation_start' event, the message
-    includes the service item, and the unique_identifier from the service item is used as the id
-    to differentiate the presentation document instances within this PresentationList.
-    The purpose of this is so that the 'presentation_stop' event, which also includes the service
-    item and its unique identifier, can result in the correct presentation being stopped.
-    This fixes issue #700
+    This is a singleton class that maintains a list of instances for presentations
+    that have been started.
+
+    The document load_presentation() method is called multiple times — for example, when
+    presentation files are loaded into the library — but a document is included in this
+    PresentationList only when it is actually displayed.
+
+    When a presentation starts, it is triggered by a Registry 'presentation_start' event,
+    which includes the service item. Instead of using the service item's unique identifier
+    directly, a new unique identifier (`unique_presentation_id`) is created by appending
+    "_is_live_True" or "_is_live_False" based on whether the presentation is live or in preview.
+
+    This prevents conflicts where a preview presentation's closure could mistakenly close
+    the live presentation, addressing a prior issue where both shared the same identifier.
+    The 'presentation_stop' event also uses this unique identifier to correctly stop
+    the intended presentation.
     """
 
     def __init__(self):
         self._presentations = {}
 
-    def add(self, document, unique_id):
-        self._presentations[unique_id] = document
+    def add(self, document, unique_presentation_id):
+        self._presentations[unique_presentation_id] = document
 
-    def remove(self, unique_id):
-        del self._presentations[unique_id]
+    def remove(self, unique_presentation_id):
+        del self._presentations[unique_presentation_id]
 
-    def get_presentation_by_id(self, unique_id):
-        if unique_id in self._presentations:
-            return self._presentations[unique_id]
+    def get_presentation_by_id(self, unique_presentation_id):
+        if unique_presentation_id in self._presentations:
+            return self._presentations[unique_presentation_id]
         else:
             return None
 
