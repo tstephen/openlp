@@ -144,9 +144,9 @@ class BibleImportForm(OpenLPWizard):
         self.format_combo_box.addItems(['', '', '', '', '', '', ''])
         self.format_combo_box.setObjectName('FormatComboBox')
         self.format_layout.addRow(self.format_label, self.format_combo_box)
-        self.spacer = QtWidgets.QSpacerItem(10, 0, QtWidgets.QSizePolicy.Policy.Fixed,
-                                            QtWidgets.QSizePolicy.Policy.Minimum)
-        self.format_layout.setItem(1, QtWidgets.QFormLayout.ItemRole.LabelRole, self.spacer)
+        self.format_spacer = QtWidgets.QSpacerItem(10, 0, QtWidgets.QSizePolicy.Policy.Fixed,
+                                                   QtWidgets.QSizePolicy.Policy.Minimum)
+        self.format_layout.setItem(1, QtWidgets.QFormLayout.ItemRole.LabelRole, self.format_spacer)
         self.select_page_layout.addLayout(self.format_layout)
         self.select_stack = QtWidgets.QStackedLayout()
         self.select_stack.setObjectName('SelectStack')
@@ -163,7 +163,9 @@ class BibleImportForm(OpenLPWizard):
             dialog_caption=WizardStrings.OpenTypeFile.format(file_type=WizardStrings.OSIS),
             show_revert=False)
         self.osis_layout.addRow(self.osis_file_label, self.osis_path_edit)
-        self.osis_layout.setItem(1, QtWidgets.QFormLayout.ItemRole.LabelRole, self.spacer)
+        self.osis_spacer = QtWidgets.QSpacerItem(10, 0, QtWidgets.QSizePolicy.Policy.Fixed,
+                                                 QtWidgets.QSizePolicy.Policy.Minimum)
+        self.osis_layout.setItem(1, QtWidgets.QFormLayout.ItemRole.LabelRole, self.osis_spacer)
         self.select_stack.addWidget(self.osis_widget)
         self.csv_widget = QtWidgets.QWidget(self.select_page)
         self.csv_widget.setObjectName('CsvWidget')
@@ -193,7 +195,9 @@ class BibleImportForm(OpenLPWizard):
             '{name} (*.csv)'.format(name=translate('BiblesPlugin.ImportWizardForm', 'CSV File'))
         self.csv_layout.addRow(self.csv_books_label, self.csv_books_path_edit)
         self.csv_layout.addRow(self.csv_verses_label, self.csv_verses_path_edit)
-        self.csv_layout.setItem(3, QtWidgets.QFormLayout.ItemRole.LabelRole, self.spacer)
+        self.csv_spacer = QtWidgets.QSpacerItem(10, 0, QtWidgets.QSizePolicy.Policy.Fixed,
+                                                QtWidgets.QSizePolicy.Policy.Minimum)
+        self.csv_layout.setItem(3, QtWidgets.QFormLayout.ItemRole.LabelRole, self.csv_spacer)
         self.select_stack.addWidget(self.csv_widget)
         self.open_song_widget = QtWidgets.QWidget(self.select_page)
         self.open_song_widget.setObjectName('OpenSongWidget')
@@ -209,7 +213,9 @@ class BibleImportForm(OpenLPWizard):
             show_revert=False,
         )
         self.open_song_layout.addRow(self.open_song_file_label, self.open_song_path_edit)
-        self.open_song_layout.setItem(1, QtWidgets.QFormLayout.ItemRole.LabelRole, self.spacer)
+        self.opensong_spacer = QtWidgets.QSpacerItem(10, 0, QtWidgets.QSizePolicy.Policy.Fixed,
+                                                     QtWidgets.QSizePolicy.Policy.Minimum)
+        self.open_song_layout.setItem(1, QtWidgets.QFormLayout.ItemRole.LabelRole, self.opensong_spacer)
         self.select_stack.addWidget(self.open_song_widget)
         self.web_widget = QtWidgets.QWidget(self.select_page)
         self.web_widget.setObjectName('WebWidget')
@@ -259,7 +265,9 @@ class BibleImportForm(OpenLPWizard):
             show_revert=False,
         )
         self.zefania_layout.addRow(self.zefania_file_label, self.zefania_path_edit)
-        self.zefania_layout.setItem(2, QtWidgets.QFormLayout.ItemRole.LabelRole, self.spacer)
+        self.zefania_spacer = QtWidgets.QSpacerItem(10, 0, QtWidgets.QSizePolicy.Policy.Fixed,
+                                                    QtWidgets.QSizePolicy.Policy.Minimum)
+        self.zefania_layout.setItem(2, QtWidgets.QFormLayout.ItemRole.LabelRole, self.zefania_spacer)
         self.select_stack.addWidget(self.zefania_widget)
         self.sword_widget = QtWidgets.QWidget(self.select_page)
         self.sword_widget.setObjectName('SwordWidget')
@@ -331,7 +339,9 @@ class BibleImportForm(OpenLPWizard):
             dialog_caption=WizardStrings.OpenTypeFile.format(file_type=WizardStrings.WordProject),
             show_revert=False)
         self.wordproject_layout.addRow(self.wordproject_file_label, self.wordproject_path_edit)
-        self.wordproject_layout.setItem(1, QtWidgets.QFormLayout.ItemRole.LabelRole, self.spacer)
+        self.wordproject_spacer = QtWidgets.QSpacerItem(10, 0, QtWidgets.QSizePolicy.Policy.Fixed,
+                                                        QtWidgets.QSizePolicy.Policy.Minimum)
+        self.wordproject_layout.setItem(1, QtWidgets.QFormLayout.ItemRole.LabelRole, self.wordproject_spacer)
         self.select_stack.addWidget(self.wordproject_widget)
         self.select_page_layout.addLayout(self.select_stack)
         self.addPage(self.select_page)
@@ -439,7 +449,10 @@ class BibleImportForm(OpenLPWizard):
                           self.csv_verses_label.minimumSizeHint().width(),
                           self.open_song_file_label.minimumSizeHint().width(),
                           self.zefania_file_label.minimumSizeHint().width())
-        self.spacer.changeSize(label_width, 0, QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed)
+        for spacer in [self.format_spacer, self.osis_spacer, self.csv_spacer, self.opensong_spacer,
+                       self.zefania_spacer, self.wordproject_spacer]:
+            spacer.changeSize(label_width, 0,
+                              QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed)
 
     def validateCurrentPage(self):
         """

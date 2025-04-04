@@ -28,16 +28,12 @@ from PySide6 import QtWidgets, QtTest, QtCore
 
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
-from openlp.plugins.bibles.forms.bibleimportform import BibleImportForm
-
-
-pytestmark = pytest.mark.skip('One of the QFormLayouts in the BibleImportForm is causing a segfault')
+from openlp.plugins.bibles.forms.bibleimportform import BibleImportForm, PYSWORD_AVAILABLE
 
 
 @pytest.fixture
-def form(registry: Registry, settings: Settings) -> BibleImportForm:
-    # main_window = QtWidgets.QMainWindow()
-    registry.register('main_window', None)
+def import_form(registry: Registry, settings: Settings) -> BibleImportForm:
+    registry.register('main_window', MagicMock())
     yield BibleImportForm(None, MagicMock(), MagicMock())
 
 
@@ -45,51 +41,51 @@ def form(registry: Registry, settings: Settings) -> BibleImportForm:
 @patch('openlp.plugins.bibles.forms.bibleimportform.BGExtract.get_bibles_from_http')
 @patch('openlp.plugins.bibles.forms.bibleimportform.BSExtract.get_bibles_from_http')
 def test_on_web_update_button_clicked(mocked_bsextract: MagicMock, mocked_bgextract: MagicMock,
-                                      mocked_cwextract: MagicMock, form: BibleImportForm):
+                                      mocked_cwextract: MagicMock, import_form: BibleImportForm):
     """
     Test that on_web_update_button_clicked handles problems correctly
     """
     # GIVEN: Some mocked GUI components and mocked bibleextractors
-    form.web_source_combo_box = MagicMock()
-    form.web_translation_combo_box = MagicMock()
-    form.web_update_button = MagicMock()
-    form.web_progress_bar = MagicMock()
-    mocked_bsextract.return_value = None
-    mocked_bgextract.return_value = None
-    mocked_cwextract.return_value = None
+    with patch.object(import_form, 'web_source_combo_box'), \
+            patch.object(import_form, 'web_translation_combo_box'), \
+            patch.object(import_form, 'web_update_button'), \
+            patch.object(import_form, 'web_progress_bar'):
+        mocked_bsextract.return_value = None
+        mocked_bgextract.return_value = None
+        mocked_cwextract.return_value = None
 
-    # WHEN: Running on_web_update_button_clicked
-    form.on_web_update_button_clicked()
+        # WHEN: Running on_web_update_button_clicked
+        import_form.on_web_update_button_clicked()
 
     # THEN: The webbible list should still be empty
-    assert form.web_bible_list == {}, 'The webbible list should be empty'
+    assert import_form.web_bible_list == {}, 'The webbible list should be empty'
 
 
-def test_custom_init(form: BibleImportForm):
+def test_custom_init(import_form: BibleImportForm):
     """
     Test that custom_init works as expected if pysword is unavailable
     """
     # GIVEN: A mocked sword_tab_widget
-    form.sword_tab_widget = MagicMock()
+    with patch.object(import_form, 'sword_tab_widget') as mocked_tab_widget:
 
-    # WHEN: Running custom_init
-    form.custom_init()
+        # WHEN: Running custom_init
+        import_form.custom_init()
 
     # THEN: sword_tab_widget.setDisabled(True) should have been called
-    form.sword_tab_widget.setDisabled.assert_called_with(True)
+    if not PYSWORD_AVAILABLE:
+        mocked_tab_widget.setDisabled.assert_called_with(True)
+    else:
+        mocked_tab_widget.setDisabled.assert_not_called()
 
 
-@patch.object(BibleImportForm, 'provide_help')
-def test_help(mocked_help: MagicMock, settings: Settings):
+def test_help(import_form: BibleImportForm):
     """
     Test the help button
     """
-    # GIVEN: A bible import wizard and a patched help function
-    bible_import_form = BibleImportForm(None, MagicMock(), None)
-
     # WHEN: The Help button is clicked
-    QtTest.QTest.mouseClick(bible_import_form.button(QtWidgets.QWizard.WizardButton.HelpButton),
-                            QtCore.Qt.MouseButton.LeftButton)
+    with patch.object(import_form, 'provide_help') as mocked_help:
+        QtTest.QTest.mouseClick(import_form.button(QtWidgets.QWizard.WizardButton.HelpButton),
+                                QtCore.Qt.MouseButton.LeftButton)
 
     # THEN: The Help function should be called
     mocked_help.assert_called_once()
