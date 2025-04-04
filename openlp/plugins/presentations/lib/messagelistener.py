@@ -63,7 +63,7 @@ class Controller(object):
             # Inform slidecontroller that the action failed?
             self.doc.ui_slidenumber = 0
             return
-        PresentationList().add(self.doc, unique_id)
+        PresentationList().add(self.doc, f'{unique_id}_is_live_{self.is_live}')
         self.doc.ui_slidenumber = slide_no
         self.hide_mode = hide_mode
         log.debug('add_handler, slide_number: {slide:d}'.format(slide=slide_no))
@@ -211,10 +211,10 @@ class Controller(object):
         Based on the handler passed at startup triggers slide show to shut down.
         """
         log.debug('Live = {live}, shutdown'.format(live=self.is_live))
-        presentation_to_close = PresentationList().get_presentation_by_id(unique_id)
+        presentation_to_close = PresentationList().get_presentation_by_id(f'{unique_id}_is_live_{self.is_live}')
         if presentation_to_close:
             presentation_to_close.close_presentation()
-            PresentationList().remove(unique_id)
+            PresentationList().remove(f'{unique_id}_is_live_{self.is_live}')
 
     def blank(self, hide_mode):
         """
