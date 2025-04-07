@@ -111,7 +111,6 @@ class AuthorsForm(QtWidgets.QDialog, Ui_AuthorsDialog):
                 self.display_edit.setFocus()
                 return False
         else:
-            self._set_display_name(self.first_name_edit.text() + ' ' + self.last_name_edit.text())
             return QtWidgets.QDialog.accept(self)
 
     def _normalize(self, value):
