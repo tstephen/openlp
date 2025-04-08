@@ -135,6 +135,5 @@ using a computer and a display/projector.""",
             'flake8',
         ]
     },
-    setup_requires=['pytest-runner'],
     entry_points={'gui_scripts': ['openlp = openlp.__main__:start']}
 )
