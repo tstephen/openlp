@@ -69,7 +69,7 @@ class AuthorsForm(QtWidgets.QDialog, Ui_AuthorsDialog):
             return
         if self.last_name_edit.text():
             display_name = display_name + ' ' + self.last_name_edit.text()
-        self._set_display_name(display_name)
+        self.display_edit.setText(display_name)
 
     def on_last_name_edited(self, display_name):
         """
@@ -84,7 +84,7 @@ class AuthorsForm(QtWidgets.QDialog, Ui_AuthorsDialog):
             return
         if self.first_name_edit.text():
             display_name = self.first_name_edit.text() + ' ' + display_name
-        self._set_display_name(display_name)
+        self.display_edit.setText(display_name)
 
     def accept(self):
         """
@@ -105,20 +105,13 @@ class AuthorsForm(QtWidgets.QDialog, Ui_AuthorsDialog):
                 message=translate('SongsPlugin.AuthorsForm',
                                   'You have not set a display name for the author, combine the first and last names?'),
                     parent=self, question=True) == QtWidgets.QMessageBox.StandardButton.Yes:
-                self._set_display_name(self.first_name_edit.text() + ' ' + self.last_name_edit.text())
+                self.display_edit.setText(self.first_name_edit.text() + ' ' + self.last_name_edit.text())
                 return QtWidgets.QDialog.accept(self)
             else:
                 self.display_edit.setFocus()
                 return False
         else:
             return QtWidgets.QDialog.accept(self)
-
-    def _normalize(self, value):
-        """
-        Normalize the input value to remove all newline characters and carriage return characters.
-        """
-        normalized_value = value.replace('\n', ' ').replace('\r', '')
-        return normalized_value
 
     def _get_first_name(self):
         """
@@ -130,7 +123,7 @@ class AuthorsForm(QtWidgets.QDialog, Ui_AuthorsDialog):
         """
         Set the value of the first name in the UI widget.
         """
-        self.first_name_edit.setText(self._normalize(value))
+        self.first_name_edit.setText(value)
 
     first_name = property(_get_first_name, _set_first_name)
 
@@ -144,7 +137,7 @@ class AuthorsForm(QtWidgets.QDialog, Ui_AuthorsDialog):
         """
         Set the value of the last name in the UI widget.
         """
-        self.last_name_edit.setText(self._normalize(value))
+        self.last_name_edit.setText(value)
 
     last_name = property(_get_last_name, _set_last_name)
 
@@ -152,6 +145,6 @@ class AuthorsForm(QtWidgets.QDialog, Ui_AuthorsDialog):
         return self.display_edit.text()
 
     def _set_display_name(self, value):
-        self.display_edit.setText(self._normalize(value))
+        self.display_edit.setText(value)
 
     display_name = property(_get_display_name, _set_display_name)
