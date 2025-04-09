@@ -226,7 +226,7 @@ class Author(Base):
             kwargs['display_name'] = self._normalize_name(kwargs['display_name'])
 
         super().__init__(**kwargs)
-    
+        
     def _normalize_name(self, name):
         """
         Normalize the input value to remove all newline characters and carriage return characters.
