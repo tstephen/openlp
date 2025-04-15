@@ -23,6 +23,7 @@ This module contains tests for the lib submodule of the Presentations plugin.
 """
 from unittest.mock import MagicMock, patch
 
+from openlp.core.ui import HideMode
 from openlp.plugins.presentations.lib.mediaitem import MessageListener
 from openlp.plugins.presentations.lib.messagelistener import Controller
 
@@ -130,3 +131,94 @@ def test_add_handler_failure():
 
     # THEN: ui_slidenumber should be 0
     assert controller.doc.ui_slidenumber == 0, 'doc.ui_slidenumber should be 0'
+
+
+@patch('openlp.plugins.presentations.lib.messagelistener.PresentationList')
+@patch('openlp.plugins.presentations.lib.messagelistener.Registry')
+def test_add_handler_hide_mode_screen_and_slidenumber_zero(
+        mocked_registry: MagicMock, mocked_presentation_list: MagicMock):
+    """
+    Test that add_handler calls stop() and Registry().execute() when hide_mode is HideMode.Screen.
+    Also, verify that ui_slidenumber is set to 1 when slide_no = 0.
+    """
+    # GIVEN: A Controller, a mocked document controller, and dependencies
+    controller = Controller(True)
+    mocked_doc_controller = MagicMock()
+    mocked_doc = MagicMock()
+    mocked_doc.load_presentation.return_value = True
+    mocked_doc_controller.add_document.return_value = mocked_doc
+    mocked_registry_instance = mocked_registry.return_value
+
+    # WHEN: Calling add_handler with hide_mode = HideMode.Screen and slide_no = 0
+    with patch.object(controller, 'stop') as mocked_stop:
+        controller.add_handler(mocked_doc_controller, MagicMock(), HideMode.Screen, 0, "uuid")
+
+    # THEN: stop() and Registry.execute() should have been called, and ui_slidenumber should be set to 1
+    mocked_registry_instance.execute.assert_called_with('live_display_hide', HideMode.Screen)
+    mocked_stop.assert_called_once()
+    assert controller.doc.ui_slidenumber == 1, 'doc.ui_slidenumber should be 1'
+
+
+@patch('openlp.plugins.presentations.lib.messagelistener.PresentationList')
+def test_add_handler_hide_mode_theme(mocked_presentation_list: MagicMock):
+    """
+    Test that add_handler calls blank() when hide_mode is HideMode.Theme.
+    """
+    # GIVEN: A Controller and a mocked document controller
+    controller = Controller(True)
+    mocked_doc_controller = MagicMock()
+    mocked_doc = MagicMock()
+    mocked_doc.load_presentation.return_value = True
+    mocked_doc_controller.add_document.return_value = mocked_doc
+
+    # WHEN: Calling add_handler with hide_mode = HideMode.Theme
+    with patch.object(controller, 'blank') as mocked_blank:
+        controller.add_handler(mocked_doc_controller, MagicMock(), HideMode.Theme, 1, "uuid")
+
+    # THEN: blank() should have been called with HideMode.Theme
+    mocked_blank.assert_called_once_with(HideMode.Theme)
+
+
+@patch('openlp.plugins.presentations.lib.messagelistener.PresentationList')
+def test_add_handler_hide_mode_blank(mocked_presentation_list: MagicMock):
+    """
+    Test that add_handler calls blank() when hide_mode is HideMode.Blank.
+    """
+    # GIVEN: A Controller and a mocked document controller
+    controller = Controller(True)
+    mocked_doc_controller = MagicMock()
+    mocked_doc = MagicMock()
+    mocked_doc.load_presentation.return_value = True
+    mocked_doc_controller.add_document.return_value = mocked_doc
+
+    # WHEN: Calling add_handler with hide_mode = HideMode.Blank
+    with patch.object(controller, 'blank') as mocked_blank:
+        controller.add_handler(mocked_doc_controller, MagicMock(), HideMode.Blank, 1, "uuid")
+
+    # THEN: blank() should have been called with HideMode.Blank
+    mocked_blank.assert_called_once_with(HideMode.Blank)
+
+
+@patch('openlp.plugins.presentations.lib.messagelistener.PresentationList')
+@patch('openlp.plugins.presentations.lib.messagelistener.Registry')
+def test_add_handler_slidenumber_one(mocked_registry: MagicMock, mocked_presentation_list: MagicMock):
+    """
+    Test that add_handler calls slide(), start_presentation(), and Registry().execute() when slide_no = 1.
+    """
+    # GIVEN: A Controller, a mocked document controller, and dependencies
+    controller = Controller(True)
+    mocked_doc_controller = MagicMock()
+    mocked_doc = MagicMock()
+    mocked_doc.load_presentation.return_value = True
+    mocked_doc.start_presentation = MagicMock()
+    mocked_doc_controller.add_document.return_value = mocked_doc
+    mocked_registry_instance = mocked_registry.return_value
+
+    # WHEN: Calling add_handler with slide_no = 1
+    with patch.object(controller, 'slide') as mocked_slide:
+        controller.add_handler(mocked_doc_controller, MagicMock(), None, 1, "uuid")
+
+    # THEN: slide(), start_presentation(), and Registry.execute() should have been called
+    mocked_slide.assert_called_once_with(1)
+    mocked_doc.start_presentation.assert_called_once()
+    mocked_registry_instance.execute.assert_called_with('live_display_hide', HideMode.Screen)
