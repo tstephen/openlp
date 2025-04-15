@@ -80,7 +80,7 @@ class Controller(object):
             else:
                 self.doc.start_presentation()
                 Registry().execute('live_display_hide', HideMode.Screen)
-                if slide_no > 1:
+                if slide_no > 0:
                     self.slide(slide_no)
 
     def activate(self):
