@@ -1344,7 +1344,7 @@ var Display = {
   },
   /**
    * Called whenever openlp wants to finish completely with the current text/image slides
-   * because a different window (eg presentation or vlc) is going to be displaying the next item
+   * because a different window (eg presentation or media is going to be displaying the next item
    * and we don't want any flashbacks to the current slide contents
    */
   finishWithCurrentItem: function () {

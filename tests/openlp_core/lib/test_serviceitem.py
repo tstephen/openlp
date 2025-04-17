@@ -486,8 +486,8 @@ def test_service_item_load_song_and_audio_from_service(mock_sha256_file_hash, st
 
 
 @patch('openlp.core.lib.serviceitem.sha256_file_hash')
-def test_service_item_load_song_and_audio_from_service_no_vlc(mock_sha256_file_hash, state_media,
-                                                              settings, service_item_env):
+def test_service_item_load_song_and_audio_from_service_no_media(mock_sha256_file_hash, state_media,
+                                                                settings, service_item_env):
     """
     Test the Service Item - adding a song slide from a saved service
     """

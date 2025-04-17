@@ -48,7 +48,7 @@ if is_win():
 
 log = logging.getLogger(__name__)
 
-__version__ = 3
+__version__ = 4
 
 
 class ProxyMode(IntEnum):
@@ -394,7 +394,6 @@ class Settings(QtCore.QSettings):
         'media/media files': [],
         'media/last directory': None,
         'media/media auto start': QtCore.Qt.CheckState.Unchecked,
-        'media/vlc arguments': '',
         'media/live volume': 50,
         'media/preview volume': 0,
         'media/live loop': False,
@@ -584,6 +583,11 @@ class Settings(QtCore.QSettings):
     # Settings upgrades for 3.1
     __setting_upgrade_3__ = [
         ('songs/add songbook slide', 'songs/first slide mode', [(upgrade_add_first_songbook_slide_config, False)])
+    ]
+
+    # Settings upgrades for 4
+    __setting_upgrade_4__ = [
+        ('media/vlc arguments', '', [])
     ]
 
     @staticmethod

@@ -152,7 +152,7 @@ def extension_loader(glob_pattern: str, excluded_files: list = None, community: 
         try:
             import_openlp_module(module_name)
         except (ImportError, OSError):
-            # On some platforms importing vlc.py might cause OSError exceptions. (e.g. Mac OS X)
+            # On some platforms importing an module might cause OSError exceptions. (e.g. Mac OS X)
             log.exception('Failed to import {module_name} on path {extension_path}'
                           .format(module_name=module_name, extension_path=extension_path))
 
