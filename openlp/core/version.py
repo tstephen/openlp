@@ -51,7 +51,6 @@ LIBRARIES = OrderedDict([
     ('Chardet', ('chardet',)),
     ('PyEnchant', ('enchant',)),
     ('Mako', ('mako',)),
-    ('VLC', ('openlp.core.ui.media.vlcplayer', 'VERSION')),
 ])
 VERSION_BASE_URL = 'https://get.openlp.org/versions/'
 VERSION_STABLE = 'version.txt'

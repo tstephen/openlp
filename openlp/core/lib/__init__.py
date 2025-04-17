@@ -155,7 +155,7 @@ class ItemCapabilities(object):
             The item has Meta Data about item
 
     ``CanStream``
-            The item requires to process a VLC Stream
+            The item requires to process a Media Player Stream
 
     ``HasBackgroundVideo``
             That a video file is present with the text

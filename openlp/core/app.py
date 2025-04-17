@@ -529,20 +529,6 @@ def main():
         set_up_logging(AppLocation.get_directory(AppLocation.CacheDir))
         set_up_web_engine_cache(AppLocation.get_directory(AppLocation.CacheDir) / 'web_cache')
     settings.init_default_shortcuts()
-    # Set the libvlc environment variable if we're frozen
-    if getattr(sys, 'frozen', False):
-        # Path to libvlc and the plugins
-        vlc_dir = AppLocation.get_directory(AppLocation.AppDir) / 'vlc'
-        vlc_lib = None
-        if is_win():
-            vlc_lib = 'libvlc.dll'
-        elif is_macosx():
-            vlc_lib = 'libvlc.dylib'
-        if vlc_lib and vlc_dir.joinpath(vlc_lib).exists():
-            os.environ['PYTHON_VLC_LIB_PATH'] = str(vlc_dir / vlc_lib)
-            os.environ['PYTHON_VLC_MODULE_PATH'] = str(vlc_dir)
-            os.environ['PATH'] += ';' + str(vlc_dir)
-            log.debug('VLC Path: {}'.format(os.environ.get('PYTHON_VLC_LIB_PATH', '')))
     if settings.value('advanced/protect data directory'):
         # attempt to create a file lock
         app.data_dir_lock = FileLock(AppLocation.get_data_path(), get_version()['full'])

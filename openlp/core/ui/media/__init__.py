@@ -144,7 +144,7 @@ def parse_stream_path(input_string):
     Split the device stream path info.
 
     :param input_string: The string to parse
-    :return: The elements extracted from the string:  type, streamname, MRL, VLC-options
+    :return: The elements extracted from the string:  type, streamname, MRL, options
     """
     log.debug('parse_stream_path, about to parse: "{text}"'.format(text=input_string))
     # identify header: 'devicestream:' or 'networkstream:'

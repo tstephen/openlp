@@ -193,13 +193,13 @@ def test_path_to_module():
     Test `path_to_module` when supplied with a `Path` object
     """
     # GIVEN: A `Path` object
-    path = Path('core', 'ui', 'media', 'vlcplayer.py')
+    path = Path('core', 'ui', 'media', 'mediaplayer.py')
 
     # WHEN: Calling path_to_module with the `Path` object
     result = path_to_module(path)
 
     # THEN: path_to_module should return the module name
-    assert result == 'openlp.core.ui.media.vlcplayer'
+    assert result == 'openlp.core.ui.media.mediaplayer'
 
 
 def test_path_to_module_community():
@@ -207,13 +207,13 @@ def test_path_to_module_community():
     Test `path_to_module` when supplied with a `Path` object
     """
     # GIVEN: A `Path` object
-    path = Path('core', 'ui', 'media', 'vlcplayer.py')
+    path = Path('core', 'ui', 'media', 'mediaplayer.py')
 
     # WHEN: Calling path_to_module with the `Path` object
     result = path_to_module(path, True)
 
     # THEN: path_to_module should return the module name
-    assert result == 'contrib.core.ui.media.vlcplayer'
+    assert result == 'contrib.core.ui.media.mediaplayer'
 
 
 def test_trace_error_handler():
