@@ -916,6 +916,7 @@ describe("Display.setFullscreenImage", function () {
     Display.setFullscreenImage(bg_color, image);
 
     expect($(".slides > section > img")[0].getAttribute("src")).toEqual("file:///openlp1.jpg");
+    expect($(".slides > section > img")[0].getAttribute("style")).toEqual("height: 100%; width: 100%; margin: 0; object-fit: contain;");
     expect(Reveal.sync).toHaveBeenCalledTimes(1);
   });
 });
