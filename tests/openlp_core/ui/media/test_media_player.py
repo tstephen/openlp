@@ -112,7 +112,7 @@ def test_load_media(base_media_player):
     """
     Test loading a media into MediaPlayer
     """
-    # GIVEN: A mocked out get_vlc() method
+    # GIVEN: A mocked out media_player
     media_path = '/path/to/media.mp4'
     base_media_player.controller.media_play_item.media_type = MediaType.Video
     base_media_player.controller.media_play_item.media_file = media_path
@@ -130,7 +130,7 @@ def test_load_with_stream(base_media_player):
     # GIVEN: A stream load call with a missing stream
     base_media_player.controller.media_play_item.media_type = MediaType.DeviceStream
     base_media_player.controller.media_play_item.external_stream = None
-    # WHEN: A video is loaded into VLC
+    # WHEN: A video is loaded into media_player
     result = base_media_player.load_stream()
     # THEN: The media should fail
     base_media_player.media_player.setAudioOutput.assert_not_called()
@@ -226,7 +226,7 @@ def test_pause_media(base_media_player):
     """
     Test that the pause method works correctly
     """
-    # GIVEN: A mocked out get_vlc method
+    # GIVEN: A mocked out media_player method
     base_media_player.media_player = MagicMock()
     # WHEN: The media is paused
     base_media_player.pause()
@@ -239,7 +239,7 @@ def test_pause_stream(base_media_player):
     """
     Test that the pause method works correctly
     """
-    # GIVEN: A mocked out get_vlc method
+    # GIVEN: A mocked out media_player method
     base_media_player.controller.media_play_item.media_type = MediaType.DeviceStream
     base_media_player.device_video_input = MagicMock()
     base_media_player.device_audio_input = MagicMock()
@@ -263,7 +263,7 @@ def test_stop_media(base_media_player):
     # WHEN: stop is called
     base_media_player.stop()
 
-    # THEN: A thread should have been started to stop VLC
+    # THEN: the media player should have been asked to stop
     base_media_player.media_player.stop.assert_called_once()
 
 
@@ -280,7 +280,7 @@ def test_stop_stream(base_media_player):
     # WHEN: stop is called
     base_media_player.stop()
 
-    # THEN: A thread should have been started to stop VLC
+    # THEN: A media_player should have been started to stop
     base_media_player.media_player.stop.assert_not_called()
     base_media_player.device_video_input.stop.assert_called_once()
     base_media_player.device_audio_input.setMuted.assert_called_with(True)

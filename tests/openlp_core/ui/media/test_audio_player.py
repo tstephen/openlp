@@ -76,7 +76,7 @@ def test_load_audio(base_audio_player):
     """
     Test loading a media into MediaPlayer
     """
-    # GIVEN: A mocked out get_vlc() method
+    # GIVEN: A mocked out audio_player method
     media_path = '/path/to/media.mp3'
     base_audio_player.controller.media_play_item.media_type = MediaType.Audio
     base_audio_player.controller.media_play_item.audio_file = media_path
@@ -91,7 +91,7 @@ def test_load_no_audio(base_audio_player):
     """
     Test loading a media into MediaPlayer
     """
-    # GIVEN: A mocked out get_vlc() method
+    # GIVEN: A mocked out audio_player method
     base_audio_player.controller.media_play_item.media_type = MediaType.Audio
     base_audio_player.controller.media_play_item.audio_file = None
     # WHEN: An audio file needs to be played
@@ -118,7 +118,7 @@ def test_pause(base_audio_player):
     """
     Test that the pause method works correctly
     """
-    # GIVEN: A mocked out get_vlc method
+    # GIVEN: A mocked out audio_player method
     base_audio_player.media_player = MagicMock()
     # WHEN: The media is paused
     base_audio_player.pause()
@@ -137,7 +137,7 @@ def test_stop(base_audio_player):
     # WHEN: stop is called
     base_audio_player.stop()
 
-    # THEN: A thread should have been started to stop VLC
+    # THEN: A thread should have been started to stop audio_player
     base_audio_player.media_player.stop.assert_called_once()
 
 
@@ -149,7 +149,7 @@ def test_media_status_changed_live_media(base_audio_player, registry):
     base_audio_player.controller.media_play_item.media_type = MediaType.Dual
     base_audio_player.controller.is_live = True
     mocked_controller = MagicMock()
-    Registry().register("media_controller", mocked_controller)
+    registry.register("media_controller", mocked_controller)
     # WHEN: the media state changes and it is end of media
     base_audio_player.media_status_changed_event(QMediaPlayer.MediaStatus.EndOfMedia)
     # THEN: the live media status event is triggered

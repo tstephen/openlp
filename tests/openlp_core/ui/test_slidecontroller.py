@@ -1045,9 +1045,9 @@ def test_process_item_text(mocked_execute: MagicMock, registry: Registry, state_
 
 
 @patch.object(Registry, 'execute')
-def test_process_item_song_vlc(mocked_execute: MagicMock, registry: Registry, state_media: State):
+def test_process_item_song_media(mocked_execute: MagicMock, registry: Registry, state_media: State):
     """
-    Test that media is started if VLC is present.
+    Test that media is started if media is present.
     """
     # GIVEN: A mocked presentation service item, a mocked media service item, a mocked Registry.execute
     #        and a slide controller with many mocks.
@@ -1092,9 +1092,9 @@ def test_process_item_song_vlc(mocked_execute: MagicMock, registry: Registry, st
 
 
 @patch.object(Registry, 'execute')
-def test_process_item_song_no_vlc(mocked_execute: MagicMock, registry: Registry, state_media: State):
+def test_process_item_song_no_media(mocked_execute: MagicMock, registry: Registry, state_media: State):
     """
-    Test that media is started if VLC is present.
+    Test that media is started if medis is present.
     """
     # GIVEN: A mocked presentation service item, a mocked media service item, a mocked Registry.execute
     #        and a slide controller with many mocks.

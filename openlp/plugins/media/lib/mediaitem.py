@@ -329,13 +329,10 @@ class MediaMediaItem(FolderLibraryItem):
         """
         When the open network stream button is clicked, open the stream selector window.
         """
-        # if get_vlc():
+        # if media_add_to_service:
         stream_selector_form = NetworkStreamSelectorForm(self.main_window, self.add_network_stream)
         stream_selector_form.exec()
         del stream_selector_form
-        # else:
-        #     critical_error_message_box(translate('MediaPlugin.MediaItem', 'VLC is not available'),
-        #                               translate('MediaPlugin.MediaItem', 'Network streaming support requires VLC.'))
 
     def add_network_stream(self, stream):
         """

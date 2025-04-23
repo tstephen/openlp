@@ -38,7 +38,6 @@ exceptionform.CHARDET_VERSION = 'CHARDET Test'
 exceptionform.ENCHANT_VERSION = 'Enchant Test'
 exceptionform.MAKO_VERSION = 'Mako Test'
 exceptionform.ICU_VERSION = 'ICU Test'
-exceptionform.VLC_VERSION = 'VLC Test'
 
 MAIL_ITEM_TEXT = ('**OpenLP Bug Report**\nVersion: Trunk Test\n\n--- Details of the Exception. ---\n\n'
                   'Description Test\n\n --- Exception Traceback ---\nopenlp: Traceback Test\n'
@@ -46,7 +45,7 @@ MAIL_ITEM_TEXT = ('**OpenLP Bug Report**\nVersion: Trunk Test\n\n--- Details of 
                   'Python: Python Test\nQt6: Qt6 Test\nPySide6: PySide6 Test\n'
                   'SQLAlchemy: SQLAlchemy Test\nAlembic: Alembic Test\nBeautifulSoup: BeautifulSoup Test\n'
                   'lxml: ETree Test\nChardet: Chardet Test\nPyEnchant: PyEnchant Test\nMako: Mako Test\n'
-                  'pyICU: pyICU Test\nVLC: VLC Test\nPyUNO: UNO Bridge Test\n')
+                  'pyICU: pyICU Test\nPyUNO: UNO Bridge Test\n')
 LIBRARY_VERSIONS = OrderedDict([
     ('Python', 'Python Test'),
     ('Qt6', 'Qt6 Test'),
@@ -59,7 +58,6 @@ LIBRARY_VERSIONS = OrderedDict([
     ('PyEnchant', 'PyEnchant Test'),
     ('Mako', 'Mako Test'),
     ('pyICU', 'pyICU Test'),
-    ('VLC', 'VLC Test')
 ])
 
 

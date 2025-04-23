@@ -386,7 +386,7 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
 
     def add_media_suffixes(self):
         """
-        Add the suffixes supported by :mod:`openlp.core.ui.media.vlcplayer`
+        Add the suffixes supported by :mod:`openlp.core.ui.media.*player`
         """
         audio, video = get_supported_media_suffix()
         self.suffixes.update(audio)
