@@ -215,6 +215,23 @@ class Author(Base):
 
     authors_songs = relationship('AuthorSong', back_populates='author')
 
+    def __init__(self, **kwargs):
+        if 'first_name' in kwargs and isinstance(kwargs['first_name'], str):
+            kwargs['first_name'] = self._normalize_name(kwargs['first_name'])
+
+        if 'last_name' in kwargs and isinstance(kwargs['last_name'], str):
+            kwargs['last_name'] = self._normalize_name(kwargs['last_name'])
+
+        if 'display_name' in kwargs and isinstance(kwargs['display_name'], str):
+            kwargs['display_name'] = self._normalize_name(kwargs['display_name'])
+
+        super().__init__(**kwargs)
+
+    def _normalize_name(self, name):
+        """Remove all newline characters and carriage return characters"""
+        normalized_name = name.replace('\n', ' ').replace('\r', '')
+        return normalized_name
+
     def get_display_name(self, author_type: Optional[str] = None) -> str:
         """Determine the display name"""
         if author_type:
