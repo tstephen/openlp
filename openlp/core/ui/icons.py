@@ -92,6 +92,7 @@ class UiIcons(metaclass=Singleton):
             'error': {'icon': 'mdi.exclamation-thick', 'attr': 'red'},
             'exception': {'icon': 'mdi.close-circle'},
             'exit': {'icon': 'mdi.logout'},
+            'favourite': {'icon': 'mdi.star'},
             'folder': {'icon': 'mdi.folder'},
             'group': {'icon': 'mdi.group'},
             'inactive': {'icon': 'mdi.human-handsup', 'attr': 'lightGray'},

@@ -445,6 +445,7 @@ class Settings(QtCore.QSettings):
         'songs/last import type': 0,
         'songs/update service on edit': False,
         'songs/add song from service': True,
+        'songs/favourites_toggled': False,
         'songs/first slide mode': SongFirstSlideMode.Default,
         'songs/display songbar': True,
         'songs/last directory import': None,

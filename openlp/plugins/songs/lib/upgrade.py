@@ -40,7 +40,7 @@ from openlp.core.db.upgrades import get_upgrade_op
 
 
 log = logging.getLogger(__name__)
-__version__ = 8
+__version__ = 9
 
 
 # TODO: When removing an upgrade path the ftw-data needs updating to the minimum supported version
@@ -221,3 +221,16 @@ def upgrade_8(session, metadata):
                 # set a fake "hash" to allow for the upgrade to go through. The image will be marked as invalid
                 hash_ = 'NONE'
             conn.execute(update(media_files).where(media_files.c.id == row.id).values(file_hash=hash_))
+
+
+def upgrade_9(session: Session, metadata: MetaData):
+    """
+    Version 9 upgrade - add an "is_favourite" column to each song
+    """
+    log.debug('Starting upgrade_9 for adding is_favourite column')
+    metadata.clear()
+    songs_table = Table('songs', metadata, autoload_with=metadata.bind)
+    if 'is_favourite' not in [col.name for col in songs_table.c.values()]:
+        op = get_upgrade_op(session)
+        op.add_column('songs', Column('is_favourite', Boolean, default=False))
+        songs_table.append_column(Column('is_favourite', Boolean, default=False))
