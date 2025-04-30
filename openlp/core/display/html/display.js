@@ -497,7 +497,7 @@ var Display = {
     section.setAttribute("style", "height: 100%; width: 100%;");
     var img = document.createElement('img');
     img.src = image;
-    img.setAttribute("style", "height: 100%; width: 100%");
+    img.setAttribute("style", "height: 100%; width: 100%; margin: 0; object-fit: contain;");
     section.appendChild(img);
     Display._slides['0'] = 0;
     Display.replaceSlides(section);
