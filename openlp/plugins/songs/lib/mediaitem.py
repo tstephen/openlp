@@ -26,7 +26,7 @@ from shutil import copyfile
 from typing import Any
 
 from PySide6 import QtCore, QtWidgets
-from sqlalchemy.sql import and_, or_
+from sqlalchemy.sql import or_
 
 from openlp.core.state import State
 from openlp.core.common.applocation import AppLocation
@@ -95,18 +95,33 @@ class SongMediaItem(MediaManagerItem):
         self.maintenance_action = self.toolbar.add_toolbar_action('maintenance_action',
                                                                   icon=UiIcons().database,
                                                                   triggers=self.on_song_maintenance_click)
+
         self.add_search_to_toolbar()
+        # Add in an extra toggle button
+        self.favourite_toggle_button = QtWidgets.QPushButton(self)
+        self.favourite_toggle_button.setObjectName('favourite_toggle_button')
+        self.favourite_toggle_button.setIcon(UiIcons().favourite)
+        self.favourite_toggle_button.setCheckable(True)
+        self.favourite_toggle_button.setChecked(self.settings.value('songs/favourites_toggled'))
+        self.search_button_layout.insertWidget(1, self.favourite_toggle_button)
         # Signals and slots
         Registry().register_function('songs_load_list', self.on_song_list_load)
         Registry().register_function('songs_preview', self.on_preview_click)
         self.search_text_edit.cleared.connect(self.on_clear_text_button_click)
         self.search_text_edit.searchTypeChanged.connect(self.on_search_text_button_clicked)
+        self.favourite_toggle_button.toggled.connect(self.on_favourite_toggle_button_clicked)
 
     def add_custom_context_actions(self):
         create_widget_action(self.list_view, separator=True)
         create_widget_action(
             self.list_view, text=translate('OpenLP.MediaManagerItem', '&Clone'), icon=UiIcons().clone,
             triggers=self.on_clone_click)
+        create_widget_action(
+            self.list_view,
+            text=translate('OpenLP.SongsPlugin', 'Toggle Favourite'),
+            icon=UiIcons().favourite,
+            triggers=self.on_favourite_click
+        )
 
     def on_focus(self):
         self.search_text_edit.setFocus()
@@ -127,6 +142,8 @@ class SongMediaItem(MediaManagerItem):
         self.maintenance_action.setText(SongStrings().SongMaintenance)
         self.maintenance_action.setToolTip(translate('SongsPlugin.MediaItem',
                                                      'Maintain the lists of authors, topics and books.'))
+        self.favourite_toggle_button.setToolTip(translate('SongsPlugin.MediaItem',
+                                                          'Show only favourites'))
 
     def initialise(self):
         """
@@ -161,75 +178,102 @@ class SongMediaItem(MediaManagerItem):
         ])
         self.config_update()
 
+    def on_favourite_toggle_button_clicked(self, checked: bool) -> None:
+        """Run the search when the button is clicked, and save the state to the settings"""
+        self.settings.setValue('songs/favourites_toggled', checked)
+        self.on_search_text_button_clicked()
+
     def on_search_text_button_clicked(self):
         # Reload the list considering the new search type.
         search_keywords = str(self.search_text_edit.displayText())
         search_type = self.search_text_edit.current_search_type()
+        filter_clauses = []
+        is_fav = self.favourite_toggle_button.isChecked()
+        if is_fav and search_type not in [SongSearch.Authors, SongSearch.Topics]:
+            filter_clauses.append(Song.is_favourite.is_(True))
         if search_type == SongSearch.Entire:
             log.debug('Entire Song Search')
-            search_results = self.search_entire(search_keywords)
+            search_results = self.search_entire(search_keywords, *filter_clauses)
             self.display_results_song(search_results)
         elif search_type == SongSearch.Titles:
             log.debug('Titles Search')
             search_string = '%{text}%'.format(text=clean_string(search_keywords))
-            search_results = self.plugin.manager.get_all_objects(Song, Song.search_title.like(search_string))
+            filter_clauses.append(Song.search_title.like(search_string))
+            search_results = self.plugin.manager.get_all_objects(Song, *filter_clauses)
             self.display_results_song(search_results)
         elif search_type == SongSearch.Lyrics:
             log.debug('Lyrics Search')
             search_string = '%{text}%'.format(text=clean_string(search_keywords))
-            search_results = self.plugin.manager.get_all_objects(Song, Song.search_lyrics.like(search_string))
+            filter_clauses.append(Song.search_lyrics.like(search_string))
+            search_results = self.plugin.manager.get_all_objects(Song, *filter_clauses)
             self.display_results_song(search_results)
         elif search_type == SongSearch.Authors:
             log.debug('Authors Search')
             search_string = '%{text}%'.format(text=search_keywords)
-            search_results = self.plugin.manager.get_all_objects(
-                Author, Author.display_name.like(search_string))
-            self.display_results_author(search_results)
+            search_results = self.plugin.manager.get_all_objects(Author, Author.display_name.like(search_string))
+            self.display_results_author(search_results, is_fav)
         elif search_type == SongSearch.Topics:
             log.debug('Topics Search')
             search_string = '%{text}%'.format(text=search_keywords)
-            search_results = self.plugin.manager.get_all_objects(
-                Topic, Topic.name.like(search_string))
-            self.display_results_topic(search_results)
+            search_results = self.plugin.manager.get_all_objects(Topic, Topic.name.like(search_string))
+            self.display_results_topic(search_results, is_fav)
         elif search_type == SongSearch.Books:
             log.debug('Songbook Search')
             search_keywords = search_keywords.rpartition(' ')
             search_book = '{text}%'.format(text=search_keywords[0])
             search_entry = '{text}%'.format(text=search_keywords[2])
-            search_results = (self.plugin.manager.session.query(SongBookEntry.entry, SongBook.name, Song.title, Song.id)
-                              .join(Song)
-                              .join(SongBook)
-                              .filter(SongBook.name.like(search_book), SongBookEntry.entry.like(search_entry),
-                                      Song.temporary.is_(False)).all())
+            filter_clauses.extend([
+                SongBook.name.like(search_book),
+                SongBookEntry.entry.like(search_entry),
+                Song.temporary.is_(False)
+            ])
+            search_results = self.plugin.manager.session.query(
+                SongBookEntry.entry,
+                SongBook.name,
+                Song.title,
+                Song.id
+            ).join(Song).join(SongBook).filter(*filter_clauses).all()
             self.display_results_book(search_results)
         elif search_type == SongSearch.Themes:
             log.debug('Theme Search')
             search_string = '%{text}%'.format(text=search_keywords)
-            search_results = self.plugin.manager.get_all_objects(
-                Song, Song.theme_name.like(search_string))
+            filter_clauses.append(Song.theme_name.like(search_string))
+            search_results = self.plugin.manager.get_all_objects(Song, *filter_clauses)
             self.display_results_themes(search_results)
         elif search_type == SongSearch.Copyright:
             log.debug('Copyright Search')
             search_string = '%{text}%'.format(text=search_keywords)
-            search_results = self.plugin.manager.get_all_objects(
-                Song, and_(Song.copyright.like(search_string), Song.copyright != ''))
+            filter_clauses.extend([
+                Song.copyright.like(search_string),
+                Song.copyright != ''
+            ])
+            search_results = self.plugin.manager.get_all_objects(Song, *filter_clauses)
             self.display_results_song(search_results)
         elif search_type == SongSearch.CCLInumber:
             log.debug('CCLI number Search')
             search_string = '%{text}%'.format(text=search_keywords)
-            search_results = self.plugin.manager.get_all_objects(
-                Song, and_(Song.ccli_number.like(search_string), Song.ccli_number != ''))
+            filter_clauses.extend([
+                Song.ccli_number.like(search_string),
+                Song.ccli_number != ''
+            ])
+            search_results = self.plugin.manager.get_all_objects(Song, *filter_clauses)
             self.display_results_cclinumber(search_results)
 
-    def search_entire(self, search_keywords):
+    def search_entire(self, search_keywords: str, *filter_clauses):
         search_string = '%{text}%'.format(text=clean_string(search_keywords))
+        filter_clauses = list(filter_clauses)
+        filter_clauses.append(
+            or_(
+                SongBook.name.like(search_string), SongBookEntry.entry.like(search_string),
+                # hint: search_title contains alternate title
+                Song.search_title.like(search_string), Song.search_lyrics.like(search_string),
+                Song.comments.like(search_string)
+            )
+        )
         return self.plugin.manager.session.query(Song) \
             .join(SongBookEntry, isouter=True) \
             .join(SongBook, isouter=True) \
-            .filter(or_(SongBook.name.like(search_string), SongBookEntry.entry.like(search_string),
-                        # hint: search_title contains alternate title
-                        Song.search_title.like(search_string), Song.search_lyrics.like(search_string),
-                        Song.comments.like(search_string))) \
+            .filter(*filter_clauses) \
             .all()
 
     def on_song_list_load(self):
@@ -279,7 +323,7 @@ class SongMediaItem(MediaManagerItem):
                 self.list_view.setCurrentItem(song_name)
         self.auto_select_id = -1
 
-    def display_results_author(self, search_results):
+    def display_results_author(self, search_results: list[Author], is_fav: bool = False):
         """
         Display the song search results in the media manager list, grouped by author
 
@@ -298,7 +342,10 @@ class SongMediaItem(MediaManagerItem):
         self.list_view.clear()
         search_results.sort(key=get_author_key)
         for author in search_results:
-            songs = [author_song.song for author_song in author.authors_songs]
+            if is_fav:
+                songs = [author_song.song for author_song in author.authors_songs if author_song.song.is_favourite]
+            else:
+                songs = [author_song.song for author_song in author.authors_songs]
             songs.sort(key=get_song_key)
             for song in songs:
                 # Do not display temporary songs
@@ -333,7 +380,7 @@ class SongMediaItem(MediaManagerItem):
             song_name.setData(QtCore.Qt.ItemDataRole.UserRole, result[3])
             self.list_view.addItem(song_name)
 
-    def display_results_topic(self, search_results):
+    def display_results_topic(self, search_results, is_fav: bool = False):
         """
         Display the song search results in the media manager list, grouped by topic
 
@@ -355,7 +402,7 @@ class SongMediaItem(MediaManagerItem):
             topic.songs.sort(key=get_song_key)
             for song in topic.songs:
                 # Do not display temporary songs
-                if song.temporary:
+                if (is_fav and not song.is_favourite) or song.temporary:
                     continue
                 song_detail = '{topic} ({title})'.format(topic=topic.name, title=song.title)
                 song_name = QtWidgets.QListWidgetItem(song_detail)
@@ -547,6 +594,18 @@ class SongMediaItem(MediaManagerItem):
             self.plugin.manager.save_object(new_song)
             new_song.init_on_load()
             Registry().execute('song_changed', new_song.id)
+        self.on_song_list_load()
+
+    def on_favourite_click(self):
+        """Toggle a song as a favourite"""
+        log.debug('on_favourite_click')
+        if check_item_selected(self.list_view, UiStrings().SelectEdit):
+            for selected_item in self.list_view.selectedItems():
+                item_id = selected_item.data(QtCore.Qt.ItemDataRole.UserRole)
+                song = self.plugin.manager.get_object(Song, item_id)
+                song.is_favourite = not song.is_favourite
+                self.plugin.manager.save_object(song)
+                Registry().execute('song_changed', song.id)
         self.on_song_list_load()
 
     def generate_slide_data(self, service_item, *, item=None, context=ServiceItemContext.Service, **kwargs):

@@ -22,13 +22,15 @@
 This module contains tests for the lib submodule of the Songs plugin.
 """
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, call
 
-from PySide6 import QtCore
+from PySide6 import QtCore, QtWidgets
 
-from openlp.core.common.enum import SongFirstSlideMode
+from openlp.core.common.enum import SongFirstSlideMode, SongSearch
 from openlp.core.common.registry import Registry
+from openlp.core.common.settings import Settings
 from openlp.core.lib.serviceitem import ServiceItem
+from openlp.core.ui.icons import UiIcons
 from openlp.plugins.songs.lib.db import AuthorType, Song
 from openlp.plugins.songs.lib.mediaitem import SongMediaItem
 from openlp.plugins.songs.lib.openlyricsxml import OpenLyrics
@@ -96,9 +98,9 @@ SONG_VERSES_TEST_VERSE_ORDER = 'v1'
 
 
 @pytest.fixture
-def media_item(settings):
-    Registry().register('service_list', MagicMock())
-    Registry().register('main_window', MagicMock())
+def media_item(registry: Registry, settings: Settings):
+    registry.register('service_list', MagicMock())
+    registry.register('main_window', MagicMock())
     mocked_plugin = MagicMock()
     with patch('openlp.core.lib.mediamanageritem.MediaManagerItem._setup'), \
             patch('openlp.plugins.songs.forms.editsongform.EditSongForm.__init__'):
@@ -112,95 +114,458 @@ def media_item(settings):
         media_item.auto_select_id = -1
         media_item.display_songbook = False
         media_item.display_copyright_symbol = False
-    settings = Registry().get('settings')
+    settings = registry.get('settings')
     settings.extend_default_settings(__default_settings__)
     QtCore.QLocale.setDefault(QtCore.QLocale('en_GB'))
     yield media_item
 
 
-def test_display_results_song(media_item):
+def test_add_middle_header_bar(media_item: SongMediaItem):
+    """Test the add_middle_header_bar() function, that it sets up the search interface"""
+    # GIVEN: A mocked out toolbar and other methods
+    with patch.object(media_item, 'add_search_to_toolbar') as mocked_add_search:
+        media_item.toolbar = MagicMock()
+        media_item.search_button_layout = MagicMock()
+        media_item.search_text_edit = MagicMock()
+
+        # WHEN: add_middle_header_bar() is called
+        media_item.add_middle_header_bar()
+
+    # THEN: The favourite toggle button should have been added to the
+    media_item.toolbar.addSeparator.assert_called_once_with()
+    mocked_add_search.assert_called_once_with()
+    assert hasattr(media_item, 'favourite_toggle_button')
+    assert isinstance(media_item.favourite_toggle_button, QtWidgets.QPushButton)
+    media_item.search_button_layout.insertWidget.assert_called_once_with(1, media_item.favourite_toggle_button)
+
+
+@patch('openlp.plugins.songs.lib.mediaitem.create_widget_action')
+def test_add_custom_context_actions(mocked_create_action: MagicMock, media_item: SongMediaItem):
+    """Test that adding extra context menu items works"""
+    # GIVEN: A pre-mocked media item
+    # WHEN: add_custom_context_actions() is called
+    media_item.add_custom_context_actions()
+
+    # THEN: Custom actions are added to the context menu
+    assert mocked_create_action.call_args_list == [
+        call(media_item.list_view, separator=True),
+        call(media_item.list_view, text='&Clone', icon=UiIcons().clone, triggers=media_item.on_clone_click),
+        call(media_item.list_view, text='Toggle Favourite', icon=UiIcons().favourite,
+             triggers=media_item.on_favourite_click)
+    ]
+
+
+def test_on_focus(media_item: SongMediaItem):
+    """Test that the on_focus() handler does the correct actions"""
+    # GIVEN: A mocked out search_text_edit widget
+    mocked_edit = MagicMock()
+    media_item.search_text_edit = mocked_edit
+
+    # WHEN: on_focus() is called
+    media_item.on_focus()
+
+    # THEN: The search text edit should be focused and all the text selected
+    mocked_edit.setFocus.assert_called_once_with()
+    mocked_edit.selectAll.assert_called_once_with()
+
+
+def test_config_update(settings: Settings, media_item: SongMediaItem):
+    """Test that the local configuration is updated from the settings"""
+    # GIVEN: A settings object and a SongMediaItem
+    media_item.is_search_as_you_type_enabled = False
+    media_item.update_service_on_edit = True
+    media_item.add_song_from_service = True
+
+    settings.setValue('advanced/search as type', True)
+    settings.setValue('songs/update service on edit', False)
+    settings.setValue('songs/add song from service', False)
+
+    # WHEN: config_update() is called
+    media_item.config_update()
+
+    # THEN: The set values should be correct
+    assert media_item.is_search_as_you_type_enabled is True
+    assert media_item.update_service_on_edit is False
+    assert media_item.add_song_from_service is False
+
+
+def test_retranslate_ui(media_item: SongMediaItem):
+    """Test that the labels are all set correctly when calling retranslate_ui()"""
+    # GIVEN: A song media item with a number of mocked out attributes
+    media_item.search_text_label = MagicMock()
+    media_item.search_text_button = MagicMock()
+    media_item.maintenance_action = MagicMock()
+    media_item.favourite_toggle_button = MagicMock()
+
+    # WHEN: retranslate_ui() is called
+    media_item.retranslate_ui()
+
+    # THEN: The correct strings should be set
+    media_item.search_text_label.setText.assert_called_once_with('Search:')
+    media_item.search_text_button.setText.assert_called_once_with('Search')
+    media_item.maintenance_action.setText.assert_called_once_with('Song Maintenance')
+    media_item.maintenance_action.setToolTip.assert_called_once_with(
+        'Maintain the lists of authors, topics and books.'
+    )
+    media_item.favourite_toggle_button.setToolTip.assert_called_once_with('Show only favourites')
+
+
+@pytest.mark.parametrize('is_checked', (True, False))
+def test_on_favourite_toggle_button_clicked(settings: Settings, media_item: SongMediaItem, is_checked: bool):
+    """Test the on_favourite_toggle_button_clicked() method"""
+    # GIVEN: A mocked out on_search_text_button_clicked
+    with patch.object(media_item, 'on_search_text_button_clicked') as mocked_clicked:
+        # WHEN: on_favourite_toggle_button_clicked() is called after toggling
+        media_item.on_favourite_toggle_button_clicked(is_checked)
+
+    # THEN: The setting should be correct, and the method should have been called
+    assert settings.value('songs/favourites_toggled') is is_checked
+    mocked_clicked.assert_called_once_with()
+
+
+@pytest.mark.parametrize('fav_filter', (False, True))
+@patch('openlp.plugins.songs.lib.mediaitem.Song')
+def test_on_search_text_button_clicked_entire(MockSong: MagicMock, fav_filter: bool, media_item: SongMediaItem):
+    """Test the search button handler"""
+    # GIVEN: A media item with some mocked stuff
+    MockSong.is_favourite.is_.return_value = 'is_true'
+    media_item.search_text_edit = MagicMock()
+    media_item.search_text_edit.displayText.return_value = 'Amazing grace'
+    media_item.search_text_edit.current_search_type.return_value = SongSearch.Entire
+    media_item.favourite_toggle_button = MagicMock()
+    media_item.favourite_toggle_button.isChecked.return_value = fav_filter
+    with patch.object(media_item, 'search_entire') as mocked_search_entire, \
+            patch.object(media_item, 'display_results_song') as mocked_display_results:
+        mocked_search_entire.return_value = ['Amazing Grace']
+
+        # WHEN: on_search_text_button_clicked() is called
+        media_item.on_search_text_button_clicked()
+
+    # THEN: The correct calls should have been made
+    if fav_filter:
+        mocked_search_entire.assert_called_once_with('Amazing grace', 'is_true')
+    else:
+        mocked_search_entire.assert_called_once_with('Amazing grace')
+    mocked_display_results.assert_called_once_with(['Amazing Grace'])
+
+
+@pytest.mark.parametrize('fav_filter', (False, True))
+@patch('openlp.plugins.songs.lib.mediaitem.Song')
+def test_on_search_text_button_clicked_titles(MockSong: MagicMock, fav_filter: bool, media_item: SongMediaItem):
+    """Test the search button handler"""
+    # GIVEN: A media item with some mocked stuff
+    MockSong.is_favourite.is_.return_value = 'is_true'
+    MockSong.search_title.like.return_value = 'like Amazing Grace'
+    media_item.search_text_edit = MagicMock()
+    media_item.search_text_edit.displayText.return_value = 'Amazing grace'
+    media_item.search_text_edit.current_search_type.return_value = SongSearch.Titles
+    media_item.favourite_toggle_button = MagicMock()
+    media_item.favourite_toggle_button.isChecked.return_value = fav_filter
+    with patch.object(media_item.plugin.manager, 'get_all_objects') as mocked_get_all_objects, \
+            patch.object(media_item, 'display_results_song') as mocked_display_results:
+        mocked_get_all_objects.return_value = ['Amazing Grace']
+
+        # WHEN: on_search_text_button_clicked() is called
+        media_item.on_search_text_button_clicked()
+
+    # THEN: The correct calls should have been made
+    if fav_filter:
+        mocked_get_all_objects.assert_called_once_with(MockSong, 'is_true', 'like Amazing Grace')
+    else:
+        mocked_get_all_objects.assert_called_once_with(MockSong, 'like Amazing Grace')
+    mocked_display_results.assert_called_once_with(['Amazing Grace'])
+
+
+@pytest.mark.parametrize('fav_filter', (False, True))
+@patch('openlp.plugins.songs.lib.mediaitem.Song')
+def test_on_search_text_button_clicked_lyrics(MockSong: MagicMock, fav_filter: bool, media_item: SongMediaItem):
+    """Test the search button handler"""
+    # GIVEN: A media item with some mocked stuff
+    MockSong.is_favourite.is_.return_value = 'is_true'
+    MockSong.search_lyrics.like.return_value = 'lyrics Amazing Grace'
+    media_item.search_text_edit = MagicMock()
+    media_item.search_text_edit.displayText.return_value = 'Amazing grace'
+    media_item.search_text_edit.current_search_type.return_value = SongSearch.Lyrics
+    media_item.favourite_toggle_button = MagicMock()
+    media_item.favourite_toggle_button.isChecked.return_value = fav_filter
+    with patch.object(media_item.plugin.manager, 'get_all_objects') as mocked_get_all_objects, \
+            patch.object(media_item, 'display_results_song') as mocked_display_results:
+        mocked_get_all_objects.return_value = ['Amazing Grace']
+
+        # WHEN: on_search_text_button_clicked() is called
+        media_item.on_search_text_button_clicked()
+
+    # THEN: The correct calls should have been made
+    if fav_filter:
+        mocked_get_all_objects.assert_called_once_with(MockSong, 'is_true', 'lyrics Amazing Grace')
+    else:
+        mocked_get_all_objects.assert_called_once_with(MockSong, 'lyrics Amazing Grace')
+    mocked_display_results.assert_called_once_with(['Amazing Grace'])
+
+
+@pytest.mark.parametrize('fav_filter', (False, True))
+@patch('openlp.plugins.songs.lib.mediaitem.Author')
+def test_on_search_text_button_clicked_authors(MockAuthor: MagicMock, fav_filter: bool,
+                                               media_item: SongMediaItem):
+    """Test the search button handler"""
+    # GIVEN: A media item with some mocked stuff
+    MockAuthor.display_name.like.return_value = 'like John Newton'
+    media_item.search_text_edit = MagicMock()
+    media_item.search_text_edit.displayText.return_value = 'John Newton'
+    media_item.search_text_edit.current_search_type.return_value = SongSearch.Authors
+    media_item.favourite_toggle_button = MagicMock()
+    media_item.favourite_toggle_button.isChecked.return_value = fav_filter
+    with patch.object(media_item.plugin.manager, 'get_all_objects') as mocked_get_all_objects, \
+            patch.object(media_item, 'display_results_author') as mocked_display_results:
+        mocked_get_all_objects.return_value = ['Amazing Grace']
+
+        # WHEN: on_search_text_button_clicked() is called
+        media_item.on_search_text_button_clicked()
+
+    # THEN: The correct calls should have been made
+    mocked_get_all_objects.assert_called_once_with(MockAuthor, 'like John Newton')
+    mocked_display_results.assert_called_once_with(['Amazing Grace'], fav_filter)
+
+
+@pytest.mark.parametrize('fav_filter', (False, True))
+@patch('openlp.plugins.songs.lib.mediaitem.Topic')
+def test_on_search_text_button_clicked_topics(MockTopic: MagicMock, fav_filter: bool,
+                                              media_item: SongMediaItem):
+    """Test the search button handler"""
+    # GIVEN: A media item with some mocked stuff
+    MockTopic.name.like.return_value = 'like Salvation'
+    media_item.search_text_edit = MagicMock()
+    media_item.search_text_edit.displayText.return_value = 'Salvation'
+    media_item.search_text_edit.current_search_type.return_value = SongSearch.Topics
+    media_item.favourite_toggle_button = MagicMock()
+    media_item.favourite_toggle_button.isChecked.return_value = fav_filter
+    with patch.object(media_item.plugin.manager, 'get_all_objects') as mocked_get_all_objects, \
+            patch.object(media_item, 'display_results_topic') as mocked_display_results:
+        mocked_get_all_objects.return_value = ['Amazing Grace']
+
+        # WHEN: on_search_text_button_clicked() is called
+        media_item.on_search_text_button_clicked()
+
+    # THEN: The correct calls should have been made
+    mocked_get_all_objects.assert_called_once_with(MockTopic, 'like Salvation')
+    mocked_display_results.assert_called_once_with(['Amazing Grace'], fav_filter)
+
+
+@pytest.mark.parametrize('fav_filter', (False, True))
+@patch('openlp.plugins.songs.lib.mediaitem.SongBookEntry')
+@patch('openlp.plugins.songs.lib.mediaitem.SongBook')
+@patch('openlp.plugins.songs.lib.mediaitem.Song')
+def test_on_search_text_button_clicked_songbooks(MockSong: MagicMock, MockSongBook: MagicMock,
+                                                 MockSongBookEntry: MagicMock, fav_filter: bool,
+                                                 media_item: SongMediaItem):
+    """Test the search button handler"""
+    # GIVEN: A media item with some mocked stuff
+    MockSong.is_favourite.is_.return_value = 'is_true'
+    MockSongBook.name.like.return_value = 'like Trinity Hymnal'
+    MockSongBookEntry.entry.like.return_value = 'like 451'
+    MockSong.temporary.is_.return_value = 'is False'
+    media_item.search_text_edit = MagicMock()
+    media_item.search_text_edit.displayText.return_value = 'Salvation'
+    media_item.search_text_edit.current_search_type.return_value = SongSearch.Books
+    media_item.favourite_toggle_button = MagicMock()
+    media_item.favourite_toggle_button.isChecked.return_value = fav_filter
+    with patch.object(media_item.plugin.manager.session, 'query') as mocked_query, \
+            patch.object(media_item, 'display_results_book') as mocked_display_results:
+        mocked_song_join = MagicMock()
+        mocked_songbook_join = MagicMock()
+        mocked_filter = MagicMock()
+        mocked_query.return_value = mocked_song_join
+        mocked_song_join.join.return_value = mocked_songbook_join
+        mocked_songbook_join.join.return_value = mocked_filter
+        mocked_filter.filter.return_value.all.return_value = ['Amazing Grace']
+
+        # WHEN: on_search_text_button_clicked() is called
+        media_item.on_search_text_button_clicked()
+
+    # THEN: The correct calls should have been made
+    mocked_query.assert_called_once_with(MockSongBookEntry.entry, MockSongBook.name, MockSong.title, MockSong.id)
+    mocked_song_join.join.assert_called_once_with(MockSong)
+    mocked_songbook_join.join.assert_called_once_with(MockSongBook)
+    if fav_filter:
+        mocked_filter.filter.assert_called_once_with('is_true', 'like Trinity Hymnal', 'like 451', 'is False')
+    else:
+        mocked_filter.filter.assert_called_once_with('like Trinity Hymnal', 'like 451', 'is False')
+    mocked_display_results.assert_called_once_with(['Amazing Grace'])
+
+
+@pytest.mark.parametrize('fav_filter', (False, True))
+@patch('openlp.plugins.songs.lib.mediaitem.Song')
+def test_on_search_text_button_clicked_themes(MockSong: MagicMock, fav_filter: bool, media_item: SongMediaItem):
+    """Test the search button handler"""
+    # GIVEN: A media item with some mocked stuff
+    MockSong.is_favourite.is_.return_value = 'is_true'
+    MockSong.theme_name.like.return_value = 'like sunrise'
+    media_item.search_text_edit = MagicMock()
+    media_item.search_text_edit.displayText.return_value = 'sunrise'
+    media_item.search_text_edit.current_search_type.return_value = SongSearch.Themes
+    media_item.favourite_toggle_button = MagicMock()
+    media_item.favourite_toggle_button.isChecked.return_value = fav_filter
+    with patch.object(media_item.plugin.manager, 'get_all_objects') as mocked_get_all_objects, \
+            patch.object(media_item, 'display_results_themes') as mocked_display_results:
+        mocked_get_all_objects.return_value = ['Amazing Grace']
+
+        # WHEN: on_search_text_button_clicked() is called
+        media_item.on_search_text_button_clicked()
+
+    # THEN: The correct calls should have been made
+    if fav_filter:
+        mocked_get_all_objects.assert_called_once_with(MockSong, 'is_true', 'like sunrise')
+    else:
+        mocked_get_all_objects.assert_called_once_with(MockSong, 'like sunrise')
+    mocked_display_results.assert_called_once_with(['Amazing Grace'])
+
+
+@pytest.mark.parametrize('fav_filter', (False, True))
+@patch('openlp.plugins.songs.lib.mediaitem.Song')
+def test_on_search_text_button_clicked_copyright(MockSong: MagicMock, fav_filter: bool,
+                                                 media_item: SongMediaItem):
+    """Test the search button handler"""
+    # GIVEN: A media item with some mocked stuff
+    MockSong.is_favourite.is_.return_value = 'is_true'
+    MockSong.copyright.like.return_value = 'like public domain'
+    MockSong.copyright.__ne__.return_value = 'ne ""'
+    media_item.search_text_edit = MagicMock()
+    media_item.search_text_edit.displayText.return_value = 'public domain'
+    media_item.search_text_edit.current_search_type.return_value = SongSearch.Copyright
+    media_item.favourite_toggle_button = MagicMock()
+    media_item.favourite_toggle_button.isChecked.return_value = fav_filter
+    with patch.object(media_item.plugin.manager, 'get_all_objects') as mocked_get_all_objects, \
+            patch.object(media_item, 'display_results_song') as mocked_display_results:
+        mocked_get_all_objects.return_value = ['Amazing Grace']
+
+        # WHEN: on_search_text_button_clicked() is called
+        media_item.on_search_text_button_clicked()
+
+    # THEN: The correct calls should have been made
+    if fav_filter:
+        mocked_get_all_objects.assert_called_once_with(MockSong, 'is_true', 'like public domain', 'ne ""')
+    else:
+        mocked_get_all_objects.assert_called_once_with(MockSong, 'like public domain', 'ne ""')
+    mocked_display_results.assert_called_once_with(['Amazing Grace'])
+
+
+@pytest.mark.parametrize('fav_filter', (False, True))
+@patch('openlp.plugins.songs.lib.mediaitem.Song')
+def test_on_search_text_button_clicked_cclinumber(MockSong: MagicMock, fav_filter: bool,
+                                                  media_item: SongMediaItem):
+    """Test the search button handler"""
+    # GIVEN: A media item with some mocked stuff
+    MockSong.is_favourite.is_.return_value = 'is_true'
+    MockSong.ccli_number.like.return_value = 'like 12345'
+    MockSong.ccli_number.__ne__.return_value = 'ne ""'
+    media_item.search_text_edit = MagicMock()
+    media_item.search_text_edit.displayText.return_value = 'public domain'
+    media_item.search_text_edit.current_search_type.return_value = SongSearch.CCLInumber
+    media_item.favourite_toggle_button = MagicMock()
+    media_item.favourite_toggle_button.isChecked.return_value = fav_filter
+    with patch.object(media_item.plugin.manager, 'get_all_objects') as mocked_get_all_objects, \
+            patch.object(media_item, 'display_results_cclinumber') as mocked_display_results:
+        mocked_get_all_objects.return_value = ['Amazing Grace']
+
+        # WHEN: on_search_text_button_clicked() is called
+        media_item.on_search_text_button_clicked()
+
+    # THEN: The correct calls should have been made
+    if fav_filter:
+        mocked_get_all_objects.assert_called_once_with(MockSong, 'is_true', 'like 12345', 'ne ""')
+    else:
+        mocked_get_all_objects.assert_called_once_with(MockSong, 'like 12345', 'ne ""')
+    mocked_display_results.assert_called_once_with(['Amazing Grace'])
+
+
+def test_display_results_song(media_item: SongMediaItem):
     """
     Test displaying song search results with basic song
     """
     # GIVEN: Search results, plus a mocked QtListWidgetItem
     with patch('openlp.core.lib.QtWidgets.QListWidgetItem') as MockedQListWidgetItem:
-        mock_search_results = []
-        mock_song = MagicMock()
-        mock_song.id = 1
-        mock_song.title = 'My Song'
-        mock_song.sort_key = 'My Song'
-        mock_song.authors = []
-        mock_song_temp = MagicMock()
-        mock_song_temp.id = 2
-        mock_song_temp.title = 'My Temporary'
-        mock_song_temp.sort_key = 'My Temporary'
-        mock_song_temp.authors = []
-        mock_author = MagicMock()
-        mock_author.display_name = 'My Author'
-        mock_song.authors.append(mock_author)
-        mock_song_temp.authors.append(mock_author)
-        mock_song.temporary = False
-        mock_song_temp.temporary = True
-        mock_search_results.append(mock_song)
-        mock_search_results.append(mock_song_temp)
-        mock_qlist_widget = MagicMock()
-        MockedQListWidgetItem.return_value = mock_qlist_widget
+        mocked_author = MagicMock(display_name='My Author')
+        mocked_song = MagicMock(id=1, title='My Song', sort_key='My Song', temporary=False,
+                                authors=[mocked_author])
+        mocked_song_temp = MagicMock(id=2, title='My Temporary', sort_key='My Temporary', temporary=True,
+                                     authors=[mocked_author])
+        mocked_song_media = MagicMock(id=3, title='My Song Other', sort_key='My Song Other', temporary=False,
+                                      authors=[mocked_author], media_files=[MagicMock()])
+        mocked_search_results = [mocked_song, mocked_song_temp, mocked_song_media]
+        mocked_list_item = MagicMock()
+        mocked_list_item_media = MagicMock()
+        MockedQListWidgetItem.side_effect = [mocked_list_item, mocked_list_item_media]
         media_item.auto_select_id = 1
 
         # WHEN: I display song search results
-        media_item.display_results_song(mock_search_results)
+        media_item.display_results_song(mocked_search_results)
 
         # THEN: The current list view is cleared, the widget is created, and the relevant attributes set
         media_item.list_view.clear.assert_called_with()
         media_item.save_auto_select_id.assert_called_with()
-        MockedQListWidgetItem.assert_called_once_with('My Song (My Author)')
-        mock_qlist_widget.setData.assert_called_once_with(QtCore.Qt.ItemDataRole.UserRole, mock_song.id)
-        media_item.list_view.addItem.assert_called_once_with(mock_qlist_widget)
-        media_item.list_view.setCurrentItem.assert_called_with(mock_qlist_widget)
+        assert MockedQListWidgetItem.call_args_list == [
+            call('My Song (My Author)'),
+            call('My Song Other (A) (My Author)')
+        ]
+        mocked_list_item.setData.assert_called_once_with(QtCore.Qt.ItemDataRole.UserRole, mocked_song.id)
+        mocked_list_item_media.setData.assert_called_once_with(QtCore.Qt.ItemDataRole.UserRole,
+                                                               mocked_song_media.id)
+        assert media_item.list_view.addItem.call_args_list == [
+            call(mocked_list_item),
+            call(mocked_list_item_media)
+        ]
+        media_item.list_view.setCurrentItem.assert_called_with(mocked_list_item)
 
 
-def test_display_results_author(media_item):
+@pytest.mark.parametrize('is_fav', [True, False])
+def test_display_results_author(is_fav: bool, media_item: SongMediaItem):
     """
     Test displaying song search results grouped by author with basic song
     """
     # GIVEN: Search results grouped by author, plus a mocked QtListWidgetItem
     with patch('openlp.core.lib.QtWidgets.QListWidgetItem') as MockedQListWidgetItem:
-        mock_search_results = []
-        mock_author = MagicMock()
-        mock_song = MagicMock()
-        mock_song_temp = MagicMock()
-        mock_author.display_name = 'My Author'
-        mock_author.songs = []
-        mock_song.id = 1
-        mock_song.title = 'My Song'
-        mock_song.sort_key = 'My Song'
-        mock_song.temporary = False
-        mock_author_song = MagicMock()
-        mock_author_song.author = mock_author
-        mock_author_song.song = mock_song
-        mock_song_temp.id = 2
-        mock_song_temp.title = 'My Temporary'
-        mock_song_temp.sort_key = 'My Temporary'
-        mock_song_temp.temporary = True
-        mock_author_song_temp = MagicMock()
-        mock_author_song_temp.author = mock_author
-        mock_author_song_temp.song = mock_song_temp
-        mock_author.authors_songs = [mock_author_song, mock_author_song_temp]
-        mock_search_results.append(mock_author)
-        mock_qlist_widget = MagicMock()
-        MockedQListWidgetItem.return_value = mock_qlist_widget
+        mocked_author = MagicMock(display_name='My Author')
+        mocked_song_regular = MagicMock(id=1, title='My Song', sort_key='1',
+                                        temporary=False, is_favourite=False)
+        mocked_song_temp = MagicMock(id=2, title='My Song Temp', sort_key='2',
+                                     temporary=True, is_favourite=False)
+        mocked_song_fav = MagicMock(id=3, title='My Song Favourite', sort_key='3',
+                                    temporary=False, is_favourite=True)
+        mocked_author_song_regular = MagicMock(author=mocked_author, song=mocked_song_regular)
+        mocked_author_song_temp = MagicMock(author=mocked_author, song=mocked_song_temp)
+        mocked_author_song_fav = MagicMock(author=mocked_author, song=mocked_song_fav)
+        mocked_author.authors_songs = [mocked_author_song_regular, mocked_author_song_temp,
+                                       mocked_author_song_fav]
+        mocked_search_results = [mocked_author]
+        mocked_list_item_regular = MagicMock()
+        mocked_list_item_favourite = MagicMock()
+        if is_fav:
+            MockedQListWidgetItem.side_effect = [mocked_list_item_favourite]
+        else:
+            MockedQListWidgetItem.side_effect = [mocked_list_item_regular, mocked_list_item_favourite]
 
         # WHEN: I display song search results grouped by author
-        media_item.display_results_author(mock_search_results)
+        media_item.display_results_author(mocked_search_results, is_fav)
 
         # THEN: The current list view is cleared, the widget is created, and the relevant attributes set
         media_item.list_view.clear.assert_called_with()
-        MockedQListWidgetItem.assert_called_once_with('My Author (My Song)')
-        mock_qlist_widget.setData.assert_called_once_with(QtCore.Qt.ItemDataRole.UserRole, mock_song.id)
-        media_item.list_view.addItem.assert_called_once_with(mock_qlist_widget)
+        if is_fav:
+            MockedQListWidgetItem.assert_called_once_with('My Author (My Song Favourite)')
+        else:
+            assert MockedQListWidgetItem.call_args_list == [
+                call('My Author (My Song)'),
+                call('My Author (My Song Favourite)')
+            ]
+        if not is_fav:
+            mocked_list_item_regular.setData.assert_called_once_with(QtCore.Qt.ItemDataRole.UserRole,
+                                                                     mocked_song_regular.id)
+            assert call(mocked_list_item_regular) in media_item.list_view.addItem.call_args_list
+        mocked_list_item_favourite.setData.assert_called_once_with(QtCore.Qt.ItemDataRole.UserRole,
+                                                                   mocked_song_fav.id)
+        assert call(mocked_list_item_favourite) in media_item.list_view.addItem.call_args_list
 
 
-def test_display_results_book(media_item):
+def test_display_results_book(media_item: SongMediaItem):
     """
     Test displaying song search results grouped by book and entry with basic song
     """
@@ -220,7 +585,7 @@ def test_display_results_book(media_item):
         media_item.list_view.addItem.assert_called_once_with(mock_qlist_widget)
 
 
-def test_songbook_natural_sorting(media_item):
+def test_songbook_natural_sorting(media_item: SongMediaItem):
     """
     Test that songbooks are sorted naturally
     """
@@ -243,43 +608,55 @@ def test_songbook_natural_sorting(media_item):
                               ('2', 'Thy Book', 'Thy Song', 50)]
 
 
-def test_display_results_topic(media_item):
+@pytest.mark.parametrize('is_fav', [True, False])
+def test_display_results_topic(is_fav: bool, media_item: SongMediaItem):
     """
     Test displaying song search results grouped by topic with basic song
     """
     # GIVEN: Search results grouped by topic, plus a mocked QtListWidgetItem
     with patch('openlp.core.lib.QtWidgets.QListWidgetItem') as MockedQListWidgetItem:
-        mock_search_results = []
-        mock_topic = MagicMock()
-        mock_song = MagicMock()
-        mock_song_temp = MagicMock()
-        mock_topic.name = 'My Topic'
-        mock_topic.songs = []
-        mock_song.id = 1
-        mock_song.title = 'My Song'
-        mock_song.sort_key = 'My Song'
-        mock_song.temporary = False
-        mock_song_temp.id = 2
-        mock_song_temp.title = 'My Temporary'
-        mock_song_temp.sort_key = 'My Temporary'
-        mock_song_temp.temporary = True
-        mock_topic.songs.append(mock_song)
-        mock_topic.songs.append(mock_song_temp)
-        mock_search_results.append(mock_topic)
-        mock_qlist_widget = MagicMock()
-        MockedQListWidgetItem.return_value = mock_qlist_widget
+        mocked_song_regular = MagicMock(id=1, title='My Song', sort_key='1',
+                                        temporary=False, is_favourite=False)
+        mocked_song_temp = MagicMock(id=2, title='My Song Temp', sort_key='2',
+                                     temporary=True, is_favourite=False)
+        mocked_song_fav = MagicMock(id=3, title='My Song Favourite', sort_key='3',
+                                    temporary=False, is_favourite=True)
+        mocked_topic = MagicMock()
+        # See https://docs.python.org/3/library/unittest.mock.html#mock-names-and-the-name-attribute
+        mocked_topic.name = 'My Topic'
+        mocked_topic.songs = [mocked_song_regular, mocked_song_temp, mocked_song_fav]
+        mocked_search_results = [mocked_topic]
+        mocked_list_item_regular = MagicMock()
+        mocked_list_item_favourite = MagicMock()
+        if is_fav:
+            MockedQListWidgetItem.side_effect = [mocked_list_item_favourite]
+        else:
+            MockedQListWidgetItem.side_effect = [mocked_list_item_regular, mocked_list_item_favourite]
 
         # WHEN: I display song search results grouped by topic
-        media_item.display_results_topic(mock_search_results)
+        media_item.display_results_topic(mocked_search_results, is_fav)
 
         # THEN: The current list view is cleared, the widget is created, and the relevant attributes set
         media_item.list_view.clear.assert_called_with()
-        MockedQListWidgetItem.assert_called_once_with('My Topic (My Song)')
-        mock_qlist_widget.setData.assert_called_once_with(QtCore.Qt.ItemDataRole.UserRole, mock_song.id)
-        media_item.list_view.addItem.assert_called_once_with(mock_qlist_widget)
+        if is_fav:
+            assert MockedQListWidgetItem.call_args_list == [
+                call('My Topic (My Song Favourite)')
+            ]
+        else:
+            assert MockedQListWidgetItem.call_args_list == [
+                call('My Topic (My Song)'),
+                call('My Topic (My Song Favourite)')
+            ]
+        if not is_fav:
+            mocked_list_item_regular.setData.assert_called_once_with(QtCore.Qt.ItemDataRole.UserRole,
+                                                                     mocked_song_regular.id)
+            assert call(mocked_list_item_regular) in media_item.list_view.addItem.call_args_list
+        mocked_list_item_favourite.setData.assert_called_once_with(QtCore.Qt.ItemDataRole.UserRole,
+                                                                   mocked_song_fav.id)
+        assert call(mocked_list_item_favourite) in media_item.list_view.addItem.call_args_list
 
 
-def test_display_results_themes(media_item):
+def test_display_results_themes(media_item: SongMediaItem):
     """
     Test displaying song search results sorted by theme with basic song
     """
@@ -313,7 +690,7 @@ def test_display_results_themes(media_item):
         media_item.list_view.addItem.assert_called_once_with(mock_qlist_widget)
 
 
-def test_display_results_cclinumber(media_item):
+def test_display_results_cclinumber(media_item: SongMediaItem):
     """
     Test displaying song search results sorted by CCLI number with basic song
     """
@@ -347,7 +724,7 @@ def test_display_results_cclinumber(media_item):
         media_item.list_view.addItem.assert_called_once_with(mock_qlist_widget)
 
 
-def test_build_song_footer_two_authors(media_item):
+def test_build_song_footer_two_authors(media_item: SongMediaItem):
     """
     Test build songs footer with basic song and two authors
     """
@@ -391,7 +768,7 @@ def test_build_song_footer_two_authors(media_item):
         'The author list should be returned correctly with two authors'
 
 
-def test_build_song_footer_base_ccli(media_item):
+def test_build_song_footer_base_ccli(media_item: SongMediaItem):
     """
     Test build songs footer with basic song and a CCLI number
     """
@@ -422,7 +799,7 @@ def test_build_song_footer_base_ccli(media_item):
         'The array should be returned correctly with a song, an author, copyright and amended ccli'
 
 
-def test_build_song_footer_base_songbook(media_item):
+def test_build_song_footer_base_songbook(media_item: SongMediaItem):
     """
     Test build songs footer with basic song and multiple songbooks
     """
@@ -455,7 +832,7 @@ def test_build_song_footer_base_songbook(media_item):
     assert service_item.raw_footer == ['My Song', '© My copyright', 'My songbook #12, Thy songbook #502A']
 
 
-def test_build_song_footer_copyright_enabled(media_item):
+def test_build_song_footer_copyright_enabled(media_item: SongMediaItem):
     """
     Test building song footer with displaying the copyright symbol
     """
@@ -477,7 +854,7 @@ def test_build_song_footer_copyright_enabled(media_item):
     assert service_item.raw_footer == ['My Song', '© My copyright']
 
 
-def test_build_song_footer_copyright_disabled(media_item):
+def test_build_song_footer_copyright_disabled(media_item: SongMediaItem):
     """
     Test building song footer without displaying the copyright symbol
     """
@@ -498,7 +875,7 @@ def test_build_song_footer_copyright_disabled(media_item):
     assert service_item.raw_footer == ['My Song', '© My copyright']
 
 
-def test_authors_match(media_item):
+def test_authors_match(media_item: SongMediaItem):
     """
     Test the author matching when importing a song from a service
     """
@@ -525,7 +902,7 @@ def test_authors_match(media_item):
     assert result is True, "Authors should match"
 
 
-def test_authors_dont_match(media_item):
+def test_authors_dont_match(media_item: SongMediaItem):
     # GIVEN: A song and a string with authors
     song = MagicMock()
     song.authors = []
@@ -549,7 +926,7 @@ def test_authors_dont_match(media_item):
     assert result is False, "Authors should not match"
 
 
-def test_build_remote_search(media_item):
+def test_build_remote_search(media_item: SongMediaItem):
     """
     Test results for the remote search api
     """
@@ -573,7 +950,8 @@ def test_build_remote_search(media_item):
 @patch('openlp.plugins.songs.lib.mediaitem.SongBookEntry')
 @patch('openlp.plugins.songs.lib.mediaitem.Song')
 @patch('openlp.plugins.songs.lib.mediaitem.or_')
-def test_entire_song_search(mocked_or, MockedSong, MockedSongBookEntry, MockedBook, media_item):
+def test_entire_song_search(mocked_or: MagicMock, MockedSong: MagicMock, MockedSongBookEntry: MagicMock,
+                            MockedBook: MagicMock, media_item: SongMediaItem):
     """
     Test that searching the entire song does the right queries
     """
@@ -601,7 +979,7 @@ def test_entire_song_search(mocked_or, MockedSong, MockedSongBookEntry, MockedBo
     assert media_item.plugin.manager.session.query.mock_calls[4][0] == '().join().join().filter().all'
 
 
-def test_build_song_footer_one_author_show_written_by(media_item):
+def test_build_song_footer_one_author_show_written_by(media_item: SongMediaItem):
     """
     Test build songs footer with basic song and one author
     """
@@ -648,8 +1026,11 @@ def test_build_song_footer_one_author_show_written_by(media_item):
 @patch('openlp.plugins.songs.lib.mediaitem.SongMediaItem._get_id_of_item_to_generate')
 @patch('openlp.plugins.songs.lib.mediaitem.SongXML.get_verses')
 @pytest.mark.parametrize('first_slide_mode', SongFirstSlideMode)
-def test_song_first_slide_creation_works(mocked_get_verses, mocked__get_id_of_item_to_generate, media_item,
-                                         first_slide_mode, settings):
+def test_song_first_slide_creation_works(mocked_get_verses: MagicMock,
+                                         mocked__get_id_of_item_to_generate: MagicMock,
+                                         media_item: SongMediaItem,
+                                         first_slide_mode: SongFirstSlideMode,
+                                         settings: Settings):
     """
     Test building song with SongFirstSlideMode = Songbook works
     """

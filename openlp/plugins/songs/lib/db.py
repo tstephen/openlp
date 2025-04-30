@@ -303,6 +303,7 @@ class Song(Base):
     create_date = Column(DateTime, default=func.now())
     last_modified = Column(DateTime, default=func.now(), onupdate=func.now())
     temporary = Column(Boolean, default=False)
+    is_favourite = Column(Boolean, default=False)
 
     authors_songs = relationship('AuthorSong', back_populates='song', cascade='all, delete-orphan')
     media_files = relationship('MediaFile', back_populates='songs', order_by='MediaFile.weight')

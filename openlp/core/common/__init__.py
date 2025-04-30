@@ -138,9 +138,9 @@ def extension_loader(glob_pattern: str, excluded_files: list = None, community: 
     """
     from openlp.core.common.applocation import AppLocation
     if community:
-        app_dir = AppLocation.get_directory(AppLocation.DataDir)
-        sys.path.insert(0, str(app_dir))
-        app_dir = app_dir / 'contrib'
+        data_dir = AppLocation.get_directory(AppLocation.DataDir)
+        sys.path.insert(0, str(data_dir))
+        app_dir = data_dir / 'contrib'
     else:
         app_dir = AppLocation.get_directory(AppLocation.AppDir)
     for extension_path in app_dir.glob(glob_pattern):

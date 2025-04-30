@@ -52,3 +52,19 @@ class LazyComboBox(QtWidgets.QComboBox):
             self.loaded = self.loader()
 
         super().showPopup()
+
+
+def create_combo_box(parent: QtWidgets.QWidget, name: str, editable: bool = True):
+    """
+    Utility method to generate a standard combo box for this dialog.
+
+    :param parent: The parent widget for this combo box.
+    :param name: The object name
+    """
+    combo_box = QtWidgets.QComboBox(parent)
+    combo_box.setSizeAdjustPolicy(QtWidgets.QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon)
+    combo_box.setSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Fixed)
+    combo_box.setEditable(editable)
+    combo_box.setInsertPolicy(QtWidgets.QComboBox.InsertPolicy.NoInsert)
+    combo_box.setObjectName(name)
+    return combo_box
