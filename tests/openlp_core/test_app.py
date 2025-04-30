@@ -33,6 +33,7 @@ sys.modules['PySide6.QtWebEngineCore'] = MagicMock()
 from openlp.core.app import parse_options, backup_if_version_changed, main as app_main, setup_portable_settings
 from openlp.core.common.platform import is_win
 from openlp.core.common.settings import Settings
+from openlp.core.ui.style import UiThemes
 
 
 @pytest.fixture
@@ -321,9 +322,11 @@ def test_backup_on_upgrade(mocked_question, mocked_get_version, qapp, settings):
 @patch('openlp.core.app.set_up_web_engine_cache')
 @patch('openlp.core.app.set_up_logging')
 @patch('openlp.core.app.check_for_variant_migration')
-def test_main(mock_chk_var_migr: MagicMock, mock_logging: MagicMock, mock_web_cache: MagicMock, mock_backup: MagicMock,
-              mock_sys: MagicMock, mock_openlp: MagicMock, mock_ftlang_form: MagicMock, mocked_qapp: MagicMock,
-              app_main_env: None):
+@patch('openlp.core.app.is_ui_theme')
+@patch('openlp.core.app.is_ui_theme_dark')
+def test_main(mock_is_ui_theme_dark: MagicMock, mock_is_ui_theme: MagicMock, mock_chk_var_migr: MagicMock,
+              mock_logging: MagicMock, mock_web_cache: MagicMock, mock_backup: MagicMock, mock_sys: MagicMock,
+              mock_openlp: MagicMock, mock_ftlang_form: MagicMock, mocked_qapp: MagicMock, app_main_env: None):
     """
     Test the main method performs primary actions
     """
@@ -336,6 +339,8 @@ def test_main(mock_chk_var_migr: MagicMock, mock_logging: MagicMock, mock_web_ca
     mock_ftlang_form_exec = MagicMock()
     mock_ftlang_form_exec.return_value = True
     mock_ftlang_form.return_value = mock_ftlang_form_exec
+    mock_is_ui_theme.side_effect = lambda theme: theme == UiThemes.DefaultLight
+    mock_is_ui_theme_dark.return_value = False
 
     # WHEN: the main method is run
     app_main()
@@ -348,6 +353,121 @@ def test_main(mock_chk_var_migr: MagicMock, mock_logging: MagicMock, mock_web_ca
     mocked_qapp.setOrganizationName.assert_called_once_with('OpenLP')
     mocked_qapp.setApplicationName.assert_called_once_with('OpenLP')
     mocked_qapp.setOrganizationDomain.assert_called_once_with('openlp.org')
+
+
+@pytest.mark.skipif(not is_win(), reason='This test only works on windows')
+@patch('openlp.core.app.FirstTimeLanguageForm')
+@patch('openlp.core.app.OpenLP')
+@patch('openlp.core.app.sys')
+@patch('openlp.core.app.backup_if_version_changed')
+@patch('openlp.core.app.set_up_web_engine_cache')
+@patch('openlp.core.app.set_up_logging')
+@patch('openlp.core.app.check_for_variant_migration')
+@patch('openlp.core.app.is_ui_theme')
+@patch('openlp.core.app.is_ui_theme_dark')
+def test_main_windows_darkmode_light(mock_is_ui_theme_dark: MagicMock, mock_is_ui_theme: MagicMock,
+                                     mock_chk_var_migr: MagicMock, mock_logging: MagicMock, mock_web_cache: MagicMock,
+                                     mock_backup: MagicMock, mock_sys: MagicMock, mock_openlp: MagicMock,
+                                     mock_ftlang_form: MagicMock, mocked_qapp: MagicMock, app_main_env: None):
+    """
+    Test that Windows dark mode is set to 0 (light) when the selected UI theme is DefaultLight.
+    """
+    # GIVEN: A light theme and dark mode preference mocked appropriately
+    openlp_instance = MagicMock()
+    mock_openlp.return_value = openlp_instance
+    openlp_instance.is_data_path_missing.return_value = False
+    mock_backup.return_value = True
+    mock_chk_var_migr.side_effect = (lambda x: x)
+    mock_ftlang_form_exec = MagicMock()
+    mock_ftlang_form_exec.return_value = True
+    mock_ftlang_form.return_value = mock_ftlang_form_exec
+    mock_is_ui_theme.side_effect = lambda theme: theme == UiThemes.DefaultLight
+    mock_is_ui_theme_dark.return_value = True
+
+    # WHEN: the main method is run
+    app_main()
+
+    # THEN: The Qt args should contain windows:darkmode=0
+    args_passed = mocked_qapp.call_args[0][0]
+    assert '-platform' in args_passed
+    assert 'windows:darkmode=0' in args_passed
+
+
+@pytest.mark.skipif(not is_win(), reason='This test only works on windows')
+@patch('openlp.core.app.FirstTimeLanguageForm')
+@patch('openlp.core.app.OpenLP')
+@patch('openlp.core.app.sys')
+@patch('openlp.core.app.backup_if_version_changed')
+@patch('openlp.core.app.set_up_web_engine_cache')
+@patch('openlp.core.app.set_up_logging')
+@patch('openlp.core.app.check_for_variant_migration')
+@patch('openlp.core.app.is_ui_theme')
+@patch('openlp.core.app.is_ui_theme_dark')
+def test_main_windows_darkmode_automatic_light(mock_is_ui_theme_dark: MagicMock, mock_is_ui_theme: MagicMock,
+                                               mock_chk_var_migr: MagicMock, mock_logging: MagicMock,
+                                               mock_web_cache: MagicMock, mock_backup: MagicMock, mock_sys: MagicMock,
+                                               mock_openlp: MagicMock, mock_ftlang_form: MagicMock,
+                                               mocked_qapp: MagicMock, app_main_env: None):
+    """
+    Test that Windows dark mode is set to 0 (light) when the theme is Automatic but dark mode is off.
+    """
+    # GIVEN: Automatic theme with light mode detected
+    openlp_instance = MagicMock()
+    mock_openlp.return_value = openlp_instance
+    openlp_instance.is_data_path_missing.return_value = False
+    mock_backup.return_value = True
+    mock_chk_var_migr.side_effect = (lambda x: x)
+    mock_ftlang_form_exec = MagicMock()
+    mock_ftlang_form_exec.return_value = True
+    mock_ftlang_form.return_value = mock_ftlang_form_exec
+    mock_is_ui_theme.side_effect = lambda theme: theme == UiThemes.Automatic
+    mock_is_ui_theme_dark.return_value = False
+
+    # WHEN: the main method is run
+    app_main()
+
+    # THEN: The Qt args should contain windows:darkmode=0
+    args_passed = mocked_qapp.call_args[0][0]
+    assert '-platform' in args_passed
+    assert 'windows:darkmode=0' in args_passed
+
+
+@pytest.mark.skipif(not is_win(), reason='This test only works on windows')
+@patch('openlp.core.app.FirstTimeLanguageForm')
+@patch('openlp.core.app.OpenLP')
+@patch('openlp.core.app.sys')
+@patch('openlp.core.app.backup_if_version_changed')
+@patch('openlp.core.app.set_up_web_engine_cache')
+@patch('openlp.core.app.set_up_logging')
+@patch('openlp.core.app.check_for_variant_migration')
+@patch('openlp.core.app.is_ui_theme')
+@patch('openlp.core.app.is_ui_theme_dark')
+def test_main_windows_darkmode_dark(mock_is_ui_theme_dark: MagicMock, mock_is_ui_theme: MagicMock,
+                                    mock_chk_var_migr: MagicMock, mock_logging: MagicMock, mock_web_cache: MagicMock,
+                                    mock_backup: MagicMock, mock_sys: MagicMock, mock_openlp: MagicMock,
+                                    mock_ftlang_form: MagicMock, mocked_qapp: MagicMock, app_main_env: None):
+    """
+    Test that Windows dark mode is set to 2 (dark) when the selected UI theme is DefaultDark.
+    """
+    # GIVEN: A dark theme selected and dark mode enabled
+    openlp_instance = MagicMock()
+    mock_openlp.return_value = openlp_instance
+    openlp_instance.is_data_path_missing.return_value = False
+    mock_backup.return_value = True
+    mock_chk_var_migr.side_effect = (lambda x: x)
+    mock_ftlang_form_exec = MagicMock()
+    mock_ftlang_form_exec.return_value = True
+    mock_ftlang_form.return_value = mock_ftlang_form_exec
+    mock_is_ui_theme.side_effect = lambda theme: theme == UiThemes.DefaultDark
+    mock_is_ui_theme_dark.return_value = True
+
+    # WHEN: the main method is run
+    app_main()
+
+    # THEN: The Qt args should contain windows:darkmode=2
+    args_passed = mocked_qapp.call_args[0][0]
+    assert '-platform' in args_passed
+    assert 'windows:darkmode=2' in args_passed
 
 
 @patch('openlp.core.app.QtWidgets.QMessageBox.warning')

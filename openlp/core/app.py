@@ -58,7 +58,7 @@ from openlp.core.ui.firsttimeform import FirstTimeForm
 from openlp.core.ui.firsttimelanguageform import FirstTimeLanguageForm
 from openlp.core.ui.mainwindow import MainWindow
 from openlp.core.ui.splashscreen import SplashScreen
-from openlp.core.ui.style import get_application_stylesheet, set_default_theme
+from openlp.core.ui.style import get_application_stylesheet, set_default_theme, is_ui_theme, is_ui_theme_dark, UiThemes
 from openlp.core.version import check_for_update, get_version
 
 
@@ -470,10 +470,6 @@ def main():
     # Bug #1018855: Set the WM_CLASS property in X11
     if not is_win() and not is_macosx():
         qt_args.append('OpenLP')
-    elif is_win():
-        # support dark mode on windows 10. This makes the titlebar dark, the rest is setup later
-        # by calling set_windows_darkmode
-        qt_args.extend(['-platform', 'windows:darkmode=1'])
     elif is_macosx() and getattr(sys, 'frozen', False) and not os.environ.get('QTWEBENGINEPROCESS_PATH'):
         # Set the location to the QtWebEngineProcess binary, normally set by PyInstaller, but it moves around...
         os.environ['QTWEBENGINEPROCESS_PATH'] = str((AppLocation.get_directory(AppLocation.AppDir) / 'PySide6' /
@@ -500,6 +496,15 @@ def main():
     settings = check_for_variant_migration(settings)
     Registry().register('settings', settings)
     app.settings = settings
+    if is_win():
+        # If OpenLP is set to run in dark mode or automatic mode, this sets the title bar to dark.
+        # This only takes effect when the system style is also set to dark mode.
+        # The rest of the UI is configured later via set_windows_darkmode.
+        # Note: With QDarkStyle, the title bar will still appear light.
+        if is_ui_theme(UiThemes.DefaultLight) or (is_ui_theme(UiThemes.Automatic) and not is_ui_theme_dark()):
+            qt_args.extend(['-platform', 'windows:darkmode=0'])
+        else:
+            qt_args.extend(['-platform', 'windows:darkmode=2'])
     # Doing HiDPI adjustments that need to be done before QCoreApplication instantiation.
     hidpi_mode = settings.value('advanced/hidpi mode')
     apply_dpi_adjustments_stage_qt(hidpi_mode, qt_args)
