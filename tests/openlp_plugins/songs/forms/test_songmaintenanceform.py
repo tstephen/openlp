@@ -560,26 +560,13 @@ def test_merge_authors(request, registry: Registry, settings: Settings, temp_fol
     """
     # GIVEN a test database populated with test data, and a song maintenance form
     db_tmp_path = os.path.join(temp_folder, 'test-song-maint-merge-authors.sqlite')
-    print(db_tmp_path)
-
-    # def cleanup_db():
-    #     try:
-    #         os.unlink(db_tmp_path)
-    #     except Exception:
-    #         # Ignore exceptions
-    #         pass
-
-    # request.addfinalizer(cleanup_db)
-
     # Create a db manager
     manager = DBManager('songs', init_schema, db_file_path=db_tmp_path)
-
     # create 2 song books, both with the same name
     author1 = Author(first_name='John', last_name='Newton', display_name='John Newton')
     manager.save_object(author1)
     author2 = Author(first_name='John', last_name='Newton', display_name='John Newton')
     manager.save_object(author2)
-
     # create 3 songs, all with same search_title
     song1 = Song()
     song1.title = 'test song1'
@@ -599,21 +586,18 @@ def test_merge_authors(request, registry: Registry, settings: Settings, temp_fol
     song3.search_title = 'test song'
     song3.search_lyrics = 'lyrics3'
     manager.save_object(song3)
-
     # associate songs with authors
     song1.add_author(author1)
     song2.add_author(author1)
     song3.add_author(author2)
-
     manager.save_objects([song1, song2, song3])
-
     song_maintenance_form = SongMaintenanceForm(manager)
 
     # WHEN the song books are merged, getting rid of book1
-    song_maintenance_form.merge_authors(author1)
+    with patch.object(Song, 'init_on_load') as mock_init_on_load:
+        song_maintenance_form.merge_authors(author1)
 
     # THEN the database should reflect correctly the merge
-
     songs = manager.get_all_objects(Song, Song.search_title == 'test song')
     author_song1 = manager.get_all_objects(AuthorSong, AuthorSong.author_id == author1.id)
     author_song2 = manager.get_all_objects(AuthorSong, AuthorSong.author_id == author2.id)
@@ -624,7 +608,6 @@ def test_merge_authors(request, registry: Registry, settings: Settings, temp_fol
     song3_author2 = manager.get_all_objects(AuthorSong, and_(AuthorSong.author_id == author2.id,
                                                              AuthorSong.song_id == song3.id))
     authors = manager.get_all_objects(Author, Author.display_name == 'John Newton')
-
     # song records should not be deleted
     assert len(songs) == 3
     # the old author should have been deleted
@@ -637,3 +620,120 @@ def test_merge_authors(request, registry: Registry, settings: Settings, temp_fol
     assert len(song1_author2) == 1
     assert len(song2_author2) == 1
     assert len(song3_author2) == 1
+    assert mock_init_on_load.call_count == 2
+    mock_init_on_load.assert_any_call(force_song_detail_recalculation=True)
+
+
+@patch('openlp.plugins.songs.forms.songmaintenanceform.critical_error_message_box')
+@patch('openlp.plugins.songs.forms.songmaintenanceform.translate')
+def test_on_edit_author_button_clicked_new_author(mock_translate, mock_critical_error, maintenance_form):
+    """
+    Test the on_edit_author_button_clicked method without any conflict
+    """
+    # Given: A mock author and setup for editing
+    mock_translate.return_value = 'Translated message'
+    author = MagicMock()
+    author.id = 1
+    author.first_name = 'John'
+    author.last_name = 'Doe'
+    author.display_name = 'John Doe'
+    author.songs = [MagicMock(init_on_load=MagicMock())]
+    maintenance_form.authors_list_widget = MagicMock()
+    maintenance_form._get_current_item_id = MagicMock(return_value=1)
+    maintenance_form.manager.get_object = MagicMock(return_value=author)
+    maintenance_form.author_form.auto_display_name = True
+    maintenance_form.author_form.first_name_edit = MagicMock()
+    maintenance_form.author_form.last_name_edit = MagicMock()
+    maintenance_form.author_form.display_edit = MagicMock()
+    maintenance_form.author_form.first_name_edit.text.return_value = 'Johnny'
+    maintenance_form.author_form.last_name_edit.text.return_value = 'Doestar'
+    maintenance_form.author_form.display_edit.text.return_value = 'Johnny Doestar'
+    maintenance_form.author_form.exec = MagicMock(return_value=QtWidgets.QDialog.Accepted)
+    maintenance_form.check_author_exists = MagicMock(return_value=True)
+    maintenance_form.manager.save_object = MagicMock(return_value=True)
+    maintenance_form.reset_authors = MagicMock()
+    maintenance_form.from_song_edit = False
+
+    with patch('openlp.plugins.songs.forms.songmaintenanceform.Registry') as mock_registry:
+        registry_instance = mock_registry.return_value
+        registry_instance.execute = MagicMock()
+
+        # When: on_edit_author_button_clicked is called
+        maintenance_form.on_edit_author_button_clicked()
+
+    # Then: The author is updated and saved, and related functions are called
+    assert author.first_name == 'Johnny'
+    assert author.last_name == 'Doestar'
+    assert author.display_name == 'Johnny Doestar'
+    maintenance_form.manager.save_object.assert_called_once_with(author)
+    maintenance_form.reset_authors.assert_called_once()
+    registry_instance.execute.assert_called_once_with('songs_load_list')
+    author.songs[0].init_on_load.assert_called_once_with(force_song_detail_recalculation=True)
+
+
+@patch('openlp.plugins.songs.forms.songmaintenanceform.critical_error_message_box')
+@patch('openlp.plugins.songs.forms.songmaintenanceform.translate')
+def test_on_edit_author_button_clicked_author_exists_and_merge(mock_translate, mock_critical_error, maintenance_form):
+    """
+    Test the on_edit_author_button_clicked method when the author exists and the user chooses to merge
+    """
+    # Given: A mock author setup where the author already exists
+    mock_translate.side_effect = lambda *args, **kwargs: args[-1]
+    author = MagicMock()
+    author.id = 1
+    author.first_name = 'John'
+    author.last_name = 'Doe'
+    author.display_name = 'John Doe'
+    maintenance_form.authors_list_widget = MagicMock()
+    maintenance_form._get_current_item_id = MagicMock(return_value=1)
+    maintenance_form.manager.get_object = MagicMock(return_value=author)
+    maintenance_form.author_form.first_name_edit = MagicMock(text=MagicMock(return_value='Johnny'))
+    maintenance_form.author_form.last_name_edit = MagicMock(text=MagicMock(return_value='Doestar'))
+    maintenance_form.author_form.display_edit = MagicMock(text=MagicMock(return_value='Johnny Doestar'))
+    maintenance_form.author_form.exec = MagicMock(return_value=QtWidgets.QDialog.Accepted)
+    maintenance_form.check_author_exists = MagicMock(return_value=False)
+    maintenance_form._merge_objects = MagicMock()
+    maintenance_form.merge_authors = MagicMock()
+    maintenance_form.reset_authors = MagicMock()
+    mock_critical_error.return_value = QtWidgets.QMessageBox.StandardButton.Yes
+
+    # When: on_edit_author_button_clicked is called
+    maintenance_form.on_edit_author_button_clicked()
+
+    # Then: The merge flow is triggered
+    maintenance_form._merge_objects.assert_called_once_with(author, maintenance_form.merge_authors,
+                                                            maintenance_form.reset_authors)
+
+
+@patch('openlp.plugins.songs.forms.songmaintenanceform.critical_error_message_box')
+@patch('openlp.plugins.songs.forms.songmaintenanceform.translate')
+def test_on_edit_author_button_clicked_author_exists_and_user_declines_merge(mock_translate, mock_critical_error,
+                                                                             maintenance_form):
+    """
+    Test the on_edit_author_button_clicked method when the author exists and the user declines to merge
+    """
+    # Given: A mock author setup with conflict and the user chooses not to merge
+    mock_translate.side_effect = lambda *args, **kwargs: args[-1]
+    author = MagicMock()
+    author.id = 1
+    author.first_name = 'John'
+    author.last_name = 'Doe'
+    author.display_name = 'John Doe'
+    maintenance_form.authors_list_widget = MagicMock()
+    maintenance_form._get_current_item_id = MagicMock(return_value=1)
+    maintenance_form.manager.get_object = MagicMock(return_value=author)
+    maintenance_form.author_form.first_name_edit = MagicMock(text=MagicMock(return_value='Johnny'))
+    maintenance_form.author_form.last_name_edit = MagicMock(text=MagicMock(return_value='Doestar'))
+    maintenance_form.author_form.display_edit = MagicMock(text=MagicMock(return_value='Johnny Doestar'))
+    maintenance_form.author_form.exec = MagicMock(return_value=QtWidgets.QDialog.Accepted)
+    maintenance_form.check_author_exists = MagicMock(return_value=False)
+    mock_critical_error.return_value = QtWidgets.QMessageBox.StandardButton.No
+
+    # When: on_edit_author_button_clicked is called
+    maintenance_form.on_edit_author_button_clicked()
+
+    # Then: The original author names are restored, and error is shown
+    assert author.first_name == 'John'
+    assert author.last_name == 'Doe'
+    assert author.display_name == 'John Doe'
+    mock_critical_error.assert_called()

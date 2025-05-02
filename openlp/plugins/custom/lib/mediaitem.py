@@ -74,7 +74,6 @@ class CustomMediaItem(MediaManagerItem):
         self.toolbar.addSeparator()
         self.add_search_to_toolbar()
         # Signals and slots
-        self.search_text_edit.cleared.connect(self.on_clear_text_button_click)
         self.search_text_edit.searchTypeChanged.connect(self.on_search_text_button_clicked)
         Registry().register_function('custom_load_list', self.load_list)
         Registry().register_function('custom_preview', self.on_preview_click)
