@@ -478,42 +478,29 @@ def test_on_search_text_button_clicked_cclinumber(MockSong: MagicMock, fav_filte
     mocked_display_results.assert_called_once_with(['Amazing Grace'])
 
 
-def test_display_results_song(media_item: SongMediaItem):
+def test_display_results_song(media_item):
     """
     Test displaying song search results with basic song
     """
     # GIVEN: Search results, plus a mocked QtListWidgetItem
     with patch('openlp.core.lib.QtWidgets.QListWidgetItem') as MockedQListWidgetItem:
-        mocked_author = MagicMock(display_name='My Author')
-        mocked_song = MagicMock(id=1, title='My Song', sort_key='My Song', temporary=False,
-                                authors=[mocked_author])
-        mocked_song_temp = MagicMock(id=2, title='My Temporary', sort_key='My Temporary', temporary=True,
-                                     authors=[mocked_author])
-        mocked_song_media = MagicMock(id=3, title='My Song Other', sort_key='My Song Other', temporary=False,
-                                      authors=[mocked_author], media_files=[MagicMock()])
-        mocked_search_results = [mocked_song, mocked_song_temp, mocked_song_media]
+        mocked_song = MagicMock(id=1, sort_key='My Song', song_detail='My Song (My Author)', temporary=False)
+        mocked_song_temp = MagicMock(id=2, sort_key='My Temporary', song_detail='My Temporary (Skipped)',
+                                     temporary=True)
+        mock_search_results = [mocked_song, mocked_song_temp]
         mocked_list_item = MagicMock()
-        mocked_list_item_media = MagicMock()
-        MockedQListWidgetItem.side_effect = [mocked_list_item, mocked_list_item_media]
+        MockedQListWidgetItem.return_value = mocked_list_item
         media_item.auto_select_id = 1
 
         # WHEN: I display song search results
-        media_item.display_results_song(mocked_search_results)
+        media_item.display_results_song(mock_search_results)
 
         # THEN: The current list view is cleared, the widget is created, and the relevant attributes set
         media_item.list_view.clear.assert_called_with()
         media_item.save_auto_select_id.assert_called_with()
-        assert MockedQListWidgetItem.call_args_list == [
-            call('My Song (My Author)'),
-            call('My Song Other (A) (My Author)')
-        ]
+        MockedQListWidgetItem.assert_called_once_with(mocked_song.song_detail)
         mocked_list_item.setData.assert_called_once_with(QtCore.Qt.ItemDataRole.UserRole, mocked_song.id)
-        mocked_list_item_media.setData.assert_called_once_with(QtCore.Qt.ItemDataRole.UserRole,
-                                                               mocked_song_media.id)
-        assert media_item.list_view.addItem.call_args_list == [
-            call(mocked_list_item),
-            call(mocked_list_item_media)
-        ]
+        media_item.list_view.addItem.assert_called_once_with(mocked_list_item)
         media_item.list_view.setCurrentItem.assert_called_with(mocked_list_item)
 
 

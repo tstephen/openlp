@@ -119,6 +119,7 @@ from sqlalchemy.types import Boolean, DateTime, Integer, Unicode, UnicodeText
 from openlp.core.common.i18n import get_natural_key, translate
 from openlp.core.db.types import PathType
 from openlp.core.db.helpers import init_db
+from openlp.core.lib import create_separated_list
 
 
 Base = declarative_base()
@@ -129,6 +130,10 @@ songs_topics_table = Table(
     Column('song_id', Integer, ForeignKey('songs.id'), primary_key=True),
     Column('topic_id', Integer, ForeignKey('topics.id'), primary_key=True)
 )
+
+
+sort_key_cache = {}
+song_detail_cache = {}
 
 
 class AuthorType(object):
@@ -315,14 +320,31 @@ class Song(Base):
         return [author_song.author for author_song in self.authors_songs]
 
     @reconstructor
-    def init_on_load(self):
+    def init_on_load(self, force_song_detail_recalculation=False):
         """
-        Precompute a natural sorting, locale aware sorting key.
+        Precompute and cache performance-sensitive values:
+        - A locale-aware natural sort key based on the song title.
+        - A display text for the song list, composed of author names or the title.
 
-        Song sorting is performance sensitive operation.
-        To get maximum speed lets precompute the sorting key.
+        This avoids repeated computation during sorting and rendering.
         """
-        self.sort_key = get_natural_key(self.title)
+        sort_key = sort_key_cache.get(self.title)
+        if sort_key is None:
+            sort_key = get_natural_key(self.title)
+            sort_key_cache[self.title] = sort_key
+        self.sort_key = sort_key
+
+        key = f'{self.id}-{self.last_modified}'
+        song_detail = song_detail_cache.get(key)
+        if song_detail is None or force_song_detail_recalculation:
+            author_list = [author.display_name for author in self.authors]
+            text = create_separated_list(author_list) if author_list else self.title
+            if len(self.media_files) > 0:
+                song_detail = f'{self.title} (A) ({text})'
+            else:
+                song_detail = '{title} ({author})'.format(title=self.title, author=text)
+            song_detail_cache[key] = song_detail
+        self.song_detail = song_detail
 
     def add_author(self, author, author_type=None):
         """

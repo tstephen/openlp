@@ -1363,6 +1363,7 @@ class EditSongForm(QtWidgets.QDialog, RegistryProperties):
         self.clear_caches()
         if self._validate_song():
             self.save_song()
+            self.song.init_on_load(force_song_detail_recalculation=True)
             self.song = None
             QtWidgets.QDialog.accept(self)
 

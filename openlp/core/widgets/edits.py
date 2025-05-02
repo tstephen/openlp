@@ -54,7 +54,6 @@ class SearchEdit(QtWidgets.QLineEdit):
     This is a specialised QLineEdit with a "clear" button inside for searches.
     """
     searchTypeChanged = QtCore.Signal(int)
-    cleared = QtCore.Signal()
 
     def __init__(self, parent, settings_section):
         """
@@ -176,12 +175,9 @@ class SearchEdit(QtWidgets.QLineEdit):
 
     def _on_clear_button_clicked(self):
         """
-        Internally implemented slot to react to the clear button being clicked to clear the line edit. Once it has
-        cleared the line edit, it emits the ``cleared()`` signal so that an application can react to the clearing of the
-        line edit.
+        Internally implemented slot to react to the clear button being clicked to clear the line edit.
         """
         self.clear()
-        self.cleared.emit()
 
     def _on_menu_action_triggered(self):
         """

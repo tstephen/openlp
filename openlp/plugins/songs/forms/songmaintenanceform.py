@@ -313,6 +313,8 @@ class SongMaintenanceForm(QtWidgets.QDialog, Ui_SongMaintenanceDialog, RegistryP
             author.display_name = self.author_form.display_edit.text()
             if self.check_author_exists(author, True):
                 if self.manager.save_object(author):
+                    for song in author.songs:
+                        song.init_on_load(force_song_detail_recalculation=True)
                     self.reset_authors()
                     if not self.from_song_edit:
                         Registry().execute('songs_load_list')
@@ -445,6 +447,7 @@ class SongMaintenanceForm(QtWidgets.QDialog, Ui_SongMaintenanceDialog, RegistryP
             for author_song in song.authors_songs:
                 song.add_author(existing_author, author_song.author_type)
                 song.remove_author(old_author, author_song.author_type)
+            song.init_on_load(force_song_detail_recalculation=True)
             self.manager.save_object(song)
         self.manager.delete_object(Author, old_author.id)
 

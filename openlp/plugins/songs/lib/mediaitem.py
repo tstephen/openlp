@@ -107,7 +107,6 @@ class SongMediaItem(MediaManagerItem):
         # Signals and slots
         Registry().register_function('songs_load_list', self.on_song_list_load)
         Registry().register_function('songs_preview', self.on_preview_click)
-        self.search_text_edit.cleared.connect(self.on_clear_text_button_click)
         self.search_text_edit.searchTypeChanged.connect(self.on_search_text_button_clicked)
         self.favourite_toggle_button.toggled.connect(self.on_favourite_toggle_button_clicked)
 
@@ -309,13 +308,7 @@ class SongMediaItem(MediaManagerItem):
             # Do not display temporary songs
             if song.temporary:
                 continue
-            author_list = [author.display_name for author in song.authors]
-            text = create_separated_list(author_list) if author_list else song.title
-            if len(song.media_files) > 0:
-                song_detail = f'{song.title} (A) ({text})'
-            else:
-                song_detail = '{title} ({author})'.format(title=song.title, author=text)
-            song_name = QtWidgets.QListWidgetItem(song_detail)
+            song_name = QtWidgets.QListWidgetItem(song.song_detail)
             song_name.setData(QtCore.Qt.ItemDataRole.UserRole, song.id)
             self.list_view.addItem(song_name)
             # Auto-select the item if name has been set
