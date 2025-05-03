@@ -33,6 +33,8 @@ def upload_file(upload_url: str, filename: Path, destination: str, upload_token:
     is_success = response.status_code == 201
     if is_success:
         print('Uploaded successfully')
+    else:
+        print(f'Error: {response.status_code}: {response.text}')
     return is_success
 
 

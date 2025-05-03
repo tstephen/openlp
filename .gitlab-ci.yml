@@ -263,6 +263,31 @@ build-source:
   rules:
     - if: $CI_COMMIT_BRANCH == "master"
 
+build-flatpak:
+  stage: build
+  image: $IMAGE_BASE/flatpak
+  script: |
+      mkdir -p dist
+      if [ "$CI_COMMIT_TAG" != "" ]; then
+          VERSION="${CI_COMMIT_TAG}"
+      else
+          git fetch --tags
+          python3 setup.py sdist
+          VERSION=`cat openlp/.version`
+      fi
+      # Download packaging repo
+      curl -SL "https://gitlab.com/${CI_PROJECT_NAMESPACE}/${PACKAGING_REPOSITORY_NAME}/-/archive/${PACKAGING_BRANCH_NAME}/${PACKAGING_ZIP_FILE_NAME}" -o "/tmp/${PACKAGING_ZIP_FILE_NAME}"
+      unzip "/tmp/${PACKAGING_ZIP_FILE_NAME}"
+      cd ${PACKAGING_DIRECTORY_NAME}
+      python3 builders/flatpak-builder.py --project ${CI_PROJECT_ID} --token ${CI_JOB_TOKEN} --token-type ci "$VERSION"
+  artifacts:
+    name: $CI_COMMIT_REF_SLUG
+    paths:
+      - dist
+    expire_in: 1 days
+  rules:
+    - if: $CI_COMMIT_TAG
+
 build-windows:
   stage: build
   extends: test-windows
@@ -334,7 +359,7 @@ deploy-nightlies:
   stage: deploy
   image: $IMAGE_BASE/debian
   script:
-    - python scripts/upload-build.py dist/*
+    - python3 scripts/upload-build.py dist/*
   rules:
     - if: $CI_COMMIT_BRANCH == "master"
 
@@ -342,9 +367,9 @@ deploy-installers-for-windows-and-macos:
   stage: deploy
   image: $IMAGE_BASE/debian
   script:
-    - python scripts/upload-build.py dist/*.exe
-    - python scripts/upload-build.py dist/*.msi
-    - python scripts/upload-build.py dist/*.dmg
+    - python3 scripts/upload-build.py dist/*.exe
+    - python3 scripts/upload-build.py dist/*.msi
+    - python3 scripts/upload-build.py dist/*.dmg
   rules:
     - if: $CI_COMMIT_TAG
 
