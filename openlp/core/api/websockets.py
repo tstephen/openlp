@@ -29,13 +29,16 @@ import uuid
 from dataclasses import asdict, dataclass
 from typing import Optional, Union
 
-import time
 from PySide6 import QtCore
 
 try:
-    from websockets import serve
+    # New way to do websockets stuff
+    from websockets.asyncio.server import serve
 except ImportError:
-    from websockets.server import serve
+    try:
+        from websockets.server import serve
+    except ImportError:
+        from websockets import serve
 
 from openlp.core.common.mixins import LogMixin, RegistryProperties
 from openlp.core.common.registry import Registry, RegistryBase
@@ -67,6 +70,11 @@ class WebSocketWorker(ThreadWorker, RegistryProperties, LogMixin):
     The main idea is that state-based websocket connections will be removed in future, in favour of message-based
     connections (this will also help save some bandwidth on busy networks)
     """
+    async def run_server(self, address: str, port: int):
+        """Run the server"""
+        self.server = await serve(self.handle_websocket, address, port)
+        await self.server.start_serving()
+
     def start(self):
         """
         Run the worker.
@@ -74,34 +82,10 @@ class WebSocketWorker(ThreadWorker, RegistryProperties, LogMixin):
         settings = Registry().get('settings_thread')
         address = settings.value('api/ip address')
         port = settings.value('api/websocket port')
-        # Start the event loop
-        self.event_loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(self.event_loop)
-        # Create the websocker server
-        loop = 1
         self.server = None
         self.state_queues = set()
         self.message_queues = set()
-        while not self.server:
-            try:
-                self.server = serve(self.handle_websocket, address, port)
-                log.debug('WebSocket server started on {addr}:{port}'.format(addr=address, port=port))
-            except Exception:
-                log.exception('Failed to start WebSocket server')
-                time.sleep(0.1)
-            if not self.server and loop > 3:
-                log.error('Unable to start WebSocket server {addr}:{port}, giving up'.format(addr=address, port=port))
-                break
-            loop += 1
-        if self.server:
-            # If the websocket server exists, start listening
-            try:
-                self.event_loop.run_until_complete(self.server)
-                self.event_loop.run_forever()
-            except Exception:
-                log.exception('Failed to start WebSocket server')
-            finally:
-                self.event_loop.close()
+        asyncio.run(self.run_server(address, port))
         self.quit.emit()
 
     def stop(self):
@@ -109,9 +93,10 @@ class WebSocketWorker(ThreadWorker, RegistryProperties, LogMixin):
         Stop the websocket server
         """
         try:
-            self.event_loop.call_soon_threadsafe(self.event_loop.stop)
+            if self.server:
+                self.server.close()
         except BaseException:
-            pass
+            log.exception('Unable to stop websockets server')
 
     async def handle_websocket(self, websocket, path: str):
         """
