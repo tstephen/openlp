@@ -22,7 +22,7 @@
 Functional tests to test the Http Server Class.
 """
 import pytest
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import AsyncMock, MagicMock, call, patch
 
 from openlp.core.api.websocketspoll import WebSocketPoller
 from openlp.core.api.websockets import WebSocketMessage, WebSocketWorker, WebSocketServer, websocket_send_message
@@ -170,75 +170,59 @@ def test_websocket_send_message_fail(registry: Registry, settings: Settings):
     assert result is False
 
 
+@pytest.mark.asyncio
 @patch('openlp.core.api.websockets.serve')
+async def test_websocket_worker_run_server(mocked_serve: AsyncMock, worker: WebSocketWorker):
+    """Test the run_server() method of the worker"""
+    # GIVEN: A mocked serve function and an instance of the WebSocketServer class
+    mocked_server = MagicMock()
+    mocked_serve.return_value = mocked_server
+    # WHEN: run_server is called
+    await worker.run_server('0.0.0.0', 9000)
+    mocked_serve.assert_awaited_once_with(worker.handle_websocket, '0.0.0.0', 9000)
+    mocked_server.start_serving.assert_called_once_with()
+    assert worker.server is mocked_server, 'The worker.server attribute should be the awaited object'
+
+
 @patch('openlp.core.api.websockets.asyncio')
-@patch('openlp.core.api.websockets.log')
-def test_websocket_worker_start(mocked_log: MagicMock, mocked_asyncio: MagicMock, mocked_serve: MagicMock,
-                                worker: WebSocketWorker, settings: Settings):
+def test_websocket_worker_start(mocked_asyncio: MagicMock, worker: WebSocketWorker):
     """
     Test the start function of the worker
     """
-    # GIVEN: A mocked serve function and event loop
-    mocked_serve.return_value = 'server_thing'
-    event_loop = MagicMock()
-    mocked_asyncio.new_event_loop.return_value = event_loop
+    # GIVEN: A worker object
     # WHEN: The start function is called
-    worker.start()
+    with patch.object(worker, 'run_server') as mocked_run_server, \
+            patch.object(worker, 'quit') as mocked_quit:
+        worker.start()
     # THEN: No error occurs
-    mocked_serve.assert_called_once()
-    event_loop.run_until_complete.assert_called_once_with('server_thing')
-    event_loop.run_forever.assert_called_once_with()
-    mocked_log.exception.assert_not_called()
-    # Because run_forever is mocked, it doesn't stall the thread so close will be called immediately
-    event_loop.close.assert_called_once_with()
+    mocked_run_server.assert_called_once()
+    mocked_quit.emit.assert_called_once()
 
 
-@patch('openlp.core.api.websockets.serve')
-@patch('openlp.core.api.websockets.asyncio')
-@patch('openlp.core.api.websockets.log')
-def test_websocket_worker_start_fail(mocked_log: MagicMock, mocked_asyncio: MagicMock, mocked_serve: MagicMock,
-                                     worker: WebSocketWorker, settings: Settings):
-    """
-    Test the start function of the worker handles a error nicely
-    """
-    # GIVEN: A mocked serve function and event loop. run_until_complete returns a error
-    mocked_serve.return_value = 'server_thing'
-    event_loop = MagicMock()
-    mocked_asyncio.new_event_loop.return_value = event_loop
-    event_loop.run_until_complete.side_effect = Exception()
+def test_websocket_worker_stop(worker: WebSocketWorker, settings: Settings):
+    """Test that the worker stops"""
+    # GIVEN: A WebSocketWorker with a mocked server
+    worker.server = MagicMock()
 
-    # WHEN: The start function is called
-    worker.start()
+    # WHEN: stop is called
+    worker.stop()
 
-    # THEN: An exception is logged but is handled and the event_loop is closed
-    mocked_serve.assert_called_once()
-    event_loop.run_until_complete.assert_called_once_with('server_thing')
-    event_loop.run_forever.assert_not_called()
-    mocked_log.exception.assert_called_once()
-    event_loop.close.assert_called_once_with()
+    # THEN: No exception and the method should have been called
+    worker.server.close.assert_called_once_with()
 
 
-@patch('openlp.core.api.websockets.serve')
-@patch('openlp.core.api.websockets.asyncio')
-@patch('openlp.core.api.websockets.log')
-def test_websocket_worker_start_exception(mocked_log: MagicMock, mocked_asyncio: MagicMock, mocked_serve: MagicMock,
-                                          worker: WebSocketWorker, settings: Settings):
-    """
-    Test the start function of the worker handles a error nicely
-    """
-    # GIVEN: A mocked serve function and event loop. run_until_complete returns a error
-    mocked_serve.return_value = None
-    mocked_serve.side_effect = Exception('Test')
+def test_websocket_worker_stop_exception(worker: WebSocketWorker, settings: Settings):
+    """Test that the worker stops"""
+    # GIVEN: A WebSocketWorker with a mocked server
+    worker.server = MagicMock()
+    worker.server.close.side_effect = Exception
 
-    # WHEN: The start function is called
-    worker.start()
+    # WHEN: stop is called
+    with patch('openlp.core.api.websockets.log') as mocked_log:
+        worker.stop()
 
-    # THEN: An exception is logged but is handled and the event_loop is closed
-    assert worker.server is None
-    assert not worker.state_queues
-    assert not worker.message_queues
-    mocked_log.exception.assert_called_with('Failed to start WebSocket server')
-    mocked_log.error.assert_called_once_with('Unable to start WebSocket server 0.0.0.0:4317, giving up')
+    # THEN: No exception and the method should have been called
+    mocked_log.exception.assert_called_once_with('Unable to stop websockets server')
 
 
 def test_websocket_server_bootstrap_post_set_up(settings: Settings):
@@ -457,16 +441,3 @@ def test_add_message_to_queues_no_loop(worker: WebSocketWorker, settings: Settin
 
     # THEN: Worker add_message_to_queues should be called
     worker.event_loop.call_soon_threadsafe.assert_not_called()
-
-
-def test_worker_stop(worker: WebSocketWorker, settings: Settings):
-    """Test that the worker stops"""
-    # GIVEN: A WebSocketWorker
-    worker.event_loop = MagicMock()
-    worker.event_loop.call_soon_threadsafe.side_effect = Exception('Test')
-
-    # WHEN: stop is called
-    worker.stop()
-
-    # THEN: No exception and the method should have been called
-    worker.event_loop.call_soon_threadsafe.assert_called_once()

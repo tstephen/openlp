@@ -956,10 +956,10 @@ def test_wait_for_threads_no_threads(MockApp, main_window_reduced):
 def test_wait_for_threads_disappearing_thread(MockApp, main_window_reduced):
     """Test that the wait_for_threads() method correctly ignores threads that resolve themselves"""
     # GIVEN: A mocked application, and a reduced main window
-    main_window_reduced.application.worker_threads = MagicMock(**{'keys.side_effect': [['http'], []]})
-
     # WHEN: _wait_for_threads() is called
-    main_window_reduced._wait_for_threads()
+    with patch.object(main_window_reduced.application, 'worker_threads') as worker_threads_mock:
+        worker_threads_mock.keys.side_effect = [['http'], []]
+        main_window_reduced._wait_for_threads()
 
     # THEN: The correct methods should have been called
     assert MockApp.processEvents.call_count == 0, 'processEvents() should not have been called'

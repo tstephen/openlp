@@ -21,10 +21,14 @@
 """
 The :mod:`openlp.core.threading` module contains some common threading code
 """
+import logging
+
 from PySide6 import QtCore
 
 from openlp.core.common.mixins import LogMixin
 from openlp.core.common.registry import Registry
+
+log = logging.getLogger(__name__)
 
 
 class ThreadWorker(QtCore.QObject, LogMixin):
@@ -100,6 +104,7 @@ def is_thread_finished(thread_name):
         app = Registry().get('application')
         return thread_name not in app.worker_threads or app.worker_threads[thread_name]['thread'].isFinished()
     except KeyError:
+        log.exception(f'Thread {thread_name} not found when checking for finished threads')
         return True
 
 
@@ -119,5 +124,6 @@ def make_remove_thread(thread_name):
         """
         application = Registry().get('application')
         if application and thread_name in application.worker_threads:
+            log.debug(f'Removing thread {thread_name}')
             del application.worker_threads[thread_name]
     return remove_thread
