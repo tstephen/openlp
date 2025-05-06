@@ -26,6 +26,8 @@ This module is for controlling powerpoint. PPT API documentation:
 """
 import logging
 
+from PySide6 import QtCore
+
 from openlp.core.common import trace_error_handler
 from openlp.core.common.i18n import UiStrings
 from openlp.core.common.platform import is_win
@@ -39,8 +41,10 @@ if is_win():
     from win32com.client import Dispatch
     import win32con
     import win32gui
-    import win32ui
+    import win32api
     import pywintypes
+    import winreg
+    import ctypes
 
 log = logging.getLogger(__name__)
 
@@ -215,7 +219,12 @@ class PowerpointDocument(PresentationDocument):
         log.debug('close_presentation')
         if self.presentation:
             try:
+                check_for_ghost_window = (self.presentation.SlideShowSettings.ShowType == 2)
+                if check_for_ghost_window:
+                    current_window_position = self._get_QRect_from_current_powerpoint_window_position()
                 self.presentation.Close()
+                if check_for_ghost_window and isinstance(current_window_position, QtCore.QRect):
+                    self.close_powerpoint_ghost_window(current_window_position)
             except (AttributeError, pywintypes.com_error):
                 log.exception('Caught exception while closing powerpoint presentation')
                 trace_error_handler(log)
@@ -251,9 +260,12 @@ class PowerpointDocument(PresentationDocument):
                 return False
             if self.presentation.SlideShowWindow.View is None:
                 return False
-        except (AttributeError, pywintypes.com_error):
-            log.exception('Caught exception while in is_active')
-            trace_error_handler(log)
+        except (AttributeError, pywintypes.com_error) as e:
+            # PowerPoint COM error 2147188160: occurs in windowed mode with no SlideShowWindow. (e.g. ShowDesktop)
+            error_code = getattr(e, 'excepinfo', [None] * 6)[5]
+            if error_code != -2147188160:
+                log.exception('Caught exception while in is_active')
+                trace_error_handler(log)
             return False
         return True
 
@@ -320,7 +332,16 @@ class PowerpointDocument(PresentationDocument):
         """
         log.debug('stop_presentation')
         try:
+            check_for_ghost_window = (self.presentation.SlideShowSettings.ShowType == 2)
+            if check_for_ghost_window:
+                current_window_position = self._get_QRect_from_current_powerpoint_window_position()
+            self.presentation.SlideShowSettings.ShowType = 4
             self.presentation.SlideShowWindow.View.Exit()
+            if check_for_ghost_window and isinstance(current_window_position, QtCore.QRect):
+                if self.close_powerpoint_ghost_window(current_window_position):
+                    # The closure of the ghost window causes the presentation to be closed.
+                    # It is therefore reloaded immediately.
+                    self.load_presentation()
         except (AttributeError, pywintypes.com_error):
             log.exception('Caught exception while in stop_presentation')
             trace_error_handler(log)
@@ -332,51 +353,171 @@ class PowerpointDocument(PresentationDocument):
             Starts a presentation from the beginning.
             """
             log.debug('start_presentation')
-            # SlideShowWindow measures its size/position by points, not pixels
-            # https://technet.microsoft.com/en-us/library/dn528846.aspx
-            try:
-                dpi = win32ui.GetActiveWindow().GetDC().GetDeviceCaps(88)
-            except win32ui.error:
-                try:
-                    dpi = win32ui.GetForegroundWindow().GetDC().GetDeviceCaps(88)
-                except win32ui.error:
-                    dpi = 96
-            size = ScreenList().current.display_geometry
             ppt_window = None
+            change_powerpoint_display_monitor = (Registry().get('settings')
+                                                 .value('presentations/powerpoint control window')
+                                                 == QtCore.Qt.CheckState.Unchecked)
+            is_fullscreen = (ScreenList().current.custom_geometry is None)
+            # Configure and run PowerPoint
             try:
-                # Disable the presentation console
+                if change_powerpoint_display_monitor:
+                    if is_fullscreen:
+                        self.presentation.SlideShowSettings.ShowType = 1
+                        win_displayname = self.get_win_display_name_by_geometry(ScreenList().current.display_geometry)
+                        original_powerpoint_display_monitor = self.modify_powerpoint_display_monitor(win_displayname)
+                    else:
+                        self.presentation.SlideShowSettings.ShowType = 2
+                        self.presentation.SlideShowSettings.ShowScrollbar = 0
                 self.presentation.SlideShowSettings.ShowPresenterView = 0
-                # Start the presentation
                 ppt_window = self.presentation.SlideShowSettings.Run()
+                if change_powerpoint_display_monitor:
+                    if is_fullscreen:
+                        self.modify_powerpoint_display_monitor(original_powerpoint_display_monitor)
+                    else:
+                        self.adjust_powerpoint_window_position(ppt_window, hwnd_to_scale=None)
             except (AttributeError, pywintypes.com_error):
                 log.exception('Caught exception while in start_presentation')
                 trace_error_handler(log)
                 self.show_error_msg()
-            if ppt_window and not Registry().get('settings').value('presentations/powerpoint control window'):
-                try:
-                    ppt_window.Top = size.y() * 72 / dpi
-                    ppt_window.Height = size.height() * 72 / dpi
-                    ppt_window.Left = size.x() * 72 / dpi
-                    ppt_window.Width = size.width() * 72 / dpi
-                except AttributeError:
-                    log.exception('AttributeError while in start_presentation')
             # Find the presentation window and save the handle for later
             self.presentation_hwnd = None
             if ppt_window:
+                size = ScreenList().current.display_geometry
                 log.debug('main display size:  y={y:d}, height={height:d}, '
-                          'x={x:d}, width={width:d}'.format(y=size.y(), height=size.height(),
-                                                            x=size.x(), width=size.width()))
+                          'x={x:d}, width={width:d}'.format(y=int(size.y()), height=int(size.height()),
+                                                            x=int(size.x()), width=int(size.width())))
                 try:
-                    win32gui.EnumWindows(self._window_enum_callback, size)
+                    win32gui.EnumWindows(lambda hwnd,
+                                         _: self._window_enum_callback(hwnd, size, search_presentation_window=True),
+                                         None)
                 except pywintypes.error:
                     # When _window_enum_callback returns False to stop the enumeration (looping over open windows)
                     # it causes an exception that is ignored here
                     pass
+                # Move PowerPoint window slightly so caption and border are outside the geometry used by OpenLP
+                if not is_fullscreen:
+                    self.adjust_powerpoint_window_position(ppt_window, self.presentation_hwnd)
+                # It is a known bug that BringWindowToTop and SetForegroundWindow don't work properly in some cases.
+                # A widely accepted workaround is pressing a key before calling the API,
+                # but even that does not guarantee success. Here, BringWindowToTop is used without any workarounds,
+                # just to increase the chances of it showing up on top, in case there are other programs running
+                # on the monitor which ideally shouldn't be the case in a multi screen setup anyway.
+                try:
+                    win32gui.BringWindowToTop(self.presentation_hwnd)
+                except Exception as e:
+                    log.exception(f'Caught exception while running BringWindowToTop in start_presentation. {e}')
             # Make sure powerpoint doesn't steal focus, unless we're on a single screen setup
             if len(ScreenList()) > 1:
                 Registry().get('main_window').activateWindow()
 
-    def _window_enum_callback(self, hwnd, size):
+        def close_powerpoint_ghost_window(self, size):
+            """
+            Closes a 'ghost' PowerPoint window that appears when PowerPoint is in windowed mode and
+            SlideShowWindow.View.Exit() or presentation.Close() is called.
+            Ideally this function shouldn't exist but it seems there is no way
+            to prevent the creation of this new window.
+            """
+            log.debug('close_powerpoint_ghost_window')
+            # Since the presentation window got closed, presentation_hwnd can be reused for this 'ghost window'
+            self.presentation_hwnd = None
+            try:
+                win32gui.EnumWindows(lambda hwnd,
+                                     _: self._window_enum_callback(hwnd, size, search_presentation_window=False),
+                                     None)
+            except pywintypes.error:
+                # When _window_enum_callback returns False to stop the enumeration (looping over open windows),
+                # it causes an exception that is ignored here
+                pass
+            if self.presentation_hwnd is not None:
+                try:
+                    WM_CLOSE = 0x0010
+                    ctypes.windll.user32.PostMessageW(self.presentation_hwnd, WM_CLOSE, 0, 0)
+                    return True
+                except Exception:
+                    log.warning('Caught exception while trying to close possible PowerPoint ghost window')
+                    trace_error_handler(log)
+                finally:
+                    self.presentation_hwnd = None
+
+        def get_win_display_name_by_geometry(self, qt_geometry):
+            try:
+                qt_tuple = (qt_geometry.x(),
+                            qt_geometry.y(),
+                            qt_geometry.x() + qt_geometry.width(),
+                            qt_geometry.y() + qt_geometry.height())
+                for hMonitor, hdcMonitor, win_rect in win32api.EnumDisplayMonitors():
+                    if qt_tuple == win_rect:
+                        info = win32api.GetMonitorInfo(hMonitor)
+                        return info['Device']
+            except Exception:
+                log.warning('Caught exception while in get_win_display_name_by_geometry')
+                trace_error_handler(log)
+            return None
+
+        def modify_powerpoint_display_monitor(self, new_value):
+            """
+            Changes the registry key used by PowerPoint to control which monitor is used when in fullscreen.
+            The state of the registry key before the change is cached and rolled back immediately after
+            the presentation is started.
+            """
+            if not isinstance(new_value, str):
+                log.warning('modify_powerpoint_display_monitor called with a new value that is not a string.')
+                return
+            pp_version = 'Failed to find PowerPoint version'
+            try:
+                pp_version = self.presentation.Parent.Application.Version
+                reg_path = rf'SOFTWARE\Microsoft\Office\{pp_version}\PowerPoint\Options'
+                reg_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0,
+                                         winreg.KEY_ALL_ACCESS | winreg.KEY_WOW64_32KEY)
+                try:
+                    original_value = winreg.QueryValueEx(reg_key, 'DisplayMonitor')[0]
+                except FileNotFoundError:
+                    original_value = None
+                if original_value != new_value:
+                    winreg.SetValueEx(reg_key, 'DisplayMonitor', 0, winreg.REG_SZ, new_value)
+                winreg.CloseKey(reg_key)
+                return original_value
+            except OSError:
+                log.warning(
+                    f'Unable to change PowerPoint setting for selecting the presentation monitor. '
+                    f'PowerPoint version used for registry access: {pp_version}')
+
+        def adjust_powerpoint_window_position(self, ppt_window, hwnd_to_scale=None):
+            """
+            Move PowerPoint window to geometry used by OpenLP or move PowerPoint window
+            so that the part of the window used fot the presentation it the same as the geometry used by OpenLP.
+            This function is only used when PowerPoint is run in windowed mode
+            """
+            # Calculate Border and Caption
+            caption_hight = 0
+            border_width = 0
+            if hwnd_to_scale is not None:
+                try:
+                    window_rect = ctypes.wintypes.RECT()
+                    usable_rect = ctypes.wintypes.RECT()
+                    ctypes.windll.user32.GetWindowRect(self.presentation_hwnd, ctypes.byref(window_rect))
+                    ctypes.windll.user32.GetClientRect(self.presentation_hwnd, ctypes.byref(usable_rect))
+                    window_width = window_rect.right - window_rect.left
+                    window_height = window_rect.bottom - window_rect.top
+                    client_width = usable_rect.right - usable_rect.left
+                    client_height = usable_rect.bottom - usable_rect.top
+                    border_width = (window_width - client_width) // 2
+                    caption_hight = window_height - client_height - border_width
+                except Exception:
+                    log.exception('Unable to calculate border and titlebar size.')
+                    trace_error_handler(log)
+            try:
+                dpi = ScreenList().current.raw_screen.logicalDotsPerInch()
+                size = ScreenList().current.display_geometry
+                ppt_window.Top = (size.y() - caption_hight) * 72 / dpi
+                ppt_window.Height = (size.height() + caption_hight + border_width) * 72 / dpi
+                ppt_window.Left = (size.x() - border_width) * 72 / dpi
+                ppt_window.Width = (size.width() + 2 * border_width) * 72 / dpi
+            except AttributeError:
+                log.exception('AttributeError while in adjust_powerpoint_window_position')
+                trace_error_handler(log)
+
+    def _window_enum_callback(self, hwnd, size, search_presentation_window=True):
         """
         Method for callback from win32gui.EnumWindows.
         Used to find the PowerPoint presentation window and stop it flashing in the taskbar.
@@ -396,14 +537,31 @@ class PowerpointDocument(PresentationDocument):
             size.height() <= powerpoint_height and \
             size.x() == left and \
             size.width() <= powerpoint_width and \
-            self.file_path.stem in window_title
+            window_title.startswith('PowerPoint')
+        if search_presentation_window:
+            handle_is_found = handle_is_found and self.file_path.stem in window_title
         if handle_is_found:
             log.debug('Found a match and will save the handle')
             self.presentation_hwnd = hwnd
-            # Stop PowerPoint from flashing in the taskbar.
-            win32gui.FlashWindowEx(self.presentation_hwnd, win32con.FLASHW_STOP, 0, 0)
+            if search_presentation_window:
+                # Stop PowerPoint from flashing in the taskbar.
+                win32gui.FlashWindowEx(self.presentation_hwnd, win32con.FLASHW_STOP, 0, 0)
         # Returning false stops the enumeration (looping over open windows).
         return not handle_is_found
+
+    def _get_QRect_from_current_powerpoint_window_position(self):
+        if not self.presentation:
+            return False
+        try:
+            dpi = ScreenList().current.raw_screen.logicalDotsPerInch()
+            return QtCore.QRect(self.presentation.SlideShowWindow.Left * dpi / 72,
+                                self.presentation.SlideShowWindow.Top * dpi / 72,
+                                self.presentation.SlideShowWindow.Width * dpi / 72,
+                                self.presentation.SlideShowWindow.Height * dpi / 72)
+        except Exception:
+            log.exception('Caught exception while calculating powerpoint position')
+            trace_error_handler(log)
+            return False
 
     def get_slide_number(self):
         """
