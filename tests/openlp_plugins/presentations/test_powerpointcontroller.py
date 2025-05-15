@@ -21,9 +21,10 @@
 """
 Functional tests to test the PowerPointController class and related methods.
 """
+import json
 from PySide6 import QtCore
 from pathlib import Path
-from unittest.mock import MagicMock, PropertyMock, patch
+from unittest.mock import MagicMock, PropertyMock, patch, mock_open
 import pytest
 
 from openlp.core.common.platform import is_win
@@ -38,9 +39,8 @@ if is_win():
 
 @pytest.fixture()
 def presentation_setup(settings):
-    gtf = patch('openlp.plugins.presentations.lib.powerpointcontroller.PresentationDocument._setup')
-    yield gtf.start()
-    gtf.stop()
+    with patch('openlp.plugins.presentations.lib.powerpointcontroller.PresentationDocument._setup') as mocked_setup:
+        yield mocked_setup
 
 
 def test_constructor(settings, mock_plugin):
@@ -80,47 +80,202 @@ def test_show_error_msg(presentation_setup):
                                                                  'present it.')
 
 
-def test_create_titles_and_notes(presentation_setup):
+def test_export_presentation_data_skips_if_already_exists(presentation_setup):
     """
-    Test creating the titles from PowerPoint
+    Test that export_presentation_data does nothing if data already exists.
     """
-    # GIVEN: mocked save_titles_and_notes, _get_text_from_shapes and two mocked slides
+    # GIVEN: A document where export data already exists
     doc = PowerpointDocument(MagicMock(), MagicMock())
-    doc.get_slide_count = MagicMock()
-    doc.get_slide_count.return_value = 2
-    doc.index_map = {1: 1, 2: 2}
+    doc.check_exported_presentation_data_exists = MagicMock(return_value=True)
     doc.save_titles_and_notes = MagicMock()
-    doc._PowerpointDocument__get_text_from_shapes = MagicMock()
+
+    # WHEN: export_presentation_data is called
+    doc.export_presentation_data()
+
+    # THEN: It should return early without saving or processing
+    doc.save_titles_and_notes.assert_not_called()
+
+
+@patch('openlp.plugins.presentations.lib.powerpointcontroller._get_text_from_shapes', return_value='NoteText')
+@patch('openlp.plugins.presentations.lib.powerpointcontroller.PresentationDocument.get_thumbnail_folder')
+def test_export_presentation_data_exports_all(mocked_get_thumb_folder, mock_get_text, presentation_setup):
+    """
+    Test that export_presentation_data creates thumbnails, saves titles and notes,
+    updates index_map, and writes index_map.txt file.
+    """
+    # GIVEN: A presentation with 2 visible slides and titles/notes
+    doc = PowerpointDocument(MagicMock(), MagicMock())
+    doc.check_exported_presentation_data_exists = MagicMock(return_value=False)
+    doc.save_titles_and_notes = MagicMock()
+    mocked_get_thumb_folder.return_value = Path('/mocked/thumb/folder')
+    doc.index_map = {}
+    slide1 = MagicMock()
+    slide1.SlideShowTransition.Hidden = False
+    slide1.Shapes.Title.TextFrame.TextRange.Text = 'Title 1'
+    slide1.Export = MagicMock()
+    slide2 = MagicMock()
+    slide2.SlideShowTransition.Hidden = False
+    slide2.Shapes.Title.TextFrame.TextRange.Text = 'Title 2'
+    slide2.Export = MagicMock()
+    doc.presentation = MagicMock()
+    doc.presentation.Slides.Count = 2
+    doc.presentation.Slides.side_effect = lambda i: [slide1, slide2][i - 1]
+    doc.presentation.PageSetup.SlideWidth = 1280
+    doc.presentation.PageSetup.SlideHeight = 720
+
+    # WHEN: export_presentation_data is called
+    with patch('builtins.open', mock_open()) as mock_file:
+        doc.export_presentation_data()
+
+    # THEN: Titles and notes are saved, thumbnails exported, index updated
+    assert doc.index_map == {1: 1, 2: 2}
+    assert doc.slide_count == 2
+    doc.save_titles_and_notes.assert_called_once_with(['Title 1', 'Title 2'], ['NoteText', 'NoteText'])
+    slide1.Export.assert_called_once()
+    slide2.Export.assert_called_once()
+    mock_file.assert_called_with(Path('/mocked/thumb/folder') / "index_map.txt", "w", encoding='utf-8')
+
+
+@patch('openlp.plugins.presentations.lib.powerpointcontroller._get_text_from_shapes', return_value='Note')
+@patch('openlp.plugins.presentations.lib.powerpointcontroller.PresentationDocument.get_thumbnail_folder')
+def test_export_presentation_data_skips_hidden_slides(mocked_get_thumb_folder, mock_get_text, presentation_setup):
+    """
+    Test that export_presentation_data skips hidden slides and only exports visible ones.
+    """
+    # GIVEN: A presentation with 3 slides, where 1 is hidden
+    doc = PowerpointDocument(MagicMock(), MagicMock())
+    doc.check_exported_presentation_data_exists = MagicMock(return_value=False)
+    doc.save_titles_and_notes = MagicMock()
+    mocked_get_thumb_folder.return_value = Path('/mocked/thumb/folder')
+    doc.index_map = {}
+    slide1 = MagicMock()
+    slide1.SlideShowTransition.Hidden = False
+    slide1.Shapes.Title.TextFrame.TextRange.Text = 'Title 1'
+    slide1.Export = MagicMock()
+    slide2 = MagicMock()
+    slide2.SlideShowTransition.Hidden = True
+    slide3 = MagicMock()
+    slide3.SlideShowTransition.Hidden = False
+    slide3.Shapes.Title.TextFrame.TextRange.Text = 'Title 3'
+    slide3.Export = MagicMock()
+    slides = [slide1, slide2, slide3]
+    doc.presentation = MagicMock()
+    doc.presentation.Slides.Count = 3
+    doc.presentation.Slides.side_effect = lambda i: slides[i - 1]
+    doc.presentation.PageSetup.SlideWidth = 1280
+    doc.presentation.PageSetup.SlideHeight = 720
+
+    # WHEN: export_presentation_data is called
+    with patch('builtins.open', mock_open()):
+        doc.export_presentation_data()
+
+    # THEN: Only visible slides are processed
+    assert doc.index_map == {1: 1, 2: 3}
+    assert doc.slide_count == 2
+    doc.save_titles_and_notes.assert_called_once_with(['Title 1', 'Title 3'], ['Note', 'Note'])
+    slide1.Export.assert_called_once()
+    slide2.Export.assert_not_called()
+    slide3.Export.assert_called_once()
+
+
+@patch('openlp.plugins.presentations.lib.powerpointcontroller._get_text_from_shapes', return_value='NoteText')
+@patch('openlp.plugins.presentations.lib.powerpointcontroller.PresentationDocument.get_thumbnail_folder')
+def test_export_presentation_data_title_exception_handled(mocked_get_thumb_folder, mock_get_text, presentation_setup):
+    """
+    Test that export_presentation_data handles exceptions when accessing slide title.
+    """
+    # GIVEN: A slide that raises exception when accessing title text
+    doc = PowerpointDocument(MagicMock(), MagicMock())
+    doc.check_exported_presentation_data_exists = MagicMock(return_value=False)
+    doc.save_titles_and_notes = MagicMock()
+    mocked_get_thumb_folder.return_value = Path('/mocked/thumb/folder')
+    doc.index_map = {}
     slide = MagicMock()
-    slide.Shapes.Title.TextFrame.TextRange.Text = 'SlideText'
-    pres = MagicMock()
-    pres.Slides = MagicMock(side_effect=[slide, slide])
-    doc.presentation = pres
+    slide.SlideShowTransition.Hidden = False
+    type(slide.Shapes.Title.TextFrame.TextRange).Text = PropertyMock(side_effect=Exception("Title error"))
+    slide.Export = MagicMock()
+    doc.presentation = MagicMock()
+    doc.presentation.Slides.Count = 1
+    doc.presentation.Slides.side_effect = lambda i: slide
+    doc.presentation.PageSetup.SlideWidth = 1280
+    doc.presentation.PageSetup.SlideHeight = 720
 
-    # WHEN reading the titles and notes
-    doc.create_titles_and_notes()
+    # WHEN: export_presentation_data is called
+    with patch('builtins.open', mock_open()):
+        doc.export_presentation_data()
 
-    # THEN the save should have been called exactly once with 2 titles and 2 notes
-    doc.save_titles_and_notes.assert_called_once_with(['SlideText', 'SlideText'], [' ', ' '])
+    # THEN: Empty title should be handled and saved
+    doc.save_titles_and_notes.assert_called_once_with([''], ['NoteText'])
 
 
-def test_create_titles_and_notes_with_no_slides(presentation_setup):
+def test_check_exported_data_returns_true_if_data_exists(presentation_setup):
     """
-    Test creating the titles from PowerPoint when it returns no slides
+    Test that check_exported_presentation_data_exists returns True if index_map and slide_count are already set.
     """
-    # GIVEN: mocked save_titles_and_notes, _get_text_from_shapes and two mocked slides
+    # GIVEN: A document with index_map and non-zero slide_count
     doc = PowerpointDocument(MagicMock(), MagicMock())
-    doc.save_titles_and_notes = MagicMock()
-    doc._PowerpointDocument__get_text_from_shapes = MagicMock()
-    pres = MagicMock()
-    pres.Slides = []
-    doc.presentation = pres
+    doc.index_map = {1: 1}
+    doc.slide_count = 1
 
-    # WHEN reading the titles and notes
-    doc.create_titles_and_notes()
+    # WHEN: check_exported_presentation_data_exists is called
+    result = doc.check_exported_presentation_data_exists()
 
-    # THEN the save should have been called exactly once with empty titles and notes
-    doc.save_titles_and_notes.assert_called_once_with([], [])
+    # THEN: It should return True
+    assert result is True
+
+
+@patch('openlp.plugins.presentations.lib.powerpointcontroller.PresentationDocument.get_thumbnail_folder')
+def test_check_exported_data_reads_index_map_as_dict(mock_get_thumb_folder, presentation_setup):
+    """
+    Test that check_exported_presentation_data_exists reads the index_map from file and ensures it's a dictionary.
+    """
+    # GIVEN: A valid index_map.txt file with dictionary data
+    doc = PowerpointDocument(MagicMock(), MagicMock())
+    doc.index_map = None
+    doc.slide_count = 0
+    mock_folder = Path('/mocked/thumb/folder')
+    mock_get_thumb_folder.return_value = mock_folder
+
+    index_map_data = {'1': 1, '2': 2}
+    with patch('pathlib.Path.is_file', return_value=True), \
+         patch('builtins.open', mock_open(read_data=json.dumps(index_map_data))):
+
+        # WHEN: check_exported_presentation_data_exists is called
+        result = doc.check_exported_presentation_data_exists()
+
+    # THEN: It should return True, and index_map should be a dictionary
+    assert result is True
+    assert isinstance(doc.index_map, dict), "Expected index_map to be a dictionary"
+    assert doc.index_map == index_map_data
+    assert doc.slide_count == 2
+
+
+@patch('openlp.plugins.presentations.lib.powerpointcontroller.PresentationDocument.get_thumbnail_folder')
+def test_check_exported_data_returns_false_on_file_error(mock_get_thumb_folder, presentation_setup):
+    """
+    Test that check_exported_presentation_data_exists returns False if index_map.txt is missing or causes an exception.
+    """
+    # GIVEN: No index_map and missing or broken index_map.txt
+    doc = PowerpointDocument(MagicMock(), MagicMock())
+    doc.index_map = None
+    doc.slide_count = 0
+    mock_folder = Path('/mocked/thumb/folder')
+    mock_get_thumb_folder.return_value = mock_folder
+
+    # WHEN: File does not exist
+    with patch('pathlib.Path.is_file', return_value=False):
+        result = doc.check_exported_presentation_data_exists()
+
+        # THEN: result should be False
+        assert result is False
+
+    # WHEN: File exists but reading it raises exception
+    with patch('pathlib.Path.is_file', return_value=True), \
+         patch('builtins.open', side_effect=IOError("boom")):
+        result = doc.check_exported_presentation_data_exists()
+
+        # THEN: result should be False
+        assert result is False
 
 
 def test_get_text_from_shapes():
@@ -316,6 +471,64 @@ def test_presentation_is_in_cloud(file_path, expected_is_in_cloud, expected_same
         'is_in_cloud should be false because this file is locally stored'
     assert (doc.presentation_file == doc.presentation_controller_file) == expected_same_file_name, \
         'presentation_file should have the same value as presentation_controller_file'
+
+
+def test_get_slide_count_returns_cached_count(presentation_setup):
+    """
+    Test get_slide_count returns precomputed slide count without triggering export.
+    """
+    # GIVEN: A loaded presentation with a precomputed slide_count and index_map
+    doc = PowerpointDocument(MagicMock(), MagicMock())
+    doc.slide_count = 5
+    doc.index_map = {1: 1, 2: 2, 3: 3, 4: 4, 5: 5}
+    doc.is_loaded = MagicMock(return_value=True)
+    doc.export_presentation_data = MagicMock()
+
+    # WHEN: get_slide_count is called
+    count = doc.get_slide_count()
+
+    # THEN: It should return the existing slide_count and not call export_presentation_data
+    assert count == 5
+    doc.export_presentation_data.assert_not_called()
+
+
+def test_get_slide_count_triggers_export_when_needed(presentation_setup):
+    """
+    Test get_slide_count triggers export if slide_count is zero and index_map is empty.
+    """
+    # GIVEN: A presentation with no cached slide_count or index_map
+    doc = PowerpointDocument(MagicMock(), MagicMock())
+    doc.slide_count = 0
+    doc.index_map = {}
+    doc.is_loaded = MagicMock(return_value=True)
+    doc.export_presentation_data = MagicMock()
+    doc.export_presentation_data.side_effect = lambda: setattr(doc, 'slide_count', 3)
+
+    # WHEN: get_slide_count is called
+    count = doc.get_slide_count()
+
+    # THEN: It should call export_presentation_data and return the new slide_count
+    doc.export_presentation_data.assert_called_once()
+    assert count == 3
+
+
+def test_get_slide_count_does_not_export_if_not_loaded(presentation_setup):
+    """
+    Test get_slide_count does not trigger export if presentation is not loaded.
+    """
+    # GIVEN: A presentation with no cached data and not loaded
+    doc = PowerpointDocument(MagicMock(), MagicMock())
+    doc.slide_count = 0
+    doc.index_map = {}
+    doc.is_loaded = MagicMock(return_value=False)
+    doc.export_presentation_data = MagicMock()
+
+    # WHEN: get_slide_count is called
+    count = doc.get_slide_count()
+
+    # THEN: It should return 0 and not attempt to export data
+    assert count == 0
+    doc.export_presentation_data.assert_not_called()
 
 
 @pytest.mark.skipif(not is_win(), reason='This test only works on Windows')

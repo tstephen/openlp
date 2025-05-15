@@ -26,6 +26,7 @@ This module is for controlling powerpoint. PPT API documentation:
 """
 import logging
 
+import json
 from PySide6 import QtCore
 
 from openlp.core.common import trace_error_handler
@@ -164,8 +165,7 @@ class PowerpointDocument(PresentationDocument):
                 self.controller.start_process()
             self.presentation = self.controller.process.Presentations.Open(str(self.file_path), False, False, False)
             log.debug('Loaded presentation %s' % self.presentation.FullName)
-            self.create_thumbnails()
-            self.create_titles_and_notes()
+            self.export_presentation_data()
             # Make sure powerpoint doesn't steal focus, unless we're on a single screen setup
             if len(ScreenList()) > 1:
                 Registry().get('main_window').activateWindow()
@@ -175,41 +175,78 @@ class PowerpointDocument(PresentationDocument):
             trace_error_handler(log)
             return False
 
-    def check_thumbnails(self):
+    def export_presentation_data(self):
         """
-        This is an overwritten method of the method in the PresentationDocument class. It adds a check for content
-        in self.index_map.
-
-        :return: If the thumbnail is valid
-        :rtype: bool
+        Creates the following data for each slide:
+        slide[x].png      - Thumbnail images of the slides
+        slideNotes[x].txt - Notes for each slide
+        titles.txt        - Titles of all slides
+        index_map.txt     - Index map of slides and animations
         """
-        return super().check_thumbnails() and bool(self.index_map)
+        if self.check_exported_presentation_data_exists():
+            return
+        try:
+            key = 1
+            titles = []
+            notes = []
+            thumbnail_folder = super().get_thumbnail_folder()
+            image_width = round(self.presentation.PageSetup.SlideWidth / self.presentation.PageSetup.SlideHeight * 360)
+            for num in range(self.presentation.Slides.Count):
+                slide = self.presentation.Slides(num + 1)
+                if not slide.SlideShowTransition.Hidden:
+                    self.index_map[key] = num + 1
+                    slide.Export(str(thumbnail_folder / 'slide{key:d}.png'.format(key=key)),
+                                 'png', image_width, 360)
+                    try:
+                        text = slide.Shapes.Title.TextFrame.TextRange.Text
+                    except Exception:
+                        log.exception('Exception raised when getting title text')
+                        text = ''
+                    slide_title = text.replace('\r\n', ' ').replace('\n', ' ').replace('\x0b', ' ').strip()
+                    titles.append(slide_title)
+                    note = _get_text_from_shapes(slide.NotesPage.Shapes)
+                    if len(note) == 0:
+                        note = ' '
+                    notes.append(note)
+                    key += 1
+            self.slide_count = key - 1
+            self.save_titles_and_notes(titles, notes)
+            with open(thumbnail_folder / 'index_map.txt', 'w', encoding='utf-8') as file:
+                json.dump(self.index_map, file)
+        except Exception:
+            log.exception('Caught exception while creating thumbnails')
+            trace_error_handler(log)
 
-    def create_thumbnails(self):
+    def check_exported_presentation_data_exists(self):
         """
-        Create the thumbnail images for the current presentation.
+        Checks if there is already exported data that can be used.
+        This is the case when:
+        1. self.index_map is not empty, since it is only created here or in export_presentation_data.
+        2. if index_map.txt exists and is not empty.
 
-        Note an alternative and quicker method would be do::
-
-            self.presentation.Slides[n].Copy()
-            thumbnail = QApplication.clipboard.image()
-
-        However, for the moment, we want a physical file since it makes life easier elsewhere.
+        We don't need to check if the content of the PowerPoint file has changed, since get_thumbnail_folder() is
+        hash-dependent and would change if the PowerPoint content changes.
         """
-        log.debug('create_thumbnails')
-        generate_thumbs = True
-        if super().check_thumbnails():
-            # No need for thumbnails but we still need the index
-            generate_thumbs = False
-        key = 1
-        for num in range(self.presentation.Slides.Count):
-            if not self.presentation.Slides(num + 1).SlideShowTransition.Hidden:
-                self.index_map[key] = num + 1
-                if generate_thumbs:
-                    self.presentation.Slides(num + 1).Export(
-                        str(self.get_thumbnail_folder() / 'slide{key:d}.png'.format(key=key)), 'png', 640, 360)
-                key += 1
-        self.slide_count = key - 1
+        if self.index_map and self.slide_count != 0:
+            return True
+        thumbnail_folder = super().get_thumbnail_folder()
+        index_map_path = thumbnail_folder / 'index_map.txt'
+        if not index_map_path.is_file():
+            return False
+        try:
+            with open(index_map_path, 'r', encoding='utf-8') as file:
+                self.index_map = json.load(file)
+            if not isinstance(self.index_map, dict):
+                log.error('Invalid index_map format: Expected a dictionary, got {}'.format(type(self.index_map)))
+                self.index_map = {}
+                self.slide_count = 0
+                return False
+            self.slide_count = len(self.index_map)
+            return True
+        except Exception:
+            log.exception('Caught exception while trying to import index_map')
+            trace_error_handler(log)
+            return False
 
     def close_presentation(self):
         """
@@ -588,9 +625,12 @@ class PowerpointDocument(PresentationDocument):
 
     def get_slide_count(self):
         """
-        Returns total number of slides.
+        Returns total number of slides that are not hidden.
         """
         log.debug('get_slide_count')
+        if (self.slide_count == 0 or bool(self.index_map) is False) and self.is_loaded():
+            # If this function gets run before export_presentation_data() we haven't calculated the slide_count yet
+            self.export_presentation_data()
         return self.slide_count
 
     def goto_slide(self, slide_no):
@@ -679,30 +719,6 @@ class PowerpointDocument(PresentationDocument):
         :param slide_no: The slide the text is required for, starting at 1
         """
         return _get_text_from_shapes(self.presentation.Slides(self.index_map[slide_no]).NotesPage.Shapes)
-
-    def create_titles_and_notes(self):
-        """
-        Writes the list of titles (one per slide)
-        to 'titles.txt'
-        and the notes to 'slideNotes[x].txt'
-        in the thumbnails directory
-        """
-        titles = []
-        notes = []
-        for num in range(self.get_slide_count()):
-            slide = self.presentation.Slides(self.index_map[num + 1])
-            try:
-                text = slide.Shapes.Title.TextFrame.TextRange.Text
-            except Exception:
-                log.exception('Exception raised when getting title text')
-                text = ''
-            slide_title = text.replace('\r\n', ' ').replace('\n', ' ').replace('\x0b', ' ').strip()
-            titles.append(slide_title)
-            note = _get_text_from_shapes(slide.NotesPage.Shapes)
-            if len(note) == 0:
-                note = ' '
-            notes.append(note)
-        self.save_titles_and_notes(titles, notes)
 
     def show_error_msg(self):
         """
