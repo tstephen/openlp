@@ -367,9 +367,9 @@ class PresentationDocument(object):
         for slide_no, title in enumerate(titles, 1):
             notes_path = self.get_thumbnail_folder() / 'slideNotes{number:d}.txt'.format(number=slide_no)
             try:
-                note = notes_path.read_text()
+                note = notes_path.read_text(encoding='utf-8')
             except Exception:
-                log.exception('Failed to open/read notes file')
+                log.exception(f'Failed to open/read notes file {notes_path}')
                 note = ''
             notes.append(note)
         return titles, notes
@@ -382,12 +382,13 @@ class PresentationDocument(object):
         :param list[str] notes: The notes to save
         :rtype: None
         """
+        thumbnail_folder = self.get_thumbnail_folder()
         if titles:
-            titles_path = self.get_thumbnail_folder() / 'titles.txt'
+            titles_path = thumbnail_folder / 'titles.txt'
             titles_path.write_text('\n'.join(titles), encoding='utf-8')
         if notes:
             for slide_no, note in enumerate(notes, 1):
-                notes_path = self.get_thumbnail_folder() / 'slideNotes{number:d}.txt'.format(number=slide_no)
+                notes_path = thumbnail_folder / 'slideNotes{number:d}.txt'.format(number=slide_no)
                 notes_path.write_text(note, encoding='utf-8')
 
     def get_sha256_file_hash(self):
