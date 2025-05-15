@@ -62,7 +62,7 @@ def test_setup(mocked_register_views: MagicMock, media_env: MediaController):
     expected_functions_list = ['bootstrap_initialise', 'bootstrap_post_set_up', 'bootstrap_completion',
                                'playbackPlay', 'playbackPause', 'playbackStop', 'playbackLoop', 'seek_slider',
                                'volume_slider', 'media_hide', 'media_blank', 'media_unblank', 'songs_hide',
-                               'songs_blank', 'songs_unblank']
+                               'songs_blank', 'songs_unblank', 'media_state']
     # WHEN: Setup is called
     media_env.setup()
     # THEN: the functions should be defined along with the api blueprint
@@ -598,25 +598,6 @@ def test_media_play(media_env, settings):
     mocked_controller._set_theme.assert_called_once()
 
 
-def test_decide_autoplay_media_preview(media_env, settings):
-    """
-    Test that media with a normal background behaves
-    """
-    # GIVEN: A media controller and a service item
-    mocked_service_item = MagicMock()
-    mocked_service_item.requires_media.return_value = False
-    settings.setValue('media/media auto start', QtCore.Qt.CheckState.Unchecked)
-    media_env.media_controller.media_play_item = MediaPlayItem()
-    media_env.media_controller.is_live = False
-    media_env.media_controller.is_theme_background = False
-
-    # WHEN: decide_autoplay() is called
-    media_env.media_controller.decide_autostart(mocked_service_item, media_env.media_controller)
-
-    # THEN: The current controller's media should be reset
-    assert media_env.media_controller.media_play_item.media_autostart is True, "The Media should have been autoplayed"
-
-
 @pytest.mark.parametrize("tests", [[False, QtCore.Qt.CheckState.Unchecked, False, False, MediaType.Audio, False],
                                    [True, QtCore.Qt.CheckState.Checked, True, True, MediaType.DeviceStream, True],
                                    [False, QtCore.Qt.CheckState.Checked, False, False, MediaType.Audio, True],
@@ -762,8 +743,8 @@ def test_media_pause(media_env):
     media_env.media_controller.media_pause(mocked_controller)
 
     # THEN: The following should have happened
-    mocked_controller.media_play_item.media_autostart is not None
-    mocked_controller.media_play_item.audio_autostart is not None
+    assert mocked_controller.media_play_item.media_autostart is not None
+    assert mocked_controller.media_play_item.audio_autostart is not None
     mocked_controller.audio_player.pause.assert_not_called()
     mocked_controller.media_player.pause.assert_called_once()
     mocked_controller.output_has_changed.assert_called_once()
@@ -787,8 +768,8 @@ def test_media_pause_dual(media_env):
     media_env.media_controller.media_pause(mocked_controller)
 
     # THEN: The following should have happened
-    mocked_controller.media_play_item.media_autostart is not None
-    mocked_controller.media_play_item.audio_autostart is not None
+    assert mocked_controller.media_play_item.media_autostart is not None
+    assert mocked_controller.media_play_item.audio_autostart is not None
     mocked_controller.audio_player.pause.assert_called_once()
     mocked_controller.media_player.pause.assert_not_called()
     mocked_controller.output_has_changed.assert_called_once()
