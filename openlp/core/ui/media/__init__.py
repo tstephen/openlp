@@ -82,10 +82,23 @@ class MediaPlayItem(object):
     end_time = 0
     is_playing = MediaState.Off
     timer = 1000
-    media_type = MediaType().Unused
+    media_type = MediaType.Unused
     media_autostart = False
     audio_autostart = False
     request_play = False  # On Load do I reun play
+
+
+def media_state() -> int:
+    """
+    Evaluates and returns the current start of live media
+    return: Returns the current live Media Media State
+    """
+    live = Registry().get('live_controller')
+    if live.media_play_item.is_theme_background and \
+            live.media_play_item.media_type is not MediaType.Dual:
+        return MediaState.Off
+    else:
+        return live.media_play_item.is_playing
 
 
 def get_volume(controller) -> int:

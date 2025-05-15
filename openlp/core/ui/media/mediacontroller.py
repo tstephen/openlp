@@ -35,7 +35,8 @@ from openlp.core.state import State
 from openlp.core.ui import DisplayControllerType, HideMode
 from openlp.core.ui.slidecontroller import SlideController
 from openlp.core.ui.media import MediaState, MediaPlayItem, MediaType, format_play_seconds, \
-    format_play_time, parse_stream_path, get_volume, toggle_looping_playback, saved_looping_playback, save_volume
+    format_play_time, parse_stream_path, get_volume, toggle_looping_playback, saved_looping_playback, save_volume, \
+    media_state
 from openlp.core.ui.media.remote import register_views
 from openlp.core.ui.media.mediainfo import media_info
 from openlp.core.ui.media.audioplayer import AudioPlayer
@@ -85,6 +86,7 @@ class MediaController(QtWidgets.QWidget, RegistryBase, LogMixin, RegistryPropert
         Registry().register_function("songs_hide", self.media_hide)
         Registry().register_function("songs_blank", self.media_blank)
         Registry().register_function("songs_unblank", self.media_unblank)
+        Registry().register_function("media_state", media_state)
         register_views()
 
     def bootstrap_initialise(self):

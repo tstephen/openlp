@@ -17,9 +17,33 @@
 #                                                                        #
 # You should have received a copy of the GNU General Public License      #
 # along with this program.  If not, see <https://www.gnu.org/licenses/>. #
-##########################################################################
+###########################################################################
 """
-:mod: `tests.openlp_core.ui.media` module
+Package to test the openlp.core.ui.media package.
+"""
+import pytest
 
-Tests modules/files for module openlp.core.ui.media
-"""
+from unittest.mock import MagicMock
+
+
+from openlp.core.common.registry import Registry
+from openlp.core.ui.media import MediaPlayItem, media_state, MediaState, MediaType
+
+
+@pytest.mark.parametrize("theme, type, playing, result", [
+    (True, MediaType.Audio, MediaState.Paused, MediaState.Off),
+    (True, MediaType.Dual, MediaState.Paused, MediaState.Paused),
+    (False, MediaType.Dual, MediaState.Playing, MediaState.Playing),
+    (False, MediaType.Audio, MediaState.Paused, MediaState.Paused),
+    (False, MediaType.Video, MediaState.Playing, MediaState.Playing)
+])
+def test_media_state(registry: Registry, theme: bool, type: MediaType, playing: MediaState, result: MediaState):
+    live = MagicMock()
+    live.media_play_item = MediaPlayItem()
+    live.media_play_item.is_theme_background = theme
+    live.media_play_item.media_type = type
+    live.media_play_item.is_playing = playing
+    Registry().register("live_controller", live)
+    Registry().register_function("media_state", media_state)
+    ans = registry.execute("media_state")[0]
+    assert ans == result
