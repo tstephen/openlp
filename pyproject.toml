@@ -1,0 +1,151 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "openlp"
+version = "3.1.2.dev176+f3d2d3a92"
+description = "Open source Church presentation and lyrics projection application."
+authors = ["Raoul Snyman <raoulsnyman@openlp.org>"]
+license = "GPL-3.0-or-later"
+readme = "README.rst"
+homepage = "https://openlp.org/"
+repository = "https://github.com/OpenLP/OpenLP"
+keywords = ["open", "source", "church", "presentation", "lyrics", "projection", "song", "bible", "display", "project"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: MacOS X",
+    "Environment :: Win32 (MS Windows)",
+    "Environment :: X11 Applications",
+    "Environment :: X11 Applications :: Qt",
+    "Intended Audience :: End Users/Desktop",
+    "Intended Audience :: Religion",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Natural Language :: Afrikaans",
+    "Natural Language :: Dutch",
+    "Natural Language :: English",
+    "Natural Language :: French",
+    "Natural Language :: German",
+    "Natural Language :: Hungarian",
+    "Natural Language :: Indonesian",
+    "Natural Language :: Japanese",
+    "Natural Language :: Norwegian",
+    "Natural Language :: Portuguese (Brazilian)",
+    "Natural Language :: Russian",
+    "Natural Language :: Swedish",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: BSD :: FreeBSD",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Desktop Environment :: Gnome",
+    "Topic :: Desktop Environment :: K Desktop Environment (KDE)",
+    "Topic :: Multimedia",
+    "Topic :: Multimedia :: Graphics :: Presentation",
+    "Topic :: Multimedia :: Sound/Audio",
+    "Topic :: Multimedia :: Video",
+    "Topic :: Religion",
+]
+packages = [
+    { include = "openlp" },
+]
+include = [
+    "openlp/**/*",
+]
+exclude = [
+    "tests*",
+    "ez_setup",
+]
+
+[tool.poetry.dependencies]
+python = ">=3.9,<3.13"
+alembic = "*"
+beautifulsoup4 = "*"
+chardet = "*"
+dbus-python = { version = "*", markers = "platform_system == 'Linux'" }
+distro = { version = "*", markers = "platform_system == 'Linux'" }
+flask = "*"
+flask-cors = "*"
+lxml = "*"
+Mako = "*"
+packaging = "*"
+platformdirs = "*"
+PyICU = "*"
+pyobjc = { version = "*", markers = "platform_system == 'Darwin'" }
+pyobjc-framework-Cocoa = { version = "*", markers = "platform_system == 'Darwin'" }
+PySide6 = ">=6.8"
+Pyro5 = { version = "*", markers = "platform_system == 'Darwin'" }
+pywin32 = { version = "*", markers = "platform_system == 'Windows'" }
+QtAwesome = "*"
+qrcode = "*"
+requests = "*"
+SQLAlchemy = "*"
+waitress = "*"
+websockets = "*"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "*"
+pytest-qt = "*"
+flake8 = "*"
+coverage = "^7.9.2"
+
+[tool.poetry.group.extras.dependencies]
+QDarkStyle = "*"
+PyMySQL = "*"
+pyodbc = "*"
+psycopg2_binary = "*"
+pyenchant = "*"
+pysword = "*"
+
+[tool.poetry.extras]
+darkstyle = ["QDarkStyle"]
+mysql = ["PyMySQL"]
+odbc = ["pyodbc"]
+postgresql = ["psycopg2_binary"]
+spellcheck = ["pyenchant"]
+sword-bibles = ["pysword"]
+test = ["pyodbc", "pysword", "pytest", "pytest-qt", "flake8"]
+
+[tool.poetry.scripts]
+openlp = "openlp.__main__:start"
+
+# Pytest configuration
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q"
+testpaths = [
+    "tests",
+]
+# Coverage settings
+[tool.coverage.run]
+omit = [
+    "venv/*",
+    "*/shiboken*",
+    "*/PySide6/*",
+    "*/site-packages/*",
+]
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+]
+
+# Flake8 configuration
+[tool.flake8]
+max-line-length = 120
+exclude = [
+    ".git",
+    "__pycache__",
+    ".pytest_cache",
+    ".venv",
+    "venv",
+    "build",
+    "dist",
+]
