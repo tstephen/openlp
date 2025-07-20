@@ -87,6 +87,13 @@ requests = "*"
 SQLAlchemy = "*"
 waitress = "*"
 websockets = "*"
+# Optional dependencies (previously in extras group)
+QDarkStyle = { version = "*", optional = true }
+PyMySQL = { version = "*", optional = true }
+pyodbc = { version = "*", optional = true }
+psycopg2_binary = { version = "*", optional = true }
+pyenchant = { version = "*", optional = true }
+pysword = { version = "*", optional = true }
 
 [tool.poetry.group.dev.dependencies]
 pytest = "*"
@@ -94,13 +101,6 @@ pytest-qt = "*"
 flake8 = "*"
 coverage = "^7.9.2"
 
-[tool.poetry.group.extras.dependencies]
-QDarkStyle = "*"
-PyMySQL = "*"
-pyodbc = "*"
-psycopg2_binary = "*"
-pyenchant = "*"
-pysword = "*"
 
 [tool.poetry.extras]
 darkstyle = ["QDarkStyle"]
