@@ -5216,4 +5216,4 @@ sword-bibles = ["pysword"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<3.13"
-content-hash = "f4f1eadb2a60ae4454a1beab06e17f673f5c170dddc88761047fc42b81a033d8"
+content-hash = "c8e65c0c6bde42419b257349e46e1d83b2d716627c6b25b55f3cc7e75adcb8b3"

@@ -1,17 +1,8 @@
 [build-system]
-requires = ["poetry-core"]
+requires = ['poetry-core (>=2.0,<3.0)']
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-name = "openlp"
-version = "3.1.2.dev176+f3d2d3a92"
-description = "Open source Church presentation and lyrics projection application."
-authors = ["Raoul Snyman <raoulsnyman@openlp.org>"]
-license = "GPL-3.0-or-later"
-readme = "README.rst"
-homepage = "https://openlp.org/"
-repository = "https://github.com/OpenLP/OpenLP"
-keywords = ["open", "source", "church", "presentation", "lyrics", "projection", "song", "bible", "display", "project"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Environment :: MacOS X",
@@ -61,39 +52,7 @@ exclude = [
     "tests*",
     "ez_setup",
 ]
-
-[tool.poetry.dependencies]
-python = ">=3.9,<3.13"
-alembic = "*"
-beautifulsoup4 = "*"
-chardet = "*"
-dbus-python = { version = "*", markers = "platform_system == 'Linux'" }
-distro = { version = "*", markers = "platform_system == 'Linux'" }
-flask = "*"
-flask-cors = "*"
-lxml = "*"
-Mako = "*"
-packaging = "*"
-platformdirs = "*"
-PyICU = "*"
-pyobjc = { version = "*", markers = "platform_system == 'Darwin'" }
-pyobjc-framework-Cocoa = { version = "*", markers = "platform_system == 'Darwin'" }
-PySide6 = ">=6.8"
-Pyro5 = { version = "*", markers = "platform_system == 'Darwin'" }
-pywin32 = { version = "*", markers = "platform_system == 'Windows'" }
-QtAwesome = "*"
-qrcode = "*"
-requests = "*"
-SQLAlchemy = "*"
-waitress = "*"
-websockets = "*"
-# Optional dependencies (previously in extras group)
-QDarkStyle = { version = "*", optional = true }
-PyMySQL = { version = "*", optional = true }
-pyodbc = { version = "*", optional = true }
-psycopg2_binary = { version = "*", optional = true }
-pyenchant = { version = "*", optional = true }
-pysword = { version = "*", optional = true }
+requires-poetry = '>=2.0,<3.0'
 
 [tool.poetry.group.dev.dependencies]
 pytest = "*"
@@ -102,18 +61,6 @@ flake8 = "*"
 coverage = "^7.9.2"
 
 
-[tool.poetry.extras]
-darkstyle = ["QDarkStyle"]
-mysql = ["PyMySQL"]
-odbc = ["pyodbc"]
-postgresql = ["psycopg2_binary"]
-spellcheck = ["pyenchant"]
-sword-bibles = ["pysword"]
-
-[tool.poetry.scripts]
-openlp = "openlp.__main__:start"
-
-# Pytest configuration
 [tool.pytest.ini_options]
 minversion = "6.0"
 addopts = "-ra -q"
@@ -148,3 +95,30 @@ exclude = [
     "build",
     "dist",
 ]
+
+[project]
+name = "openlp"
+description = "Open source Church presentation and lyrics projection application."
+license = "GPL-3.0-or-later"
+keywords = ["open", "source", "church", "presentation", "lyrics", "projection", "song", "bible", "display", "project"]
+version = "3.1.2.dev176+f3d2d3a92"
+dynamic = ["classifiers"]
+readme = "README.rst"
+authors = [{name = "Raoul Snyman", email = "raoulsnyman@openlp.org"}]
+requires-python = '>=3.9,<3.13'
+dependencies = ['alembic', 'beautifulsoup4', 'chardet', 'dbus-python ; platform_system == "Linux"', 'distro ; platform_system == "Linux"', 'flask', 'flask-cors', 'lxml', 'Mako', 'packaging', 'platformdirs', 'PyICU', 'pyobjc ; platform_system == "Darwin"', 'pyobjc-framework-Cocoa ; platform_system == "Darwin"', 'PySide6 (>=6.8)', 'Pyro5 ; platform_system == "Darwin"', 'pywin32 ; platform_system == "Windows"', 'QtAwesome', 'qrcode', 'requests', 'SQLAlchemy', 'waitress', 'websockets']
+
+[project.urls]
+homepage = "https://openlp.org/"
+repository = "https://github.com/OpenLP/OpenLP"
+
+[project.scripts]
+openlp = "openlp.__main__:start"
+
+[project.optional-dependencies]
+darkstyle = ['QDarkStyle']
+mysql = ['PyMySQL']
+odbc = ['pyodbc']
+postgresql = ['psycopg2_binary']
+spellcheck = ['pyenchant']
+sword-bibles = ['pysword']
