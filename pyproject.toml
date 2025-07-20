@@ -58,7 +58,7 @@ requires-poetry = '>=2.0,<3.0'
 pytest = "*"
 pytest-qt = "*"
 flake8 = "*"
-coverage = "^7.9.2"
+pytest-cov = "^6.2.1"
 
 
 [tool.pytest.ini_options]
@@ -67,22 +67,6 @@ addopts = "-ra -q"
 testpaths = [
     "tests",
 ]
-# Coverage settings
-[tool.coverage.run]
-omit = [
-    "venv/*",
-    "*/shiboken*",
-    "*/PySide6/*",
-    "*/site-packages/*",
-]
-[tool.coverage.report]
-exclude_lines = [
-    "pragma: no cover",
-    "def __repr__",
-    "raise AssertionError",
-    "raise NotImplementedError",
-]
-
 # Flake8 configuration
 [tool.flake8]
 max-line-length = 120
