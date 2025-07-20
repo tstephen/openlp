@@ -4564,7 +4564,7 @@ description = "DB API module for ODBC"
 optional = true
 python-versions = ">=3.8"
 groups = ["main"]
-markers = "extra == \"odbc\" or extra == \"test\""
+markers = "extra == \"odbc\""
 files = [
     {file = "pyodbc-5.2.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:eb0850e3e3782f57457feed297e220bb20c3e8fd7550d7a6b6bb96112bd9b6fe"},
     {file = "pyodbc-5.2.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:0dae0fb86078c87acf135dbe5afd3c7d15d52ab0db5965c44159e84058c3e2fb"},
@@ -4685,7 +4685,7 @@ description = "A native Python2/3 reader module for the SWORD Project Bible Modu
 optional = true
 python-versions = "*"
 groups = ["main"]
-markers = "extra == \"sword-bibles\" or extra == \"test\""
+markers = "extra == \"sword-bibles\""
 files = [
     {file = "pysword-0.2.8.tar.gz", hash = "sha256:6302f350c22f39090e2556729551fac57a4c25ceb268f90cd7fd0584b9cca4f0"},
 ]
@@ -5212,9 +5212,8 @@ odbc = ["pyodbc"]
 postgresql = ["psycopg2_binary"]
 spellcheck = ["pyenchant"]
 sword-bibles = ["pysword"]
-test = ["pyodbc", "pysword"]
 
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<3.13"
-content-hash = "e4b2f95dfc68e6a4364d828be281b0b06ea5218ba33397884d9bdd19c3e24571"
+content-hash = "f4f1eadb2a60ae4454a1beab06e17f673f5c170dddc88761047fc42b81a033d8"

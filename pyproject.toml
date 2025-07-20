@@ -109,7 +109,6 @@ odbc = ["pyodbc"]
 postgresql = ["psycopg2_binary"]
 spellcheck = ["pyenchant"]
 sword-bibles = ["pysword"]
-test = ["pyodbc", "pysword", "pytest", "pytest-qt", "flake8"]
 
 [tool.poetry.scripts]
 openlp = "openlp.__main__:start"
