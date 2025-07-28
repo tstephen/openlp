@@ -295,6 +295,8 @@ def parse_options():
                         help='Disable the error notification form.')
     parser.add_argument('-l', '--log-level', dest='loglevel', default='warning', metavar='LEVEL',
                         help='Set logging to LEVEL level. Valid values are "debug", "info", "warning".')
+    parser.add_argument('-v', '--verbose', dest='verbose', action='store_true',
+                        help='Print logging output to the console.')
     parser.add_argument('-p', '--portable', dest='portable', action='store_true',
                         help='Specify if this should be run as a portable app, ')
     parser.add_argument('-P', '--portable-path', dest='portablepath', default=None,
@@ -309,21 +311,27 @@ def parse_options():
     return parser.parse_args()
 
 
-def set_up_logging(log_path):
+def set_up_logging(log_path: str, display_on_console: bool = False):
     """
     Setup our logging using log_path
 
     :param Path log_path: The file to save the log to.
+    :param bool display_on_console: If True, log messages will be displayed on the console as well.
     :rtype: None
     """
     create_paths(log_path, do_not_log=True)
     file_path = log_path / 'openlp.log'
     logfile = logging.FileHandler(file_path, 'w', encoding='UTF-8')
-    logfile.setFormatter(logging.Formatter('%(asctime)s %(threadName)s %(name)-55s %(levelname)-8s %(message)s'))
+    formatter = logging.Formatter('%(asctime)s %(threadName)s %(name)-55s %(levelname)-8s %(message)s')
+    logfile.setFormatter(formatter)
     log.addHandler(logfile)
     # Send warnings to the log file
     logging.captureWarnings(True)
     print(f'Logging to: {file_path} and level {log.level}')
+    if display_on_console:
+        console_log = logging.StreamHandler(sys.stdout)
+        console_log.setFormatter(formatter)
+        log.addHandler(console_log)
 
 
 def set_up_web_engine_cache(web_cache_path):
@@ -520,19 +528,18 @@ def main():
         # font.setPointSizeF(font.pointSizeF() * application.devicePixelRatio())
         font.setPointSizeF(font.pointSizeF() * application.devicePixelRatio())
         application.setFont(font)
+    verbose = getattr(args, 'verbose', False)
+    cache_path = portable_path / 'Other' if args.portable else AppLocation.get_directory(AppLocation.CacheDir)
+    set_up_logging(cache_path, verbose)
+    set_up_web_engine_cache(cache_path / 'web_cache')
     if args.portable:
-        data_path = portable_path / 'Data'
-        set_up_logging(portable_path / 'Other')
-        set_up_web_engine_cache(portable_path / 'Other' / 'web_cache')
         log.info('Running portable')
         # Set our data path
+        data_path = portable_path / 'Data'
         log.info(f'Data path: {data_path}')
         settings.setValue('advanced/data path', data_path)
         settings.setValue('advanced/is portable', True)
         settings.sync()
-    else:
-        set_up_logging(AppLocation.get_directory(AppLocation.CacheDir))
-        set_up_web_engine_cache(AppLocation.get_directory(AppLocation.CacheDir) / 'web_cache')
     settings.init_default_shortcuts()
     if settings.value('advanced/protect data directory'):
         # attempt to create a file lock
