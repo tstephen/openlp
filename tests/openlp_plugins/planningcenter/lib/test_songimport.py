@@ -106,6 +106,37 @@ def test_add_song_with_verse(MockAuthor: MagicMock, MockSong: MagicMock, song_im
     assert MockSong.return_value.theme_name == theme_name, 'Mock Song Theme matches input theme'
 
 
+@patch('openlp.plugins.songs.lib.importers.songimport.Song')
+@patch('openlp.plugins.songs.lib.importers.songimport.Author')
+def test_add_song_with_verse_order(MockAuthor: MagicMock, MockSong: MagicMock, song_import: PlanningCenterSongImport):
+    """
+    Test that a song can be added with verse order properly set
+    """
+    # GIVEN: A PlanningCenterSongImport Class and values including verse_order
+    item_title = 'Title'
+    author = 'Author'
+    copyright = "Copyright"
+    ccli_number = 1111
+    lyrics = 'V1\nVerse one\n\nChorus\nThis is the chorus'
+    theme_name = 'Theme Name'
+    last_modified = datetime.datetime.now()
+    verse_order = "v1 c v1"
+    mock_song_instance = MagicMock()
+    MockSong.return_value = mock_song_instance
+    # Mock the manager.get_object to return our mock song
+    song_import.manager.get_object = MagicMock(return_value=mock_song_instance)
+    # WHEN: A song is added with verse order
+    song_import.add_song(item_title, author, lyrics, theme_name, last_modified, copyright, ccli_number, verse_order)
+    # THEN: The mock song has the verse_order properly set
+    assert mock_song_instance.title == item_title, 'Mock Song Title matches input title'
+    assert mock_song_instance.copyright == copyright
+    assert mock_song_instance.ccli_number == ccli_number
+    assert mock_song_instance.verse_order == verse_order, 'Mock Song verse_order matches input verse_order'
+    assert 'Verse one' in mock_song_instance.lyrics, 'Mock Song Lyrics contain verse text'
+    assert 'This is the chorus' in mock_song_instance.lyrics, 'Mock Song Lyrics contain chorus text'
+    assert mock_song_instance.theme_name == theme_name, 'Mock Song Theme matches input theme'
+
+
 def test_parse_lyrics_with_end_marker(song_import: PlanningCenterSongImport):
     """
     Test that a lyrics after an END marker are skipped
@@ -144,3 +175,28 @@ def test_parse_lyrics_with_single_spaced_verse_tags(song_import: PlanningCenterS
     output_verses = song_import._split_lyrics_into_verses(lyrics)
     # THEN:  A mock song has valid title, lyrics, and theme_name values
     assert len(output_verses) == 2, 'Two output verses are returned'
+
+
+@patch('openlp.plugins.songs.lib.importers.songimport.Song')
+@patch('openlp.plugins.songs.lib.importers.songimport.Author')
+def test_add_song_with_empty_verse_order(MockAuthor: MagicMock, MockSong: MagicMock,
+                                         song_import: PlanningCenterSongImport):
+    """
+    Test that a song can be added with empty verse order (KeyError case)
+    """
+    # GIVEN: A PlanningCenterSongImport Class and values with empty verse_order
+    item_title = 'Title'
+    author = 'Author'
+    copyright = "Copyright"
+    ccli_number = 1111
+    lyrics = 'V1\nVerse one\n\nChorus\nThis is the chorus'
+    theme_name = 'Theme Name'
+    last_modified = datetime.datetime.now()
+    verse_order = ""  # Empty verse order to test edge case
+    mock_song_instance = MagicMock()
+    MockSong.return_value = mock_song_instance
+    song_import.manager.get_object = MagicMock(return_value=mock_song_instance)
+    # WHEN: A song is added with empty verse order
+    song_import.add_song(item_title, author, lyrics, theme_name, last_modified, copyright, ccli_number, verse_order)
+    # THEN: The mock song has empty verse_order set
+    assert mock_song_instance.verse_order == "", 'Mock Song verse_order is empty string'

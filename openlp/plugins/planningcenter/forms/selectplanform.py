@@ -226,6 +226,15 @@ class SelectPlanForm(QtWidgets.QDialog, Ui_SelectPlanDialog):
                             log.error("no ccli_number info for %s", item_title)
                             ccli_no = ""
                         lyrics = arrangement_data['attributes']['lyrics']
+                        try:
+                            verse_order = " ".join(arrangement_data['attributes']['sequence_short'])
+
+                            # handle inconsistencies in the verse order format
+                            verse_order = verse_order.replace("Intro", "I1")
+                            verse_order = verse_order.replace("Outro", "O1")
+                        except KeyError:
+                            verse_order = ""
+
                         arrangement_updated_at = datetime.strptime(arrangement_data['attributes']['updated_at'].
                                                                    rstrip("Z"), '%Y-%m-%dT%H:%M:%S')
                         # start importing the song
@@ -233,7 +242,7 @@ class SelectPlanForm(QtWidgets.QDialog, Ui_SelectPlanDialog):
                         theme_name = self.song_theme_selection_combo_box.currentText()
                         openlp_id = planning_center_import.add_song(item_title, author, lyrics,
                                                                     theme_name, arrangement_updated_at,
-                                                                    copyright, ccli_no)
+                                                                    copyright, ccli_no, verse_order)
                         planning_center_id_to_openlp_id[song_id] = openlp_id
                     openlp_id = planning_center_id_to_openlp_id[song_id]
                     media_type = 'songs'

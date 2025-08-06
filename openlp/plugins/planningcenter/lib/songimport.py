@@ -44,7 +44,8 @@ class PlanningCenterSongImport(SongImport):
         manager = songs.plugin.manager
         SongImport.__init__(self, manager, file_path=None)
 
-    def add_song(self, item_title, author, lyrics, theme_name, last_modified, copyright="", ccli_number=""):
+    def add_song(self, item_title, author, lyrics, theme_name, last_modified, copyright="", ccli_number="",
+                 verse_order=""):
         """
         Builds and adds song to the database and returns the Song ID
         :param item_title: The song title.
@@ -54,6 +55,7 @@ class PlanningCenterSongImport(SongImport):
         :param last_modified: DateTime of last modified date for this song
         :param copyright: Copyright statement for this song
         :param ccli_no: CCLI number for this song
+        :param verse_order: Verse Order for this song
         """
         self.set_defaults()
         self.title = item_title
@@ -77,6 +79,7 @@ class PlanningCenterSongImport(SongImport):
         # set the last_updated date/time based on the PCO date/time so I can look for updates
         song = self.manager.get_object(Song, openlp_id)
         song.last_modified = last_modified
+        song.verse_order = verse_order
         self.manager.save_object(song)
         return openlp_id
 

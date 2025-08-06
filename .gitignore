@@ -34,6 +34,7 @@ build
 cover
 coverage
 coverage.xml
+venv
 dist
 env
 htmlcov
