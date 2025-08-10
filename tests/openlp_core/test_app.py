@@ -27,13 +27,14 @@ from unittest.mock import MagicMock, patch
 import pytest
 from PySide6 import QtCore, QtWidgets
 
-# Mock QtWebEngineCore
-sys.modules['PySide6.QtWebEngineCore'] = MagicMock()
-
 from openlp.core.app import parse_options, backup_if_version_changed, main as app_main, setup_portable_settings
 from openlp.core.common.platform import is_win
 from openlp.core.common.settings import Settings
 from openlp.core.ui.style import UiThemes
+
+
+# Mock QtWebEngineCore
+sys.modules['PySide6.QtWebEngineCore'] = MagicMock()
 
 
 @pytest.fixture

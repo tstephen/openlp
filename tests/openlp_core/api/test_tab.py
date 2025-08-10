@@ -50,7 +50,7 @@ def api_tab_instantiate(mocked_get_installed_version, settings):
     parent = QtWidgets.QMainWindow()
 
     def _create_api_tab():
-        nonlocal forms, parent
+        nonlocal forms, parent  # noqa: F824
         Registry().set_flag('website_version', '00-00-0000')
         Registry().set_flag('no_web_server', False)
         form = ApiTab(parent)
