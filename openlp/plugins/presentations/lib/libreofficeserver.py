@@ -43,8 +43,8 @@ sys.path.append(os.path.join(os.path.dirname(__file__)))
 # Add the vendor directory to sys.path so that we can load Pyro5
 sys.path.append(os.path.join(os.path.dirname(__file__), 'vendor'))
 
-from serializers import register_classes
-from Pyro5.api import Daemon, expose
+from serializers import register_classes  # noqa: E402
+from Pyro5.api import Daemon, expose  # noqa:E402
 
 try:
     # Wrap these imports in a try so that we can run the tests on macOS

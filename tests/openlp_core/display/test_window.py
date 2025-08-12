@@ -30,9 +30,6 @@ from unittest.mock import MagicMock, patch
 
 from PySide6 import QtCore
 
-# Mock QtWebEngineCore
-sys.modules['PySide6.QtWebEngineCore'] = MagicMock()
-
 from openlp.core.common.enum import ServiceItemType
 from openlp.core.common.platform import is_win
 from openlp.core.common.registry import Registry
@@ -40,6 +37,9 @@ from openlp.core.display.screens import Screen
 from openlp.core.display.window import TRANSITION_END_EVENT_NAME, DisplayWindow, DisplayWatcher
 from openlp.core.lib.theme import Theme
 from openlp.core.ui import HideMode
+
+# Mock QtWebEngineCore
+sys.modules['PySide6.QtWebEngineCore'] = MagicMock()
 
 
 @pytest.fixture

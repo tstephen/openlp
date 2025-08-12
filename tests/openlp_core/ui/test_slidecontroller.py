@@ -1683,7 +1683,7 @@ def test__capture_maindisplay_offscreen_command_screenshot(mocked_is_wayland_com
     pixmap = QtGui.QPixmap(1, 1)
 
     def attempt_screenshot(params):
-        nonlocal pixmap
+        nonlocal pixmap  # noqa: F824
         return True, pixmap
 
     registry.register_function('screenshottable_attempt_screenshot', attempt_screenshot)
