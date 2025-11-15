@@ -222,6 +222,16 @@ class FormattingTags(object):
                 'hidden': False
             },
             {
+                'desc': translate('OpenLP.FormattingTags', 'Preview'),
+                'start tag': '{preview}',
+                'start html': '<span style="opacity: 0.6; font-size: 80%;">',
+                'end tag': '{/preview}',
+                'end html': '</span>',
+                'protected': True,
+                'temporary': False,
+                'hidden': False
+            },
+            {
                 'desc': translate('OpenLP.FormattingTags', 'Break'),
                 'start tag': '{br}',
                 'start html': '<br>',

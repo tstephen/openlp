@@ -145,6 +145,48 @@ class SongsTab(SettingsTab):
         self.ccli_login_layout.addRow(self.ccli_password_label, self.ccli_password)
         self.right_layout.addWidget(self.ccli_login_group_box)
 
+        # Enable Preview of first line group box
+        self.preview_group_box = QtWidgets.QGroupBox(self.left_column)
+        self.preview_group_box.setObjectName('preview_group_box')
+        self.preview_group_box.setCheckable(True)  # whole feature can be enabled/disabled
+        self.preview_layout = QtWidgets.QVBoxLayout(self.preview_group_box)
+        self.preview_layout.setObjectName('preview_layout')
+        self.preview_info_label = QtWidgets.QLabel(self.preview_group_box)  # Info label
+        self.preview_info_label.setWordWrap(True)
+        self.preview_layout.addWidget(self.preview_info_label)
+
+        # Individual strophe type checkboxes for preview
+        self.preview_intro_check_box = QtWidgets.QCheckBox(self.preview_group_box)
+        self.preview_intro_check_box.setObjectName('preview_intro_check_box')
+        self.preview_layout.addWidget(self.preview_intro_check_box)
+
+        self.preview_verse_check_box = QtWidgets.QCheckBox(self.preview_group_box)
+        self.preview_verse_check_box.setObjectName('preview_verse_check_box')
+        self.preview_layout.addWidget(self.preview_verse_check_box)
+
+        self.preview_chorus_check_box = QtWidgets.QCheckBox(self.preview_group_box)
+        self.preview_chorus_check_box.setObjectName('preview_chorus_check_box')
+        self.preview_layout.addWidget(self.preview_chorus_check_box)
+
+        self.preview_bridge_check_box = QtWidgets.QCheckBox(self.preview_group_box)
+        self.preview_bridge_check_box.setObjectName('preview_bridge_check_box')
+        self.preview_layout.addWidget(self.preview_bridge_check_box)
+
+        self.preview_pre_chorus_check_box = QtWidgets.QCheckBox(self.preview_group_box)
+        self.preview_pre_chorus_check_box.setObjectName('preview_pre_chorus_check_box')
+        self.preview_layout.addWidget(self.preview_pre_chorus_check_box)
+
+        self.preview_ending_check_box = QtWidgets.QCheckBox(self.preview_group_box)
+        self.preview_ending_check_box.setObjectName('preview_ending_check_box')
+        self.preview_layout.addWidget(self.preview_ending_check_box)
+
+        self.preview_other_check_box = QtWidgets.QCheckBox(self.preview_group_box)
+        self.preview_other_check_box.setObjectName('preview_other_check_box')
+        self.preview_layout.addWidget(self.preview_other_check_box)
+
+        # Add group box to the left column
+        self.left_layout.addWidget(self.preview_group_box)
+
         # Make sure everything is top-aligned
         self.left_layout.addStretch()
         self.right_layout.addStretch()
@@ -162,6 +204,16 @@ class SongsTab(SettingsTab):
         self.german_notation_radio_button.clicked.connect(self.on_german_notation_button_clicked)
         self.neolatin_notation_radio_button.clicked.connect(self.on_neolatin_notation_button_clicked)
         self.footer_reset_button.clicked.connect(self.on_footer_reset_button_clicked)
+
+        # Connect Preview group signals
+        self.preview_group_box.toggled.connect(self.on_preview_group_box_toggled)
+        self.preview_intro_check_box.stateChanged.connect(self.on_preview_intro_check_box_changed)
+        self.preview_verse_check_box.stateChanged.connect(self.on_preview_verse_check_box_changed)
+        self.preview_chorus_check_box.stateChanged.connect(self.on_preview_chorus_check_box_changed)
+        self.preview_bridge_check_box.stateChanged.connect(self.on_preview_bridge_check_box_changed)
+        self.preview_pre_chorus_check_box.stateChanged.connect(self.on_preview_pre_chorus_check_box_changed)
+        self.preview_ending_check_box.stateChanged.connect(self.on_preview_ending_check_box_changed)
+        self.preview_other_check_box.stateChanged.connect(self.on_preview_other_check_box_changed)
 
     def retranslate_ui(self):
         self.mode_group_box.setTitle(translate('SongsPlugin.SongsTab', 'Song related settings'))
@@ -191,6 +243,17 @@ class SongsTab(SettingsTab):
             translate('SongsPlugin.SongsTab', 'Neo-Latin') + ' (Do-Re-Mi-Fa-Sol-La-Si)')
         self.song_key_warning_check_box.setText(translate('SongsPlugin.SongsTab', 'Warn about missing song key'))
         self.footer_group_box.setTitle(translate('SongsPlugin.SongsTab', 'Footer'))
+        # Preview first line feature
+        self.preview_group_box.setTitle(translate('SongsPlugin.SongsTab', 'Preview'))
+        self.preview_info_label.setText(translate('SongsPlugin.SongsTab',
+                                                  'Enable previewing the first line of the next section.'))
+        self.preview_intro_check_box.setText(translate('SongsPlugin.SongsTab', 'Intro'))
+        self.preview_verse_check_box.setText(translate('SongsPlugin.SongsTab', 'Verse'))
+        self.preview_chorus_check_box.setText(translate('SongsPlugin.SongsTab', 'Chorus'))
+        self.preview_bridge_check_box.setText(translate('SongsPlugin.SongsTab', 'Bridge'))
+        self.preview_pre_chorus_check_box.setText(translate('SongsPlugin.SongsTab', 'Pre-Chorus'))
+        self.preview_ending_check_box.setText(translate('SongsPlugin.SongsTab', 'Ending'))
+        self.preview_other_check_box.setText(translate('SongsPlugin.SongsTab', 'Other'))
         # Keep this in sync with the list in mediaitem.py
         const = '<code>"{}"</code>'
         placeholders = [
@@ -279,6 +342,30 @@ class SongsTab(SettingsTab):
     def on_footer_reset_button_clicked(self):
         self.footer_edit_box.setPlainText(self.settings.get_default_value('songs/footer template'))
 
+    def on_preview_group_box_toggled(self, checked):
+        self.preview_enabled = checked
+
+    def on_preview_intro_check_box_changed(self, check_state):
+        self.preview_intro = (check_state == QtCore.Qt.CheckState.Checked)
+
+    def on_preview_verse_check_box_changed(self, check_state):
+        self.preview_verse = (check_state == QtCore.Qt.CheckState.Checked)
+
+    def on_preview_chorus_check_box_changed(self, check_state):
+        self.preview_chorus = (check_state == QtCore.Qt.CheckState.Checked)
+
+    def on_preview_bridge_check_box_changed(self, check_state):
+        self.preview_bridge = (check_state == QtCore.Qt.CheckState.Checked)
+
+    def on_preview_pre_chorus_check_box_changed(self, check_state):
+        self.preview_pre_chorus = (check_state == QtCore.Qt.CheckState.Checked)
+
+    def on_preview_ending_check_box_changed(self, check_state):
+        self.preview_ending = (check_state == QtCore.Qt.CheckState.Checked)
+
+    def on_preview_other_check_box_changed(self, check_state):
+        self.preview_other = (check_state == QtCore.Qt.CheckState.Checked)
+
     def load(self):
         """
         Load the songs settings
@@ -313,6 +400,32 @@ class SongsTab(SettingsTab):
         if self.first_slide_mode > 0:
             self.first_slide_mode_combobox.setCurrentIndex(self.first_slide_mode)
 
+        # Preview group box (master enable/disable)
+        self.preview_enabled = self.settings.value('songs/preview_enabled')
+        self.preview_group_box.setChecked(self.preview_enabled)
+
+        # Individual preview checkboxes
+        self.preview_intro = self.settings.value('songs/preview_intro')
+        self.preview_intro_check_box.setChecked(self.preview_intro)
+
+        self.preview_verse = self.settings.value('songs/preview_verse')
+        self.preview_verse_check_box.setChecked(self.preview_verse)
+
+        self.preview_chorus = self.settings.value('songs/preview_chorus')
+        self.preview_chorus_check_box.setChecked(self.preview_chorus)
+
+        self.preview_bridge = self.settings.value('songs/preview_bridge')
+        self.preview_bridge_check_box.setChecked(self.preview_bridge)
+
+        self.preview_pre_chorus = self.settings.value('songs/preview_pre_chorus')
+        self.preview_pre_chorus_check_box.setChecked(self.preview_pre_chorus)
+
+        self.preview_ending = self.settings.value('songs/preview_ending')
+        self.preview_ending_check_box.setChecked(self.preview_ending)
+
+        self.preview_other = self.settings.value('songs/preview_other')
+        self.preview_other_check_box.setChecked(self.preview_other)
+
     def save(self):
         """
         Save the song settings
@@ -327,6 +440,19 @@ class SongsTab(SettingsTab):
         self.settings.setValue('songs/warn about missing song key', self.song_key_warning)
         self.settings.setValue('songs/chord notation', self.chord_notation)
         self.settings.setValue('songs/songselect username', self.ccli_username.text())
+
+        # Preview group box (master enable/disable)
+        self.settings.setValue('songs/preview_enabled', self.preview_group_box.isChecked())
+
+        # Individual preview checkboxes
+        self.settings.setValue('songs/preview_intro', self.preview_intro)
+        self.settings.setValue('songs/preview_verse', self.preview_verse)
+        self.settings.setValue('songs/preview_chorus', self.preview_chorus)
+        self.settings.setValue('songs/preview_bridge', self.preview_bridge)
+        self.settings.setValue('songs/preview_pre_chorus', self.preview_pre_chorus)
+        self.settings.setValue('songs/preview_ending', self.preview_ending)
+        self.settings.setValue('songs/preview_other', self.preview_other)
+
         # Only save password if it's blank or the user acknowleges the warning
         if (self.ccli_password.text() == ''):
             self.settings.setValue('songs/songselect password', '')

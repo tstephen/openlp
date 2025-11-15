@@ -1071,3 +1071,180 @@ def test_song_first_slide_creation_works(mocked_get_verses: MagicMock,
         assert service_item.slides[0]['text'] == service_item.footer_html
         # It needs to have empty footer as it's already shown on text
         assert service_item.slides[0]['footer_html'] == ''
+
+
+@patch('openlp.plugins.songs.lib.mediaitem.SongMediaItem._get_id_of_item_to_generate')
+@patch('openlp.plugins.songs.lib.mediaitem.SongXML.get_verses')
+def test_generate_slide_data_adds_preview_for_next_verse(mocked_get_verses: MagicMock,
+                                                         mocked__get_id_of_item_to_generate: MagicMock,
+                                                         media_item: SongMediaItem,
+                                                         settings: Settings):
+    """
+    Simple test to check that previews are added for the next verse.
+    When preview is enabled for verses, generate_slide_data should append the
+    first line of the next verse wrapped in {preview}...{/preview}.
+    """
+
+    # GIVEN: A Song which has multiple verses and a preview setting enabled for verses
+    mocked__get_id_of_item_to_generate.return_value = '00000000-0000-0000-0000-000000000000'
+    settings.setValue('songs/preview_enabled', True)
+    settings.setValue('songs/preview_verse', True)
+
+    preview_verses = [
+                        [{'type': 'v', 'label': '1'}, 'Line 1 of the verse 1\nLine 2 of the verse 1'],
+                        [{'type': 'v', 'label': '2'}, 'Line 1 of the verse 2\nLine 2 of the verse 2']
+                    ]
+    preview_order = 'v1 v2'
+
+    mocked_get_verses.return_value = preview_verses
+    media_item.plugin = MagicMock()
+    media_item.open_lyrics = OpenLyrics(media_item.plugin.manager)
+
+    # Build a Song instance
+    song = Song()
+    song.title = 'My Song'
+    song.lyrics = '<fake xml>'  # Mocked by mocked_get_verses
+    song.theme_name = 'Default'
+    song.verse_order = preview_order
+    media_item.plugin.manager.get_object.return_value = song
+    service_item = ServiceItem(None)
+
+    # The expected first slide text should contain the preview tag with the first line of the next verse
+    expected_first_slide = (
+        "Line 1 of the verse 1\n"
+        "Line 2 of the verse 1\n"
+        "{preview}Line 1 of the verse 2{/preview}"
+    )
+
+    # WHEN: I generate the slides
+    media_item.generate_slide_data(service_item, item=song)
+
+    # THEN: The first slide should contain the preview tag with the first line of the next verse
+    slide_texts = [s['text'] for s in service_item.slides]
+    assert slide_texts[0] == expected_first_slide, \
+        f"Expected {expected_first_slide}, but got {slide_texts[0]}"
+
+
+@patch('openlp.plugins.songs.lib.mediaitem.SongMediaItem._get_id_of_item_to_generate')
+@patch('openlp.plugins.songs.lib.mediaitem.SongXML.get_verses')
+def test_generate_slide_data_forced_split_previews_next_split(mocked_get_verses: MagicMock,
+                                                              mocked__get_id_of_item_to_generate: MagicMock,
+                                                              media_item: SongMediaItem,
+                                                              settings: Settings):
+    """
+    If a verse contains a forced split [--}{--] the preview for the last split
+    should be the first line of the next split (within the same verse),
+    and the last split should preview the first line of the next verse.
+    """
+
+    #  GIVEN: A Song which has multiple verses with a split and a preview setting enabled for verses
+    mocked__get_id_of_item_to_generate.return_value = '00000000-0000-0000-0000-000000000000'
+    settings.setValue('songs/preview_enabled', True)
+    settings.setValue('songs/preview_verse', True)
+
+    preview_verses = [
+        [{'type': 'v', 'label': '1'}, "Line 1 of the verse 1\n[--}{--]\nLine 2 of the verse 1\nLine 3 of the verse 1"],
+        [{'type': 'v', 'label': '2'}, "Line 1 of the verse 2\nLine 2 of the verse 2"]
+    ]
+
+    preview_order = 'v1 v2'
+
+    mocked_get_verses.return_value = preview_verses
+    media_item.plugin = MagicMock()
+    media_item.open_lyrics = OpenLyrics(media_item.plugin.manager)
+
+    song = Song()
+    song.title = 'Split Song'
+    song.lyrics = '<fake xml>'
+    song.theme_name = 'Default'
+    song.verse_order = preview_order
+    media_item.plugin.manager.get_object.return_value = song
+    service_item = ServiceItem(None)
+
+    # WHEN: I generate the slides
+    media_item.generate_slide_data(service_item, item=song)
+
+    # THEN: the preview for the last split should be the first line of the next split (within the same verse)
+    # and the last split should preview the first line of the next verse.
+    slide_texts = [s['text'] for s in service_item.slides]
+
+    expected_slides = [
+        "Line 1 of the verse 1\n{preview}Line 2 of the verse 1{/preview}",
+        "Line 2 of the verse 1\nLine 3 of the verse 1\n{preview}Line 1 of the verse 2{/preview}"
+    ]
+
+    assert slide_texts[:2] == expected_slides, \
+        f"Expected {expected_slides}, but got {slide_texts[:2]}"
+
+
+@patch('openlp.plugins.songs.lib.mediaitem.SongMediaItem._get_id_of_item_to_generate')
+@patch('openlp.plugins.songs.lib.mediaitem.SongXML.get_verses')
+def test_generate_slide_data_adds_preview_for_selected_verses(mocked_get_verses: MagicMock,
+                                                              mocked__get_id_of_item_to_generate: MagicMock,
+                                                              media_item: SongMediaItem,
+                                                              settings: Settings):
+    """
+    When preview is enabled for selected verses, generate_slide_data
+    should append only for those in which were selected in the settings
+    """
+
+    # GIVEN: A Song which has multiple verses and a preview setting enabled for verses and bridge
+    mocked__get_id_of_item_to_generate.return_value = '00000000-0000-0000-0000-000000000000'
+    settings.setValue('songs/preview_enabled', True)
+    settings.setValue('songs/preview_verse', True)
+    settings.setValue('songs/preview_chorus', False)
+    settings.setValue('songs/preview_bridge', True)
+
+    preview_verses = [
+                        [{'type': 'v', 'label': '1'}, 'Line 1 of the verse 1\nLine 2 of the verse 1'],
+                        [{'type': 'v', 'label': '2'}, 'Line 1 of the verse 2\nLine 2 of the verse 2'],
+                        [{'type': 'c', 'label': '1'}, 'Line 1 of the chorus 1\nLine 2 of the chorus 1'],
+                        [{'type': 'b', 'label': '1'}, 'Line 1 of the bridge 1\nLine 2 of the bridge 1'],
+                        ]
+    preview_order = 'v1 v2 c1 b1 v2'
+
+    mocked_get_verses.return_value = preview_verses
+    media_item.plugin = MagicMock()
+    media_item.open_lyrics = OpenLyrics(media_item.plugin.manager)
+
+    # Build a Song instance
+    song = Song()
+    song.title = 'My Song'
+    song.lyrics = '<fake xml>'  # Mocked by mocked_get_verses
+    song.theme_name = 'Default'
+    song.verse_order = preview_order
+    media_item.plugin.manager.get_object.return_value = song
+    service_item = ServiceItem(None)
+
+    # The expected slides should contain:
+    # 1. V1 with preview for first line of verse 2 (enabled)
+    # 2. V2 with no preview for chorus 1 (disabled)
+    # 3. C1 with no preview for bridge 1 (disabled chorus)
+    # 4. B1 with preview for verse 2 (enabled)
+    expected_slides = [(
+        "Line 1 of the verse 1\n"
+        "Line 2 of the verse 1\n"
+        "{preview}Line 1 of the verse 2{/preview}"
+    ), (
+        "Line 1 of the verse 2\n"
+        "Line 2 of the verse 2"
+    ), (
+        "Line 1 of the chorus 1\n"
+        "Line 2 of the chorus 1"
+    ), (
+        "Line 1 of the bridge 1\n"
+        "Line 2 of the bridge 1\n"
+        "{preview}Line 1 of the verse 2{/preview}"
+    ), (
+        "Line 1 of the verse 2\n"
+        "Line 2 of the verse 2"
+    )]
+
+    # WHEN: I generate the slides
+    media_item.generate_slide_data(service_item, item=song)
+
+    # THEN: The first slide should contain the preview tag with the first line of the next verse
+    slide_texts = [s['text'] for s in service_item.slides]
+
+    assert slide_texts == expected_slides, \
+        f"Expected {expected_slides}, but got {slide_texts[0]}"
