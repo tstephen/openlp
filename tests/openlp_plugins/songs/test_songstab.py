@@ -93,6 +93,16 @@ def test_save_check_box_settings(form):
     form.on_disable_chords_import_check_box_changed(QtCore.Qt.CheckState.Unchecked)
     form.on_auto_play_check_box_changed(QtCore.Qt.CheckState.Checked)
     form.on_uppercase_check_box_changed(QtCore.Qt.CheckState.Checked)
+    # Preview group
+    form.preview_group_box.setChecked(True)
+    form.on_preview_intro_check_box_changed(QtCore.Qt.CheckState.Checked)
+    form.on_preview_verse_check_box_changed(QtCore.Qt.CheckState.Unchecked)
+    form.on_preview_chorus_check_box_changed(QtCore.Qt.CheckState.Checked)
+    form.on_preview_bridge_check_box_changed(QtCore.Qt.CheckState.Unchecked)
+    form.on_preview_pre_chorus_check_box_changed(QtCore.Qt.CheckState.Checked)
+    form.on_preview_ending_check_box_changed(QtCore.Qt.CheckState.Unchecked)
+    form.on_preview_other_check_box_changed(QtCore.Qt.CheckState.Checked)
+
     # WHEN: Save is invoked
     form.save()
     # THEN: The correct values should be stored in the settings
@@ -103,6 +113,15 @@ def test_save_check_box_settings(form):
     assert form.settings.value('songs/disable chords import') is False
     assert form.settings.value('songs/auto play audio') is True
     assert form.settings.value('songs/uppercase songs') is True
+    # Preview group
+    assert form.settings.value('songs/preview_enabled') is True
+    assert form.settings.value('songs/preview_intro') is True
+    assert form.settings.value('songs/preview_verse') is False
+    assert form.settings.value('songs/preview_chorus') is True
+    assert form.settings.value('songs/preview_bridge') is False
+    assert form.settings.value('songs/preview_pre_chorus') is True
+    assert form.settings.value('songs/preview_ending') is False
+    assert form.settings.value('songs/preview_other') is True
 
 
 def test_english_notation_button(form):
@@ -151,7 +170,7 @@ def test_password_change(mocked_settings_set_val, mocked_question, form):
     form.save()
     # THEN: footer should not have been saved (one less call than the change test below)
     mocked_question.assert_called_once()
-    assert mocked_settings_set_val.call_count == 12
+    assert mocked_settings_set_val.call_count == 20
 
 
 @patch('openlp.plugins.songs.lib.songstab.QtWidgets.QMessageBox.question')
@@ -167,7 +186,7 @@ def test_password_change_cancelled(mocked_settings_set_val, mocked_question, for
     form.save()
     # THEN: footer should not have been saved (one less call than the change test below)
     mocked_question.assert_called_once()
-    assert mocked_settings_set_val.call_count == 11
+    assert mocked_settings_set_val.call_count == 19
 
 
 @patch('openlp.core.common.settings.Settings.setValue')
@@ -179,7 +198,7 @@ def test_footer_nochange(mocked_settings_set_val, form):
     # WHEN: save is invoked
     form.save()
     # THEN: footer should not have been saved (one less call than the change test below)
-    assert mocked_settings_set_val.call_count == 12
+    assert mocked_settings_set_val.call_count == 20
 
 
 @patch('openlp.core.common.settings.Settings.setValue')
@@ -192,7 +211,7 @@ def test_footer_change(mocked_settings_set_val, form):
     # WHEN: save is invoked
     form.save()
     # THEN: footer should have been saved (one more call to setValue than the nochange test)
-    assert mocked_settings_set_val.call_count == 13
+    assert mocked_settings_set_val.call_count == 21
     assert form.footer_edit_box.toPlainText() == 'A new footer'
 
 

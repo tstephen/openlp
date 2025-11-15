@@ -458,6 +458,14 @@ class Settings(QtCore.QSettings):
         'songs/disable chords import': False,
         'songs/auto play audio': False,
         'songs/uppercase songs': False,
+        'songs/preview_enabled': False,       # Master switch for preview group box
+        'songs/preview_intro': True,         # Show intro strophes in preview by default
+        'songs/preview_verse': True,         # Show verses in preview
+        'songs/preview_chorus': True,        # Show chorus in preview
+        'songs/preview_bridge': True,        # Show bridge in preview
+        'songs/preview_pre_chorus': True,    # Show pre-chorus in preview
+        'songs/preview_ending': True,        # Show ending in preview
+        'songs/preview_other': True,         # Show "other" strophes in preview
         'songusage/status': PluginStatus.Inactive,
         'songusage/db type': 'sqlite',
         'songusage/db username': '',
@@ -588,7 +596,7 @@ class Settings(QtCore.QSettings):
     # Settings upgrades for 4
     __setting_upgrade_4__ = [
         ('media/vlc arguments', '', []),
-        ('presentations/thumbnail_scheme', '', []),
+        ('presentations/thumbnail_scheme', '', [])
     ]
 
     @staticmethod

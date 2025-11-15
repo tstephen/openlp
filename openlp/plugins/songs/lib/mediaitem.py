@@ -613,6 +613,17 @@ class SongMediaItem(MediaManagerItem):
         log.debug('generate_slide_data: {service}, {item}, {remote}'.format(service=service_item, item=item,
                                                                             remote=self.remote_song))
         uppercase = bool(self.settings.value('songs/uppercase songs'))
+
+        # Load preview settings
+        preview_enabled = bool(self.settings.value('songs/preview_enabled'))
+        preview_intro = bool(self.settings.value('songs/preview_intro'))
+        preview_verse = bool(self.settings.value('songs/preview_verse'))
+        preview_chorus = bool(self.settings.value('songs/preview_chorus'))
+        preview_bridge = bool(self.settings.value('songs/preview_bridge'))
+        preview_pre_chorus = bool(self.settings.value('songs/preview_pre_chorus'))
+        preview_ending = bool(self.settings.value('songs/preview_ending'))
+        preview_other = bool(self.settings.value('songs/preview_other'))
+
         item_id = self._get_id_of_item_to_generate(item, self.remote_song)
         service_item.add_capability(ItemCapabilities.CanEdit)
         service_item.add_capability(ItemCapabilities.CanPreview)
@@ -655,7 +666,8 @@ class SongMediaItem(MediaManagerItem):
                     service_item.add_from_text(split_verse, verse_def)
         else:
             # Loop through the verse list and expand the song accordingly.
-            for order in song.verse_order.lower().split():
+            order_list = song.verse_order.lower().split()
+            for order_pos, order in enumerate(order_list):
                 if not order:
                     break
                 for verse in verse_list:
@@ -668,10 +680,72 @@ class SongMediaItem(MediaManagerItem):
                         verse_tag = VerseType.translated_tags[verse_index]
                         verse_def = '{tag}{label}'.format(tag=verse_tag, label=verse[0]['label'])
                         force_verse = verse[1].split('[--}{--]\n')
-                        for split_verse in force_verse:
+
+                        for i, split_verse in enumerate(force_verse):
+                            # Feature #118 - Append preview of next verse's first line if applicable
+                            preview_line = ""
+
+                            if preview_enabled:
+                                verse_type_lower = verse[0]['type'].lower()
+
+                                # Determine if preview is allowed for this strophe type
+                                preview_allowed = any([
+                                    (verse_type_lower.startswith("i") and preview_intro),
+                                    (verse_type_lower.startswith("v") and preview_verse),
+                                    (verse_type_lower.startswith("c") and preview_chorus),
+                                    (verse_type_lower.startswith("b") and preview_bridge),
+                                    (verse_type_lower.startswith("p") and preview_pre_chorus),
+                                    (verse_type_lower.startswith("e") and preview_ending),
+                                    (verse_type_lower.startswith("o") and preview_other)
+                                ])
+
+                                if preview_allowed:
+                                    if i < len(force_verse) - 1:
+                                        # Case 1: preview next split of the same verse
+                                        next_lines = force_verse[i + 1].splitlines()
+                                        if next_lines:
+                                            preview_line = "{preview}" + next_lines[0] + "{/preview}"
+
+                                    if (
+                                        not preview_line
+                                        and i == len(force_verse) - 1
+                                        and order_pos + 1 < len(order_list)
+                                    ):
+                                        # Case 2: preview first line of the next verse
+                                        next_order = order_list[order_pos + 1]
+                                        for next_verse in verse_list:
+                                            if (
+                                                next_verse[0]['type'][0].lower() == next_order[0]
+                                                and (
+                                                    next_verse[0]['label'].lower() == next_order[1:]
+                                                    or not next_order[1:]
+                                                    )
+                                            ):
+                                                next_verse_type = next_verse[0]['type'].lower()
+                                                next_allowed = any([
+                                                    (next_verse_type.startswith("i") and preview_intro),
+                                                    (next_verse_type.startswith("v") and preview_verse),
+                                                    (next_verse_type.startswith("c") and preview_chorus),
+                                                    (next_verse_type.startswith("b") and preview_bridge),
+                                                    (next_verse_type.startswith("p") and preview_pre_chorus),
+                                                    (next_verse_type.startswith("e") and preview_ending),
+                                                    (next_verse_type.startswith("o") and preview_other)
+                                                ])
+                                                if next_allowed:
+                                                    next_verse_lines = next_verse[1].splitlines()
+                                                    if next_verse_lines:
+                                                        preview_line = "{preview}" + next_verse_lines[0] + "{/preview}"
+                                                break
+
+                            # Append preview line if present
+                            if preview_line:
+                                split_verse = split_verse.rstrip() + "\n" + preview_line
+                            # Feature #2098 - uppercase
                             if uppercase:
                                 split_verse = "{uc}" + split_verse + "{/uc}"
+
                             service_item.add_from_text(split_verse, verse_def)
+
         service_item.data_string = {
             'title': song.search_title,
             'alternate_title': song.alternate_title,
