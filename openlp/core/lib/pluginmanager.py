@@ -46,7 +46,7 @@ class PluginManager(RegistryBase, LogMixin, RegistryProperties):
         """
         super(PluginManager, self).__init__(parent)
         self.log_info('Plugin manager Initialising')
-        self.log_debug('Base path {path}'.format(path=AppLocation.get_directory(AppLocation.PluginsDir)))
+        self.log_debug(f'Base path {AppLocation.get_directory(AppLocation.PluginsDir)}')
         self.log_info('Plugin manager Initialised')
 
     def bootstrap_initialise(self):
@@ -55,15 +55,17 @@ class PluginManager(RegistryBase, LogMixin, RegistryProperties):
         Scan a directory for objects inheriting from the ``Plugin`` class.
         """
         glob_pattern = os.path.join('plugins', '*', '[!.]*plugin.py')
-        extension_loader(glob_pattern)
-        extension_loader(glob_pattern, community=True)
+        extension_loader(AppLocation.get_directory(AppLocation.AppDir), glob_pattern)
+        extension_loader(
+            AppLocation.get_directory(AppLocation.DataDir), glob_pattern, community=True
+        )
         plugin_classes = Plugin.__subclasses__()
-        for p in plugin_classes:
+        for plugin in plugin_classes:
             try:
-                p()
-                self.log_debug('Loaded plugin {plugin}'.format(plugin=str(p)))
+                plugin()
+                self.log_debug(f'Loaded plugin {plugin}')
             except TypeError:
-                self.log_exception('Failed to load plugin {plugin}'.format(plugin=str(p)))
+                self.log_exception(f'Failed to load plugin {plugin}')
 
     def bootstrap_post_set_up(self):
         """
