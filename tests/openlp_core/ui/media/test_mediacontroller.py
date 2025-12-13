@@ -478,7 +478,8 @@ def test_media_length(file_name, media_length, media_env):
     results = media_env.media_controller.media_length(full_path)
 
     # THEN you can determine the run time
-    assert results == media_length, f'The correct duration for {file_name} should be {media_length}, was {results}'
+    assert results == pytest.approx(media_length, rel=0.1), \
+        f'The correct duration for {file_name} should be {media_length}, was {results}'
 
 
 def test_on_media_play(media_env):

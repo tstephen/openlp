@@ -1158,18 +1158,19 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
 
     def slide_selected(self, start=False):
         """
-        Generate the preview when you click on a slide. If this is the Live Controller also display on the screen
+        Generate the preview when you click on a slide. If this is the Live Controller also display on the screen.
 
         :param start:
         """
+        row = self.preview_widget.current_slide_number()
+        Registry().execute('slidecontroller_slide_selected', [self.service_item, self.is_live, row])
         # Only one thread should be in here at the time. If already locked just skip, since the update will be
         # done by the thread holding the lock. If it is a "start" slide, we must wait for the lock, but only for 0.2
         # seconds, since we don't want to cause a deadlock
         timeout = 0.2 if start else -1
         if not self.slide_selected_lock.acquire(start, timeout):
             if start:
-                self.log_debug('Could not get lock in slide_selected after waiting %f, skip to avoid deadlock.'
-                               % timeout)
+                self.log_debug(f'Could not get lock in slide_selected after waiting {timeout}, skip to avoid deadlock.')
             return
         # If "click live slide to unblank" is enabled, unblank the display. And start = Item is sent to Live.
         # Note: If this if statement is placed at the bottom of this function instead of top slide transitions are lost.
@@ -1178,7 +1179,6 @@ class SlideController(QtWidgets.QWidget, LogMixin, RegistryProperties):
            self._current_hide_mode and
            self.settings.value('core/click live slide to unblank')):
             Registry().execute('slidecontroller_live_unblank')
-        row = self.preview_widget.current_slide_number()
         self.selected_row = 0
         if -1 < row < self.preview_widget.slide_count():
             if self.service_item.is_command():

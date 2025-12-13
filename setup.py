@@ -118,6 +118,7 @@ using a computer and a display/projector.""",
         'requests',
         'SQLAlchemy',
         'waitress',
+        'websocket-client',
         'websockets'
     ],
     extras_require={
