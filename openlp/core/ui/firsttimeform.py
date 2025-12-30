@@ -250,7 +250,7 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
         self.theme_combo_box.clear()
         self.remote_page.can_download_remote = False
         self.button(QtWidgets.QWizard.WizardButton.CustomButton1).setVisible(False)
-        if self.has_run_wizard:
+        if self.has_run_wizard and self.plugin_manager is not None:
             self.songs_check_box.setChecked(self.plugin_manager.get_plugin_by_name('songs').is_active())
             self.bible_check_box.setChecked(self.plugin_manager.get_plugin_by_name('bibles').is_active())
             self.presentation_check_box.setChecked(
@@ -264,6 +264,7 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
             self.custom_check_box.setChecked(self.plugin_manager.get_plugin_by_name('custom').is_active())
             self.song_usage_check_box.setChecked(self.plugin_manager.get_plugin_by_name('songusage').is_active())
             self.alert_check_box.setChecked(self.plugin_manager.get_plugin_by_name('alerts').is_active())
+            self.obs_studio_check_box.setChecked(self.plugin_manager.get_plugin_by_name('obs_studio').is_active())
             # Add any existing themes to list.
             self.theme_combo_box.insertSeparator(0)
             self.theme_combo_box.addItems(sorted(self.theme_manager.get_theme_names()))
@@ -320,6 +321,7 @@ class FirstTimeForm(QtWidgets.QWizard, UiFirstTimeWizard, RegistryProperties):
         self._set_plugin_status(self.custom_check_box, 'custom/status')
         self._set_plugin_status(self.song_usage_check_box, 'songusage/status')
         self._set_plugin_status(self.alert_check_box, 'alerts/status')
+        self._set_plugin_status(self.obs_studio_check_box, 'obs_studio/status')
         self.screen_selection_widget.save()
         if self.theme_combo_box.currentIndex() != -1:
             self.settings.setValue('themes/global theme', self.theme_combo_box.currentText())
