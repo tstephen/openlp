@@ -233,6 +233,10 @@ class UiFirstTimeWizard(object):
         self.alert_check_box.setChecked(True)
         self.alert_check_box.setObjectName('alert_check_box')
         self.plugin_layout.addWidget(self.alert_check_box)
+        self.obs_studio_check_box = QtWidgets.QCheckBox(self.plugin_page)
+        self.obs_studio_check_box.setChecked(False)
+        self.obs_studio_check_box.setObjectName('obs_studio_check_box')
+        self.plugin_layout.addWidget(self.obs_studio_check_box)
         first_time_wizard.setPage(FirstTimePage.Plugins, self.plugin_page)
         # Web Remote page
         self.remote_page = RemotePage(self)
@@ -344,6 +348,9 @@ class UiFirstTimeWizard(object):
         self.song_usage_check_box.setText(translate('OpenLP.FirstTimeWizard', 'Song Usage Monitor'))
         self.alert_check_box.setText(translate('OpenLP.FirstTimeWizard',
                                                'Alerts – Display informative messages while showing other slides'))
+        self.obs_studio_check_box.setText(
+            translate('OpenLP.FirstTimeWizard', 'OBS Studio - Control scenes directly from OpenLP')
+        )
         self.resource_page.setTitle(translate('OpenLP.FirstTimeWizard', 'Resource Data'))
         self.resource_page.setSubTitle(translate('OpenLP.FirstTimeWizard', 'Can OpenLP download some resource data?'))
         self.resource_label.setText(
