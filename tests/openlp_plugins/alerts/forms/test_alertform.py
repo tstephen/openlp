@@ -30,8 +30,7 @@ from openlp.core.common.settings import Settings
 from openlp.plugins.alerts.forms.alertform import AlertForm
 
 
-@patch.object(AlertForm, 'provide_help')
-def test_help(mocked_help: MagicMock, settings: Settings, registry: Registry):
+def test_help(settings: Settings, registry: Registry):
     """
     Test the help button
     """
@@ -40,8 +39,9 @@ def test_help(mocked_help: MagicMock, settings: Settings, registry: Registry):
     alert_form = AlertForm(MagicMock())
 
     # WHEN: The Help button is clicked
-    QtTest.QTest.mouseClick(alert_form.button_box.button(QtWidgets.QDialogButtonBox.StandardButton.Help),
-                            QtCore.Qt.MouseButton.LeftButton)
+    with patch.object(alert_form, 'provide_help') as mocked_help:
+        QtTest.QTest.mouseClick(alert_form.button_box.button(QtWidgets.QDialogButtonBox.StandardButton.Help),
+                                QtCore.Qt.MouseButton.LeftButton)
 
     # THEN: The Help function should be called
     mocked_help.assert_called_once()

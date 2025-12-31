@@ -22,21 +22,14 @@
 Package to test the screens tab functionality (primarily ScreenSelectionWidget and ScreenButton classes)
 within openlp/core/widgets/widgets.py
 """
-import pytest
-
 from unittest.mock import MagicMock, call, patch
 
 from PySide6 import QtCore, QtWidgets, QtTest
 
-from openlp.core.common.settings import ProxyMode
+from openlp.core.app import OpenLP
+from openlp.core.common.settings import ProxyMode, Settings
 from openlp.core.display.screens import Screen
 from openlp.core.widgets.widgets import ProxyWidget, ProxyDialog, ScreenButton, ScreenSelectionWidget
-
-
-@pytest.fixture()
-def form(settings):
-    test_form = ScreenSelectionWidget()
-    return test_form
 
 
 def mocked_screens(custom_geometry):
@@ -46,119 +39,105 @@ def mocked_screens(custom_geometry):
     screen0.is_primary = False
     screen0.geometry = QtCore.QRect(-271, -1080, 1920, 1080)
     screen0.custom_geometry = custom_geometry
-    screen0.__str__.return_value = "Screen 1"
+    screen0.__str__.return_value = 'Screen 1'                                   # type: ignore[attr-defined]
     screen1 = MagicMock()
     screen1.number = 1
     screen1.is_display = False
     screen1.is_primary = True
     screen1.geometry = QtCore.QRect(0, 0, 1366, 768)
     screen1.custom_geometry = custom_geometry
-    screen1.__str__.return_value = "Screen 2"
+    screen1.__str__.return_value = 'Screen 2'                                   # type: ignore[attr-defined]
     return [screen0, screen1]
 
 
-@patch('openlp.core.display.screens.ScreenList')
-def test_screen_buttons_show_pixels(mocked_screenList, form):
+def test_screen_buttons_show_pixels():
     '''
     Test that the screen buttons show the screen sizes in pixels
     '''
     # GIVEN: A mocked extended desktop configuration
-
-    mocked_screenList.return_value = mocked_screens(None)
-    form.screens = mocked_screenList()
+    screen_selection_widget = ScreenSelectionWidget(None, mocked_screens(None))
 
     # WHEN: When I go into screen settings for the display screen
-    ScreenSelectionWidget.load(form)
+    screen_selection_widget.load()
 
     # THEN: The screen buttons should show the correct size of that screen
-    screen_0_button = form.findChild(QtWidgets.QPushButton, 'screen_0_button')
-    screen_1_button = form.findChild(QtWidgets.QPushButton, 'screen_1_button')
-    assert '1920' in str(screen_0_button.text())
-    assert '1080' in str(screen_0_button.text())
-    assert '1366' in str(screen_1_button.text())
-    assert '768' in str(screen_1_button.text())
+    screen_0_button = screen_selection_widget.findChild(QtWidgets.QPushButton, 'screen_0_button')
+    screen_1_button = screen_selection_widget.findChild(QtWidgets.QPushButton, 'screen_1_button')
+    assert '1920' in str(screen_0_button.text())                                # type: ignore[union-attr]
+    assert '1080' in str(screen_0_button.text())                                # type: ignore[union-attr]
+    assert '1366' in str(screen_1_button.text())                                # type: ignore[union-attr]
+    assert '768' in str(screen_1_button.text())                                 # type: ignore[union-attr]
 
 
-@patch('openlp.core.display.screens.ScreenList')
-def test_spinboxes_no_previous_custom_geometry(mocked_screenList, form):
+def test_spinboxes_no_previous_custom_geometry():
     """
     Test screen custom geometry can be changed from None
     """
     # GIVEN: A mocked extended desktop configuration
-
-    mocked_screenList.return_value = mocked_screens(None)
-    form.screens = mocked_screenList()
+    screen_selection_widget = ScreenSelectionWidget(None, mocked_screens(None))
 
     # WHEN: When I go into screen settings for the display screen and set the custom geometry
-    ScreenSelectionWidget.load(form)
-    QtTest.QTest.mouseClick(form.custom_geometry_button, QtCore.Qt.MouseButton.LeftButton)
-    QtTest.QTest.keyClick(form.left_spin_box, QtCore.Qt.Key.Key_Up)
-    QtTest.QTest.keyClick(form.top_spin_box, QtCore.Qt.Key.Key_Up)
-    QtTest.QTest.keyClick(form.width_spin_box, QtCore.Qt.Key.Key_Down)
-    QtTest.QTest.keyClick(form.height_spin_box, QtCore.Qt.Key.Key_Down)
+    screen_selection_widget.load()
+    QtTest.QTest.mouseClick(screen_selection_widget.custom_geometry_button, QtCore.Qt.MouseButton.LeftButton)
+    QtTest.QTest.keyClick(screen_selection_widget.left_spin_box, QtCore.Qt.Key.Key_Up)
+    QtTest.QTest.keyClick(screen_selection_widget.top_spin_box, QtCore.Qt.Key.Key_Up)
+    QtTest.QTest.keyClick(screen_selection_widget.width_spin_box, QtCore.Qt.Key.Key_Down)
+    QtTest.QTest.keyClick(screen_selection_widget.height_spin_box, QtCore.Qt.Key.Key_Down)
 
     # THEN: The spin boxes should show the correct values
-    assert form.left_spin_box.value() == 1
-    assert form.top_spin_box.value() == 1
-    assert form.width_spin_box.value() == 1919
-    assert form.height_spin_box.value() == 1079
+    assert screen_selection_widget.left_spin_box.value() == 1
+    assert screen_selection_widget.top_spin_box.value() == 1
+    assert screen_selection_widget.width_spin_box.value() == 1919
+    assert screen_selection_widget.height_spin_box.value() == 1079
 
 
-@patch('openlp.core.display.screens.ScreenList')
-def test_spinboxes_with_previous_custom_geometry(mocked_screenList, form):
+def test_spinboxes_with_previous_custom_geometry():
     """
     Test screen existing custom geometry can be changed
     """
     # GIVEN: A mocked extended desktop configuration
-
-    testGeometry = QtCore.QRect(1, 1, 1919, 1079)
-    mocked_screenList.return_value = mocked_screens(testGeometry)
-    form.screens = mocked_screenList()
+    screen_selection_widget = ScreenSelectionWidget(None, mocked_screens(QtCore.QRect(1, 1, 1919, 1079)))
 
     # WHEN: When I go into screen settings for the display screen and update the custom geometry
-    ScreenSelectionWidget.load(form)
-    QtTest.QTest.mouseClick(form.custom_geometry_button, QtCore.Qt.MouseButton.LeftButton)
-    QtTest.QTest.keyClick(form.left_spin_box, QtCore.Qt.Key.Key_Up)
-    QtTest.QTest.keyClick(form.top_spin_box, QtCore.Qt.Key.Key_Up)
-    QtTest.QTest.keyClick(form.width_spin_box, QtCore.Qt.Key.Key_Down)
-    QtTest.QTest.keyClick(form.height_spin_box, QtCore.Qt.Key.Key_Down)
+    screen_selection_widget.load()
+    QtTest.QTest.mouseClick(screen_selection_widget.custom_geometry_button, QtCore.Qt.MouseButton.LeftButton)
+    QtTest.QTest.keyClick(screen_selection_widget.left_spin_box, QtCore.Qt.Key.Key_Up)
+    QtTest.QTest.keyClick(screen_selection_widget.top_spin_box, QtCore.Qt.Key.Key_Up)
+    QtTest.QTest.keyClick(screen_selection_widget.width_spin_box, QtCore.Qt.Key.Key_Down)
+    QtTest.QTest.keyClick(screen_selection_widget.height_spin_box, QtCore.Qt.Key.Key_Down)
 
     # THEN: The spin boxes should show the updated values
-    assert form.left_spin_box.value() == 2
-    assert form.top_spin_box.value() == 2
-    assert form.width_spin_box.value() == 1918
-    assert form.height_spin_box.value() == 1078
+    assert screen_selection_widget.left_spin_box.value() == 2
+    assert screen_selection_widget.top_spin_box.value() == 2
+    assert screen_selection_widget.width_spin_box.value() == 1918
+    assert screen_selection_widget.height_spin_box.value() == 1078
 
 
-@patch('openlp.core.display.screens.ScreenList')
-def test_spinboxes_going_outside_screen_geometry(mocked_screenList, form):
+def test_spinboxes_going_outside_screen_geometry():
     """
     Test screen existing custom geometry can be increased beyond the bounds of the screen
     """
     # GIVEN: A mocked extended desktop configuration
-
-    testGeometry = QtCore.QRect(1, 1, 1919, 1079)
-    mocked_screenList.return_value = mocked_screens(testGeometry)
-    form.screens = mocked_screenList()
+    screen_selection_widget = ScreenSelectionWidget(None, mocked_screens(QtCore.QRect(1, 1, 1919, 1079)))
 
     # WHEN: When I go into screen settings for the display screen and
     #       update the custom geometry to be outside the screen coordinates
-    ScreenSelectionWidget.load(form)
-    QtTest.QTest.mouseClick(form.custom_geometry_button, QtCore.Qt.MouseButton.LeftButton)
+    screen_selection_widget.load()
+    QtTest.QTest.mouseClick(screen_selection_widget.custom_geometry_button, QtCore.Qt.MouseButton.LeftButton)
     for _ in range(2):
-        QtTest.QTest.keyClick(form.left_spin_box, QtCore.Qt.Key.Key_Down)
-        QtTest.QTest.keyClick(form.top_spin_box, QtCore.Qt.Key.Key_Down)
-        QtTest.QTest.keyClick(form.width_spin_box, QtCore.Qt.Key.Key_Up)
-        QtTest.QTest.keyClick(form.height_spin_box, QtCore.Qt.Key.Key_Up)
+        QtTest.QTest.keyClick(screen_selection_widget.left_spin_box, QtCore.Qt.Key.Key_Down)
+        QtTest.QTest.keyClick(screen_selection_widget.top_spin_box, QtCore.Qt.Key.Key_Down)
+        QtTest.QTest.keyClick(screen_selection_widget.width_spin_box, QtCore.Qt.Key.Key_Up)
+        QtTest.QTest.keyClick(screen_selection_widget.height_spin_box, QtCore.Qt.Key.Key_Up)
 
     # THEN: The spin boxes should show the updated values
-    assert form.left_spin_box.value() == -1
-    assert form.top_spin_box.value() == -1
-    assert form.width_spin_box.value() == 1921
-    assert form.height_spin_box.value() == 1081
+    assert screen_selection_widget.left_spin_box.value() == -1
+    assert screen_selection_widget.top_spin_box.value() == -1
+    assert screen_selection_widget.width_spin_box.value() == 1921
+    assert screen_selection_widget.height_spin_box.value() == 1081
 
 
-def test_radio_button_exclusivity_no_proxy(settings):
+def test_radio_button_exclusivity_no_proxy(settings: Settings):
     """
     Test that only one radio button can be checked at a time, and that the line edits are only enabled when the
     `manual_proxy_radio` is checked
@@ -179,7 +158,7 @@ def test_radio_button_exclusivity_no_proxy(settings):
     assert proxy_widget.password_edit.isEnabled() is False
 
 
-def test_radio_button_exclusivity_system_proxy(settings):
+def test_radio_button_exclusivity_system_proxy(settings: Settings):
     """
     Test that only one radio button can be checked at a time, and that the line edits are only enabled when the
     `manual_proxy_radio` is checked
@@ -200,7 +179,7 @@ def test_radio_button_exclusivity_system_proxy(settings):
     assert proxy_widget.password_edit.isEnabled() is False
 
 
-def test_radio_button_exclusivity_manual_proxy(settings):
+def test_radio_button_exclusivity_manual_proxy(settings: Settings):
     """
     Test that only one radio button can be checked at a time, and that the line edits are only enabled when the
     `manual_proxy_radio` is checked
@@ -221,7 +200,7 @@ def test_radio_button_exclusivity_manual_proxy(settings):
     assert proxy_widget.password_edit.isEnabled() is True
 
 
-def test_proxy_widget_load_default_settings(settings):
+def test_proxy_widget_load_default_settings(settings: Settings):
     """
     Test that the default settings are loaded from the config correctly
     """
@@ -239,8 +218,7 @@ def test_proxy_widget_load_default_settings(settings):
     assert proxy_widget.password_edit.text() == ''
 
 
-@patch.object(ProxyWidget, 'load')
-def test_proxy_widget_save_no_proxy_settings(proxy_widget_load_patcher, qapp, mock_settings):
+def test_proxy_widget_save_no_proxy_settings(qapp: OpenLP, settings: Settings):
     """
     Test that the settings are saved correctly
     """
@@ -253,19 +231,20 @@ def test_proxy_widget_save_no_proxy_settings(proxy_widget_load_patcher, qapp, mo
     proxy_widget.password_edit.setText('')
 
     # WHEN: Calling save
-    proxy_widget.save()
+    with patch.object(settings, 'setValue') as mocked_set_value:
+        proxy_widget.save()
 
     # THEN: The settings should be set as expected
-    mock_settings.setValue.assert_has_calls(
-        [call('advanced/proxy mode', ProxyMode.NO_PROXY),
-         call('advanced/proxy http', ''),
-         call('advanced/proxy https', ''),
-         call('advanced/proxy username', ''),
-         call('advanced/proxy password', '')])
+    mocked_set_value.assert_has_calls([
+        call('advanced/proxy mode', ProxyMode.NO_PROXY),
+        call('advanced/proxy http', ''),
+        call('advanced/proxy https', ''),
+        call('advanced/proxy username', ''),
+        call('advanced/proxy password', '')
+    ])
 
 
-@patch.object(ProxyWidget, 'load')
-def test_proxy_widget_save_manual_settings(proxy_widget_load_patcher, qapp, mock_settings):
+def test_proxy_widget_save_manual_settings(qapp: OpenLP, settings: Settings):
     """
     Test that the settings are saved correctly
     """
@@ -278,18 +257,20 @@ def test_proxy_widget_save_manual_settings(proxy_widget_load_patcher, qapp, mock
     proxy_widget.password_edit.setText('password')
 
     # WHEN: Calling save
-    proxy_widget.save()
+    with patch.object(settings, 'setValue') as mocked_set_value:
+        proxy_widget.save()
 
     # THEN: The settings should be set as expected
-    mock_settings.setValue.assert_has_calls(
-        [call('advanced/proxy mode', ProxyMode.MANUAL_PROXY),
-         call('advanced/proxy http', 'http_proxy_server:port'),
-         call('advanced/proxy https', 'https_proxy_server:port'),
-         call('advanced/proxy username', 'username'),
-         call('advanced/proxy password', 'password')])
+    mocked_set_value.assert_has_calls([
+        call('advanced/proxy mode', ProxyMode.MANUAL_PROXY),
+        call('advanced/proxy http', 'http_proxy_server:port'),
+        call('advanced/proxy https', 'https_proxy_server:port'),
+        call('advanced/proxy username', 'username'),
+        call('advanced/proxy password', 'password')
+    ])
 
 
-def test_proxy_dialog_init(settings):
+def test_proxy_dialog_init(settings: Settings):
     """Test that the ProxyDialog is created successfully"""
     # GIVEN: ProxyDialog class
     # WHEN: It is instantiated
@@ -297,7 +278,7 @@ def test_proxy_dialog_init(settings):
     ProxyDialog()
 
 
-def test_proxy_dialog_accept(settings):
+def test_proxy_dialog_accept(settings: Settings):
     """Test that the accept() method of the ProxyDialog works correctly"""
     # GIVEN: An instance of a ProxyDialog with a mocked out widget
     dlg = ProxyDialog()
@@ -318,7 +299,7 @@ def test_screen_button_initialisation():
     screen_mock = MagicMock(spec=Screen)
     screen_mock.number = 0
     screen_mock.geometry = None
-    screen_mock.__str__.return_value = 'Mocked Screen Object'
+    screen_mock.__str__.return_value = 'Mocked Screen Object'                   # type: ignore[attr-defined]
 
     # WHEN: initialising the ScreenButton object
     instance = ScreenButton(None, screen_mock)
@@ -421,7 +402,7 @@ def test_save_screen_display():
 
 
 @patch('openlp.core.widgets.widgets.QtCore.QRect')
-def test_save_screen_full_screen(mocked_q_rect):
+def test_save_screen_full_screen(mocked_q_rect: MagicMock):
     """
     Test ScreenSelectionWidget._save_screen when the display is set to full screen
     """
@@ -440,7 +421,7 @@ def test_save_screen_full_screen(mocked_q_rect):
 
 
 @patch('openlp.core.widgets.widgets.QtCore.QRect')
-def test_save_screen_custom_geometry(mocked_q_rect):
+def test_save_screen_custom_geometry(mocked_q_rect: MagicMock):
     """
     Test ScreenSelectionWidget._save_screen when a custom geometry is set
     """
@@ -536,7 +517,7 @@ def test_on_identify_button_clicked():
     mocked_screen.geometry.x.return_value = 0
     mocked_screen.geometry.y.return_value = 0
     mocked_screen.geometry.width.return_value = 1920
-    mocked_screen.__str__.return_value = 'Screen 1'
+    mocked_screen.__str__.return_value = 'Screen 1'                             # type: ignore[attr-defined]
     instance.screens = [mocked_screen]
     instance.timer = MagicMock()
 
@@ -617,13 +598,13 @@ def test_screen_selection_save(mock_settings):
     # GIVEN: A ScreenSelectionWidget and a bunch o' mocks
     mocked_screen = MagicMock(**{'number': 0, 'to_dict.return_value': {'number': 0}})
     instance = ScreenSelectionWidget()
-    instance._save_screen = MagicMock()
     instance.screens = [mocked_screen]
     instance.current_screen = mocked_screen
 
-    instance.save()
+    with patch.object(instance, '_save_screen') as mocked_save_screen:
+        instance.save()
 
     # THEN: The right things should happen
-    instance._save_screen.assert_called_once_with(mocked_screen)
+    mocked_save_screen.assert_called_once_with(mocked_screen)
     mocked_screen.to_dict.assert_called_once()
     mock_settings.setValue.assert_called_once_with('core/screens', {0: {'number': 0}})

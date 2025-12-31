@@ -25,10 +25,23 @@ from unittest.mock import MagicMock, patch
 
 from PySide6 import QtCore, QtWidgets, QtTest
 
+from openlp.core.common.registry import Registry
 from openlp.core.ui.settingsform import SettingsForm
 
 
-def test_insert_tab_visible(registry, mock_settings):
+class MockTab(QtWidgets.QWidget):
+    """A mocked tab object, to make MyPy happy"""
+    def __init__(self, parent, tab_title: str, tab_title_visible: str, icon_path: str):
+        super().__init__(parent)
+        self.tab_title = tab_title
+        self.tab_title_visible = tab_title_visible
+        self.icon_path = icon_path
+        self.save = MagicMock()
+        self.load = MagicMock()
+        self.cancel = MagicMock()
+
+
+def test_insert_tab_visible(registry: Registry, mock_settings: MagicMock):
     """
     Test that the insert_tab() method works correctly when a visible tab is inserted
     """
@@ -49,7 +62,7 @@ def test_insert_tab_visible(registry, mock_settings):
         assert 1 == mocked_add_item.call_count, 'addItem should have been called'
 
 
-def test_insert_tab_not_visible(registry, mock_settings):
+def test_insert_tab_not_visible(registry: Registry, mock_settings: MagicMock):
     """
     Test that the insert_tab() method works correctly when a tab that should not be visible is inserted
     """
@@ -68,51 +81,33 @@ def test_insert_tab_not_visible(registry, mock_settings):
         assert 0 == mocked_add_item.call_count, 'addItem should not have been called'
 
 
-def test_accept_with_inactive_plugins(registry, mock_settings):
+def test_accept_with_inactive_plugins(registry: Registry, mock_settings: MagicMock):
     """
     Test that the accept() method works correctly when some of the plugins are inactive
     """
     # GIVEN: A visible general tab and an invisible theme tab in a Settings Form
+
     settings_form = SettingsForm(None)
-    general_tab = QtWidgets.QWidget(None)
-    general_tab.tab_title = 'mock-general'
-    general_tab.tab_title_visible = 'Mock General'
-    general_tab.icon_path = ':/icon/openlp-logo.svg'
-    mocked_general_save = MagicMock()
-    general_tab.save = mocked_general_save
-    mocked_general_load = MagicMock()
-    general_tab.load = mocked_general_load
+    general_tab = MockTab(None, 'mock-general', 'Mock General', ':/icon/openlp-logo.svg')
     settings_form.insert_tab(general_tab, is_visible=True)
-    themes_tab = QtWidgets.QWidget(None)
-    themes_tab.tab_title = 'mock-themes'
-    themes_tab.tab_title_visible = 'Mock Themes'
-    themes_tab.icon_path = ':/icon/openlp-logo.svg'
-    mocked_theme_save = MagicMock()
-    themes_tab.save = mocked_theme_save
-    mocked_theme_load = MagicMock()
-    themes_tab.load = mocked_theme_load
+    themes_tab = MockTab(None, 'mock-themes', 'Mock Themes', ':/icon/openlp-logo.svg')
     settings_form.insert_tab(themes_tab, is_visible=False)
 
     # WHEN: The accept() method is called
     settings_form.accept()
 
     # THEN: The general tab's save() method should have been called, but not the themes tab
-    mocked_general_save.assert_called_with()
-    assert 0 == mocked_theme_save.call_count, 'The Themes tab\'s save() should not have been called'
+    general_tab.save.assert_called_with()
+    assert 0 == themes_tab.save.call_count, 'The Themes tab\'s save() should not have been called'
 
 
-def test_list_item_changed_invalid_item(registry, mock_settings):
+def test_list_item_changed_invalid_item(registry: Registry, mock_settings: MagicMock):
     """
     Test that the list_item_changed() slot handles a non-existent item
     """
     # GIVEN: A mocked tab inserted into a Settings Form
     settings_form = SettingsForm(None)
-    general_tab = QtWidgets.QWidget(None)
-    general_tab.tab_title = 'mock'
-    general_tab.tab_title_visible = 'Mock'
-    general_tab.icon_path = ':/icon/openlp-logo.svg'
-    mocked_general_load = MagicMock()
-    general_tab.load = mocked_general_load
+    general_tab = MockTab(None, 'mock', 'Mock', ':/icon/openlp-logo.svg')
     settings_form.insert_tab(general_tab, is_visible=True)
 
     with patch.object(settings_form.stacked_layout, 'count') as mocked_count:
@@ -123,38 +118,26 @@ def test_list_item_changed_invalid_item(registry, mock_settings):
         assert 0 == mocked_count.call_count, 'The count method of the stacked layout should not be called'
 
 
-def test_reject_with_inactive_items(registry, mock_settings):
+def test_reject_with_inactive_items(registry: Registry, mock_settings: MagicMock):
     """
     Test that the reject() method works correctly when some of the plugins are inactive
     """
     # GIVEN: A visible general tab and an invisible theme tab in a Settings Form
     settings_form = SettingsForm(None)
-    general_tab = QtWidgets.QWidget(None)
-    general_tab.tab_title = 'mock-general'
-    general_tab.tab_title_visible = 'Mock General'
-    general_tab.icon_path = ':/icon/openlp-logo.svg'
-    mocked_general_cancel = MagicMock()
-    general_tab.cancel = mocked_general_cancel
-    mocked_general_load = MagicMock()
-    general_tab.load = mocked_general_load
+    general_tab = MockTab(None, 'mock-general', 'Mock General', ':/icon/openlp-logo.svg')
     settings_form.insert_tab(general_tab, is_visible=True)
-    themes_tab = QtWidgets.QWidget(None)
-    themes_tab.tab_title = 'mock-themes'
-    themes_tab.tab_title_visible = 'Mock Themes'
-    themes_tab.icon_path = ':/icon/openlp-logo.svg'
-    mocked_theme_cancel = MagicMock()
-    themes_tab.cancel = mocked_theme_cancel
+    themes_tab = MockTab(None, 'mock-themes', 'Mock Themes', ':/icon/openlp-logo.svg')
     settings_form.insert_tab(themes_tab, is_visible=False)
 
     # WHEN: The reject() method is called
     settings_form.reject()
 
     # THEN: The general tab's cancel() method should have been called, but not the themes tab
-    mocked_general_cancel.assert_called_with()
-    assert 0 == mocked_theme_cancel.call_count, 'The Themes tab\'s cancel() should not have been called'
+    general_tab.cancel.assert_called_with()
+    assert 0 == themes_tab.cancel.call_count, 'The Themes tab\'s cancel() should not have been called'
 
 
-def test_register_post_process(registry, mock_settings):
+def test_register_post_process(registry: Registry, mock_settings: MagicMock):
     """
     Test that the register_post_process() method works correctly
     """
@@ -169,8 +152,7 @@ def test_register_post_process(registry, mock_settings):
     assert fake_function in settings_form.processes
 
 
-@patch.object(SettingsForm, 'provide_help')
-def test_help(mocked_help, mock_settings):
+def test_help(mock_settings: MagicMock):
     """
     Test the help button
     """
@@ -178,8 +160,9 @@ def test_help(mocked_help, mock_settings):
     settings_form = SettingsForm(None)
 
     # WHEN: The Help button is clicked
-    QtTest.QTest.mouseClick(settings_form.button_box.button(QtWidgets.QDialogButtonBox.StandardButton.Help),
-                            QtCore.Qt.MouseButton.LeftButton)
+    with patch.object(settings_form, 'provide_help') as mocked_help:
+        QtTest.QTest.mouseClick(settings_form.button_box.button(QtWidgets.QDialogButtonBox.StandardButton.Help),
+                                QtCore.Qt.MouseButton.LeftButton)
 
     # THEN: The Help function should be called
     mocked_help.assert_called_once()

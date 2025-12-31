@@ -26,11 +26,12 @@ from unittest.mock import MagicMock, patch
 
 from PySide6 import QtCore, QtTest, QtWidgets
 
+from openlp.core.common.settings import Settings
 from openlp.plugins.custom.forms.editcustomform import EditCustomForm
 
 
 @pytest.fixture()
-def form(settings):
+def form(settings: Settings):
     main_window = QtWidgets.QMainWindow()
     media_item = MagicMock()
     manager = MagicMock()
@@ -40,7 +41,7 @@ def form(settings):
     del main_window
 
 
-def test_load_themes(form):
+def test_load_themes(form: EditCustomForm):
     """
     Test the load_themes() method.
     """
@@ -54,7 +55,7 @@ def test_load_themes(form):
     assert form.theme_combo_box.count() == 3, 'There should be three items (themes) in the combo box.'
 
 
-def test_load_custom(form):
+def test_load_custom(form: EditCustomForm):
     """
     Test the load_custom() method.
     """
@@ -66,7 +67,7 @@ def test_load_custom(form):
     assert form.credit_edit.text() == '', 'The credit edit should be empty'
 
 
-def test_on_add_button_clicked(form):
+def test_on_add_button_clicked(form: EditCustomForm):
     """
     Test the on_add_button_clicked_test method / add_button button.
     """
@@ -79,7 +80,7 @@ def test_on_add_button_clicked(form):
         assert form.slide_list_view.count() == 1, 'There should be one slide added.'
 
 
-def test_validate_not_valid_part1(form):
+def test_validate_not_valid_part1(form: EditCustomForm):
     """
     Test the _validate() method.
     """
@@ -99,7 +100,7 @@ def test_validate_not_valid_part1(form):
         mocked_critical_error_message_box.assert_called_with(message='You need to type in a title.')
 
 
-def test_validate_not_valid_part2(form):
+def test_validate_not_valid_part2(form: EditCustomForm):
     """
     Test the _validate() method.
     """
@@ -117,7 +118,7 @@ def test_validate_not_valid_part2(form):
         mocked_critical_error_message_box.assert_called_with(message='You need to add at least one slide.')
 
 
-def test_update_slide_list(form):
+def test_update_slide_list(form: EditCustomForm):
     """
     Test the update_slide_list() method
     """
@@ -134,8 +135,7 @@ def test_update_slide_list(form):
     form.slide_list_view.addItems.assert_called_with(['1st Slide', '2nd Slide', '3rd Slide'])
 
 
-@patch.object(EditCustomForm, 'provide_help')
-def test_help(mocked_help, settings):
+def test_help(settings: Settings):
     """
     Test the help button
     """
@@ -144,8 +144,9 @@ def test_help(mocked_help, settings):
     custom_form = EditCustomForm(MagicMock(), main_window, MagicMock())
 
     # WHEN: The Help button is clicked
-    QtTest.QTest.mouseClick(custom_form.button_box.button(QtWidgets.QDialogButtonBox.StandardButton.Help),
-                            QtCore.Qt.MouseButton.LeftButton)
+    with patch.object(custom_form, 'provide_help') as mocked_help:
+        QtTest.QTest.mouseClick(custom_form.button_box.button(QtWidgets.QDialogButtonBox.StandardButton.Help),
+                                QtCore.Qt.MouseButton.LeftButton)
 
     # THEN: The Help function should be called
     mocked_help.assert_called_once()

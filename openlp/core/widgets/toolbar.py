@@ -23,7 +23,7 @@ Provide common toolbar handling for OpenLP
 """
 import logging
 
-from PySide6 import QtCore, QtWidgets
+from PySide6 import QtCore, QtGui, QtWidgets
 from openlp.core.common.i18n import translate
 from openlp.core.common.registry import Registry
 
@@ -46,7 +46,7 @@ class OpenLPToolbar(QtWidgets.QToolBar):
         super().__init__(parent)
         # useful to be able to reuse button icons...
         self.setIconSize(QtCore.QSize(20, 20))
-        self.actions = {}
+        self.actions: dict[str, QtGui.QAction] = {}     # type: ignore[assignment]
         log.debug('Init done for %s' % parent.__class__.__name__)
 
     def add_toolbar_action(self, name, **kwargs):
@@ -142,7 +142,6 @@ class MediaToolbar(OpenLPToolbar):
     def __init__(self, parent, hide_components=[], action_prefixes=''):
         super().__init__(parent)
         self.on_action = lambda *args: None
-        self.parent = parent
         self.hide_components = hide_components
         self.action_prefixes = action_prefixes
         self.setup_ui()
