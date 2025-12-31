@@ -88,8 +88,8 @@ def test_import_menu_item_added(plugin: PlanningCenterPlugin):
     assert import_menu.isEmpty() is False, "Menu Item is populated"
 
 
-@patch('openlp.plugins.planningcenter.planningcenterplugin.SelectPlanForm.exec')
-def test_on_import_planning_center_triggered_with_auth_settings(mocked_selectplan_exec: MagicMock,
+@patch('openlp.plugins.planningcenter.planningcenterplugin.SelectPlanForm')
+def test_on_import_planning_center_triggered_with_auth_settings(MockSelectPlanForm: MagicMock,
                                                                 plugin: PlanningCenterPlugin,
                                                                 registry: Registry, settings: Settings):
     """
@@ -98,6 +98,8 @@ def test_on_import_planning_center_triggered_with_auth_settings(mocked_selectpla
     """
     # GIVEN: A PlanningCenterPlugin Class with mocked exec calls on both
     # PlanningCenter forms and settings set
+    mocked_select_plan_form = MagicMock()
+    MockSelectPlanForm.return_value = mocked_select_plan_form
     mocked_settings_form = MagicMock()
     registry.register('settings_form', mocked_settings_form)
     settings.setValue('planningcenter/application_id', 'test-application-id')
@@ -106,7 +108,7 @@ def test_on_import_planning_center_triggered_with_auth_settings(mocked_selectpla
     # WHEN:  on_import_planning_center_triggered is called
     plugin.on_import_planning_center_triggered()
     # THEN:
-    assert mocked_selectplan_exec.call_count == 1, 'Select Plan Form was shown'
+    assert mocked_select_plan_form.exec.call_count == 1, 'Select Plan Form was shown'
     assert mocked_settings_form.exec.call_count == 0, 'Settings Form was not shown'
 
 

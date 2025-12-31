@@ -767,57 +767,61 @@ def test_single_click_preview_false(mocked_singleShot: MagicMock, settings: Sett
 
 
 @patch('openlp.core.ui.servicemanager.QtCore.QTimer.singleShot')
-@patch('openlp.core.ui.servicemanager.ServiceManager.make_live')
-def test_single_click_preview_double(mocked_make_live: MagicMock, mocked_singleShot: MagicMock,
-                                     settings: Settings):
+def test_single_click_preview_double(mocked_singleShot: MagicMock, settings: Settings):
     """
     Test that when a double click has registered the preview timer doesn't start
     """
     # GIVEN: A setting to enable "Preview items when clicked in Service Manager" and a service manager.
     settings.setValue('advanced/single click service preview', True)
     service_manager = ServiceManager(None)
+
     # WHEN: on_single_click_preview() is called following a double click
-    service_manager.on_double_click_live()
-    service_manager.on_single_click_preview()
+    with patch.object(service_manager, 'make_live') as mocked_make_live:
+        service_manager.on_double_click_live()
+        service_manager.on_single_click_preview()
+
     # THEN: timer should not be started
     mocked_make_live.assert_called_with()
     assert mocked_singleShot.call_count == 0, 'Should not be called'
 
 
-@patch('openlp.core.ui.servicemanager.ServiceManager.make_preview')
-def test_single_click_timeout_single(mocked_make_preview: MagicMock, settings: Settings):
+def test_single_click_timeout_single(settings: Settings):
     """
     Test that when a single click has been registered, the item is sent to preview
     """
     # GIVEN: A service manager.
     service_manager = ServiceManager(None)
+
     # WHEN: on_single_click_preview() is called
-    service_manager.on_single_click_preview_timeout()
+    with patch.object(service_manager, 'make_preview') as mocked_make_preview:
+        service_manager.on_single_click_preview_timeout()
+
     # THEN: make_preview() should have been called
     assert mocked_make_preview.call_count == 1, 'ServiceManager.make_preview() should have been called once'
 
 
-@patch('openlp.core.ui.servicemanager.ServiceManager.make_preview')
-@patch('openlp.core.ui.servicemanager.ServiceManager.make_live')
-def test_single_click_timeout_double(mocked_make_live: MagicMock, mocked_make_preview: MagicMock,
-                                     settings: Settings):
+def test_single_click_timeout_double(settings: Settings):
     """
     Test that when a double click has been registered, the item does not goes to preview
     """
     # GIVEN: A service manager.
     service_manager = ServiceManager(None)
+
     # WHEN: on_single_click_preview() is called after a double click
-    service_manager.on_double_click_live()
-    service_manager.on_single_click_preview_timeout()
+    with patch.object(service_manager, 'make_preview') as mocked_make_preview, \
+            patch.object(service_manager, 'make_live') as mocked_make_live:
+        service_manager.on_double_click_live()
+        service_manager.on_single_click_preview_timeout()
+
     # THEN: make_preview() should not have been called
     assert mocked_make_preview.call_count == 0, 'ServiceManager.make_preview() should not be called'
+    assert mocked_make_live.call_count == 1, 'ServiceManager.make_live() should have been called once'
 
 
 @patch('openlp.core.ui.servicemanager.zipfile')
-@patch('openlp.core.ui.servicemanager.ServiceManager.save_file_as')
 @patch('openlp.core.ui.servicemanager.shutil')
-def test_save_file_raises_permission_error(mocked_shutil: MagicMock, mocked_save_file_as: MagicMock,
-                                           mocked_zipfile: MagicMock, settings: Settings):
+def test_save_file_raises_permission_error(mocked_shutil: MagicMock, mocked_zipfile: MagicMock,
+                                           settings: Settings):
     """
     Test that when a PermissionError is raised when trying to save a file, it is handled correctly
     """
@@ -830,12 +834,13 @@ def test_save_file_raises_permission_error(mocked_shutil: MagicMock, mocked_save
     service_manager.service_items = []
     service_manager.service_theme = 'Default'
     service_manager.service_manager_list = MagicMock()
-    mocked_save_file_as.return_value = False
     mocked_zipfile.ZipFile.return_value = MagicMock()
     mocked_shutil.move.side_effect = PermissionError
 
     # WHEN: The service is saved and a PermissionError is raised
-    result = service_manager.save_file()
+    with patch.object(service_manager, 'save_file_as') as mocked_save_file_as:
+        mocked_save_file_as.return_value = False
+        result = service_manager.save_file()
 
     # THEN: The "save_as" method is called to save the service
     assert result is False
@@ -843,12 +848,11 @@ def test_save_file_raises_permission_error(mocked_shutil: MagicMock, mocked_save
 
 
 @patch('openlp.core.ui.servicemanager.zipfile')
-@patch('openlp.core.ui.servicemanager.ServiceManager.save_file_as')
 @patch('openlp.core.ui.servicemanager.os')
 @patch('openlp.core.ui.servicemanager.shutil')
 @patch('openlp.core.ui.servicemanager.len')
 def test_save_file_large_file(mocked_len: MagicMock, mocked_shutil: MagicMock, mocked_os: MagicMock,
-                              mocked_save_file_as: MagicMock, mocked_zipfile: MagicMock, registry: Registry):
+                              mocked_zipfile: MagicMock, registry: Registry):
     """
     Test that when a file size size larger than a 32bit signed int is attempted to save, the progress bar
     should be provided a value that fits in a 32bit int (because it's passed to C++ as a 32bit unsigned int)
@@ -868,20 +872,20 @@ def test_save_file_large_file(mocked_len: MagicMock, mocked_shutil: MagicMock, m
     service_manager.service_items = []
     service_manager.service_theme = 'Default'
     service_manager.service_manager_list = MagicMock()
-    mocked_save_file_as.return_value = False
     mocked_zipfile.ZipFile.return_value = MagicMock()
     mocked_len.return_value = 10000000000000
 
     # WHEN: The service is saved and no error is raised
-    result = service_manager.save_file()
+    with patch.object(service_manager, 'save_file_as') as mocked_save_file_as:
+        mocked_save_file_as.return_value = False
+        result = service_manager.save_file()
 
     # THEN: The "save_as" method is called to save the service
     assert result is True
     mocked_save_file_as.assert_not_called()
 
 
-@patch('openlp.core.ui.servicemanager.ServiceManager.regenerate_service_items')
-def test_theme_change_global(mocked_regenerate_service_items: MagicMock, settings: Settings):
+def test_theme_change_global(settings: Settings):
     """
     Test that when a Toolbar theme combobox displays correctly when the theme is set to Global
     """
@@ -893,15 +897,15 @@ def test_theme_change_global(mocked_regenerate_service_items: MagicMock, setting
     settings.setValue('themes/theme level', ThemeLevel.Global)
 
     # WHEN: theme_change is called
-    service_manager.on_theme_level_changed()
+    with patch.object(service_manager, 'regenerate_service_items'):
+        service_manager.on_theme_level_changed()
 
     # THEN: The the theme toolbar should not be visible
     assert service_manager.toolbar.actions['theme_combo_box'].isVisible() is False, \
         'The visibility should be False'
 
 
-@patch('openlp.core.ui.servicemanager.ServiceManager.regenerate_service_items')
-def test_theme_change_service(mocked_regenerate_service_items: MagicMock, settings: Settings):
+def test_theme_change_service(settings: Settings):
     """
     Test that when a Toolbar theme combobox displays correctly when the theme is set to Theme
     """
@@ -913,15 +917,15 @@ def test_theme_change_service(mocked_regenerate_service_items: MagicMock, settin
     settings.setValue('themes/theme level', ThemeLevel.Service)
 
     # WHEN: theme_change is called
-    service_manager.on_theme_level_changed()
+    with patch.object(service_manager, 'regenerate_service_items'):
+        service_manager.on_theme_level_changed()
 
     # THEN: The the theme toolbar should be visible
     assert service_manager.toolbar.actions['theme_combo_box'].isVisible() is True, \
         'The visibility should be True'
 
 
-@patch('openlp.core.ui.servicemanager.ServiceManager.regenerate_service_items')
-def test_theme_change_song(mocked_regenerate_service_items: MagicMock, settings: Settings):
+def test_theme_change_song(settings: Settings):
     """
     Test that when a Toolbar theme combobox displays correctly when the theme is set to Song
     """
@@ -933,7 +937,8 @@ def test_theme_change_song(mocked_regenerate_service_items: MagicMock, settings:
     settings.setValue('themes/theme level', ThemeLevel.Song)
 
     # WHEN: theme_change is called
-    service_manager.on_theme_level_changed()
+    with patch.object(service_manager, 'regenerate_service_items'):
+        service_manager.on_theme_level_changed()
 
     # THEN: The the theme toolbar should be visible
     assert service_manager.toolbar.actions['theme_combo_box'].isVisible() is True, \

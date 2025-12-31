@@ -25,11 +25,11 @@ from unittest.mock import MagicMock, patch
 
 from PySide6 import QtWidgets, QtTest, QtCore
 
+from openlp.core.common.settings import Settings
 from openlp.plugins.songusage.forms.songusagedetailform import SongUsageDetailForm
 
 
-@patch.object(SongUsageDetailForm, 'provide_help')
-def test_help(mocked_help, settings):
+def test_help(settings: Settings):
     """
     Test the help button
     """
@@ -38,8 +38,9 @@ def test_help(mocked_help, settings):
     detail_form = SongUsageDetailForm(MagicMock(), main_window)
 
     # WHEN: The Help button is clicked
-    QtTest.QTest.mouseClick(detail_form.button_box.button(QtWidgets.QDialogButtonBox.StandardButton.Help),
-                            QtCore.Qt.MouseButton.LeftButton)
+    with patch.object(detail_form, 'provide_help') as mocked_help:
+        QtTest.QTest.mouseClick(detail_form.button_box.button(QtWidgets.QDialogButtonBox.StandardButton.Help),
+                                QtCore.Qt.MouseButton.LeftButton)
 
     # THEN: The Help function should be called
     mocked_help.assert_called_once()

@@ -28,11 +28,12 @@ from PySide6 import QtWidgets, QtTest, QtCore
 
 from openlp.core.common.i18n import UiStrings
 from openlp.core.common.registry import Registry
+from openlp.core.common.settings import Settings
 from openlp.plugins.songs.forms.editsongform import EditSongForm
 
 
 @pytest.fixture()
-def form(settings):
+def form(settings: Settings):
     main_window = QtWidgets.QMainWindow()
     Registry().register('main_window', main_window)
     Registry().register('theme_manager', MagicMock())
@@ -42,7 +43,7 @@ def form(settings):
     del main_window
 
 
-def test_ui_defaults(form):
+def test_ui_defaults(form: EditSongForm):
     """
     Test that the EditSongForm defaults are correct
     """
@@ -52,7 +53,7 @@ def test_ui_defaults(form):
     assert form.topic_remove_button.isEnabled() is False, 'The topic remove button should not be enabled'
 
 
-def test_verse_order_no_warning(form):
+def test_verse_order_no_warning(form: EditSongForm):
     """
     Test if the verse order warning is not shown
     """
@@ -74,7 +75,7 @@ def test_verse_order_no_warning(form):
     assert form.warning_label.text() == '', 'There should be no warning.'
 
 
-def test_verse_order_incomplete_warning(form):
+def test_verse_order_incomplete_warning(form: EditSongForm):
     """
     Test if the verse-order-incomple warning is shown
     """
@@ -97,7 +98,7 @@ def test_verse_order_incomplete_warning(form):
         'The verse-order-incomplete warning should be shown.'
 
 
-def test_bug_1170435(form):
+def test_bug_1170435(form: EditSongForm):
     """
     Regression test for bug 1170435 (test if "no verse order" message is shown)
     """
@@ -118,7 +119,7 @@ def test_bug_1170435(form):
         'The no-verse-order message should be shown.'
 
 
-def test_bug_1404967(form):
+def test_bug_1404967(form: EditSongForm):
     """
     Test for CCLI label showing correct text
     """
@@ -130,7 +131,7 @@ def test_bug_1404967(form):
         'CCLI label text should be "{}"'.format(UiStrings().CCLISongNumberLabel)
 
 
-def test_verse_order_lowercase(form):
+def test_verse_order_lowercase(form: EditSongForm):
     """
     Test that entering a verse order in lowercase automatically converts to uppercase
     """
@@ -145,8 +146,7 @@ def test_verse_order_lowercase(form):
     assert form.verse_order_edit.text() == 'V1 V2 C1 V3 C1 V4 C1'
 
 
-@patch.object(EditSongForm, 'provide_help')
-def test_help(mocked_help, settings):
+def test_help(settings: Settings):
     """
     Test the help button
     """
@@ -157,8 +157,9 @@ def test_help(mocked_help, settings):
     edit_song_form = EditSongForm(MagicMock(), main_window, MagicMock())
 
     # WHEN: The Help button is clicked
-    QtTest.QTest.mouseClick(edit_song_form.button_box.button(QtWidgets.QDialogButtonBox.StandardButton.Help),
-                            QtCore.Qt.MouseButton.LeftButton)
+    with patch.object(edit_song_form, 'provide_help') as mocked_help:
+        QtTest.QTest.mouseClick(edit_song_form.button_box.button(QtWidgets.QDialogButtonBox.StandardButton.Help),
+                                QtCore.Qt.MouseButton.LeftButton)
 
     # THEN: The Help function should be called
     mocked_help.assert_called_once()

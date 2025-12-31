@@ -28,6 +28,7 @@ from unittest.mock import MagicMock, call, patch, DEFAULT
 from PySide6 import QtCore, QtWidgets, QtTest
 
 from openlp.core.common.registry import Registry
+from openlp.core.common.settings import Settings
 from openlp.core.ui.firsttimeform import FirstTimeForm, ThemeListWidgetItem
 from openlp.core.ui.firsttimewizard import RemotePage, ThemeListWidget
 from openlp.core.ui.icons import UiIcons
@@ -487,16 +488,16 @@ def test_successful_download(mocked_build_icon, mocked_set_icon):
     mocked_set_icon.assert_has_calls([call(UiIcons().get_icon_variant('picture')), call(mocked_build_icon())])
 
 
-@patch.object(FirstTimeForm, 'provide_help')
-def test_help(mocked_help, settings):
+def test_help(settings: Settings):
     """
     Test the help button
     """
     # GIVEN: A First Time Wizard and a patched help function
-    frw = FirstTimeForm(None)
+    ftw = FirstTimeForm(None)
 
     # WHEN: The Help button is clicked
-    QtTest.QTest.mouseClick(frw.button(QtWidgets.QWizard.WizardButton.HelpButton), QtCore.Qt.MouseButton.LeftButton)
+    with patch.object(ftw, 'provide_help') as mocked_help:
+        QtTest.QTest.mouseClick(ftw.button(QtWidgets.QWizard.WizardButton.HelpButton), QtCore.Qt.MouseButton.LeftButton)
 
     # THEN: The Help function should be called
     mocked_help.assert_called_once()

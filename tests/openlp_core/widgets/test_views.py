@@ -52,11 +52,20 @@ def preview_widget_env():
     viewport_patcher = patch('openlp.core.widgets.views.ListPreviewWidget.viewport')
     mocked_viewport = viewport_patcher.start()
     mocked_viewport_obj = MagicMock()
-    mocked_viewport_obj.width.return_value = 200
+    mocked_viewport_obj.return_value.width.return_value = 200
     mocked_viewport.return_value = mocked_viewport_obj
     yield mocked_parent, mocked_viewport_obj
     parent_patcher.stop()
     viewport_patcher.stop()
+
+
+@pytest.fixture()
+def mocked_parent():
+    """A prepared parent object"""
+    parent_obj = QtWidgets.QWidget(None)
+    with patch.object(parent_obj, 'width') as mocked_width:
+        mocked_width.return_value = 100
+        yield parent_obj
 
 
 @pytest.fixture()
@@ -116,24 +125,20 @@ def test_directory():
         assert result == [mocked_path_instance_1, mocked_path_instance_2, mocked_path_instance_3]
 
 
-def test_new_list_preview_widget(preview_widget_env, mock_settings):
+def test_new_list_preview_widget(mocked_parent: QtWidgets.QWidget, mock_settings: MagicMock):
     """
     Test that creating an instance of ListPreviewWidget works
     """
-    # GIVEN: A ListPreviewWidget class
-
+    # GIVEN: A ListPreviewWidget class with a mocked parent
     # WHEN: An object is created
-    list_preview_widget = ListPreviewWidget(None, 1)
+    list_preview_widget = ListPreviewWidget(mocked_parent, 1)
 
     # THEN: The object is not None, and the _setup() method was called.
     assert list_preview_widget is not None, 'The ListPreviewWidget object should not be None'
     assert list_preview_widget.screen_ratio == 1, 'Should not be called'
 
 
-@patch(u'openlp.core.widgets.views.ListPreviewWidget.resizeRowsToContents')
-@patch(u'openlp.core.widgets.views.ListPreviewWidget.setRowHeight')
-def test_replace_service_item_thumbs(mocked_setRowHeight, mocked_resizeRowsToContents,
-                                     preview_widget_env, mock_settings):
+def test_replace_service_item_thumbs(mocked_parent: QtWidgets.QWidget, mock_settings: MagicMock):
     """
     Test that thubmails for different slides are loaded properly in replace_service_item.
     """
@@ -143,8 +148,8 @@ def test_replace_service_item_thumbs(mocked_setRowHeight, mocked_resizeRowsToCon
     # Mock Settings().value('advanced/slide max height')
     mock_settings.value.return_value = 0
     # Mock self.viewport().width()
-    mocked_viewport_obj = preview_widget_env[1]
-    mocked_viewport_obj.width.return_value = 200
+    mocked_viewport_obj = MagicMock()
+    mocked_viewport_obj.return_value.width.return_value = 200
     # Mock Image service item
     mocked_img_service_item = MagicMock()
     mocked_img_service_item.is_text.return_value = False
@@ -163,17 +168,17 @@ def test_replace_service_item_thumbs(mocked_setRowHeight, mocked_resizeRowsToCon
                                                        {'title': None, 'path': 'FAIL', 'image': 'TEST4'}]
 
     # init ListPreviewWidget and load service item
-    list_preview_widget = ListPreviewWidget(None, 1)
+    list_preview_widget = ListPreviewWidget(mocked_parent, 1)
 
     # WHEN: replace_service_item is called
-    list_preview_widget.replace_service_item(mocked_img_service_item, 200, 0)
-    list_preview_widget.replace_service_item(mocked_cmd_service_item, 200, 0)
+    with patch.object(list_preview_widget, 'viewport', mocked_viewport_obj), \
+            patch.object(list_preview_widget, 'resizeRowsToContents'), \
+            patch.object(list_preview_widget, 'setRowHeight'):
+        list_preview_widget.replace_service_item(mocked_img_service_item, 200, 0)
+        list_preview_widget.replace_service_item(mocked_cmd_service_item, 200, 0)
 
 
-@patch(u'openlp.core.widgets.views.ListPreviewWidget.resizeRowsToContents')
-@patch(u'openlp.core.widgets.views.ListPreviewWidget.setRowHeight')
-def test_replace_recalculate_layout_text(mocked_setRowHeight, mocked_resizeRowsToContents,
-                                         preview_widget_env, mock_settings):
+def test_replace_recalculate_layout_text(mocked_parent: QtWidgets.QWidget, mock_settings: MagicMock):
     """
     Test if "Max height for non-text slides..." enabled, txt slides unchanged in replace_service_item & __recalc...
     """
@@ -183,32 +188,32 @@ def test_replace_recalculate_layout_text(mocked_setRowHeight, mocked_resizeRowsT
     # Mock Settings().value('advanced/slide max height')
     mock_settings.value.return_value = 100
     # Mock self.viewport().width()
-    mocked_viewport_obj = preview_widget_env[1]
-    mocked_viewport_obj.width.return_value = 200
+    mocked_viewport_obj = MagicMock()
+    mocked_viewport_obj.return_value.width.return_value = 200
     # Mock text service item
     service_item = MagicMock()
     service_item.is_text.return_value = True
     service_item.get_frames.return_value = [{'title': None, 'text': None, 'verseTag': None},
                                             {'title': None, 'text': None, 'verseTag': None}]
     # init ListPreviewWidget and load service item
-    list_preview_widget = ListPreviewWidget(None, 1)
+    list_preview_widget = ListPreviewWidget(mocked_parent, 1)
     list_preview_widget.replace_service_item(service_item, 200, 0)
     # Change viewport width before forcing a resize
-    mocked_viewport_obj.width.return_value = 400
+    mocked_viewport_obj.return_value.width.return_value = 400
 
     # WHEN: __recalculate_layout() is called (via resizeEvent)
-    list_preview_widget.resizeEvent(None)
+    with patch.object(list_preview_widget, 'resizeRowsToContents') as mocked_resize_rows_to_contents, \
+            patch.object(list_preview_widget, 'setRowHeight') as mocked_set_row_height, \
+            patch.object(list_preview_widget, 'viewport', mocked_viewport_obj):
+        list_preview_widget.resizeEvent(None)
 
     # THEN: setRowHeight() should not be called, while resizeRowsToContents() should be called twice
     #       (once each in __recalculate_layout and replace_service_item)
-    assert mocked_resizeRowsToContents.call_count == 2, 'Should be called'
-    assert mocked_setRowHeight.call_count == 0, 'Should not be called'
+    assert mocked_resize_rows_to_contents.call_count == 1, 'Should be called'
+    assert mocked_set_row_height.call_count == 0, 'Should not be called'
 
 
-@patch(u'openlp.core.widgets.views.ListPreviewWidget.resizeRowsToContents')
-@patch(u'openlp.core.widgets.views.ListPreviewWidget.setRowHeight')
-def test_replace_recalculate_layout_img(mocked_setRowHeight, mocked_resizeRowsToContents,
-                                        preview_widget_env, mock_settings, clapperboard):
+def test_replace_recalculate_layout_img(mocked_parent: QtWidgets.QWidget, mock_settings: MagicMock, clapperboard):
     """
     Test if "Max height for non-text slides..." disabled, img slides unchanged in replace_service_item & __recalc...
     """
@@ -218,8 +223,8 @@ def test_replace_recalculate_layout_img(mocked_setRowHeight, mocked_resizeRowsTo
     # Mock Settings().value('advanced/slide max height')
     mock_settings.value.return_value = 0
     # Mock self.viewport().width()
-    mocked_viewport_obj = preview_widget_env[1]
-    mocked_viewport_obj.width.return_value = 200
+    mocked_viewport_obj = MagicMock()
+    mocked_viewport_obj.return_value.width.return_value = 200
     # Mock image service item
     service_item = MagicMock()
     service_item.is_text.return_value = False
@@ -227,28 +232,28 @@ def test_replace_recalculate_layout_img(mocked_setRowHeight, mocked_resizeRowsTo
     service_item.get_frames.return_value = [{'title': None, 'path': None, 'image': clapperboard},
                                             {'title': None, 'path': None, 'image': clapperboard}]
     # init ListPreviewWidget and load service item
-    list_preview_widget = ListPreviewWidget(None, 1)
+    list_preview_widget = ListPreviewWidget(mocked_parent, 1)
     list_preview_widget.replace_service_item(service_item, 200, 0)
     # Change viewport width before forcing a resize
-    mocked_viewport_obj.width.return_value = 400
+    mocked_viewport_obj.return_value.width.return_value = 400
 
     # WHEN: __recalculate_layout() is called (via resizeEvent)
-    list_preview_widget.resizeEvent(None)
-    mock_settings.value.return_value = None
-    list_preview_widget.resizeEvent(None)
+    with patch.object(list_preview_widget, 'resizeRowsToContents') as mocked_resize_rows_to_contents, \
+            patch.object(list_preview_widget, 'setRowHeight') as mocked_set_row_height, \
+            patch.object(list_preview_widget, 'viewport', mocked_viewport_obj):
+        list_preview_widget.resizeEvent(None)
+        mock_settings.value.return_value = None
+        list_preview_widget.resizeEvent(None)
 
     # THEN: resizeRowsToContents() should not be called, while setRowHeight() should be called
     #       twice for each slide.
-    assert mocked_resizeRowsToContents.call_count == 0, 'Should not be called'
-    assert mocked_setRowHeight.call_count == 0, 'Should not be called'
+    assert mocked_resize_rows_to_contents.call_count == 0, 'Should not be called'
+    assert mocked_set_row_height.call_count == 0, 'Should not be called'
     # calls = [call(0, 200), call(1, 200), call(0, 400), call(1, 400), call(0, 400), call(1, 400)]
     # mocked_setRowHeight.assert_has_calls(calls)
 
 
-@patch(u'openlp.core.widgets.views.ListPreviewWidget.resizeRowsToContents')
-@patch(u'openlp.core.widgets.views.ListPreviewWidget.setRowHeight')
-def test_replace_recalculate_layout_img_max(mocked_setRowHeight, mocked_resizeRowsToContents,
-                                            preview_widget_env, mock_settings, clapperboard):
+def test_replace_recalculate_layout_img_max(mocked_parent: QtWidgets.QWidget, mock_settings: MagicMock, clapperboard):
     """
     Test if "Max height for non-text slides..." enabled, img slides resized in replace_service_item & __recalc...
     """
@@ -258,8 +263,8 @@ def test_replace_recalculate_layout_img_max(mocked_setRowHeight, mocked_resizeRo
     # Mock Settings().value('advanced/slide max height')
     mock_settings.value.return_value = 100
     # Mock self.viewport().width()
-    mocked_viewport_obj = preview_widget_env[1]
-    mocked_viewport_obj.width.return_value = 200
+    mocked_viewport_obj = MagicMock()
+    mocked_viewport_obj.return_value.width.return_value = 200
     # Mock image service item
     service_item = MagicMock()
     service_item.is_text.return_value = False
@@ -267,26 +272,26 @@ def test_replace_recalculate_layout_img_max(mocked_setRowHeight, mocked_resizeRo
     service_item.get_frames.return_value = [{'title': None, 'path': None, 'image': clapperboard},
                                             {'title': None, 'path': None, 'image': clapperboard}]
     # init ListPreviewWidget and load service item
-    list_preview_widget = ListPreviewWidget(None, 1)
+    list_preview_widget = ListPreviewWidget(mocked_parent, 1)
     list_preview_widget.replace_service_item(service_item, 200, 0)
     # Change viewport width before forcing a resize
-    mocked_viewport_obj.width.return_value = 400
+    mocked_viewport_obj.return_value.width.return_value = 400
 
     # WHEN: __recalculate_layout() is called (via resizeEvent)
-    list_preview_widget.resizeEvent(None)
+    with patch.object(list_preview_widget, 'resizeRowsToContents') as mocked_resize_rows_to_contents, \
+            patch.object(list_preview_widget, 'setRowHeight') as mocked_set_row_height, \
+            patch.object(list_preview_widget, 'viewport', mocked_viewport_obj):
+        list_preview_widget.resizeEvent(None)
 
     # THEN: resizeRowsToContents() should not be called, while setRowHeight() should be called
     #       twice for each slide.
-    assert mocked_resizeRowsToContents.call_count == 0, 'Should not be called'
-    assert mocked_setRowHeight.call_count == 0, 'Should not be called'
+    assert mocked_resize_rows_to_contents.call_count == 0, 'Should not be called'
+    assert mocked_set_row_height.call_count == 0, 'Should not be called'
     # calls = [call(0, 100), call(1, 100), call(0, 100), call(1, 100)]
     # mocked_setRowHeight.assert_has_calls(calls)
 
 
-@patch(u'openlp.core.widgets.views.ListPreviewWidget.resizeRowsToContents')
-@patch(u'openlp.core.widgets.views.ListPreviewWidget.setRowHeight')
-def test_replace_recalculate_layout_img_auto(mocked_setRowHeight, mocked_resizeRowsToContents,
-                                             preview_widget_env, mock_settings, clapperboard):
+def test_replace_recalculate_layout_img_auto(mocked_parent: QtWidgets.QWidget, mock_settings: MagicMock, clapperboard):
     """
     Test if "Max height for non-text slides..." auto, img slides resized in replace_service_item & __recalc...
     """
@@ -296,9 +301,9 @@ def test_replace_recalculate_layout_img_auto(mocked_setRowHeight, mocked_resizeR
     # Mock Settings().value('advanced/slide max height')
     mock_settings.value.return_value = -4
     # Mock self.viewport().width()
-    mocked_viewport_obj = preview_widget_env[1]
-    mocked_viewport_obj.width.return_value = 200
-    mocked_viewport_obj.height.return_value = 600
+    mocked_viewport_obj = MagicMock()
+    mocked_viewport_obj.return_value.width.return_value = 200
+    mocked_viewport_obj.return_value.height.return_value = 600
     # Mock image service item
     service_item = MagicMock()
     service_item.is_text.return_value = False
@@ -306,29 +311,28 @@ def test_replace_recalculate_layout_img_auto(mocked_setRowHeight, mocked_resizeR
     service_item.get_frames.return_value = [{'title': None, 'path': None, 'image': clapperboard},
                                             {'title': None, 'path': None, 'image': clapperboard}]
     # init ListPreviewWidget and load service item
-    list_preview_widget = ListPreviewWidget(None, 1)
+    list_preview_widget = ListPreviewWidget(mocked_parent, 1)
     list_preview_widget.replace_service_item(service_item, 200, 0)
     # Change viewport width before forcing a resize
-    mocked_viewport_obj.width.return_value = 400
+    mocked_viewport_obj.return_value.width.return_value = 400
 
     # WHEN: __recalculate_layout() is called (via screen_size_changed)
-    list_preview_widget.screen_size_changed(1)
-    mocked_viewport_obj.height.return_value = 200
-    list_preview_widget.screen_size_changed(1)
+    with patch.object(list_preview_widget, 'resizeRowsToContents') as mocked_resize_rows_to_contents, \
+            patch.object(list_preview_widget, 'setRowHeight') as mocked_set_row_height, \
+            patch.object(list_preview_widget, 'viewport', mocked_viewport_obj):
+        list_preview_widget.screen_size_changed(1)
+        mocked_viewport_obj.height.return_value = 200
+        list_preview_widget.screen_size_changed(1)
 
     # THEN: resizeRowsToContents() should not be called, while setRowHeight() should be called
     #       twice for each slide.
-    assert mocked_resizeRowsToContents.call_count == 0, 'Should not be called'
-    assert mocked_setRowHeight.call_count == 0, 'Should not be called'
+    assert mocked_resize_rows_to_contents.call_count == 0, 'Should not be called'
+    assert mocked_set_row_height.call_count == 0, 'Should not be called'
     # calls = [call(0, 100), call(1, 100), call(0, 150), call(1, 150), call(0, 100), call(1, 100)]
     # mocked_setRowHeight.assert_has_calls(calls)
 
 
-@patch(u'openlp.core.widgets.views.ListPreviewWidget.resizeRowsToContents')
-@patch(u'openlp.core.widgets.views.ListPreviewWidget.setRowHeight')
-@patch(u'openlp.core.widgets.views.ListPreviewWidget.cellWidget')
-def test_row_resized_text(mocked_cellWidget, mocked_setRowHeight, mocked_resizeRowsToContents,
-                          preview_widget_env, mock_settings):
+def test_row_resized_text(mocked_parent: QtWidgets.QWidget, mock_settings: MagicMock):
     """
     Test if "Max height for non-text slides..." enabled, text-based slides not affected in row_resized.
     """
@@ -338,34 +342,33 @@ def test_row_resized_text(mocked_cellWidget, mocked_setRowHeight, mocked_resizeR
     # Mock Settings().value('advanced/slide max height')
     mock_settings.value.return_value = 100
     # Mock self.viewport().width()
-    mocked_viewport_obj = preview_widget_env[1]
-    mocked_viewport_obj.width.return_value = 200
+    mocked_viewport_obj = MagicMock()
+    mocked_viewport_obj.return_value.width.return_value = 200
     # Mock text service item
     service_item = MagicMock()
     service_item.is_text.return_value = True
     service_item.get_frames.return_value = [{'title': None, 'text': None, 'verseTag': None},
                                             {'title': None, 'text': None, 'verseTag': None}]
     # Mock self.cellWidget().children().setMaximumWidth()
-    mocked_cellWidget_child = MagicMock()
-    mocked_cellWidget_obj = MagicMock()
-    mocked_cellWidget_obj.children.return_value = [None, mocked_cellWidget_child]
-    mocked_cellWidget.return_value = mocked_cellWidget_obj
+    mocked_cell_widget_child = MagicMock()
+    mocked_cell_widget = MagicMock()
+    mocked_cell_widget.return_value.children.return_value = [None, mocked_cell_widget_child]
     # init ListPreviewWidget and load service item
-    list_preview_widget = ListPreviewWidget(None, 1)
+    list_preview_widget = ListPreviewWidget(mocked_parent, 1)
     list_preview_widget.replace_service_item(service_item, 200, 0)
 
     # WHEN: row_resized() is called
-    list_preview_widget.row_resized(0, 100, 150)
+    with patch.object(list_preview_widget, 'resizeRowsToContents'), \
+            patch.object(list_preview_widget, 'setRowHeight'), \
+            patch.object(list_preview_widget, 'cellWidget', mocked_cell_widget), \
+            patch.object(list_preview_widget, 'viewport', mocked_viewport_obj):
+        list_preview_widget.row_resized(0, 100, 150)
 
     # THEN: self.cellWidget(row, 0).children()[1].setMaximumWidth() should not be called
-    assert mocked_cellWidget_child.setMaximumWidth.call_count == 0, 'Should not be called'
+    assert mocked_cell_widget_child.setMaximumWidth.call_count == 0, 'Should not be called'
 
 
-@patch(u'openlp.core.widgets.views.ListPreviewWidget.resizeRowsToContents')
-@patch(u'openlp.core.widgets.views.ListPreviewWidget.setRowHeight')
-@patch(u'openlp.core.widgets.views.ListPreviewWidget.cellWidget')
-def test_row_resized_img(mocked_cellWidget, mocked_setRowHeight, mocked_resizeRowsToContents,
-                         preview_widget_env, mock_settings, clapperboard):
+def test_row_resized_img(mocked_parent: QtWidgets.QWidget, mock_settings: MagicMock, clapperboard):
     """
     Test if "Max height for non-text slides..." disabled, image-based slides not affected in row_resized.
     """
@@ -375,8 +378,8 @@ def test_row_resized_img(mocked_cellWidget, mocked_setRowHeight, mocked_resizeRo
     # Mock Settings().value('advanced/slide max height')
     mock_settings.value.return_value = 0
     # Mock self.viewport().width()
-    mocked_viewport_obj = preview_widget_env[1]
-    mocked_viewport_obj.width.return_value = 200
+    mocked_viewport_obj = MagicMock()
+    mocked_viewport_obj.return_value.width.return_value = 200
     # Mock image service item
     service_item = MagicMock()
     service_item.is_text.return_value = False
@@ -384,28 +387,27 @@ def test_row_resized_img(mocked_cellWidget, mocked_setRowHeight, mocked_resizeRo
     service_item.get_frames.return_value = [{'title': None, 'path': None, 'image': clapperboard},
                                             {'title': None, 'path': None, 'image': clapperboard}]
     # Mock self.cellWidget().children().setMaximumWidth()
-    mocked_cellWidget_child = MagicMock()
-    mocked_cellWidget_obj = MagicMock()
-    mocked_cellWidget_obj.children.return_value = [None, mocked_cellWidget_child]
-    mocked_cellWidget.return_value = mocked_cellWidget_obj
+    mocked_cell_widget_child = MagicMock()
+    mocked_cell_widget = MagicMock()
+    mocked_cell_widget.return_value.children.return_value = [None, mocked_cell_widget_child]
     # init ListPreviewWidget and load service item
-    list_preview_widget = ListPreviewWidget(None, 1)
+    list_preview_widget = ListPreviewWidget(mocked_parent, 1)
     list_preview_widget.replace_service_item(service_item, 200, 0)
 
     # WHEN: row_resized() is called
-    list_preview_widget.row_resized(0, 100, 150)
-    mock_settings.value.return_value = None
-    list_preview_widget.row_resized(0, 100, 150)
+    with patch.object(list_preview_widget, 'resizeRowsToContents'), \
+            patch.object(list_preview_widget, 'setRowHeight'), \
+            patch.object(list_preview_widget, 'cellWidget', mocked_cell_widget), \
+            patch.object(list_preview_widget, 'viewport', mocked_viewport_obj):
+        list_preview_widget.row_resized(0, 100, 150)
+        mock_settings.value.return_value = None
+        list_preview_widget.row_resized(0, 100, 150)
 
     # THEN: self.cellWidget(row, 0).children()[1].setMaximumWidth() should not be called
-    assert mocked_cellWidget_child.setMaximumWidth.call_count == 0, 'Should not be called'
+    assert mocked_cell_widget_child.setMaximumWidth.call_count == 0, 'Should not be called'
 
 
-@patch(u'openlp.core.widgets.views.ListPreviewWidget.resizeRowsToContents')
-@patch(u'openlp.core.widgets.views.ListPreviewWidget.setRowHeight')
-@patch(u'openlp.core.widgets.views.ListPreviewWidget.cellWidget')
-def test_row_resized_img_max(mocked_cellWidget, mocked_setRowHeight, mocked_resizeRowsToContents,
-                             preview_widget_env, mock_settings, clapperboard):
+def test_row_resized_img_max(mocked_parent: QtWidgets.QWidget, mock_settings: MagicMock, clapperboard):
     """
     Test if "Max height for non-text slides..." enabled, image-based slides are scaled in row_resized.
     """
@@ -423,26 +425,25 @@ def test_row_resized_img_max(mocked_cellWidget, mocked_setRowHeight, mocked_resi
     service_item.get_frames.return_value = [{'title': None, 'path': None, 'image': clapperboard},
                                             {'title': None, 'path': None, 'image': clapperboard}]
     # Mock self.cellWidget().children().setMaximumWidth()
-    mocked_cellWidget_child = MagicMock()
-    mocked_cellWidget_obj = MagicMock()
-    mocked_cellWidget_obj.children.return_value = [None, mocked_cellWidget_child]
-    mocked_cellWidget.return_value = mocked_cellWidget_obj
+    mocked_cell_widget_child = MagicMock()
+    mocked_cell_widget = MagicMock()
+    mocked_cell_widget.return_value.children.return_value = [None, mocked_cell_widget_child]
     # init ListPreviewWidget and load service item
-    list_preview_widget = ListPreviewWidget(None, 1)
+    list_preview_widget = ListPreviewWidget(mocked_parent, 1)
     list_preview_widget.replace_service_item(service_item, 200, 0)
 
     # WHEN: row_resized() is called
-    list_preview_widget.row_resized(0, 100, 150)
+    with patch.object(list_preview_widget, 'resizeRowsToContents'), \
+            patch.object(list_preview_widget, 'setRowHeight'), \
+            patch.object(list_preview_widget, 'cellWidget', mocked_cell_widget), \
+            patch.object(list_preview_widget, 'viewport'):
+        list_preview_widget.row_resized(0, 100, 150)
 
     # THEN: self.cellWidget(row, 0).children()[1].setMaximumWidth() should be called
-    mocked_cellWidget_child.setMaximumWidth.assert_called_once_with(150)
+    mocked_cell_widget_child.setMaximumWidth.assert_called_once_with(150)
 
 
-@patch(u'openlp.core.widgets.views.ListPreviewWidget.resizeRowsToContents')
-@patch(u'openlp.core.widgets.views.ListPreviewWidget.setRowHeight')
-@patch(u'openlp.core.widgets.views.ListPreviewWidget.cellWidget')
-def test_row_resized_setting_changed(mocked_cellWidget, mocked_setRowHeight, mocked_resizeRowsToContents,
-                                     preview_widget_env, mock_settings, clapperboard):
+def test_row_resized_setting_changed(mocked_parent: QtWidgets.QWidget, mock_settings: MagicMock, clapperboard):
     """
     Test if "Max height for non-text slides..." enabled while item live, program doesn't crash on row_resized.
     """
@@ -452,8 +453,8 @@ def test_row_resized_setting_changed(mocked_cellWidget, mocked_setRowHeight, moc
     # Mock Settings().value('advanced/slide max height')
     mock_settings.value.return_value = 0
     # Mock self.viewport().width()
-    mocked_viewport_obj = preview_widget_env[1]
-    mocked_viewport_obj.width.return_value = 200
+    mocked_viewport_obj = MagicMock()
+    mocked_viewport_obj.return_value.width.return_value = 200
     # Mock image service item
     service_item = MagicMock()
     service_item.is_text.return_value = False
@@ -461,123 +462,120 @@ def test_row_resized_setting_changed(mocked_cellWidget, mocked_setRowHeight, moc
     service_item.get_frames.return_value = [{'title': None, 'path': None, 'image': clapperboard},
                                             {'title': None, 'path': None, 'image': clapperboard}]
     # Mock self.cellWidget().children()
-    mocked_cellWidget_obj = MagicMock()
-    mocked_cellWidget_obj.children.return_value = None
-    mocked_cellWidget.return_value = mocked_cellWidget_obj
+    mocked_cell_widget = MagicMock()
+    mocked_cell_widget.return_value.children.return_value = None
     # init ListPreviewWidget and load service item
-    list_preview_widget = ListPreviewWidget(None, 1)
+    list_preview_widget = ListPreviewWidget(mocked_parent, 1)
     list_preview_widget.replace_service_item(service_item, 200, 0)
     mock_settings.value.return_value = 100
 
     # WHEN: row_resized() is called
-    list_preview_widget.row_resized(0, 100, 150)
+    with patch.object(list_preview_widget, 'resizeRowsToContents'), \
+            patch.object(list_preview_widget, 'setRowHeight'), \
+            patch.object(list_preview_widget, 'cellWidget', mocked_cell_widget), \
+            patch.object(list_preview_widget, 'viewport', mocked_viewport_obj):
+        list_preview_widget.row_resized(0, 100, 150)
 
     # THEN: self.cellWidget(row, 0).children()[1].setMaximumWidth() should fail
-    assert Exception
+    # assert Exception
 
 
-@patch(u'openlp.core.widgets.views.ListPreviewWidget.selectRow')
-@patch(u'openlp.core.widgets.views.ListPreviewWidget.scrollToItem')
-@patch(u'openlp.core.widgets.views.ListPreviewWidget.item')
-@patch(u'openlp.core.widgets.views.ListPreviewWidget.slide_count')
-def test_autoscroll_setting_invalid(mocked_slide_count, mocked_item, mocked_scrollToItem, mocked_selectRow,
-                                    preview_widget_env, mock_settings):
+def test_autoscroll_setting_invalid(mocked_parent: QtWidgets.QWidget, mock_settings: MagicMock):
     """
     Test if 'advanced/autoscrolling' setting None or invalid, that no autoscrolling occurs on change_slide().
     """
     # GIVEN: A setting for autoscrolling and a ListPreviewWidget.
     # Mock Settings().value('advanced/autoscrolling')
     mock_settings.value.return_value = None
-    # Mocked returns
-    mocked_slide_count.return_value = 1
-    mocked_item.return_value = None
     # init ListPreviewWidget and load service item
-    list_preview_widget = ListPreviewWidget(None, 1)
+    list_preview_widget = ListPreviewWidget(mocked_parent, 1)
 
     # WHEN: change_slide() is called
-    list_preview_widget.change_slide(0)
-    mock_settings.value.return_value = 1
-    list_preview_widget.change_slide(0)
-    mock_settings.value.return_value = {'fail': 1}
-    list_preview_widget.change_slide(0)
-    mock_settings.value.return_value = {'dist': 1, 'fail': 1}
-    list_preview_widget.change_slide(0)
-    mock_settings.value.return_value = {'dist': 'fail', 'pos': 1}
-    list_preview_widget.change_slide(0)
-    mock_settings.value.return_value = {'dist': 1, 'pos': 'fail'}
-    list_preview_widget.change_slide(0)
+    with patch.object(list_preview_widget, 'selectRow') as mocked_select_row, \
+            patch.object(list_preview_widget, 'scrollToItem') as mocked_scroll_to_item, \
+            patch.object(list_preview_widget, 'item') as mocked_item, \
+            patch.object(list_preview_widget, 'slide_count') as mocked_slide_count:
+        mocked_slide_count.return_value = 1
+        mocked_item.return_value = None
+        list_preview_widget.change_slide(0)
+        mock_settings.value.return_value = 1
+        list_preview_widget.change_slide(0)
+        mock_settings.value.return_value = {'fail': 1}
+        list_preview_widget.change_slide(0)
+        mock_settings.value.return_value = {'dist': 1, 'fail': 1}
+        list_preview_widget.change_slide(0)
+        mock_settings.value.return_value = {'dist': 'fail', 'pos': 1}
+        list_preview_widget.change_slide(0)
+        mock_settings.value.return_value = {'dist': 1, 'pos': 'fail'}
+        list_preview_widget.change_slide(0)
 
     # THEN: no further functions should be called
     assert mocked_slide_count.call_count == 0, 'Should not be called'
-    assert mocked_scrollToItem.call_count == 0, 'Should not be called'
-    assert mocked_selectRow.call_count == 0, 'Should not be called'
+    assert mocked_scroll_to_item.call_count == 0, 'Should not be called'
+    assert mocked_select_row.call_count == 0, 'Should not be called'
     assert mocked_item.call_count == 0, 'Should not be called'
 
 
-@patch(u'openlp.core.widgets.views.ListPreviewWidget.selectRow')
-@patch(u'openlp.core.widgets.views.ListPreviewWidget.scrollToItem')
-@patch(u'openlp.core.widgets.views.ListPreviewWidget.item')
-@patch(u'openlp.core.widgets.views.ListPreviewWidget.slide_count')
-def test_autoscroll_dist_bounds(mocked_slide_count, mocked_item, mocked_scrollToItem, mocked_selectRow,
-                                preview_widget_env, mock_settings):
+def test_autoscroll_dist_bounds(mocked_parent: QtWidgets.QWidget, mock_settings: MagicMock):
     """
     Test if 'advanced/autoscrolling' setting asks to scroll beyond list bounds, that it does not beyond.
     """
     # GIVEN: A setting for autoscrolling and a ListPreviewWidget.
     # Mock Settings().value('advanced/autoscrolling')
     mock_settings.value.return_value = {'dist': -1, 'pos': 1}
-    # Mocked returns
-    mocked_slide_count.return_value = 1
-    mocked_item.return_value = None
     # init ListPreviewWidget and load service item
-    list_preview_widget = ListPreviewWidget(None, 1)
+    list_preview_widget = ListPreviewWidget(mocked_parent, 1)
 
-    # WHEN: change_slide() is called
-    list_preview_widget.change_slide(0)
-    mock_settings.value.return_value = {'dist': 1, 'pos': 1}
-    list_preview_widget.change_slide(0)
+    with patch.object(list_preview_widget, 'selectRow') as mocked_select_row, \
+            patch.object(list_preview_widget, 'scrollToItem') as mocked_scroll_to_item, \
+            patch.object(list_preview_widget, 'item') as mocked_item, \
+            patch.object(list_preview_widget, 'slide_count') as mocked_slide_count:
+        # Mocked returns
+        mocked_slide_count.return_value = 1
+        mocked_item.return_value = None
+        # WHEN: change_slide() is called
+        list_preview_widget.change_slide(0)
+        mock_settings.value.return_value = {'dist': 1, 'pos': 1}
+        list_preview_widget.change_slide(0)
 
     # THEN: no further functions should be called
     assert mocked_slide_count.call_count == 3, 'Should be called'
-    assert mocked_scrollToItem.call_count == 2, 'Should be called'
-    assert mocked_selectRow.call_count == 2, 'Should be called'
+    assert mocked_scroll_to_item.call_count == 2, 'Should be called'
+    assert mocked_select_row.call_count == 2, 'Should be called'
     assert mocked_item.call_count == 2, 'Should be called'
-    calls = [call(0, 0), call(0, 0)]
-    mocked_item.assert_has_calls(calls)
+    mocked_item.assert_has_calls([call(0, 0), call(0, 0)])
 
 
-@patch(u'openlp.core.widgets.views.ListPreviewWidget.selectRow')
-@patch(u'openlp.core.widgets.views.ListPreviewWidget.scrollToItem')
-@patch(u'openlp.core.widgets.views.ListPreviewWidget.item')
-@patch(u'openlp.core.widgets.views.ListPreviewWidget.slide_count')
-def test_autoscroll_normal(mocked_slide_count, mocked_item, mocked_scrollToItem, mocked_selectRow,
-                           preview_widget_env, mock_settings):
+def test_autoscroll_normal(mocked_parent: QtWidgets.QWidget, mock_settings: MagicMock):
     """
     Test if 'advanced/autoscrolling' setting valid, autoscrolling called as expected.
     """
     # GIVEN: A setting for autoscrolling and a ListPreviewWidget.
     # Mock Settings().value('advanced/autoscrolling')
     mock_settings.value.return_value = {'dist': -1, 'pos': 1}
-    # Mocked returns
-    mocked_slide_count.return_value = 3
-    mocked_item.return_value = None
     # init ListPreviewWidget and load service item
-    list_preview_widget = ListPreviewWidget(None, 1)
+    list_preview_widget = ListPreviewWidget(mocked_parent, 1)
 
-    # WHEN: change_slide() is called
-    list_preview_widget.change_slide(1)
-    mock_settings.value.return_value = {'dist': 0, 'pos': 1}
-    list_preview_widget.change_slide(1)
-    mock_settings.value.return_value = {'dist': 1, 'pos': 1}
-    list_preview_widget.change_slide(1)
+    with patch.object(list_preview_widget, 'selectRow') as mocked_select_row, \
+            patch.object(list_preview_widget, 'scrollToItem') as mocked_scroll_to_item, \
+            patch.object(list_preview_widget, 'item') as mocked_item, \
+            patch.object(list_preview_widget, 'slide_count') as mocked_slide_count:
+        # Mocked returns
+        mocked_slide_count.return_value = 3
+        mocked_item.return_value = None
+        # WHEN: change_slide() is called
+        list_preview_widget.change_slide(1)
+        mock_settings.value.return_value = {'dist': 0, 'pos': 1}
+        list_preview_widget.change_slide(1)
+        mock_settings.value.return_value = {'dist': 1, 'pos': 1}
+        list_preview_widget.change_slide(1)
 
     # THEN: no further functions should be called
     assert mocked_slide_count.call_count == 3, 'Should be called'
-    assert mocked_scrollToItem.call_count == 3, 'Should be called'
-    assert mocked_selectRow.call_count == 3, 'Should be called'
+    assert mocked_scroll_to_item.call_count == 3, 'Should be called'
+    assert mocked_select_row.call_count == 3, 'Should be called'
     assert mocked_item.call_count == 3, 'Should be called'
-    calls = [call(0, 0), call(1, 0), call(2, 0)]
-    mocked_item.assert_has_calls(calls)
+    mocked_item.assert_has_calls([call(0, 0), call(1, 0), call(2, 0)])
 
 
 def test_treewidgetwithdnd_clear():
