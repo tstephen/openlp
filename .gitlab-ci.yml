@@ -48,8 +48,11 @@ test-debian:
   stage: test
   image: $IMAGE_BASE/debian
   script:
+    - pipx install hatch
+    - pipx ensurepath
+    - source ~/.bashrc
     - sh scripts/generate_resources.sh
-    - xvfb-run -s '-screen 0 1024x768x24' pytest-3 --color=no --disable-warnings --cov openlp --cov-report term --cov-report xml:coverage.xml
+    - xvfb-run -s '-screen 0 1024x768x24' pytest --color=no --disable-warnings --cov openlp --cov-report term --cov-report xml:coverage.xml
     - mv .coverage linux.coverage
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   artifacts:
@@ -66,8 +69,11 @@ test-ubuntu:
   stage: test
   image: $IMAGE_BASE/ubuntu
   script:
+    - pipx install hatch
+    - pipx ensurepath
+    - source ~/.bashrc
     - sh scripts/generate_resources.sh
-    - xvfb-run -s '-screen 0 1024x768x24' pytest-3 --color=no --disable-warnings
+    - xvfb-run -s '-screen 0 1024x768x24' pytest --color=no --disable-warnings
   rules:
     - if: $CI_COMMIT_TAG == null
 
@@ -122,6 +128,8 @@ test-arch:
       waitress
       websocket-client
       websockets
+      hatch
+      hatch-vcs
 
 .run_tests:
   script:
@@ -250,11 +258,12 @@ build-source:
       if [ "$CI_COMMIT_TAG" != "" ]; then
           git archive -o "dist/OpenLP-${CI_COMMIT_TAG}.tar.gz" "$CI_COMMIT_TAG" .
       else
+          pipx install hatch
           git fetch --tags
-          python setup.py sdist
-          rm -f dist/*
-          VERSION=`cat openlp/.version`
-          git archive -o "dist/OpenLP-${VERSION}.tar.gz" HEAD .
+          rm -fr dist
+          VERSION=`hatch version`
+          echo "$VERSION" >! openlp/.version
+          git archive -o "dist/OpenLP-${VERSION}.tar.gz" --add-file=openlp/.version HEAD .
       fi
   artifacts:
     name: $CI_COMMIT_REF_SLUG
@@ -272,9 +281,10 @@ build-flatpak:
       if [ "$CI_COMMIT_TAG" != "" ]; then
           VERSION="${CI_COMMIT_TAG}"
       else
+          pipx install hatch
           git fetch --tags
-          python3 setup.py sdist
-          VERSION=`cat openlp/.version`
+          VERSION=`hatch version`
+          echo "$VERSION" >! openlp/.version
       fi
       # Download packaging repo
       curl -SL "https://gitlab.com/${CI_PROJECT_NAMESPACE}/${PACKAGING_REPOSITORY_NAME}/-/archive/${PACKAGING_BRANCH_NAME}/${PACKAGING_ZIP_FILE_NAME}" -o "/tmp/${PACKAGING_ZIP_FILE_NAME}"
@@ -378,8 +388,9 @@ upload-pypi:
   stage: deploy
   image: $IMAGE_BASE/debian
   script:
-    - python3 setup.py sdist bdist_wheel
-    - twine upload dist/*
+    - pipx install hatch
+    - hatch build
+    - hatch publish --user $TWINE_USERNAME --auth $TWINE_PASSWORD
   rules:
     - if: $CI_COMMIT_TAG
 

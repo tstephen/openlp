@@ -285,7 +285,8 @@ def test_set_service_unmodified(main_window):
         'The main window\'s title should be set to "<the contents of UiStrings().OpenLP> - test.osz"'
 
 
-@pytest.mark.skipif(QT_QPA_PLATFORM == 'offscreen', reason='This test does not work with the offscreen backend')
+@pytest.mark.skipif(QT_QPA_PLATFORM in ['offscreen', 'wayland'],
+                    reason='This test does not work with the offscreen or wayland backends')
 def test_load_settings_position_valid(main_window, settings):
     """
     Test that the position of the main window is restored when it's valid
