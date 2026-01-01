@@ -437,8 +437,8 @@ def test_add_list_view_mode_items_to_toolbar_creates_items(settings):
     add_list_view_mode_items_to_toolbar(toolbar, MagicMock())
 
     # THEN: Assert correct icons are created
-    assert isinstance(toolbar.actions['listView'], QtGui.QAction) is True
-    assert isinstance(toolbar.actions['gridView'], QtGui.QAction) is True
+    assert isinstance(toolbar.actions_map['listView'], QtGui.QAction) is True
+    assert isinstance(toolbar.actions_map['gridView'], QtGui.QAction) is True
 
 
 def test_add_list_view_mode_items_to_toolbar_click_calls_handlers(settings):
@@ -451,8 +451,8 @@ def test_add_list_view_mode_items_to_toolbar_click_calls_handlers(settings):
     add_list_view_mode_items_to_toolbar(toolbar, handler)
 
     # WHEN: handler items is called
-    toolbar.actions['listView'].trigger()
-    toolbar.actions['gridView'].trigger()
+    toolbar.actions_map['listView'].trigger()
+    toolbar.actions_map['gridView'].trigger()
 
     # THEN: Assert correct handlers were called
     handler.on_set_view_mode_list.assert_called_once()
@@ -471,8 +471,8 @@ def test_set_list_view_mode_toolbar_state_view_mode_list_mode(settings):
     set_list_view_mode_toolbar_state(toolbar, QtWidgets.QListWidget.ViewMode.ListMode)
 
     # THEN: Assert correct icons are checked or not
-    assert toolbar.actions['listView'].isChecked() is True
-    assert toolbar.actions['gridView'].isChecked() is False
+    assert toolbar.actions_map['listView'].isChecked() is True
+    assert toolbar.actions_map['gridView'].isChecked() is False
 
 
 def test_set_list_view_mode_toolbar_state_view_mode_icon_mode(settings):
@@ -487,5 +487,5 @@ def test_set_list_view_mode_toolbar_state_view_mode_icon_mode(settings):
     set_list_view_mode_toolbar_state(toolbar, QtWidgets.QListWidget.ViewMode.IconMode)
 
     # THEN: Assert correct icons are checked or not
-    assert toolbar.actions['listView'].isChecked() is False
-    assert toolbar.actions['gridView'].isChecked() is True
+    assert toolbar.actions_map['listView'].isChecked() is False
+    assert toolbar.actions_map['gridView'].isChecked() is True

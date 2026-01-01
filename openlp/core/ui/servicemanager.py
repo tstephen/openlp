@@ -464,8 +464,8 @@ class ServiceManager(QtWidgets.QWidget, RegistryBase, Ui_ServiceManager, LogMixi
     def set_theme_visibility(self):
         """Set the visibility of the theme items"""
         visible = self.settings.value('themes/theme level') != ThemeLevel.Global
-        self.toolbar.actions['theme_combo_box'].setVisible(visible)
-        self.toolbar.actions['theme_label'].setVisible(visible)
+        self.toolbar.actions_map['theme_combo_box'].setVisible(visible)
+        self.toolbar.actions_map['theme_label'].setVisible(visible)
 
     def on_new_service_clicked(self):
         """

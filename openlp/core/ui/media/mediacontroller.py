@@ -445,24 +445,24 @@ class MediaController(QtWidgets.QWidget, RegistryBase, LogMixin, RegistryPropert
         controller.mediabar.seek_slider.setTickInterval(controller.media_play_item.length // 10)
         controller.mediabar.seek_slider.setMaximum(controller.media_play_item.length)
         if mode == "load":
-            controller.mediabar.actions["playbackPlay"].setDisabled(False)
-            controller.mediabar.actions["playbackPause"].setDisabled(True)
-            controller.mediabar.actions["playbackStop"].setDisabled(True)
-            controller.mediabar.actions["playbackLoop"].setChecked(loop_set)
-            controller.mediabar.actions["playbackLoop"].setDisabled(loop_disabled)
+            controller.mediabar.actions_map["playbackPlay"].setDisabled(False)
+            controller.mediabar.actions_map["playbackPause"].setDisabled(True)
+            controller.mediabar.actions_map["playbackStop"].setDisabled(True)
+            controller.mediabar.actions_map["playbackLoop"].setChecked(loop_set)
+            controller.mediabar.actions_map["playbackLoop"].setDisabled(loop_disabled)
         if mode == "play":
-            controller.mediabar.actions["playbackPlay"].setDisabled(not controller.media_play_item.request_play)
-            controller.mediabar.actions["playbackPause"].setDisabled(controller.media_play_item.request_play)
-            controller.mediabar.actions["playbackStop"].setDisabled(controller.media_play_item.request_play)
-            controller.mediabar.actions["playbackLoop"].setChecked(loop_set)
-            controller.mediabar.actions["playbackLoop"].setDisabled(loop_disabled)
+            controller.mediabar.actions_map["playbackPlay"].setDisabled(not controller.media_play_item.request_play)
+            controller.mediabar.actions_map["playbackPause"].setDisabled(controller.media_play_item.request_play)
+            controller.mediabar.actions_map["playbackStop"].setDisabled(controller.media_play_item.request_play)
+            controller.mediabar.actions_map["playbackLoop"].setChecked(loop_set)
+            controller.mediabar.actions_map["playbackLoop"].setDisabled(loop_disabled)
         if mode == "pause" or mode == "stop" or mode == "reset":
-            controller.mediabar.actions["playbackPlay"].setDisabled(False)
-            controller.mediabar.actions["playbackPause"].setDisabled(True)
-            controller.mediabar.actions["playbackStop"].setDisabled(False)
+            controller.mediabar.actions_map["playbackPlay"].setDisabled(False)
+            controller.mediabar.actions_map["playbackPause"].setDisabled(True)
+            controller.mediabar.actions_map["playbackStop"].setDisabled(False)
         if mode == "stop" or mode == "reset":
-            controller.mediabar.actions["playbackLoop"].setChecked(loop_set)
-            controller.mediabar.actions["playbackLoop"].setDisabled(loop_disabled)
+            controller.mediabar.actions_map["playbackLoop"].setChecked(loop_set)
+            controller.mediabar.actions_map["playbackLoop"].setDisabled(loop_disabled)
         controller.mediabar.blockSignals(False)
 
     @staticmethod
@@ -530,14 +530,14 @@ class MediaController(QtWidgets.QWidget, RegistryBase, LogMixin, RegistryPropert
 
         :param controller: The controller that needs to be stopped
         """
-        controller.mediabar.actions['playbackLoop'].blockSignals(True)
+        controller.mediabar.actions_map['playbackLoop'].blockSignals(True)
         toggle_looping_playback(controller)
         if controller.media_play_item.media_type == MediaType.Dual:
             controller.audio_player.toggle_loop(saved_looping_playback(controller))
         else:
             controller.media_player.toggle_loop(saved_looping_playback(controller))
-        controller.mediabar.actions["playbackLoop"].setChecked(saved_looping_playback(controller))
-        controller.mediabar.actions['playbackLoop'].blockSignals(False)
+        controller.mediabar.actions_map["playbackLoop"].setChecked(saved_looping_playback(controller))
+        controller.mediabar.actions_map['playbackLoop'].blockSignals(False)
 
     def media_stop_msg(self, msg: list) -> bool:
         """

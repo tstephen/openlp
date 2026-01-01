@@ -636,18 +636,18 @@ def test_media_bar_play(media_env, settings):
     mocked_controller.media_play_item = MediaPlayItem()
     mocked_controller.mediabar = OpenLPToolbar(None)
     mocked_controller.mediabar.seek_slider = MagicMock()
-    mocked_controller.mediabar.actions['playbackPlay'] = MagicMock()
-    mocked_controller.mediabar.actions['playbackPause'] = MagicMock()
-    mocked_controller.mediabar.actions['playbackStop'] = MagicMock()
-    mocked_controller.mediabar.actions['playbackLoop'] = MagicMock()
+    mocked_controller.mediabar.actions_map['playbackPlay'] = MagicMock()
+    mocked_controller.mediabar.actions_map['playbackPause'] = MagicMock()
+    mocked_controller.mediabar.actions_map['playbackStop'] = MagicMock()
+    mocked_controller.mediabar.actions_map['playbackLoop'] = MagicMock()
     mocked_controller.media_play_item.is_theme_background = False
     settings.setValue('media/live loop', False)
     # WHEN: _media_bar() is called
     media_env.media_controller._media_bar(mocked_controller, "play")
     # THEN: The following functions should have been called
-    mocked_controller.mediabar.actions['playbackPlay'].setDisabled.assert_called_with(True)
-    mocked_controller.mediabar.actions['playbackPause'].setDisabled.assert_called_with(False)
-    mocked_controller.mediabar.actions['playbackStop'].setDisabled.assert_called_with(False)
+    mocked_controller.mediabar.actions_map['playbackPlay'].setDisabled.assert_called_with(True)
+    mocked_controller.mediabar.actions_map['playbackPause'].setDisabled.assert_called_with(False)
+    mocked_controller.mediabar.actions_map['playbackStop'].setDisabled.assert_called_with(False)
 
 
 @pytest.mark.parametrize("mode", ["pause", "stop", "reset"])
@@ -660,18 +660,18 @@ def test_media_bar_stop(media_env, settings, mode):
     mocked_controller.media_play_item = MediaPlayItem()
     mocked_controller.mediabar = OpenLPToolbar(None)
     mocked_controller.mediabar.seek_slider = MagicMock()
-    mocked_controller.mediabar.actions['playbackPlay'] = MagicMock()
-    mocked_controller.mediabar.actions['playbackPause'] = MagicMock()
-    mocked_controller.mediabar.actions['playbackStop'] = MagicMock()
-    mocked_controller.mediabar.actions['playbackLoop'] = MagicMock()
+    mocked_controller.mediabar.actions_map['playbackPlay'] = MagicMock()
+    mocked_controller.mediabar.actions_map['playbackPause'] = MagicMock()
+    mocked_controller.mediabar.actions_map['playbackStop'] = MagicMock()
+    mocked_controller.mediabar.actions_map['playbackLoop'] = MagicMock()
     mocked_controller.media_play_item.is_theme_background = False
     settings.setValue('media/live loop', False)
     # WHEN: _media_bar() is called
     media_env.media_controller._media_bar(mocked_controller, mode)
     # THEN: The following functions should have been called
-    mocked_controller.mediabar.actions['playbackPlay'].setDisabled.assert_called_with(False)
-    mocked_controller.mediabar.actions['playbackPause'].setDisabled.assert_called_with(True)
-    mocked_controller.mediabar.actions['playbackStop'].setDisabled.assert_called_with(False)
+    mocked_controller.mediabar.actions_map['playbackPlay'].setDisabled.assert_called_with(False)
+    mocked_controller.mediabar.actions_map['playbackPause'].setDisabled.assert_called_with(True)
+    mocked_controller.mediabar.actions_map['playbackStop'].setDisabled.assert_called_with(False)
 
 
 @pytest.mark.parametrize("back, repeat, result", [(False, True, False),
@@ -691,14 +691,14 @@ def test_media_bar_loop_disabled(media_env: MediaController, settings: Settings,
     mocked_controller.media_play_item.is_theme_background = False
     mocked_controller.mediabar = OpenLPToolbar(None)
     mocked_controller.mediabar.seek_slider = MagicMock()
-    mocked_controller.mediabar.actions['playbackPlay'] = MagicMock()
-    mocked_controller.mediabar.actions['playbackPause'] = MagicMock()
-    mocked_controller.mediabar.actions['playbackStop'] = MagicMock()
-    mocked_controller.mediabar.actions['playbackLoop'] = MagicMock()
+    mocked_controller.mediabar.actions_map['playbackPlay'] = MagicMock()
+    mocked_controller.mediabar.actions_map['playbackPause'] = MagicMock()
+    mocked_controller.mediabar.actions_map['playbackStop'] = MagicMock()
+    mocked_controller.mediabar.actions_map['playbackLoop'] = MagicMock()
     # WHEN: _media_bar() is called
     media_env.media_controller._media_bar(mocked_controller, "load")
     # THEN: The following functions should have been called
-    mocked_controller.mediabar.actions['playbackLoop'].setDisabled.assert_called_with(result)
+    mocked_controller.mediabar.actions_map['playbackLoop'].setDisabled.assert_called_with(result)
 
 
 @pytest.mark.parametrize("loop, result", [(False, False), (True, True)])
@@ -716,15 +716,15 @@ def test_media_bar_loop_checked(media_env: MediaController, settings: Settings, 
     mocked_controller.media_play_item.media_type = MediaType.Video
     mocked_controller.mediabar = OpenLPToolbar(None)
     mocked_controller.mediabar.seek_slider = MagicMock()
-    mocked_controller.mediabar.actions['playbackPlay'] = MagicMock()
-    mocked_controller.mediabar.actions['playbackPause'] = MagicMock()
-    mocked_controller.mediabar.actions['playbackStop'] = MagicMock()
-    mocked_controller.mediabar.actions['playbackLoop'] = MagicMock()
+    mocked_controller.mediabar.actions_map['playbackPlay'] = MagicMock()
+    mocked_controller.mediabar.actions_map['playbackPause'] = MagicMock()
+    mocked_controller.mediabar.actions_map['playbackStop'] = MagicMock()
+    mocked_controller.mediabar.actions_map['playbackLoop'] = MagicMock()
     settings.setValue('media/live loop', loop)
     # WHEN: _media_bar() is called
     media_env.media_controller._media_bar(mocked_controller, "load")
     # THEN: The following functions should have been called
-    mocked_controller.mediabar.actions['playbackLoop'].setChecked.assert_called_with(result)
+    mocked_controller.mediabar.actions_map['playbackLoop'].setChecked.assert_called_with(result)
 
 
 def test_media_pause(media_env):
