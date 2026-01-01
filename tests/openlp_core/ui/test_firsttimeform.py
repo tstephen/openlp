@@ -27,6 +27,7 @@ from unittest.mock import MagicMock, call, patch, DEFAULT
 
 from PySide6 import QtCore, QtWidgets, QtTest
 
+from openlp.core.app import OpenLP
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.ui.firsttimeform import FirstTimeForm, ThemeListWidgetItem
@@ -46,12 +47,12 @@ sample_theme_data = {'file_name': 'BlueBurst.otz', 'sha256': 'sha_256_hash',
 
 
 @pytest.fixture()
-def ftf_app(registry, qapp):
+def ftf_app(registry: Registry, qapp: OpenLP):
     Registry().register('application', qapp)
 
 
 @pytest.fixture()
-def download_env(registry):
+def download_env(registry: Registry):
     download_worker_patcher = patch('openlp.core.ui.firsttimeform.DownloadWorker')
     run_thread_patcher = patch('openlp.core.ui.firsttimeform.run_thread')
     mocked_download_worker = download_worker_patcher.start()
@@ -227,7 +228,7 @@ def test_accept_method_theme_not_selected(mock_settings):
     mock_settings = Registry().get('settings')
     frw = FirstTimeForm(None)
     with patch.object(frw, '_set_plugin_status'), patch.object(frw, 'screen_selection_widget'), \
-            patch.object(frw, 'theme_combo_box', **{'currentIndex.return_value': -1}):
+            patch.object(frw, 'theme_combo_box', **{'currentIndex.return_value': -1}):     # type: ignore[call-overload]
 
         # WHEN: Calling accept and the currentIndex method of the theme_combo_box returns -1
         frw.accept()
@@ -347,9 +348,12 @@ def test_accept_method_theme_selected(mock_settings):
     mock_settings.value.return_value = True
 
     with patch.object(frw, '_set_plugin_status'), \
-            patch.object(frw, 'screen_selection_widget'), \
-            patch.object(
-            frw, 'theme_combo_box', **{'currentIndex.return_value': 0, 'currentText.return_value': 'Test Item'}):
+            patch.object(                                           # type: ignore[call-overload]
+                frw,
+                'theme_combo_box',
+                **{'currentIndex.return_value': 0, 'currentText.return_value': 'Test Item'}
+            ), \
+            patch.object(frw, 'screen_selection_widget'):
 
         # WHEN: Calling accept and the currentIndex method of the theme_combo_box returns 0
         frw.accept()
@@ -456,8 +460,8 @@ def test_failed_download(mocked_set_icon):
     Test that icon get set to indicate a failure when `DownloadWorker` emits the download_failed signal
     """
     # GIVEN: An instance of `DownloadWorker`
-    instance = ThemeListWidgetItem('url', sample_theme_data, MagicMock())  # noqa Overcome GC issue
-    worker_threads = Registry().get('application').worker_threads
+    instance = ThemeListWidgetItem('url', sample_theme_data, MagicMock())       # noqa Overcome GC issue
+    worker_threads = Registry().get('application').worker_threads               # type: ignore[union-attr]
     worker = worker_threads['thumbnail_download_BlueBurst.png']['worker']
 
     # WHEN: `DownloadWorker` emits the `download_failed` signal
@@ -475,8 +479,8 @@ def test_successful_download(mocked_build_icon, mocked_set_icon):
     signal
     """
     # GIVEN: An instance of `DownloadWorker`
-    instance = ThemeListWidgetItem('url', sample_theme_data, MagicMock())  # noqa Overcome GC issue
-    worker_threads = Registry().get('application').worker_threads
+    instance = ThemeListWidgetItem('url', sample_theme_data, MagicMock())       # noqa Overcome GC issue
+    worker_threads = Registry().get('application').worker_threads               # type: ignore[union-attr]
     worker = worker_threads['thumbnail_download_BlueBurst.png']['worker']
     test_path = Path('downlaoded', 'file')
 
