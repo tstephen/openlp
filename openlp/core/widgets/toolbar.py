@@ -46,7 +46,7 @@ class OpenLPToolbar(QtWidgets.QToolBar):
         super().__init__(parent)
         # useful to be able to reuse button icons...
         self.setIconSize(QtCore.QSize(20, 20))
-        self.actions: dict[str, QtGui.QAction] = {}     # type: ignore[assignment]
+        self.actions_map: dict[str, QtGui.QAction] = {}
         log.debug('Init done for %s' % parent.__class__.__name__)
 
     def add_toolbar_action(self, name, **kwargs):
@@ -56,7 +56,7 @@ class OpenLPToolbar(QtWidgets.QToolBar):
         please look at openlp.core.lib.ui.create_action()
         """
         action = create_widget_action(self, name, **kwargs)
-        self.actions[name] = action
+        self.actions_map[name] = action
         return action
 
     def add_toolbar_widget(self, widget):
@@ -64,7 +64,7 @@ class OpenLPToolbar(QtWidgets.QToolBar):
         Add a widget and store it's handle under the widgets object name.
         """
         action = self.addWidget(widget)
-        self.actions[widget.objectName()] = action
+        self.actions_map[widget.objectName()] = action
 
     def set_widget_visible(self, widgets, visible=True):
         """
@@ -75,13 +75,13 @@ class OpenLPToolbar(QtWidgets.QToolBar):
         """
         if isinstance(widgets, list):
             for handle in widgets:
-                if handle in self.actions:
-                    self.actions[handle].setVisible(visible)
+                if handle in self.actions_map:
+                    self.actions_map[handle].setVisible(visible)
                 else:
                     log.warning('No handle "%s" in actions list.', str(handle))
         else:
-            if widgets in self.actions:
-                self.actions[widgets].setVisible(visible)
+            if widgets in self.actions_map:
+                self.actions_map[widgets].setVisible(visible)
             else:
                 log.warning('No handle "%s" in actions list.', str(widgets))
 
@@ -93,8 +93,8 @@ class OpenLPToolbar(QtWidgets.QToolBar):
         :param enabled: The new state as bool.
         """
         for handle in widgets:
-            if handle in self.actions:
-                self.actions[handle].setEnabled(enabled)
+            if handle in self.actions_map:
+                self.actions_map[handle].setEnabled(enabled)
             else:
                 log.warning('No handle "%s" in actions list.', str(handle))
 
@@ -107,13 +107,13 @@ class OpenLPToolbar(QtWidgets.QToolBar):
         """
         if isinstance(widgets, list):
             for handle in widgets:
-                if handle in self.actions:
-                    self.actions[handle].setChecked(checked)
+                if handle in self.actions_map:
+                    self.actions_map[handle].setChecked(checked)
                 else:
                     log.warning('No handle "%s" in actions list.', str(handle))
         else:
-            if widgets in self.actions:
-                self.actions[widgets].setChecked(checked)
+            if widgets in self.actions_map:
+                self.actions_map[widgets].setChecked(checked)
             else:
                 log.warning('No handle "%s" in actions list.', str(widgets))
 
@@ -124,7 +124,7 @@ class OpenLPToolbar(QtWidgets.QToolBar):
         :return:
         """
         try:
-            act = self.actions[name]
+            act = self.actions_map[name]
             self.removeAction(act)
         except KeyError:
             log.warning(f'No handle {name} in actions list.')

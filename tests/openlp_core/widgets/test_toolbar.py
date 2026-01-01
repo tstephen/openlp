@@ -30,13 +30,13 @@ from openlp.core.widgets.toolbar import MediaToolbar
 HIDE_COMPONENTS = [
     ('seek', lambda toolbar: not hasattr(toolbar, 'seek_slider')),
     ('volume', lambda toolbar: not hasattr(toolbar, 'volume_slider')),
-    ('loop', lambda toolbar: 'playbackLoop' not in toolbar.actions)
+    ('loop', lambda toolbar: 'playbackLoop' not in toolbar.actions_map)
 ]
 HAS_PREFIX_CHECKS = [
-    ('play', lambda toolbar, prefix: prefix + 'playbackPlay' in toolbar.actions),
-    ('pause', lambda toolbar, prefix: prefix + 'playbackPause' in toolbar.actions),
-    ('stop', lambda toolbar, prefix: prefix + 'playbackStop' in toolbar.actions),
-    ('loop', lambda toolbar, prefix: prefix + 'playbackLoop' in toolbar.actions),
+    ('play', lambda toolbar, prefix: prefix + 'playbackPlay' in toolbar.actions_map),
+    ('pause', lambda toolbar, prefix: prefix + 'playbackPause' in toolbar.actions_map),
+    ('stop', lambda toolbar, prefix: prefix + 'playbackStop' in toolbar.actions_map),
+    ('loop', lambda toolbar, prefix: prefix + 'playbackLoop' in toolbar.actions_map),
     ('seek', lambda toolbar, prefix: toolbar.seek_slider.objectName() == prefix + 'seek_slider'),
     ('volume', lambda toolbar, prefix: toolbar.volume_slider.objectName() == prefix + 'volume_slider'),
 ]

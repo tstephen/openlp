@@ -58,7 +58,7 @@ def _create_mock_action(s_manager: ServiceManager, name: str, **kwargs):
     action.setObjectName(name)
     if kwargs.get('triggers'):
         action.triggered.connect(kwargs.pop('triggers'))
-    s_manager.toolbar.actions[name] = action
+    s_manager.toolbar.actions_map[name] = action
     return action
 
 
@@ -901,7 +901,7 @@ def test_theme_change_global(settings: Settings):
         service_manager.on_theme_level_changed()
 
     # THEN: The the theme toolbar should not be visible
-    assert service_manager.toolbar.actions['theme_combo_box'].isVisible() is False, \
+    assert service_manager.toolbar.actions_map['theme_combo_box'].isVisible() is False, \
         'The visibility should be False'
 
 
@@ -921,7 +921,7 @@ def test_theme_change_service(settings: Settings):
         service_manager.on_theme_level_changed()
 
     # THEN: The the theme toolbar should be visible
-    assert service_manager.toolbar.actions['theme_combo_box'].isVisible() is True, \
+    assert service_manager.toolbar.actions_map['theme_combo_box'].isVisible() is True, \
         'The visibility should be True'
 
 
@@ -941,7 +941,7 @@ def test_theme_change_song(settings: Settings):
         service_manager.on_theme_level_changed()
 
     # THEN: The the theme toolbar should be visible
-    assert service_manager.toolbar.actions['theme_combo_box'].isVisible() is True, \
+    assert service_manager.toolbar.actions_map['theme_combo_box'].isVisible() is True, \
         'The visibility should be True'
 
 
@@ -2242,7 +2242,7 @@ def test_click_on_new_service(service_manager: ServiceManager):
     with patch.object(service_manager, 'new_file') as mocked_new_file:
 
         # WHEN displaying the UI and pressing cancel
-        new_service = service_manager.toolbar.actions['newService']
+        new_service = service_manager.toolbar.actions_map['newService']
         new_service.trigger()
 
         assert mocked_new_file.call_count == 1, \

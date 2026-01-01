@@ -464,7 +464,7 @@ def test_click_on_new_theme(theme_manager):
     theme_manager.setup_ui(theme_manager)
 
     # WHEN displaying the UI and pressing cancel
-    new_theme = theme_manager.toolbar.actions['newTheme']
+    new_theme = theme_manager.toolbar.actions_map['newTheme']
     new_theme.trigger()
 
     assert mocked_event.call_count == 1, 'The on_add_theme method should have been called once'
