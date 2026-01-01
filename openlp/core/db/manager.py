@@ -231,12 +231,12 @@ class DBManager(object):
         :param object_class: The type of objects to return.
         :param filter_clause: The filter governing selection of objects to return. Defaults to None.
         """
-        query = select(object_class)
+        query = select(func.count()).select_from(object_class)
         if filter_clause is not None:
             query = query.where(filter_clause)
         for try_count in range(3):
             try:
-                return self.session.execute(query.with_only_columns(func.count())).scalar()
+                return self.session.execute(query).scalar()
             except OperationalError:
                 # This exception clause is for users running MySQL which likes to terminate connections on its own
                 # without telling anyone. See bug #927473. However, other dbms can raise it, usually in a
