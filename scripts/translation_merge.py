@@ -1,8 +1,9 @@
-#!/bin/sh
+#!/usr/bin/env python
+
 ##########################################################################
 # OpenLP - Open Source Lyrics Projection                                 #
 # ---------------------------------------------------------------------- #
-# Copyright (c) 2008-2024 OpenLP Developers                              #
+# Copyright (c) 2008 OpenLP Developers                                   #
 # ---------------------------------------------------------------------- #
 # This program is free software: you can redistribute it and/or modify   #
 # it under the terms of the GNU General Public License as published by   #
@@ -17,59 +18,28 @@
 # You should have received a copy of the GNU General Public License      #
 # along with this program.  If not, see <https://www.gnu.org/licenses/>. #
 ##########################################################################
-#
-# This script automates the update of the translations on OpenLP.
-#
-# It uses the tx client from Transifex for all the heavy lifting
-# All download *.ts files are converted to *.qm files which are used by
-# OpenLP.
-#
-###############################################################################
-pwd=`pwd`
-result=${PWD##*/}; echo $result
 
-if [ $result != 'scripts' ] ; then
-	echo 'This script must be run from the scripts directory'
-	exit
-fi
+'''
+Combine all the xml files and remove the first 3 lines and the last 1.
+'''
 
-echo $pwd
-echo
-echo Generation translation control file
-echo
-rm ../resources/i18n/*.ts
+import sys
 
-echo
-echo Creating base translation file
-echo
-./translation_raw_generate.sh
-
-echo
-echo Remove empty translation files
-echo
-find ../resources/i18n -type f -name *.xml -size 78c -delete
-
-echo
-echo Merge Trannslation file
-echo
-./translation_merge.py ../resources/i18n/*.xml > ../resources/i18n/en_ts.txt
+# Tags to be removed
+matches = ['xml version', 'DOCTYPE TS', 'TS version', 'TS>']
 
 
-echo
-echo Add header and trailer
-echo
-cat ./translation_head.txt ../resources/i18n/en_ts.txt ./translation_tail.txt > ../resources/i18n/en.ts
+def run(files):
+    for filename in files:
+        # print(filename)
+        f = open(filename)
+        rows = f.readlines()
+        for row in rows:
+            if any(m in row for m in matches):
+                pass
+            else:
+                print(row.replace('\n', ''))
 
 
-echo
-echo Remove all xml files
-echo
-rm ../resources/i18n/*.xml
-
-echo Check of invalid characters in push file
-grep -axv '.*' ../resources/i18n/en.ts
-
-tx push -s
-
-echo New translation file pushed.
-
+if __name__ == "__main__":
+    run(sys.argv[1:])
