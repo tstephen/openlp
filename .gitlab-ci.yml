@@ -258,7 +258,7 @@ build-source:
       if [ "$CI_COMMIT_TAG" != "" ]; then
           git archive -o "dist/OpenLP-${CI_COMMIT_TAG}.tar.gz" "$CI_COMMIT_TAG" .
       else
-          pipx install hatch
+          pip install hatch
           git fetch --tags
           rm -fr dist
           VERSION=`hatch version`
