@@ -253,16 +253,18 @@ test-display:
 build-source:
   stage: build
   image: $IMAGE_BASE/pypi
+  variables:
+    GIT_STRATEGY: clone
   script: |
       mkdir -p dist
       if [ "$CI_COMMIT_TAG" != "" ]; then
-          git archive -o "dist/OpenLP-${CI_COMMIT_TAG}.tar.gz" "$CI_COMMIT_TAG" .
+          echo -n "$CI_COMMIT_TAG" >! openlp/.version
+          git archive -o "dist/OpenLP-${CI_COMMIT_TAG}.tar.gz" --add-file=openlp/.version "$CI_COMMIT_TAG" .
       else
           pip install hatch
-          git fetch --tags
-          rm -fr dist
+          git fetch --unshallow --tags
           VERSION=`hatch version`
-          echo "$VERSION" >! openlp/.version
+          echo -n "$VERSION" >! openlp/.version
           git archive -o "dist/OpenLP-${VERSION}.tar.gz" --add-file=openlp/.version HEAD .
       fi
   artifacts:
@@ -276,16 +278,20 @@ build-source:
 build-flatpak:
   stage: build
   image: $IMAGE_BASE/flatpak
+  variables:
+    GIT_STRATEGY: clone
   script: |
       mkdir -p dist
       if [ "$CI_COMMIT_TAG" != "" ]; then
           VERSION="${CI_COMMIT_TAG}"
       else
           pipx install hatch
-          git fetch --tags
+          pipx ensurepath
+          source /root/.bashrc
+          git fetch --unshallow --tags
           VERSION=`hatch version`
-          echo "$VERSION" >! openlp/.version
       fi
+      echo -n "$VERSION" >! openlp/.version
       # Download packaging repo
       curl -SL "https://gitlab.com/${CI_PROJECT_NAMESPACE}/${PACKAGING_REPOSITORY_NAME}/-/archive/${PACKAGING_BRANCH_NAME}/${PACKAGING_ZIP_FILE_NAME}" -o "/tmp/${PACKAGING_ZIP_FILE_NAME}"
       unzip "/tmp/${PACKAGING_ZIP_FILE_NAME}"
@@ -302,6 +308,8 @@ build-flatpak:
 build-windows:
   stage: build
   extends: test-windows
+  variables:
+    GIT_STRATEGY: clone
   script:
     - !reference [test-windows, script]
     - "# Installing WiX Toolset"
@@ -322,6 +330,7 @@ build-windows:
     - Expand-Archive -Path "$env:Temp\$env:PACKAGING_ZIP_FILE_NAME" -DestinationPath .
     - Set-Location $env:PACKAGING_DIRECTORY_NAME
     - "# Creating Windows MSI and Portable"
+    - echo -n "$CI_COMMIT_TAG" >! openlp/.version
     - python builders/windows-builder.py --release $env:CI_COMMIT_TAG --skip-update --config windows/config-gitlab.ini --branch $env:CI_PROJECT_DIR --portable
   artifacts:
     name: $CI_COMMIT_REF_SLUG
@@ -339,6 +348,7 @@ build-macos:
   variables:
     # Set environment variable QT_QPA_PLATFORM to offscreen to avoid UI troubles
     QT_QPA_PLATFORM: "offscreen"
+    GIT_STRATEGY: clone
   extends: test-macos
   script:
     - !reference [test-macos, script]
@@ -357,6 +367,7 @@ build-macos:
     - unzip "$TMPDIR/$PACKAGING_ZIP_FILE_NAME"
     - cd $PACKAGING_DIRECTORY_NAME
     - "# Creating macOS Installer"
+    - echo -n "$CI_COMMIT_TAG" >! openlp/.version
     - python builders/macos-builder.py --release $CI_COMMIT_TAG --skip-update --config macos/config-gitlab.ini --branch $CI_PROJECT_DIR
   artifacts:
     name: $CI_COMMIT_REF_SLUG
@@ -388,7 +399,8 @@ upload-pypi:
   stage: deploy
   image: $IMAGE_BASE/debian
   script:
-    - pipx install hatch
+    - git fetch --unshallow --tags
+    - pip install hatch
     - hatch build
     - hatch publish --user $TWINE_USERNAME --auth $TWINE_PASSWORD
   rules:
