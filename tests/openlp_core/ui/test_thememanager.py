@@ -361,12 +361,13 @@ def test_unzip_theme(mocked_theme_set_defaults, theme_manager: ThemeManager):
         theme_file_path = RESOURCE_PATH / 'themes' / 'Moss_on_tree.otz'
 
         # WHEN: We try to unzip it
-        theme_manager.unzip_theme(theme_file_path)
+        ret_theme_name = theme_manager.unzip_theme(theme_file_path)
 
         # THEN: Files should be unpacked AND xml file should be upgraded to json
         assert (theme_manager.theme_path / 'Moss on tree' / 'Moss on tree.xml').exists() is False
         assert (theme_manager.theme_path / 'Moss on tree' / 'Moss on tree.json').exists() is True
         assert mocked_critical_error_message_box.call_count == 0, 'No errors should have happened'
+        assert ret_theme_name == "Moss on tree", "The theme name should have been returned"
         shutil.rmtree(theme_manager.theme_path)
 
 
@@ -385,10 +386,11 @@ def test_unzip_theme_invalid_version(theme_manager: ThemeManager):
         theme_manager.theme_path = Path('folder')
 
         # WHEN: unzip_theme is called
-        theme_manager.unzip_theme(Path('theme.file'))
+        ret_theme_name = theme_manager.unzip_theme(Path('theme.file'))
 
         # THEN: The critical_error_message_box should have been called
         assert mocked_critical_error_message_box.call_count == 1, 'Should have been called once'
+        assert ret_theme_name is None, 'No theme name should have been returned'
 
 
 def test_update_preview_images(theme_manager: ThemeManager):

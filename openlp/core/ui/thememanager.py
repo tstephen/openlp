@@ -693,6 +693,7 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
                 translate('OpenLP.ThemeManager', 'There was a problem importing {file_name}.\n\nIt is corrupt, '
                                                  'inaccessible or not a valid theme.').format(file_name=file_path))
         finally:
+            ret = None
             if not abort_import:
                 # TODO: remove XML handling after once the upgrade path from 2.4 is no longer required
                 # As all files are closed, upgrade theme (xml to json) if needed.
@@ -703,9 +704,8 @@ class ThemeManager(QtWidgets.QWidget, RegistryBase, Ui_ThemeManager, LogMixin, R
                         xml_file_path.unlink()
                     theme = self._create_theme_from_xml(file_xml, self.theme_path)
                     self.save_theme(theme)
-                return theme_name
-            else:
-                return None
+                ret = theme_name
+        return ret
 
     def check_if_theme_exists(self, theme_name):
         """
