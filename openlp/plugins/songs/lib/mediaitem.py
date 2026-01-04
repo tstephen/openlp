@@ -22,6 +22,7 @@ from collections import namedtuple
 import logging
 import mako
 import os
+from pathlib import Path
 from shutil import copyfile
 from typing import Any
 
@@ -761,7 +762,7 @@ class SongMediaItem(MediaManagerItem):
                 total_length = 0
                 # We could have stored multiple files but only the first one will be played.
                 for m in song.media_files:
-                    file_path = m.file_path
+                    file_path = Path(m.file_path)
                     if file_path.is_file():
                         total_length += self.media_controller.media_length(file_path)
                         service_item.background_audio = [(file_path, m.file_hash)]

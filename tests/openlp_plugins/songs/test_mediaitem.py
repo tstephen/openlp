@@ -30,6 +30,7 @@ from openlp.core.common.enum import SongFirstSlideMode, SongSearch
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
 from openlp.core.lib.serviceitem import ServiceItem
+from openlp.core.state import State
 from openlp.core.ui.icons import UiIcons
 from openlp.plugins.songs.lib.db import AuthorType, Song
 from openlp.plugins.songs.lib.mediaitem import SongMediaItem
@@ -101,6 +102,7 @@ SONG_VERSES_TEST_VERSE_ORDER = 'v1'
 def media_item(registry: Registry, settings: Settings):
     registry.register('service_list', MagicMock())
     registry.register('main_window', MagicMock())
+    registry.register('media_controller', MagicMock())
     mocked_plugin = MagicMock()
     with patch('openlp.core.lib.mediamanageritem.MediaManagerItem._setup'), \
             patch('openlp.plugins.songs.forms.editsongform.EditSongForm.__init__'):
@@ -1091,9 +1093,9 @@ def test_generate_slide_data_adds_preview_for_next_verse(mocked_get_verses: Magi
     settings.setValue('songs/preview_verse', True)
 
     preview_verses = [
-                        [{'type': 'v', 'label': '1'}, 'Line 1 of the verse 1\nLine 2 of the verse 1'],
-                        [{'type': 'v', 'label': '2'}, 'Line 1 of the verse 2\nLine 2 of the verse 2']
-                    ]
+        [{'type': 'v', 'label': '1'}, 'Line 1 of the verse 1\nLine 2 of the verse 1'],
+        [{'type': 'v', 'label': '2'}, 'Line 1 of the verse 2\nLine 2 of the verse 2']
+    ]
     preview_order = 'v1 v2'
 
     mocked_get_verses.return_value = preview_verses
@@ -1196,11 +1198,11 @@ def test_generate_slide_data_adds_preview_for_selected_verses(mocked_get_verses:
     settings.setValue('songs/preview_bridge', True)
 
     preview_verses = [
-                        [{'type': 'v', 'label': '1'}, 'Line 1 of the verse 1\nLine 2 of the verse 1'],
-                        [{'type': 'v', 'label': '2'}, 'Line 1 of the verse 2\nLine 2 of the verse 2'],
-                        [{'type': 'c', 'label': '1'}, 'Line 1 of the chorus 1\nLine 2 of the chorus 1'],
-                        [{'type': 'b', 'label': '1'}, 'Line 1 of the bridge 1\nLine 2 of the bridge 1'],
-                        ]
+        [{'type': 'v', 'label': '1'}, 'Line 1 of the verse 1\nLine 2 of the verse 1'],
+        [{'type': 'v', 'label': '2'}, 'Line 1 of the verse 2\nLine 2 of the verse 2'],
+        [{'type': 'c', 'label': '1'}, 'Line 1 of the chorus 1\nLine 2 of the chorus 1'],
+        [{'type': 'b', 'label': '1'}, 'Line 1 of the bridge 1\nLine 2 of the bridge 1'],
+    ]
     preview_order = 'v1 v2 c1 b1 v2'
 
     mocked_get_verses.return_value = preview_verses
@@ -1221,24 +1223,30 @@ def test_generate_slide_data_adds_preview_for_selected_verses(mocked_get_verses:
     # 2. V2 with no preview for chorus 1 (disabled)
     # 3. C1 with no preview for bridge 1 (disabled chorus)
     # 4. B1 with preview for verse 2 (enabled)
-    expected_slides = [(
-        "Line 1 of the verse 1\n"
-        "Line 2 of the verse 1\n"
-        "{preview}Line 1 of the verse 2{/preview}"
-    ), (
-        "Line 1 of the verse 2\n"
-        "Line 2 of the verse 2"
-    ), (
-        "Line 1 of the chorus 1\n"
-        "Line 2 of the chorus 1"
-    ), (
-        "Line 1 of the bridge 1\n"
-        "Line 2 of the bridge 1\n"
-        "{preview}Line 1 of the verse 2{/preview}"
-    ), (
-        "Line 1 of the verse 2\n"
-        "Line 2 of the verse 2"
-    )]
+    expected_slides = [
+        (
+            "Line 1 of the verse 1\n"
+            "Line 2 of the verse 1\n"
+            "{preview}Line 1 of the verse 2{/preview}"
+        ),
+        (
+            "Line 1 of the verse 2\n"
+            "Line 2 of the verse 2"
+        ),
+        (
+            "Line 1 of the chorus 1\n"
+            "Line 2 of the chorus 1"
+        ),
+        (
+            "Line 1 of the bridge 1\n"
+            "Line 2 of the bridge 1\n"
+            "{preview}Line 1 of the verse 2{/preview}"
+        ),
+        (
+            "Line 1 of the verse 2\n"
+            "Line 2 of the verse 2"
+        )
+    ]
 
     # WHEN: I generate the slides
     media_item.generate_slide_data(service_item, item=song)
@@ -1248,3 +1256,52 @@ def test_generate_slide_data_adds_preview_for_selected_verses(mocked_get_verses:
 
     assert slide_texts == expected_slides, \
         f"Expected {expected_slides}, but got {slide_texts[0]}"
+
+
+@patch('openlp.plugins.songs.lib.mediaitem.SongMediaItem._get_id_of_item_to_generate')
+@patch('openlp.plugins.songs.lib.mediaitem.SongXML.get_verses')
+@patch('openlp.plugins.songs.lib.mediaitem.Path')
+def test_generate_slide_data_with_media_files_as_strings(MockPath: MagicMock, mocked_get_verses: MagicMock,
+                                                         mocked__get_id_of_item_to_generate: MagicMock,
+                                                         media_item: SongMediaItem, registry: Registry,
+                                                         settings: Settings):
+    """Test that generate_slide_data() correctly handles media files as strings"""
+    # GIVEN: A Song which has multiple verses and a media file attached
+    mocked__get_id_of_item_to_generate.return_value = '00000000-0000-0000-0000-000000000000'
+    mocked_verses = [
+        [{'type': 'v', 'label': '1'}, 'Line 1 of the verse 1\nLine 2 of the verse 1'],
+        [{'type': 'v', 'label': '2'}, 'Line 1 of the verse 2\nLine 2 of the verse 2'],
+        [{'type': 'c', 'label': '1'}, 'Line 1 of the chorus 1\nLine 2 of the chorus 1'],
+        [{'type': 'b', 'label': '1'}, 'Line 1 of the bridge 1\nLine 2 of the bridge 1'],
+    ]
+    mocked_order = 'v1 v2 c1 b1 v2'
+    mocked_get_verses.return_value = mocked_verses
+    media_item.plugin = MagicMock()
+    media_item.open_lyrics = OpenLyrics(media_item.plugin.manager)
+    registry.register('media_plugin', MagicMock())
+    State().load_settings()
+    State().add_service('media', 1, True)
+    State().update_pre_conditions('media', True)
+    mocked_path = MagicMock()
+    mocked_path.is_file.return_value = True
+    MockPath.return_value = mocked_path
+
+    # Build a Song instance
+    song = Song()
+    song.title = 'My Song'
+    song.lyrics = '<fake xml>'  # Mocked by mocked_get_verses
+    song.theme_name = 'Default'
+    song.verse_order = mocked_order
+    song.media_files = [MagicMock(file_path='/path/to/media-file.mp3', file_hash='1234567890')]
+    media_item.plugin.manager.get_object.return_value = song
+    service_item = ServiceItem(None)
+    media_item.media_controller.media_length.return_value = 120
+
+    # WHEN: I generate the slides
+    # import pudb
+    # pudb.set_trace()
+    media_item.generate_slide_data(service_item, item=song)
+
+    # THEN: The media file should have been added to the service item
+    assert service_item.background_audio == [(mocked_path, '1234567890')]
+    assert service_item.media_length == 120
