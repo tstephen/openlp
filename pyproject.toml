@@ -170,6 +170,7 @@ dependencies = [
 
 [tool.hatch.envs.test.scripts]
 run = "pytest tests {args}"
+run_selected = "pytest {args}"
 cov = "pytest tests --cov openlp --cov-report html {args}"
 debug = "pytest tests --pudb {args}"
 ci = "pytest tests --color=no --disable-warnings {args}"
