@@ -560,10 +560,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
         # Sometimes the threads haven't finished, let's wait for them
         thread_names = list(self.application.worker_threads.keys())
         for thread_name in thread_names:
-            if thread_name not in self.application.worker_threads.keys():
-                continue
             self.log_debug('Waiting for thread %s' % thread_name)
             QtWidgets.QApplication.processEvents()
+            if thread_name not in self.application.worker_threads.keys():
+                continue
             thread = self.application.worker_threads[thread_name]['thread']
             worker = self.application.worker_threads[thread_name]['worker']
             try:

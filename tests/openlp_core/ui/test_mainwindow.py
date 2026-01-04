@@ -963,7 +963,7 @@ def test_wait_for_threads_disappearing_thread(MockApp, main_window_reduced):
         main_window_reduced._wait_for_threads()
 
     # THEN: The correct methods should have been called
-    assert MockApp.processEvents.call_count == 0, 'processEvents() should not have been called'
+    assert MockApp.processEvents.call_count == 1, 'processEvents() should have only been called once'
 
 
 @patch('openlp.core.ui.mainwindow.QtWidgets.QApplication')
