@@ -19,6 +19,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>. #
 ##########################################################################
 import logging
+import os
 
 from PySide6 import QtCore, QtWidgets
 from pathlib import Path
@@ -177,7 +178,7 @@ class PresentationMediaItem(FolderLibraryItem):
         tree_item = None
         file_path = Path(item.file_path)
         file_name = file_path.name
-        if not file_path.exists():
+        if not file_path.exists() or not os.access(file_path, os.R_OK):
             tree_item = QtWidgets.QTreeWidgetItem([file_name])
             tree_item.setIcon(0, UiIcons().delete)
             tree_item.setData(0, QtCore.Qt.ItemDataRole.UserRole, item)
@@ -292,6 +293,18 @@ class PresentationMediaItem(FolderLibraryItem):
                 path, file_name = file_path.parent, file_path.name
                 service_item.title = file_name
                 if file_path.exists():
+                    if not os.access(file_path, os.R_OK):
+                        # File is inaccessible
+                        if not remote:
+                            critical_error_message_box(
+                                    translate('PresentationPlugin.MediaItem', 'Missing Presentation'),
+                                    translate(
+                                        'PresentationPlugin.MediaItem',
+                                        'The presentation {name} is inaccessible.'
+                                    ).format(name=file_path)
+                            )
+                        return False
+
                     processor = self.find_controller_by_type(file_path)
                     if not processor:
                         return False
@@ -329,46 +342,58 @@ class PresentationMediaItem(FolderLibraryItem):
                 path, file_name = file_path.parent, file_path.name
                 service_item.title = file_name
                 if file_path.exists():
-                    if self.display_type_combo_box.itemData(self.display_type_combo_box.currentIndex()) == 'automatic':
-                        service_item.processor = self.find_controller_by_type(file_path)
-                        if not service_item.processor:
+                    if os.access(file_path, os.R_OK):
+                        if (self.display_type_combo_box.itemData(self.display_type_combo_box.currentIndex())
+                                == 'automatic'):
+                            service_item.processor = self.find_controller_by_type(file_path)
+                            if not service_item.processor:
+                                return False
+                        controller = self.controllers[service_item.processor]
+                        doc = controller.add_document(file_path)
+                        if doc.get_thumbnail_path(1, True) is None:
+                            doc.load_presentation()
+                        i = 1
+                        thumbnail_path = doc.get_thumbnail_path(i, True)
+                        if thumbnail_path:
+                            # Get titles and notes
+                            titles, notes = doc.get_titles_and_notes()
+                            service_item.add_capability(ItemCapabilities.HasDisplayTitle)
+                            if notes.count('') != len(notes):
+                                service_item.add_capability(ItemCapabilities.HasNotes)
+                            service_item.add_capability(ItemCapabilities.HasThumbnails)
+                            while thumbnail_path:
+                                # Use title and note if available
+                                title = ''
+                                if titles and len(titles) >= i:
+                                    title = titles[i - 1]
+                                note = ''
+                                if notes and len(notes) >= i:
+                                    note = notes[i - 1]
+                                service_item.add_from_command(str(path), file_name, thumbnail_path, title, note,
+                                                              doc.get_sha256_file_hash())
+                                i += 1
+                                thumbnail_path = doc.get_thumbnail_path(i, True)
+                            doc.close_presentation()
+                            service_item.validate_item()
+                            return True
+                        else:
+                            # File is no longer present
+                            if not remote:
+                                critical_error_message_box(translate('PresentationPlugin.MediaItem',
+                                                                     'Missing Presentation'),
+                                                           translate('PresentationPlugin.MediaItem',
+                                                                     'The presentation {name} is incomplete, '
+                                                                     'please reload.').format(name=file_path))
                             return False
-                    controller = self.controllers[service_item.processor]
-                    doc = controller.add_document(file_path)
-                    if doc.get_thumbnail_path(1, True) is None:
-                        doc.load_presentation()
-                    i = 1
-                    thumbnail_path = doc.get_thumbnail_path(i, True)
-                    if thumbnail_path:
-                        # Get titles and notes
-                        titles, notes = doc.get_titles_and_notes()
-                        service_item.add_capability(ItemCapabilities.HasDisplayTitle)
-                        if notes.count('') != len(notes):
-                            service_item.add_capability(ItemCapabilities.HasNotes)
-                        service_item.add_capability(ItemCapabilities.HasThumbnails)
-                        while thumbnail_path:
-                            # Use title and note if available
-                            title = ''
-                            if titles and len(titles) >= i:
-                                title = titles[i - 1]
-                            note = ''
-                            if notes and len(notes) >= i:
-                                note = notes[i - 1]
-                            service_item.add_from_command(str(path), file_name, thumbnail_path, title, note,
-                                                          doc.get_sha256_file_hash())
-                            i += 1
-                            thumbnail_path = doc.get_thumbnail_path(i, True)
-                        doc.close_presentation()
-                        service_item.validate_item()
-                        return True
                     else:
-                        # File is no longer present
+                        # File is inaccessible
                         if not remote:
-                            critical_error_message_box(translate('PresentationPlugin.MediaItem',
-                                                                 'Missing Presentation'),
-                                                       translate('PresentationPlugin.MediaItem',
-                                                                 'The presentation {name} is incomplete, '
-                                                                 'please reload.').format(name=file_path))
+                            critical_error_message_box(
+                                    translate('PresentationPlugin.MediaItem', 'Missing Presentation'),
+                                    translate(
+                                        'PresentationPlugin.MediaItem',
+                                        'The presentation {name} is inaccessible.'
+                                    ).format(name=file_path))
                         return False
                 else:
                     # File is no longer present

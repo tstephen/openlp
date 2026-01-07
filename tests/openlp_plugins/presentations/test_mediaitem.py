@@ -201,6 +201,67 @@ def test_generate_slide_data_from_pdf(media_item):
     mocked_service_item.add_capability.assert_any_call(ItemCapabilities.ProvidesOwnTheme)
 
 
+@patch('openlp.core.lib.ui.Registry')
+def test_generate_slide_data_with_nonexistent_path(MockRegistry, media_item):
+    """
+    Test that the generate slide data function shows the right error for non-existent paths.
+    """
+    # GIVEN: A mocked pdf service item
+    media_item.list_view = MagicMock()
+    media_item.display_type_combo_box = MagicMock()
+    mocked_service_item = MagicMock()
+
+    # WHEN: generate_slide_data is called with a file_path that doesn't really exist
+    success = media_item.generate_slide_data(
+            mocked_service_item,
+            item=mocked_service_item,
+            context=ServiceItemContext.Live,
+            file_path=Path('test.pdf')
+    )
+
+    # THEN: a error message box should appear telling the user that the path doesn't exist
+    MockRegistry.return_value.get.return_value.error_message.assert_called_once_with(
+            'Missing Presentation',
+            'The presentation test.pdf no longer exists.'
+    )
+
+    # THEN: The slide data could not be generated.
+    assert success is False, 'The slide data could not be generated'
+
+
+@patch('openlp.core.lib.ui.Registry')
+def test_generate_slide_data_with_inaccessible_path(MockRegistry, media_item):
+    """
+    Test that the generate slide data function shows the right error for inaccessible paths.
+    """
+    # GIVEN: A mocked pdf service item
+    media_item.list_view = MagicMock()
+    media_item.display_type_combo_box = MagicMock()
+    mocked_service_item = MagicMock()
+
+    with patch('openlp.plugins.presentations.lib.mediaitem.Path') as mocked_path:
+        # GIVEN: A fake file which "exists" cannot be read - so it's inaccessible
+        mocked_path.exists.return_value = True
+        file_path = mocked_path('test.pdf')
+
+        # WHEN: generate_slide_data is called with a file_path that can't be read
+        success = media_item.generate_slide_data(
+                mocked_service_item,
+                item=mocked_service_item,
+                context=ServiceItemContext.Live,
+                file_path=file_path
+        )
+
+        # THEN: a error message box should appear telling the user that the path doesn't exist
+        MockRegistry.return_value.get.return_value.error_message.assert_called_once_with(
+                'Missing Presentation',
+                f'The presentation {file_path} is inaccessible.'
+        )
+
+        # THEN: The slide data could not be generated.
+        assert success is False, 'The slide data could not be generated'
+
+
 @patch('openlp.plugins.presentations.lib.mediaitem.FolderLibraryItem._setup')
 @patch('openlp.plugins.presentations.lib.mediaitem.PresentationMediaItem.setup_item')
 def test_search_found(mock_setup, mock_item, registry):
