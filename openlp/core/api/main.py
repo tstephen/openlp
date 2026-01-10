@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 ##########################################################################
 # OpenLP - Open Source Lyrics Projection                                 #
 # ---------------------------------------------------------------------- #
@@ -19,6 +17,10 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>. #
 ##########################################################################
 
+"""
+Main API views for OpenLP.
+"""
+
 import os
 
 from flask import Blueprint, send_from_directory
@@ -31,27 +33,79 @@ main_views = Blueprint('main', __name__)
 @main_views.route('/', defaults={'path': ''})
 @main_views.route('/<path>')
 def index(path):
-    if os.path.isfile(AppLocation.get_section_data_path('remotes') / path):
-        return send_from_directory(str(AppLocation.get_section_data_path('remotes')),
+    """
+    Serve the main index file or other files from the remotes directory.
+
+    :param path: The path to the file.
+    :type path: Path
+    :return: The requested file or index.html.
+    :rtype: Response
+    """
+    directory = AppLocation.get_section_data_path('remotes')
+    if os.path.isfile(directory / path):
+        return send_from_directory(str(directory),
                                    path, mimetype=get_mime_type(path))
-    else:
-        return send_from_directory(str(AppLocation.get_section_data_path('remotes')),
-                                   'index.html', mimetype='text/html')
+    return send_from_directory(str(directory),
+                               'index.html', mimetype='text/html')
 
 
 @main_views.route('/assets/<path:path>')
 def assets(path):
-    return send_from_directory(str(AppLocation.get_section_data_path('remotes') / 'assets'),
+    """
+    Serve assets.
+
+    :param path: The path to the asset file.
+    :type path: str
+    :return: The asset file.
+    :rtype: Response
+    """
+    directory = AppLocation.get_section_data_path('remotes')
+    return send_from_directory(str(directory / 'assets'),
+                               path, mimetype=get_mime_type(path))
+
+
+@main_views.route('/media/<path:path>')
+def media(path):
+    """
+    Serve media files.
+
+    :param path: The path to the media file.
+    :type path: str
+    :return: The media file.
+    :rtype: Response
+    """
+    directory = AppLocation.get_section_data_path('remotes')
+    return send_from_directory(str(directory / 'media'),
                                path, mimetype=get_mime_type(path))
 
 
 @main_views.route('/stage/<path>/')
 def stages(path):
-    return send_from_directory(str(AppLocation.get_section_data_path('stages') / path),
+    """
+    Serve stage HTML file.
+
+    :param path: The path to the stage directory.
+    :type path: Path
+    :return: The stage HTML file.
+    :rtype: Response
+    """
+    directory = AppLocation.get_section_data_path('stages')
+    return send_from_directory(str(directory / path),
                                'stage.html', mimetype='text/html')
 
 
 @main_views.route('/stage/<path:path>/<file>')
 def stage_assets(path, file):
-    return send_from_directory(str(AppLocation.get_section_data_path('stages') / path),
+    """
+    Serve stage asset files.
+
+    :param path: The path to the stage directory.
+    :type path: Path
+    :param file: The asset file name.
+    :type file: str
+    :return: The stage asset file.
+    :rtype: Response
+    """
+    directory = AppLocation.get_section_data_path('stages')
+    return send_from_directory(str(directory / path),
                                file, mimetype=get_mime_type(file))
