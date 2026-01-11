@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 ##########################################################################
 # OpenLP - Open Source Lyrics Projection                                 #
 # ---------------------------------------------------------------------- #
@@ -18,6 +16,11 @@
 # You should have received a copy of the GNU General Public License      #
 # along with this program.  If not, see <https://www.gnu.org/licenses/>. #
 ##########################################################################
+
+"""
+Core API v2 endpoints.
+"""
+
 import logging
 
 from flask import jsonify, request, abort, Blueprint
@@ -36,13 +39,19 @@ log = logging.getLogger(__name__)
 @core.route('/display', methods=['POST'])
 @login_required
 def toggle_display():
-    ALLOWED_ACTIONS = ['hide', 'show', 'blank', 'theme', 'desktop']
+    """
+    Toggle the display state of the main display.
+
+    returns: Empty response with status code 204.
+    rtype: flask.Response
+    """
+    allowed_actions = ['hide', 'show', 'blank', 'theme', 'desktop']
     data = request.json
     if not data:
         log.error('Missing request data')
         abort(400)
     display = data.get('display', '').lower()
-    if display not in ALLOWED_ACTIONS:
+    if display not in allowed_actions:
         abort(400)
     Registry().get('live_controller').slidecontroller_toggle_display.emit(display)
     return '', 204
@@ -50,6 +59,12 @@ def toggle_display():
 
 @core.route('/plugins')
 def plugin_list():
+    """
+    Get a list of active plugins that support searching.
+
+    returns: JSON response containing the list of plugins.
+    rtype: flask.Response
+    """
     searches = []
     for plugin in State().list_plugins():
         if plugin.status == PluginStatus.Active and plugin.media_item and plugin.media_item.has_search:
@@ -59,6 +74,12 @@ def plugin_list():
 
 @core.route('/shortcuts')
 def shortcuts():
+    """
+    Get a list of all keyboard shortcuts.
+
+    returns: JSON response containing the list of shortcuts.
+    rtype: flask.Response
+    """
     data = []
     settings = Registry().get('settings_thread')
     shortcut_prefix = 'shortcuts/'
@@ -75,22 +96,40 @@ def shortcuts():
 
 @core.route('/system')
 def system_information():
+    """
+    Get system information.
+
+    returns: JSON response containing system information.
+    rtype: flask.Response
+    """
     data = {}
     data['websocket_port'] = Registry().get('settings_thread').value('api/websocket port')
     data['login_required'] = Registry().get('settings_thread').value('api/authentication enabled')
     data['api_version'] = 2
-    data['api_revision'] = 6
+    data['api_revision'] = 7
     return jsonify(data)
 
 
 @core.route('/language')
 def language():
-    language = LanguageManager.get_language()
-    return jsonify({'language': language})
+    """
+    Get the current language.
+
+    returns: JSON response containing the current language.
+    rtype: flask.Response
+    """
+    current_language = LanguageManager.get_language()
+    return jsonify({'language': current_language})
 
 
 @core.route('/login', methods=['POST'])
 def login():
+    """
+    Login to the API and get an authentication token.
+
+    returns: JSON response containing the authentication token.
+    rtype: flask.Response
+    """
     data = request.json
     if not data:
         log.error('Missing request data')
@@ -100,15 +139,20 @@ def login():
     if username == Registry().get('settings_thread').value('api/user id') and \
             password == Registry().get('settings_thread').value('api/password'):
         return jsonify({'token': Registry().get('authentication_token')})
-    else:
-        log.error('Unauthorised Request for ' + username)
-        return '', 401
+    log.error('Unauthorised Request for %s', username)
+    return '', 401
 
 
 @core.route('/live-image')
 def main_image():
+    """
+    Get a base64 encoded image of the current main display.
+
+    returns: JSON response containing the base64 encoded image.
+    rtype: flask.Response
+    """
     live_controller = Registry().get('live_controller')
     img_data = live_controller.staticMetaObject.invokeMethod(
         live_controller, 'grab_maindisplay', QtCore.Qt.ConnectionType.DirectConnection, QtCore.Q_RETURN_ARG(str))
-    img = 'data:image/jpeg;base64,{}'.format(img_data)
+    img = f'data:image/jpeg;base64,{img_data}'
     return jsonify({'binary_image': img})
