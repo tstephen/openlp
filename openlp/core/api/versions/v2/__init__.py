@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 ##########################################################################
 # OpenLP - Open Source Lyrics Projection                                 #
 # ---------------------------------------------------------------------- #
@@ -18,17 +16,23 @@
 # You should have received a copy of the GNU General Public License      #
 # along with this program.  If not, see <https://www.gnu.org/licenses/>. #
 ##########################################################################
+"""
+The :mod:`~openlp.core.api.versions.v2` module provides the OpenLP API version 2.
+"""
 
 from openlp.core.api.versions.v2.controller import controller_views
 from openlp.core.api.versions.v2.core import core
 from openlp.core.api.versions.v2.service import service_views
-from openlp.core.api.versions.v2.plugins import plugins, alert_1_views, alert_2_views
+from openlp.core.api.versions.v2.plugins import plugins
 
 
 def register_blueprints(app):
+    """
+    Registers the API Blue prints.
+
+    :param: app: flask.app.Flask: The application object.
+    """
     app.register_blueprint(controller_views, url_prefix='/api/v2/controller/')
     app.register_blueprint(core, url_prefix='/api/v2/core/')
     app.register_blueprint(service_views, url_prefix='/api/v2/service/')
     app.register_blueprint(plugins, url_prefix='/api/v2/plugins/')
-    app.register_blueprint(alert_2_views, url_prefix='/api/v2/plugins/alerts')
-    app.register_blueprint(alert_1_views, url_prefix='/api/alert')

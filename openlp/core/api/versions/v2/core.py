@@ -45,13 +45,12 @@ def toggle_display():
     returns: Empty response with status code 204.
     rtype: flask.Response
     """
-    allowed_actions = ['hide', 'show', 'blank', 'theme', 'desktop']
     data = request.json
     if not data:
         log.error('Missing request data')
         abort(400)
     display = data.get('display', '').lower()
-    if display not in allowed_actions:
+    if display not in ['hide', 'show', 'blank', 'theme', 'desktop']:
         abort(400)
     Registry().get('live_controller').slidecontroller_toggle_display.emit(display)
     return '', 204

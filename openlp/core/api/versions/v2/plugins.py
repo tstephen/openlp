@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-# vim: autoindent shiftwidth=4 expandtab textwidth=120 tabstop=4 softtabstop=4
-
 ##########################################################################
 # OpenLP - Open Source Lyrics Projection                                 #
 # ---------------------------------------------------------------------- #
@@ -19,6 +16,10 @@
 # You should have received a copy of the GNU General Public License      #
 # along with this program.  If not, see <https://www.gnu.org/licenses/>. #
 ##########################################################################
+"""
+The OpenLP plugins.
+"""
+
 import logging
 import json
 import re
@@ -26,7 +27,7 @@ import re
 from flask import abort, request, Blueprint, jsonify, Response
 from PySide6 import QtCore
 
-from openlp.core.api.lib import login_required, extract_request, old_success_response, old_auth
+from openlp.core.api.lib import login_required
 from openlp.core.lib.plugin import PluginStatus
 from openlp.core.common.json import OpenLPJSONEncoder
 from openlp.core.common.registry import Registry
@@ -36,11 +37,19 @@ log = logging.getLogger(__name__)
 
 
 plugins = Blueprint('v2-plugins', __name__)
-alert_1_views = Blueprint('v1-alert-plugin', __name__)
-alert_2_views = Blueprint('v2-alert-plugin', __name__)
 
 
 def search(plugin_name, text):
+    """
+    Searches the given plugin for the given text.
+
+    :param plugin_name: The name of the plugin to search.
+    :type plugin_name: str
+    :param text: The text to search for.
+    :type text: str
+    :return: The search results.
+    :rtype: list
+    """
     plugin = Registry().get('plugin_manager').get_plugin_by_name(plugin_name)
     if plugin.status == PluginStatus.Active and plugin.media_item and plugin.media_item.has_search:
         if hasattr(plugin.media_item.search, '_slots'):
@@ -55,20 +64,44 @@ def search(plugin_name, text):
     return None
 
 
-def live(plugin_name, id):
+def live(plugin_name, item_id):
+    """
+    Sends the given item to live.
+
+    :param plugin_name: The name of the plugin.
+    :type plugin_name: str
+    :param item_id: The ID of the item to send to live.
+    :type item_id: int
+    """
     plugin = Registry().get('plugin_manager').get_plugin_by_name(plugin_name)
     if plugin.status == PluginStatus.Active and plugin.media_item:
-        getattr(plugin.media_item, '{action}_go_live'.format(action=plugin_name)).emit([id, True])
+        getattr(plugin.media_item, f'{plugin_name}_go_live').emit([item_id, True])
 
 
-def add(plugin_name, id):
+def add(plugin_name, item_id):
+    """
+    Adds the given item to the service.
+
+    :param plugin_name: The name of the plugin.
+    :type plugin_name: str
+    :param item_id: The ID of the item to add to the service.
+    :type item_id: int
+    """
     plugin = Registry().get('plugin_manager').get_plugin_by_name(plugin_name)
     if plugin.status == PluginStatus.Active and plugin.media_item:
-        item_id = plugin.media_item.create_item_from_id(id)
-        getattr(plugin.media_item, '{action}_add_to_service'.format(action=plugin_name)).emit([item_id, True])
+        new_item_id = plugin.media_item.create_item_from_id(item_id)
+        getattr(plugin.media_item, f'{plugin_name}_add_to_service').emit([new_item_id, True])
 
 
 def get_options(plugin_name):
+    """
+    Gets the plugin's search options.
+
+    :param plugin_name: The name of the plugin.
+    :type plugin_name: str
+    :return: The search options.
+    :rtype: list
+    """
     plugin = Registry().get('plugin_manager').get_plugin_by_name(plugin_name)
     if plugin.status == PluginStatus.Active and plugin.media_item:
         options = plugin.media_item.search_options()
@@ -77,6 +110,18 @@ def get_options(plugin_name):
 
 
 def set_option(plugin_name, search_option, value):
+    """
+    Sets the plugin's search option.
+
+    :param plugin_name: The name of the plugin.
+    :type plugin_name: str
+    :param search_option: The search option to set.
+    :type search_option: str
+    :param value: The value to set the search option to.
+    :type value: any
+    :return: True if the search option was set successfully, False otherwise.
+    :rtype: bool
+    """
     plugin = Registry().get('plugin_manager').get_plugin_by_name(plugin_name)
     success = False
     if plugin.status == PluginStatus.Active and plugin.media_item:
@@ -87,7 +132,15 @@ def set_option(plugin_name, search_option, value):
 @plugins.route('/<plugin>/search')
 @login_required
 def search_view(plugin):
-    log.debug(f'{plugin}/search called')
+    """
+    Searches the given plugin for the given text.
+
+    :param plugin: The name of the plugin to search.
+    :type plugin: str
+    :return: The search results.
+    :rtype: flask.Response
+    """
+    log.debug('%s/search called', plugin)
     text = request.args.get('text', '')
     result = search(plugin, text)
     return jsonify(result)
@@ -96,33 +149,54 @@ def search_view(plugin):
 @plugins.route('/<plugin>/add', methods=['POST'])
 @login_required
 def add_view(plugin):
-    log.debug(f'{plugin}/add called')
+    """
+    Adds the given item to the service.
+
+    :param plugin: The name of the plugin.
+    :type plugin: str
+    :return: The HTTP code.
+    :rtype: flask.Response
+    """
+    log.debug('%s/add called', plugin)
     data = request.json
     if not data:
         abort(400)
-    id = data.get('id', -1)
-    add(plugin, id)
+    item_id = data.get('id', -1)
+    add(plugin, item_id)
     return '', 204
 
 
 @plugins.route('/<plugin>/live', methods=['POST'])
 @login_required
 def live_view(plugin):
-    log.debug(f'{plugin}/live called')
+    """
+    Sends the given item to live.
+
+    :param plugin: The name of the plugin.
+    :type plugin: str
+    :return: The HTTP code.
+    :rtype: flask.Response
+    """
+    log.debug('%s/live called', plugin)
     data = request.json
     if not data:
         abort(400)
-    id = data.get('id', -1)
-    live(plugin, id)
+    item_id = data.get('id', -1)
+    live(plugin, item_id)
     return '', 204
 
 
 @plugins.route('/<plugin>/search-options', methods=['GET'])
 def search_options(plugin):
     """
-    Get the plugin's search options
+    Gets the plugin's search options
+
+    :param plugin: The name of the plugin.
+    :type plugin: str
+    :return: The search options.
+    :rtype: flask.Response
     """
-    log.debug(f'{plugin}/search-options called')
+    log.debug('%s/search-options called', plugin)
     return jsonify(get_options(plugin))
 
 
@@ -130,9 +204,14 @@ def search_options(plugin):
 @login_required
 def set_search_option(plugin):
     """
-    Sets the plugin's search options
+    Sets the plugin's search options.
+
+    :param plugin: The name of the plugin.
+    :type plugin: str
+    :return: The HTTP code.
+    :rtype: flask.Response
     """
-    log.debug(f'{plugin}/search-options-set called')
+    log.debug('%s/search-options-set called', plugin)
     data = request.json
     if not data:
         log.error('Missing request data')
@@ -145,13 +224,20 @@ def set_search_option(plugin):
 
     if set_option(plugin, option, value):
         return '', 204
-    else:
-        log.error('Invalid option or value')
-        return '', 400
+    log.error('Invalid option or value')
+    return '', 400
 
 
 @plugins.route('/songs/transpose-live-item/<transpose_value>', methods=['GET'])
 def transpose(transpose_value):
+    """
+    Transposes the live song by the given value.
+
+    :param transpose_value: The value to transpose the song by.
+    :type transpose_value: str
+    :return: The transposed song.
+    :rtype: flask.Response
+    """
     log.debug('songs/transpose-live-item called')
     response_format = request.args.get('response_format', None, type=str)
     return_service_item = response_format == 'service_item'
@@ -171,7 +257,7 @@ def transpose(transpose_value):
         chord_song_text = ''
         verse_index = 1
         for item in live_item['slides']:
-            chord_song_text += ('---[Verse:%d]---' % verse_index) + '\n'
+            chord_song_text += (f'---[Verse:{verse_index}]---') + '\n'
             chord_song_text += item['chords'] + '\n'
             verse_index += 1
         # transpose
@@ -193,30 +279,27 @@ def transpose(transpose_value):
             live_item['slides'][live_controller.selected_row]['selected'] = True
             json_live_item = json.dumps(live_item, cls=OpenLPJSONEncoder)
             return Response(json_live_item, mimetype='application/json')
-        else:
-            return jsonify(chord_slides), 200
+        return jsonify(chord_slides), 200
     abort(400)
 
 
-@alert_2_views.route('', methods=['POST'])
+@plugins.route('/alerts', methods=['POST'])
 @login_required
 def alert():
+    """
+    Sends an alert to be displayed.
+
+    :param plugin: The name of the plugin.
+    :type plugin: str
+    :return: The HTTP code.
+    :rtype: flask.Response
+    """
     data = request.json
     if not data:
         abort(400)
-    alert = data.get('text', '')
-    if alert:
+    alert_text = data.get('text', '')
+    if alert_text:
         if Registry().get('plugin_manager').get_plugin_by_name('alerts').status == PluginStatus.Active:
-            Registry().get('alerts_manager').alerts_text.emit([alert])
+            Registry().get('alerts_manager').alerts_text.emit([alert_text])
             return '', 204
     abort(400)
-
-
-@alert_1_views.route('')
-@old_auth
-def old_alert():
-    alert = extract_request(request.args.get('data', ''), 'text')
-    if alert:
-        if Registry().get('plugin_manager').get_plugin_by_name('alerts').status == PluginStatus.Active:
-            Registry().get('alerts_manager').alerts_text.emit([alert])
-    return old_success_response()
