@@ -39,7 +39,7 @@ def index(path):
     :param path: The path to the file.
     :type path: Path
     :return: The requested file or index.html.
-    :rtype: Response
+    :rtype: flask.Response
     """
     directory = AppLocation.get_section_data_path('remotes')
     if os.path.isfile(directory / path):
@@ -57,7 +57,7 @@ def assets(path):
     :param path: The path to the asset file.
     :type path: str
     :return: The asset file.
-    :rtype: Response
+    :rtype: flask.Response
     """
     directory = AppLocation.get_section_data_path('remotes')
     return send_from_directory(str(directory / 'assets'),
@@ -72,7 +72,7 @@ def media(path):
     :param path: The path to the media file.
     :type path: str
     :return: The media file.
-    :rtype: Response
+    :rtype: flask.Response
     """
     directory = AppLocation.get_section_data_path('remotes')
     return send_from_directory(str(directory / 'media'),
@@ -87,7 +87,7 @@ def stages(path):
     :param path: The path to the stage directory.
     :type path: Path
     :return: The stage HTML file.
-    :rtype: Response
+    :rtype: flask.Response
     """
     directory = AppLocation.get_section_data_path('stages')
     return send_from_directory(str(directory / path),
@@ -104,7 +104,7 @@ def stage_assets(path, file):
     :param file: The asset file name.
     :type file: str
     :return: The stage asset file.
-    :rtype: Response
+    :rtype: flask.Response
     """
     directory = AppLocation.get_section_data_path('stages')
     return send_from_directory(str(directory / path),
