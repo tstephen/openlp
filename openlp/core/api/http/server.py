@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 ##########################################################################
 # OpenLP - Open Source Lyrics Projection                                 #
 # ---------------------------------------------------------------------- #
@@ -27,7 +25,6 @@ from secrets import token_hex
 
 from waitress.server import create_server
 
-from openlp.core.api.poll import Poller
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.mixins import LogMixin, RegistryProperties
 from openlp.core.common.path import create_paths
@@ -43,6 +40,13 @@ class HttpWorker(ThreadWorker):
     """
     A special Qt thread class to allow the HTTP server to run at the same time as the UI.
     """
+    def __init__(self):
+        """
+        Initialize the HttpWorker.
+        """
+        super().__init__()
+        self.server = None
+
     def start(self):
         """
         Run the thread.
@@ -59,7 +63,7 @@ class HttpWorker(ThreadWorker):
 
     def stop(self):
         """
-        A method to stop the worker
+        A method to stop the worker.
         """
         if hasattr(self, 'server'):
             # Loop through all the channels and close them to stop the server
@@ -76,22 +80,23 @@ class HttpWorker(ThreadWorker):
 
 class HttpServer(RegistryBase, RegistryProperties, LogMixin):
     """
-    Wrapper round a server instance
+    Wrapper round a http server instance.
     """
     def __init__(self, parent=None):
         """
-        Initialise the http server, and start the http server
+        Initialize the http server.
+
+        :param parent: The parent object.
+        :type parent: openlp.core.mainwindow.MainWindow | None
         """
         super(HttpServer, self).__init__(parent)
         Registry().register('authentication_token', token_hex())
 
     def bootstrap_post_set_up(self):
         """
-        Register the poll return service and start the servers.
+        Start the http server.
         """
         create_paths(AppLocation.get_section_data_path('remotes'))
-        self.poller = Poller()
-        Registry().register('poller', self.poller)
         if not Registry().get_flag('no_web_server'):
             worker = HttpWorker()
             run_thread(worker, 'http_server')

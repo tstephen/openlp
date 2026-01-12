@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 ##########################################################################
 # OpenLP - Open Source Lyrics Projection                                 #
 # ---------------------------------------------------------------------- #
@@ -84,7 +82,7 @@ def test_worker_start(mocked_get_path: MagicMock, mocked_create_server: MagicMoc
     mocked_create_server.return_value = mocked_server
 
     # WHEN: The start() method is called
-    worker = HttpWorker(None)
+    worker = HttpWorker()
     with patch.object(worker, 'quit') as mocked_quit:
         worker.start()
 
@@ -99,7 +97,7 @@ def test_worker_start(mocked_get_path: MagicMock, mocked_create_server: MagicMoc
 def test_worker_stop_with_map():
     """Test that calling stop() on the worker does the right things (with .map)"""
     # GIVEN: A worker with some mocks
-    worker = HttpWorker(None)
+    worker = HttpWorker()
     worker.server = MagicMock()
     mock_channel_1 = MagicMock()
     del mock_channel_1.close
@@ -118,7 +116,7 @@ def test_worker_stop_with_map():
 def test_worker_stop_with__map():
     """Test that calling stop() on the worker does the right things (with ._map)"""
     # GIVEN: A worker with some mocks
-    worker = HttpWorker(None)
+    worker = HttpWorker()
     worker.server = MagicMock()
     mock_channel_1 = MagicMock()
     del mock_channel_1.close
