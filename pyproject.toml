@@ -148,6 +148,9 @@ dependencies = [
     "hatchling",
     "hatch-vcs"
 ]
+pre-install-commands = [
+    "python scripts/ensure_icu_prereqs.py",
+]
 
 [tool.hatch.envs.default.scripts]
 # For those who have problems running "hatch run openlp"
