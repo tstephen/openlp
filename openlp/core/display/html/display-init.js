@@ -15,7 +15,7 @@ class CommunicationBridge {
             returnValue = this.target._handleNativeCall(action, ...values);
         }
 
-        if (action == 'init') {
+        if (action == 'init' && this.target) {
             this._onInitialized();
         }
 
@@ -44,6 +44,7 @@ class CommunicationBridge {
         if (this.initOptions) {
             this.target._handleNativeCall('init', ...[this.initOptions]);
             this._onInitialized();
+            this.initOptions = null;
         }
     }
 

@@ -1498,6 +1498,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
 
         :param list[str] args: List of remaining positional arguments
         """
+        args = list(args)
         self.log_info(args)
         # Drop this argument, it's obvs not a filename
         if '--disable-web-security' in args:
@@ -1512,6 +1513,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
                 args.pop(platform_idx)
         except (ValueError, IndexError):
             pass
+        # Ignore launches that only pass internal Qt arguments.
+        if not args:
+            return
         # It has been known for Microsoft to double quote the path passed in and then encode one of the quotes.
         # Remove these to get the correct path.
         args = list(map(lambda x: x.replace('&quot;', ''), args))
@@ -1546,5 +1550,5 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, LogMixin, RegistryPropert
         if file_path and file_path.suffix in ['.osz', '.oszl']:
             self.log_info("File name found")
             self.service_manager_contents.load_file(file_path)
-        else:
+        elif args:
             self.log_error(f"File {file_path} not found for arg {args}")

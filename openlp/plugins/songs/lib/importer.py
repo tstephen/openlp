@@ -60,14 +60,14 @@ log = logging.getLogger(__name__)
 try:
     from .importers.songsoffellowship import SongsOfFellowshipImport
     HAS_SOF = True
-except ImportError:
-    log.exception('Error importing {text}'.format(text='SongsOfFellowshipImport'))
+except ImportError as error:
+    log.warning('Optional importer %s unavailable: %s', 'SongsOfFellowshipImport', error)
     HAS_SOF = False
 try:
     from .importers.openoffice import OpenOfficeImport
     HAS_OOO = True
-except ImportError:
-    log.exception('Error importing {text}'.format(text='OooImport'))
+except ImportError as error:
+    log.warning('Optional importer %s unavailable: %s', 'OooImport', error)
     HAS_OOO = False
 HAS_MEDIASHOUT = False
 if is_win():

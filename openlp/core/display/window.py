@@ -335,7 +335,7 @@ class DisplayWindow(QtWidgets.QWidget, RegistryProperties, LogMixin):
                             'hideMouse': hide_mouse,
                             'displayTitle': self.window_title
                             })
-        wait_for(lambda: self._is_initialised)
+        wait_for(lambda: self._is_initialised, timeout=20)
         if self.scale != 1:
             self.set_scale(self.scale)
         if self._can_show_startup_screen:

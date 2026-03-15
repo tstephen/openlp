@@ -326,6 +326,7 @@ var Display = {
   _animationState: AnimationState.NoAnimation,
   _doTransitions: false,
   _doItemTransitions: false,
+  _isInitialised: false,
   _skipNextTransition: false,
   _themeApplied: true,
   _revealConfig: {
@@ -365,6 +366,19 @@ var Display = {
       Display._revealConfig.slideNumber = Display.setFooterSlideNumbers;
     }
 
+    // Avoid re-running Reveal initialisation on the same page instance.
+    if (Display._isInitialised) {
+      if (hideMouse) {
+        document.body.classList.add('hide-mouse');
+      }
+      Display._doTransitions = isDisplay;
+      Display.setItemTransition(doItemTransitions && isDisplay);
+      if (window.displayWatcher) {
+        displayWatcher.setInitialised(true);
+      }
+      return;
+    }
+
     // Now continue to initialisation
     if (!isDisplay) {
       document.body.classList.add('checkerboard');
@@ -379,6 +393,7 @@ var Display = {
     Reveal.initialize(Display._revealConfig);
     Reveal.addEventListener('slidechanged', Display._onSlideChanged);
     Display.setItemTransition(doItemTransitions && isDisplay);
+    Display._isInitialised = true;
     displayWatcher.setInitialised(true);
   },
   /**
