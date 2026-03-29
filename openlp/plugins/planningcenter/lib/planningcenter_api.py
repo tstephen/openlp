@@ -123,9 +123,11 @@ class PlanningCenterAPI:
             api_response = opener.open(request_url, timeout=30)
         except urllib.error.HTTPError as error:
             if error.code != 401 or self._has_basic_auth_challenge(error):
-                log.error("HTTPError: {code} {reason} for URL: {url}".format(code=error.code, reason=error.reason, url=request_url))
+                log.error("HTTPError: {code} {reason} for URL: {url}"
+                          .format(code=error.code, reason=error.reason, url=request_url))
                 raise
-            log.warning("Received 401 Unauthorized for URL: {url} without Basic auth challenge, retrying with preemptive Basic auth".format(url=request_url))
+            log.warning("Received 401 Unauthorized for URL: {url} without Basic auth challenge, " \
+                        "retrying with preemptive Basic auth".format(url=request_url))
             api_response = self._open_with_preemptive_basic_auth(request_url)
         api_response_string = api_response.read()
         api_response_object = loads(api_response_string.decode('utf-8'))
