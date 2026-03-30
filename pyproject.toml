@@ -174,3 +174,13 @@ run_selected = "pytest {args}"
 cov = "pytest tests --cov openlp --cov-report html {args}"
 debug = "pytest tests --pudb {args}"
 ci = "pytest tests --color=no --disable-warnings {args}"
+
+[tool.hatch.envs.windows]
+# Runs the Windows bundle build via Wine.  Requires the devcontainer (or a
+# Linux host with wine64, xvfb, and Python 3.12 installed inside WINEPREFIX).
+detached = true
+dependencies = []
+
+[tool.hatch.envs.windows.scripts]
+build-windows = "python scripts/build_windows_wine.py {args}"
+build-windows-clean = "python scripts/build_windows_wine.py --clean {args}"
