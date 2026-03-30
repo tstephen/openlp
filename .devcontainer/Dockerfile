@@ -15,6 +15,7 @@ RUN dpkg --add-architecture i386 \
        curl \
        git \
        gnupg \
+       openssh-client \
        pinentry-curses \
        pipx \
        python3 \
