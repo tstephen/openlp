@@ -11,27 +11,27 @@ ENV PYTHON_VERSION=3.12.10
 RUN dpkg --add-architecture i386 \
  && apt-get update \
  && apt-get install -y --no-install-recommends \
-       ca-certificates \
-       curl \
-       git \
-       gnupg \
-       openssh-client \
-       pinentry-curses \
-       pipx \
-       python3 \
-       python3-pip \
-       python3-venv \
-       qt6-tools-dev-tools \
-       sudo \
-       unzip \
-       vim \
-       wget \
-       winbind \
-       wine \
-       wine32:i386 \
-       wine64 \
-       winetricks \
-       xvfb \
+        ca-certificates \
+        curl \
+        git \
+        gnupg \
+        openssh-client \
+        pinentry-curses \
+        pipx \
+        python3 \
+        python3-pip \
+        python3-venv \
+        qt6-tools-dev-tools \
+        sudo \
+        unzip \
+        vim \
+        wget \
+        winbind \
+        wine \
+        wine32:i386 \
+        wine64 \
+        winetricks \
+        xvfb \
  && rm -rf /var/lib/apt/lists/*
 
 # ── Non-root user (matches VS Code devcontainer convention) ───────────────────

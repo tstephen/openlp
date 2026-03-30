@@ -5,6 +5,19 @@ set -euo pipefail
 # Ensure pipx is on the PATH
 pipx ensurepath
 
+# Ensure SSH alias used by git remotes is available in the container.
+mkdir -p "$HOME/.ssh"
+chmod 700 "$HOME/.ssh"
+if ! grep -q "^Host github-tstephen$" "$HOME/.ssh/config" 2>/dev/null; then
+cat >> "$HOME/.ssh/config" <<'EOF'
+
+Host github-tstephen
+    HostName github.com
+    User git
+EOF
+fi
+chmod 600 "$HOME/.ssh/config"
+
 # Initialises the Wine prefix, installs Python for Windows, then installs
 # all required Python packages via wine pip.
 PYTHON_VERSION="${PYTHON_VERSION:-3.12.10}"
