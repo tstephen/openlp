@@ -22,7 +22,7 @@
 Package to test the openlp.plugins.planningcenter.lib.planningcenter_api package.
 """
 import os
-from email.message import Message
+from email.message import EmailMessage
 from urllib.error import HTTPError
 from unittest.mock import MagicMock, patch
 
@@ -144,7 +144,7 @@ def test_get_from_services_api_falls_back_without_basic_challenge(mocked_build_o
     Test that get_from_services_api falls back to preemptive auth when 401 has no Basic challenge.
     """
     # GIVEN: opener auth returns HTTP 401 without a Basic challenge header
-    headers = Message()
+    headers = EmailMessage()
     headers.add_header('WWW-Authenticate', 'Bearer realm="PlanningCenter"')
     http_error = HTTPError(api.api_url + 'test', 401, 'Unauthorized', headers, None)
     mocked_build_opener.return_value.open.side_effect = http_error
@@ -164,7 +164,7 @@ def test_get_from_services_api_raises_with_basic_challenge(mocked_build_opener: 
     Test that get_from_services_api does not fallback when 401 includes Basic challenge.
     """
     # GIVEN: opener auth returns HTTP 401 with a Basic challenge header
-    headers = Message()
+    headers = EmailMessage()
     headers.add_header('WWW-Authenticate', 'Basic realm="PlanningCenter"')
     http_error = HTTPError(api.api_url + 'test', 401, 'Unauthorized', headers, None)
     mocked_build_opener.return_value.open.side_effect = http_error
