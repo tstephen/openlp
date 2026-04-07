@@ -1,31 +1,32 @@
 {
   "name": "openlp",
-  "version": "2.5.1",
+  "version": "4.0.0",
   "description": "OpenLP is free church worship presentation software",
-  "repository": "lp:openlp",
+  "homepage": "https://openlp.org/",
+  "license": "GPL-3.0-or-later",
+  "author": "OpenLP Developers",
+  "repository": {
+    "type": "git",
+    "url": "https://gitlab.com/openlp/openlp.git"
+  },
   "directories": {
     "test": "tests"
   },
-  "dependencies": {
-    "jasmine-core": "^2.6.4",
-    "jshint": "^2.10.2",
-    "karma": "^3.1.4",
-    "karma-coverage": "^1.1.2",
-    "karma-junit-reporter": "^1.2.0",
-    "karma-log-reporter": "0.0.4"
-  },
   "scripts": {
     "test": "karma start --single-run",
-    "lint": "jshint openlp/core/display/html/display*.js"
+    "lint": "eslint openlp/core/display/html/display*.js"
   },
-  "jshintConfig": {
-    "esversion": 6
+  "dependencies": {
+    "@eslint/js": "^10.0.1",   
+    "eslint": "^10.2.0",
+    "jasmine-core": "~2.99.0",
+    "karma": "^6.4.4",
+    "karma-coverage": "^2.2.1",
+    "karma-junit-reporter": "^2.0.1",
+    "karma-log-reporter": "0.0.4"
   },
-  "author": "OpenLP Developers",
-  "license": "GPL-3.0-or-later",
   "devDependencies": {
     "karma-chrome-launcher": "^3.1.0",
-    "karma-firefox-launcher": "^1.2.0",
     "karma-jasmine": "^1.1.0"
   }
 }
