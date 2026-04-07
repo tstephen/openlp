@@ -26,9 +26,9 @@ lint-python:
 lint-javascript:
   stage: test
   image: $IMAGE_BASE/angular
-  script:
-    - yarn install
-    - yarn lint
+  script: |
+    pnpm install
+    pnpm lint
   rules:
     - if: $CI_COMMIT_TAG == null
 
@@ -115,7 +115,7 @@ test-arch:
       platformdirs
       psycopg2-binary
       pyenchant
-      PySide6
+      PySide6==6.10.3
       pysword
       pytest
       pytest-qt
@@ -226,8 +226,9 @@ test-windows:
     - "# Downloading the necessary files for PySide6 from OpenLP"
     - $zipFileName = 'requiredfiles.zip'
     - Invoke-WebRequest -OutFile "$env:Temp\$zipFileName" -Uri "https://get.openlp.org/win-sdk/$zipFileName"
+    - Unblock-File -Path "$env:Temp\$zipFileName"
     - "# Extracting the ZIP file"
-    - Expand-Archive -Path "$env:Temp\$zipFileName" -DestinationPath "C:\Windows\System32"
+    - Expand-Archive -Path "$env:Temp\$zipFileName" -DestinationPath "$env:WinDir\System32"
     - !reference [.pip_dependencies, script]
     - "# Installing Windows only dependencies from PyPI"
     - >
@@ -244,9 +245,9 @@ test-windows:
 test-display:
   stage: test
   image: $IMAGE_BASE/angular
-  script:
-    - yarn install
-    - yarn test --browsers ChromiumHeadlessCI
+  script: |
+    pnpm install
+    pnpm test --browsers ChromiumHeadlessCI
   rules:
     - if: $CI_COMMIT_TAG == null
 
