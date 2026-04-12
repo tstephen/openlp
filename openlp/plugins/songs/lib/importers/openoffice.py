@@ -36,9 +36,13 @@ if is_win():
     from win32com.client import Dispatch
     NoConnectException = Exception
 else:
-    import uno
-    from com.sun.star.connection import NoConnectException
-    from com.sun.star.beans import PropertyValue
+    try:
+        import uno
+        from com.sun.star.connection import NoConnectException
+        from com.sun.star.beans import PropertyValue
+    except ImportError as exc:
+        # Let callers disable this importer when pyuno is unavailable.
+        raise ImportError('Unable to import pyuno (UNO bridge)') from exc
 try:
     from com.sun.star.style.BreakType import PAGE_BEFORE, PAGE_AFTER, PAGE_BOTH
 except ImportError:
