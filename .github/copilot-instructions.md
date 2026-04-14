@@ -52,5 +52,6 @@ hatch build
 - Plugin classes conventionally call `State().add_service(...)`, then `State().update_pre_conditions(...)`, and expose menu/media/settings integration by overriding the base `Plugin` hooks instead of wiring themselves directly into the main window.
 - When changing slide rendering or chord handling, check both Python and browser code. `openlp/core/display/render.py` contains logic that is intentionally mirrored in the display HTML/JS stack and covered by `tests/js/test_*.js`.
 - Resource changes are generated, not hand-edited. If you touch `resources/images/**` or `resources/images/openlp-2.qrc`, regenerate `openlp/core/resources.py` with `sh scripts/generate_resources.sh`.
+- Prefer Python for repository scripts under `scripts/`; only use shell when the task is inherently shell-specific.
 - Tests mirror the runtime layout: core tests live under `tests/openlp_core/**`, plugin tests under `tests/openlp_plugins/**`, and shared isolation fixtures for `Registry`, `State`, `Settings`, and `OpenLP` live in `tests/conftest.py`.
 - Keep the existing Python file prologues intact when editing older modules: most files start with the UTF-8 coding line, the GPL banner block, and then a module docstring.
