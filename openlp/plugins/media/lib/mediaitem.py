@@ -210,12 +210,10 @@ class MediaMediaItem(FolderLibraryItem):
         """
         # self.populate_display_types()
         audio, video = get_supported_media_suffix()
-        video_masks = [case_insensitive_glob(suffix[2:]) for suffix in video if suffix.startswith('*.')]
-        audio_masks = [case_insensitive_glob(suffix[2:]) for suffix in audio if suffix.startswith('*.')]
         self.on_new_file_masks = translate('MediaPlugin.MediaItem',
                                            'Videos ({video});;Audio ({audio});;{files} '
-                                           '(*)').format(video=' '.join(video_masks),
-                                                         audio=' '.join(audio_masks),
+                                           '(*)').format(video=' '.join(video),
+                                                         audio=' '.join(audio),
                                                          files=UiStrings().AllFiles)
 
     def file_to_item(self, filename):
