@@ -258,6 +258,9 @@ class ActionList(object):
         # We have to do this to ensure that the loaded shortcut list e. g. STRG+O (German) is converted to CTRL+O,
         # which is only done when we convert the strings in this way (QKeySequencet -> uncode).
         shortcuts = list(map(QtGui.QKeySequence.toString, map(QtGui.QKeySequence, shortcuts)))
+        if not shortcuts:
+            action.setShortcuts([])
+            return
         # Check the alternate shortcut first, to avoid problems when the alternate shortcut becomes the primary shortcut
         #  after removing the (initial) primary shortcut due to conflicts.
         if len(shortcuts) == 2:
@@ -284,6 +287,9 @@ class ActionList(object):
                         'because another action already uses this shortcut.'.format(shortcut=shortcuts[0],
                                                                                     action=action.objectName()))
             shortcuts.remove(shortcuts[0])
+        if not shortcuts:
+            action.setShortcuts([])
+            return
         action.setShortcuts([QtGui.QKeySequence(shortcut) for shortcut in shortcuts])
 
     def remove_action(self, action, category=None):
@@ -363,10 +369,20 @@ class ActionList(object):
                 continue
             if existing_action in affected_actions:
                 return False
-            if existing_action.shortcutContext() in [QtCore.Qt.ShortcutContext.WindowShortcut,
-                                                     QtCore.Qt.ShortcutContext.ApplicationShortcut]:
+            try:
+                existing_context = existing_action.shortcutContext()
+            except RuntimeError:
+                # Ignore deleted QAction instances left in shortcut_map.
+                continue
+            if existing_context in [QtCore.Qt.ShortcutContext.WindowShortcut,
+                                    QtCore.Qt.ShortcutContext.ApplicationShortcut]:
                 return False
-            elif action in self.get_all_child_objects(existing_action.parent()):
+            try:
+                existing_parent_children = self.get_all_child_objects(existing_action.parent())
+            except RuntimeError:
+                # Ignore deleted QAction instances left in shortcut_map.
+                continue
+            if action in existing_parent_children:
                 return False
         return True
 

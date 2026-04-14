@@ -28,7 +28,7 @@ from pathlib import Path
 from tempfile import mkdtemp
 from unittest.mock import ANY, Mock, MagicMock, patch, call, sentinel
 
-from PySide6 import QtWidgets
+from PySide6 import QtGui, QtWidgets
 
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
@@ -470,6 +470,23 @@ def test_click_on_new_theme(theme_manager):
     new_theme.trigger()
 
     assert mocked_event.call_count == 1, 'The on_add_theme method should have been called once'
+
+
+def test_theme_rename_action_shortcut(theme_manager: ThemeManager):
+    """Test that the theme rename action is shortcut-managed and mapped to F2 by default."""
+    # GIVEN: A theme manager with UI created
+    theme_manager.setup_ui(theme_manager)
+
+    # WHEN: looking up the rename action metadata
+    action = theme_manager.rename_action
+
+    # THEN: The shortcut-managed action id and default shortcut should be present
+    assert action.objectName() == 'themeRenameItem'
+    shortcut_strings = [
+        shortcut.toString(QtGui.QKeySequence.SequenceFormat.PortableText)
+        for shortcut in action.shortcuts()
+    ]
+    assert 'F2' in shortcut_strings
 
 
 @patch('openlp.core.ui.themeform.ThemeForm._setup')

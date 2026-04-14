@@ -251,6 +251,22 @@ def test_create_basic_service(settings: Settings):
     assert service['openlp_core']['lite-service'] is False, 'The lite service should be saved'
 
 
+def test_service_rename_action_shortcut(service_manager: ServiceManager):
+    """Test that the service rename action is shortcut-managed and mapped to F2 by default."""
+    # GIVEN: A service manager created through the fixture
+
+    # WHEN: looking up the rename action metadata
+    action = service_manager.rename_action
+
+    # THEN: The shortcut-managed action id and default shortcut should be present
+    assert action.objectName() == 'serviceRenameItem'
+    shortcut_strings = [
+        shortcut.toString(QtGui.QKeySequence.SequenceFormat.PortableText)
+        for shortcut in action.shortcuts()
+    ]
+    assert 'F2' in shortcut_strings
+
+
 def test_is_modified(settings: Settings):
     """
     Test the is_modified() method

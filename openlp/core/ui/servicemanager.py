@@ -246,9 +246,16 @@ class Ui_ServiceManager(object):
         self.menu = QtWidgets.QMenu()
         self.edit_action = create_widget_action(self.menu, text=translate('OpenLP.ServiceManager', '&Edit Item'),
                                                 icon=UiIcons().edit, triggers=self.remote_edit)
-        self.rename_action = create_widget_action(self.menu, text=translate('OpenLP.ServiceManager', '&Rename...'),
-                                                  icon=UiIcons().edit,
-                                                  triggers=self.on_service_item_rename)
+        self.rename_action = create_widget_action(
+            self.service_manager_list,
+            'serviceRenameItem',
+            can_shortcuts=True,
+            category=UiStrings().Service,
+            text=translate('OpenLP.ServiceManager', '&Rename...'),
+            icon=UiIcons().edit,
+            triggers=self.on_service_item_rename
+        )
+        self.menu.addAction(self.rename_action)
         self.maintain_action = create_widget_action(self.menu, text=translate('OpenLP.ServiceManager', '&Reorder Item'),
                                                     icon=UiIcons().edit,
                                                     triggers=self.on_service_item_edit_form)

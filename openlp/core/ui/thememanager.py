@@ -117,9 +117,16 @@ class Ui_ThemeManager(object):
         self.copy_action = create_widget_action(self.menu,
                                                 text=translate('OpenLP.ThemeManager', '&Copy Theme'),
                                                 icon=UiIcons().copy, triggers=self.on_copy_theme)
-        self.rename_action = create_widget_action(self.menu,
-                                                  text=translate('OpenLP.ThemeManager', '&Rename Theme'),
-                                                  icon=UiIcons().edit, triggers=self.on_rename_theme)
+        self.rename_action = create_widget_action(
+            self.theme_list_widget,
+            'themeRenameItem',
+            can_shortcuts=True,
+            category=UiStrings().Theme,
+            text=translate('OpenLP.ThemeManager', '&Rename Theme'),
+            icon=UiIcons().edit,
+            triggers=self.on_rename_theme
+        )
+        self.menu.addAction(self.rename_action)
         self.delete_action = create_widget_action(self.menu,
                                                   text=translate('OpenLP.ThemeManager', '&Delete Theme'),
                                                   icon=UiIcons().delete, triggers=self.on_delete_theme)
