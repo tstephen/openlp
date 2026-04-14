@@ -347,10 +347,12 @@ class MediaManagerItem(QtWidgets.QWidget, RegistryProperties, LogMixin):
         """
         Add a file to the list widget to make it available for showing
         """
+        options = QtWidgets.QFileDialog.Option.HideNameFilterDetails
         file_paths, _ = FileDialog.getOpenFileNames(
             self, self.on_new_prompt,
             self.settings.value(self.settings_section + '/last directory'),
-            self.on_new_file_masks)
+            self.on_new_file_masks,
+            options=options)
         self.log_info(f'New file(s) {file_paths}')
         if file_paths:
             self.application.set_busy_cursor()
