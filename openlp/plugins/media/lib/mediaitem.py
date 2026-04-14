@@ -26,7 +26,7 @@ from pathlib import Path
 from PySide6 import QtCore, QtWidgets
 from sqlalchemy.sql.expression import or_
 
-from openlp.core.common import delete_file
+from openlp.core.common import case_insensitive_glob, delete_file
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.i18n import UiStrings, translate
 from openlp.core.common.path import create_paths
@@ -210,10 +210,12 @@ class MediaMediaItem(FolderLibraryItem):
         """
         # self.populate_display_types()
         audio, video = get_supported_media_suffix()
+        video_masks = [case_insensitive_glob(suffix[2:]) for suffix in video if suffix.startswith('*.')]
+        audio_masks = [case_insensitive_glob(suffix[2:]) for suffix in audio if suffix.startswith('*.')]
         self.on_new_file_masks = translate('MediaPlugin.MediaItem',
                                            'Videos ({video});;Audio ({audio});;{files} '
-                                           '(*)').format(video=' '.join(video),
-                                                         audio=' '.join(audio),
+                                           '(*)').format(video=' '.join(video_masks),
+                                                         audio=' '.join(audio_masks),
                                                          files=UiStrings().AllFiles)
 
     def file_to_item(self, filename):
