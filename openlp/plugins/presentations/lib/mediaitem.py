@@ -422,7 +422,7 @@ class PresentationMediaItem(FolderLibraryItem):
             return None
         for controller in self.controllers:
             if self.controllers[controller].enabled():
-                if file_type in self.controllers[controller].supports:
+                if file_type.lower() in self.controllers[controller].supports:
                     return controller
         for controller in self.controllers:
             if self.controllers[controller].enabled():
