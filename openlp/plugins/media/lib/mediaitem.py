@@ -26,7 +26,7 @@ from pathlib import Path
 from PySide6 import QtCore, QtWidgets
 from sqlalchemy.sql.expression import or_
 
-from openlp.core.common import case_insensitive_glob, delete_file
+from openlp.core.common import delete_file
 from openlp.core.common.applocation import AppLocation
 from openlp.core.common.i18n import UiStrings, translate
 from openlp.core.common.path import create_paths
