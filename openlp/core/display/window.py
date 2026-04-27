@@ -42,6 +42,8 @@ from openlp.core.ui import HideMode
 
 FONT_FOUNDRY = re.compile(r'(.*?) \[(.*?)\]')
 TRANSITION_END_EVENT_NAME = 'transparent_transition_end'
+DISPLAY_INITIALISE_WAIT_TIMEOUT = 5
+DISPLAY_SCRIPT_WAIT_TIMEOUT = 2
 log = logging.getLogger(__name__)
 
 
@@ -335,7 +337,10 @@ class DisplayWindow(QtWidgets.QWidget, RegistryProperties, LogMixin):
                             'hideMouse': hide_mouse,
                             'displayTitle': self.window_title
                             })
-        wait_for(lambda: self._is_initialised)
+        if not wait_for(lambda: self._is_initialised,
+                        error_message='Display initialisation timed out',
+                        timeout=DISPLAY_INITIALISE_WAIT_TIMEOUT):
+            return
         if self.scale != 1:
             self.set_scale(self.scale)
         if self._can_show_startup_screen:
@@ -378,14 +383,20 @@ class DisplayWindow(QtWidgets.QWidget, RegistryProperties, LogMixin):
         """
         log.debug((script[:80] + '..') if len(script) > 80 else script)
         # Wait for previous scripts to finish
-        wait_for(lambda: self.__script_done)
+        if not wait_for(lambda: self.__script_done,
+                        error_message='Timed out waiting for previous JavaScript request',
+                        timeout=DISPLAY_SCRIPT_WAIT_TIMEOUT):
+            # Recover from a stale state to avoid locking all future script requests.
+            self.__script_done = True
         if is_sync:
             self.__script_done = False
             self.__script_result = None
             self.webview.page().runJavaScript(
                 "window.displayWatcher.dispatchEvent(\"runJavascriptCallback\", " + script + ")")
             # Wait for script to finish
-            if not wait_for(lambda: self.__script_done):
+            if not wait_for(lambda: self.__script_done,
+                            error_message='Timed out waiting for JavaScript callback',
+                            timeout=DISPLAY_SCRIPT_WAIT_TIMEOUT):
                 self.__script_done = True
             return self.__script_result
         else:
