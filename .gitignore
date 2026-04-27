@@ -21,6 +21,7 @@
 .idea
 .kdev4
 .komodotools
+.pnpm-store
 .pylintrc
 .pytest_cache
 .venv
