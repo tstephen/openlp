@@ -441,6 +441,27 @@ def test_run_in_display_no_sync_no_wait(mocked_wait_for, display_window_env, moc
 
 
 @patch('openlp.core.display.window.wait_for')
+def test_run_in_display_no_sync_recovers_from_previous_script_timeout(mocked_wait_for, display_window_env,
+                                                                      mock_settings):
+    """
+    test a stale previous script state does not block new async scripts
+    """
+    # GIVEN: A fake webengine page and wait_for timeout for previous script completion
+    mocked_wait_for.return_value = False
+    display_window = DisplayWindow()
+    display_window._DisplayWindow__script_done = False
+    webengine_page = MagicMock()
+    display_window.webview.page = MagicMock(return_value=webengine_page)
+
+    # WHEN: javascript is requested to run
+    display_window._run_javascript('javascript to execute')
+
+    # THEN: javascript should still run and stale state should be recovered
+    webengine_page.runJavaScript.assert_called_once_with('javascript to execute')
+    assert display_window._DisplayWindow__script_done is True
+
+
+@patch('openlp.core.display.window.wait_for')
 def test_run_in_display_sync_no_wait(mocked_wait_for, display_window_env, mock_settings):
     """
     test a synced script is run on the webview and immediately returns a result
@@ -464,6 +485,28 @@ def test_run_in_display_sync_no_wait(mocked_wait_for, display_window_env, mock_s
     # THEN: javascript should be run with no delay and return with the correct result
     assert result == 1234
     webengine_page.runJavaScript.assert_called_once()
+
+
+@patch('openlp.core.display.window.wait_for')
+def test_after_loaded_stops_on_initialisation_timeout(mocked_wait_for, display_window_env, mock_settings):
+    """
+    Test after_loaded exits early if display initialisation times out
+    """
+    # GIVEN: A display window where init script runs but initialisation wait times out
+    mocked_wait_for.return_value = False
+    display_window = DisplayWindow()
+    display_window.run_in_display = MagicMock()
+    display_window.set_scale = MagicMock()
+    display_window.set_startup_screen = MagicMock()
+    display_window.scale = 2
+
+    # WHEN: after_loaded is run
+    display_window.after_loaded()
+
+    # THEN: startup steps that assume initialisation should be skipped
+    display_window.run_in_display.assert_called_once()
+    display_window.set_scale.assert_not_called()
+    display_window.set_startup_screen.assert_not_called()
 
 
 @patch('openlp.core.display.window.is_win')
