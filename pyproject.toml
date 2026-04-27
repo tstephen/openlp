@@ -160,6 +160,7 @@ dependencies = [
     "flake8",
     "hatchling",
     "hatch-vcs",
+    "pre-commit",
     "PyMuPDF",
     "PyMySQL",
     "pyenchant >= 1.6",
