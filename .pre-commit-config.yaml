@@ -22,10 +22,10 @@ repos:
           "--line-length", "120",
           "--py", "310",
           "--atomic",
-          "--trailing-comma",
-          "--multi-line-output", "3",
-          "--lines-after-imports", "2",
-          "--force-alphabetical-sort-within-sections"
+          "--tc",
+          "-m", "3",
+          "--lai", "2",
+          "--fas"
         ]
   - repo: https://github.com/pycqa/flake8
     rev: 7.3.0
