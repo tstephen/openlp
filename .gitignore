@@ -55,4 +55,3 @@ openlp-test-projectordb.sqlite
 .DS_Store
 OpenLP.spec
 **/.version
-*.osz

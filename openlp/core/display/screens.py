@@ -439,7 +439,7 @@ class ScreenList(metaclass=Singleton):
                 removed_screen_number = screen.number
                 break
 
-        # Fall back to geometry for older state or tests where object identity may not be available.
+        # Fall back to geometry for old state or tests where object identity may not be available.
         if removed_screen_number is None:
             removed_geometry = removed_screen.geometry()
             for screen in self.screens:
