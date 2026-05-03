@@ -45,7 +45,6 @@ import subprocess
 import sys
 import tempfile
 
-
 DEFAULT_IMAGE_BASE = "registry.gitlab.com/openlp/runners"
 WINDOWS_DEVCONTAINER_CONFIG = ".devcontainer/windows-on-linux/devcontainer.json"
 
@@ -169,6 +168,10 @@ def run_build_source(
     """
     Replicate .gitlab-ci.yml:build-source script in the pypi runner image.
     """
+    # Pre-create dist/ owned by the current user so Docker (running as root) never creates it as root.
+    if not dry_run:
+        (repo_root / "dist").mkdir(exist_ok=True)
+
     script = """
 echo '==> [1/3] Preparing dist directory'
 mkdir -p dist

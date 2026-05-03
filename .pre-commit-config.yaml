@@ -6,26 +6,21 @@ repos:
       - id: check-merge-conflict
       - id: end-of-file-fixer
       - id: check-yaml
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        args: [
+          "--profile=black",
+          "--line-length=120"
+        ]
   - repo: https://github.com/psf/black
     rev: 26.3.1
     hooks:
       - id: black
         args: [
-          "--line-length=120"
-        ]
-  - repo: https://github.com/PyCQA/isort
-    rev: 8.0.1
-    hooks:
-      - id: isort
-        args: [
-          "--profile", "black",
-          "--line-length", "120",
-          "--py", "310",
-          "--atomic",
-          "--tc",
-          "-m", "3",
-          "--lai", "2",
-          "--fas"
+          "--line-length=120",
+          "--target-version=py313"
         ]
   - repo: https://github.com/pycqa/flake8
     rev: 7.3.0
