@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 ##########################################################################
 # OpenLP - Open Source Lyrics Projection                                 #
 # ---------------------------------------------------------------------- #
@@ -22,19 +20,17 @@
 Package to test the openlp.core.ui.media package.
 """
 from pathlib import Path
-
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-from openlp.core.state import State
 from openlp.core.common.registry import Registry
 from openlp.core.common.settings import Settings
+from openlp.core.state import State
 from openlp.core.ui import DisplayControllerType, HideMode
-from openlp.core.ui.media.mediacontroller import MediaController
 from openlp.core.ui.media import MediaPlayItem, MediaState, MediaType
+from openlp.core.ui.media.mediacontroller import MediaController
 from openlp.core.widgets.toolbar import OpenLPToolbar
-
 from tests.utils.constants import RESOURCE_PATH
 
 
@@ -464,6 +460,26 @@ def test_media_hide(media_env, settings):
     # THEN: media should be paused and hidden, but the player should still exist
     media_env.media_controller.media_pause.assert_called_once()
     media_env.media_controller._media_set_visibility.assert_called_once_with(mocked_slide_controller, False)
+
+
+@patch('openlp.core.ui.media.mediacontroller.Registry.execute')
+def test_media_unblank_without_media_does_not_start_playback(mocked_registry_execute, media_env):
+    """
+    Test that unblanking a text/live item without media does not trigger media playback logic.
+    """
+    # GIVEN: A live controller without any media loaded
+    mocked_live_controller = MagicMock()
+    mocked_live_controller.media_play_item = MediaPlayItem()
+    Registry().register('live_controller', mocked_live_controller)
+    media_env.media_controller.live_kill_timer = MagicMock(isActive=MagicMock(return_value=False))
+    media_env.media_controller.media_play = MagicMock()
+
+    # WHEN: media_unblank() is called for live
+    media_env.media_controller.media_unblank([None, True])
+
+    # THEN: We only request the live display to show, and do not run media playback logic
+    mocked_registry_execute.assert_called_once_with('live_display_show')
+    media_env.media_controller.media_play.assert_not_called()
 
 
 @pytest.mark.parametrize('file_name,media_length', TEST_MEDIA)
