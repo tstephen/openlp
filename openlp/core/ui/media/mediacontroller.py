@@ -21,7 +21,6 @@ The :mod:`~openlp.core.ui.media.mediacontroller` module is the control module fo
 """
 import logging
 from pathlib import Path
-from typing import Union
 
 from PySide6 import QtCore, QtWidgets
 
@@ -33,14 +32,14 @@ from openlp.core.lib.serviceitem import ItemCapabilities
 from openlp.core.lib.ui import critical_error_message_box, warning_message_box
 from openlp.core.state import State
 from openlp.core.ui import DisplayControllerType, HideMode
-from openlp.core.ui.slidecontroller import SlideController
-from openlp.core.ui.media import MediaState, MediaPlayItem, MediaType, format_play_seconds, \
-    format_play_time, parse_stream_path, get_volume, toggle_looping_playback, saved_looping_playback, save_volume, \
-    media_state
-from openlp.core.ui.media.remote import register_views
-from openlp.core.ui.media.mediainfo import media_info
+from openlp.core.ui.media import MediaPlayItem, MediaState, MediaType, \
+    format_play_seconds, format_play_time, get_volume, media_state, parse_stream_path, \
+    save_volume, saved_looping_playback, toggle_looping_playback
 from openlp.core.ui.media.audioplayer import AudioPlayer
+from openlp.core.ui.media.mediainfo import media_info
 from openlp.core.ui.media.mediaplayer import MediaPlayer
+from openlp.core.ui.media.remote import register_views
+from openlp.core.ui.slidecontroller import SlideController
 
 log = logging.getLogger(__name__)
 
@@ -62,12 +61,22 @@ class MediaController(QtWidgets.QWidget, RegistryBase, LogMixin, RegistryPropert
     preview_media_stop = QtCore.Signal()
 
     def __init__(self, parent=None):
-        """ """
-        super(MediaController, self).__init__(parent)
+        """
+        Initialise the MediaController.
+        """
+        super().__init__(parent)
         self.log_info("MediaController Initialising")
+        self.live_hide_timer = None
+        self.live_kill_timer = None
+        self.preview_hide_timer = None
+        self.preview_kill_timer = None
+        self.has_started = False
 
     def setup(self):
-        # Timer for video state
+        """
+        Set up the MediaController.
+        """
+        # Timer for live video state
         self.live_hide_timer = QtCore.QTimer()
         self.live_hide_timer.setSingleShot(True)
         self.live_kill_timer = QtCore.QTimer()
@@ -236,18 +245,16 @@ class MediaController(QtWidgets.QWidget, RegistryBase, LogMixin, RegistryPropert
         """
         controller.media_player.resize()
 
-    def load_media(self, source, service_item, hidden: bool = False, is_theme_background: bool = False) -> bool:
+    def load_media(self, source, service_item, is_theme_background: bool = False) -> bool:
         """
         Loads and starts a video to run and sets the stored sound value.
 
         :param source: Where the call originated form
         :param service_item: The player which is doing the playing
-
-        :param hidden: The player which is doing the playing
         :param is_theme_background: Is the theme providing a background
         """
         controller = self._display_controllers(source)
-        log.debug(f"load_media is_live:{controller.is_live}")
+        log.debug(f"load_media is_live: {controller.is_live}")
         # stop running videos
         self.media_reset(controller)
         controller.media_play_item.is_theme_background = is_theme_background
@@ -290,7 +297,7 @@ class MediaController(QtWidgets.QWidget, RegistryBase, LogMixin, RegistryPropert
                           controller.media_play_item.media_file),
             )
             return False
-        self.log_debug("video media type: {tpe} ".format(tpe=str(controller.media_play_item.media_type)))
+        self.log_debug(f"video media type: {controller.media_play_item.media_type!s}")
         # If both the preview and live view have a device stream, make sure only the live view continues streaming
         if controller.media_play_item.media_type == MediaType.DeviceStream:
             if controller.is_live:
@@ -340,7 +347,7 @@ class MediaController(QtWidgets.QWidget, RegistryBase, LogMixin, RegistryPropert
                 controller.media_play_item.audio_autostart = True
 
     @staticmethod
-    def media_length(media_path: Union[str, Path]) -> int:
+    def media_length(media_path: str | Path) -> int:
         """
         Uses Media Info to obtain the media length
 
@@ -358,9 +365,7 @@ class MediaController(QtWidgets.QWidget, RegistryBase, LogMixin, RegistryPropert
         """
         if controller.media_play_item.media_type in [MediaType.DeviceStream, MediaType.NetworkStream]:
             self._resize(controller)
-            if controller.media_player.load_stream():
-                return True
-            return False
+            return controller.media_player.load_stream()
         loaded_m = True
         loaded_a = True
         if controller.media_play_item.media_file:
@@ -369,9 +374,7 @@ class MediaController(QtWidgets.QWidget, RegistryBase, LogMixin, RegistryPropert
                 self._resize(controller)
         if controller.media_play_item.audio_file:
             loaded_a = controller.audio_player.load()
-        if loaded_a is True and loaded_m is True:
-            return True
-        return False
+        return loaded_a is True and loaded_m is True
 
     def media_play_msg(self, msg: list):
         """
@@ -754,6 +757,10 @@ class MediaController(QtWidgets.QWidget, RegistryBase, LogMixin, RegistryPropert
         if not is_live or self.live_kill_timer.isActive():
             return
         Registry().execute("live_display_show")
+        # Text items (e.g. songs) can trigger unblank events too. If there is no media loaded,
+        # avoid media playback/visibility logic that can hide the live display again.
+        if self.live_controller.media_play_item.media_type == MediaType.Unused:
+            return
         if self.live_controller.media_play_item.is_playing != MediaState.Playing:
             self.media_play(self.live_controller)
         else:
