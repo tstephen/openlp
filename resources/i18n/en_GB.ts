@@ -9538,7 +9538,7 @@ Processing has terminated and no changes have been made.</translation>
     <message>
         <location filename="../../openlp/core/ui/firsttimewizard.py" line="352"/>
         <source>OBS Studio - Control scenes directly from OpenLP</source>
-        <translation type="unfinished"/>
+        <translation>OBS Studio - Control scenes directly from OpenLP</translation>
     </message>
     <message>
         <location filename="../../openlp/core/ui/firsttimewizard.py" line="354"/>
@@ -9726,17 +9726,17 @@ If you click the &apos;{finish_button}&apos; button you can download the data at
     <message>
         <location filename="../../openlp/core/ui/media/mediatab.py" line="101"/>
         <source>Audio output (requires restart)</source>
-        <translation type="unfinished"/>
+        <translation>Audio output (requires restart)</translation>
     </message>
     <message>
         <location filename="../../openlp/core/ui/media/mediatab.py" line="102"/>
         <source>Live audio output device</source>
-        <translation type="unfinished"/>
+        <translation>Live audio output device</translation>
     </message>
     <message>
         <location filename="../../openlp/core/ui/media/mediatab.py" line="103"/>
         <source>Preview audio output device</source>
-        <translation type="unfinished"/>
+        <translation>Preview audio output device</translation>
     </message>
     <message>
         <location filename="../../openlp/core/ui/media/mediatab.py" line="114"/>
@@ -9744,7 +9744,7 @@ If you click the &apos;{finish_button}&apos; button you can download the data at
         <location filename="../../openlp/core/ui/media/mediatab.py" line="135"/>
         <location filename="../../openlp/core/ui/media/mediatab.py" line="140"/>
         <source>System default audio output</source>
-        <translation type="unfinished"/>
+        <translation>System default audio output</translation>
     </message>
 </context>
 <context>
@@ -12445,17 +12445,17 @@ has been successfully created.</translation>
     <message>
         <location filename="../../openlp/plugins/obs_studio/lib/obs_studio_tab.py" line="82"/>
         <source>Network Settings</source>
-        <translation type="unfinished"/>
+        <translation>Network Settings</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/obs_studio/lib/obs_studio_tab.py" line="84"/>
         <source>Host:</source>
-        <translation type="unfinished"/>
+        <translation>Host:</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/obs_studio/lib/obs_studio_tab.py" line="85"/>
         <source>Port:</source>
-        <translation type="unfinished"/>
+        <translation>Port:</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/obs_studio/lib/obs_studio_tab.py" line="87"/>
@@ -12470,12 +12470,12 @@ has been successfully created.</translation>
     <message>
         <location filename="../../openlp/plugins/obs_studio/lib/obs_studio_tab.py" line="90"/>
         <source>Test</source>
-        <translation type="unfinished"/>
+        <translation>Test</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/obs_studio/lib/obs_studio_tab.py" line="91"/>
         <source>Message:</source>
-        <translation type="unfinished"/>
+        <translation>Message:</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/obs_studio/lib/obs_studio_tab.py" line="92"/>
@@ -12485,17 +12485,17 @@ has been successfully created.</translation>
     <message>
         <location filename="../../openlp/plugins/obs_studio/lib/obs_studio_tab.py" line="130"/>
         <source>OBS Studio Connection Test</source>
-        <translation type="unfinished"/>
+        <translation>OBS Studio Connection Test</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/obs_studio/lib/obs_studio_tab.py" line="137"/>
         <source>Message was sent successfully.</source>
-        <translation type="unfinished"/>
+        <translation>Message was sent successfully.</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/obs_studio/lib/obs_studio_tab.py" line="146"/>
         <source>Message was not sent successfully: {exception}</source>
-        <translation type="unfinished"/>
+        <translation>Message was not sent successfully: {exception}</translation>
     </message>
 </context>
 <context>
@@ -12504,19 +12504,19 @@ has been successfully created.</translation>
         <location filename="../../openlp/plugins/obs_studio/obs_studio_plugin.py" line="74"/>
         <source>OBS Studio</source>
         <comment>name singular</comment>
-        <translation type="unfinished"/>
+        <translation>OBS Studio</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/obs_studio/obs_studio_plugin.py" line="76"/>
         <source>OBS Studio</source>
         <comment>name plural</comment>
-        <translation type="unfinished"/>
+        <translation>OBS Studio</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/obs_studio/obs_studio_plugin.py" line="81"/>
         <source>OBS Studio</source>
         <comment>container title</comment>
-        <translation type="unfinished"/>
+        <translation>OBS Studio</translation>
     </message>
 </context>
 <context>
@@ -12580,7 +12580,7 @@ has been successfully created.</translation>
         <location filename="../../openlp/plugins/presentations/lib/mediaitem.py" line="303"/>
         <location filename="../../openlp/plugins/presentations/lib/mediaitem.py" line="395"/>
         <source>The presentation {name} is inaccessible.</source>
-        <translation type="unfinished"/>
+        <translation>The presentation {name} is inaccessible.</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/presentations/lib/mediaitem.py" line="335"/>
