@@ -89,7 +89,7 @@
     <message>
         <location filename="../../openlp/plugins/bibles/lib/importers/http.py" line="815"/>
         <source>There was a problem downloading your verse selection. Please check your Internet connection, and if this error continues to occur, please consider reporting a bug.</source>
-        <translation type="unfinished"/>
+        <translation>Wystąpił problem podczas pobierania wybranych wersetów. Sprawdź swoje połączenie internetowe, a jeśli błąd nadal występuje, należy rozważyć zgłoszenie błędu oprogramowania.</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/bibles/lib/importers/http.py" line="820"/>
@@ -107,12 +107,12 @@
     <message>
         <location filename="../../openlp/plugins/bibles/lib/importers/wordproject.py" line="60"/>
         <source>Incorrect Bible file type, not a Zip file.</source>
-        <translation type="unfinished"/>
+        <translation> Nieprawidłowy typ pliku biblii, nie jest to plik ZIP.</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/bibles/lib/importers/wordproject.py" line="75"/>
         <source>Incorrect Bible file type, files are missing.</source>
-        <translation type="unfinished"/>
+        <translation>Nieprawidłowy typ pliku biblii, brakuje plików.</translation>
     </message>
 </context>
 <context>
@@ -709,7 +709,7 @@
     <message>
         <location filename="../../openlp/plugins/bibles/lib/mediaitem.py" line="200"/>
         <source>Second:</source>
-        <translation type="unfinished"/>
+        <translation>Drugi:</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/bibles/lib/mediaitem.py" line="264"/>
@@ -773,12 +773,12 @@ Będziesz musiał zaimportować ją ponownie, aby móc jej znowu używać.</tran
     <message>
         <location filename="../../openlp/plugins/bibles/lib/mediaitem.py" line="508"/>
         <source>Saved ({result_count})</source>
-        <translation type="unfinished"/>
+        <translation>Zapisane ({result_count})</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/bibles/lib/mediaitem.py" line="511"/>
         <source>Results ({result_count})</source>
-        <translation type="unfinished"/>
+        <translation>Wyniki ({result_count})</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/bibles/lib/mediaitem.py" line="591"/>
@@ -793,7 +793,7 @@ Będziesz musiał zaimportować ją ponownie, aby móc jej znowu używać.</tran
     <message>
         <location filename="../../openlp/plugins/bibles/lib/mediaitem.py" line="775"/>
         <source>Verses not found</source>
-        <translation type="unfinished"/>
+        <translation>Nie znaleziono wersetu</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/bibles/lib/mediaitem.py" line="776"/>
@@ -1023,42 +1023,42 @@ minimum {count} znaków i spację)</translation>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="239"/>
         <source>music by</source>
-        <translation type="unfinished"/>
+        <translation>Muzyka od</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="240"/>
         <source>music:</source>
-        <translation type="unfinished"/>
+        <translation>muzyka:</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="241"/>
         <source>arranged by</source>
-        <translation type="unfinished"/>
+        <translation>Zaaranżowany przez</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="242"/>
         <source>arranged:</source>
-        <translation type="unfinished"/>
+        <translation>aranżacja:</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="243"/>
         <source>composed by</source>
-        <translation type="unfinished"/>
+        <translation>skomponowany przez</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="244"/>
         <source>composer:</source>
-        <translation type="unfinished"/>
+        <translation>kompozytor:</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="245"/>
         <source>words by</source>
-        <translation type="unfinished"/>
+        <translation>Napisany przez</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="246"/>
         <source>words:</source>
-        <translation type="unfinished"/>
+        <translation>słowa:</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/songs/lib/importers/songimport.py" line="247"/>
@@ -1593,22 +1593,22 @@ Nie można dostosowywać i zmieniać nazw ksiąg.</translation>
     <message>
         <location filename="../../openlp/plugins/bibles/bibleplugin.py" line="155"/>
         <source>Edit the selected Bible.</source>
-        <translation type="unfinished"/>
+        <translation>Edytuj wybraną Biblię.</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/bibles/bibleplugin.py" line="156"/>
         <source>Delete the selected Bible.</source>
-        <translation type="unfinished"/>
+        <translation>Usuń wybraną Biblię.</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/bibles/bibleplugin.py" line="157"/>
         <source>Preview the selected Bible.</source>
-        <translation type="unfinished"/>
+        <translation>Podgląd wybranej Biblii.</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/bibles/bibleplugin.py" line="158"/>
         <source>Send the selected Bible live.</source>
-        <translation type="unfinished"/>
+        <translation>Wyświetl na ekranie wybraną Biblię.</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/bibles/bibleplugin.py" line="159"/>
@@ -1650,7 +1650,7 @@ Nie można dostosowywać i zmieniać nazw ksiąg.</translation>
     <message>
         <location filename="../../openlp/plugins/planningcenter/lib/planningcentertab.py" line="115"/>
         <source>Test Credentials</source>
-        <translation type="unfinished"/>
+        <translation>Test danych logowania</translation>
     </message>
 </context>
 <context>
@@ -1658,17 +1658,17 @@ Nie można dostosowywać i zmieniać nazw ksiąg.</translation>
     <message>
         <location filename="../../openlp/plugins/planningcenter/lib/planningcentertab.py" line="93"/>
         <source>Authentication Settings</source>
-        <translation type="unfinished"/>
+        <translation>Ustawienia autoryzacji</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/planningcenter/lib/planningcentertab.py" line="94"/>
         <source>Application ID:</source>
-        <translation type="unfinished"/>
+        <translation>ID aplikacji:</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/planningcenter/lib/planningcentertab.py" line="95"/>
         <source>Secret:</source>
-        <translation type="unfinished"/>
+        <translation>Tajne:</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/planningcenter/lib/planningcentertab.py" line="98"/>
@@ -1692,12 +1692,12 @@ boxes below. Personal Access Tokens are created by doing the following:
     <message>
         <location filename="../../openlp/plugins/planningcenter/lib/planningcentertab.py" line="119"/>
         <source>Defaults</source>
-        <translation type="unfinished"/>
+        <translation>Domyślne</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/planningcenter/lib/planningcentertab.py" line="121"/>
         <source>Default service type:</source>
-        <translation type="unfinished"/>
+        <translation>Domyślna nazwa planu nabożeństwa</translation>
     </message>
 </context>
 <context>
@@ -1705,7 +1705,7 @@ boxes below. Personal Access Tokens are created by doing the following:
     <message>
         <location filename="../../openlp/plugins/planningcenter/forms/selectplanform.py" line="115"/>
         <source>PlanningCenter</source>
-        <translation type="unfinished"/>
+        <translation>Centrum planowania</translation>
     </message>
 </context>
 <context>
@@ -1713,7 +1713,7 @@ boxes below. Personal Access Tokens are created by doing the following:
     <message>
         <location filename="../../openlp/plugins/planningcenter/forms/selectplanform.py" line="74"/>
         <source>Authentication Failed</source>
-        <translation type="unfinished"/>
+        <translation>Autoryzacji się nie powiodła</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/planningcenter/forms/selectplanform.py" line="75"/>
@@ -1723,7 +1723,7 @@ boxes below. Personal Access Tokens are created by doing the following:
     <message>
         <location filename="../../openlp/plugins/planningcenter/forms/selectplanform.py" line="289"/>
         <source>Import failed</source>
-        <translation type="unfinished"/>
+        <translation>Import się nie powiódł</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/planningcenter/forms/selectplanform.py" line="290"/>
@@ -1741,17 +1741,17 @@ boxes below. Personal Access Tokens are created by doing the following:
     <message>
         <location filename="../../openlp/plugins/planningcenter/forms/selectplandialog.py" line="72"/>
         <source>Service Type</source>
-        <translation type="unfinished"/>
+        <translation>Typ nabożeństwa</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/planningcenter/forms/selectplandialog.py" line="73"/>
         <source>Select Plan</source>
-        <translation type="unfinished"/>
+        <translation>Wybierz plan</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/planningcenter/forms/selectplandialog.py" line="74"/>
         <source>Import New</source>
-        <translation type="unfinished"/>
+        <translation>Importuj nowy</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/planningcenter/forms/selectplandialog.py" line="75"/>
@@ -1761,7 +1761,7 @@ boxes below. Personal Access Tokens are created by doing the following:
     <message>
         <location filename="../../openlp/plugins/planningcenter/forms/selectplandialog.py" line="77"/>
         <source>Refresh Service</source>
-        <translation type="unfinished"/>
+        <translation>Odśwież nabożeństwo</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/planningcenter/forms/selectplandialog.py" line="78"/>
@@ -1771,7 +1771,7 @@ boxes below. Personal Access Tokens are created by doing the following:
     <message>
         <location filename="../../openlp/plugins/planningcenter/forms/selectplandialog.py" line="82"/>
         <source>Edit Authentication</source>
-        <translation type="unfinished"/>
+        <translation>Edytuj uwierzytelnianie</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/planningcenter/forms/selectplandialog.py" line="83"/>
@@ -1781,12 +1781,12 @@ boxes below. Personal Access Tokens are created by doing the following:
     <message>
         <location filename="../../openlp/plugins/planningcenter/forms/selectplandialog.py" line="85"/>
         <source>Song Theme</source>
-        <translation type="unfinished"/>
+        <translation>Motyw utworu</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/planningcenter/forms/selectplandialog.py" line="86"/>
         <source>Slide Theme</source>
-        <translation type="unfinished"/>
+        <translation>Motyw slajdu</translation>
     </message>
 </context>
 <context>
@@ -1794,7 +1794,7 @@ boxes below. Personal Access Tokens are created by doing the following:
     <message>
         <location filename="../../openlp/plugins/planningcenter/planningcenterplugin.py" line="76"/>
         <source>Planning Center Service</source>
-        <translation type="unfinished"/>
+        <translation>Centrum Planowania Nabożeństwa</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/planningcenter/planningcenterplugin.py" line="78"/>
@@ -1804,7 +1804,7 @@ boxes below. Personal Access Tokens are created by doing the following:
     <message>
         <location filename="../../openlp/plugins/planningcenter/planningcenterplugin.py" line="94"/>
         <source>PlanningCenter</source>
-        <translation type="unfinished"/>
+        <translation>Centrum planowania</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/planningcenter/planningcenterplugin.py" line="107"/>
@@ -1815,19 +1815,19 @@ boxes below. Personal Access Tokens are created by doing the following:
         <location filename="../../openlp/plugins/planningcenter/planningcenterplugin.py" line="117"/>
         <source>PlanningCenter</source>
         <comment>name singular</comment>
-        <translation type="unfinished"/>
+        <translation>Centrum planowania</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/planningcenter/planningcenterplugin.py" line="119"/>
         <source>PlanningCenter</source>
         <comment>name plural</comment>
-        <translation type="unfinished"/>
+        <translation>Centrum planowania</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/planningcenter/planningcenterplugin.py" line="124"/>
         <source>PlanningCenter</source>
         <comment>container title</comment>
-        <translation type="unfinished"/>
+        <translation>Centrum planowania</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/planningcenter/planningcenterplugin.py" line="130"/>
@@ -1884,12 +1884,12 @@ Czy mimo to chcesz dodać inne?</translation>
     <message>
         <location filename="../../openlp/plugins/images/lib/imagetab.py" line="72"/>
         <source>Image Background</source>
-        <translation type="unfinished"/>
+        <translation>Obraz tła</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/images/lib/imagetab.py" line="73"/>
         <source>Use blank theme</source>
-        <translation type="unfinished"/>
+        <translation>Użyj pusty motyw</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/images/lib/imagetab.py" line="74"/>
@@ -2012,7 +2012,7 @@ Czy mimo to chcesz dodać inne?</translation>
     <message>
         <location filename="../../openlp/plugins/images/imageplugin.py" line="91"/>
         <source>Preview the selected image.</source>
-        <translation type="unfinished"/>
+        <translation>Podgląd wybranego obrazu</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/images/imageplugin.py" line="92"/>
@@ -2256,13 +2256,13 @@ Czy mimo to chcesz dodać inne?</translation>
         <location filename="../../openlp/plugins/media/lib/mediaitem.py" line="131"/>
         <location filename="../../openlp/plugins/media/lib/mediaitem.py" line="132"/>
         <source>Open network stream</source>
-        <translation type="unfinished"/>
+        <translation>Otwórz transmisję sieciową</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/media/lib/mediaitem.py" line="136"/>
         <location filename="../../openlp/plugins/media/lib/mediaitem.py" line="137"/>
         <source>Open device stream</source>
-        <translation type="unfinished"/>
+        <translation>Otwórz transmisję urządzenia</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/media/lib/mediaitem.py" line="189"/>
@@ -2285,7 +2285,7 @@ Czy mimo to chcesz dodać inne?</translation>
     <message>
         <location filename="../../openlp/plugins/media/forms/__init__.py" line="83"/>
         <source>A Stream name is needed.</source>
-        <translation type="unfinished"/>
+        <translation>Potrzebna jest nazwa transmisji.</translation>
     </message>
 </context>
 <context>
@@ -2298,12 +2298,12 @@ Czy mimo to chcesz dodać inne?</translation>
     <message>
         <location filename="../../openlp/plugins/media/forms/networkstreamselectorform.py" line="71"/>
         <source>Stream name</source>
-        <translation type="unfinished"/>
+        <translation>Nazwa transmisji</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/media/forms/networkstreamselectorform.py" line="72"/>
         <source>Network URL</source>
-        <translation type="unfinished"/>
+        <translation>URL sieciowe</translation>
     </message>
 </context>
 <context>
@@ -2311,7 +2311,7 @@ Czy mimo to chcesz dodać inne?</translation>
     <message>
         <location filename="../../openlp/plugins/media/forms/streamselectordialog.py" line="78"/>
         <source>Device Selection</source>
-        <translation type="unfinished"/>
+        <translation>Wybór urządzenia</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/media/forms/streamselectordialog.py" line="79"/>
@@ -2331,7 +2331,7 @@ Czy mimo to chcesz dodać inne?</translation>
     <message>
         <location filename="../../openlp/plugins/media/forms/streamselectordialog.py" line="139"/>
         <source>Stream name</source>
-        <translation type="unfinished"/>
+        <translation>Nazwa transmisji</translation>
     </message>
 </context>
 <context>
@@ -2481,7 +2481,7 @@ Czy mimo to chcesz dodać inne?</translation>
     <message>
         <location filename="../../openlp/plugins/alerts/alertsplugin.py" line="161"/>
         <source>&amp;Alert</source>
-        <translation type="unfinished"/>
+        <translation>&amp;Komunikat</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/alerts/alertsplugin.py" line="163"/>
@@ -2667,7 +2667,7 @@ Do you want to continue anyway?</source>
     <message>
         <location filename="../../openlp/core/lib/formattingtags.py" line="215"/>
         <source>UpperCase</source>
-        <translation type="unfinished"/>
+        <translation>Duża litera</translation>
     </message>
     <message>
         <location filename="../../openlp/core/lib/formattingtags.py" line="225"/>
@@ -2879,7 +2879,7 @@ File extension not supported</source>
     <message>
         <location filename="../../openlp/core/widgets/widgets.py" line="180"/>
         <source>Proxy Server Settings</source>
-        <translation type="unfinished"/>
+        <translation>Ustawienia serwera Proxy</translation>
     </message>
 </context>
 <context>
@@ -2887,22 +2887,22 @@ File extension not supported</source>
     <message>
         <location filename="../../openlp/core/widgets/widgets.py" line="119"/>
         <source>Proxy Server Settings</source>
-        <translation type="unfinished"/>
+        <translation>Ustawienia serwera Proxy</translation>
     </message>
     <message>
         <location filename="../../openlp/core/widgets/widgets.py" line="120"/>
         <source>No prox&amp;y</source>
-        <translation type="unfinished"/>
+        <translation>Brak prox&amp;y</translation>
     </message>
     <message>
         <location filename="../../openlp/core/widgets/widgets.py" line="121"/>
         <source>&amp;Use system proxy</source>
-        <translation type="unfinished"/>
+        <translation>&amp;Użyj proxy systemowe</translation>
     </message>
     <message>
         <location filename="../../openlp/core/widgets/widgets.py" line="122"/>
         <source>&amp;Manual proxy configuration</source>
-        <translation type="unfinished"/>
+        <translation>Manualna konfiguracja serwera proxy</translation>
     </message>
     <message>
         <location filename="../../openlp/core/widgets/widgets.py" line="123"/>
@@ -2912,12 +2912,12 @@ File extension not supported</source>
     <message>
         <location filename="../../openlp/core/widgets/widgets.py" line="124"/>
         <source>HTTP:</source>
-        <translation type="unfinished"/>
+        <translation>HTTP:</translation>
     </message>
     <message>
         <location filename="../../openlp/core/widgets/widgets.py" line="126"/>
         <source>HTTPS:</source>
-        <translation type="unfinished"/>
+        <translation>HTTPS:</translation>
     </message>
     <message>
         <location filename="../../openlp/core/widgets/widgets.py" line="128"/>
@@ -2943,7 +2943,7 @@ File extension not supported</source>
     <message>
         <location filename="../../openlp/core/widgets/widgets.py" line="309"/>
         <source>F&amp;ull screen</source>
-        <translation type="unfinished"/>
+        <translation>Pełny ekran</translation>
     </message>
     <message>
         <location filename="../../openlp/core/widgets/widgets.py" line="310"/>
@@ -2953,12 +2953,12 @@ File extension not supported</source>
     <message>
         <location filename="../../openlp/core/widgets/widgets.py" line="311"/>
         <source>Use this screen as a display</source>
-        <translation type="unfinished"/>
+        <translation>Użyj tego ekranu jako wyświetlacz</translation>
     </message>
     <message>
         <location filename="../../openlp/core/widgets/widgets.py" line="314"/>
         <source>Left:</source>
-        <translation type="unfinished"/>
+        <translation>Lewo:</translation>
     </message>
     <message>
         <location filename="../../openlp/core/widgets/widgets.py" line="315"/>
@@ -2968,7 +2968,7 @@ File extension not supported</source>
     <message>
         <location filename="../../openlp/core/widgets/widgets.py" line="316"/>
         <source>Top:</source>
-        <translation type="unfinished"/>
+        <translation>Przód:</translation>
     </message>
     <message>
         <location filename="../../openlp/core/widgets/widgets.py" line="317"/>
@@ -2983,7 +2983,7 @@ File extension not supported</source>
     <message>
         <location filename="../../openlp/core/widgets/widgets.py" line="322"/>
         <source>Select a Display</source>
-        <translation type="unfinished"/>
+        <translation>Wybierz wyświetlacz</translation>
     </message>
     <message>
         <location filename="../../openlp/core/widgets/widgets.py" line="323"/>
@@ -3123,7 +3123,7 @@ File extension not supported</source>
     <message>
         <location filename="../../openlp/core/widgets/dialogs.py" line="120"/>
         <source>Importing Website</source>
-        <translation type="unfinished"/>
+        <translation>Importowanie strony internetowej</translation>
     </message>
 </context>
 <context>
@@ -3252,7 +3252,7 @@ File extension not supported</source>
     <message>
         <location filename="../../openlp/core/widgets/toolbar.py" line="195"/>
         <source>Volume.</source>
-        <translation type="unfinished"/>
+        <translation>Głośność.</translation>
     </message>
     <message>
         <location filename="../../openlp/core/widgets/toolbar.py" line="207"/>
@@ -3346,12 +3346,12 @@ File extension not supported</source>
     <message>
         <location filename="../../openlp/core/common/i18n.py" line="341"/>
         <source>Add folder</source>
-        <translation type="unfinished"/>
+        <translation>Dodaj folder</translation>
     </message>
     <message>
         <location filename="../../openlp/core/common/i18n.py" line="342"/>
         <source>Add folder.</source>
-        <translation type="unfinished"/>
+        <translation>Dodaj folder</translation>
     </message>
     <message>
         <location filename="../../openlp/core/common/i18n.py" line="343"/>
@@ -3709,7 +3709,7 @@ Closing this instance</source>
     <message>
         <location filename="../../openlp/core/common/i18n.py" line="433"/>
         <source>Permission Error</source>
-        <translation type="unfinished"/>
+        <translation>Błąd pozwoleń</translation>
     </message>
     <message>
         <location filename="../../openlp/core/common/i18n.py" line="434"/>
@@ -3920,7 +3920,7 @@ Closing this instance</source>
     <message>
         <location filename="../../openlp/core/common/i18n.py" line="490"/>
         <source>Warning</source>
-        <translation type="unfinished"/>
+        <translation>Ostrzeżenie</translation>
     </message>
     <message>
         <location filename="../../openlp/core/common/i18n.py" line="491"/>
@@ -3971,7 +3971,7 @@ Closing this instance</source>
     <message>
         <location filename="../../openlp/core/common/i18n.py" line="376"/>
         <source>Down</source>
-        <translation type="unfinished"/>
+        <translation>Dół</translation>
     </message>
     <message>
         <location filename="../../openlp/core/common/i18n.py" line="379"/>
@@ -4006,7 +4006,7 @@ Closing this instance</source>
     <message>
         <location filename="../../openlp/core/common/i18n.py" line="481"/>
         <source>Up</source>
-        <translation type="unfinished"/>
+        <translation>Góra</translation>
     </message>
     <message>
         <location filename="../../openlp/core/common/i18n.py" line="485"/>
@@ -4978,7 +4978,7 @@ Closing this instance</source>
     <message>
         <location filename="../../openlp/core/common/handlers.py" line="45"/>
         <source>Permission Error</source>
-        <translation type="unfinished"/>
+        <translation>Błąd pozwoleń</translation>
     </message>
     <message>
         <location filename="../../openlp/core/common/handlers.py" line="46"/>
@@ -5392,12 +5392,12 @@ Closing this instance</source>
     <message>
         <location filename="../../openlp/core/projectors/manager.py" line="686"/>
         <source>ON</source>
-        <translation type="unfinished"/>
+        <translation>ON</translation>
     </message>
     <message>
         <location filename="../../openlp/core/projectors/manager.py" line="688"/>
         <source>OFF</source>
-        <translation type="unfinished"/>
+        <translation>OFF</translation>
     </message>
     <message>
         <location filename="../../openlp/core/projectors/manager.py" line="689"/>
@@ -5470,157 +5470,157 @@ Closing this instance</source>
     <message>
         <location filename="../../openlp/core/projectors/constants.py" line="549"/>
         <source>Internal</source>
-        <translation type="unfinished"/>
+        <translation>Wewnętrzny</translation>
     </message>
     <message>
         <location filename="../../openlp/core/projectors/constants.py" line="553"/>
         <source>1</source>
-        <translation type="unfinished"/>
+        <translation>1</translation>
     </message>
     <message>
         <location filename="../../openlp/core/projectors/constants.py" line="554"/>
         <source>2</source>
-        <translation type="unfinished"/>
+        <translation>2</translation>
     </message>
     <message>
         <location filename="../../openlp/core/projectors/constants.py" line="555"/>
         <source>3</source>
-        <translation type="unfinished"/>
+        <translation>3</translation>
     </message>
     <message>
         <location filename="../../openlp/core/projectors/constants.py" line="556"/>
         <source>4</source>
-        <translation type="unfinished"/>
+        <translation>4</translation>
     </message>
     <message>
         <location filename="../../openlp/core/projectors/constants.py" line="557"/>
         <source>5</source>
-        <translation type="unfinished"/>
+        <translation>5</translation>
     </message>
     <message>
         <location filename="../../openlp/core/projectors/constants.py" line="558"/>
         <source>6</source>
-        <translation type="unfinished"/>
+        <translation>6</translation>
     </message>
     <message>
         <location filename="../../openlp/core/projectors/constants.py" line="559"/>
         <source>7</source>
-        <translation type="unfinished"/>
+        <translation>7</translation>
     </message>
     <message>
         <location filename="../../openlp/core/projectors/constants.py" line="560"/>
         <source>8</source>
-        <translation type="unfinished"/>
+        <translation>8</translation>
     </message>
     <message>
         <location filename="../../openlp/core/projectors/constants.py" line="561"/>
         <source>9</source>
-        <translation type="unfinished"/>
+        <translation>9</translation>
     </message>
     <message>
         <location filename="../../openlp/core/projectors/constants.py" line="562"/>
         <source>A</source>
-        <translation type="unfinished"/>
+        <translation>A</translation>
     </message>
     <message>
         <location filename="../../openlp/core/projectors/constants.py" line="563"/>
         <source>B</source>
-        <translation type="unfinished"/>
+        <translation>B</translation>
     </message>
     <message>
         <location filename="../../openlp/core/projectors/constants.py" line="564"/>
         <source>C</source>
-        <translation type="unfinished"/>
+        <translation>C</translation>
     </message>
     <message>
         <location filename="../../openlp/core/projectors/constants.py" line="565"/>
         <source>D</source>
-        <translation type="unfinished"/>
+        <translation>D</translation>
     </message>
     <message>
         <location filename="../../openlp/core/projectors/constants.py" line="566"/>
         <source>E</source>
-        <translation type="unfinished"/>
+        <translation>E</translation>
     </message>
     <message>
         <location filename="../../openlp/core/projectors/constants.py" line="567"/>
         <source>F</source>
-        <translation type="unfinished"/>
+        <translation>F</translation>
     </message>
     <message>
         <location filename="../../openlp/core/projectors/constants.py" line="568"/>
         <source>G</source>
-        <translation type="unfinished"/>
+        <translation>G</translation>
     </message>
     <message>
         <location filename="../../openlp/core/projectors/constants.py" line="569"/>
         <source>H</source>
-        <translation type="unfinished"/>
+        <translation>H</translation>
     </message>
     <message>
         <location filename="../../openlp/core/projectors/constants.py" line="570"/>
         <source>I</source>
-        <translation type="unfinished"/>
+        <translation>I</translation>
     </message>
     <message>
         <location filename="../../openlp/core/projectors/constants.py" line="571"/>
         <source>J</source>
-        <translation type="unfinished"/>
+        <translation>J</translation>
     </message>
     <message>
         <location filename="../../openlp/core/projectors/constants.py" line="572"/>
         <source>K</source>
-        <translation type="unfinished"/>
+        <translation>K</translation>
     </message>
     <message>
         <location filename="../../openlp/core/projectors/constants.py" line="573"/>
         <source>L</source>
-        <translation type="unfinished"/>
+        <translation>L</translation>
     </message>
     <message>
         <location filename="../../openlp/core/projectors/constants.py" line="574"/>
         <source>M</source>
-        <translation type="unfinished"/>
+        <translation>M</translation>
     </message>
     <message>
         <location filename="../../openlp/core/projectors/constants.py" line="575"/>
         <source>N</source>
-        <translation type="unfinished"/>
+        <translation>N</translation>
     </message>
     <message>
         <location filename="../../openlp/core/projectors/constants.py" line="576"/>
         <source>O</source>
-        <translation type="unfinished"/>
+        <translation>O</translation>
     </message>
     <message>
         <location filename="../../openlp/core/projectors/constants.py" line="577"/>
         <source>P</source>
-        <translation type="unfinished"/>
+        <translation>P</translation>
     </message>
     <message>
         <location filename="../../openlp/core/projectors/constants.py" line="578"/>
         <source>Q</source>
-        <translation type="unfinished"/>
+        <translation>Q</translation>
     </message>
     <message>
         <location filename="../../openlp/core/projectors/constants.py" line="579"/>
         <source>R</source>
-        <translation type="unfinished"/>
+        <translation>R</translation>
     </message>
     <message>
         <location filename="../../openlp/core/projectors/constants.py" line="580"/>
         <source>S</source>
-        <translation type="unfinished"/>
+        <translation>S</translation>
     </message>
     <message>
         <location filename="../../openlp/core/projectors/constants.py" line="581"/>
         <source>T</source>
-        <translation type="unfinished"/>
+        <translation>T</translation>
     </message>
     <message>
         <location filename="../../openlp/core/projectors/constants.py" line="582"/>
         <source>U</source>
-        <translation type="unfinished"/>
+        <translation>U</translation>
     </message>
     <message>
         <location filename="../../openlp/core/projectors/constants.py" line="583"/>
@@ -5630,7 +5630,7 @@ Closing this instance</source>
     <message>
         <location filename="../../openlp/core/projectors/constants.py" line="584"/>
         <source>W</source>
-        <translation type="unfinished"/>
+        <translation>W</translation>
     </message>
     <message>
         <location filename="../../openlp/core/projectors/constants.py" line="585"/>
@@ -5645,7 +5645,7 @@ Closing this instance</source>
     <message>
         <location filename="../../openlp/core/projectors/constants.py" line="587"/>
         <source>Z</source>
-        <translation type="unfinished"/>
+        <translation>Z</translation>
     </message>
 </context>
 <context>
@@ -5771,7 +5771,7 @@ Closing this instance</source>
     <message>
         <location filename="../../openlp/core/projectors/constants.py" line="259"/>
         <source>Turn lamp on or off/standby.</source>
-        <translation type="unfinished"/>
+        <translation>Włącz lub wyłącz/uśpij lampę</translation>
     </message>
     <message>
         <location filename="../../openlp/core/projectors/constants.py" line="264"/>
@@ -6084,7 +6084,7 @@ Closing this instance</source>
     <message>
         <location filename="../../openlp/core/projectors/constants.py" line="485"/>
         <source>Not Connected</source>
-        <translation type="unfinished"/>
+        <translation>Niepołączono</translation>
     </message>
     <message>
         <location filename="../../openlp/core/projectors/constants.py" line="486"/>
@@ -6258,7 +6258,7 @@ Closing this instance</source>
     <message>
         <location filename="../../openlp/core/pages/background.py" line="170"/>
         <source>Live stream</source>
-        <translation type="unfinished"/>
+        <translation>Transmisja na żywo</translation>
     </message>
     <message>
         <location filename="../../openlp/core/pages/background.py" line="171"/>
@@ -6389,7 +6389,7 @@ Closing this instance</source>
     <message>
         <location filename="../../openlp/core/pages/fontselect.py" line="196"/>
         <source>Style:</source>
-        <translation type="unfinished"/>
+        <translation>Styl:</translation>
     </message>
     <message>
         <location filename="../../openlp/core/pages/fontselect.py" line="198"/>
@@ -6431,7 +6431,7 @@ Closing this instance</source>
     <message>
         <location filename="../../openlp/core/pages/fontselect.py" line="213"/>
         <source>Shadow</source>
-        <translation type="unfinished"/>
+        <translation>Cień</translation>
     </message>
 </context>
 <context>
@@ -7417,7 +7417,7 @@ elementu nabożeństwa</translation>
     <message>
         <location filename="../../openlp/core/ui/folders.py" line="91"/>
         <source>Add folder</source>
-        <translation type="unfinished"/>
+        <translation>Dodaj folder</translation>
     </message>
     <message>
         <location filename="../../openlp/core/ui/folders.py" line="92"/>
@@ -12392,7 +12392,7 @@ has been successfully created.</source>
     <message>
         <location filename="../../openlp/plugins/obs_studio/lib/obs_studio_tab.py" line="87"/>
         <source>Authentication Settings</source>
-        <translation type="unfinished"/>
+        <translation>Ustawienia autoryzacji</translation>
     </message>
     <message>
         <location filename="../../openlp/plugins/obs_studio/lib/obs_studio_tab.py" line="89"/>
