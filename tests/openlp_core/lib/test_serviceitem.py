@@ -202,7 +202,8 @@ def test_old_service_item_load_image_from_service(state_media, settings):
     image_name = 'image_1.jpg'
     fake_hash = 'abcd'
     extracted_file = Path(TEST_PATH) / '{base}{ext}'.format(base=fake_hash, ext=os.path.splitext(image_name)[1])
-    frame_array = {'path': extracted_file, 'title': image_name, 'file_hash': fake_hash}
+    frame_array = {'path': extracted_file, 'title': image_name, 'file_hash': fake_hash,
+                   'thumbnail': Path('/path/thumbnails/abcd.jpg')}
     service_item = ServiceItem(None)
     service_item.add_icon = MagicMock()
 
@@ -249,8 +250,10 @@ def test_service_item_load_image_from_local_service(mocked_get_section_data_path
     image_name2 = 'image_2.jpg'
     test_file1 = Path('/home/openlp') / image_name1
     test_file2 = Path('/home/openlp') / image_name2
-    frame_array1 = {'path': test_file1, 'title': image_name1, 'file_hash': 'abcd'}
-    frame_array2 = {'path': test_file2, 'title': image_name2, 'file_hash': 'abcd'}
+    frame_array1 = {'path': test_file1, 'title': image_name1, 'file_hash': 'abcd',
+                    'thumbnail': Path('/path/thumbnails/abcd.jpg')}
+    frame_array2 = {'path': test_file2, 'title': image_name2, 'file_hash': 'abcd',
+                    'thumbnail': Path('/path/thumbnails/abcd.jpg')}
     service_item = ServiceItem(None)
     service_item.add_icon = MagicMock()
     service_item2 = ServiceItem(None)
