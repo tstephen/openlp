@@ -118,9 +118,9 @@ test-arch:
     - Expand-Archive -Path "$env:Temp\$zipFileName" -DestinationPath .
     - Set-Location ".\pyinstaller-$pyInstallerVersion\bootloader"
     - "# Building the boot loader"
-    - uv python ./waf all --target-arch=64bit
+    - uv run python ./waf all --target-arch=64bit
     - Set-Location '..'
-    - uv install .
+    - uv pip install .
     - Set-Location '..'
 
 test-macos:
