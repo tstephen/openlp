@@ -138,6 +138,7 @@ template = "{version}"
 [tool.hatch.build.targets.sdist]
 include = [
     "/openlp",
+     "/resources",
 ]
 
 [tool.hatch.build.targets.wheel]
