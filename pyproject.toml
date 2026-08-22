@@ -139,6 +139,7 @@ template = "{version}"
 include = [
     "/openlp",
      "/resources",
+     "copyright.txt",
 ]
 
 [tool.hatch.build.targets.wheel]
