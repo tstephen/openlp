@@ -31,6 +31,7 @@ from enum import IntEnum
 from contextlib import suppress
 from pathlib import Path
 from tempfile import gettempdir
+from packaging.version import Version
 
 from PySide6 import QtCore, QtGui
 
@@ -156,11 +157,9 @@ def check_for_variant_migration(settings):
     manual conversion from PyQt5 variant to PySide6 variant.
     """
     # Check for need to upgrade variants from PyQt5 to PySide6
-    settings_version = settings.value('core/application version')
-    # convert to string of version in format "1.2.3" to an integer tuple for easy comparison
-    settings_version_tuple = tuple(map(int, settings_version.split('.')))
+    settings_version = Version(settings.value('core/application version'))
     # last version using PyQt5 was the 3.1.x series
-    if settings_version_tuple < (3, 1, 99):
+    if settings_version < Version('3.1.99'):
         # Do OS/format specific conversion:
         if is_linux() or settings.format() == Settings.IniFormat:
             settings_filename = settings.fileName()
