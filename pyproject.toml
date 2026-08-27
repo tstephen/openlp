@@ -68,6 +68,7 @@ dependencies = [
     "flask-cors",
     "lxml",
     "Mako",
+    "packaging",
     "pillow",
     "platformdirs",
     "PyICU; platform_system != 'Windows'",
